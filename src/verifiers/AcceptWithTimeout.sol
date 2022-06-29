@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.4;
+pragma solidity >=0.8.0;
 
 // defines a timeout
 // allows a "PAUSER" role to stop processing of messages
@@ -33,6 +33,7 @@ contract AcceptWithTimeout {
         address _socket,
         address _manager
     ) {
+	require(_socket!=address(0) || _manager!=address(0),"invalid addresses");
         timeoutInSeconds = _timeout;
         socket = _socket;
         manager = _manager;
