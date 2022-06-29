@@ -89,11 +89,11 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         payable(msg.sender).transfer(amount);
     }
 
-    function setMinBondAmount(amount) external onlyOwner {
+    function setMinBondAmount(uint256 amount) external onlyOwner {
         _setMinBondAmount(amount);
     }
 
-    function setBondClaimDelay(delay) external onlyOwner {
+    function setBondClaimDelay(uint256 delay) external onlyOwner {
         _setBondClaimDelay(delay);
     }
 
