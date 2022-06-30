@@ -12,7 +12,7 @@ contract AcceptWithTimeout {
 
     bool public isActive;
 
-    mapping(address => mapping(uint256 => bool)) isPauserPerIncomingChain;
+    mapping(address => mapping(uint256 => bool)) public isPauserPerIncomingChain;
 
     event NewPauser(address pauser, uint256 chain);
     event RemovedPauser(address pauser, uint256 chain);
@@ -55,7 +55,7 @@ contract AcceptWithTimeout {
     function Pause(uint256 chain) external onlyPauser(chain) {
         require(isActive, "already paused");
         isActive = false;
-	emit Paused(msg.sender, chain);
+	    emit Paused(msg.sender, chain);
     }
 
     function Activate() external onlyManager {
