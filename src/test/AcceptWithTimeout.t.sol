@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import "forge-std/Test.sol";
-import {AcceptWithTimeout} from "./AcceptWithTimeout.sol";
+import {AcceptWithTimeout} from "../verifiers/AcceptWithTimeout.sol";
 
 contract AcceptWithTimeoutTest is Test{
     address DUMMY_MANAGER = address(0x75bbC04fA183dd0ac75857a0400F93f766748f01); 
