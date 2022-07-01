@@ -2,12 +2,11 @@
 pragma solidity 0.8.10;
 
 import "../utils/Ownable.sol";
-import "forge-std/Test.sol";
 
-contract MockOwnable is Ownable, Test {
+contract MockOwnable is Ownable {
     constructor(address owner) Ownable(owner) {}
 
-    function OwnerFunction() external onlyOwner {}
+    function ownerFunction() external onlyOwner {}
 
-    function PublicFunction() external {}
+    function publicFunction() external {}
 }

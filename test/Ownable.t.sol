@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 import "forge-std/Test.sol";
 import "../src/mocks/MockOwnable.sol";
 
-contract OwnableTest is Test {
+contract TestOwnable is Test {
     address _bob = address(1);
     address _owner = address(2);
     address _newOwner = address(3);
@@ -21,19 +21,19 @@ contract OwnableTest is Test {
 
     function testOwnableFunction() external {
         hoax(_owner);
-        _mo.OwnerFunction();
+        _mo.ownerFunction();
 
         hoax(_bob);
         vm.expectRevert(Ownable.OnlyOwner.selector);
-        _mo.OwnerFunction();
+        _mo.ownerFunction();
     }
 
     function testPublicFunction() external {
         hoax(_owner);
-        _mo.PublicFunction();
+        _mo.publicFunction();
 
         hoax(_bob);
-        _mo.PublicFunction();
+        _mo.publicFunction();
     }
 
     function testNominate() external {
@@ -65,14 +65,14 @@ contract OwnableTest is Test {
         _mo.claimOwner();
 
         hoax(_newOwner);
-        _mo.OwnerFunction();
+        _mo.ownerFunction();
 
         hoax(_owner);
         vm.expectRevert(Ownable.OnlyOwner.selector);
-        _mo.OwnerFunction();
+        _mo.ownerFunction();
 
         hoax(_bob);
         vm.expectRevert(Ownable.OnlyOwner.selector);
-        _mo.OwnerFunction();
+        _mo.ownerFunction();
     }
 }
