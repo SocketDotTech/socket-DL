@@ -4,10 +4,10 @@ pragma solidity 0.8.10;
 import "forge-std/Test.sol";
 import "../src/mocks/MockOwnable.sol";
 
-contract TestOwnable is Test {
-    address _bob = address(1);
-    address _owner = address(2);
-    address _newOwner = address(3);
+contract OwnableTest is Test {
+    address constant _bob = address(1);
+    address constant _owner = address(2);
+    address constant _newOwner = address(3);
     MockOwnable _mo;
 
     function setUp() external {

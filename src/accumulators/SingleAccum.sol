@@ -4,14 +4,18 @@ pragma solidity 0.8.10;
 import "../interfaces/IAccumulator.sol";
 import "../utils/AccessControl.sol";
 
-contract SingleAcc is IAccumulator, AccessControl(msg.sender) {
+contract SingleAccum is IAccumulator, AccessControl(msg.sender) {
     bytes32 private _root;
     uint256 private _batchId;
     mapping(uint256 => bytes32) private _roots;
 
     error PendingPacket();
 
-    function addPacket(bytes32 packetHash) external override onlyPerm(SOCKET_ROLE) {
+    constructor(address socket_) {
+        _grantRole(SOCKET_ROLE, socket_);
+    }
+
+    function addPacket(bytes32 packetHash) external override onlyRole(SOCKET_ROLE) {
         if (_roots[_batchId] != bytes32(0)) revert PendingPacket();
         _roots[_batchId] = packetHash;
         emit PacketAdded(packetHash, packetHash);
@@ -26,9 +30,9 @@ contract SingleAcc is IAccumulator, AccessControl(msg.sender) {
     }
 
     // caller only Notary
-    function incrementBatch() external override onlyPerm(NOTARY_ROLE) returns (bytes32) {
+    function sealBatch() external override onlyRole(SOCKET_ROLE) returns (bytes32, uint256) {
         bytes32 root = _roots[_batchId];
-        emit BatchComplete(root, _batchId++);
-        return root;
+        emit BatchComplete(root, _batchId);
+        return (root, _batchId++);
     }
 }

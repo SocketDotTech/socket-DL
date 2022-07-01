@@ -4,13 +4,13 @@ pragma solidity 0.8.10;
 import "forge-std/Test.sol";
 import "../src/mocks/MockAccessControl.sol";
 
-contract TestAccessControl is Test {
-    address _owner = address(1);
-    address _giraffe_0 = address(2);
-    address _giraffe_1 = address(3);
-    address _hippo_0 = address(4);
-    address _hippo_1 = address(5);
-    address _ape = address(6);
+contract AccessControlTest is Test {
+    address constant _owner = address(1);
+    address constant _giraffe_0 = address(2);
+    address constant _giraffe_1 = address(3);
+    address constant _hippo_0 = address(4);
+    address constant _hippo_1 = address(5);
+    address constant _ape = address(6);
     MockAccessControl _mac;
     bytes32 ROLE_GIRAFFE;
     bytes32 ROLE_HIPPO;

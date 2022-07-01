@@ -2,8 +2,7 @@
 pragma solidity 0.8.10;
 
 abstract contract IAccumulator {
-    bytes32 SOCKET_ROLE = keccak256("SOCKET_ROLE");
-    bytes32 NOTARY_ROLE = keccak256("NOTARY_ROLE");
+    bytes32 public SOCKET_ROLE = keccak256("SOCKET_ROLE");
 
     event SocketSet(address indexed socket);
     event NotarySet(address indexed notary);
@@ -18,5 +17,5 @@ abstract contract IAccumulator {
     function getRootById(uint256 id) external view virtual returns (bytes32);
 
     // caller only Notary
-    function incrementBatch() external virtual returns (bytes32);
+    function sealBatch() external virtual returns (bytes32, uint256);
 }
