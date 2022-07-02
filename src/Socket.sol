@@ -5,6 +5,12 @@ import "./interfaces/ISocket.sol";
 import "./utils/AccessControl.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
+    // localPlug => remoteChainId => OutboundConfig
+    mapping(address => mapping(uint256 => OutboundConfig)) public outboundConfigs;
+
+    // localPlug => remoteChainId => InboundConfig
+    mapping(address => mapping(uint256 => InboundConfig)) public inboundConfigs;
+
     uint256 public minBondAmount;
     uint256 public bondClaimDelay;
     uint256 public immutable chainId;
@@ -105,5 +111,33 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     function _setBondClaimDelay(uint256 delay) private {
         bondClaimDelay = delay;
         emit BondClaimDelaySet(delay);
+    }
+
+    function setInboundConfig(
+        uint256 _remoteChainId,
+        address _accumulator,
+        address _verifier,
+        address _remotePlug,
+    ) external {
+         InboundConfig storage config = inboundConfigs[msg.sender][_remoteChainId];
+         config.accumulator = _accumulator;
+         config.verifier = _verifier;
+         config.remotePlug = _remotePlug;
+
+         // TODO: emit event
+    }
+
+    function setOutboundConfig(
+        uint256 _remoteChainId,
+        address _accumulator,
+        address _verifier,
+        address _remotePlug,
+    ) external {
+         OutboundConfig storage config = outboundConfigs[msg.sender][_remoteChainId];
+         config.accumulator = _accumulator;
+         config.verifier = _verifier;
+         config.remotePlug = _remotePlug;
+
+         // TODO: emit event
     }
 }

@@ -49,4 +49,31 @@ interface ISocket {
         uint256 remoteChainId,
         bytes calldata payload
     ) external;
+
+      // TODO: add confs and blocking/non-blocking 
+      struct InboundConfig {
+        address accumulator;
+        address verifier;
+        address remotePlug;
+    }
+
+    struct OutboundConfig {
+        address accumulator;
+        address verifier;
+        address remotePlug;
+    }
+
+    function setInboundConfig(
+        uint256 remoteChainId,
+        address accumulator,
+        address verifier,
+        address remotePlug,
+    ) external;
+
+    function setOutboundConfig(
+        uint256 remoteChainId,
+        address accumulator,
+        address verifier,
+        address remotePlug,
+    ) external;
 }
