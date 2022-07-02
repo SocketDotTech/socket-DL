@@ -31,7 +31,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     function outbound(
         uint256 remoteChainId,
-        address remotePlug,
         bytes calldata payload
     ) external {
 	    // TODO: add stuff
