@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 interface ISocket {
-
     event BondAdded(
         address indexed signer,
         uint256 addAmount, // assuming native token
@@ -48,7 +47,6 @@ interface ISocket {
 
     function outbound(
         uint256 remoteChainId,
-        address remotePlug,
         bytes calldata payload
     ) external;
 }
