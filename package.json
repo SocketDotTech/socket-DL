@@ -1,0 +1,22 @@
+{
+  "name": "@socket.tech/socket-dl",
+  "license": "UNLICENSED",
+  "version": "0.0.0",
+  "description": "Smart contracts for socket data layer.",
+  "files": [
+    "src/**/*.sol"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SocketDotTech/socket-DL.git"
+  },
+  "devDependencies": {
+    "pre-commit": "^1.2.2",
+    "prettier": "^2.3.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.13"
+  },
+  "scripts": {
+    "lint": "prettier --write **.sol"
+  },
+  "pre-commit": [ "lint" ]
+}
