@@ -15,8 +15,8 @@ contract AcceptWithTimeoutTest is Test{
     function setUp(
     ) public {
         verifier = new AcceptWithTimeout(timeout, DUMMY_SOCKET, DUMMY_MANAGER);
-                vm.prank(DUMMY_MANAGER);
-                verifier.Activate();
+        vm.prank(DUMMY_MANAGER);
+        verifier.Activate();
     }
 
     function testDeployment() public {
@@ -24,7 +24,6 @@ contract AcceptWithTimeoutTest is Test{
         assertEq(verifier.socket(), DUMMY_SOCKET); 
         bool isActive = verifier.isActive();
         assertTrue(isActive);
-        
     }
 
     function testPausing() public {
