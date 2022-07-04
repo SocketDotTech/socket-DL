@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 abstract contract Ownable {
     address private _owner;
@@ -11,7 +11,7 @@ abstract contract Ownable {
     error OnlyOwner();
     error OnlyNominee();
 
-    constructor (address owner_) {
+    constructor(address owner_) {
         _claimOwner(owner_);
     }
 

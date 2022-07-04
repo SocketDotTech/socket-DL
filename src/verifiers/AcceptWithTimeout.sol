@@ -12,11 +12,12 @@ contract AcceptWithTimeout {
 
     bool public isActive;
 
-    mapping(address => mapping(uint256 => bool)) private isPauserForIncomingChain;
+    mapping(address => mapping(uint256 => bool))
+        private isPauserForIncomingChain;
 
     event NewPauser(address pauser, uint256 chain);
     event RemovedPauser(address pauser, uint256 chain);
-    event Paused(address pauser, uint chain);
+    event Paused(address pauser, uint256 chain);
 
     modifier onlyManager() {
         require(msg.sender == manager, "can only be called by manager");
@@ -29,7 +30,10 @@ contract AcceptWithTimeout {
     }
 
     modifier onlyPauser(uint256 chain) {
-        require(isPauserForIncomingChain[msg.sender][chain], "address not set as pauser by manager");
+        require(
+            isPauserForIncomingChain[msg.sender][chain],
+            "address not set as pauser by manager"
+        );
         _;
     }
 
@@ -39,13 +43,16 @@ contract AcceptWithTimeout {
         address _socket,
         address _manager
     ) {
-	require(_socket!=address(0) || _manager!=address(0),"invalid addresses");
+        require(
+            _socket != address(0) || _manager != address(0),
+            "invalid addresses"
+        );
         timeoutInSeconds = _timeout;
         socket = _socket;
         manager = _manager;
     }
 
-    function PreExecHook()  external onlySocket() returns (bool) {
+    function PreExecHook() external onlySocket returns (bool) {
         require(isActive, "inactive verifier");
 
         // TODO make sure this can be called only by Socket
@@ -61,7 +68,7 @@ contract AcceptWithTimeout {
     function Pause(uint256 chain) external onlyPauser(chain) {
         require(isActive, "already paused");
         isActive = false;
-	    emit Paused(msg.sender, chain);
+        emit Paused(msg.sender, chain);
     }
 
     function Activate() external onlyManager {
@@ -69,19 +76,35 @@ contract AcceptWithTimeout {
         isActive = true;
     }
 
-    function AddPauser(address _newPauser, uint256 _incomingChain) external onlyManager {
-        require(!isPauserForIncomingChain[_newPauser][_incomingChain], "Already set as pauser");
+    function AddPauser(address _newPauser, uint256 _incomingChain)
+        external
+        onlyManager
+    {
+        require(
+            !isPauserForIncomingChain[_newPauser][_incomingChain],
+            "Already set as pauser"
+        );
         isPauserForIncomingChain[_newPauser][_incomingChain] = true;
         emit NewPauser(_newPauser, _incomingChain);
     }
 
-    function RemovePauser(address _currentPauser, uint256 _incomingChain) external onlyManager {
-        require(isPauserForIncomingChain[_currentPauser][_incomingChain], "Pauser inactive already");
+    function RemovePauser(address _currentPauser, uint256 _incomingChain)
+        external
+        onlyManager
+    {
+        require(
+            isPauserForIncomingChain[_currentPauser][_incomingChain],
+            "Pauser inactive already"
+        );
         isPauserForIncomingChain[_currentPauser][_incomingChain] = false;
         emit RemovedPauser(_currentPauser, _incomingChain);
     }
 
-    function IsPauser(address _pauser, uint256 _incomingChainId) external view returns(bool){
-        return isPauserForIncomingChain[_pauser][_incomingChainId];  
+    function IsPauser(address _pauser, uint256 _incomingChainId)
+        external
+        view
+        returns (bool)
+    {
+        return isPauserForIncomingChain[_pauser][_incomingChainId];
     }
 }

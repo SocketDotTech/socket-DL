@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 import "../src/mocks/MockAccessControl.sol";
@@ -74,7 +74,10 @@ contract AccessControlTest is Test {
         hoax(caller);
         if (!success) {
             vm.expectRevert(
-                abi.encodeWithSelector(AccessControl.NoPermit.selector, ROLE_GIRAFFE)
+                abi.encodeWithSelector(
+                    AccessControl.NoPermit.selector,
+                    ROLE_GIRAFFE
+                )
             );
         }
         _mac.giraffe();
@@ -84,7 +87,10 @@ contract AccessControlTest is Test {
         hoax(caller);
         if (!success) {
             vm.expectRevert(
-                abi.encodeWithSelector(AccessControl.NoPermit.selector, ROLE_HIPPO)
+                abi.encodeWithSelector(
+                    AccessControl.NoPermit.selector,
+                    ROLE_HIPPO
+                )
             );
         }
         _mac.hippo();

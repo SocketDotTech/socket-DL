@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 interface ISocket {
     event BondAdded(
@@ -14,16 +14,9 @@ interface ISocket {
         uint256 newBond
     );
 
-    event Unbonded(
-        address indexed signer,
-        uint256 amount,
-        uint256 claimTime
-    );
+    event Unbonded(address indexed signer, uint256 amount, uint256 claimTime);
 
-    event BondClaimed(
-        address indexed signer,
-        uint256 amount
-    );
+    event BondClaimed(address indexed signer, uint256 amount);
 
     event BondClaimDelaySet(uint256 delay);
 
@@ -45,8 +38,5 @@ interface ISocket {
 
     function claimBond() external;
 
-    function outbound(
-        uint256 remoteChainId,
-        bytes calldata payload
-    ) external;
+    function outbound(uint256 remoteChainId, bytes calldata payload) external;
 }
