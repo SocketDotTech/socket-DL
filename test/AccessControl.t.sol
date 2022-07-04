@@ -74,7 +74,10 @@ contract AccessControlTest is Test {
         hoax(caller);
         if (!success) {
             vm.expectRevert(
-                abi.encodeWithSelector(AccessControl.NoPermit.selector, ROLE_GIRAFFE)
+                abi.encodeWithSelector(
+                    AccessControl.NoPermit.selector,
+                    ROLE_GIRAFFE
+                )
             );
         }
         _mac.giraffe();
@@ -84,7 +87,10 @@ contract AccessControlTest is Test {
         hoax(caller);
         if (!success) {
             vm.expectRevert(
-                abi.encodeWithSelector(AccessControl.NoPermit.selector, ROLE_HIPPO)
+                abi.encodeWithSelector(
+                    AccessControl.NoPermit.selector,
+                    ROLE_HIPPO
+                )
             );
         }
         _mac.hippo();

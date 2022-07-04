@@ -29,20 +29,13 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         chainId = chainId_;
     }
 
-    function outbound(
-        uint256 remoteChainId,
-        bytes calldata payload
-    ) external {
-	    // TODO: add stuff
+    function outbound(uint256 remoteChainId, bytes calldata payload) external {
+        // TODO: add stuff
     }
 
     function addBond() external payable override {
         _bonds[msg.sender] += msg.value;
-        emit BondAdded(
-            msg.sender,
-            msg.value,
-            _bonds[msg.sender]
-        );
+        emit BondAdded(msg.sender, msg.value, _bonds[msg.sender]);
     }
 
     function reduceBond(uint256 amount) external override {
@@ -51,11 +44,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         if (newBond < minBondAmount) revert InvalidBondReduce();
 
         _bonds[msg.sender] = newBond;
-        emit BondReduced(
-            msg.sender,
-            amount,
-            newBond
-        );
+        emit BondReduced(msg.sender, amount, newBond);
 
         payable(msg.sender).transfer(amount);
     }
@@ -69,17 +58,12 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         _bonds[msg.sender] = 0;
         _unbonds[msg.sender] = UnbondData(amount, claimTime);
 
-        emit Unbonded(
-            msg.sender,
-            amount,
-            claimTime
-        );
+        emit Unbonded(msg.sender, amount, claimTime);
     }
 
     function claimBond() external override {
-        if (
-            _unbonds[msg.sender].claimTime < block.timestamp
-        ) revert ClaimTimeLeft();
+        if (_unbonds[msg.sender].claimTime < block.timestamp)
+            revert ClaimTimeLeft();
 
         uint256 amount = _unbonds[msg.sender].amount;
         _unbonds[msg.sender] = UnbondData(0, 0);

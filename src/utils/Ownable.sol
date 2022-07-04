@@ -11,7 +11,7 @@ abstract contract Ownable {
     error OnlyOwner();
     error OnlyNominee();
 
-    constructor (address owner_) {
+    constructor(address owner_) {
         _claimOwner(owner_);
     }
 

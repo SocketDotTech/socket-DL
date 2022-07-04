@@ -19,11 +19,7 @@ contract SingleAccumTest is Test {
     }
 
     function testSetUp() external {
-        assertEq(
-            _sa.owner(),
-            _owner,
-            "Owner not set"
-        );
+        assertEq(_sa.owner(), _owner, "Owner not set");
         assertTrue(
             _sa.hasRole(_sa.SOCKET_ROLE(), _socket),
             "Socket role not set"
@@ -70,7 +66,10 @@ contract SingleAccumTest is Test {
 
     function testAddPacketByRaju() external {
         vm.expectRevert(
-            abi.encodeWithSelector(AccessControl.NoPermit.selector, _sa.SOCKET_ROLE())
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                _sa.SOCKET_ROLE()
+            )
         );
         hoax(_raju);
         _sa.addPacket(_packet_0);
@@ -79,7 +78,10 @@ contract SingleAccumTest is Test {
     function testSealBatchByRaju() external {
         _addPacket(_packet_0);
         vm.expectRevert(
-            abi.encodeWithSelector(AccessControl.NoPermit.selector, _sa.SOCKET_ROLE())
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                _sa.SOCKET_ROLE()
+            )
         );
         hoax(_raju);
         _sa.sealBatch();
@@ -87,25 +89,13 @@ contract SingleAccumTest is Test {
 
     function _assertNextBatch(bytes32 root_, uint256 batchId_) private {
         (bytes32 root, uint256 batchId) = _sa.getNextBatch();
-        assertEq(
-            root,
-            root_,
-            "Root Invalid"
-        );
-        assertEq(
-            batchId,
-            batchId_,
-            "BatchId Invalid"
-        );
+        assertEq(root, root_, "Root Invalid");
+        assertEq(batchId, batchId_, "BatchId Invalid");
     }
 
     function _assertBatchById(bytes32 root_, uint256 batchId_) private {
         bytes32 root = _sa.getRootById(batchId_);
-        assertEq(
-            root,
-            root_,
-            "Root Invalid"
-        );
+        assertEq(root, root_, "Root Invalid");
     }
 
     function _addPacket(bytes32 packetHash) private {

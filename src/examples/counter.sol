@@ -5,12 +5,12 @@ import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
 
 contract Counter is IPlug {
-	// immutables 
+    // immutables
     address public immutable socket;
-    
+
     // application state
     uint256 public counter;
-    
+
     // application ops
     bytes32 OP_ADD = keccak256("OP_ADD");
     bytes32 OP_SUB = keccak256("OP_SUB");
@@ -18,7 +18,6 @@ contract Counter is IPlug {
     constructor(address _socket) {
         socket = _socket;
     }
-
 
     function localAddOperation(uint256 amount) public {
         _addOperation(amount);
@@ -28,19 +27,22 @@ contract Counter is IPlug {
         _subOperation(amount);
     }
 
-    function remoteAddOperation(uint256 chainId,uint256 amount) public {
+    function remoteAddOperation(uint256 chainId, uint256 amount) public {
         bytes memory payload = abi.encode(OP_ADD, amount);
         _outbound(chainId, payload);
     }
 
-    function remoteSubOperation(uint256 chainId,uint256 amount) public {
+    function remoteSubOperation(uint256 chainId, uint256 amount) public {
         bytes memory payload = abi.encode(OP_SUB, amount);
         _outbound(chainId, payload);
     }
 
     function inbound(bytes calldata payload) external override {
         require(msg.sender == socket, "Counter: Invalid Socket");
-        (bytes32 operationType, uint256 amount) = abi.decode(payload, (bytes32, uint256));
+        (bytes32 operationType, uint256 amount) = abi.decode(
+            payload,
+            (bytes32, uint256)
+        );
 
         if (operationType == OP_ADD) {
             _addOperation(amount);
@@ -56,7 +58,7 @@ contract Counter is IPlug {
     }
 
     //
-    // base ops 
+    // base ops
     //
     function _addOperation(uint256 amount) private {
         counter += amount;
@@ -67,7 +69,7 @@ contract Counter is IPlug {
     }
 
     // settings
-	function setSocketConfig(
+    function setSocketConfig(
         uint256 chainId,
         address plug,
         address channel,
