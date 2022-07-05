@@ -9,7 +9,7 @@ contract Counter is IPlug {
     address public immutable socket;
 
     address public owner;
-    
+
     // application state
     uint256 public counter;
 
@@ -77,16 +77,26 @@ contract Counter is IPlug {
     }
 
     // settings
-	function setSocketConfig(
+    function setSocketConfig(
         uint256 remoteChainId,
         address remotePlug,
         address localAccumulator,
-        address localVerifier,  
+        address localVerifier,
         address remoteAccumulator,
         address remoteVerifier
-    ) external onlyOwner(){
-        ISocket(socket).setInboundConfig(remoteChainId, localAccumulator, localVerifier);
-        ISocket(socket).setOutboundConfig(remoteChainId, remoteAccumulator, remoteVerifier);
+    ) external onlyOwner {
+        ISocket(socket).setInboundConfig(
+            remoteChainId,
+            localAccumulator,
+            localVerifier,
+            remotePlug
+        );
+        ISocket(socket).setOutboundConfig(
+            remoteChainId,
+            remoteAccumulator,
+            remoteVerifier,
+            remotePlug
+        );
     }
 
     function setupComplete() external {

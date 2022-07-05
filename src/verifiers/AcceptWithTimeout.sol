@@ -10,12 +10,12 @@ contract AcceptWithTimeout {
     address public immutable socket;
     address public immutable manager;
 
-    
     // current state of the verifier
     bool public isActive;
 
     // pauserState
-    mapping(address => mapping(uint256 => bool)) private isPauserForIncomingChain;
+    mapping(address => mapping(uint256 => bool))
+        private isPauserForIncomingChain;
 
     event NewPauser(address pauser, uint256 chain);
     event RemovedPauser(address pauser, uint256 chain);

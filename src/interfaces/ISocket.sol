@@ -38,13 +38,10 @@ interface ISocket {
 
     function claimBond() external;
 
-    function outbound(
-        uint256 remoteChainId,
-        bytes calldata payload
-    ) external;
+    function outbound(uint256 remoteChainId, bytes calldata payload) external;
 
-      // TODO: add confs and blocking/non-blocking 
-      struct InboundConfig {
+    // TODO: add confs and blocking/non-blocking
+    struct InboundConfig {
         address accumulator;
         address verifier;
         address remotePlug;
@@ -60,13 +57,13 @@ interface ISocket {
         uint256 remoteChainId,
         address accumulator,
         address verifier,
-        address remotePlug,
+        address remotePlug
     ) external;
 
     function setOutboundConfig(
         uint256 remoteChainId,
         address accumulator,
         address verifier,
-        address remotePlug,
+        address remotePlug
     ) external;
 }
