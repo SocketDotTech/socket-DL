@@ -1,72 +1,64 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 import "./Ownable.sol";
 
 abstract contract AccessControl is Ownable {
-    // role => address => permission
-    mapping(bytes32 => mapping (address => bool)) private _permissions;
+    // role => address => permit
+    mapping(bytes32 => mapping(address => bool)) private _permits;
 
-    event PermissionGranted(
-        bytes32 indexed role,
-        address indexed grantee
-    );
+    event RoleGranted(bytes32 indexed role, address indexed grantee);
 
-    event PermissionRevoked(
-        bytes32 indexed role,
-        address indexed revokee
-    );
+    event RoleRevoked(bytes32 indexed role, address indexed revokee);
 
-    error NoPermission(bytes32 role);
+    error NoPermit(bytes32 role);
 
     constructor(address owner_) Ownable(owner_) {}
 
-    modifier onlyPerm(bytes32 role) {
-        if (!_permissions[role][msg.sender]) revert NoPermission(role);
+    modifier onlyRole(bytes32 role) {
+        if (!_permits[role][msg.sender]) revert NoPermit(role);
         _;
     }
 
-    function hasPermission(
-        bytes32 role,
-        address _address
-    ) external view returns (bool) {
-        return _hasPermission(role, _address);
+    function hasRole(bytes32 role, address _address)
+        external
+        view
+        returns (bool)
+    {
+        return _hasRole(role, _address);
     }
 
-    function grantPermission(
-        bytes32 role,
-        address grantee
-    ) external virtual onlyOwner {
-        _grantPermission(role, grantee);
+    function grantRole(bytes32 role, address grantee)
+        external
+        virtual
+        onlyOwner
+    {
+        _grantRole(role, grantee);
     }
 
-    function revokPermission(
-        bytes32 role,
-        address revokee
-    ) external virtual onlyOwner {
-        _revokPermission(role, revokee);
+    function revokeRole(bytes32 role, address revokee)
+        external
+        virtual
+        onlyOwner
+    {
+        _revokeRole(role, revokee);
     }
 
-    function _grantPermission(
-        bytes32 role,
-        address grantee
-    ) internal {
-        _permissions[role][grantee] = true;
-        emit PermissionGranted(role, grantee);
+    function _grantRole(bytes32 role, address grantee) internal {
+        _permits[role][grantee] = true;
+        emit RoleGranted(role, grantee);
     }
 
-    function _revokPermission(
-        bytes32 role,
-        address revokee
-    ) internal {
-        _permissions[role][revokee] = true;
-        emit PermissionRevoked(role, revokee);
+    function _revokeRole(bytes32 role, address revokee) internal {
+        _permits[role][revokee] = false;
+        emit RoleRevoked(role, revokee);
     }
 
-    function _hasPermission(
-        bytes32 role,
-        address _address
-    ) internal view returns (bool) {
-        return _permissions[role][_address];
+    function _hasRole(bytes32 role, address _address)
+        internal
+        view
+        returns (bool)
+    {
+        return _permits[role][_address];
     }
 }
