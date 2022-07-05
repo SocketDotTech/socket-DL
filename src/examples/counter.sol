@@ -8,6 +8,8 @@ contract Counter is IPlug {
     // immutables
     address public immutable socket;
 
+    address public owner;
+
     // application state
     uint256 public counter;
 
@@ -17,6 +19,12 @@ contract Counter is IPlug {
 
     constructor(address _socket) {
         socket = _socket;
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "can only be called by owner");
+        _;
     }
 
     function localAddOperation(uint256 amount) public {
@@ -70,17 +78,28 @@ contract Counter is IPlug {
 
     // settings
     function setSocketConfig(
-        uint256 chainId,
-        address plug,
-        address channel,
-        address executor,
-        address prover,
-        uint256 requiredConfs,
-        bool isBlocking
-    ) public {
-        // remoteChainId = chainId;
-        // remotePlug = plug;
-        // ISocket(socket).setInboundConfig(chainId, channel, executor, prover, requiredConfs, isBlocking);
-        // ISocket(socket).setOutboundConfig(chainId, channel, executor, prover);
+        uint256 remoteChainId,
+        address remotePlug,
+        address localAccumulator,
+        address localVerifier,
+        address remoteAccumulator,
+        address remoteVerifier
+    ) external onlyOwner {
+        ISocket(socket).setInboundConfig(
+            remoteChainId,
+            localAccumulator,
+            localVerifier,
+            remotePlug
+        );
+        ISocket(socket).setOutboundConfig(
+            remoteChainId,
+            remoteAccumulator,
+            remoteVerifier,
+            remotePlug
+        );
+    }
+
+    function setupComplete() external {
+        owner = address(0);
     }
 }

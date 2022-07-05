@@ -5,13 +5,15 @@ pragma solidity >=0.8.0;
 // allows a "PAUSER" role to stop processing of messages
 // allows an "MANAGER" role to setup "PAUSER"
 contract AcceptWithTimeout {
+    // immutables
     uint256 public immutable timeoutInSeconds;
-
     address public immutable socket;
     address public immutable manager;
 
+    // current state of the verifier
     bool public isActive;
 
+    // pauserState
     mapping(address => mapping(uint256 => bool))
         private isPauserForIncomingChain;
 
