@@ -22,13 +22,21 @@ interface ISocket {
 
     event MinBondAmountSet(uint256 amount);
 
+    event SignatureSubmitted(
+        address indexed accumAddress,
+        uint256 indexed batchId,
+        uint8 sigV,
+        bytes32 sigR,
+        bytes32 sigS
+    );
+
     error InvalidBondReduce();
 
     error UnbondInProgress();
 
     error ClaimTimeLeft();
 
-    error InvalidSigner(address signer);
+    error InvalidBond();
 
     function addBond() external payable;
 
@@ -37,6 +45,13 @@ interface ISocket {
     function unbondSigner() external;
 
     function claimBond() external;
+
+    function submitSignature(
+        uint8 sigV,
+        bytes32 sigR,
+        bytes32 sigS,
+        address accumAddress
+    ) external;
 
     function outbound(uint256 remoteChainId, bytes calldata payload) external;
 

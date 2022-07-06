@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./interfaces/ISocket.sol";
 import "./utils/AccessControl.sol";
+import "./interfaces/IAccumulator.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
     // localPlug => remoteChainId => OutboundConfig
@@ -12,9 +13,9 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     // localPlug => remoteChainId => InboundConfig
     mapping(address => mapping(uint256 => InboundConfig)) public inboundConfigs;
 
-    uint256 public minBondAmount;
-    uint256 public bondClaimDelay;
-    uint256 public immutable chainId;
+    uint256 private _minBondAmount;
+    uint256 private _bondClaimDelay;
+    uint256 private immutable _chainId;
 
     // signer => bond amount
     mapping(address => uint256) private _bonds;
@@ -26,6 +27,13 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     // signer => unbond data
     mapping(address => UnbondData) private _unbonds;
 
+    struct Signature {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+    mapping(address => mapping(uint256 => Signature)) private _signatures;
+
     constructor(
         uint256 minBondAmount_,
         uint256 bondClaimDelay_,
@@ -33,7 +41,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     ) {
         _setMinBondAmount(minBondAmount_);
         _setBondClaimDelay(bondClaimDelay_);
-        chainId = chainId_;
+        _chainId = chainId_;
     }
 
     function outbound(uint256 remoteChainId, bytes calldata payload) external {
@@ -48,7 +56,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     function reduceBond(uint256 amount) external override {
         uint256 newBond = _bonds[msg.sender] - amount;
 
-        if (newBond < minBondAmount) revert InvalidBondReduce();
+        if (newBond < _minBondAmount) revert InvalidBondReduce();
 
         _bonds[msg.sender] = newBond;
         emit BondReduced(msg.sender, amount, newBond);
@@ -60,7 +68,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         if (_unbonds[msg.sender].claimTime != 0) revert UnbondInProgress();
 
         uint256 amount = _bonds[msg.sender];
-        uint256 claimTime = block.timestamp + bondClaimDelay;
+        uint256 claimTime = block.timestamp + _bondClaimDelay;
 
         _bonds[msg.sender] = 0;
         _unbonds[msg.sender] = UnbondData(amount, claimTime);
@@ -69,7 +77,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     }
 
     function claimBond() external override {
-        if (_unbonds[msg.sender].claimTime < block.timestamp)
+        if (_unbonds[msg.sender].claimTime > block.timestamp)
             revert ClaimTimeLeft();
 
         uint256 amount = _unbonds[msg.sender].amount;
@@ -77,6 +85,30 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         emit BondClaimed(msg.sender, amount);
 
         payable(msg.sender).transfer(amount);
+    }
+
+    function minBondAmount() external view returns (uint256) {
+        return _minBondAmount;
+    }
+
+    function bondClaimDelay() external view returns (uint256) {
+        return _bondClaimDelay;
+    }
+
+    function chainId() external view returns (uint256) {
+        return _chainId;
+    }
+
+    function getBond(address signer) external view returns (uint256) {
+        return _bonds[signer];
+    }
+
+    function getUnbondData(address signer)
+        external
+        view
+        returns (uint256, uint256)
+    {
+        return (_unbonds[signer].amount, _unbonds[signer].claimTime);
     }
 
     function setMinBondAmount(uint256 amount) external onlyOwner {
@@ -87,13 +119,33 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         _setBondClaimDelay(delay);
     }
 
+    function submitSignature(
+        uint8 sigV,
+        bytes32 sigR,
+        bytes32 sigS,
+        address accumAddress
+    ) external override {
+        (bytes32 root, uint256 batchId) = IAccumulator(accumAddress)
+            .sealBatch();
+
+        bytes32 digest = keccak256(
+            abi.encode(_chainId, accumAddress, batchId, root)
+        );
+        address signer = ecrecover(digest, sigV, sigR, sigS);
+
+        if (_bonds[signer] < _minBondAmount) revert InvalidBond();
+        _signatures[accumAddress][batchId] = Signature(sigV, sigR, sigS);
+
+        emit SignatureSubmitted(accumAddress, batchId, sigV, sigR, sigS);
+    }
+
     function _setMinBondAmount(uint256 amount) private {
-        minBondAmount = amount;
+        _minBondAmount = amount;
         emit MinBondAmountSet(amount);
     }
 
     function _setBondClaimDelay(uint256 delay) private {
-        bondClaimDelay = delay;
+        _bondClaimDelay = delay;
         emit BondClaimDelaySet(delay);
     }
 
