@@ -30,6 +30,14 @@ interface ISocket {
         bytes32 sigS
     );
 
+    event SignatureChallenged(
+        address indexed signer,
+        address indexed accumAddress,
+        uint256 indexed batchId,
+        address challenger,
+        uint256 rewardAmount
+    );
+
     error InvalidBondReduce();
 
     error UnbondInProgress();
@@ -47,10 +55,19 @@ interface ISocket {
     function claimBond() external;
 
     function submitSignature(
-        uint8 sigV,
-        bytes32 sigR,
-        bytes32 sigS,
-        address accumAddress
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        address accumAddress_
+    ) external;
+
+    function challengeSignature(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        address accumAddress_,
+        bytes32 root_,
+        uint256 batchId_
     ) external;
 
     function outbound(uint256 remoteChainId, bytes calldata payload) external;

@@ -9,9 +9,11 @@ contract SocketTest is Test {
     address constant _owner = address(1);
     uint256 constant _signerPrivateKey = uint256(2);
     address constant _accum = address(3);
-    address constant _root = address(4);
+    address constant _root = address(4); // todo: change to bytes32
     uint256 constant _batchId = uint256(5);
     address _signer;
+    address constant _raju = address(6);
+    bytes32 constant _altRoot = bytes32(uint256(7));
 
     uint256 constant _minBondAmount = 100e18;
     uint256 constant _bondClaimDelay = 1 weeks;
@@ -165,5 +167,48 @@ contract SocketTest is Test {
 
         vm.expectRevert(ISocket.InvalidBond.selector);
         _socket.submitSignature(sigV, sigR, sigS, _accum);
+    }
+
+    function testChallengeSignature() external {
+        hoax(_signer, 150e18);
+        _socket.addBond{value: 120e18}();
+
+        vm.mockCall(
+            _accum,
+            abi.encodeWithSelector(IAccumulator.sealBatch.selector),
+            abi.encode(_root, _batchId)
+        );
+
+        bytes32 digest = keccak256(
+            abi.encode(_chainId, _accum, _batchId, _root)
+        );
+        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
+            _signerPrivateKey,
+            digest
+        );
+
+        _socket.submitSignature(sigV, sigR, sigS, _accum);
+
+        bytes32 altDigest = keccak256(
+            abi.encode(_chainId, _accum, _batchId, _altRoot)
+        );
+        (uint8 altSigV, bytes32 altSigR, bytes32 altSigS) = vm.sign(
+            _signerPrivateKey,
+            altDigest
+        );
+
+        hoax(_raju, 0);
+        _socket.challengeSignature(
+            altSigV,
+            altSigR,
+            altSigS,
+            _accum,
+            _altRoot,
+            _batchId
+        );
+
+        assertEq(_signer.balance, 30e18);
+        assertEq(_raju.balance, 120e18);
+        assertEq(address(_socket).balance, 0);
     }
 }

@@ -32,7 +32,9 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         bytes32 r;
         bytes32 s;
     }
-    mapping(address => mapping(uint256 => Signature)) private _signatures;
+    // signer => accumAddress => batchId => Signature
+    mapping(address => mapping(address => mapping(uint256 => Signature)))
+        private _signatures;
 
     constructor(
         uint256 minBondAmount_,
@@ -120,23 +122,54 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     }
 
     function submitSignature(
-        uint8 sigV,
-        bytes32 sigR,
-        bytes32 sigS,
-        address accumAddress
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        address accumAddress_
     ) external override {
-        (bytes32 root, uint256 batchId) = IAccumulator(accumAddress)
+        (bytes32 root, uint256 batchId) = IAccumulator(accumAddress_)
             .sealBatch();
 
         bytes32 digest = keccak256(
-            abi.encode(_chainId, accumAddress, batchId, root)
+            abi.encode(_chainId, accumAddress_, batchId, root)
         );
-        address signer = ecrecover(digest, sigV, sigR, sigS);
+        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
 
         if (_bonds[signer] < _minBondAmount) revert InvalidBond();
-        _signatures[accumAddress][batchId] = Signature(sigV, sigR, sigS);
+        _signatures[signer][accumAddress_][batchId] = Signature(
+            sigV_,
+            sigR_,
+            sigS_
+        );
 
-        emit SignatureSubmitted(accumAddress, batchId, sigV, sigR, sigS);
+        emit SignatureSubmitted(accumAddress_, batchId, sigV_, sigR_, sigS_);
+    }
+
+    function challengeSignature(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        address accumAddress_,
+        bytes32 root_,
+        uint256 batchId_
+    ) external override {
+        bytes32 digest = keccak256(
+            abi.encode(_chainId, accumAddress_, batchId_, root_)
+        );
+        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
+        Signature memory sig = _signatures[signer][accumAddress_][batchId_];
+
+        if (sig.v != sigV_ || sig.r != sigR_ || sig.s != sigS_) {
+            uint256 bond = _unbonds[signer].amount + _bonds[signer];
+            payable(msg.sender).transfer(bond);
+            emit SignatureChallenged(
+                signer,
+                accumAddress_,
+                batchId_,
+                msg.sender,
+                bond
+            );
+        }
     }
 
     function _setMinBondAmount(uint256 amount) private {
