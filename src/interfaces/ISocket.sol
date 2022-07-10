@@ -30,6 +30,13 @@ interface ISocket {
         bytes32 sigS
     );
 
+    event RemoteRootSubmitted(
+        uint256 indexed remoteChainId,
+        address indexed accumAddress,
+        uint256 indexed batchId,
+        bytes32 root
+    );
+
     event SignatureChallenged(
         address indexed signer,
         address indexed accumAddress,
@@ -45,6 +52,8 @@ interface ISocket {
     error ClaimTimeLeft();
 
     error InvalidBond();
+
+    error InvalidSigner();
 
     function addBond() external payable;
 

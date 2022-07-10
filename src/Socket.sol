@@ -34,7 +34,14 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     }
     // signer => accumAddress => batchId => Signature
     mapping(address => mapping(address => mapping(uint256 => Signature)))
-        private _signatures;
+        private _localSignatures;
+
+    // remoteChainId => accumAddress => batchId => root
+    mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
+        private _remoteRoots;
+
+    bytes32 public constant SIGNER_ROLE_SALT = keccak256("SIGNER_ROLE_SALT");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     constructor(
         uint256 minBondAmount_,
@@ -136,7 +143,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         address signer = ecrecover(digest, sigV_, sigR_, sigS_);
 
         if (_bonds[signer] < _minBondAmount) revert InvalidBond();
-        _signatures[signer][accumAddress_][batchId] = Signature(
+        _localSignatures[signer][accumAddress_][batchId] = Signature(
             sigV_,
             sigR_,
             sigS_
@@ -157,7 +164,9 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             abi.encode(_chainId, accumAddress_, batchId_, root_)
         );
         address signer = ecrecover(digest, sigV_, sigR_, sigS_);
-        Signature memory sig = _signatures[signer][accumAddress_][batchId_];
+        Signature memory sig = _localSignatures[signer][accumAddress_][
+            batchId_
+        ];
 
         if (sig.v != sigV_ || sig.r != sigR_ || sig.s != sigS_) {
             uint256 bond = _unbonds[signer].amount + _bonds[signer];
@@ -212,5 +221,42 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         config.remotePlug = _remotePlug;
 
         // TODO: emit event
+    }
+
+    function grantSignerRole(uint256 remoteChainId_, address signer_)
+        external
+        onlyOwner
+    {
+        _grantRole(_signerRole(remoteChainId_), signer_);
+    }
+
+    function submitRemoteRoot(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 batchId_,
+        bytes32 root_
+    ) external {
+        bytes32 digest = keccak256(
+            abi.encode(remoteChainId_, accumAddress_, batchId_, root_)
+        );
+        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
+
+        if (!_hasRole(_signerRole(remoteChainId_), signer))
+            revert InvalidSigner();
+
+        _remoteRoots[remoteChainId_][accumAddress_][batchId_] = root_;
+        emit RemoteRootSubmitted(
+            remoteChainId_,
+            accumAddress_,
+            batchId_,
+            root_
+        );
+    }
+
+    function _signerRole(uint256 chainId_) internal pure returns (bytes32) {
+        return keccak256(abi.encode(SIGNER_ROLE_SALT, chainId_));
     }
 }

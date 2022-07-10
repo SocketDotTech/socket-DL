@@ -9,7 +9,7 @@ contract SocketTest is Test {
     address constant _owner = address(1);
     uint256 constant _signerPrivateKey = uint256(2);
     address constant _accum = address(3);
-    address constant _root = address(4); // todo: change to bytes32
+    bytes32 constant _root = bytes32(uint256(4));
     uint256 constant _batchId = uint256(5);
     address _signer;
     address constant _raju = address(6);
