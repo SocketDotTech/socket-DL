@@ -36,8 +36,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     mapping(address => mapping(address => mapping(uint256 => Signature)))
         private _localSignatures;
 
-    // remoteChainId => accumAddress => batchId => root
-    mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
+    // signer => remoteChainId => accumAddress => batchId => root
+    mapping(address => mapping(uint256 => mapping(address => mapping(uint256 => bytes32))))
         private _remoteRoots;
 
     bytes32 public constant SIGNER_ROLE_SALT = keccak256("SIGNER_ROLE_SALT");
@@ -223,13 +223,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         // TODO: emit event
     }
 
-    function grantSignerRole(uint256 remoteChainId_, address signer_)
-        external
-        onlyOwner
-    {
-        _grantRole(_signerRole(remoteChainId_), signer_);
-    }
-
     function submitRemoteRoot(
         uint8 sigV_,
         bytes32 sigR_,
@@ -244,10 +237,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         );
         address signer = ecrecover(digest, sigV_, sigR_, sigS_);
 
-        if (!_hasRole(_signerRole(remoteChainId_), signer))
-            revert InvalidSigner();
-
-        _remoteRoots[remoteChainId_][accumAddress_][batchId_] = root_;
+        _remoteRoots[signer][remoteChainId_][accumAddress_][batchId_] = root_;
         emit RemoteRootSubmitted(
             remoteChainId_,
             accumAddress_,
@@ -256,7 +246,12 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         );
     }
 
-    function _signerRole(uint256 chainId_) internal pure returns (bytes32) {
-        return keccak256(abi.encode(SIGNER_ROLE_SALT, chainId_));
+    function getRemoteRoot(
+        address signer_,
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 batchId_
+    ) external view returns (bytes32) {
+        return _remoteRoots[signer_][remoteChainId_][accumAddress_][batchId_];
     }
 }
