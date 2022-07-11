@@ -18,6 +18,7 @@ contract SocketTest is Test {
     uint256 constant _minBondAmount = 100e18;
     uint256 constant _bondClaimDelay = 1 weeks;
     uint256 constant _chainId = 0x2013AA263;
+    uint256 constant _remoteChainId = 0x2013AA264;
 
     Socket _socket;
 
@@ -210,5 +211,31 @@ contract SocketTest is Test {
         assertEq(_signer.balance, 30e18);
         assertEq(_raju.balance, 120e18);
         assertEq(address(_socket).balance, 0);
+    }
+
+    function testSubmitRemoteRoot() external {
+        bytes32 digest = keccak256(
+            abi.encode(_remoteChainId, _accum, _batchId, _root)
+        );
+        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
+            _signerPrivateKey,
+            digest
+        );
+
+        hoax(_raju);
+        _socket.submitRemoteRoot(
+            sigV,
+            sigR,
+            sigS,
+            _remoteChainId,
+            _accum,
+            _batchId,
+            _root
+        );
+
+        assertEq(
+            _socket.getRemoteRoot(_signer, _remoteChainId, _accum, _batchId),
+            _root
+        );
     }
 }
