@@ -119,6 +119,7 @@ contract AcceptWithTimeout is IVerifier {
         uint256,
         bytes32
     ) external view returns (bool) {
+        // todo: verify timeout
         if (isChainActive[remoteChainId_]) {
             return true;
         } else {

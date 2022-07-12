@@ -4,6 +4,9 @@ pragma solidity ^0.8.0;
 import "./interfaces/ISocket.sol";
 import "./utils/AccessControl.sol";
 import "./interfaces/IAccumulator.sol";
+import "./interfaces/IDeaccumulator.sol";
+import "./interfaces/IVerifier.sol";
+import "./interfaces/IPlug.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
     // localPlug => remoteChainId => OutboundConfig
@@ -53,8 +56,93 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         _chainId = chainId_;
     }
 
-    function outbound(uint256 remoteChainId, bytes calldata payload) external {
-        // TODO: add stuff
+    function outbound(uint256 remoteChainId_, bytes calldata payload_)
+        external
+    {
+        OutboundConfig memory config = outboundConfigs[msg.sender][
+            remoteChainId_
+        ];
+        bytes32 packet = _makePacket(
+            _chainId,
+            msg.sender,
+            remoteChainId_,
+            config.remotePlug,
+            payload_
+        );
+        IAccumulator(config.accum).addPacket(packet);
+        emit PacketTransmitted(
+            _chainId,
+            msg.sender,
+            remoteChainId_,
+            config.remotePlug,
+            payload_
+        );
+    }
+
+    function inbound(
+        uint256 remoteChainId_,
+        address remotePlug_,
+        address localPlug_,
+        address signer_,
+        address remoteAccum_,
+        uint256 batchId_,
+        bytes calldata payload_,
+        bytes calldata deaccumProof
+    ) external {
+        bytes32 packet = _makePacket(
+            remoteChainId_,
+            remotePlug_,
+            _chainId,
+            localPlug_,
+            payload_
+        );
+        InboundConfig memory config = inboundConfigs[localPlug_][
+            remoteChainId_
+        ];
+        if (remotePlug_ != config.remotePlug) revert InvalidRemotePlug();
+
+        bytes32 root = _remoteRoots[signer_][remoteChainId_][remoteAccum_][
+            batchId_
+        ];
+
+        if (
+            !IDeaccumulator(config.deaccum).verifyPacketHash(
+                root,
+                packet,
+                deaccumProof
+            )
+        ) revert InvalidProof();
+
+        if (
+            !IVerifier(config.verifier).verifyRoot(
+                signer_,
+                remoteChainId_,
+                remoteAccum_,
+                batchId_,
+                root
+            )
+        ) revert DappVerificationFailed();
+
+        IPlug(localPlug_).inbound(payload_);
+    }
+
+    function _makePacket(
+        uint256 srcChainId,
+        address srcPlug,
+        uint256 dstChainId,
+        address dstPlug,
+        bytes calldata payload
+    ) private pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encodePacked(
+                    srcChainId,
+                    srcPlug,
+                    dstChainId,
+                    dstPlug,
+                    payload
+                )
+            );
     }
 
     function addBond() external payable override {

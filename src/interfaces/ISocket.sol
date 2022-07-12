@@ -45,6 +45,14 @@ interface ISocket {
         uint256 rewardAmount
     );
 
+    event PacketTransmitted(
+        uint256 srcChainId,
+        address srcPlug,
+        uint256 dstChainId,
+        address dstPlug,
+        bytes payload
+    );
+
     error InvalidBondReduce();
 
     error UnbondInProgress();
@@ -54,6 +62,12 @@ interface ISocket {
     error InvalidBond();
 
     error InvalidSigner();
+
+    error InvalidRemotePlug();
+
+    error InvalidProof();
+
+    error DappVerificationFailed();
 
     function addBond() external payable;
 
