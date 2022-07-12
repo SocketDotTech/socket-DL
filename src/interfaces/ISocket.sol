@@ -83,28 +83,28 @@ interface ISocket {
 
     // TODO: add confs and blocking/non-blocking
     struct InboundConfig {
-        address accumulator;
-        address verifier;
         address remotePlug;
+        address signer;
+        address deaccum;
+        address verifier;
     }
 
     struct OutboundConfig {
-        address accumulator;
-        address verifier;
+        address accum;
         address remotePlug;
     }
 
     function setInboundConfig(
-        uint256 remoteChainId,
-        address accumulator,
-        address verifier,
-        address remotePlug
+        uint256 remoteChainId_,
+        address remotePlug_,
+        address signer_,
+        address deaccum_,
+        address verifier_
     ) external;
 
     function setOutboundConfig(
-        uint256 remoteChainId,
-        address accumulator,
-        address verifier,
-        address remotePlug
+        uint256 remoteChainId_,
+        address remotePlug_,
+        address accum_
     ) external;
 }

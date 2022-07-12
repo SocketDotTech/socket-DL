@@ -192,33 +192,33 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     }
 
     function setInboundConfig(
-        uint256 _remoteChainId,
-        address _accumulator,
-        address _verifier,
-        address _remotePlug
+        uint256 remoteChainId_,
+        address remotePlug_,
+        address signer_,
+        address deaccum_,
+        address verifier_
     ) external {
         InboundConfig storage config = inboundConfigs[msg.sender][
-            _remoteChainId
+            remoteChainId_
         ];
-        config.accumulator = _accumulator;
-        config.verifier = _verifier;
-        config.remotePlug = _remotePlug;
+        config.remotePlug = remotePlug_;
+        config.signer = signer_;
+        config.deaccum = deaccum_;
+        config.verifier = verifier_;
 
         // TODO: emit event
     }
 
     function setOutboundConfig(
-        uint256 _remoteChainId,
-        address _accumulator,
-        address _verifier,
-        address _remotePlug
+        uint256 remoteChainId_,
+        address remotePlug_,
+        address accum_
     ) external {
         OutboundConfig storage config = outboundConfigs[msg.sender][
-            _remoteChainId
+            remoteChainId_
         ];
-        config.accumulator = _accumulator;
-        config.verifier = _verifier;
-        config.remotePlug = _remotePlug;
+        config.accum = accum_;
+        config.remotePlug = remotePlug_;
 
         // TODO: emit event
     }

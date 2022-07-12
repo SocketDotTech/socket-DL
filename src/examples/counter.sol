@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity >=0.8.4;
+pragma solidity ^0.8.0;
 
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
@@ -80,23 +80,19 @@ contract Counter is IPlug {
     function setSocketConfig(
         uint256 remoteChainId,
         address remotePlug,
-        address localAccumulator,
-        address localVerifier,
-        address remoteAccumulator,
-        address remoteVerifier
+        address signer,
+        address accum,
+        address deaccum,
+        address verifier
     ) external onlyOwner {
         ISocket(socket).setInboundConfig(
             remoteChainId,
-            localAccumulator,
-            localVerifier,
-            remotePlug
+            remotePlug,
+            signer,
+            deaccum,
+            verifier
         );
-        ISocket(socket).setOutboundConfig(
-            remoteChainId,
-            remoteAccumulator,
-            remoteVerifier,
-            remotePlug
-        );
+        ISocket(socket).setOutboundConfig(remoteChainId, remotePlug, accum);
     }
 
     function setupComplete() external {
