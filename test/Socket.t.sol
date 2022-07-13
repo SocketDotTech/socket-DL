@@ -222,6 +222,9 @@ contract SocketTest is Test {
             digest
         );
 
+        hoax(_owner);
+        _socket.grantSignerRole(_remoteChainId, _signer);
+
         hoax(_raju);
         _socket.submitRemoteRoot(
             sigV,
@@ -234,7 +237,7 @@ contract SocketTest is Test {
         );
 
         assertEq(
-            _socket.getRemoteRoot(_signer, _remoteChainId, _accum, _batchId),
+            _socket.getRemoteRoot(_remoteChainId, _accum, _batchId),
             _root
         );
     }

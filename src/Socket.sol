@@ -34,11 +34,10 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     mapping(address => mapping(address => mapping(uint256 => bytes32)))
         private _localSignatures;
 
-    // signer => remoteChainId => accumAddress => batchId => root
-    mapping(address => mapping(uint256 => mapping(address => mapping(uint256 => bytes32))))
+    // remoteChainId => accumAddress => batchId => root
+    mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
         private _remoteRoots;
 
-    bytes32 public constant SIGNER_ROLE_SALT = keccak256("SIGNER_ROLE_SALT");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     constructor(
@@ -96,9 +95,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         ];
         if (remotePlug_ != config.remotePlug) revert InvalidRemotePlug();
 
-        bytes32 root = _remoteRoots[signer_][remoteChainId_][remoteAccum_][
-            batchId_
-        ];
+        bytes32 root = _remoteRoots[remoteChainId_][remoteAccum_][batchId_];
 
         if (
             !IDeaccumulator(config.deaccum).verifyPacketHash(
@@ -273,7 +270,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     function setInboundConfig(
         uint256 remoteChainId_,
         address remotePlug_,
-        address signer_,
         address deaccum_,
         address verifier_
     ) external {
@@ -281,7 +277,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
         config.remotePlug = remotePlug_;
-        config.signer = signer_;
         config.deaccum = deaccum_;
         config.verifier = verifier_;
 
@@ -316,7 +311,13 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         );
         address signer = ecrecover(digest, sigV_, sigR_, sigS_);
 
-        _remoteRoots[signer][remoteChainId_][accumAddress_][batchId_] = root_;
+        if (!_hasRole(_signerRole(remoteChainId_), signer))
+            revert InvalidSigner();
+
+        if (_remoteRoots[remoteChainId_][accumAddress_][batchId_] != 0)
+            revert RemoteRootAlreadySubmitted();
+
+        _remoteRoots[remoteChainId_][accumAddress_][batchId_] = root_;
         emit RemoteRootSubmitted(
             remoteChainId_,
             accumAddress_,
@@ -326,11 +327,28 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     }
 
     function getRemoteRoot(
-        address signer_,
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 batchId_
     ) external view returns (bytes32) {
-        return _remoteRoots[signer_][remoteChainId_][accumAddress_][batchId_];
+        return _remoteRoots[remoteChainId_][accumAddress_][batchId_];
+    }
+
+    function grantSignerRole(uint256 remoteChainId_, address signer_)
+        external
+        onlyOwner
+    {
+        _grantRole(_signerRole(remoteChainId_), signer_);
+    }
+
+    function revokeSignerRole(uint256 remoteChainId_, address signer_)
+        external
+        onlyOwner
+    {
+        _revokeRole(_signerRole(remoteChainId_), signer_);
+    }
+
+    function _signerRole(uint256 chainId_) internal pure returns (bytes32) {
+        return bytes32(chainId_);
     }
 }

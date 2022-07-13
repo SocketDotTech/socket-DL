@@ -69,6 +69,8 @@ interface ISocket {
 
     error DappVerificationFailed();
 
+    error RemoteRootAlreadySubmitted();
+
     function addBond() external payable;
 
     function reduceBond(uint256 amount) external;
@@ -98,7 +100,6 @@ interface ISocket {
     // TODO: add confs and blocking/non-blocking
     struct InboundConfig {
         address remotePlug;
-        address signer;
         address deaccum;
         address verifier;
     }
@@ -111,7 +112,6 @@ interface ISocket {
     function setInboundConfig(
         uint256 remoteChainId_,
         address remotePlug_,
-        address signer_,
         address deaccum_,
         address verifier_
     ) external;

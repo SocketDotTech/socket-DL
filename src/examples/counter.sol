@@ -80,7 +80,6 @@ contract Counter is IPlug {
     function setSocketConfig(
         uint256 remoteChainId,
         address remotePlug,
-        address signer,
         address accum,
         address deaccum,
         address verifier
@@ -88,7 +87,6 @@ contract Counter is IPlug {
         ISocket(socket).setInboundConfig(
             remoteChainId,
             remotePlug,
-            signer,
             deaccum,
             verifier
         );

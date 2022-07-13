@@ -71,7 +71,6 @@ contract HappyTest is Test {
         _counter_A__.setSocketConfig(
             _chainId_B,
             address(_counter_B__),
-            _signer,
             address(_accum_A__),
             address(_deaccum_A__),
             address(_verifier_A__)
@@ -81,7 +80,6 @@ contract HappyTest is Test {
         _counter_B__.setSocketConfig(
             _chainId_A,
             address(_counter_A__),
-            _signer,
             address(_accum_B__),
             address(_deaccum_B__),
             address(_verifier_B__)
