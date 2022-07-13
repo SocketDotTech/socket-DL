@@ -241,4 +241,26 @@ contract SocketTest is Test {
             _root
         );
     }
+
+    function testSubmitRemoteRootWithoutRole() external {
+        bytes32 digest = keccak256(
+            abi.encode(_remoteChainId, _accum, _batchId, _root)
+        );
+        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
+            _signerPrivateKey,
+            digest
+        );
+
+        hoax(_raju);
+        vm.expectRevert(ISocket.InvalidSigner.selector);
+        _socket.submitRemoteRoot(
+            sigV,
+            sigR,
+            sigS,
+            _remoteChainId,
+            _accum,
+            _batchId,
+            _root
+        );
+    }
 }
