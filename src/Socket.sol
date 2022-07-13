@@ -30,13 +30,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     // signer => unbond data
     mapping(address => UnbondData) private _unbonds;
 
-    struct Signature {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-    // signer => accumAddress => batchId => Signature
-    mapping(address => mapping(address => mapping(uint256 => Signature)))
+    // signer => accumAddress => batchId => sig hash
+    mapping(address => mapping(address => mapping(uint256 => bytes32)))
         private _localSignatures;
 
     // signer => remoteChainId => accumAddress => batchId => root
@@ -231,10 +226,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         address signer = ecrecover(digest, sigV_, sigR_, sigS_);
 
         if (_bonds[signer] < _minBondAmount) revert InvalidBond();
-        _localSignatures[signer][accumAddress_][batchId] = Signature(
-            sigV_,
-            sigR_,
-            sigS_
+        _localSignatures[signer][accumAddress_][batchId] = keccak256(
+            abi.encode(sigV_, sigR_, sigS_)
         );
 
         emit SignatureSubmitted(accumAddress_, batchId, sigV_, sigR_, sigS_);
@@ -252,11 +245,9 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             abi.encode(_chainId, accumAddress_, batchId_, root_)
         );
         address signer = ecrecover(digest, sigV_, sigR_, sigS_);
-        Signature memory sig = _localSignatures[signer][accumAddress_][
-            batchId_
-        ];
+        bytes32 oldSig = _localSignatures[signer][accumAddress_][batchId_];
 
-        if (sig.v != sigV_ || sig.r != sigR_ || sig.s != sigS_) {
+        if (oldSig != keccak256(abi.encode(sigV_, sigR_, sigS_))) {
             uint256 bond = _unbonds[signer].amount + _bonds[signer];
             payable(msg.sender).transfer(bond);
             emit SignatureChallenged(
