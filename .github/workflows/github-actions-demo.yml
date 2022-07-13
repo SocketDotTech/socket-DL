@@ -1,23 +1,26 @@
-on: [push]
+name: Tests
 
-name: Run tests and take snapshot
+on: [push, pull_request]
 
 jobs:
-  check:
-    name: Foundry project
+  tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v2
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: onbjerg/foundry-toolchain@v1
         with:
           version: nightly
 
-      - name: Run tests
-        run: forge test -vvv
+      - name: Install dependencies
+        run: forge install
 
-      - name: Run snapshot
-        run: forge snapshot >> $GITHUB_STEP_SUMMARY
+      - name: Check contract sizes
+        run: forge build --sizes
+
+      - name: Check gas snapshots
+        run: forge snapshot --check
+
+      - name: Run tests
+        run: forge test
