@@ -52,6 +52,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     function outbound(uint256 remoteChainId_, bytes calldata payload_)
         external
+        override
     {
         OutboundConfig memory config = outboundConfigs[msg.sender][
             remoteChainId_
@@ -82,7 +83,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         uint256 batchId_,
         bytes calldata payload_,
         bytes calldata deaccumProof
-    ) external {
+    ) external override {
         bytes32 packet = _makePacket(
             remoteChainId_,
             remotePlug_,
@@ -272,7 +273,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         address remotePlug_,
         address deaccum_,
         address verifier_
-    ) external {
+    ) external override {
         InboundConfig storage config = inboundConfigs[msg.sender][
             remoteChainId_
         ];
@@ -287,7 +288,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         uint256 remoteChainId_,
         address remotePlug_,
         address accum_
-    ) external {
+    ) external override {
         OutboundConfig storage config = outboundConfigs[msg.sender][
             remoteChainId_
         ];
@@ -305,7 +306,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         address accumAddress_,
         uint256 batchId_,
         bytes32 root_
-    ) external {
+    ) external override {
         bytes32 digest = keccak256(
             abi.encode(remoteChainId_, accumAddress_, batchId_, root_)
         );
@@ -330,12 +331,13 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 batchId_
-    ) external view returns (bytes32) {
+    ) external view override returns (bytes32) {
         return _remoteRoots[remoteChainId_][accumAddress_][batchId_];
     }
 
     function grantSignerRole(uint256 remoteChainId_, address signer_)
         external
+        override
         onlyOwner
     {
         _grantRole(_signerRole(remoteChainId_), signer_);
@@ -343,6 +345,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     function revokeSignerRole(uint256 remoteChainId_, address signer_)
         external
+        override
         onlyOwner
     {
         _revokeRole(_signerRole(remoteChainId_), signer_);

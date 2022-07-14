@@ -95,7 +95,28 @@ interface ISocket {
         uint256 batchId_
     ) external;
 
+    function submitRemoteRoot(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 batchId_,
+        bytes32 root_
+    ) external;
+
     function outbound(uint256 remoteChainId, bytes calldata payload) external;
+
+    function inbound(
+        uint256 remoteChainId_,
+        address remotePlug_,
+        address localPlug_,
+        address signer_,
+        address remoteAccum_,
+        uint256 batchId_,
+        bytes calldata payload_,
+        bytes calldata deaccumProof
+    ) external;
 
     // TODO: add confs and blocking/non-blocking
     struct InboundConfig {
@@ -121,4 +142,14 @@ interface ISocket {
         address remotePlug_,
         address accum_
     ) external;
+
+    function grantSignerRole(uint256 remoteChainId_, address signer_) external;
+
+    function revokeSignerRole(uint256 remoteChainId_, address signer_) external;
+
+    function getRemoteRoot(
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 batchId_
+    ) external view returns (bytes32);
 }
