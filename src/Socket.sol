@@ -40,6 +40,15 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
+    // localPlug => remoteChainId => nonce
+    mapping(address => mapping(uint256 => uint256)) private _nonces;
+
+    // packethash => executeStatus
+    mapping(bytes32 => bool) private _executedPackets;
+
+    // localPlug => remoteChainId => nextNonce
+    mapping(address => mapping(uint256 => uint256)) private _nextNonces;
+
     constructor(
         uint256 minBondAmount_,
         uint256 bondClaimDelay_,
@@ -57,52 +66,64 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         OutboundConfig memory config = outboundConfigs[msg.sender][
             remoteChainId_
         ];
+        uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
         bytes32 packet = _makePacket(
             _chainId,
             msg.sender,
             remoteChainId_,
             config.remotePlug,
+            nonce,
             payload_
         );
+
         IAccumulator(config.accum).addPacket(packet);
         emit PacketTransmitted(
             _chainId,
             msg.sender,
             remoteChainId_,
             config.remotePlug,
+            nonce,
             payload_
         );
     }
 
     function inbound(
         uint256 remoteChainId_,
-        address remotePlug_,
         address localPlug_,
+        uint256 nonce_,
         address signer_,
         address remoteAccum_,
         uint256 batchId_,
         bytes calldata payload_,
-        bytes calldata deaccumProof
+        bytes calldata deaccumProof_
     ) external override {
-        bytes32 packet = _makePacket(
-            remoteChainId_,
-            remotePlug_,
-            _chainId,
-            localPlug_,
-            payload_
-        );
         InboundConfig memory config = inboundConfigs[localPlug_][
             remoteChainId_
         ];
-        if (remotePlug_ != config.remotePlug) revert InvalidRemotePlug();
+
+        bytes32 packet = _makePacket(
+            remoteChainId_,
+            config.remotePlug,
+            _chainId,
+            localPlug_,
+            nonce_,
+            payload_
+        );
+
+        if (_executedPackets[packet]) revert PacketAlreadyExecuted();
+        _executedPackets[packet] = true;
+
+        if (
+            config.isSequential &&
+            nonce_ != _nextNonces[localPlug_][remoteChainId_]++
+        ) revert InvalidNonce();
 
         bytes32 root = _remoteRoots[remoteChainId_][remoteAccum_][batchId_];
-
         if (
             !IDeaccumulator(config.deaccum).verifyPacketHash(
                 root,
                 packet,
-                deaccumProof
+                deaccumProof_
             )
         ) revert InvalidProof();
 
@@ -124,18 +145,24 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         address srcPlug,
         uint256 dstChainId,
         address dstPlug,
+        uint256 nonce,
         bytes calldata payload
     ) private pure returns (bytes32) {
         return
             keccak256(
-                abi.encodePacked(
+                abi.encode(
                     srcChainId,
                     srcPlug,
                     dstChainId,
                     dstPlug,
+                    nonce,
                     payload
                 )
             );
+    }
+
+    function dropPackets(uint256 remoteChainId_, uint256 count_) external {
+        _nextNonces[msg.sender][remoteChainId_] += count_;
     }
 
     function addBond() external payable override {
@@ -272,7 +299,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         uint256 remoteChainId_,
         address remotePlug_,
         address deaccum_,
-        address verifier_
+        address verifier_,
+        bool isSequential_
     ) external override {
         InboundConfig storage config = inboundConfigs[msg.sender][
             remoteChainId_
@@ -280,6 +308,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         config.remotePlug = remotePlug_;
         config.deaccum = deaccum_;
         config.verifier = verifier_;
+        config.isSequential = isSequential_;
 
         // TODO: emit event
     }

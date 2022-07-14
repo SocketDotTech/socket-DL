@@ -43,7 +43,7 @@ contract HappyTest is Test {
         _deploySocketContracts();
         _initSigner();
         _deployPlugContracts();
-        _configPlugContracts();
+        _configPlugContracts(true);
         _initPausers();
     }
 
@@ -104,14 +104,15 @@ contract HappyTest is Test {
         vm.stopPrank();
     }
 
-    function _configPlugContracts() private {
+    function _configPlugContracts(bool isSequential_) private {
         hoax(_counterOwner);
         _a.counter__.setSocketConfig(
             _b.chainId,
             address(_b.counter__),
             address(_a.accum__),
             address(_a.deaccum__),
-            address(_a.verifier__)
+            address(_a.verifier__),
+            isSequential_
         );
 
         hoax(_counterOwner);
@@ -120,7 +121,8 @@ contract HappyTest is Test {
             address(_a.counter__),
             address(_b.accum__),
             address(_b.deaccum__),
-            address(_b.verifier__)
+            address(_b.verifier__),
+            isSequential_
         );
     }
 
@@ -145,6 +147,7 @@ contract HappyTest is Test {
 
         hoax(_raju);
         _a.counter__.remoteAddOperation(_b.chainId, amount);
+        // TODO: get nonce from event
         (
             bytes32 root,
             uint256 batchId,
@@ -152,7 +155,7 @@ contract HappyTest is Test {
         ) = _getLatestSignature(_a);
         _submitSignatureOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, batchId, root);
-        _executePayloadOnDst(_a, _b, batchId, payload, proof);
+        _executePayloadOnDst(_a, _b, batchId, 0, payload, proof);
 
         assertEq(_b.counter__.counter(), amount);
         assertEq(_a.counter__.counter(), 0);
@@ -172,7 +175,7 @@ contract HappyTest is Test {
         ) = _getLatestSignature(_b);
         _submitSignatureOnSrc(_b, sig);
         _submitRootOnDst(_b, _a, sig, batchId, root);
-        _executePayloadOnDst(_b, _a, batchId, payload, proof);
+        _executePayloadOnDst(_b, _a, batchId, 0, payload, proof);
 
         assertEq(_a.counter__.counter(), amount);
         assertEq(_b.counter__.counter(), 0);
@@ -233,14 +236,15 @@ contract HappyTest is Test {
         ChainContext storage src_,
         ChainContext storage dst_,
         uint256 batchId_,
+        uint256 nonce_,
         bytes memory payload_,
         bytes memory proof_
     ) private {
         hoax(_raju);
         dst_.socket__.inbound(
             src_.chainId,
-            address(src_.counter__),
             address(dst_.counter__),
+            nonce_,
             _signer,
             address(src_.accum__),
             batchId_,

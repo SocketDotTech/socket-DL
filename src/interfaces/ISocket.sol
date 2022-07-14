@@ -50,6 +50,7 @@ interface ISocket {
         address srcPlug,
         uint256 dstChainId,
         address dstPlug,
+        uint256 nonce,
         bytes payload
     );
 
@@ -70,6 +71,10 @@ interface ISocket {
     error DappVerificationFailed();
 
     error RemoteRootAlreadySubmitted();
+
+    error PacketAlreadyExecuted();
+
+    error InvalidNonce();
 
     function addBond() external payable;
 
@@ -109,13 +114,13 @@ interface ISocket {
 
     function inbound(
         uint256 remoteChainId_,
-        address remotePlug_,
         address localPlug_,
+        uint256 nonce,
         address signer_,
         address remoteAccum_,
         uint256 batchId_,
         bytes calldata payload_,
-        bytes calldata deaccumProof
+        bytes calldata deaccumProof_
     ) external;
 
     // TODO: add confs and blocking/non-blocking
@@ -123,6 +128,7 @@ interface ISocket {
         address remotePlug;
         address deaccum;
         address verifier;
+        bool isSequential;
     }
 
     struct OutboundConfig {
@@ -134,7 +140,8 @@ interface ISocket {
         uint256 remoteChainId_,
         address remotePlug_,
         address deaccum_,
-        address verifier_
+        address verifier_,
+        bool isSequential_
     ) external;
 
     function setOutboundConfig(
