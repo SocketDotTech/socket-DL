@@ -181,6 +181,29 @@ contract HappyTest is Test {
         assertEq(_b.counter__.counter(), 0);
     }
 
+    function testExecSamePacketTwice() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
+        bytes memory proof = abi.encode(0);
+
+        hoax(_raju);
+        _a.counter__.remoteAddOperation(_b.chainId, amount);
+        (
+            bytes32 root,
+            uint256 batchId,
+            Signature memory sig
+        ) = _getLatestSignature(_a);
+        _submitSignatureOnSrc(_a, sig);
+        _submitRootOnDst(_a, _b, sig, batchId, root);
+        _executePayloadOnDst(_a, _b, batchId, 0, payload, proof);
+
+        vm.expectRevert(ISocket.PacketAlreadyExecuted.selector);
+        _executePayloadOnDst(_a, _b, batchId, 0, payload, proof);
+
+        assertEq(_b.counter__.counter(), amount);
+        assertEq(_a.counter__.counter(), 0);
+    }
+
     function _getLatestSignature(ChainContext storage src_)
         private
         returns (
