@@ -22,13 +22,59 @@ interface ISocket {
 
     event MinBondAmountSet(uint256 amount);
 
+    event SignatureSubmitted(
+        address indexed accumAddress,
+        uint256 indexed batchId,
+        uint8 sigV,
+        bytes32 sigR,
+        bytes32 sigS
+    );
+
+    event RemoteRootSubmitted(
+        uint256 indexed remoteChainId,
+        address indexed accumAddress,
+        uint256 indexed batchId,
+        bytes32 root
+    );
+
+    event SignatureChallenged(
+        address indexed signer,
+        address indexed accumAddress,
+        uint256 indexed batchId,
+        address challenger,
+        uint256 rewardAmount
+    );
+
+    event PacketTransmitted(
+        uint256 srcChainId,
+        address srcPlug,
+        uint256 dstChainId,
+        address dstPlug,
+        uint256 nonce,
+        bytes payload
+    );
+
     error InvalidBondReduce();
 
     error UnbondInProgress();
 
     error ClaimTimeLeft();
 
-    error InvalidSigner(address signer);
+    error InvalidBond();
+
+    error InvalidSigner();
+
+    error InvalidRemotePlug();
+
+    error InvalidProof();
+
+    error DappVerificationFailed();
+
+    error RemoteRootAlreadySubmitted();
+
+    error PacketAlreadyExecuted();
+
+    error InvalidNonce();
 
     function addBond() external payable;
 
@@ -38,32 +84,79 @@ interface ISocket {
 
     function claimBond() external;
 
+    function submitSignature(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        address accumAddress_
+    ) external;
+
+    function challengeSignature(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        address accumAddress_,
+        bytes32 root_,
+        uint256 batchId_
+    ) external;
+
+    function submitRemoteRoot(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 batchId_,
+        bytes32 root_
+    ) external;
+
     function outbound(uint256 remoteChainId, bytes calldata payload) external;
+
+    function inbound(
+        uint256 remoteChainId_,
+        address localPlug_,
+        uint256 nonce,
+        address signer_,
+        address remoteAccum_,
+        uint256 batchId_,
+        bytes calldata payload_,
+        bytes calldata deaccumProof_
+    ) external;
 
     // TODO: add confs and blocking/non-blocking
     struct InboundConfig {
-        address accumulator;
-        address verifier;
         address remotePlug;
+        address deaccum;
+        address verifier;
+        bool isSequential;
     }
 
     struct OutboundConfig {
-        address accumulator;
-        address verifier;
+        address accum;
         address remotePlug;
     }
 
     function setInboundConfig(
-        uint256 remoteChainId,
-        address accumulator,
-        address verifier,
-        address remotePlug
+        uint256 remoteChainId_,
+        address remotePlug_,
+        address deaccum_,
+        address verifier_,
+        bool isSequential_
     ) external;
 
     function setOutboundConfig(
-        uint256 remoteChainId,
-        address accumulator,
-        address verifier,
-        address remotePlug
+        uint256 remoteChainId_,
+        address remotePlug_,
+        address accum_
     ) external;
+
+    function grantSignerRole(uint256 remoteChainId_, address signer_) external;
+
+    function revokeSignerRole(uint256 remoteChainId_, address signer_) external;
+
+    function getRemoteRoot(
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 batchId_
+    ) external view returns (bytes32);
 }

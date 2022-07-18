@@ -1,17 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.8.0;
 
+import "../interfaces/IVerifier.sol";
+
 // defines a timeout
 // allows a "PAUSER" role to stop processing of messages
 // allows an "MANAGER" role to setup "PAUSER"
-contract AcceptWithTimeout {
+contract AcceptWithTimeout is IVerifier {
     // immutables
     uint256 public immutable timeoutInSeconds;
     address public immutable socket;
     address public immutable manager;
 
     // current state of the verifier
-    bool public isActive;
+    mapping(uint256 => bool) public isChainActive;
 
     // pauserState
     mapping(address => mapping(uint256 => bool))
@@ -20,6 +22,7 @@ contract AcceptWithTimeout {
     event NewPauser(address pauser, uint256 chain);
     event RemovedPauser(address pauser, uint256 chain);
     event Paused(address pauser, uint256 chain);
+    event Unpaused(address pauser, uint256 chain);
 
     modifier onlyManager() {
         require(msg.sender == manager, "can only be called by manager");
@@ -54,28 +57,27 @@ contract AcceptWithTimeout {
         manager = _manager;
     }
 
-    function PreExecHook() external onlySocket returns (bool) {
-        require(isActive, "inactive verifier");
+    // function PreExecHook() external onlySocket returns (bool) {
+    //     require(isChainActive, "inactive verifier");
 
-        // TODO make sure this can be called only by Socket
-        // TODO fetch delivery time for the packet
+    //     // TODO make sure this can be called only by Socket
+    //     // TODO fetch delivery time for the packet
 
-        // check if enough packed has timeed out or not
-        // delivery time + timeout
+    //     // check if enough packed has timeed out or not
+    //     // delivery time + timeout
 
-        // return true/false
-        return true;
-    }
+    //     // return true/false
+    //     return true;
+    // }
 
     function Pause(uint256 chain) external onlyPauser(chain) {
-        require(isActive, "already paused");
-        isActive = false;
+        isChainActive[chain] = false;
         emit Paused(msg.sender, chain);
     }
 
-    function Activate() external onlyManager {
-        require(!isActive, "already active");
-        isActive = true;
+    function Activate(uint256 chain) external onlyPauser(chain) {
+        isChainActive[chain] = true;
+        emit Unpaused(msg.sender, chain);
     }
 
     function AddPauser(address _newPauser, uint256 _incomingChain)
@@ -108,5 +110,20 @@ contract AcceptWithTimeout {
         returns (bool)
     {
         return isPauserForIncomingChain[_pauser][_incomingChainId];
+    }
+
+    function verifyRoot(
+        address,
+        uint256 remoteChainId_,
+        address,
+        uint256,
+        bytes32
+    ) external view returns (bool) {
+        // todo: verify timeout
+        if (isChainActive[remoteChainId_]) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
