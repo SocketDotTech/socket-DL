@@ -34,6 +34,16 @@ contract HappyTest is Test {
         Counter counter__;
     }
 
+    struct PacketContext {
+        uint256 amount;
+        bytes payload;
+        bytes proof;
+        uint256 nonce;
+        bytes32 root;
+        uint256 batchId;
+        Signature sig;
+    }
+
     ChainContext _a;
     ChainContext _b;
 
@@ -45,6 +55,195 @@ contract HappyTest is Test {
         _deployPlugContracts();
         _configPlugContracts(true);
         _initPausers();
+    }
+
+    function testRemoteAddFromAtoB() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
+        bytes memory proof = abi.encode(0);
+
+        hoax(_raju);
+        _a.counter__.remoteAddOperation(_b.chainId, amount);
+        // TODO: get nonce from event
+        (
+            bytes32 root,
+            uint256 batchId,
+            Signature memory sig
+        ) = _getLatestSignature(_a);
+        _submitSignatureOnSrc(_a, sig);
+        _submitRootOnDst(_a, _b, sig, batchId, root);
+        _executePayloadOnDst(_a, _b, batchId, 0, payload, proof);
+
+        assertEq(_b.counter__.counter(), amount);
+        assertEq(_a.counter__.counter(), 0);
+    }
+
+    function testRemoteAddFromBtoA() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
+        bytes memory proof = abi.encode(0);
+
+        hoax(_raju);
+        _b.counter__.remoteAddOperation(_a.chainId, amount);
+        (
+            bytes32 root,
+            uint256 batchId,
+            Signature memory sig
+        ) = _getLatestSignature(_b);
+        _submitSignatureOnSrc(_b, sig);
+        _submitRootOnDst(_b, _a, sig, batchId, root);
+        _executePayloadOnDst(_b, _a, batchId, 0, payload, proof);
+
+        assertEq(_a.counter__.counter(), amount);
+        assertEq(_b.counter__.counter(), 0);
+    }
+
+    function testRemoteAddAndSubtract() external {
+        uint256 addAmount = 100;
+        bytes memory addPayload = abi.encode(keccak256("OP_ADD"), addAmount);
+        bytes memory addProof = abi.encode(0);
+        uint256 addNonce = 0;
+
+        uint256 subAmount = 40;
+        bytes memory subPayload = abi.encode(keccak256("OP_SUB"), subAmount);
+        bytes memory subProof = abi.encode(0);
+        uint256 subNonce = 1;
+
+        bytes32 root;
+        uint256 batchId;
+        Signature memory sig;
+
+        hoax(_raju);
+        _a.counter__.remoteAddOperation(_b.chainId, addAmount);
+
+        (root, batchId, sig) = _getLatestSignature(_a);
+        _submitSignatureOnSrc(_a, sig);
+        _submitRootOnDst(_a, _b, sig, batchId, root);
+        _executePayloadOnDst(_a, _b, batchId, addNonce, addPayload, addProof);
+
+        hoax(_raju);
+        _a.counter__.remoteSubOperation(_b.chainId, subAmount);
+
+        (root, batchId, sig) = _getLatestSignature(_a);
+        _submitSignatureOnSrc(_a, sig);
+        _submitRootOnDst(_a, _b, sig, batchId, root);
+        _executePayloadOnDst(_a, _b, batchId, subNonce, subPayload, subProof);
+
+        assertEq(_b.counter__.counter(), addAmount - subAmount);
+        assertEq(_a.counter__.counter(), 0);
+    }
+
+    function testPacketsOutOfOrderForSequentialConfig() external {
+        _configPlugContracts(true);
+
+        PacketContext memory p1;
+        p1.amount = 100;
+        p1.payload = abi.encode(keccak256("OP_ADD"), p1.amount);
+        p1.proof = abi.encode(0);
+        p1.nonce = 0;
+
+        hoax(_raju);
+        _a.counter__.remoteAddOperation(_b.chainId, p1.amount);
+
+        (p1.root, p1.batchId, p1.sig) = _getLatestSignature(_a);
+        _submitSignatureOnSrc(_a, p1.sig);
+        _submitRootOnDst(_a, _b, p1.sig, p1.batchId, p1.root);
+
+        PacketContext memory p2;
+        p2.amount = 40;
+        p2.payload = abi.encode(keccak256("OP_ADD"), p2.amount);
+        p2.proof = abi.encode(0);
+        p2.nonce = 1;
+
+        hoax(_raju);
+        _a.counter__.remoteAddOperation(_b.chainId, p2.amount);
+
+        (p2.root, p2.batchId, p2.sig) = _getLatestSignature(_a);
+        _submitSignatureOnSrc(_a, p2.sig);
+        _submitRootOnDst(_a, _b, p2.sig, p2.batchId, p2.root);
+
+        vm.expectRevert(ISocket.InvalidNonce.selector);
+        _executePayloadOnDst(
+            _a,
+            _b,
+            p2.batchId,
+            p2.nonce,
+            p2.payload,
+            p2.proof
+        );
+    }
+
+    function testPacketsOutOfOrderForNonSequentialConfig() external {
+        _configPlugContracts(false);
+
+        PacketContext memory p1;
+        p1.amount = 100;
+        p1.payload = abi.encode(keccak256("OP_ADD"), p1.amount);
+        p1.proof = abi.encode(0);
+        p1.nonce = 0;
+
+        hoax(_raju);
+        _a.counter__.remoteAddOperation(_b.chainId, p1.amount);
+
+        (p1.root, p1.batchId, p1.sig) = _getLatestSignature(_a);
+        _submitSignatureOnSrc(_a, p1.sig);
+        _submitRootOnDst(_a, _b, p1.sig, p1.batchId, p1.root);
+
+        PacketContext memory p2;
+        p2.amount = 40;
+        p2.payload = abi.encode(keccak256("OP_ADD"), p2.amount);
+        p2.proof = abi.encode(0);
+        p2.nonce = 1;
+
+        hoax(_raju);
+        _a.counter__.remoteAddOperation(_b.chainId, p2.amount);
+
+        (p2.root, p2.batchId, p2.sig) = _getLatestSignature(_a);
+        _submitSignatureOnSrc(_a, p2.sig);
+        _submitRootOnDst(_a, _b, p2.sig, p2.batchId, p2.root);
+
+        _executePayloadOnDst(
+            _a,
+            _b,
+            p2.batchId,
+            p2.nonce,
+            p2.payload,
+            p2.proof
+        );
+        _executePayloadOnDst(
+            _a,
+            _b,
+            p1.batchId,
+            p1.nonce,
+            p1.payload,
+            p1.proof
+        );
+
+        assertEq(_b.counter__.counter(), p1.amount + p2.amount);
+        assertEq(_a.counter__.counter(), 0);
+    }
+
+    function testExecSamePacketTwice() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
+        bytes memory proof = abi.encode(0);
+
+        hoax(_raju);
+        _a.counter__.remoteAddOperation(_b.chainId, amount);
+        (
+            bytes32 root,
+            uint256 batchId,
+            Signature memory sig
+        ) = _getLatestSignature(_a);
+        _submitSignatureOnSrc(_a, sig);
+        _submitRootOnDst(_a, _b, sig, batchId, root);
+        _executePayloadOnDst(_a, _b, batchId, 0, payload, proof);
+
+        vm.expectRevert(ISocket.PacketAlreadyExecuted.selector);
+        _executePayloadOnDst(_a, _b, batchId, 0, payload, proof);
+
+        assertEq(_b.counter__.counter(), amount);
+        assertEq(_a.counter__.counter(), 0);
     }
 
     function _deploySocketContracts() private {
@@ -138,70 +337,6 @@ contract HappyTest is Test {
         _a.verifier__.Activate(_b.chainId);
         hoax(_pauser);
         _b.verifier__.Activate(_a.chainId);
-    }
-
-    function testRemoteAddFromAtoB() external {
-        uint256 amount = 100;
-        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
-        bytes memory proof = abi.encode(0);
-
-        hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, amount);
-        // TODO: get nonce from event
-        (
-            bytes32 root,
-            uint256 batchId,
-            Signature memory sig
-        ) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, sig);
-        _submitRootOnDst(_a, _b, sig, batchId, root);
-        _executePayloadOnDst(_a, _b, batchId, 0, payload, proof);
-
-        assertEq(_b.counter__.counter(), amount);
-        assertEq(_a.counter__.counter(), 0);
-    }
-
-    function testRemoteAddFromBtoA() external {
-        uint256 amount = 100;
-        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
-        bytes memory proof = abi.encode(0);
-
-        hoax(_raju);
-        _b.counter__.remoteAddOperation(_a.chainId, amount);
-        (
-            bytes32 root,
-            uint256 batchId,
-            Signature memory sig
-        ) = _getLatestSignature(_b);
-        _submitSignatureOnSrc(_b, sig);
-        _submitRootOnDst(_b, _a, sig, batchId, root);
-        _executePayloadOnDst(_b, _a, batchId, 0, payload, proof);
-
-        assertEq(_a.counter__.counter(), amount);
-        assertEq(_b.counter__.counter(), 0);
-    }
-
-    function testExecSamePacketTwice() external {
-        uint256 amount = 100;
-        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
-        bytes memory proof = abi.encode(0);
-
-        hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, amount);
-        (
-            bytes32 root,
-            uint256 batchId,
-            Signature memory sig
-        ) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, sig);
-        _submitRootOnDst(_a, _b, sig, batchId, root);
-        _executePayloadOnDst(_a, _b, batchId, 0, payload, proof);
-
-        vm.expectRevert(ISocket.PacketAlreadyExecuted.selector);
-        _executePayloadOnDst(_a, _b, batchId, 0, payload, proof);
-
-        assertEq(_b.counter__.counter(), amount);
-        assertEq(_a.counter__.counter(), 0);
     }
 
     function _getLatestSignature(ChainContext storage src_)

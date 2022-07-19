@@ -22,8 +22,6 @@ contract SocketTest is Test {
 
     Socket _socket;
 
-    address constant _signer_1 = address(3);
-
     function setUp() external {
         _signer = vm.addr(_signerPrivateKey);
         hoax(_owner);
