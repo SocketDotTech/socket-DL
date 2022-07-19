@@ -37,7 +37,7 @@ interface ISocket {
         bytes32 root
     );
 
-    event SignatureChallenged(
+    event ChallengedSuccessfully(
         address indexed signer,
         address indexed accumAddress,
         uint256 indexed batchId,
@@ -112,7 +112,7 @@ interface ISocket {
 
     function outbound(uint256 remoteChainId, bytes calldata payload) external;
 
-    function inbound(
+    function execute(
         uint256 remoteChainId_,
         address localPlug_,
         uint256 nonce,

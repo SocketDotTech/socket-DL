@@ -264,7 +264,7 @@ contract HappyTest is Test {
         bytes memory proof_
     ) private {
         hoax(_raju);
-        dst_.socket__.inbound(
+        dst_.socket__.execute(
             src_.chainId,
             address(dst_.counter__),
             nonce_,

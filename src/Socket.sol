@@ -87,7 +87,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         );
     }
 
-    function inbound(
+    function execute(
         uint256 remoteChainId_,
         address localPlug_,
         uint256 nonce_,
@@ -275,7 +275,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         if (oldSig != keccak256(abi.encode(sigV_, sigR_, sigS_))) {
             uint256 bond = _unbonds[signer].amount + _bonds[signer];
             payable(msg.sender).transfer(bond);
-            emit SignatureChallenged(
+            emit ChallengedSuccessfully(
                 signer,
                 accumAddress_,
                 batchId_,
