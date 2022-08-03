@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import "./BaseAccum.sol";
 
 contract SingleAccum is BaseAccum {
+    uint256 internal _nextBatchToFill;
+
     error PendingPacket();
 
     constructor(address socket_) BaseAccum(socket_) {}
@@ -13,8 +15,8 @@ contract SingleAccum is BaseAccum {
         override
         onlyRole(SOCKET_ROLE)
     {
-        if (_roots[_nextBatch] != bytes32(0)) revert PendingPacket();
-        _roots[_nextBatch] = packetHash;
-        emit PacketAdded(packetHash, packetHash);
+        _roots[_nextBatchToFill] = packetHash;
+        emit PacketAdded(packetHash, _roots[_nextBatchToFill]);
+        _nextBatchToFill++;
     }
 }
