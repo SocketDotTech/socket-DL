@@ -10,7 +10,7 @@ contract SocketTest is Test {
     uint256 constant _signerPrivateKey = uint256(2);
     address constant _accum = address(3);
     bytes32 constant _root = bytes32(uint256(4));
-    uint256 constant _batchId = uint256(5);
+    uint256 constant _packetId = uint256(5);
     address _signer;
     address constant _raju = address(6);
     bytes32 constant _altRoot = bytes32(uint256(7));
@@ -131,12 +131,12 @@ contract SocketTest is Test {
 
         vm.mockCall(
             _accum,
-            abi.encodeWithSelector(IAccumulator.sealBatch.selector),
-            abi.encode(_root, _batchId)
+            abi.encodeWithSelector(IAccumulator.sealPacket.selector),
+            abi.encode(_root, _packetId)
         );
 
         bytes32 digest = keccak256(
-            abi.encode(_chainId, _accum, _batchId, _root)
+            abi.encode(_chainId, _accum, _packetId, _root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
             _signerPrivateKey,
@@ -152,12 +152,12 @@ contract SocketTest is Test {
 
         vm.mockCall(
             _accum,
-            abi.encodeWithSelector(IAccumulator.sealBatch.selector),
-            abi.encode(_root, _batchId)
+            abi.encodeWithSelector(IAccumulator.sealPacket.selector),
+            abi.encode(_root, _packetId)
         );
 
         bytes32 digest = keccak256(
-            abi.encode(_chainId, _accum, _batchId, _root)
+            abi.encode(_chainId, _accum, _packetId, _root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
             _signerPrivateKey,
@@ -174,12 +174,12 @@ contract SocketTest is Test {
 
         vm.mockCall(
             _accum,
-            abi.encodeWithSelector(IAccumulator.sealBatch.selector),
-            abi.encode(_root, _batchId)
+            abi.encodeWithSelector(IAccumulator.sealPacket.selector),
+            abi.encode(_root, _packetId)
         );
 
         bytes32 digest = keccak256(
-            abi.encode(_chainId, _accum, _batchId, _root)
+            abi.encode(_chainId, _accum, _packetId, _root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
             _signerPrivateKey,
@@ -189,7 +189,7 @@ contract SocketTest is Test {
         _socket.submitSignature(sigV, sigR, sigS, _accum);
 
         bytes32 altDigest = keccak256(
-            abi.encode(_chainId, _accum, _batchId, _altRoot)
+            abi.encode(_chainId, _accum, _packetId, _altRoot)
         );
         (uint8 altSigV, bytes32 altSigR, bytes32 altSigS) = vm.sign(
             _signerPrivateKey,
@@ -203,7 +203,7 @@ contract SocketTest is Test {
             altSigS,
             _accum,
             _altRoot,
-            _batchId
+            _packetId
         );
 
         assertEq(_signer.balance, 30e18);
@@ -213,7 +213,7 @@ contract SocketTest is Test {
 
     function testSubmitRemoteRoot() external {
         bytes32 digest = keccak256(
-            abi.encode(_remoteChainId, _accum, _batchId, _root)
+            abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
             _signerPrivateKey,
@@ -230,19 +230,19 @@ contract SocketTest is Test {
             sigS,
             _remoteChainId,
             _accum,
-            _batchId,
+            _packetId,
             _root
         );
 
         assertEq(
-            _socket.getRemoteRoot(_remoteChainId, _accum, _batchId),
+            _socket.getRemoteRoot(_remoteChainId, _accum, _packetId),
             _root
         );
     }
 
     function testSubmitRemoteRootWithoutRole() external {
         bytes32 digest = keccak256(
-            abi.encode(_remoteChainId, _accum, _batchId, _root)
+            abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
             _signerPrivateKey,
@@ -257,7 +257,7 @@ contract SocketTest is Test {
             sigS,
             _remoteChainId,
             _accum,
-            _batchId,
+            _packetId,
             _root
         );
     }

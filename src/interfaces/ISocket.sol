@@ -24,7 +24,7 @@ interface ISocket {
 
     event SignatureSubmitted(
         address indexed accumAddress,
-        uint256 indexed batchId,
+        uint256 indexed packetId,
         uint8 sigV,
         bytes32 sigR,
         bytes32 sigS
@@ -33,19 +33,19 @@ interface ISocket {
     event RemoteRootSubmitted(
         uint256 indexed remoteChainId,
         address indexed accumAddress,
-        uint256 indexed batchId,
+        uint256 indexed packetId,
         bytes32 root
     );
 
     event ChallengedSuccessfully(
         address indexed signer,
         address indexed accumAddress,
-        uint256 indexed batchId,
+        uint256 indexed packetId,
         address challenger,
         uint256 rewardAmount
     );
 
-    event PacketTransmitted(
+    event MessageTransmitted(
         uint256 srcChainId,
         address srcPlug,
         uint256 dstChainId,
@@ -72,7 +72,7 @@ interface ISocket {
 
     error RemoteRootAlreadySubmitted();
 
-    error PacketAlreadyExecuted();
+    error MessageAlreadyExecuted();
 
     error InvalidNonce();
 
@@ -97,7 +97,7 @@ interface ISocket {
         bytes32 sigS_,
         address accumAddress_,
         bytes32 root_,
-        uint256 batchId_
+        uint256 packetId_
     ) external;
 
     function submitRemoteRoot(
@@ -106,7 +106,7 @@ interface ISocket {
         bytes32 sigS_,
         uint256 remoteChainId_,
         address accumAddress_,
-        uint256 batchId_,
+        uint256 packetId_,
         bytes32 root_
     ) external;
 
@@ -118,7 +118,7 @@ interface ISocket {
         uint256 nonce,
         address signer_,
         address remoteAccum_,
-        uint256 batchId_,
+        uint256 packetId_,
         bytes calldata payload_,
         bytes calldata deaccumProof_
     ) external;
@@ -157,6 +157,6 @@ interface ISocket {
     function getRemoteRoot(
         uint256 remoteChainId_,
         address accumAddress_,
-        uint256 batchId_
+        uint256 packetId_
     ) external view returns (bytes32);
 }
