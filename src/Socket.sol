@@ -30,11 +30,11 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     // signer => unbond data
     mapping(address => UnbondData) private _unbonds;
 
-    // signer => accumAddress => batchId => sig hash
+    // signer => accumAddress => packetId => sig hash
     mapping(address => mapping(address => mapping(uint256 => bytes32)))
         private _localSignatures;
 
-    // remoteChainId => accumAddress => batchId => root
+    // remoteChainId => accumAddress => packetId => root
     mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
         private _remoteRoots;
 
@@ -43,8 +43,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     // localPlug => remoteChainId => nonce
     mapping(address => mapping(uint256 => uint256)) private _nonces;
 
-    // packethash => executeStatus
-    mapping(bytes32 => bool) private _executedPackets;
+    // packedMessage => executeStatus
+    mapping(bytes32 => bool) private _executedMessages;
 
     // localPlug => remoteChainId => nextNonce
     mapping(address => mapping(uint256 => uint256)) private _nextNonces;
@@ -67,7 +67,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
-        bytes32 packet = _makePacket(
+        bytes32 packedMessage = _packMessage(
             _chainId,
             msg.sender,
             remoteChainId_,
@@ -76,8 +76,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             payload_
         );
 
-        IAccumulator(config.accum).addPacket(packet);
-        emit PacketTransmitted(
+        IAccumulator(config.accum).addMessage(packedMessage);
+        emit MessageTransmitted(
             _chainId,
             msg.sender,
             remoteChainId_,
@@ -87,13 +87,13 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         );
     }
 
-    function inbound(
+    function execute(
         uint256 remoteChainId_,
         address localPlug_,
         uint256 nonce_,
         address signer_,
         address remoteAccum_,
-        uint256 batchId_,
+        uint256 packetId_,
         bytes calldata payload_,
         bytes calldata deaccumProof_
     ) external override {
@@ -101,7 +101,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
 
-        bytes32 packet = _makePacket(
+        bytes32 packedMessage = _packMessage(
             remoteChainId_,
             config.remotePlug,
             _chainId,
@@ -110,19 +110,19 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             payload_
         );
 
-        if (_executedPackets[packet]) revert PacketAlreadyExecuted();
-        _executedPackets[packet] = true;
+        if (_executedMessages[packedMessage]) revert MessageAlreadyExecuted();
+        _executedMessages[packedMessage] = true;
 
         if (
             config.isSequential &&
             nonce_ != _nextNonces[localPlug_][remoteChainId_]++
         ) revert InvalidNonce();
 
-        bytes32 root = _remoteRoots[remoteChainId_][remoteAccum_][batchId_];
+        bytes32 root = _remoteRoots[remoteChainId_][remoteAccum_][packetId_];
         if (
-            !IDeaccumulator(config.deaccum).verifyPacketHash(
+            !IDeaccumulator(config.deaccum).verifyMessageInclusion(
                 root,
-                packet,
+                packedMessage,
                 deaccumProof_
             )
         ) revert InvalidProof();
@@ -132,7 +132,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
                 signer_,
                 remoteChainId_,
                 remoteAccum_,
-                batchId_,
+                packetId_,
                 root
             )
         ) revert DappVerificationFailed();
@@ -140,7 +140,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         IPlug(localPlug_).inbound(payload_);
     }
 
-    function _makePacket(
+    function _packMessage(
         uint256 srcChainId,
         address srcPlug,
         uint256 dstChainId,
@@ -161,7 +161,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             );
     }
 
-    function dropPackets(uint256 remoteChainId_, uint256 count_) external {
+    function dropMessages(uint256 remoteChainId_, uint256 count_) external {
         _nextNonces[msg.sender][remoteChainId_] += count_;
     }
 
@@ -242,20 +242,20 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         bytes32 sigS_,
         address accumAddress_
     ) external override {
-        (bytes32 root, uint256 batchId) = IAccumulator(accumAddress_)
-            .sealBatch();
+        (bytes32 root, uint256 packetId) = IAccumulator(accumAddress_)
+            .sealPacket();
 
         bytes32 digest = keccak256(
-            abi.encode(_chainId, accumAddress_, batchId, root)
+            abi.encode(_chainId, accumAddress_, packetId, root)
         );
         address signer = ecrecover(digest, sigV_, sigR_, sigS_);
 
         if (_bonds[signer] < _minBondAmount) revert InvalidBond();
-        _localSignatures[signer][accumAddress_][batchId] = keccak256(
+        _localSignatures[signer][accumAddress_][packetId] = keccak256(
             abi.encode(sigV_, sigR_, sigS_)
         );
 
-        emit SignatureSubmitted(accumAddress_, batchId, sigV_, sigR_, sigS_);
+        emit SignatureSubmitted(accumAddress_, packetId, sigV_, sigR_, sigS_);
     }
 
     function challengeSignature(
@@ -264,21 +264,21 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         bytes32 sigS_,
         address accumAddress_,
         bytes32 root_,
-        uint256 batchId_
+        uint256 packetId_
     ) external override {
         bytes32 digest = keccak256(
-            abi.encode(_chainId, accumAddress_, batchId_, root_)
+            abi.encode(_chainId, accumAddress_, packetId_, root_)
         );
         address signer = ecrecover(digest, sigV_, sigR_, sigS_);
-        bytes32 oldSig = _localSignatures[signer][accumAddress_][batchId_];
+        bytes32 oldSig = _localSignatures[signer][accumAddress_][packetId_];
 
         if (oldSig != keccak256(abi.encode(sigV_, sigR_, sigS_))) {
             uint256 bond = _unbonds[signer].amount + _bonds[signer];
             payable(msg.sender).transfer(bond);
-            emit SignatureChallenged(
+            emit ChallengedSuccessfully(
                 signer,
                 accumAddress_,
-                batchId_,
+                packetId_,
                 msg.sender,
                 bond
             );
@@ -333,25 +333,25 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         bytes32 sigS_,
         uint256 remoteChainId_,
         address accumAddress_,
-        uint256 batchId_,
+        uint256 packetId_,
         bytes32 root_
     ) external override {
         bytes32 digest = keccak256(
-            abi.encode(remoteChainId_, accumAddress_, batchId_, root_)
+            abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
         );
         address signer = ecrecover(digest, sigV_, sigR_, sigS_);
 
         if (!_hasRole(_signerRole(remoteChainId_), signer))
             revert InvalidSigner();
 
-        if (_remoteRoots[remoteChainId_][accumAddress_][batchId_] != 0)
+        if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
             revert RemoteRootAlreadySubmitted();
 
-        _remoteRoots[remoteChainId_][accumAddress_][batchId_] = root_;
+        _remoteRoots[remoteChainId_][accumAddress_][packetId_] = root_;
         emit RemoteRootSubmitted(
             remoteChainId_,
             accumAddress_,
-            batchId_,
+            packetId_,
             root_
         );
     }
@@ -359,9 +359,9 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     function getRemoteRoot(
         uint256 remoteChainId_,
         address accumAddress_,
-        uint256 batchId_
+        uint256 packetId_
     ) external view override returns (bytes32) {
-        return _remoteRoots[remoteChainId_][accumAddress_][batchId_];
+        return _remoteRoots[remoteChainId_][accumAddress_][packetId_];
     }
 
     function grantSignerRole(uint256 remoteChainId_, address signer_)

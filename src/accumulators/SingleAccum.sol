@@ -8,13 +8,13 @@ contract SingleAccum is BaseAccum {
 
     constructor(address socket_) BaseAccum(socket_) {}
 
-    function addPacket(bytes32 packetHash)
+    function addMessage(bytes32 packedMessage)
         external
         override
         onlyRole(SOCKET_ROLE)
     {
-        if (_roots[_nextBatch] != bytes32(0)) revert PendingPacket();
-        _roots[_nextBatch] = packetHash;
-        emit PacketAdded(packetHash, packetHash);
+        if (_roots[_nextPacket] != bytes32(0)) revert PendingPacket();
+        _roots[_nextPacket] = packedMessage;
+        emit MessageAdded(packedMessage, packedMessage);
     }
 }

@@ -6,7 +6,7 @@ interface IVerifier {
         address signer_,
         uint256 remoteChainId_,
         address accumAddress_,
-        uint256 batchId_,
+        uint256 packetId_,
         bytes32 root_
     ) external returns (bool);
 }
