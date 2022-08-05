@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../src/Socket.sol";
+import "../src/Notary/BondedNotary.sol";
 import "../src/interfaces/IAccumulator.sol";
 
 contract SocketTest is Test {
@@ -20,26 +20,26 @@ contract SocketTest is Test {
     uint256 constant _chainId = 0x2013AA263;
     uint256 constant _remoteChainId = 0x2013AA264;
 
-    Socket _socket;
+    Notary _notary;
 
     function setUp() external {
         _signer = vm.addr(_signerPrivateKey);
         hoax(_owner);
-        _socket = new Socket(_minBondAmount, _bondClaimDelay, _chainId);
+        _notary = new Notary(_minBondAmount, _bondClaimDelay, _chainId);
     }
 
     function testDeployment() external {
-        assertEq(_socket.owner(), _owner);
-        assertEq(_socket.minBondAmount(), _minBondAmount);
-        assertEq(_socket.bondClaimDelay(), _bondClaimDelay);
-        assertEq(_socket.chainId(), _chainId);
+        assertEq(_notary.owner(), _owner);
+        assertEq(_notary.minBondAmount(), _minBondAmount);
+        assertEq(_notary.bondClaimDelay(), _bondClaimDelay);
+        assertEq(_notary.chainId(), _chainId);
     }
 
     function testAddBond() external {
         uint256 amount = 100e18;
         hoax(_signer);
-        _socket.addBond{value: amount}();
-        assertEq(_socket.getBond(_signer), amount);
+        _notary.addBond{value: amount}();
+        assertEq(_notary.getBond(_signer), amount);
     }
 
     function testReduceValidAmount() external {
@@ -49,10 +49,10 @@ contract SocketTest is Test {
         assertGe(initialAmount - reduceAmount, _minBondAmount);
 
         startHoax(_signer, initialAmount);
-        _socket.addBond{value: initialAmount}();
-        _socket.reduceBond(reduceAmount);
+        _notary.addBond{value: initialAmount}();
+        _notary.reduceBond(reduceAmount);
 
-        assertEq(_socket.getBond(_signer), initialAmount - reduceAmount);
+        assertEq(_notary.getBond(_signer), initialAmount - reduceAmount);
         assertEq(_signer.balance, reduceAmount);
     }
 
@@ -63,9 +63,9 @@ contract SocketTest is Test {
         assertLt(initialAmount - reduceAmount, _minBondAmount);
 
         startHoax(_signer, initialAmount);
-        _socket.addBond{value: initialAmount}();
-        vm.expectRevert(ISocket.InvalidBondReduce.selector);
-        _socket.reduceBond(reduceAmount);
+        _notary.addBond{value: initialAmount}();
+        vm.expectRevert(INotary.InvalidBondReduce.selector);
+        _notary.reduceBond(reduceAmount);
     }
 
     function testUnbondSigner() external {
@@ -73,11 +73,11 @@ contract SocketTest is Test {
         uint256 claimTime = block.timestamp + _bondClaimDelay;
 
         startHoax(_signer, amount);
-        _socket.addBond{value: amount}();
-        _socket.unbondSigner();
+        _notary.addBond{value: amount}();
+        _notary.unbondSigner();
 
-        assertEq(_socket.getBond(_signer), 0);
-        (uint256 unbondAmount, uint256 unbondClaimTime) = _socket.getUnbondData(
+        assertEq(_notary.getBond(_signer), 0);
+        (uint256 unbondAmount, uint256 unbondClaimTime) = _notary.getUnbondData(
             _signer
         );
         assertEq(unbondAmount, amount);
@@ -89,15 +89,15 @@ contract SocketTest is Test {
         uint256 claimTime = block.timestamp + _bondClaimDelay;
 
         startHoax(_signer, amount);
-        _socket.addBond{value: amount}();
-        _socket.unbondSigner();
+        _notary.addBond{value: amount}();
+        _notary.unbondSigner();
 
         vm.warp(claimTime - 10);
-        vm.expectRevert(ISocket.ClaimTimeLeft.selector);
-        _socket.claimBond();
+        vm.expectRevert(INotary.ClaimTimeLeft.selector);
+        _notary.claimBond();
 
-        assertEq(_socket.getBond(_signer), 0);
-        (uint256 unbondAmount, uint256 unbondClaimTime) = _socket.getUnbondData(
+        assertEq(_notary.getBond(_signer), 0);
+        (uint256 unbondAmount, uint256 unbondClaimTime) = _notary.getUnbondData(
             _signer
         );
         assertEq(unbondAmount, amount);
@@ -110,14 +110,14 @@ contract SocketTest is Test {
         uint256 claimTime = block.timestamp + _bondClaimDelay;
 
         startHoax(_signer, amount);
-        _socket.addBond{value: amount}();
-        _socket.unbondSigner();
+        _notary.addBond{value: amount}();
+        _notary.unbondSigner();
 
         vm.warp(claimTime + 10);
-        _socket.claimBond();
+        _notary.claimBond();
 
-        assertEq(_socket.getBond(_signer), 0);
-        (uint256 unbondAmount, uint256 unbondClaimTime) = _socket.getUnbondData(
+        assertEq(_notary.getBond(_signer), 0);
+        (uint256 unbondAmount, uint256 unbondClaimTime) = _notary.getUnbondData(
             _signer
         );
         assertEq(unbondAmount, 0);
@@ -127,7 +127,7 @@ contract SocketTest is Test {
 
     function testSubmitSignature() external {
         startHoax(_signer);
-        _socket.addBond{value: _minBondAmount}();
+        _notary.addBond{value: _minBondAmount}();
 
         vm.mockCall(
             _accum,
@@ -143,12 +143,12 @@ contract SocketTest is Test {
             digest
         );
 
-        _socket.submitSignature(sigV, sigR, sigS, _accum);
+        _notary.submitSignature(sigV, sigR, sigS, _accum);
     }
 
     function testSubmitSignatureWithoutEnoughBond() external {
         startHoax(_signer);
-        _socket.addBond{value: _minBondAmount / 2}();
+        _notary.addBond{value: _minBondAmount / 2}();
 
         vm.mockCall(
             _accum,
@@ -164,13 +164,13 @@ contract SocketTest is Test {
             digest
         );
 
-        vm.expectRevert(ISocket.InvalidBond.selector);
-        _socket.submitSignature(sigV, sigR, sigS, _accum);
+        vm.expectRevert(INotary.InvalidBond.selector);
+        _notary.submitSignature(sigV, sigR, sigS, _accum);
     }
 
     function testChallengeSignature() external {
         hoax(_signer, 150e18);
-        _socket.addBond{value: 120e18}();
+        _notary.addBond{value: 120e18}();
 
         vm.mockCall(
             _accum,
@@ -186,7 +186,7 @@ contract SocketTest is Test {
             digest
         );
 
-        _socket.submitSignature(sigV, sigR, sigS, _accum);
+        _notary.submitSignature(sigV, sigR, sigS, _accum);
 
         bytes32 altDigest = keccak256(
             abi.encode(_chainId, _accum, _packetId, _altRoot)
@@ -197,7 +197,7 @@ contract SocketTest is Test {
         );
 
         hoax(_raju, 0);
-        _socket.challengeSignature(
+        _notary.challengeSignature(
             altSigV,
             altSigR,
             altSigS,
@@ -208,7 +208,7 @@ contract SocketTest is Test {
 
         assertEq(_signer.balance, 30e18);
         assertEq(_raju.balance, 120e18);
-        assertEq(address(_socket).balance, 0);
+        assertEq(address(_notary).balance, 0);
     }
 
     function testSubmitRemoteRoot() external {
@@ -221,10 +221,10 @@ contract SocketTest is Test {
         );
 
         hoax(_owner);
-        _socket.grantSignerRole(_remoteChainId, _signer);
+        _notary.grantSignerRole(_remoteChainId, _signer);
 
         hoax(_raju);
-        _socket.submitRemoteRoot(
+        _notary.submitRemoteRoot(
             sigV,
             sigR,
             sigS,
@@ -235,7 +235,7 @@ contract SocketTest is Test {
         );
 
         assertEq(
-            _socket.getRemoteRoot(_remoteChainId, _accum, _packetId),
+            _notary.getRemoteRoot(_remoteChainId, _accum, _packetId),
             _root
         );
     }
@@ -250,8 +250,8 @@ contract SocketTest is Test {
         );
 
         hoax(_raju);
-        vm.expectRevert(ISocket.InvalidSigner.selector);
-        _socket.submitRemoteRoot(
+        vm.expectRevert(INotary.InvalidSigner.selector);
+        _notary.submitRemoteRoot(
             sigV,
             sigR,
             sigS,
