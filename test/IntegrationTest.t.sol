@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 import "../src/Socket.sol";
+import "../src/Notary/AdminNotary.sol";
 import "../src/accumulators/SingleAccum.sol";
 import "../src/deaccumulators/SingleDeaccum.sol";
 import "../src/verifiers/AcceptWithTimeout.sol";
@@ -15,9 +16,7 @@ contract HappyTest is Test {
     address _signer;
     address constant _raju = address(4);
     address constant _pauser = address(5);
-
-    uint256 constant _minBondAmount = 100e18;
-    uint256 constant _bondClaimDelay = 1 weeks;
+    bytes32 public constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
 
     struct Signature {
         uint8 v;
@@ -27,7 +26,8 @@ contract HappyTest is Test {
 
     struct ChainContext {
         uint256 chainId;
-        ISocket socket__;
+        Socket socket__;
+        Notary notary__;
         IAccumulator accum__;
         IDeaccumulator deaccum__;
         AcceptWithTimeout verifier__;
@@ -250,12 +250,24 @@ contract HappyTest is Test {
         vm.startPrank(_socketOwner);
 
         // deploy socket
-        _a.socket__ = new Socket(_minBondAmount, _bondClaimDelay, _a.chainId);
-        _b.socket__ = new Socket(_minBondAmount, _bondClaimDelay, _b.chainId);
+        _a.socket__ = new Socket(_a.chainId);
+        _b.socket__ = new Socket(_b.chainId);
+
+        _a.notary__ = new Notary(_a.chainId);
+        _b.notary__ = new Notary(_b.chainId);
+
+        _a.socket__.setNotary(address(_a.notary__));
+        _b.socket__.setNotary(address(_b.notary__));
 
         // deploy accumulators
-        _a.accum__ = new SingleAccum(address(_a.socket__));
-        _b.accum__ = new SingleAccum(address(_b.socket__));
+        _a.accum__ = new SingleAccum(
+            address(_a.socket__),
+            address(_a.notary__)
+        );
+        _b.accum__ = new SingleAccum(
+            address(_b.socket__),
+            address(_b.notary__)
+        );
 
         // deploy deaccumulators
         _a.deaccum__ = new SingleDeaccum();
@@ -268,17 +280,16 @@ contract HappyTest is Test {
         // deduce signer address from private key
         _signer = vm.addr(_signerPrivateKey);
 
-        // bond signer
-        hoax(_signer);
-        _a.socket__.addBond{value: _minBondAmount}();
-        hoax(_signer);
-        _b.socket__.addBond{value: _minBondAmount}();
+        vm.startPrank(_socketOwner);
+
+        _a.notary__.grantRole(ATTESTER_ROLE, _signer);
+        _b.notary__.grantRole(ATTESTER_ROLE, _signer);
 
         // grant signer role
-        hoax(_socketOwner);
-        _a.socket__.grantSignerRole(_b.chainId, _signer);
-        hoax(_socketOwner);
-        _b.socket__.grantSignerRole(_a.chainId, _signer);
+        _a.notary__.grantSignerRole(_b.chainId, _signer);
+        _b.notary__.grantSignerRole(_a.chainId, _signer);
+
+        vm.stopPrank();
     }
 
     function _deployPlugContracts() private {
@@ -362,8 +373,8 @@ contract HappyTest is Test {
         ChainContext storage src_,
         Signature memory sig_
     ) private {
-        hoax(_raju);
-        src_.socket__.submitSignature(
+        hoax(_signer);
+        src_.notary__.submitSignature(
             sig_.v,
             sig_.r,
             sig_.s,
@@ -379,7 +390,7 @@ contract HappyTest is Test {
         bytes32 root_
     ) private {
         hoax(_raju);
-        dst_.socket__.submitRemoteRoot(
+        dst_.notary__.submitRemoteRoot(
             sig_.v,
             sig_.r,
             sig_.s,

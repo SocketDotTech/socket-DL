@@ -6,7 +6,7 @@ import "./BaseAccum.sol";
 contract SingleAccum is BaseAccum {
     error PendingPacket();
 
-    constructor(address socket_) BaseAccum(socket_) {}
+    constructor(address socket_, address notary_) BaseAccum(socket_, notary_) {}
 
     function addMessage(bytes32 packedMessage)
         external

@@ -11,11 +11,12 @@ contract SingleAccumTest is Test {
     bytes32 constant _message_0 = bytes32(uint256(4));
     bytes32 constant _message_1 = bytes32(uint256(5));
     bytes32 constant _message_2 = bytes32(uint256(6));
+    address constant _notary = address(7);
     SingleAccum _sa;
 
     function setUp() external {
         hoax(_owner);
-        _sa = new SingleAccum(_socket);
+        _sa = new SingleAccum(_socket, _notary);
     }
 
     function testSetUp() external {
@@ -80,7 +81,7 @@ contract SingleAccumTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(
                 AccessControl.NoPermit.selector,
-                _sa.SOCKET_ROLE()
+                _sa.NOTARY_ROLE()
             )
         );
         hoax(_raju);
@@ -104,7 +105,7 @@ contract SingleAccumTest is Test {
     }
 
     function _sealPacket() private {
-        hoax(_socket);
+        hoax(_notary);
         _sa.sealPacket();
     }
 }
