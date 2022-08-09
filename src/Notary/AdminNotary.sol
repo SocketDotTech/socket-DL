@@ -8,7 +8,7 @@ import "../interfaces/IAccumulator.sol";
 contract Notary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
 
-    // signer => accumAddress => packetId => sig hash
+    // attester => accumAddress => packetId => sig hash
     mapping(address => mapping(address => mapping(uint256 => bytes32)))
         private _localSignatures;
 
@@ -32,7 +32,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         revert Restricted();
     }
 
-    function unbondSigner() external override {
+    function unbondAttester() external override {
         revert Restricted();
     }
 
@@ -56,9 +56,9 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 digest = keccak256(
             abi.encode(_chainId, accumAddress_, packetId, root)
         );
-        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
+        address attester = ecrecover(digest, sigV_, sigR_, sigS_);
 
-        _localSignatures[signer][accumAddress_][packetId] = keccak256(
+        _localSignatures[attester][accumAddress_][packetId] = keccak256(
             abi.encode(sigV_, sigR_, sigS_)
         );
 
@@ -76,14 +76,14 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 digest = keccak256(
             abi.encode(_chainId, accumAddress_, packetId_, root_)
         );
-        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
-        bytes32 oldSig = _localSignatures[signer][accumAddress_][packetId_];
+        address attester = ecrecover(digest, sigV_, sigR_, sigS_);
+        bytes32 oldSig = _localSignatures[attester][accumAddress_][packetId_];
 
         if (oldSig != keccak256(abi.encode(sigV_, sigR_, sigS_))) {
             uint256 bond = 0;
             payable(msg.sender).transfer(bond);
             emit ChallengedSuccessfully(
-                signer,
+                attester,
                 accumAddress_,
                 packetId_,
                 msg.sender,
@@ -104,10 +104,10 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 digest = keccak256(
             abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
         );
-        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
+        address attester = ecrecover(digest, sigV_, sigR_, sigS_);
 
-        if (!_hasRole(_signerRole(remoteChainId_), signer))
-            revert InvalidSigner();
+        if (!_hasRole(_attesterRole(remoteChainId_), attester))
+            revert InvalidAttester();
 
         if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
             revert RemoteRootAlreadySubmitted();
@@ -129,21 +129,21 @@ contract Notary is INotary, AccessControl(msg.sender) {
         return _remoteRoots[remoteChainId_][accumAddress_][packetId_];
     }
 
-    function grantSignerRole(uint256 remoteChainId_, address signer_)
+    function grantAttesterRole(uint256 remoteChainId_, address attester_)
         external
         onlyOwner
     {
-        _grantRole(_signerRole(remoteChainId_), signer_);
+        _grantRole(_attesterRole(remoteChainId_), attester_);
     }
 
-    function revokeSignerRole(uint256 remoteChainId_, address signer_)
+    function revokeAttesterRole(uint256 remoteChainId_, address attester_)
         external
         onlyOwner
     {
-        _revokeRole(_signerRole(remoteChainId_), signer_);
+        _revokeRole(_attesterRole(remoteChainId_), attester_);
     }
 
-    function _signerRole(uint256 chainId_) internal pure returns (bytes32) {
+    function _attesterRole(uint256 chainId_) internal pure returns (bytes32) {
         return bytes32(chainId_);
     }
 }

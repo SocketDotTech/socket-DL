@@ -3,20 +3,20 @@ pragma solidity ^0.8.0;
 
 interface INotary {
     event BondAdded(
-        address indexed signer,
+        address indexed attester,
         uint256 addAmount, // assuming native token
         uint256 newBond
     );
 
     event BondReduced(
-        address indexed signer,
+        address indexed attester,
         uint256 reduceAmount,
         uint256 newBond
     );
 
-    event Unbonded(address indexed signer, uint256 amount, uint256 claimTime);
+    event Unbonded(address indexed attester, uint256 amount, uint256 claimTime);
 
-    event BondClaimed(address indexed signer, uint256 amount);
+    event BondClaimed(address indexed attester, uint256 amount);
 
     event BondClaimDelaySet(uint256 delay);
 
@@ -38,7 +38,7 @@ interface INotary {
     );
 
     event ChallengedSuccessfully(
-        address indexed signer,
+        address indexed attester,
         address indexed accumAddress,
         uint256 indexed packetId,
         address challenger,
@@ -53,7 +53,7 @@ interface INotary {
 
     error InvalidBond();
 
-    error InvalidSigner();
+    error InvalidAttester();
 
     error RemoteRootAlreadySubmitted();
 
@@ -61,7 +61,7 @@ interface INotary {
 
     function reduceBond(uint256 amount) external;
 
-    function unbondSigner() external;
+    function unbondAttester() external;
 
     function claimBond() external;
 

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 interface IVerifier {
     function verifyRoot(
-        address signer_,
+        address attester_,
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,

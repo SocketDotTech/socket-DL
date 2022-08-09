@@ -27,7 +27,7 @@ interface ISocket {
         uint256 remoteChainId_,
         address localPlug_,
         uint256 nonce,
-        address signer_,
+        address attester_,
         address remoteAccum_,
         uint256 packetId_,
         bytes calldata payload_,

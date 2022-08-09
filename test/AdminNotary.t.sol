@@ -7,11 +7,11 @@ import "../src/interfaces/IAccumulator.sol";
 
 contract SocketTest is Test {
     address constant _owner = address(1);
-    uint256 constant _signerPrivateKey = uint256(2);
+    uint256 constant _attesterPrivateKey = uint256(2);
     address constant _accum = address(3);
     bytes32 constant _root = bytes32(uint256(4));
     uint256 constant _packetId = uint256(5);
-    address _signer;
+    address _attester;
     address constant _raju = address(6);
     bytes32 constant _altRoot = bytes32(uint256(7));
 
@@ -22,7 +22,7 @@ contract SocketTest is Test {
     Notary _notary;
 
     function setUp() external {
-        _signer = vm.addr(_signerPrivateKey);
+        _attester = vm.addr(_attesterPrivateKey);
         hoax(_owner);
         _notary = new Notary(_chainId);
     }
@@ -34,33 +34,33 @@ contract SocketTest is Test {
 
     function testAddBond() external {
         uint256 amount = 100e18;
-        hoax(_signer);
+        hoax(_attester);
         vm.expectRevert(Notary.Restricted.selector);
         _notary.addBond{value: amount}();
     }
 
     function testReduceAmount() external {
         uint256 reduceAmount = 10e18;
-        hoax(_signer);
+        hoax(_attester);
         vm.expectRevert(Notary.Restricted.selector);
         _notary.reduceBond(reduceAmount);
     }
 
-    function testUnbondSigner() external {
-        hoax(_signer);
+    function testUnbondattester() external {
+        hoax(_attester);
         vm.expectRevert(Notary.Restricted.selector);
-        _notary.unbondSigner();
+        _notary.unbondAttester();
     }
 
     function testClaimBond() external {
-        hoax(_signer);
+        hoax(_attester);
         vm.expectRevert(Notary.Restricted.selector);
         _notary.claimBond();
     }
 
     function testSubmitSignature() external {
         hoax(_owner);
-        _notary.grantRole(ATTESTER_ROLE, _signer);
+        _notary.grantRole(ATTESTER_ROLE, _attester);
 
         vm.mockCall(
             _accum,
@@ -72,17 +72,17 @@ contract SocketTest is Test {
             abi.encode(_chainId, _accum, _packetId, _root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
+            _attesterPrivateKey,
             digest
         );
 
-        hoax(_signer);
+        hoax(_attester);
         _notary.submitSignature(sigV, sigR, sigS, _accum);
     }
 
     function testChallengeSignature() external {
         hoax(_owner);
-        _notary.grantRole(ATTESTER_ROLE, _signer);
+        _notary.grantRole(ATTESTER_ROLE, _attester);
 
         vm.mockCall(
             _accum,
@@ -94,18 +94,18 @@ contract SocketTest is Test {
             abi.encode(_chainId, _accum, _packetId, _root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
+            _attesterPrivateKey,
             digest
         );
 
-        hoax(_signer);
+        hoax(_attester);
         _notary.submitSignature(sigV, sigR, sigS, _accum);
 
         bytes32 altDigest = keccak256(
             abi.encode(_chainId, _accum, _packetId, _altRoot)
         );
         (uint8 altSigV, bytes32 altSigR, bytes32 altSigS) = vm.sign(
-            _signerPrivateKey,
+            _attesterPrivateKey,
             altDigest
         );
 
@@ -125,12 +125,12 @@ contract SocketTest is Test {
             abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
+            _attesterPrivateKey,
             digest
         );
 
         hoax(_owner);
-        _notary.grantSignerRole(_remoteChainId, _signer);
+        _notary.grantAttesterRole(_remoteChainId, _attester);
 
         hoax(_raju);
         _notary.submitRemoteRoot(
@@ -154,12 +154,12 @@ contract SocketTest is Test {
             abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
+            _attesterPrivateKey,
             digest
         );
 
         hoax(_raju);
-        vm.expectRevert(INotary.InvalidSigner.selector);
+        vm.expectRevert(INotary.InvalidAttester.selector);
         _notary.submitRemoteRoot(
             sigV,
             sigR,

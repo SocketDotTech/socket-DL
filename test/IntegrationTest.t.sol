@@ -12,8 +12,8 @@ import "../src/examples/counter.sol";
 contract HappyTest is Test {
     address constant _socketOwner = address(1);
     address constant _counterOwner = address(2);
-    uint256 constant _signerPrivateKey = uint256(3);
-    address _signer;
+    uint256 constant _attesterPrivateKey = uint256(3);
+    address _attester;
     address constant _raju = address(4);
     address constant _pauser = address(5);
     bytes32 public constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
@@ -51,7 +51,7 @@ contract HappyTest is Test {
         _a.chainId = 0x2013AA263;
         _b.chainId = 0x2013AA264;
         _deploySocketContracts();
-        _initSigner();
+        _initAttester();
         _deployPlugContracts();
         _configPlugContracts(true);
         _initPausers();
@@ -276,18 +276,18 @@ contract HappyTest is Test {
         vm.stopPrank();
     }
 
-    function _initSigner() private {
-        // deduce signer address from private key
-        _signer = vm.addr(_signerPrivateKey);
+    function _initAttester() private {
+        // deduce attester address from private key
+        _attester = vm.addr(_attesterPrivateKey);
 
         vm.startPrank(_socketOwner);
 
-        _a.notary__.grantRole(ATTESTER_ROLE, _signer);
-        _b.notary__.grantRole(ATTESTER_ROLE, _signer);
+        _a.notary__.grantRole(ATTESTER_ROLE, _attester);
+        _b.notary__.grantRole(ATTESTER_ROLE, _attester);
 
-        // grant signer role
-        _a.notary__.grantSignerRole(_b.chainId, _signer);
-        _b.notary__.grantSignerRole(_a.chainId, _signer);
+        // grant attester role
+        _a.notary__.grantAttesterRole(_b.chainId, _attester);
+        _b.notary__.grantAttesterRole(_a.chainId, _attester);
 
         vm.stopPrank();
     }
@@ -363,7 +363,7 @@ contract HappyTest is Test {
             abi.encode(src_.chainId, address(src_.accum__), packetId, root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
+            _attesterPrivateKey,
             digest
         );
         sig = Signature(sigV, sigR, sigS);
@@ -373,7 +373,7 @@ contract HappyTest is Test {
         ChainContext storage src_,
         Signature memory sig_
     ) private {
-        hoax(_signer);
+        hoax(_attester);
         src_.notary__.submitSignature(
             sig_.v,
             sig_.r,
@@ -414,7 +414,7 @@ contract HappyTest is Test {
             src_.chainId,
             address(dst_.counter__),
             nonce_,
-            _signer,
+            _attester,
             address(src_.accum__),
             packetId_,
             payload_,
