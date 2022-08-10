@@ -105,7 +105,7 @@ contract HappyTest is Test {
     }
 
     function testPingPong() external {
-        uint256 iterations = 100;
+        uint256 iterations = 5;
         for (uint256 index = 0; index < iterations; index++) {
             _sendPing(index);
             _sendPong(index);
