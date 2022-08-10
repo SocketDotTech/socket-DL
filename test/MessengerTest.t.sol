@@ -104,8 +104,9 @@ contract HappyTest is Test {
         _a.messenger__.sendLocalMessage(bytes32(0));
     }
 
-    function testPingPong(uint16 times) external {
-        for (uint256 index = 0; index < times; index++) {
+    function testPingPong() external {
+        uint256 iterations = 100;
+        for (uint256 index = 0; index < iterations; index++) {
             _sendPing(index);
             _sendPong(index);
             _reset();
