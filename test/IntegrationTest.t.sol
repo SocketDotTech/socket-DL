@@ -16,7 +16,7 @@ contract HappyTest is Test {
     address _attester;
     address constant _raju = address(4);
     address constant _pauser = address(5);
-    bytes32 public constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
+    bool constant _isFast = false;
 
     struct Signature {
         uint8 v;
@@ -269,6 +269,9 @@ contract HappyTest is Test {
             address(_b.notary__)
         );
 
+        _a.notary__.addAccumulator(address(_a.accum__), _b.chainId, _isFast);
+        _b.notary__.addAccumulator(address(_b.accum__), _a.chainId, _isFast);
+
         // deploy deaccumulators
         _a.deaccum__ = new SingleDeaccum();
         _b.deaccum__ = new SingleDeaccum();
@@ -281,9 +284,6 @@ contract HappyTest is Test {
         _attester = vm.addr(_attesterPrivateKey);
 
         vm.startPrank(_socketOwner);
-
-        _a.notary__.grantRole(ATTESTER_ROLE, _attester);
-        _b.notary__.grantRole(ATTESTER_ROLE, _attester);
 
         // grant attester role
         _a.notary__.grantAttesterRole(_b.chainId, _attester);

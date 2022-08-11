@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../src/Notary/AdminNotary.sol";
 import "../src/interfaces/IAccumulator.sol";
 
-contract SocketTest is Test {
+contract AdminNotaryTest is Test {
     address constant _owner = address(1);
     uint256 constant _attesterPrivateKey = uint256(2);
     address constant _accum = address(3);
@@ -17,7 +17,7 @@ contract SocketTest is Test {
 
     uint256 constant _chainId = 0x2013AA263;
     uint256 constant _remoteChainId = 0x2013AA264;
-    bytes32 constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
+    bool constant _isFast = false;
 
     Notary _notary;
 
@@ -60,7 +60,10 @@ contract SocketTest is Test {
 
     function testSubmitSignature() external {
         hoax(_owner);
-        _notary.grantRole(ATTESTER_ROLE, _attester);
+        _notary.addAccumulator(_accum, _remoteChainId, _isFast);
+
+        hoax(_owner);
+        _notary.grantAttesterRole(_remoteChainId, _attester);
 
         vm.mockCall(
             _accum,
@@ -82,7 +85,10 @@ contract SocketTest is Test {
 
     function testChallengeSignature() external {
         hoax(_owner);
-        _notary.grantRole(ATTESTER_ROLE, _attester);
+        _notary.addAccumulator(_accum, _remoteChainId, _isFast);
+
+        hoax(_owner);
+        _notary.grantAttesterRole(_remoteChainId, _attester);
 
         vm.mockCall(
             _accum,

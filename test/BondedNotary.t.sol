@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../src/Notary/BondedNotary.sol";
 import "../src/interfaces/IAccumulator.sol";
 
-contract SocketTest is Test {
+contract BondedNotaryTest is Test {
     address constant _owner = address(1);
     uint256 constant _attesterPrivateKey = uint256(2);
     address constant _accum = address(3);

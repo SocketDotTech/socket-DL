@@ -28,8 +28,6 @@ contract Notary is INotary, AccessControl(msg.sender) {
     mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
         private _remoteRoots;
 
-    bytes32 public constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
-
     constructor(
         uint256 minBondAmount_,
         uint256 bondClaimDelay_,

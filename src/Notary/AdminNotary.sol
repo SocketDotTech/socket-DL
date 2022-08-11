@@ -16,9 +16,16 @@ contract Notary is INotary, AccessControl(msg.sender) {
     mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
         private _remoteRoots;
 
-    bytes32 public constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
+    struct AccumDetails {
+        uint256 remoteChainId;
+        bool isFast;
+    }
+
+    mapping(address => AccumDetails) private _accumDetails;
 
     error Restricted();
+
+    error AccumAlreadyAdded();
 
     constructor(uint256 chainId_) {
         _chainId = chainId_;
@@ -40,6 +47,24 @@ contract Notary is INotary, AccessControl(msg.sender) {
         revert Restricted();
     }
 
+    function addAccumulator(
+        address accumAddress_,
+        uint256 remoteChainId_,
+        bool isFast_
+    ) external onlyOwner {
+        if (_accumDetails[accumAddress_].remoteChainId != 0)
+            revert AccumAlreadyAdded();
+        _accumDetails[accumAddress_] = AccumDetails(remoteChainId_, isFast_);
+    }
+
+    function getAccumDetails(address accumAddress_)
+        public
+        view
+        returns (AccumDetails memory)
+    {
+        return _accumDetails[accumAddress_];
+    }
+
     function chainId() external view returns (uint256) {
         return _chainId;
     }
@@ -49,7 +74,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 sigR_,
         bytes32 sigS_,
         address accumAddress_
-    ) external override onlyRole(ATTESTER_ROLE) {
+    ) external override {
         (bytes32 root, uint256 packetId) = IAccumulator(accumAddress_)
             .sealPacket();
 
@@ -57,6 +82,13 @@ contract Notary is INotary, AccessControl(msg.sender) {
             abi.encode(_chainId, accumAddress_, packetId, root)
         );
         address attester = ecrecover(digest, sigV_, sigR_, sigS_);
+
+        if (
+            !_hasRole(
+                _attesterRole(_accumDetails[accumAddress_].remoteChainId),
+                attester
+            )
+        ) revert InvalidAttester();
 
         _localSignatures[attester][accumAddress_][packetId] = keccak256(
             abi.encode(sigV_, sigR_, sigS_)
@@ -80,14 +112,12 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 oldSig = _localSignatures[attester][accumAddress_][packetId_];
 
         if (oldSig != keccak256(abi.encode(sigV_, sigR_, sigS_))) {
-            uint256 bond = 0;
-            payable(msg.sender).transfer(bond);
             emit ChallengedSuccessfully(
                 attester,
                 accumAddress_,
                 packetId_,
                 msg.sender,
-                bond
+                0
             );
         }
     }
@@ -143,7 +173,11 @@ contract Notary is INotary, AccessControl(msg.sender) {
         _revokeRole(_attesterRole(remoteChainId_), attester_);
     }
 
-    function _attesterRole(uint256 chainId_) internal pure returns (bytes32) {
-        return bytes32(chainId_);
+    function _attesterRole(uint256 remoteChainId_)
+        private
+        pure
+        returns (bytes32)
+    {
+        return bytes32(remoteChainId_);
     }
 }
