@@ -18,7 +18,7 @@ contract HappyTest is Test {
     address constant _pauser = address(5);
     bytes32 public constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
 
-    struct Signature {
+    struct SignatureParams {
         uint8 v;
         bytes32 r;
         bytes32 s;
@@ -41,7 +41,7 @@ contract HappyTest is Test {
         uint256 nonce;
         bytes32 root;
         uint256 packetId;
-        Signature sig;
+        SignatureParams sig;
     }
 
     ChainContext _a;
@@ -68,7 +68,7 @@ contract HappyTest is Test {
         (
             bytes32 root,
             uint256 packetId,
-            Signature memory sig
+            SignatureParams memory sig
         ) = _getLatestSignature(_a);
         _submitSignatureOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
@@ -88,7 +88,7 @@ contract HappyTest is Test {
         (
             bytes32 root,
             uint256 packetId,
-            Signature memory sig
+            SignatureParams memory sig
         ) = _getLatestSignature(_b);
         _submitSignatureOnSrc(_b, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
@@ -111,7 +111,7 @@ contract HappyTest is Test {
 
         bytes32 root;
         uint256 packetId;
-        Signature memory sig;
+        SignatureParams memory sig;
 
         hoax(_raju);
         _a.counter__.remoteAddOperation(_b.chainId, addAmount);
@@ -233,7 +233,7 @@ contract HappyTest is Test {
         (
             bytes32 root,
             uint256 packetId,
-            Signature memory sig
+            SignatureParams memory sig
         ) = _getLatestSignature(_a);
         _submitSignatureOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
@@ -355,7 +355,7 @@ contract HappyTest is Test {
         returns (
             bytes32 root,
             uint256 packetId,
-            Signature memory sig
+            SignatureParams memory sig
         )
     {
         (root, packetId) = src_.accum__.getNextPacket();
@@ -366,12 +366,12 @@ contract HappyTest is Test {
             _signerPrivateKey,
             digest
         );
-        sig = Signature(sigV, sigR, sigS);
+        sig = SignatureParams(sigV, sigR, sigS);
     }
 
     function _submitSignatureOnSrc(
         ChainContext storage src_,
-        Signature memory sig_
+        SignatureParams memory sig_
     ) private {
         hoax(_signer);
         src_.notary__.submitSignature(
@@ -385,7 +385,7 @@ contract HappyTest is Test {
     function _submitRootOnDst(
         ChainContext storage src_,
         ChainContext storage dst_,
-        Signature memory sig_,
+        SignatureParams memory sig_,
         uint256 packetId_,
         bytes32 root_
     ) private {

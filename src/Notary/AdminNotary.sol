@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "../interfaces/INotary.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
+import "../lib/Signature.sol";
 
 contract Notary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
@@ -56,7 +57,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 digest = keccak256(
             abi.encode(_chainId, accumAddress_, packetId, root)
         );
-        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
+        address signer = Signature.recoverSigner(sigV_, sigR_, sigS_, digest);
 
         _localSignatures[signer][accumAddress_][packetId] = keccak256(
             abi.encode(sigV_, sigR_, sigS_)
@@ -76,7 +77,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 digest = keccak256(
             abi.encode(_chainId, accumAddress_, packetId_, root_)
         );
-        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
+        address signer = Signature.recoverSigner(sigV_, sigR_, sigS_, digest);
         bytes32 oldSig = _localSignatures[signer][accumAddress_][packetId_];
 
         if (oldSig != keccak256(abi.encode(sigV_, sigR_, sigS_))) {
@@ -104,7 +105,8 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 digest = keccak256(
             abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
         );
-        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
+
+        address signer = Signature.recoverSigner(sigV_, sigR_, sigS_, digest);
 
         if (!_hasRole(_signerRole(remoteChainId_), signer))
             revert InvalidSigner();
