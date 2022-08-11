@@ -8,6 +8,7 @@ import "./interfaces/IDeaccumulator.sol";
 import "./interfaces/IVerifier.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/INotary.sol";
+import "./lib/Hash.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
     // localPlug => remoteChainId => OutboundConfig
@@ -46,7 +47,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
-        bytes32 packedMessage = _packMessage(
+        bytes32 packedMessage = Hash.packMessage(
             _chainId,
             msg.sender,
             remoteChainId_,
@@ -80,7 +81,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
 
-        bytes32 packedMessage = _packMessage(
+        bytes32 packedMessage = Hash.packMessage(
             remoteChainId_,
             config.remotePlug,
             _chainId,
@@ -121,27 +122,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         ) revert DappVerificationFailed();
 
         IPlug(localPlug_).inbound(payload_);
-    }
-
-    function _packMessage(
-        uint256 srcChainId,
-        address srcPlug,
-        uint256 dstChainId,
-        address dstPlug,
-        uint256 nonce,
-        bytes calldata payload
-    ) private pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    srcChainId,
-                    srcPlug,
-                    dstChainId,
-                    dstPlug,
-                    nonce,
-                    payload
-                )
-            );
     }
 
     function dropMessages(uint256 remoteChainId_, uint256 count_) external {
