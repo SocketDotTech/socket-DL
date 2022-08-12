@@ -8,7 +8,7 @@ import "./interfaces/IDeaccumulator.sol";
 import "./interfaces/IVerifier.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/INotary.sol";
-import "./lib/Hash.sol";
+import "./libraries/Hasher.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
     // localPlug => remoteChainId => OutboundConfig
@@ -47,7 +47,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
-        bytes32 packedMessage = Hash.packMessage(
+        bytes32 packedMessage = Hasher.packMessage(
             _chainId,
             msg.sender,
             remoteChainId_,
@@ -81,7 +81,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
 
-        bytes32 packedMessage = Hash.packMessage(
+        bytes32 packedMessage = Hasher.packMessage(
             remoteChainId_,
             config.remotePlug,
             _chainId,

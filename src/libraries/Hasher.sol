@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.0;
 
-library Hash  {
+library Hasher {
     function packMessage(
         uint256 srcChainId,
         address srcPlug,
