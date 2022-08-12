@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "../interfaces/INotary.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
-import "../lib/Signature.sol";
+import "../libraries/Signature.sol";
 
 contract Notary is INotary, AccessControl(msg.sender) {
     uint256 private _minBondAmount;
@@ -112,43 +112,39 @@ contract Notary is INotary, AccessControl(msg.sender) {
         _setBondClaimDelay(delay);
     }
 
-    function submitSignature(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
-        address accumAddress_
-    ) external override {
+    function submitSignature(address accumAddress_, bytes memory signature_)
+        external
+        override
+    {
         (bytes32 root, uint256 packetId) = IAccumulator(accumAddress_)
             .sealPacket();
 
         bytes32 digest = keccak256(
             abi.encode(_chainId, accumAddress_, packetId, root)
         );
-        address signer = Signature.recoverSigner(sigV_, sigR_, sigS_, digest);
+        address signer = Signature.recoverSigner(digest, signature_);
 
         if (_bonds[signer] < _minBondAmount) revert InvalidBond();
         _localSignatures[signer][accumAddress_][packetId] = keccak256(
-            abi.encode(sigV_, sigR_, sigS_)
+            signature_
         );
 
-        emit SignatureSubmitted(accumAddress_, packetId, sigV_, sigR_, sigS_);
+        emit SignatureSubmitted(accumAddress_, packetId, signature_);
     }
 
     function challengeSignature(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         address accumAddress_,
         bytes32 root_,
-        uint256 packetId_
+        uint256 packetId_,
+        bytes memory signature_
     ) external override {
         bytes32 digest = keccak256(
             abi.encode(_chainId, accumAddress_, packetId_, root_)
         );
-        address signer = Signature.recoverSigner(sigV_, sigR_, sigS_, digest);
+        address signer = Signature.recoverSigner(digest, signature_);
         bytes32 oldSig = _localSignatures[signer][accumAddress_][packetId_];
 
-        if (oldSig != keccak256(abi.encode(sigV_, sigR_, sigS_))) {
+        if (oldSig != keccak256(signature_)) {
             uint256 bond = _unbonds[signer].amount + _bonds[signer];
             payable(msg.sender).transfer(bond);
             emit ChallengedSuccessfully(
@@ -172,18 +168,16 @@ contract Notary is INotary, AccessControl(msg.sender) {
     }
 
     function submitRemoteRoot(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,
-        bytes32 root_
+        bytes32 root_,
+        bytes memory signature_
     ) external override {
         bytes32 digest = keccak256(
             abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
         );
-        address signer = Signature.recoverSigner(sigV_, sigR_, sigS_, digest);
+        address signer = Signature.recoverSigner(digest, signature_);
 
         if (!_hasRole(_signerRole(remoteChainId_), signer))
             revert InvalidSigner();
