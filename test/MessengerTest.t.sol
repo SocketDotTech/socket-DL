@@ -9,7 +9,7 @@ import "../src/deaccumulators/SingleDeaccum.sol";
 import "../src/verifiers/AcceptWithTimeout.sol";
 import "../src/examples/Messenger.sol";
 
-contract HappyTest is Test {
+contract PingPongTest is Test {
     address constant _socketOwner = address(1);
     address constant _counterOwner = address(2);
     uint256 constant _signerPrivateKey = uint256(3);
@@ -17,8 +17,14 @@ contract HappyTest is Test {
     address constant _raju = address(4);
     address constant _pauser = address(5);
     bytes32 public constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
+    bytes32 public constant PING = keccak256("PING");
+    bytes32 public constant PONG = keccak256("PONG");
+    bytes private constant proof = abi.encode(0);
 
-    struct Signature {
+    bytes public payloadPing;
+    bytes public payloadPong;
+
+    struct SignatureParams {
         uint8 v;
         bytes32 r;
         bytes32 s;
@@ -41,7 +47,7 @@ contract HappyTest is Test {
         uint256 nonce;
         bytes32 root;
         uint256 packetId;
-        Signature sig;
+        SignatureParams sig;
     }
 
     ChainContext _a;
@@ -55,48 +61,37 @@ contract HappyTest is Test {
         _deployPlugContracts();
         _configPlugContracts(true);
         _initPausers();
+
+        payloadPing = abi.encode(_a.chainId, PING);
+        payloadPong = abi.encode(_b.chainId, PONG);
     }
 
-    function _sendPing(uint256 nonce) internal {
-        bytes32 hashedMessage = keccak256("PING");
-        bytes memory payload = abi.encode(hashedMessage);
-        bytes memory proof = abi.encode(0);
-
-        hoax(_raju);
-        _a.messenger__.sendRemoteMessage(_b.chainId, hashedMessage);
-
+    function _verifySrcToDest(uint256 nonce) internal {
         (
             bytes32 root,
             uint256 packetId,
-            Signature memory sig
+            SignatureParams memory sig
         ) = _getLatestSignature(_a);
 
         _submitSignatureOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, nonce, payload, proof);
+        _executePayloadOnDst(_a, _b, packetId, nonce, payloadPing, proof);
 
-        assertEq(_b.messenger__.message(), hashedMessage);
+        assertEq(_b.messenger__.message(), PING);
     }
 
-    function _sendPong(uint256 nonce) internal {
-        bytes32 hashedMessage = keccak256("PONG");
-        bytes memory payload = abi.encode(hashedMessage);
-        bytes memory proof = abi.encode(0);
-
-        hoax(_raju);
-        _b.messenger__.sendRemoteMessage(_a.chainId, hashedMessage);
-
+    function _verifyDestToSrc(uint256 nonce) internal {
         (
             bytes32 root,
             uint256 packetId,
-            Signature memory sig
+            SignatureParams memory sig
         ) = _getLatestSignature(_b);
 
         _submitSignatureOnSrc(_b, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
-        _executePayloadOnDst(_b, _a, packetId, nonce, payload, proof);
+        _executePayloadOnDst(_b, _a, packetId, nonce, payloadPong, proof);
 
-        assertEq(_a.messenger__.message(), hashedMessage);
+        assertEq(_a.messenger__.message(), PONG);
     }
 
     function _reset() internal {
@@ -105,10 +100,13 @@ contract HappyTest is Test {
     }
 
     function testPingPong() external {
+        hoax(_raju);
+        _a.messenger__.sendRemoteMessage(_b.chainId, PING);
+
         uint256 iterations = 5;
         for (uint256 index = 0; index < iterations; index++) {
-            _sendPing(index);
-            _sendPong(index);
+            _verifySrcToDest(index);
+            _verifyDestToSrc(index);
             _reset();
         }
     }
@@ -163,8 +161,8 @@ contract HappyTest is Test {
         vm.startPrank(_counterOwner);
 
         // deploy counters
-        _a.messenger__ = new Messenger(address(_a.socket__));
-        _b.messenger__ = new Messenger(address(_b.socket__));
+        _a.messenger__ = new Messenger(address(_a.socket__), _a.chainId);
+        _b.messenger__ = new Messenger(address(_b.socket__), _b.chainId);
 
         // deploy verifiers
         _a.verifier__ = new AcceptWithTimeout(
@@ -222,7 +220,7 @@ contract HappyTest is Test {
         returns (
             bytes32 root,
             uint256 packetId,
-            Signature memory sig
+            SignatureParams memory sig
         )
     {
         (root, packetId) = src_.accum__.getNextPacket();
@@ -233,12 +231,12 @@ contract HappyTest is Test {
             _signerPrivateKey,
             digest
         );
-        sig = Signature(sigV, sigR, sigS);
+        sig = SignatureParams(sigV, sigR, sigS);
     }
 
     function _submitSignatureOnSrc(
         ChainContext storage src_,
-        Signature memory sig_
+        SignatureParams memory sig_
     ) private {
         hoax(_signer);
         src_.notary__.submitSignature(
@@ -252,7 +250,7 @@ contract HappyTest is Test {
     function _submitRootOnDst(
         ChainContext storage src_,
         ChainContext storage dst_,
-        Signature memory sig_,
+        SignatureParams memory sig_,
         uint256 packetId_,
         bytes32 root_
     ) private {

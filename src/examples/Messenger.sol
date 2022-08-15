@@ -7,12 +7,17 @@ import "../interfaces/ISocket.sol";
 contract Messenger is IPlug {
     // immutables
     address public immutable socket;
+    uint256 private immutable chainId;
 
     address public owner;
     bytes32 public message;
 
-    constructor(address _socket) {
+    bytes32 PING = keccak256("PING");
+    bytes32 PONG = keccak256("PONG");
+
+    constructor(address _socket, uint256 chainId_) {
         socket = _socket;
+        chainId = chainId_;
         owner = msg.sender;
     }
 
@@ -26,7 +31,7 @@ contract Messenger is IPlug {
     }
 
     function sendRemoteMessage(uint256 chainId_, bytes32 message_) public {
-        bytes memory payload = abi.encode(message_);
+        bytes memory payload = abi.encode(chainId, message_);
         _outbound(chainId_, payload);
     }
 
@@ -36,9 +41,18 @@ contract Messenger is IPlug {
 
     function inbound(bytes calldata payload) external override {
         require(msg.sender == socket, "Counter: Invalid Socket");
-        bytes32 message_ = abi.decode(payload, (bytes32));
+        (uint256 srcChainId_, bytes32 message_) = abi.decode(
+            payload,
+            (uint256, bytes32)
+        );
 
         _updateMessage(message_);
+
+        bytes memory newPayload_ = abi.encode(
+            chainId,
+            message_ == PING ? PONG : PING
+        );
+        _outbound(srcChainId_, newPayload_);
     }
 
     function _outbound(uint256 targetChain, bytes memory payload) private {
