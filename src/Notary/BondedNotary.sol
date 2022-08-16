@@ -4,12 +4,13 @@ pragma solidity ^0.8.0;
 import "../interfaces/INotary.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
-import "../libraries/Signature.sol";
+import "../interfaces/ISignatureVerifier.sol";
 
 contract Notary is INotary, AccessControl(msg.sender) {
     uint256 private _minBondAmount;
     uint256 private _bondClaimDelay;
     uint256 private immutable _chainId;
+    ISignatureVerifier private _signatureVerifier;
 
     // signer => bond amount
     mapping(address => uint256) private _bonds;
@@ -34,10 +35,12 @@ contract Notary is INotary, AccessControl(msg.sender) {
     constructor(
         uint256 minBondAmount_,
         uint256 bondClaimDelay_,
-        uint256 chainId_
+        uint256 chainId_,
+        address signatureVerifier_
     ) {
         _setMinBondAmount(minBondAmount_);
         _setBondClaimDelay(bondClaimDelay_);
+        _setSignatureVerifier(signatureVerifier_);
         _chainId = chainId_;
     }
 
@@ -88,6 +91,10 @@ contract Notary is INotary, AccessControl(msg.sender) {
         return _bondClaimDelay;
     }
 
+    function signatureVerifier() external view returns (address) {
+        return address(_signatureVerifier);
+    }
+
     function chainId() external view returns (uint256) {
         return _chainId;
     }
@@ -112,6 +119,13 @@ contract Notary is INotary, AccessControl(msg.sender) {
         _setBondClaimDelay(delay);
     }
 
+    function setSignatureVerifier(address signatureVerifier_)
+        external
+        onlyOwner
+    {
+        _setSignatureVerifier(signatureVerifier_);
+    }
+
     function submitSignature(address accumAddress_, bytes memory signature_)
         external
         override
@@ -122,7 +136,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 digest = keccak256(
             abi.encode(_chainId, accumAddress_, packetId, root)
         );
-        address signer = Signature.recoverSigner(digest, signature_);
+        address signer = _signatureVerifier.recoverSigner(digest, signature_);
 
         if (_bonds[signer] < _minBondAmount) revert InvalidBond();
         _localSignatures[signer][accumAddress_][packetId] = keccak256(
@@ -141,7 +155,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 digest = keccak256(
             abi.encode(_chainId, accumAddress_, packetId_, root_)
         );
-        address signer = Signature.recoverSigner(digest, signature_);
+        address signer = _signatureVerifier.recoverSigner(digest, signature_);
         bytes32 oldSig = _localSignatures[signer][accumAddress_][packetId_];
 
         if (oldSig != keccak256(signature_)) {
@@ -167,6 +181,11 @@ contract Notary is INotary, AccessControl(msg.sender) {
         emit BondClaimDelaySet(delay);
     }
 
+    function _setSignatureVerifier(address signatureVerifier_) private {
+        _signatureVerifier = ISignatureVerifier(signatureVerifier_);
+        emit SignatureVerifierSet(signatureVerifier_);
+    }
+
     function submitRemoteRoot(
         uint256 remoteChainId_,
         address accumAddress_,
@@ -177,7 +196,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 digest = keccak256(
             abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
         );
-        address signer = Signature.recoverSigner(digest, signature_);
+        address signer = _signatureVerifier.recoverSigner(digest, signature_);
 
         if (!_hasRole(_signerRole(remoteChainId_), signer))
             revert InvalidSigner();

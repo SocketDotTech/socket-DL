@@ -1,29 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.0;
 
-library Signature {
+contract SignatureVerifier {
     error InvalidS();
+    error InvalidSigLength();
     error InvalidV();
     error ZeroSignerAddress();
 
     function recoverSigner(bytes32 hash, bytes memory signature)
-        internal
+        public
         pure
         returns (address signer)
     {
-        (bytes32 sigR_, bytes32 sigS_, uint8 sigV_) = _splitSignature(
-            signature
-        );
+        (bytes32 sigR, bytes32 sigS, uint8 sigV) = _splitSignature(signature);
 
         if (
-            uint256(sigS_) >
+            uint256(sigS) >
             0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
         ) revert InvalidS();
 
-        if (sigV_ != 27 && sigV_ != 28) revert InvalidV();
+        if (sigV != 27 && sigV != 28) revert InvalidV();
 
         // If the signature is valid (and not malleable), return the signer address
-        signer = ecrecover(hash, sigV_, sigR_, sigS_);
+        signer = ecrecover(hash, sigV, sigR, sigS);
         if (signer == address(0)) revert ZeroSignerAddress();
     }
 
@@ -36,25 +35,11 @@ library Signature {
             uint8 v
         )
     {
-        if (signature.length == 65) {
-            assembly {
-                r := mload(add(signature, 0x20))
-                s := mload(add(signature, 0x40))
-                v := byte(0, mload(add(signature, 0x60)))
-            }
-        } else if (signature.length == 64) {
-            bytes32 vs;
-            assembly {
-                r := mload(add(signature, 0x20))
-                vs := mload(add(signature, 0x40))
-            }
-
-            s =
-                vs &
-                bytes32(
-                    0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-                );
-            v = uint8((uint256(vs) >> 255) + 27);
+        if (signature.length != 65) revert InvalidSigLength();
+        assembly {
+            r := mload(add(signature, 0x20))
+            s := mload(add(signature, 0x40))
+            v := byte(0, mload(add(signature, 0x60)))
         }
     }
 
@@ -62,7 +47,7 @@ library Signature {
         bytes32 hash,
         address signer,
         bytes memory signature
-    ) internal pure returns (bool) {
+    ) external pure returns (bool) {
         address recovered = recoverSigner(hash, signature);
         if (recovered == signer) {
             return true;

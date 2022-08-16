@@ -8,7 +8,7 @@ import "./interfaces/IDeaccumulator.sol";
 import "./interfaces/IVerifier.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/INotary.sol";
-import "./libraries/Hasher.sol";
+import "./interfaces/IHasher.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
     // localPlug => remoteChainId => OutboundConfig
@@ -30,13 +30,23 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     mapping(address => mapping(uint256 => uint256)) private _nextNonces;
 
     INotary private _notary;
+    IHasher private _hasher;
 
-    constructor(uint256 chainId_) {
+    constructor(uint256 chainId_, address hasher_) {
+        setHasher(hasher_);
         _chainId = chainId_;
     }
 
     function setNotary(address notary_) public onlyOwner {
         _notary = INotary(notary_);
+    }
+
+    function setHasher(address hasher_) public onlyOwner {
+        _hasher = IHasher(hasher_);
+    }
+
+    function hasher() external view returns (address) {
+        return address(_hasher);
     }
 
     function outbound(uint256 remoteChainId_, bytes calldata payload_)
@@ -47,7 +57,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
-        bytes32 packedMessage = Hasher.packMessage(
+        bytes32 packedMessage = _hasher.packMessage(
             _chainId,
             msg.sender,
             remoteChainId_,
@@ -81,7 +91,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
 
-        bytes32 packedMessage = Hasher.packMessage(
+        bytes32 packedMessage = _hasher.packMessage(
             remoteChainId_,
             config.remotePlug,
             _chainId,

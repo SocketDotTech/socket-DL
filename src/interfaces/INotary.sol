@@ -22,6 +22,8 @@ interface INotary {
 
     event MinBondAmountSet(uint256 amount);
 
+    event SignatureVerifierSet(address verifier);
+
     event SignatureSubmitted(
         address indexed accumAddress,
         uint256 indexed packetId,
