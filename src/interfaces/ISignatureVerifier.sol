@@ -2,13 +2,13 @@
 pragma solidity >=0.8.0;
 
 interface ISignatureVerifier {
-    function recoverSigner(bytes32 hash, bytes memory signature)
+    function recoverSigner(bytes32 hash_, bytes calldata signature_)
         external
         returns (address);
 
     function verifySignature(
-        bytes32 hash,
-        address signer,
-        bytes memory signature
+        bytes32 hash_,
+        address signer_,
+        bytes calldata signature_
     ) external returns (bool);
 }

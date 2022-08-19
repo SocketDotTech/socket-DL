@@ -126,7 +126,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         _setSignatureVerifier(signatureVerifier_);
     }
 
-    function submitSignature(address accumAddress_, bytes memory signature_)
+    function submitSignature(address accumAddress_, bytes calldata signature_)
         external
         override
     {
@@ -150,7 +150,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         address accumAddress_,
         bytes32 root_,
         uint256 packetId_,
-        bytes memory signature_
+        bytes calldata signature_
     ) external override {
         bytes32 digest = keccak256(
             abi.encode(_chainId, accumAddress_, packetId_, root_)
@@ -191,7 +191,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         address accumAddress_,
         uint256 packetId_,
         bytes32 root_,
-        bytes memory signature_
+        bytes calldata signature_
     ) external override {
         bytes32 digest = keccak256(
             abi.encode(remoteChainId_, accumAddress_, packetId_, root_)

@@ -11,14 +11,21 @@ import "../src/examples/Messenger.sol";
 import "../src/utils/SignatureVerifier.sol";
 import "../src/utils/Hasher.sol";
 
-contract HappyTest is Test {
-    address constant _socketOwner = address(1);
-    address constant _counterOwner = address(2);
-    uint256 constant _signerPrivateKey = uint256(3);
-    address _signer;
-    address constant _raju = address(4);
-    address constant _pauser = address(5);
-    bytes32 public constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
+contract PingPongTest is Test {
+    bytes32 private constant _ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
+    bytes32 private constant _PING = keccak256("PING");
+    bytes32 private constant _PONG = keccak256("PONG");
+    uint256 private constant _SIGNER_PRIVATE_KEY = uint256(3);
+
+    address private constant _socketOwner = address(1);
+    address private constant _counterOwner = address(2);
+    address private constant _raju = address(4);
+    address private constant _pauser = address(5);
+    address private _signer;
+
+    bytes private constant _PROOF = abi.encode(0);
+    bytes private _payloadPing;
+    bytes private _payloadPong;
 
     struct ChainContext {
         uint256 chainId;
@@ -42,8 +49,8 @@ contract HappyTest is Test {
         bytes sig;
     }
 
-    ChainContext _a;
-    ChainContext _b;
+    ChainContext private _a;
+    ChainContext private _b;
 
     function setUp() external {
         _a.chainId = 0x2013AA263;
@@ -53,16 +60,12 @@ contract HappyTest is Test {
         _deployPlugContracts();
         _configPlugContracts(true);
         _initPausers();
+
+        _payloadPing = abi.encode(_a.chainId, _PING);
+        _payloadPong = abi.encode(_b.chainId, _PONG);
     }
 
-    function _sendPing(uint256 nonce) internal {
-        bytes32 hashedMessage = keccak256("PING");
-        bytes memory payload = abi.encode(hashedMessage);
-        bytes memory proof = abi.encode(0);
-
-        hoax(_raju);
-        _a.messenger__.sendRemoteMessage(_b.chainId, hashedMessage);
-
+    function _verifyAToB(uint256 nonce_) internal {
         (
             bytes32 root,
             uint256 packetId,
@@ -71,19 +74,12 @@ contract HappyTest is Test {
 
         _submitSignatureOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, nonce, payload, proof);
+        _executePayloadOnDst(_a, _b, packetId, nonce_, _payloadPing, _PROOF);
 
-        assertEq(_b.messenger__.message(), hashedMessage);
+        assertEq(_b.messenger__.message(), _PING);
     }
 
-    function _sendPong(uint256 nonce) internal {
-        bytes32 hashedMessage = keccak256("PONG");
-        bytes memory payload = abi.encode(hashedMessage);
-        bytes memory proof = abi.encode(0);
-
-        hoax(_raju);
-        _b.messenger__.sendRemoteMessage(_a.chainId, hashedMessage);
-
+    function _verifyBToA(uint256 nonce_) internal {
         (
             bytes32 root,
             uint256 packetId,
@@ -92,9 +88,9 @@ contract HappyTest is Test {
 
         _submitSignatureOnSrc(_b, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
-        _executePayloadOnDst(_b, _a, packetId, nonce, payload, proof);
+        _executePayloadOnDst(_b, _a, packetId, nonce_, _payloadPong, _PROOF);
 
-        assertEq(_a.messenger__.message(), hashedMessage);
+        assertEq(_a.messenger__.message(), _PONG);
     }
 
     function _reset() internal {
@@ -103,10 +99,13 @@ contract HappyTest is Test {
     }
 
     function testPingPong() external {
+        hoax(_raju);
+        _a.messenger__.sendRemoteMessage(_b.chainId, _PING);
+
         uint256 iterations = 5;
         for (uint256 index = 0; index < iterations; index++) {
-            _sendPing(index);
-            _sendPong(index);
+            _verifyAToB(index);
+            _verifyBToA(index);
             _reset();
         }
     }
@@ -149,12 +148,12 @@ contract HappyTest is Test {
 
     function _initSigner() private {
         // deduce signer address from private key
-        _signer = vm.addr(_signerPrivateKey);
+        _signer = vm.addr(_SIGNER_PRIVATE_KEY);
 
         vm.startPrank(_socketOwner);
 
-        _a.notary__.grantRole(ATTESTER_ROLE, _signer);
-        _b.notary__.grantRole(ATTESTER_ROLE, _signer);
+        _a.notary__.grantRole(_ATTESTER_ROLE, _signer);
+        _b.notary__.grantRole(_ATTESTER_ROLE, _signer);
 
         // grant signer role
         _a.notary__.grantSignerRole(_b.chainId, _signer);
@@ -167,8 +166,8 @@ contract HappyTest is Test {
         vm.startPrank(_counterOwner);
 
         // deploy counters
-        _a.messenger__ = new Messenger(address(_a.socket__));
-        _b.messenger__ = new Messenger(address(_b.socket__));
+        _a.messenger__ = new Messenger(address(_a.socket__), _a.chainId);
+        _b.messenger__ = new Messenger(address(_b.socket__), _b.chainId);
 
         // deploy verifiers
         _a.verifier__ = new AcceptWithTimeout(
@@ -234,16 +233,17 @@ contract HappyTest is Test {
             abi.encode(src_.chainId, address(src_.accum__), packetId, root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
+            _SIGNER_PRIVATE_KEY,
             digest
         );
+
         sig = new bytes(65);
-        bytes1 v32 = bytes1(sigV);
+        bytes1 v = bytes1(sigV);
 
         assembly {
-            mstore(add(sig, 96), v32)
             mstore(add(sig, 32), sigR)
             mstore(add(sig, 64), sigS)
+            mstore(add(sig, 96), v)
         }
     }
 

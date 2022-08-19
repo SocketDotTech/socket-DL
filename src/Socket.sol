@@ -33,16 +33,16 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     IHasher private _hasher;
 
     constructor(uint256 chainId_, address hasher_) {
-        setHasher(hasher_);
+        _setHasher(hasher_);
         _chainId = chainId_;
     }
 
-    function setNotary(address notary_) public onlyOwner {
+    function setNotary(address notary_) external onlyOwner {
         _notary = INotary(notary_);
     }
 
-    function setHasher(address hasher_) public onlyOwner {
-        _hasher = IHasher(hasher_);
+    function setHasher(address hasher_) external onlyOwner {
+        _setHasher(hasher_);
     }
 
     function hasher() external view returns (address) {
@@ -172,5 +172,9 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         config.remotePlug = remotePlug_;
 
         // TODO: emit event
+    }
+
+    function _setHasher(address hasher_) private {
+        _hasher = IHasher(hasher_);
     }
 }

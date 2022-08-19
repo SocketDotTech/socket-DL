@@ -65,14 +65,14 @@ interface INotary {
 
     function claimBond() external;
 
-    function submitSignature(address accumAddress_, bytes memory signature)
+    function submitSignature(address accumAddress_, bytes calldata signature_)
         external;
 
     function challengeSignature(
         address accumAddress_,
         bytes32 root_,
         uint256 packetId_,
-        bytes memory signature
+        bytes calldata signature_
     ) external;
 
     function submitRemoteRoot(
@@ -80,7 +80,7 @@ interface INotary {
         address accumAddress_,
         uint256 packetId_,
         bytes32 root_,
-        bytes memory signature
+        bytes calldata signature_
     ) external;
 
     function getRemoteRoot(

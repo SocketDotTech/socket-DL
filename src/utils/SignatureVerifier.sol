@@ -7,12 +7,33 @@ contract SignatureVerifier {
     error InvalidV();
     error ZeroSignerAddress();
 
-    function recoverSigner(bytes32 hash, bytes memory signature)
-        public
+    function verifySignature(
+        bytes32 hash_,
+        address signer_,
+        bytes calldata signature_
+    ) external pure returns (bool) {
+        address recovered = _recoverSigner(hash_, signature_);
+        if (recovered == signer_) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function recoverSigner(bytes32 hash_, bytes calldata signature_)
+        external
         pure
         returns (address signer)
     {
-        (bytes32 sigR, bytes32 sigS, uint8 sigV) = _splitSignature(signature);
+        signer = _recoverSigner(hash_, signature_);
+    }
+
+    function _recoverSigner(bytes32 hash_, bytes memory signature_)
+        private
+        pure
+        returns (address signer)
+    {
+        (bytes32 sigR, bytes32 sigS, uint8 sigV) = _splitSignature(signature_);
 
         if (
             uint256(sigS) >
@@ -22,12 +43,12 @@ contract SignatureVerifier {
         if (sigV != 27 && sigV != 28) revert InvalidV();
 
         // If the signature is valid (and not malleable), return the signer address
-        signer = ecrecover(hash, sigV, sigR, sigS);
+        signer = ecrecover(hash_, sigV, sigR, sigS);
         if (signer == address(0)) revert ZeroSignerAddress();
     }
 
-    function _splitSignature(bytes memory signature)
-        internal
+    function _splitSignature(bytes memory signature_)
+        private
         pure
         returns (
             bytes32 r,
@@ -35,24 +56,11 @@ contract SignatureVerifier {
             uint8 v
         )
     {
-        if (signature.length != 65) revert InvalidSigLength();
+        if (signature_.length != 65) revert InvalidSigLength();
         assembly {
-            r := mload(add(signature, 0x20))
-            s := mload(add(signature, 0x40))
-            v := byte(0, mload(add(signature, 0x60)))
+            r := mload(add(signature_, 0x20))
+            s := mload(add(signature_, 0x40))
+            v := byte(0, mload(add(signature_, 0x60)))
         }
-    }
-
-    function verifySignature(
-        bytes32 hash,
-        address signer,
-        bytes memory signature
-    ) external pure returns (bool) {
-        address recovered = recoverSigner(hash, signature);
-        if (recovered == signer) {
-            return true;
-        }
-
-        return false;
     }
 }
