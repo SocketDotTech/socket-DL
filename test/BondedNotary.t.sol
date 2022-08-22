@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 import "../src/Notary/BondedNotary.sol";
 import "../src/interfaces/IAccumulator.sol";
+import "../src/utils/SignatureVerifier.sol";
 
 contract SocketTest is Test {
     address constant _owner = address(1);
@@ -21,11 +22,19 @@ contract SocketTest is Test {
     uint256 constant _remoteChainId = 0x2013AA264;
 
     Notary _notary;
+    SignatureVerifier _sigVerifier;
 
     function setUp() external {
         _signer = vm.addr(_signerPrivateKey);
+        _sigVerifier = new SignatureVerifier();
+
         hoax(_owner);
-        _notary = new Notary(_minBondAmount, _bondClaimDelay, _chainId);
+        _notary = new Notary(
+            _minBondAmount,
+            _bondClaimDelay,
+            _chainId,
+            address(_sigVerifier)
+        );
     }
 
     function testDeployment() external {
@@ -138,12 +147,8 @@ contract SocketTest is Test {
         bytes32 digest = keccak256(
             abi.encode(_chainId, _accum, _packetId, _root)
         );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
-            digest
-        );
 
-        _notary.submitSignature(sigV, sigR, sigS, _accum);
+        _notary.submitSignature(_accum, _getSignature(digest));
     }
 
     function testSubmitSignatureWithoutEnoughBond() external {
@@ -159,13 +164,9 @@ contract SocketTest is Test {
         bytes32 digest = keccak256(
             abi.encode(_chainId, _accum, _packetId, _root)
         );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
-            digest
-        );
 
         vm.expectRevert(INotary.InvalidBond.selector);
-        _notary.submitSignature(sigV, sigR, sigS, _accum);
+        _notary.submitSignature(_accum, _getSignature(digest));
     }
 
     function testChallengeSignature() external {
@@ -181,29 +182,19 @@ contract SocketTest is Test {
         bytes32 digest = keccak256(
             abi.encode(_chainId, _accum, _packetId, _root)
         );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
-            digest
-        );
 
-        _notary.submitSignature(sigV, sigR, sigS, _accum);
+        _notary.submitSignature(_accum, _getSignature(digest));
 
         bytes32 altDigest = keccak256(
             abi.encode(_chainId, _accum, _packetId, _altRoot)
         );
-        (uint8 altSigV, bytes32 altSigR, bytes32 altSigS) = vm.sign(
-            _signerPrivateKey,
-            altDigest
-        );
 
         hoax(_raju, 0);
         _notary.challengeSignature(
-            altSigV,
-            altSigR,
-            altSigS,
             _accum,
             _altRoot,
-            _packetId
+            _packetId,
+            _getSignature(altDigest)
         );
 
         assertEq(_signer.balance, 30e18);
@@ -215,23 +206,17 @@ contract SocketTest is Test {
         bytes32 digest = keccak256(
             abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
-            digest
-        );
 
         hoax(_owner);
         _notary.grantSignerRole(_remoteChainId, _signer);
 
         hoax(_raju);
         _notary.submitRemoteRoot(
-            sigV,
-            sigR,
-            sigS,
             _remoteChainId,
             _accum,
             _packetId,
-            _root
+            _root,
+            _getSignature(digest)
         );
 
         assertEq(
@@ -244,21 +229,31 @@ contract SocketTest is Test {
         bytes32 digest = keccak256(
             abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
+
+        hoax(_raju);
+        vm.expectRevert(INotary.InvalidSigner.selector);
+        _notary.submitRemoteRoot(
+            _remoteChainId,
+            _accum,
+            _packetId,
+            _root,
+            _getSignature(digest)
+        );
+    }
+
+    function _getSignature(bytes32 digest) internal returns (bytes memory sig) {
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
             _signerPrivateKey,
             digest
         );
 
-        hoax(_raju);
-        vm.expectRevert(INotary.InvalidSigner.selector);
-        _notary.submitRemoteRoot(
-            sigV,
-            sigR,
-            sigS,
-            _remoteChainId,
-            _accum,
-            _packetId,
-            _root
-        );
+        sig = new bytes(65);
+        bytes1 v32 = bytes1(sigV);
+
+        assembly {
+            mstore(add(sig, 96), v32)
+            mstore(add(sig, 32), sigR)
+            mstore(add(sig, 64), sigS)
+        }
     }
 }

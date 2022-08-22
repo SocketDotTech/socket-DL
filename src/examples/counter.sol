@@ -27,20 +27,20 @@ contract Counter is IPlug {
         _;
     }
 
-    function localAddOperation(uint256 amount) public {
+    function localAddOperation(uint256 amount) external {
         _addOperation(amount);
     }
 
-    function localSubOperation(uint256 amount) public {
+    function localSubOperation(uint256 amount) external {
         _subOperation(amount);
     }
 
-    function remoteAddOperation(uint256 chainId, uint256 amount) public {
+    function remoteAddOperation(uint256 chainId, uint256 amount) external {
         bytes memory payload = abi.encode(OP_ADD, amount);
         _outbound(chainId, payload);
     }
 
-    function remoteSubOperation(uint256 chainId, uint256 amount) public {
+    function remoteSubOperation(uint256 chainId, uint256 amount) external {
         bytes memory payload = abi.encode(OP_SUB, amount);
         _outbound(chainId, payload);
     }
