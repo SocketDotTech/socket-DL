@@ -7,27 +7,25 @@ contract HelperConfig {
     struct NetworkConfig {
         uint256 destChainId;
         address signer;
-        address pauser;
-        bool isSequential;
     }
 
     mapping(uint256 => NetworkConfig) public chainIdToNetworkConfig;
 
     constructor() {
         chainIdToNetworkConfig[31337] = getAnvilEthConfig();
+        chainIdToNetworkConfig[31338] = getAnvilEthConfig();
+
         activeNetworkConfig = chainIdToNetworkConfig[block.chainid];
     }
 
     function getAnvilEthConfig()
         internal
-        pure
+        view
         returns (NetworkConfig memory anvilNetworkConfig)
     {
         anvilNetworkConfig = NetworkConfig({
-            destChainId: 1,
-            signer: address(1),
-            pauser: address(2),
-            isSequential: false
+            destChainId: block.chainid == 31337 ? 31338 : 31337,
+            signer: address(1)
         });
     }
 }

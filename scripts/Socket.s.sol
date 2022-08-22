@@ -16,7 +16,7 @@ contract DeploySocket is Script {
     function run() external {
         HelperConfig helperConfig = new HelperConfig();
 
-        (uint256 destChainId, address signer, , ) = helperConfig
+        (uint256 destChainId, address signer) = helperConfig
             .activeNetworkConfig();
 
         vm.startBroadcast();
