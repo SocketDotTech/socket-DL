@@ -93,6 +93,10 @@ contract Notary is INotary, AccessControl(msg.sender) {
         return _bonds[attester];
     }
 
+    function isAttested(address, uint256) external view returns (bool) {
+        return true;
+    }
+
     function getUnbondData(address attester)
         external
         view

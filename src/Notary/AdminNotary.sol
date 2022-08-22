@@ -16,16 +16,30 @@ contract Notary is INotary, AccessControl(msg.sender) {
     mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
         private _remoteRoots;
 
+    // attester => accumAddress => packetId => is attested
+    mapping(address => mapping(address => mapping(uint256 => bool)))
+        private _isAttested;
+
+    // accumAddress => packetId => total attestations
+    mapping(address => mapping(uint256 => uint256)) public _attestations;
+
     struct AccumDetails {
         uint256 remoteChainId;
         bool isFast;
     }
+
+    uint256 private _totalAttestors;
+    mapping(address => uint256) private _attestorList;
 
     mapping(address => AccumDetails) private _accumDetails;
 
     error Restricted();
 
     error AccumAlreadyAdded();
+
+    error AlreadyAttested();
+
+    error NotFastPath();
 
     constructor(uint256 chainId_) {
         _chainId = chainId_;
@@ -67,6 +81,18 @@ contract Notary is INotary, AccessControl(msg.sender) {
 
     function chainId() external view returns (uint256) {
         return _chainId;
+    }
+
+    function isAttested(address accumAddress_, uint256 packetId_)
+        external
+        view
+        returns (bool)
+    {
+        if (_accumDetails[accumAddress_].isFast) {
+            if (_attestations[accumAddress_][packetId_] != _totalAttestors)
+                return false;
+        }
+        return true;
     }
 
     function submitSignature(
@@ -122,6 +148,24 @@ contract Notary is INotary, AccessControl(msg.sender) {
         }
     }
 
+    function _verifyRole(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 packetId_,
+        bytes32 root_
+    ) private view returns (address attester) {
+        bytes32 digest = keccak256(
+            abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
+        );
+        attester = ecrecover(digest, sigV_, sigR_, sigS_);
+
+        if (!_hasRole(_attesterRole(remoteChainId_), attester))
+            revert InvalidAttester();
+    }
+
     function submitRemoteRoot(
         uint8 sigV_,
         bytes32 sigR_,
@@ -131,13 +175,15 @@ contract Notary is INotary, AccessControl(msg.sender) {
         uint256 packetId_,
         bytes32 root_
     ) external override {
-        bytes32 digest = keccak256(
-            abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
+        _verifyRole(
+            sigV_,
+            sigR_,
+            sigS_,
+            remoteChainId_,
+            accumAddress_,
+            packetId_,
+            root_
         );
-        address attester = ecrecover(digest, sigV_, sigR_, sigS_);
-
-        if (!_hasRole(_attesterRole(remoteChainId_), attester))
-            revert InvalidAttester();
 
         if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
             revert RemoteRootAlreadySubmitted();
@@ -149,6 +195,34 @@ contract Notary is INotary, AccessControl(msg.sender) {
             packetId_,
             root_
         );
+    }
+
+    function confirmRoot(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 packetId_,
+        bytes32 root_
+    ) external {
+        if (!_accumDetails[accumAddress_].isFast) revert NotFastPath();
+
+        address attester = _verifyRole(
+            sigV_,
+            sigR_,
+            sigS_,
+            remoteChainId_,
+            accumAddress_,
+            packetId_,
+            root_
+        );
+
+        if (_isAttested[attester][accumAddress_][packetId_])
+            revert AlreadyAttested();
+
+        _isAttested[attester][accumAddress_][packetId_] = true;
+        _attestations[accumAddress_][packetId_]++;
     }
 
     function getRemoteRoot(
@@ -163,6 +237,9 @@ contract Notary is INotary, AccessControl(msg.sender) {
         external
         onlyOwner
     {
+        _totalAttestors++;
+        _attestorList[attester_] = _totalAttestors;
+
         _grantRole(_attesterRole(remoteChainId_), attester_);
     }
 
@@ -170,6 +247,9 @@ contract Notary is INotary, AccessControl(msg.sender) {
         external
         onlyOwner
     {
+        _attestorList[attester_] = 0;
+        _totalAttestors--;
+
         _revokeRole(_attesterRole(remoteChainId_), attester_);
     }
 

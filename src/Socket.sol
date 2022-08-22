@@ -30,6 +30,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     INotary private _notary;
 
+    error NotAttested();
+
     constructor(uint256 chainId_) {
         _chainId = chainId_;
     }
@@ -88,6 +90,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             nonce_,
             payload_
         );
+
+        if (!_notary.isAttested(remoteAccum_, packetId_)) revert NotAttested();
 
         if (_executedMessages[packedMessage]) revert MessageAlreadyExecuted();
         _executedMessages[packedMessage] = true;

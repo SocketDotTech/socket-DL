@@ -96,4 +96,9 @@ interface INotary {
         address accumAddress_,
         uint256 packetId_
     ) external view returns (bytes32);
+
+    function isAttested(address accumAddress_, uint256 packetId_)
+        external
+        view
+        returns (bool);
 }
