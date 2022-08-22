@@ -8,27 +8,24 @@ import "../src/accumulators/SingleAccum.sol";
 import "../src/deaccumulators/SingleDeaccum.sol";
 import "../src/verifiers/AcceptWithTimeout.sol";
 import "../src/examples/Messenger.sol";
+import "../src/utils/SignatureVerifier.sol";
+import "../src/utils/Hasher.sol";
 
 contract PingPongTest is Test {
-    address constant _socketOwner = address(1);
-    address constant _counterOwner = address(2);
-    uint256 constant _signerPrivateKey = uint256(3);
-    address _signer;
-    address constant _raju = address(4);
-    address constant _pauser = address(5);
-    bytes32 public constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
-    bytes32 public constant PING = keccak256("PING");
-    bytes32 public constant PONG = keccak256("PONG");
-    bytes private constant proof = abi.encode(0);
+    bytes32 private constant _ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
+    bytes32 private constant _PING = keccak256("PING");
+    bytes32 private constant _PONG = keccak256("PONG");
+    uint256 private constant _SIGNER_PRIVATE_KEY = uint256(3);
 
-    bytes public payloadPing;
-    bytes public payloadPong;
+    address private constant _socketOwner = address(1);
+    address private constant _counterOwner = address(2);
+    address private constant _raju = address(4);
+    address private constant _pauser = address(5);
+    address private _signer;
 
-    struct SignatureParams {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
+    bytes private constant _PROOF = abi.encode(0);
+    bytes private _payloadPing;
+    bytes private _payloadPong;
 
     struct ChainContext {
         uint256 chainId;
@@ -38,6 +35,8 @@ contract PingPongTest is Test {
         IDeaccumulator deaccum__;
         AcceptWithTimeout verifier__;
         Messenger messenger__;
+        SignatureVerifier sigVerifier__;
+        Hasher hasher__;
     }
 
     struct MessageContext {
@@ -47,11 +46,11 @@ contract PingPongTest is Test {
         uint256 nonce;
         bytes32 root;
         uint256 packetId;
-        SignatureParams sig;
+        bytes sig;
     }
 
-    ChainContext _a;
-    ChainContext _b;
+    ChainContext private _a;
+    ChainContext private _b;
 
     function setUp() external {
         _a.chainId = 0x2013AA263;
@@ -62,36 +61,36 @@ contract PingPongTest is Test {
         _configPlugContracts(true);
         _initPausers();
 
-        payloadPing = abi.encode(_a.chainId, PING);
-        payloadPong = abi.encode(_b.chainId, PONG);
+        _payloadPing = abi.encode(_a.chainId, _PING);
+        _payloadPong = abi.encode(_b.chainId, _PONG);
     }
 
-    function _verifySrcToDest(uint256 nonce) internal {
+    function _verifyAToB(uint256 nonce_) internal {
         (
             bytes32 root,
             uint256 packetId,
-            SignatureParams memory sig
+            bytes memory sig
         ) = _getLatestSignature(_a);
 
         _submitSignatureOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, nonce, payloadPing, proof);
+        _executePayloadOnDst(_a, _b, packetId, nonce_, _payloadPing, _PROOF);
 
-        assertEq(_b.messenger__.message(), PING);
+        assertEq(_b.messenger__.message(), _PING);
     }
 
-    function _verifyDestToSrc(uint256 nonce) internal {
+    function _verifyBToA(uint256 nonce_) internal {
         (
             bytes32 root,
             uint256 packetId,
-            SignatureParams memory sig
+            bytes memory sig
         ) = _getLatestSignature(_b);
 
         _submitSignatureOnSrc(_b, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
-        _executePayloadOnDst(_b, _a, packetId, nonce, payloadPong, proof);
+        _executePayloadOnDst(_b, _a, packetId, nonce_, _payloadPong, _PROOF);
 
-        assertEq(_a.messenger__.message(), PONG);
+        assertEq(_a.messenger__.message(), _PONG);
     }
 
     function _reset() internal {
@@ -101,12 +100,12 @@ contract PingPongTest is Test {
 
     function testPingPong() external {
         hoax(_raju);
-        _a.messenger__.sendRemoteMessage(_b.chainId, PING);
+        _a.messenger__.sendRemoteMessage(_b.chainId, _PING);
 
         uint256 iterations = 5;
         for (uint256 index = 0; index < iterations; index++) {
-            _verifySrcToDest(index);
-            _verifyDestToSrc(index);
+            _verifyAToB(index);
+            _verifyBToA(index);
             _reset();
         }
     }
@@ -114,12 +113,18 @@ contract PingPongTest is Test {
     function _deploySocketContracts() private {
         vm.startPrank(_socketOwner);
 
-        // deploy socket
-        _a.socket__ = new Socket(_a.chainId);
-        _b.socket__ = new Socket(_b.chainId);
+        _a.hasher__ = new Hasher();
+        _b.hasher__ = new Hasher();
 
-        _a.notary__ = new Notary(_a.chainId);
-        _b.notary__ = new Notary(_b.chainId);
+        // deploy socket
+        _a.socket__ = new Socket(_a.chainId, address(_a.hasher__));
+        _b.socket__ = new Socket(_b.chainId, address(_b.hasher__));
+
+        _a.sigVerifier__ = new SignatureVerifier();
+        _b.sigVerifier__ = new SignatureVerifier();
+
+        _a.notary__ = new Notary(_a.chainId, address(_a.sigVerifier__));
+        _b.notary__ = new Notary(_b.chainId, address(_b.sigVerifier__));
 
         _a.socket__.setNotary(address(_a.notary__));
         _b.socket__.setNotary(address(_b.notary__));
@@ -143,12 +148,12 @@ contract PingPongTest is Test {
 
     function _initSigner() private {
         // deduce signer address from private key
-        _signer = vm.addr(_signerPrivateKey);
+        _signer = vm.addr(_SIGNER_PRIVATE_KEY);
 
         vm.startPrank(_socketOwner);
 
-        _a.notary__.grantRole(ATTESTER_ROLE, _signer);
-        _b.notary__.grantRole(ATTESTER_ROLE, _signer);
+        _a.notary__.grantRole(_ATTESTER_ROLE, _signer);
+        _b.notary__.grantRole(_ATTESTER_ROLE, _signer);
 
         // grant signer role
         _a.notary__.grantSignerRole(_b.chainId, _signer);
@@ -220,7 +225,7 @@ contract PingPongTest is Test {
         returns (
             bytes32 root,
             uint256 packetId,
-            SignatureParams memory sig
+            bytes memory sig
         )
     {
         (root, packetId) = src_.accum__.getNextPacket();
@@ -228,41 +233,41 @@ contract PingPongTest is Test {
             abi.encode(src_.chainId, address(src_.accum__), packetId, root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
+            _SIGNER_PRIVATE_KEY,
             digest
         );
-        sig = SignatureParams(sigV, sigR, sigS);
+
+        sig = new bytes(65);
+        bytes1 v = bytes1(sigV);
+
+        assembly {
+            mstore(add(sig, 32), sigR)
+            mstore(add(sig, 64), sigS)
+            mstore(add(sig, 96), v)
+        }
     }
 
-    function _submitSignatureOnSrc(
-        ChainContext storage src_,
-        SignatureParams memory sig_
-    ) private {
+    function _submitSignatureOnSrc(ChainContext storage src_, bytes memory sig_)
+        private
+    {
         hoax(_signer);
-        src_.notary__.submitSignature(
-            sig_.v,
-            sig_.r,
-            sig_.s,
-            address(src_.accum__)
-        );
+        src_.notary__.submitSignature(address(src_.accum__), sig_);
     }
 
     function _submitRootOnDst(
         ChainContext storage src_,
         ChainContext storage dst_,
-        SignatureParams memory sig_,
+        bytes memory sig_,
         uint256 packetId_,
         bytes32 root_
     ) private {
         hoax(_raju);
         dst_.notary__.submitRemoteRoot(
-            sig_.v,
-            sig_.r,
-            sig_.s,
             src_.chainId,
             address(src_.accum__),
             packetId_,
-            root_
+            root_,
+            sig_
         );
     }
 

@@ -20,11 +20,11 @@ abstract contract Ownable {
         _;
     }
 
-    function owner() public view returns (address) {
+    function owner() external view returns (address) {
         return _owner;
     }
 
-    function nominee() public view returns (address) {
+    function nominee() external view returns (address) {
         return _nominee;
     }
 

@@ -4,9 +4,11 @@ pragma solidity ^0.8.0;
 import "../interfaces/INotary.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
+import "../interfaces/ISignatureVerifier.sol";
 
 contract Notary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
+    ISignatureVerifier private _signatureVerifier;
 
     // signer => accumAddress => packetId => sig hash
     mapping(address => mapping(address => mapping(uint256 => bytes32)))
@@ -20,7 +22,8 @@ contract Notary is INotary, AccessControl(msg.sender) {
 
     error Restricted();
 
-    constructor(uint256 chainId_) {
+    constructor(uint256 chainId_, address signatureVerifier_) {
+        _setSignatureVerifier(signatureVerifier_);
         _chainId = chainId_;
     }
 
@@ -44,42 +47,50 @@ contract Notary is INotary, AccessControl(msg.sender) {
         return _chainId;
     }
 
-    function submitSignature(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
-        address accumAddress_
-    ) external override onlyRole(ATTESTER_ROLE) {
+    function signatureVerifier() external view returns (address) {
+        return address(_signatureVerifier);
+    }
+
+    function setSignatureVerifier(address signatureVerifier_)
+        external
+        onlyOwner
+    {
+        _setSignatureVerifier(signatureVerifier_);
+    }
+
+    function submitSignature(address accumAddress_, bytes calldata signature_)
+        external
+        override
+        onlyRole(ATTESTER_ROLE)
+    {
         (bytes32 root, uint256 packetId) = IAccumulator(accumAddress_)
             .sealPacket();
 
         bytes32 digest = keccak256(
             abi.encode(_chainId, accumAddress_, packetId, root)
         );
-        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
+        address signer = _signatureVerifier.recoverSigner(digest, signature_);
 
         _localSignatures[signer][accumAddress_][packetId] = keccak256(
-            abi.encode(sigV_, sigR_, sigS_)
+            signature_
         );
 
-        emit SignatureSubmitted(accumAddress_, packetId, sigV_, sigR_, sigS_);
+        emit SignatureSubmitted(accumAddress_, packetId, signature_);
     }
 
     function challengeSignature(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         address accumAddress_,
         bytes32 root_,
-        uint256 packetId_
+        uint256 packetId_,
+        bytes calldata signature_
     ) external override {
         bytes32 digest = keccak256(
             abi.encode(_chainId, accumAddress_, packetId_, root_)
         );
-        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
+        address signer = _signatureVerifier.recoverSigner(digest, signature_);
         bytes32 oldSig = _localSignatures[signer][accumAddress_][packetId_];
 
-        if (oldSig != keccak256(abi.encode(sigV_, sigR_, sigS_))) {
+        if (oldSig != keccak256(signature_)) {
             uint256 bond = 0;
             payable(msg.sender).transfer(bond);
             emit ChallengedSuccessfully(
@@ -93,18 +104,17 @@ contract Notary is INotary, AccessControl(msg.sender) {
     }
 
     function submitRemoteRoot(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,
-        bytes32 root_
+        bytes32 root_,
+        bytes calldata signature_
     ) external override {
         bytes32 digest = keccak256(
             abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
         );
-        address signer = ecrecover(digest, sigV_, sigR_, sigS_);
+
+        address signer = _signatureVerifier.recoverSigner(digest, signature_);
 
         if (!_hasRole(_signerRole(remoteChainId_), signer))
             revert InvalidSigner();
@@ -141,6 +151,11 @@ contract Notary is INotary, AccessControl(msg.sender) {
         onlyOwner
     {
         _revokeRole(_signerRole(remoteChainId_), signer_);
+    }
+
+    function _setSignatureVerifier(address signatureVerifier_) private {
+        _signatureVerifier = ISignatureVerifier(signatureVerifier_);
+        emit SignatureVerifierSet(signatureVerifier_);
     }
 
     function _signerRole(uint256 chainId_) internal pure returns (bytes32) {
