@@ -7,10 +7,7 @@ import "../interfaces/IAccumulator.sol";
 
 contract Notary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
-
-    // attester => accumAddress => packetId => sig hash
-    mapping(address => mapping(address => mapping(uint256 => bytes32)))
-        private _localSignatures;
+    uint256 public immutable _timeoutInSeconds;
 
     // remoteChainId => accumAddress => packetId => root
     mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
@@ -25,6 +22,9 @@ contract Notary is INotary, AccessControl(msg.sender) {
 
     // accumAddress => packetId => bool (is paused)
     mapping(address => mapping(uint256 => bool)) public _isChallenged;
+
+    // accumAddress => packetId => submitted at
+    mapping(address => mapping(uint256 => uint256)) public _timeRecord;
 
     struct AccumDetails {
         uint256 remoteChainId;
@@ -48,8 +48,9 @@ contract Notary is INotary, AccessControl(msg.sender) {
 
     error PacketNotChallenged();
 
-    constructor(uint256 chainId_) {
+    constructor(uint256 chainId_, uint256 timeoutInSeconds_) {
         _chainId = chainId_;
+        _timeoutInSeconds = timeoutInSeconds_;
     }
 
     function addBond() external payable override {
@@ -95,6 +96,15 @@ contract Notary is INotary, AccessControl(msg.sender) {
         view
         returns (bool)
     {
+        (, uint256 packetId) = IAccumulator(accumAddress_).getNextPacket();
+        if (packetId == packetId_) return false;
+
+        // if timedout
+        if (
+            block.timestamp - _timeRecord[accumAddress_][packetId_] >
+            _timeoutInSeconds
+        ) return false;
+
         // if not 100% confirmed for fast path
         if (_accumDetails[accumAddress_].isFast) {
             if (_attestations[accumAddress_][packetId_] != _totalAttestors)
@@ -102,7 +112,8 @@ contract Notary is INotary, AccessControl(msg.sender) {
         }
 
         // if challenged
-        if (_isChallenged[accumAddress_][packetId_]) return false;
+        if (_isChallenged[accumAddress_][packetId_])
+            return false;
 
         return true;
     }
@@ -144,13 +155,19 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 root_,
         uint256 packetId_
     ) external override {
-        bytes32 digest = keccak256(
-            abi.encode(_chainId, accumAddress_, packetId_, root_)
+        address attester = _getAttester(
+            sigV_,
+            sigR_,
+            sigS_,
+            _chainId,
+            accumAddress_,
+            packetId_,
+            root_
         );
-        address attester = ecrecover(digest, sigV_, sigR_, sigS_);
-        bytes32 oldSig = _localSignatures[attester][accumAddress_][packetId_];
 
-        if (oldSig != keccak256(abi.encode(sigV_, sigR_, sigS_))) {
+        bytes32 root = IAccumulator(accumAddress_).getRootById(packetId_);
+
+        if (root == root_) {
             emit ChallengedSuccessfully(
                 attester,
                 accumAddress_,
@@ -184,6 +201,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         );
 
         _remoteRoots[remoteChainId_][accumAddress_][packetId_] = root_;
+        _timeRecord[accumAddress_][packetId_] = block.timestamp;
         emit RemoteRootSubmitted(
             remoteChainId_,
             accumAddress_,
