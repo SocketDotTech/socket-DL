@@ -24,7 +24,7 @@ contract AdminNotaryTest is Test {
     function setUp() external {
         _attester = vm.addr(_attesterPrivateKey);
         hoax(_owner);
-        _notary = new Notary(_chainId);
+        _notary = new Notary(_chainId, 0);
     }
 
     function testDeployment() external {
