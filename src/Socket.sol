@@ -156,6 +156,14 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         return _chainId;
     }
 
+    function getMessageStatus(bytes32 packedMessage_)
+        public
+        view
+        returns (bool)
+    {
+        return _executedMessages[packedMessage_];
+    }
+
     function setInboundConfig(
         uint256 remoteChainId_,
         address remotePlug_,

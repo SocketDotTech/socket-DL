@@ -36,6 +36,14 @@ contract Notary is INotary, AccessControl(msg.sender) {
 
     mapping(address => AccumDetails) private _accumDetails;
 
+    enum PacketStatus {
+        IN_POOL,
+        PROPOSED,
+        CHALLENGED,
+        CONFIRMED,
+        TIMED_OUT
+    }
+
     error Restricted();
 
     error AccumAlreadyAdded();
@@ -96,26 +104,37 @@ contract Notary is INotary, AccessControl(msg.sender) {
         view
         returns (bool)
     {
+        PacketStatus status = getPacketStatus(accumAddress_, packetId_);
+
+        if (status == PacketStatus.CONFIRMED) return true;
+        return false;
+    }
+
+    function getPacketStatus(address accumAddress_, uint256 packetId_)
+        public
+        view
+        returns (PacketStatus status)
+    {
         (, uint256 packetId) = IAccumulator(accumAddress_).getNextPacket();
-        if (packetId == packetId_) return false;
+        if (packetId == packetId_) return PacketStatus.IN_POOL;
 
         // if timedout
         if (
             block.timestamp - _timeRecord[accumAddress_][packetId_] >
             _timeoutInSeconds
-        ) return false;
+        ) return PacketStatus.TIMED_OUT;
 
         // if not 100% confirmed for fast path
         if (_accumDetails[accumAddress_].isFast) {
             if (_attestations[accumAddress_][packetId_] != _totalAttestors)
-                return false;
+                return PacketStatus.PROPOSED;
         }
 
         // if challenged
         if (_isChallenged[accumAddress_][packetId_])
-            return false;
+            return PacketStatus.CHALLENGED;
 
-        return true;
+        return PacketStatus.CONFIRMED;
     }
 
     function submitSignature(
