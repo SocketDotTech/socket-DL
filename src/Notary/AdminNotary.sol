@@ -8,6 +8,7 @@ import "../interfaces/IAccumulator.sol";
 contract Notary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
     uint256 public immutable _timeoutInSeconds;
+    uint256 public immutable _waitTimeInSeconds;
 
     // remoteChainId => accumAddress => packetId => root
     mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
@@ -37,7 +38,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
     mapping(address => AccumDetails) private _accumDetails;
 
     enum PacketStatus {
-        IN_POOL,
+        NOT_PROPOSED,
         PROPOSED,
         CHALLENGED,
         CONFIRMED,
@@ -56,9 +57,14 @@ contract Notary is INotary, AccessControl(msg.sender) {
 
     error PacketNotChallenged();
 
-    constructor(uint256 chainId_, uint256 timeoutInSeconds_) {
+    constructor(
+        uint256 chainId_,
+        uint256 timeoutInSeconds_,
+        uint256 waitTimeInSeconds_
+    ) {
         _chainId = chainId_;
         _timeoutInSeconds = timeoutInSeconds_;
+        _waitTimeInSeconds = waitTimeInSeconds_;
     }
 
     function addBond() external payable override {
@@ -115,20 +121,21 @@ contract Notary is INotary, AccessControl(msg.sender) {
         view
         returns (PacketStatus status)
     {
-        (, uint256 packetId) = IAccumulator(accumAddress_).getNextPacket();
-        if (packetId == packetId_) return PacketStatus.IN_POOL;
+        uint256 packetArrivedAt = _timeRecord[accumAddress_][packetId_];
+        if (packetArrivedAt == 0) return PacketStatus.NOT_PROPOSED;
 
-        // if timedout
-        if (
-            block.timestamp - _timeRecord[accumAddress_][packetId_] >
-            _timeoutInSeconds
-        ) return PacketStatus.TIMED_OUT;
-
-        // if not 100% confirmed for fast path
+        // if not 100% confirmed for fast path or consider wait time for slow path
         if (_accumDetails[accumAddress_].isFast) {
             if (_attestations[accumAddress_][packetId_] != _totalAttestors)
                 return PacketStatus.PROPOSED;
+        } else {
+            if (block.timestamp - packetArrivedAt < _waitTimeInSeconds)
+                return PacketStatus.PROPOSED;
         }
+
+        // if timedout
+        if (block.timestamp - packetArrivedAt > _timeoutInSeconds)
+            return PacketStatus.TIMED_OUT;
 
         // if challenged
         if (_isChallenged[accumAddress_][packetId_])

@@ -120,8 +120,8 @@ contract HappyTest is Test {
         _a.socket__ = new Socket(_a.chainId);
         _b.socket__ = new Socket(_b.chainId);
 
-        _a.notary__ = new Notary(_a.chainId, 0);
-        _b.notary__ = new Notary(_b.chainId, 0);
+        _a.notary__ = new Notary(_a.chainId, 0, 0);
+        _b.notary__ = new Notary(_b.chainId, 0, 0);
 
         _a.socket__.setNotary(address(_a.notary__));
         _b.socket__.setNotary(address(_b.notary__));
