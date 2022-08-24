@@ -7,7 +7,11 @@ abstract contract IAccumulator {
 
     event SocketSet(address indexed socket);
     event NotarySet(address indexed notary);
-    event MessageAdded(bytes32 packedMessage, bytes32 newRootHash);
+    event MessageAdded(
+        bytes32 packedMessage,
+        uint256 packetId,
+        bytes32 newRootHash
+    );
     event PacketComplete(bytes32 rootHash, uint256 packetId);
 
     // caller only Socket

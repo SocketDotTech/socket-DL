@@ -15,6 +15,6 @@ contract SingleAccum is BaseAccum {
     {
         if (_roots[_nextPacket] != bytes32(0)) revert PendingPacket();
         _roots[_nextPacket] = packedMessage;
-        emit MessageAdded(packedMessage, packedMessage);
+        emit MessageAdded(packedMessage, _nextPacket, packedMessage);
     }
 }
