@@ -45,6 +45,24 @@ interface INotary {
         uint256 rewardAmount
     );
 
+    event RevertChallengedPacket(
+        address indexed accumAddress,
+        uint256 indexed packetId
+    );
+
+    event PacketChallengedOnDest(
+        address indexed attester,
+        address indexed accumAddress,
+        uint256 indexed packetId,
+        address challenger
+    );
+
+    event RootConfirmed(
+        address indexed attester,
+        address indexed accumAddress,
+        uint256 indexed packetId
+    );
+
     error InvalidBondReduce();
 
     error UnbondInProgress();

@@ -23,6 +23,9 @@ contract Notary is INotary, AccessControl(msg.sender) {
     // accumAddress => packetId => total attestations
     mapping(address => mapping(uint256 => uint256)) public _attestations;
 
+    // accumAddress => packetId => bool (is paused)
+    mapping(address => mapping(uint256 => bool)) public _isChallenged;
+
     struct AccumDetails {
         uint256 remoteChainId;
         bool isFast;
@@ -40,6 +43,10 @@ contract Notary is INotary, AccessControl(msg.sender) {
     error AlreadyAttested();
 
     error NotFastPath();
+
+    error PacketChallenged();
+
+    error PacketNotChallenged();
 
     constructor(uint256 chainId_) {
         _chainId = chainId_;
@@ -72,7 +79,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
     }
 
     function getAccumDetails(address accumAddress_)
-        public
+        external
         view
         returns (AccumDetails memory)
     {
@@ -88,10 +95,15 @@ contract Notary is INotary, AccessControl(msg.sender) {
         view
         returns (bool)
     {
+        // if not 100% confirmed for fast path
         if (_accumDetails[accumAddress_].isFast) {
             if (_attestations[accumAddress_][packetId_] != _totalAttestors)
                 return false;
         }
+
+        // if challenged
+        if (_isChallenged[accumAddress_][packetId_]) return false;
+
         return true;
     }
 
@@ -104,10 +116,15 @@ contract Notary is INotary, AccessControl(msg.sender) {
         (bytes32 root, uint256 packetId) = IAccumulator(accumAddress_)
             .sealPacket();
 
-        bytes32 digest = keccak256(
-            abi.encode(_chainId, accumAddress_, packetId, root)
+        address attester = _getAttester(
+            sigV_,
+            sigR_,
+            sigS_,
+            _chainId,
+            accumAddress_,
+            packetId,
+            root
         );
-        address attester = ecrecover(digest, sigV_, sigR_, sigS_);
 
         if (
             !_hasRole(
@@ -115,10 +132,6 @@ contract Notary is INotary, AccessControl(msg.sender) {
                 attester
             )
         ) revert InvalidAttester();
-
-        _localSignatures[attester][accumAddress_][packetId] = keccak256(
-            abi.encode(sigV_, sigR_, sigS_)
-        );
 
         emit SignatureSubmitted(accumAddress_, packetId, sigV_, sigR_, sigS_);
     }
@@ -148,24 +161,6 @@ contract Notary is INotary, AccessControl(msg.sender) {
         }
     }
 
-    function _verifyRole(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
-        uint256 remoteChainId_,
-        address accumAddress_,
-        uint256 packetId_,
-        bytes32 root_
-    ) private view returns (address attester) {
-        bytes32 digest = keccak256(
-            abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
-        );
-        attester = ecrecover(digest, sigV_, sigR_, sigS_);
-
-        if (!_hasRole(_attesterRole(remoteChainId_), attester))
-            revert InvalidAttester();
-    }
-
     function submitRemoteRoot(
         uint8 sigV_,
         bytes32 sigR_,
@@ -175,7 +170,10 @@ contract Notary is INotary, AccessControl(msg.sender) {
         uint256 packetId_,
         bytes32 root_
     ) external override {
-        _verifyRole(
+        if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
+            revert RemoteRootAlreadySubmitted();
+
+        _verifyAndUpdateAttestations(
             sigV_,
             sigR_,
             sigS_,
@@ -184,9 +182,6 @@ contract Notary is INotary, AccessControl(msg.sender) {
             packetId_,
             root_
         );
-
-        if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
-            revert RemoteRootAlreadySubmitted();
 
         _remoteRoots[remoteChainId_][accumAddress_][packetId_] = root_;
         emit RemoteRootSubmitted(
@@ -207,8 +202,9 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bytes32 root_
     ) external {
         if (!_accumDetails[accumAddress_].isFast) revert NotFastPath();
+        if (_isChallenged[accumAddress_][packetId_]) revert PacketChallenged();
 
-        address attester = _verifyRole(
+        address attester = _verifyAndUpdateAttestations(
             sigV_,
             sigR_,
             sigS_,
@@ -217,6 +213,90 @@ contract Notary is INotary, AccessControl(msg.sender) {
             packetId_,
             root_
         );
+
+        emit RootConfirmed(attester, accumAddress_, packetId_);
+    }
+
+    function challengePacketOnDest(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 packetId_,
+        bytes32 root_
+    ) external {
+        if (_isChallenged[accumAddress_][packetId_]) revert PacketChallenged();
+        address attester = _getAttester(
+            sigV_,
+            sigR_,
+            sigS_,
+            remoteChainId_,
+            accumAddress_,
+            packetId_,
+            root_
+        );
+
+        bytes32 root = IAccumulator(accumAddress_).getRootById(packetId_);
+
+        if (root == root_) {
+            _isChallenged[accumAddress_][packetId_] = true;
+
+            emit PacketChallengedOnDest(
+                attester,
+                accumAddress_,
+                packetId_,
+                msg.sender
+            );
+        }
+    }
+
+    function acceptChallengedPacket(address accumAddress_, uint256 packetId_)
+        external
+        onlyOwner
+    {
+        if (!_isChallenged[accumAddress_][packetId_])
+            revert PacketNotChallenged();
+        _isChallenged[accumAddress_][packetId_] = false;
+        emit RevertChallengedPacket(accumAddress_, packetId_);
+    }
+
+    function _getAttester(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 packetId_,
+        bytes32 root_
+    ) private pure returns (address attester) {
+        bytes32 digest = keccak256(
+            abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
+        );
+        attester = ecrecover(digest, sigV_, sigR_, sigS_);
+    }
+
+    function _verifyAndUpdateAttestations(
+        uint8 sigV_,
+        bytes32 sigR_,
+        bytes32 sigS_,
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 packetId_,
+        bytes32 root_
+    ) private returns (address attester) {
+        attester = _getAttester(
+            sigV_,
+            sigR_,
+            sigS_,
+            remoteChainId_,
+            accumAddress_,
+            packetId_,
+            root_
+        );
+
+        if (!_hasRole(_attesterRole(remoteChainId_), attester))
+            revert InvalidAttester();
 
         if (_isAttested[attester][accumAddress_][packetId_])
             revert AlreadyAttested();
