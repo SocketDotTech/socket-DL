@@ -1,7 +1,13 @@
 cache/
 out/
 node_modules/
-broadcast/
 deployments/
+
+#Hardhat files
+cache_hardhat/
+artifacts/
+
+#Hardhat plugin files
+typechain-types/
 
 .env
