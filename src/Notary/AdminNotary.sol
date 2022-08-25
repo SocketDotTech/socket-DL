@@ -6,7 +6,7 @@ import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
 import "../interfaces/ISignatureVerifier.sol";
 
-contract Notary is INotary, AccessControl(msg.sender) {
+contract AdminNotary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
     ISignatureVerifier private _signatureVerifier;
 
