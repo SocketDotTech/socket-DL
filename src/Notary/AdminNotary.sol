@@ -32,9 +32,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bool isFast;
     }
 
-    uint256 private _totalAttestors;
-    mapping(address => uint256) private _attestorList;
-
+    mapping(uint256 => uint256) private _totalAttestors;
     mapping(address => AccumDetails) private _accumDetails;
 
     enum PacketStatus {
@@ -44,6 +42,10 @@ contract Notary is INotary, AccessControl(msg.sender) {
         CONFIRMED,
         TIMED_OUT
     }
+
+    error AttesterExists();
+
+    error AttesterNotFound();
 
     error Restricted();
 
@@ -57,6 +59,9 @@ contract Notary is INotary, AccessControl(msg.sender) {
 
     error PacketNotChallenged();
 
+    error ZeroAddress();
+
+    // TODO: restrict the timeout durations to a few select options
     constructor(
         uint256 chainId_,
         uint256 timeoutInSeconds_,
@@ -88,6 +93,7 @@ contract Notary is INotary, AccessControl(msg.sender) {
         uint256 remoteChainId_,
         bool isFast_
     ) external onlyOwner {
+        if (accumAddress_ == address(0)) revert ZeroAddress();
         if (_accumDetails[accumAddress_].remoteChainId != 0)
             revert AccumAlreadyAdded();
         _accumDetails[accumAddress_] = AccumDetails(remoteChainId_, isFast_);
@@ -124,16 +130,20 @@ contract Notary is INotary, AccessControl(msg.sender) {
         uint256 packetArrivedAt = _timeRecord[accumAddress_][packetId_];
         if (packetArrivedAt == 0) return PacketStatus.NOT_PROPOSED;
 
+        uint256 remoteChainId = _accumDetails[accumAddress_].remoteChainId;
+
         // if not 100% confirmed for fast path or consider wait time for slow path
         if (_accumDetails[accumAddress_].isFast) {
-            if (_attestations[accumAddress_][packetId_] != _totalAttestors)
-                return PacketStatus.PROPOSED;
+            if (
+                _attestations[accumAddress_][packetId_] !=
+                _totalAttestors[remoteChainId]
+            ) return PacketStatus.PROPOSED;
         } else {
             if (block.timestamp - packetArrivedAt < _waitTimeInSeconds)
                 return PacketStatus.PROPOSED;
         }
 
-        // if timedout
+        // if timed out
         if (block.timestamp - packetArrivedAt > _timeoutInSeconds)
             return PacketStatus.TIMED_OUT;
 
@@ -361,20 +371,20 @@ contract Notary is INotary, AccessControl(msg.sender) {
         external
         onlyOwner
     {
-        _totalAttestors++;
-        _attestorList[attester_] = _totalAttestors;
-
+        if (_hasRole(_attesterRole(remoteChainId_), attester_))
+            revert AttesterExists();
         _grantRole(_attesterRole(remoteChainId_), attester_);
+        _totalAttestors[remoteChainId_]++;
     }
 
     function revokeAttesterRole(uint256 remoteChainId_, address attester_)
         external
         onlyOwner
     {
-        _attestorList[attester_] = 0;
-        _totalAttestors--;
-
+        if (!_hasRole(_attesterRole(remoteChainId_), attester_))
+            revert AttesterNotFound();
         _revokeRole(_attesterRole(remoteChainId_), attester_);
+        _totalAttestors[remoteChainId_]--;
     }
 
     function _attesterRole(uint256 remoteChainId_)
