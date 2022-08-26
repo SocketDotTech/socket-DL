@@ -168,12 +168,10 @@ contract HappyTest is Test {
 
         // deploy verifiers
         _a.verifier__ = new AcceptWithTimeout(
-            0,
             address(_a.socket__),
             _counterOwner
         );
         _b.verifier__ = new AcceptWithTimeout(
-            0,
             address(_b.socket__),
             _counterOwner
         );

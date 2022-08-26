@@ -10,11 +10,10 @@ contract AcceptWithTimeoutTest is Test {
     address DUMMY_PAUSER = address(0x4B1d0d4bae850579BD363e8755C88B3b23E12DBd);
     uint256 chainId = 1;
 
-    uint256 immutable timeout = 1000;
     AcceptWithTimeout verifier;
 
     function setUp() public {
-        verifier = new AcceptWithTimeout(timeout, DUMMY_SOCKET, DUMMY_MANAGER);
+        verifier = new AcceptWithTimeout(DUMMY_SOCKET, DUMMY_MANAGER);
         prankAndAddPauser(DUMMY_PAUSER, chainId);
         vm.prank(DUMMY_PAUSER);
         verifier.Activate(chainId);

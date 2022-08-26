@@ -8,7 +8,6 @@ import "../interfaces/IVerifier.sol";
 // allows an "MANAGER" role to setup "PAUSER"
 contract AcceptWithTimeout is IVerifier {
     // immutables
-    uint256 public immutable timeoutInSeconds;
     address public immutable socket;
     address public immutable manager;
 
@@ -42,17 +41,11 @@ contract AcceptWithTimeout is IVerifier {
         _;
     }
 
-    // TODO: restrict the timeout durations to a few select options
-    constructor(
-        uint256 _timeout,
-        address _socket,
-        address _manager
-    ) {
+    constructor(address _socket, address _manager) {
         require(
             _socket != address(0) || _manager != address(0),
             "invalid addresses"
         );
-        timeoutInSeconds = _timeout;
         socket = _socket;
         manager = _manager;
     }
