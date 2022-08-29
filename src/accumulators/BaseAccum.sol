@@ -8,6 +8,8 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     uint256 internal _nextPacket;
     mapping(uint256 => bytes32) internal _roots;
 
+    error NoPendingPacket();
+
     constructor(address socket_, address notary_) {
         _setSocket(socket_);
         _setNotary(notary_);
@@ -40,7 +42,9 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
         onlyRole(NOTARY_ROLE)
         returns (bytes32, uint256)
     {
+        if (_roots[_nextPacket] == bytes32(0)) revert NoPendingPacket();
         bytes32 root = _roots[_nextPacket];
+
         emit PacketComplete(root, _nextPacket);
         return (root, _nextPacket++);
     }

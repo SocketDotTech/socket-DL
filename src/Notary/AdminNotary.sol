@@ -5,7 +5,7 @@ import "../interfaces/INotary.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
 
-contract Notary is INotary, AccessControl(msg.sender) {
+contract AdminNotary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
     uint256 public immutable _timeoutInSeconds;
     uint256 public immutable _waitTimeInSeconds;
@@ -32,8 +32,8 @@ contract Notary is INotary, AccessControl(msg.sender) {
         bool isFast;
     }
 
-    mapping(uint256 => uint256) private _totalAttestors;
-    mapping(address => AccumDetails) private _accumDetails;
+    mapping(uint256 => uint256) public _totalAttestors;
+    mapping(address => AccumDetails) public _accumDetails;
 
     enum PacketStatus {
         NOT_PROPOSED,
@@ -60,6 +60,8 @@ contract Notary is INotary, AccessControl(msg.sender) {
     error PacketNotChallenged();
 
     error ZeroAddress();
+
+    error RootNotFound();
 
     // TODO: restrict the timeout durations to a few select options
     constructor(
@@ -132,6 +134,14 @@ contract Notary is INotary, AccessControl(msg.sender) {
 
         uint256 remoteChainId = _accumDetails[accumAddress_].remoteChainId;
 
+        // if timed out
+        if (block.timestamp - packetArrivedAt > _timeoutInSeconds)
+            return PacketStatus.TIMED_OUT;
+
+        // if challenged
+        if (_isChallenged[accumAddress_][packetId_])
+            return PacketStatus.CHALLENGED;
+
         // if not 100% confirmed for fast path or consider wait time for slow path
         if (_accumDetails[accumAddress_].isFast) {
             if (
@@ -142,14 +152,6 @@ contract Notary is INotary, AccessControl(msg.sender) {
             if (block.timestamp - packetArrivedAt < _waitTimeInSeconds)
                 return PacketStatus.PROPOSED;
         }
-
-        // if timed out
-        if (block.timestamp - packetArrivedAt > _timeoutInSeconds)
-            return PacketStatus.TIMED_OUT;
-
-        // if challenged
-        if (_isChallenged[accumAddress_][packetId_])
-            return PacketStatus.CHALLENGED;
 
         return PacketStatus.CONFIRMED;
     }
@@ -179,7 +181,6 @@ contract Notary is INotary, AccessControl(msg.sender) {
                 attester
             )
         ) revert InvalidAttester();
-
         emit SignatureSubmitted(accumAddress_, packetId, sigV_, sigR_, sigS_);
     }
 
@@ -257,6 +258,8 @@ contract Notary is INotary, AccessControl(msg.sender) {
     ) external {
         if (!_accumDetails[accumAddress_].isFast) revert NotFastPath();
         if (_isChallenged[accumAddress_][packetId_]) revert PacketChallenged();
+        if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != root_)
+            revert RootNotFound();
 
         address attester = _verifyAndUpdateAttestations(
             sigV_,
@@ -357,6 +360,14 @@ contract Notary is INotary, AccessControl(msg.sender) {
 
         _isAttested[attester][accumAddress_][packetId_] = true;
         _attestations[accumAddress_][packetId_]++;
+    }
+
+    function getConfirmations(address accumAddress_, uint256 packetId_)
+        external
+        view
+        returns (uint256)
+    {
+        return _attestations[accumAddress_][packetId_];
     }
 
     function getRemoteRoot(
