@@ -36,6 +36,9 @@ contract SingleAccumTest is Test {
     }
 
     function testSealPacket() external {
+        vm.expectRevert(BaseAccum.NoPendingPacket.selector);
+        _sealPacket();
+
         _addMessage(_message_0);
         _sealPacket();
         _assertPacketById(_message_0, 0);
