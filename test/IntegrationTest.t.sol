@@ -7,6 +7,8 @@ import "../src/Notary/AdminNotary.sol";
 import "../src/accumulators/SingleAccum.sol";
 import "../src/deaccumulators/SingleDeaccum.sol";
 import "../src/verifiers/AcceptWithTimeout.sol";
+import "../src/utils/SignatureVerifier.sol";
+import "../src/utils/Hasher.sol";
 import "../src/examples/counter.sol";
 
 contract HappyTest is Test {
@@ -18,20 +20,16 @@ contract HappyTest is Test {
     address constant _pauser = address(5);
     bool constant _isFast = false;
 
-    struct Signature {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-
     struct ChainContext {
         uint256 chainId;
         Socket socket__;
-        Notary notary__;
+        AdminNotary notary__;
         IAccumulator accum__;
         IDeaccumulator deaccum__;
         AcceptWithTimeout verifier__;
         Counter counter__;
+        SignatureVerifier sigVerifier__;
+        Hasher hasher__;
     }
 
     struct MessageContext {
@@ -41,7 +39,7 @@ contract HappyTest is Test {
         uint256 nonce;
         bytes32 root;
         uint256 packetId;
-        Signature sig;
+        bytes sig;
     }
 
     ChainContext _a;
@@ -68,7 +66,7 @@ contract HappyTest is Test {
         (
             bytes32 root,
             uint256 packetId,
-            Signature memory sig
+            bytes memory sig
         ) = _getLatestSignature(_a);
         _submitSignatureOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
@@ -85,11 +83,13 @@ contract HappyTest is Test {
 
         hoax(_raju);
         _b.counter__.remoteAddOperation(_a.chainId, amount);
+
         (
             bytes32 root,
             uint256 packetId,
-            Signature memory sig
+            bytes memory sig
         ) = _getLatestSignature(_b);
+
         _submitSignatureOnSrc(_b, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
         _executePayloadOnDst(_b, _a, packetId, 0, payload, proof);
@@ -111,7 +111,7 @@ contract HappyTest is Test {
 
         bytes32 root;
         uint256 packetId;
-        Signature memory sig;
+        bytes memory sig;
 
         hoax(_raju);
         _a.counter__.remoteAddOperation(_b.chainId, addAmount);
@@ -233,7 +233,7 @@ contract HappyTest is Test {
         (
             bytes32 root,
             uint256 packetId,
-            Signature memory sig
+            bytes memory sig
         ) = _getLatestSignature(_a);
         _submitSignatureOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
@@ -249,12 +249,18 @@ contract HappyTest is Test {
     function _deploySocketContracts() private {
         vm.startPrank(_socketOwner);
 
-        // deploy socket
-        _a.socket__ = new Socket(_a.chainId);
-        _b.socket__ = new Socket(_b.chainId);
+        _a.hasher__ = new Hasher();
+        _b.hasher__ = new Hasher();
 
-        _a.notary__ = new Notary(_a.chainId);
-        _b.notary__ = new Notary(_b.chainId);
+        // deploy socket
+        _a.socket__ = new Socket(_a.chainId, address(_a.hasher__));
+        _b.socket__ = new Socket(_b.chainId, address(_b.hasher__));
+
+        _a.sigVerifier__ = new SignatureVerifier();
+        _b.sigVerifier__ = new SignatureVerifier();
+
+        _a.notary__ = new AdminNotary(_a.chainId, address(_a.sigVerifier__));
+        _b.notary__ = new AdminNotary(_b.chainId, address(_b.sigVerifier__));
 
         _a.socket__.setNotary(address(_a.notary__));
         _b.socket__.setNotary(address(_b.notary__));
@@ -355,49 +361,49 @@ contract HappyTest is Test {
         returns (
             bytes32 root,
             uint256 packetId,
-            Signature memory sig
+            bytes memory sig
         )
     {
         (root, packetId) = src_.accum__.getNextPacket();
         bytes32 digest = keccak256(
             abi.encode(src_.chainId, address(src_.accum__), packetId, root)
         );
+
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
             _attesterPrivateKey,
             digest
         );
-        sig = Signature(sigV, sigR, sigS);
+        sig = new bytes(65);
+        bytes1 v32 = bytes1(sigV);
+
+        assembly {
+            mstore(add(sig, 96), v32)
+            mstore(add(sig, 32), sigR)
+            mstore(add(sig, 64), sigS)
+        }
     }
 
-    function _submitSignatureOnSrc(
-        ChainContext storage src_,
-        Signature memory sig_
-    ) private {
+    function _submitSignatureOnSrc(ChainContext storage src_, bytes memory sig_)
+        private
+    {
         hoax(_attester);
-        src_.notary__.submitSignature(
-            sig_.v,
-            sig_.r,
-            sig_.s,
-            address(src_.accum__)
-        );
+        src_.notary__.submitSignature(address(src_.accum__), sig_);
     }
 
     function _submitRootOnDst(
         ChainContext storage src_,
         ChainContext storage dst_,
-        Signature memory sig_,
+        bytes memory sig_,
         uint256 packetId_,
         bytes32 root_
     ) private {
         hoax(_raju);
         dst_.notary__.submitRemoteRoot(
-            sig_.v,
-            sig_.r,
-            sig_.s,
             src_.chainId,
             address(src_.accum__),
             packetId_,
-            root_
+            root_,
+            sig_
         );
     }
 

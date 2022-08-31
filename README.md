@@ -1,5 +1,5 @@
 # Socket DL
-The smart contracts that power the Data Layer of [Socket](https://socket.tech/). Socket DL is a protocol for generic message passing between chains. It has been desinged to be highly configurable so that dapps (plugs) can choose the best tradeoffs for specific usecases.
+The smart contracts that power the Data Layer of [Socket](https://socket.tech/). Socket DL is a protocol for generic message passing between chains. It has been designed to be highly configurable so that dapps (plugs) can choose the best tradeoffs for specific use cases.
 
 ## Local Development
 
@@ -9,7 +9,7 @@ The smart contracts that power the Data Layer of [Socket](https://socket.tech/).
 - Yarn
 
 ### Setup
-Clone project and install dependancies.
+Clone project and install dependencies.
 ```bash=
 # clone the repository
 git clone https://github.com/SocketDotTech/socket-dl
@@ -50,6 +50,15 @@ Tests are run using the [Forge](https://github.com/foundry-rs/foundry/tree/maste
 ```bash=
 forge test
 ```
+
+### Deploy
+Deployments use [Hardhat](https://github.com/NomicFoundation/hardhat)
+
+Local deployments:
+```bash=
+npx hardhat run scripts/deploy.ts
+```
+- This will store addresses in deployments/ folder in root which are used to configure the contracts later for each destination chain.
 
 ### IDE Setup
 It is recommended to setup the ide to work with solidity development. In case of VSCode, [Solidity](https://marketplace.visualstudio.com/items?itemName=JuanBlanco.solidity) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) plugins should work best when configured using following settings -

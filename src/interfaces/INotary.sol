@@ -22,12 +22,12 @@ interface INotary {
 
     event MinBondAmountSet(uint256 amount);
 
+    event SignatureVerifierSet(address verifier);
+
     event SignatureSubmitted(
         address indexed accumAddress,
         uint256 indexed packetId,
-        uint8 sigV,
-        bytes32 sigR,
-        bytes32 sigS
+        bytes signature
     );
 
     event RemoteRootSubmitted(
@@ -65,30 +65,22 @@ interface INotary {
 
     function claimBond() external;
 
-    function submitSignature(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
-        address accumAddress_
-    ) external;
+    function submitSignature(address accumAddress_, bytes calldata signature_)
+        external;
 
     function challengeSignature(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         address accumAddress_,
         bytes32 root_,
-        uint256 packetId_
+        uint256 packetId_,
+        bytes calldata signature_
     ) external;
 
     function submitRemoteRoot(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,
-        bytes32 root_
+        bytes32 root_,
+        bytes calldata signature_
     ) external;
 
     function getRemoteRoot(
