@@ -4,11 +4,13 @@ pragma solidity ^0.8.0;
 import "../interfaces/INotary.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
+import "../interfaces/ISignatureVerifier.sol";
 
 contract AdminNotary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
     uint256 public immutable _timeoutInSeconds;
     uint256 public immutable _waitTimeInSeconds;
+    ISignatureVerifier private _signatureVerifier;
 
     // remoteChainId => accumAddress => packetId => root
     mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
@@ -65,6 +67,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     // TODO: restrict the timeout durations to a few select options
     constructor(
+        address signatureVerifier_,
         uint256 chainId_,
         uint256 timeoutInSeconds_,
         uint256 waitTimeInSeconds_
@@ -72,6 +75,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         _chainId = chainId_;
         _timeoutInSeconds = timeoutInSeconds_;
         _waitTimeInSeconds = waitTimeInSeconds_;
+        _signatureVerifier = ISignatureVerifier(signatureVerifier_);
     }
 
     function addBond() external payable override {
@@ -156,23 +160,30 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         return PacketStatus.CONFIRMED;
     }
 
-    function submitSignature(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
-        address accumAddress_
-    ) external override {
+    function signatureVerifier() external view returns (address) {
+        return address(_signatureVerifier);
+    }
+
+    function setSignatureVerifier(address signatureVerifier_)
+        external
+        onlyOwner
+    {
+        _setSignatureVerifier(signatureVerifier_);
+    }
+
+    function submitSignature(address accumAddress_, bytes calldata signature_)
+        external
+        override
+    {
         (bytes32 root, uint256 packetId) = IAccumulator(accumAddress_)
             .sealPacket();
 
         address attester = _getAttester(
-            sigV_,
-            sigR_,
-            sigS_,
             _chainId,
             accumAddress_,
             packetId,
-            root
+            root,
+            signature_
         );
 
         if (
@@ -181,27 +192,22 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
                 attester
             )
         ) revert InvalidAttester();
-        emit SignatureSubmitted(accumAddress_, packetId, sigV_, sigR_, sigS_);
+        emit SignatureSubmitted(accumAddress_, packetId, signature_);
     }
 
     function challengeSignature(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         address accumAddress_,
         bytes32 root_,
-        uint256 packetId_
+        uint256 packetId_,
+        bytes calldata signature_
     ) external override {
         address attester = _getAttester(
-            sigV_,
-            sigR_,
-            sigS_,
             _chainId,
             accumAddress_,
             packetId_,
-            root_
+            root_,
+            signature_
         );
-
         bytes32 root = IAccumulator(accumAddress_).getRootById(packetId_);
 
         if (root == root_) {
@@ -216,25 +222,21 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     function submitRemoteRoot(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,
-        bytes32 root_
+        bytes32 root_,
+        bytes calldata signature_
     ) external override {
         if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
             revert RemoteRootAlreadySubmitted();
 
         _verifyAndUpdateAttestations(
-            sigV_,
-            sigR_,
-            sigS_,
             remoteChainId_,
             accumAddress_,
             packetId_,
-            root_
+            root_,
+            signature_
         );
 
         _remoteRoots[remoteChainId_][accumAddress_][packetId_] = root_;
@@ -248,13 +250,11 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     function confirmRoot(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,
-        bytes32 root_
+        bytes32 root_,
+        bytes calldata signature_
     ) external {
         if (!_accumDetails[accumAddress_].isFast) revert NotFastPath();
         if (_isChallenged[accumAddress_][packetId_]) revert PacketChallenged();
@@ -262,36 +262,30 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             revert RootNotFound();
 
         address attester = _verifyAndUpdateAttestations(
-            sigV_,
-            sigR_,
-            sigS_,
             remoteChainId_,
             accumAddress_,
             packetId_,
-            root_
+            root_,
+            signature_
         );
 
         emit RootConfirmed(attester, accumAddress_, packetId_);
     }
 
     function challengePacketOnDest(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,
-        bytes32 root_
+        bytes32 root_,
+        bytes calldata signature_
     ) external {
         if (_isChallenged[accumAddress_][packetId_]) revert PacketChallenged();
         address attester = _getAttester(
-            sigV_,
-            sigR_,
-            sigS_,
             remoteChainId_,
             accumAddress_,
             packetId_,
-            root_
+            root_,
+            signature_
         );
 
         bytes32 root = IAccumulator(accumAddress_).getRootById(packetId_);
@@ -319,37 +313,31 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     function _getAttester(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,
-        bytes32 root_
-    ) private pure returns (address attester) {
+        bytes32 root_,
+        bytes calldata signature_
+    ) private returns (address attester) {
         bytes32 digest = keccak256(
             abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
         );
-        attester = ecrecover(digest, sigV_, sigR_, sigS_);
+        attester = _signatureVerifier.recoverSigner(digest, signature_);
     }
 
     function _verifyAndUpdateAttestations(
-        uint8 sigV_,
-        bytes32 sigR_,
-        bytes32 sigS_,
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,
-        bytes32 root_
+        bytes32 root_,
+        bytes calldata signature_
     ) private returns (address attester) {
         attester = _getAttester(
-            sigV_,
-            sigR_,
-            sigS_,
             remoteChainId_,
             accumAddress_,
             packetId_,
-            root_
+            root_,
+            signature_
         );
 
         if (!_hasRole(_attesterRole(remoteChainId_), attester))
@@ -398,11 +386,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         _totalAttestors[remoteChainId_]--;
     }
 
-    function _attesterRole(uint256 remoteChainId_)
-        private
-        pure
-        returns (bytes32)
-    {
-        return bytes32(remoteChainId_);
+    function _setSignatureVerifier(address signatureVerifier_) private {
+        _signatureVerifier = ISignatureVerifier(signatureVerifier_);
+        emit SignatureVerifierSet(signatureVerifier_);
+    }
+
+    function _attesterRole(uint256 chainId_) internal pure returns (bytes32) {
+        return bytes32(chainId_);
     }
 }

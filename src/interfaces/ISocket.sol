@@ -21,7 +21,7 @@ interface ISocket {
 
     error InvalidNonce();
 
-    function outbound(uint256 remoteChainId, bytes calldata payload) external;
+    function outbound(uint256 remoteChainId_, bytes calldata payload_) external;
 
     function execute(
         uint256 remoteChainId_,

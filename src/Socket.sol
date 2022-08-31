@@ -8,6 +8,7 @@ import "./interfaces/IDeaccumulator.sol";
 import "./interfaces/IVerifier.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/INotary.sol";
+import "./interfaces/IHasher.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
     // localPlug => remoteChainId => OutboundConfig
@@ -29,15 +30,25 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     mapping(address => mapping(uint256 => uint256)) private _nextNonces;
 
     INotary private _notary;
+    IHasher private _hasher;
 
     error NotAttested();
 
-    constructor(uint256 chainId_) {
+    constructor(uint256 chainId_, address hasher_) {
+        _setHasher(hasher_);
         _chainId = chainId_;
     }
 
-    function setNotary(address notary_) public onlyOwner {
+    function setNotary(address notary_) external onlyOwner {
         _notary = INotary(notary_);
+    }
+
+    function setHasher(address hasher_) external onlyOwner {
+        _setHasher(hasher_);
+    }
+
+    function hasher() external view returns (address) {
+        return address(_hasher);
     }
 
     function outbound(uint256 remoteChainId_, bytes calldata payload_)
@@ -48,7 +59,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
-        bytes32 packedMessage = _packMessage(
+        bytes32 packedMessage = _hasher.packMessage(
             _chainId,
             msg.sender,
             remoteChainId_,
@@ -82,7 +93,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
 
-        bytes32 packedMessage = _packMessage(
+        bytes32 packedMessage = _hasher.packMessage(
             remoteChainId_,
             config.remotePlug,
             _chainId,
@@ -125,27 +136,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         ) revert DappVerificationFailed();
 
         IPlug(localPlug_).inbound(payload_);
-    }
-
-    function _packMessage(
-        uint256 srcChainId,
-        address srcPlug,
-        uint256 dstChainId,
-        address dstPlug,
-        uint256 nonce,
-        bytes calldata payload
-    ) private pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    srcChainId,
-                    srcPlug,
-                    dstChainId,
-                    dstPlug,
-                    nonce,
-                    payload
-                )
-            );
     }
 
     function dropMessages(uint256 remoteChainId_, uint256 count_) external {
@@ -194,5 +184,9 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         config.remotePlug = remotePlug_;
 
         // TODO: emit event
+    }
+
+    function _setHasher(address hasher_) private {
+        _hasher = IHasher(hasher_);
     }
 }

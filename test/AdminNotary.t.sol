@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 import "../src/Notary/AdminNotary.sol";
 import "../src/interfaces/IAccumulator.sol";
+import "../src/utils/SignatureVerifier.sol";
 
 contract AdminNotaryTest is Test {
     address constant _owner = address(1);
@@ -23,15 +24,18 @@ contract AdminNotaryTest is Test {
     bool constant _isFast = false;
 
     AdminNotary _notary;
+    SignatureVerifier _sigVerifier;
     uint256 private _timeoutInSeconds = 100;
     uint256 private _waitTimeInSeconds = 10;
 
     function setUp() external {
         _attester = vm.addr(_attesterPrivateKey);
         _altAttester = vm.addr(_altAttesterPrivateKey);
+        _sigVerifier = new SignatureVerifier();
 
         hoax(_owner);
         _notary = new AdminNotary(
+            address(_sigVerifier),
             _chainId,
             _timeoutInSeconds,
             _waitTimeInSeconds
@@ -57,7 +61,7 @@ contract AdminNotaryTest is Test {
         _notary.reduceBond(reduceAmount);
     }
 
-    function testUnbondattester() external {
+    function testUnbondAttester() external {
         hoax(_attester);
         vm.expectRevert(AdminNotary.Restricted.selector);
         _notary.unbondAttester();
@@ -115,23 +119,17 @@ contract AdminNotaryTest is Test {
         bytes32 digest = keccak256(
             abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _attesterPrivateKey,
-            digest
-        );
 
         // status not proposed
         assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 0);
 
         hoax(_raju);
         _notary.submitRemoteRoot(
-            sigV,
-            sigR,
-            sigS,
             _remoteChainId,
             _accum,
             _packetId,
-            _root
+            _root,
+            _getSignature(digest, _attesterPrivateKey)
         );
 
         // status proposed
@@ -140,21 +138,15 @@ contract AdminNotaryTest is Test {
         bytes32 altDigest = keccak256(
             abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
-        (uint8 altSigV, bytes32 altSigR, bytes32 altSigS) = vm.sign(
-            _altAttesterPrivateKey,
-            altDigest
-        );
 
         hoax(_raju);
         vm.expectRevert(AdminNotary.NotFastPath.selector);
         _notary.confirmRoot(
-            altSigV,
-            altSigR,
-            altSigS,
             _remoteChainId,
             _accum,
             _packetId,
-            _root
+            _root,
+            _getSignature(altDigest, _altAttesterPrivateKey)
         );
 
         skip(_waitTimeInSeconds);
@@ -179,45 +171,28 @@ contract AdminNotaryTest is Test {
         bytes32 digest = keccak256(
             abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _attesterPrivateKey,
-            digest
-        );
-
         // status not-proposed
         assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 0);
 
         hoax(_raju);
         _notary.submitRemoteRoot(
-            sigV,
-            sigR,
-            sigS,
             _remoteChainId,
             _accum,
             _packetId,
-            _root
+            _root,
+            _getSignature(digest, _attesterPrivateKey)
         );
 
         // status proposed
         assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 1);
 
-        bytes32 altDigest = keccak256(
-            abi.encode(_remoteChainId, _accum, _packetId, _root)
-        );
-        (uint8 altSigV, bytes32 altSigR, bytes32 altSigS) = vm.sign(
-            _altAttesterPrivateKey,
-            altDigest
-        );
-
         hoax(_raju);
         _notary.confirmRoot(
-            altSigV,
-            altSigR,
-            altSigS,
             _remoteChainId,
             _accum,
             _packetId,
-            _root
+            _root,
+            _getSignature(digest, _altAttesterPrivateKey)
         );
 
         // status confirmed
@@ -240,23 +215,19 @@ contract AdminNotaryTest is Test {
         bytes32 digest = keccak256(
             abi.encode(_chainId, _accum, _packetId, _root)
         );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _attesterPrivateKey,
-            digest
-        );
 
         hoax(_attester);
-        _notary.submitSignature(sigV, sigR, sigS, _accum);
-
-        // submit signature with non attester role
-        (uint8 falseSigV, bytes32 falseSigR, bytes32 falseSigS) = vm.sign(
-            _altAttesterPrivateKey,
-            digest
+        _notary.submitSignature(
+            _accum,
+            _getSignature(digest, _attesterPrivateKey)
         );
 
         hoax(_attester);
         vm.expectRevert(INotary.InvalidAttester.selector);
-        _notary.submitSignature(falseSigV, falseSigR, falseSigR, _accum);
+        _notary.submitSignature(
+            _accum,
+            _getSignature(digest, _altAttesterPrivateKey)
+        );
     }
 
     function testChallengeSignature() external {
@@ -275,30 +246,23 @@ contract AdminNotaryTest is Test {
         bytes32 digest = keccak256(
             abi.encode(_chainId, _accum, _packetId, _root)
         );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _attesterPrivateKey,
-            digest
-        );
 
         hoax(_attester);
-        _notary.submitSignature(sigV, sigR, sigS, _accum);
+        _notary.submitSignature(
+            _accum,
+            _getSignature(digest, _attesterPrivateKey)
+        );
 
         bytes32 altDigest = keccak256(
             abi.encode(_chainId, _accum, _packetId, _altRoot)
         );
-        (uint8 altSigV, bytes32 altSigR, bytes32 altSigS) = vm.sign(
-            _attesterPrivateKey,
-            altDigest
-        );
 
         hoax(_raju);
         _notary.challengeSignature(
-            altSigV,
-            altSigR,
-            altSigS,
             _accum,
             _altRoot,
-            _packetId
+            _packetId,
+            _getSignature(altDigest, _attesterPrivateKey)
         );
     }
 
@@ -306,21 +270,15 @@ contract AdminNotaryTest is Test {
         bytes32 digest = keccak256(
             abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _attesterPrivateKey,
-            digest
-        );
 
         hoax(_raju);
         vm.expectRevert(INotary.InvalidAttester.selector);
         _notary.submitRemoteRoot(
-            sigV,
-            sigR,
-            sigS,
             _remoteChainId,
             _accum,
             _packetId,
-            _root
+            _root,
+            _getSignature(digest, _attesterPrivateKey)
         );
 
         hoax(_owner);
@@ -328,13 +286,11 @@ contract AdminNotaryTest is Test {
 
         hoax(_raju);
         _notary.submitRemoteRoot(
-            sigV,
-            sigR,
-            sigS,
             _remoteChainId,
             _accum,
             _packetId,
-            _root
+            _root,
+            _getSignature(digest, _attesterPrivateKey)
         );
 
         assertEq(
@@ -361,13 +317,11 @@ contract AdminNotaryTest is Test {
         hoax(_raju);
         vm.expectRevert(INotary.RemoteRootAlreadySubmitted.selector);
         _notary.submitRemoteRoot(
-            sigV,
-            sigR,
-            sigS,
             _remoteChainId,
             _accum,
             _packetId,
-            _root
+            _root,
+            _getSignature(digest, _attesterPrivateKey)
         );
     }
 
@@ -375,127 +329,33 @@ contract AdminNotaryTest is Test {
         bytes32 digest = keccak256(
             abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _attesterPrivateKey,
-            digest
-        );
-
-        hoax(_raju);
-        vm.expectRevert(INotary.InvalidAttester.selector);
-        _notary.submitRemoteRoot(
-            sigV,
-            sigR,
-            sigS,
-            _remoteChainId,
-            _accum,
-            _packetId,
-            _root
-        );
-    }
-
-    function testChallengePacketOnDest() external {
-        bytes32 root = IAccumulator(_accum).getRootById(_packetId);
 
         hoax(_owner);
         _notary.grantAttesterRole(_remoteChainId, _attester);
 
-        bytes32 digest = keccak256(
-            abi.encode(_remoteChainId, _accum, _packetId, root)
-        );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _attesterPrivateKey,
-            digest
-        );
-
         hoax(_raju);
         _notary.submitRemoteRoot(
-            sigV,
-            sigR,
-            sigS,
             _remoteChainId,
             _accum,
             _packetId,
-            root
+            _root,
+            _getSignature(digest, _attesterPrivateKey)
         );
-
-        hoax(_owner);
-        vm.expectRevert(AdminNotary.PacketNotChallenged.selector);
-        _notary.acceptChallengedPacket(_accum, _packetId);
-
-        hoax(_raju);
-        _notary.challengePacketOnDest(
-            sigV,
-            sigR,
-            sigS,
-            _remoteChainId,
-            _accum,
-            _packetId,
-            root
-        );
-
-        assertTrue(_notary._isChallenged(_accum, _packetId));
-
-        // status proposed
-        assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 2);
-
-        hoax(_raju);
-        vm.expectRevert(Ownable.OnlyOwner.selector);
-        _notary.acceptChallengedPacket(_accum, _packetId);
-
-        hoax(_owner);
-        _notary.acceptChallengedPacket(_accum, _packetId);
-
-        assertFalse(_notary._isChallenged(_accum, _packetId));
     }
 
-    function testAcceptChallengedPacket() external {
-        bytes32 root = IAccumulator(_accum).getRootById(_packetId);
+    function _getSignature(bytes32 digest, uint256 privateKey_)
+        internal
+        returns (bytes memory sig)
+    {
+        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(privateKey_, digest);
 
-        hoax(_owner);
-        _notary.grantAttesterRole(_remoteChainId, _attester);
+        sig = new bytes(65);
+        bytes1 v32 = bytes1(sigV);
 
-        bytes32 digest = keccak256(
-            abi.encode(_remoteChainId, _accum, _packetId, root)
-        );
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _attesterPrivateKey,
-            digest
-        );
-
-        hoax(_raju);
-        _notary.submitRemoteRoot(
-            sigV,
-            sigR,
-            sigS,
-            _remoteChainId,
-            _accum,
-            _packetId,
-            root
-        );
-
-        hoax(_raju);
-        _notary.challengePacketOnDest(
-            sigV,
-            sigR,
-            sigS,
-            _remoteChainId,
-            _accum,
-            _packetId,
-            root
-        );
-
-        assertTrue(_notary._isChallenged(_accum, _packetId));
-
-        hoax(_raju);
-        vm.expectRevert(AdminNotary.PacketChallenged.selector);
-        _notary.challengePacketOnDest(
-            sigV,
-            sigR,
-            sigS,
-            _remoteChainId,
-            _accum,
-            _packetId,
-            root
-        );
+        assembly {
+            mstore(add(sig, 96), v32)
+            mstore(add(sig, 32), sigR)
+            mstore(add(sig, 64), sigS)
+        }
     }
 }
