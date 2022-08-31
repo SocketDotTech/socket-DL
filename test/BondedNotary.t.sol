@@ -21,7 +21,7 @@ contract SocketTest is Test {
     uint256 constant _chainId = 0x2013AA263;
     uint256 constant _remoteChainId = 0x2013AA264;
 
-    Notary _notary;
+    BondedNotary _notary;
     SignatureVerifier _sigVerifier;
 
     function setUp() external {
@@ -29,7 +29,7 @@ contract SocketTest is Test {
         _sigVerifier = new SignatureVerifier();
 
         hoax(_owner);
-        _notary = new Notary(
+        _notary = new BondedNotary(
             _minBondAmount,
             _bondClaimDelay,
             _chainId,

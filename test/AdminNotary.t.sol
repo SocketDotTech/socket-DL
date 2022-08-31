@@ -20,7 +20,7 @@ contract SocketTest is Test {
     uint256 constant _remoteChainId = 0x2013AA264;
     bytes32 constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
 
-    Notary _notary;
+    AdminNotary _notary;
     SignatureVerifier _sigVerifier;
 
     function setUp() external {
@@ -28,7 +28,7 @@ contract SocketTest is Test {
         _sigVerifier = new SignatureVerifier();
 
         hoax(_owner);
-        _notary = new Notary(_chainId, address(_sigVerifier));
+        _notary = new AdminNotary(_chainId, address(_sigVerifier));
     }
 
     function testDeployment() external {
@@ -39,26 +39,26 @@ contract SocketTest is Test {
     function testAddBond() external {
         uint256 amount = 100e18;
         hoax(_signer);
-        vm.expectRevert(Notary.Restricted.selector);
+        vm.expectRevert(AdminNotary.Restricted.selector);
         _notary.addBond{value: amount}();
     }
 
     function testReduceAmount() external {
         uint256 reduceAmount = 10e18;
         hoax(_signer);
-        vm.expectRevert(Notary.Restricted.selector);
+        vm.expectRevert(AdminNotary.Restricted.selector);
         _notary.reduceBond(reduceAmount);
     }
 
     function testUnbondSigner() external {
         hoax(_signer);
-        vm.expectRevert(Notary.Restricted.selector);
+        vm.expectRevert(AdminNotary.Restricted.selector);
         _notary.unbondSigner();
     }
 
     function testClaimBond() external {
         hoax(_signer);
-        vm.expectRevert(Notary.Restricted.selector);
+        vm.expectRevert(AdminNotary.Restricted.selector);
         _notary.claimBond();
     }
 

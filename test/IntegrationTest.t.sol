@@ -22,7 +22,7 @@ contract HappyTest is Test {
     struct ChainContext {
         uint256 chainId;
         Socket socket__;
-        Notary notary__;
+        AdminNotary notary__;
         IAccumulator accum__;
         IDeaccumulator deaccum__;
         AcceptWithTimeout verifier__;
@@ -258,8 +258,8 @@ contract HappyTest is Test {
         _a.sigVerifier__ = new SignatureVerifier();
         _b.sigVerifier__ = new SignatureVerifier();
 
-        _a.notary__ = new Notary(_a.chainId, address(_a.sigVerifier__));
-        _b.notary__ = new Notary(_b.chainId, address(_b.sigVerifier__));
+        _a.notary__ = new AdminNotary(_a.chainId, address(_a.sigVerifier__));
+        _b.notary__ = new AdminNotary(_b.chainId, address(_b.sigVerifier__));
 
         _a.socket__.setNotary(address(_a.notary__));
         _b.socket__.setNotary(address(_b.notary__));
