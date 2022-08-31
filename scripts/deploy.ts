@@ -8,8 +8,6 @@ import { deployContractWithoutArgs, getChainId, storeAddresses } from "../script
 import { deployAccumulator, deployCounter, deployNotary, deploySocket, deployVerifier } from "../scripts/contracts";
 import { signerAddress } from "../scripts/config";
 
-const ATTESTER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("ATTESTER_ROLE"));
-
 export const main = async () => {
   try {
     // assign deployers
@@ -37,7 +35,7 @@ export const main = async () => {
 
     // configure
     const chainId = await getChainId();
-    await notary.connect(socketSigner).grantRole(ATTESTER_ROLE, signerAddress[chainId]);
+    await notary.connect(socketSigner).grantAttesterRole(/* remoteChainId */, signerAddress[chainId]);
 
     const addresses = {
       hasher: hasher.address,

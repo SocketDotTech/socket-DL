@@ -14,11 +14,12 @@ import "../src/examples/counter.sol";
 contract HappyTest is Test {
     address constant _socketOwner = address(1);
     address constant _counterOwner = address(2);
-    uint256 constant _signerPrivateKey = uint256(3);
-    address _signer;
+    uint256 constant _attesterPrivateKey = uint256(3);
+    address _attester;
     address constant _raju = address(4);
     address constant _pauser = address(5);
-    bytes32 public constant ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
+    bool constant _isFast = false;
+
     struct ChainContext {
         uint256 chainId;
         Socket socket__;
@@ -48,7 +49,7 @@ contract HappyTest is Test {
         _a.chainId = 0x2013AA263;
         _b.chainId = 0x2013AA264;
         _deploySocketContracts();
-        _initSigner();
+        _initAttester();
         _deployPlugContracts();
         _configPlugContracts(true);
         _initPausers();
@@ -274,6 +275,9 @@ contract HappyTest is Test {
             address(_b.notary__)
         );
 
+        _a.notary__.addAccumulator(address(_a.accum__), _b.chainId, _isFast);
+        _b.notary__.addAccumulator(address(_b.accum__), _a.chainId, _isFast);
+
         // deploy deaccumulators
         _a.deaccum__ = new SingleDeaccum();
         _b.deaccum__ = new SingleDeaccum();
@@ -281,18 +285,15 @@ contract HappyTest is Test {
         vm.stopPrank();
     }
 
-    function _initSigner() private {
-        // deduce signer address from private key
-        _signer = vm.addr(_signerPrivateKey);
+    function _initAttester() private {
+        // deduce attester address from private key
+        _attester = vm.addr(_attesterPrivateKey);
 
         vm.startPrank(_socketOwner);
 
-        _a.notary__.grantRole(ATTESTER_ROLE, _signer);
-        _b.notary__.grantRole(ATTESTER_ROLE, _signer);
-
-        // grant signer role
-        _a.notary__.grantSignerRole(_b.chainId, _signer);
-        _b.notary__.grantSignerRole(_a.chainId, _signer);
+        // grant attester role
+        _a.notary__.grantAttesterRole(_b.chainId, _attester);
+        _b.notary__.grantAttesterRole(_a.chainId, _attester);
 
         vm.stopPrank();
     }
@@ -369,7 +370,7 @@ contract HappyTest is Test {
         );
 
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _signerPrivateKey,
+            _attesterPrivateKey,
             digest
         );
         sig = new bytes(65);
@@ -385,7 +386,7 @@ contract HappyTest is Test {
     function _submitSignatureOnSrc(ChainContext storage src_, bytes memory sig_)
         private
     {
-        hoax(_signer);
+        hoax(_attester);
         src_.notary__.submitSignature(address(src_.accum__), sig_);
     }
 
@@ -419,7 +420,7 @@ contract HappyTest is Test {
             src_.chainId,
             address(dst_.counter__),
             nonce_,
-            _signer,
+            _attester,
             address(src_.accum__),
             packetId_,
             payload_,

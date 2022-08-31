@@ -12,16 +12,16 @@ import "../src/utils/SignatureVerifier.sol";
 import "../src/utils/Hasher.sol";
 
 contract PingPongTest is Test {
-    bytes32 private constant _ATTESTER_ROLE = keccak256("ATTESTER_ROLE");
     bytes32 private constant _PING = keccak256("PING");
     bytes32 private constant _PONG = keccak256("PONG");
-    uint256 private constant _SIGNER_PRIVATE_KEY = uint256(3);
+    uint256 private constant _attesterPrivateKey = uint256(3);
 
     address private constant _socketOwner = address(1);
     address private constant _counterOwner = address(2);
     address private constant _raju = address(4);
     address private constant _pauser = address(5);
-    address private _signer;
+    address private _attester;
+    bool private _isFast = false;
 
     bytes private constant _PROOF = abi.encode(0);
     bytes private _payloadPing;
@@ -56,7 +56,7 @@ contract PingPongTest is Test {
         _a.chainId = 0x2013AA263;
         _b.chainId = 0x2013AA264;
         _deploySocketContracts();
-        _initSigner();
+        _initAttester();
         _deployPlugContracts();
         _configPlugContracts(true);
         _initPausers();
@@ -139,6 +139,9 @@ contract PingPongTest is Test {
             address(_b.notary__)
         );
 
+        _a.notary__.addAccumulator(address(_a.accum__), _b.chainId, _isFast);
+        _b.notary__.addAccumulator(address(_b.accum__), _a.chainId, _isFast);
+
         // deploy deaccumulators
         _a.deaccum__ = new SingleDeaccum();
         _b.deaccum__ = new SingleDeaccum();
@@ -146,18 +149,15 @@ contract PingPongTest is Test {
         vm.stopPrank();
     }
 
-    function _initSigner() private {
-        // deduce signer address from private key
-        _signer = vm.addr(_SIGNER_PRIVATE_KEY);
+    function _initAttester() private {
+        // deduce attester address from private key
+        _attester = vm.addr(_attesterPrivateKey);
 
         vm.startPrank(_socketOwner);
 
-        _a.notary__.grantRole(_ATTESTER_ROLE, _signer);
-        _b.notary__.grantRole(_ATTESTER_ROLE, _signer);
-
-        // grant signer role
-        _a.notary__.grantSignerRole(_b.chainId, _signer);
-        _b.notary__.grantSignerRole(_a.chainId, _signer);
+        // grant attester role
+        _a.notary__.grantAttesterRole(_b.chainId, _attester);
+        _b.notary__.grantAttesterRole(_a.chainId, _attester);
 
         vm.stopPrank();
     }
@@ -233,7 +233,7 @@ contract PingPongTest is Test {
             abi.encode(src_.chainId, address(src_.accum__), packetId, root)
         );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _SIGNER_PRIVATE_KEY,
+            _attesterPrivateKey,
             digest
         );
 
@@ -250,7 +250,7 @@ contract PingPongTest is Test {
     function _submitSignatureOnSrc(ChainContext storage src_, bytes memory sig_)
         private
     {
-        hoax(_signer);
+        hoax(_attester);
         src_.notary__.submitSignature(address(src_.accum__), sig_);
     }
 
@@ -284,7 +284,7 @@ contract PingPongTest is Test {
             src_.chainId,
             address(dst_.messenger__),
             nonce_,
-            _signer,
+            _attester,
             address(src_.accum__),
             packetId_,
             payload_,

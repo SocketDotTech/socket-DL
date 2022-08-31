@@ -81,7 +81,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         uint256 remoteChainId_,
         address localPlug_,
         uint256 nonce_,
-        address signer_,
+        address attester_,
         address remoteAccum_,
         uint256 packetId_,
         bytes calldata payload_,
@@ -123,7 +123,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
         if (
             !IVerifier(config.verifier).verifyRoot(
-                signer_,
+                attester_,
                 remoteChainId_,
                 remoteAccum_,
                 packetId_,

@@ -32,7 +32,7 @@ export const main = async () => {
     const deaccum = await getInstance("SingleDeaccum", srcConfig["deaccum"]);
     const verifier = await getInstance("AcceptWithTimeout", srcConfig["verifier"]);
 
-    await notary.connect(socketSigner).grantSignerRole(destChainId, signerAddress[srcChainId]);
+    await notary.connect(socketSigner).grantAttesterRole(destChainId, signerAddress[srcChainId]);
     console.log(`Granted ${signerAddress[srcChainId]} role for ${destChainId} chain id!`)
 
     await counter.connect(counterSigner).setSocketConfig(
