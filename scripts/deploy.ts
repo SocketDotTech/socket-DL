@@ -35,7 +35,7 @@ export const main = async () => {
 
     // configure
     const chainId = await getChainId();
-    await notary.connect(socketSigner).grantAttesterRole(/* remoteChainId */, signerAddress[chainId]);
+    await socket.connect(socketSigner).setNotary(notary.address);
 
     const addresses = {
       hasher: hasher.address,
