@@ -30,7 +30,7 @@ contract SingleAccumTest is Test {
     }
 
     function testAddMessage() external {
-        _addMessage(_message_0);
+        _addPackedMessage(_message_0);
         _assertPacketById(_message_0, 0);
         _assertNextPacket(_message_0, 0);
     }
@@ -39,7 +39,7 @@ contract SingleAccumTest is Test {
         vm.expectRevert(BaseAccum.NoPendingPacket.selector);
         _sealPacket();
 
-        _addMessage(_message_0);
+        _addPackedMessage(_message_0);
         _sealPacket();
         _assertPacketById(_message_0, 0);
         _assertPacketById(bytes32(0), 1);
@@ -47,17 +47,17 @@ contract SingleAccumTest is Test {
     }
 
     function testAddWithoutSeal() external {
-        _addMessage(_message_0);
+        _addPackedMessage(_message_0);
         vm.expectRevert(SingleAccum.PendingPacket.selector);
-        _addMessage(_message_1);
+        _addPackedMessage(_message_1);
     }
 
     function testAddMessageMultiple() external {
-        _addMessage(_message_0);
+        _addPackedMessage(_message_0);
         _sealPacket();
-        _addMessage(_message_1);
+        _addPackedMessage(_message_1);
         _sealPacket();
-        _addMessage(_message_2);
+        _addPackedMessage(_message_2);
         _sealPacket();
 
         _assertPacketById(_message_0, 0);
@@ -76,11 +76,11 @@ contract SingleAccumTest is Test {
             )
         );
         hoax(_raju);
-        _sa.addMessage(_message_0);
+        _sa.addPackedMessage(_message_0);
     }
 
     function testSealPacketByRaju() external {
-        _addMessage(_message_0);
+        _addPackedMessage(_message_0);
         vm.expectRevert(
             abi.encodeWithSelector(
                 AccessControl.NoPermit.selector,
@@ -102,9 +102,9 @@ contract SingleAccumTest is Test {
         assertEq(root, root_, "Root Invalid");
     }
 
-    function _addMessage(bytes32 packedMessage) private {
+    function _addPackedMessage(bytes32 packedMessage) private {
         hoax(_socket);
-        _sa.addMessage(packedMessage);
+        _sa.addPackedMessage(packedMessage);
     }
 
     function _sealPacket() private {

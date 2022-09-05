@@ -15,7 +15,7 @@ abstract contract IAccumulator {
     event PacketComplete(bytes32 rootHash, uint256 packetId);
 
     // caller only Socket
-    function addMessage(bytes32 packedMessage) external virtual;
+    function addPackedMessage(bytes32 packedMessage) external virtual;
 
     function getNextPacket() external view virtual returns (bytes32, uint256);
 

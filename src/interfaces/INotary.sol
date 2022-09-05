@@ -2,35 +2,15 @@
 pragma solidity ^0.8.0;
 
 interface INotary {
-    event BondAdded(
-        address indexed attester,
-        uint256 addAmount, // assuming native token
-        uint256 newBond
-    );
-
-    event BondReduced(
-        address indexed attester,
-        uint256 reduceAmount,
-        uint256 newBond
-    );
-
-    event Unbonded(address indexed attester, uint256 amount, uint256 claimTime);
-
-    event BondClaimed(address indexed attester, uint256 amount);
-
-    event BondClaimDelaySet(uint256 delay);
-
-    event MinBondAmountSet(uint256 amount);
-
     event SignatureVerifierSet(address verifier);
 
-    event SignatureSubmitted(
+    event PacketVerifiedAndSealed(
         address indexed accumAddress,
         uint256 indexed packetId,
         bytes signature
     );
 
-    event RemoteRootSubmitted(
+    event Proposed(
         uint256 indexed remoteChainId,
         address indexed accumAddress,
         uint256 indexed packetId,
@@ -45,13 +25,12 @@ interface INotary {
         uint256 rewardAmount
     );
 
-    event RevertChallengedPacket(
+    event PacketUnpaused(
         address indexed accumAddress,
         uint256 indexed packetId
     );
 
-    event PacketChallengedOnDest(
-        address indexed attester,
+    event PacketPaused(
         address indexed accumAddress,
         uint256 indexed packetId,
         address challenger
@@ -63,27 +42,11 @@ interface INotary {
         uint256 indexed packetId
     );
 
-    error InvalidBondReduce();
-
-    error UnbondInProgress();
-
-    error ClaimTimeLeft();
-
-    error InvalidBond();
-
     error InvalidAttester();
 
-    error RemoteRootAlreadySubmitted();
+    error AlreadyProposed();
 
-    function addBond() external payable;
-
-    function reduceBond(uint256 amount) external;
-
-    function unbondAttester() external;
-
-    function claimBond() external;
-
-    function submitSignature(address accumAddress_, bytes calldata signature_)
+    function verifyAndSeal(address accumAddress_, bytes calldata signature_)
         external;
 
     function challengeSignature(
@@ -93,7 +56,7 @@ interface INotary {
         bytes calldata signature_
     ) external;
 
-    function submitRemoteRoot(
+    function propose(
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,

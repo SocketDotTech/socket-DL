@@ -7,7 +7,32 @@ import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
 import "../interfaces/ISignatureVerifier.sol";
 
+// moved from interface
+// function addBond() external payable;
+
+//     function reduceBond(uint256 amount) external;
+
+//     function unbondAttester() external;
+
+//     function claimBond() external;
+
 // contract BondedNotary is AccessControl(msg.sender) {
+// event Unbonded(address indexed attester, uint256 amount, uint256 claimTime);
+
+// event BondClaimed(address indexed attester, uint256 amount);
+
+// event BondClaimDelaySet(uint256 delay);
+
+// event MinBondAmountSet(uint256 amount);
+
+//  error InvalidBondReduce();
+
+// error UnbondInProgress();
+
+// error ClaimTimeLeft();
+
+// error InvalidBond();
+
 //     uint256 private _minBondAmount;
 //     uint256 private _bondClaimDelay;
 //     uint256 private immutable _chainId;
@@ -30,6 +55,18 @@ import "../interfaces/ISignatureVerifier.sol";
 //     // remoteChainId => accumAddress => packetId => root
 //     mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
 //         private _remoteRoots;
+
+//     event BondAdded(
+//          address indexed attester,
+//          uint256 addAmount, // assuming native token
+//          uint256 newBond
+//     );
+
+//     event BondReduced(
+//          address indexed attester,
+//          uint256 reduceAmount,
+//          uint256 newBond
+//     );
 
 //     constructor(
 //         uint256 minBondAmount_,
@@ -146,7 +183,7 @@ import "../interfaces/ISignatureVerifier.sol";
 //             signature_
 //         );
 
-//         emit SignatureSubmitted(accumAddress_, packetId, signature_);
+//         emit PacketVerifiedAndSealed(accumAddress_, packetId, signature_);
 //     }
 
 //     function challengeSignature(
@@ -189,7 +226,7 @@ import "../interfaces/ISignatureVerifier.sol";
 //         emit SignatureVerifierSet(signatureVerifier_);
 //     }
 
-//     function submitRemoteRoot(
+//     function propose(
 //         uint256 remoteChainId_,
 //         address accumAddress_,
 //         uint256 packetId_,
@@ -205,10 +242,10 @@ import "../interfaces/ISignatureVerifier.sol";
 //             revert InvalidAttester();
 
 //         if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
-//             revert RemoteRootAlreadySubmitted();
+//             revert AlreadyProposed();
 
 //         _remoteRoots[remoteChainId_][accumAddress_][packetId_] = root_;
-//         emit RemoteRootSubmitted(
+//         emit Proposed(
 //             remoteChainId_,
 //             accumAddress_,
 //             packetId_,

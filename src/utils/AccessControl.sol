@@ -20,14 +20,6 @@ abstract contract AccessControl is Ownable {
         _;
     }
 
-    function hasRole(bytes32 role, address _address)
-        external
-        view
-        returns (bool)
-    {
-        return _hasRole(role, _address);
-    }
-
     function grantRole(bytes32 role, address grantee)
         external
         virtual
@@ -52,6 +44,14 @@ abstract contract AccessControl is Ownable {
     function _revokeRole(bytes32 role, address revokee) internal {
         _permits[role][revokee] = false;
         emit RoleRevoked(role, revokee);
+    }
+
+    function hasRole(bytes32 role, address _address)
+        external
+        view
+        returns (bool)
+    {
+        return _hasRole(role, _address);
     }
 
     function _hasRole(bytes32 role, address _address)

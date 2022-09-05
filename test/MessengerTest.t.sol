@@ -72,7 +72,7 @@ contract PingPongTest is Test {
             bytes memory sig
         ) = _getLatestSignature(_a);
 
-        _submitSignatureOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(_a, _b, packetId, nonce_, _payloadPing, _PROOF);
 
@@ -86,7 +86,7 @@ contract PingPongTest is Test {
             bytes memory sig
         ) = _getLatestSignature(_b);
 
-        _submitSignatureOnSrc(_b, sig);
+        _verifyAndSealOnSrc(_b, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
         _executePayloadOnDst(_b, _a, packetId, nonce_, _payloadPong, _PROOF);
 
@@ -116,10 +116,6 @@ contract PingPongTest is Test {
         _a.hasher__ = new Hasher();
         _b.hasher__ = new Hasher();
 
-        // deploy socket
-        _a.socket__ = new Socket(_a.chainId, address(_a.hasher__));
-        _b.socket__ = new Socket(_b.chainId, address(_b.hasher__));
-
         _a.sigVerifier__ = new SignatureVerifier();
         _b.sigVerifier__ = new SignatureVerifier();
 
@@ -136,8 +132,17 @@ contract PingPongTest is Test {
             0
         );
 
-        _a.socket__.setNotary(address(_a.notary__));
-        _b.socket__.setNotary(address(_b.notary__));
+        // deploy socket
+        _a.socket__ = new Socket(
+            _a.chainId,
+            address(_a.hasher__),
+            address(_a.notary__)
+        );
+        _b.socket__ = new Socket(
+            _b.chainId,
+            address(_b.hasher__),
+            address(_b.notary__)
+        );
 
         // deploy accumulators
         _a.accum__ = new SingleAccum(
@@ -255,11 +260,11 @@ contract PingPongTest is Test {
         }
     }
 
-    function _submitSignatureOnSrc(ChainContext storage src_, bytes memory sig_)
+    function _verifyAndSealOnSrc(ChainContext storage src_, bytes memory sig_)
         private
     {
         hoax(_attester);
-        src_.notary__.submitSignature(address(src_.accum__), sig_);
+        src_.notary__.verifyAndSeal(address(src_.accum__), sig_);
     }
 
     function _submitRootOnDst(
@@ -270,7 +275,7 @@ contract PingPongTest is Test {
         bytes32 root_
     ) private {
         hoax(_raju);
-        dst_.notary__.submitRemoteRoot(
+        dst_.notary__.propose(
             src_.chainId,
             address(src_.accum__),
             packetId_,

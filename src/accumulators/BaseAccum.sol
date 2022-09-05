@@ -15,26 +15,6 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
         _setNotary(notary_);
     }
 
-    function getNextPacket()
-        external
-        view
-        virtual
-        override
-        returns (bytes32, uint256)
-    {
-        return (_roots[_nextPacket], _nextPacket);
-    }
-
-    function getRootById(uint256 id)
-        external
-        view
-        virtual
-        override
-        returns (bytes32)
-    {
-        return _roots[id];
-    }
-
     function sealPacket()
         external
         virtual
@@ -57,5 +37,25 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     function _setNotary(address notary_) private {
         _grantRole(NOTARY_ROLE, notary_);
         emit NotarySet(notary_);
+    }
+
+    function getNextPacket()
+        external
+        view
+        virtual
+        override
+        returns (bytes32, uint256)
+    {
+        return (_roots[_nextPacket], _nextPacket);
+    }
+
+    function getRootById(uint256 id)
+        external
+        view
+        virtual
+        override
+        returns (bytes32)
+    {
+        return _roots[id];
     }
 }

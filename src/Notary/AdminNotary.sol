@@ -24,11 +24,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     mapping(address => mapping(uint256 => uint256)) public _attestations;
 
     // accumAddress => packetId => bool (is paused)
-    mapping(address => mapping(uint256 => bool)) public _isChallenged;
+    mapping(address => mapping(uint256 => bool)) public _isPaused;
 
     // accumAddress => packetId => submitted at
     mapping(address => mapping(uint256 => uint256)) public _timeRecord;
 
+    // chain => root => (accum, isChallenged, _timeRecord, _attestations, _isAttested(address))
     struct AccumDetails {
         uint256 remoteChainId;
         bool isFast;
@@ -40,7 +41,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     enum PacketStatus {
         NOT_PROPOSED,
         PROPOSED,
-        CHALLENGED,
+        PAUSED,
         CONFIRMED,
         TIMED_OUT
     }
@@ -49,17 +50,15 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     error AttesterNotFound();
 
-    error Restricted();
-
     error AccumAlreadyAdded();
 
     error AlreadyAttested();
 
     error NotFastPath();
 
-    error PacketChallenged();
+    error PacketPaused();
 
-    error PacketNotChallenged();
+    error PacketNotPaused();
 
     error ZeroAddress();
 
@@ -78,90 +77,14 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         _signatureVerifier = ISignatureVerifier(signatureVerifier_);
     }
 
-    function addBond() external payable override {
-        revert Restricted();
-    }
-
-    function reduceBond(uint256 amount) external override {
-        revert Restricted();
-    }
-
-    function unbondAttester() external override {
-        revert Restricted();
-    }
-
-    function claimBond() external override {
-        revert Restricted();
-    }
-
     function addAccumulator(
         address accumAddress_,
         uint256 remoteChainId_,
         bool isFast_
     ) external onlyOwner {
-        if (accumAddress_ == address(0)) revert ZeroAddress();
         if (_accumDetails[accumAddress_].remoteChainId != 0)
             revert AccumAlreadyAdded();
         _accumDetails[accumAddress_] = AccumDetails(remoteChainId_, isFast_);
-    }
-
-    function getAccumDetails(address accumAddress_)
-        external
-        view
-        returns (AccumDetails memory)
-    {
-        return _accumDetails[accumAddress_];
-    }
-
-    function chainId() external view returns (uint256) {
-        return _chainId;
-    }
-
-    function isAttested(address accumAddress_, uint256 packetId_)
-        external
-        view
-        returns (bool)
-    {
-        PacketStatus status = getPacketStatus(accumAddress_, packetId_);
-
-        if (status == PacketStatus.CONFIRMED) return true;
-        return false;
-    }
-
-    function getPacketStatus(address accumAddress_, uint256 packetId_)
-        public
-        view
-        returns (PacketStatus status)
-    {
-        uint256 packetArrivedAt = _timeRecord[accumAddress_][packetId_];
-        if (packetArrivedAt == 0) return PacketStatus.NOT_PROPOSED;
-
-        uint256 remoteChainId = _accumDetails[accumAddress_].remoteChainId;
-
-        // if timed out
-        if (block.timestamp - packetArrivedAt > _timeoutInSeconds)
-            return PacketStatus.TIMED_OUT;
-
-        // if challenged
-        if (_isChallenged[accumAddress_][packetId_])
-            return PacketStatus.CHALLENGED;
-
-        // if not 100% confirmed for fast path or consider wait time for slow path
-        if (_accumDetails[accumAddress_].isFast) {
-            if (
-                _attestations[accumAddress_][packetId_] !=
-                _totalAttestors[remoteChainId]
-            ) return PacketStatus.PROPOSED;
-        } else {
-            if (block.timestamp - packetArrivedAt < _waitTimeInSeconds)
-                return PacketStatus.PROPOSED;
-        }
-
-        return PacketStatus.CONFIRMED;
-    }
-
-    function signatureVerifier() external view returns (address) {
-        return address(_signatureVerifier);
     }
 
     function setSignatureVerifier(address signatureVerifier_)
@@ -171,7 +94,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         _setSignatureVerifier(signatureVerifier_);
     }
 
-    function submitSignature(address accumAddress_, bytes calldata signature_)
+    function verifyAndSeal(address accumAddress_, bytes calldata signature_)
         external
         override
     {
@@ -192,7 +115,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
                 attester
             )
         ) revert InvalidAttester();
-        emit SignatureSubmitted(accumAddress_, packetId, signature_);
+        emit PacketVerifiedAndSealed(accumAddress_, packetId, signature_);
     }
 
     function challengeSignature(
@@ -221,7 +144,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         }
     }
 
-    function submitRemoteRoot(
+    function propose(
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,
@@ -229,7 +152,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         bytes calldata signature_
     ) external override {
         if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
-            revert RemoteRootAlreadySubmitted();
+            revert AlreadyProposed();
 
         _verifyAndUpdateAttestations(
             remoteChainId_,
@@ -241,12 +164,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
         _remoteRoots[remoteChainId_][accumAddress_][packetId_] = root_;
         _timeRecord[accumAddress_][packetId_] = block.timestamp;
-        emit RemoteRootSubmitted(
-            remoteChainId_,
-            accumAddress_,
-            packetId_,
-            root_
-        );
+        emit Proposed(remoteChainId_, accumAddress_, packetId_, root_);
     }
 
     function confirmRoot(
@@ -256,8 +174,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         bytes32 root_,
         bytes calldata signature_
     ) external {
-        if (!_accumDetails[accumAddress_].isFast) revert NotFastPath();
-        if (_isChallenged[accumAddress_][packetId_]) revert PacketChallenged();
+        if (_isPaused[accumAddress_][packetId_]) revert PacketPaused();
         if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != root_)
             revert RootNotFound();
 
@@ -272,44 +189,28 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         emit RootConfirmed(attester, accumAddress_, packetId_);
     }
 
-    function challengePacketOnDest(
+    function pausePacketOnDest(
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,
-        bytes32 root_,
-        bytes calldata signature_
+        bytes32 root_
     ) external {
-        if (_isChallenged[accumAddress_][packetId_]) revert PacketChallenged();
-        address attester = _getAttester(
-            remoteChainId_,
-            accumAddress_,
-            packetId_,
-            root_,
-            signature_
-        );
+        if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != root_)
+            revert RootNotFound();
+        if (_isPaused[accumAddress_][packetId_]) revert PacketPaused();
 
-        bytes32 root = IAccumulator(accumAddress_).getRootById(packetId_);
+        _isPaused[accumAddress_][packetId_] = true;
 
-        if (root == root_) {
-            _isChallenged[accumAddress_][packetId_] = true;
-
-            emit PacketChallengedOnDest(
-                attester,
-                accumAddress_,
-                packetId_,
-                msg.sender
-            );
-        }
+        emit PacketPaused(accumAddress_, packetId_, msg.sender);
     }
 
-    function acceptChallengedPacket(address accumAddress_, uint256 packetId_)
+    function acceptPausedPacket(address accumAddress_, uint256 packetId_)
         external
         onlyOwner
     {
-        if (!_isChallenged[accumAddress_][packetId_])
-            revert PacketNotChallenged();
-        _isChallenged[accumAddress_][packetId_] = false;
-        emit RevertChallengedPacket(accumAddress_, packetId_);
+        if (!_isPaused[accumAddress_][packetId_]) revert PacketNotPaused();
+        _isPaused[accumAddress_][packetId_] = false;
+        emit PacketUnpaused(accumAddress_, packetId_);
     }
 
     function _getAttester(
@@ -350,22 +251,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         _attestations[accumAddress_][packetId_]++;
     }
 
-    function getConfirmations(address accumAddress_, uint256 packetId_)
-        external
-        view
-        returns (uint256)
-    {
-        return _attestations[accumAddress_][packetId_];
-    }
-
-    function getRemoteRoot(
-        uint256 remoteChainId_,
-        address accumAddress_,
-        uint256 packetId_
-    ) external view override returns (bytes32) {
-        return _remoteRoots[remoteChainId_][accumAddress_][packetId_];
-    }
-
     function grantAttesterRole(uint256 remoteChainId_, address attester_)
         external
         onlyOwner
@@ -393,5 +278,79 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     function _attesterRole(uint256 chainId_) internal pure returns (bytes32) {
         return bytes32(chainId_);
+    }
+
+    function getAccumDetails(address accumAddress_)
+        external
+        view
+        returns (AccumDetails memory)
+    {
+        return _accumDetails[accumAddress_];
+    }
+
+    function isAttested(address accumAddress_, uint256 packetId_)
+        external
+        view
+        returns (bool)
+    {
+        PacketStatus status = getPacketStatus(accumAddress_, packetId_);
+
+        if (status == PacketStatus.CONFIRMED) return true;
+        return false;
+    }
+
+    function getPacketStatus(address accumAddress_, uint256 packetId_)
+        public
+        view
+        returns (PacketStatus status)
+    {
+        uint256 packetArrivedAt = _timeRecord[accumAddress_][packetId_];
+        if (packetArrivedAt == 0) return PacketStatus.NOT_PROPOSED;
+
+        uint256 remoteChainId = _accumDetails[accumAddress_].remoteChainId;
+
+        // if timed out
+        if (block.timestamp - packetArrivedAt > _timeoutInSeconds)
+            return PacketStatus.TIMED_OUT;
+
+        // if paused at dest
+        if (_isPaused[accumAddress_][packetId_]) return PacketStatus.PAUSED;
+
+        // if not 100% confirmed for fast path or consider wait time for slow path
+        if (_accumDetails[accumAddress_].isFast) {
+            if (
+                _attestations[accumAddress_][packetId_] !=
+                _totalAttestors[remoteChainId]
+            ) return PacketStatus.PROPOSED;
+        } else {
+            if (block.timestamp - packetArrivedAt < _waitTimeInSeconds)
+                return PacketStatus.PROPOSED;
+        }
+
+        return PacketStatus.CONFIRMED;
+    }
+
+    function signatureVerifier() external view returns (address) {
+        return address(_signatureVerifier);
+    }
+
+    function getConfirmations(address accumAddress_, uint256 packetId_)
+        external
+        view
+        returns (uint256)
+    {
+        return _attestations[accumAddress_][packetId_];
+    }
+
+    function getRemoteRoot(
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 packetId_
+    ) external view override returns (bytes32) {
+        return _remoteRoots[remoteChainId_][accumAddress_][packetId_];
+    }
+
+    function chainId() external view returns (uint256) {
+        return _chainId;
     }
 }

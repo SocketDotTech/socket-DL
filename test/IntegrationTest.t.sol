@@ -69,7 +69,7 @@ contract HappyTest is Test {
             uint256 packetId,
             bytes memory sig
         ) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(_a, _b, packetId, 0, payload, proof);
 
@@ -91,7 +91,7 @@ contract HappyTest is Test {
             bytes memory sig
         ) = _getLatestSignature(_b);
 
-        _submitSignatureOnSrc(_b, sig);
+        _verifyAndSealOnSrc(_b, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
         _executePayloadOnDst(_b, _a, packetId, 0, payload, proof);
 
@@ -118,7 +118,7 @@ contract HappyTest is Test {
         _a.counter__.remoteAddOperation(_b.chainId, addAmount);
 
         (root, packetId, sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(_a, _b, packetId, addNonce, addPayload, addProof);
 
@@ -126,7 +126,7 @@ contract HappyTest is Test {
         _a.counter__.remoteSubOperation(_b.chainId, subAmount);
 
         (root, packetId, sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(_a, _b, packetId, subNonce, subPayload, subProof);
 
@@ -147,7 +147,7 @@ contract HappyTest is Test {
         _a.counter__.remoteAddOperation(_b.chainId, m1.amount);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, m1.sig);
+        _verifyAndSealOnSrc(_a, m1.sig);
         _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
 
         MessageContext memory m2;
@@ -160,7 +160,7 @@ contract HappyTest is Test {
         _a.counter__.remoteAddOperation(_b.chainId, m2.amount);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, m2.sig);
+        _verifyAndSealOnSrc(_a, m2.sig);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
 
         vm.expectRevert(ISocket.InvalidNonce.selector);
@@ -187,7 +187,7 @@ contract HappyTest is Test {
         _a.counter__.remoteAddOperation(_b.chainId, m1.amount);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, m1.sig);
+        _verifyAndSealOnSrc(_a, m1.sig);
         _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
 
         MessageContext memory m2;
@@ -200,7 +200,7 @@ contract HappyTest is Test {
         _a.counter__.remoteAddOperation(_b.chainId, m2.amount);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, m2.sig);
+        _verifyAndSealOnSrc(_a, m2.sig);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
 
         _executePayloadOnDst(
@@ -236,7 +236,7 @@ contract HappyTest is Test {
             uint256 packetId,
             bytes memory sig
         ) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(_a, _b, packetId, 0, payload, proof);
 
@@ -252,10 +252,6 @@ contract HappyTest is Test {
 
         _a.hasher__ = new Hasher();
         _b.hasher__ = new Hasher();
-
-        // deploy socket
-        _a.socket__ = new Socket(_a.chainId, address(_a.hasher__));
-        _b.socket__ = new Socket(_b.chainId, address(_b.hasher__));
 
         _a.sigVerifier__ = new SignatureVerifier();
         _b.sigVerifier__ = new SignatureVerifier();
@@ -273,8 +269,17 @@ contract HappyTest is Test {
             _waitTimeInSeconds
         );
 
-        _a.socket__.setNotary(address(_a.notary__));
-        _b.socket__.setNotary(address(_b.notary__));
+        // deploy socket
+        _a.socket__ = new Socket(
+            _a.chainId,
+            address(_a.hasher__),
+            address(_a.notary__)
+        );
+        _b.socket__ = new Socket(
+            _b.chainId,
+            address(_b.hasher__),
+            address(_b.notary__)
+        );
 
         // deploy accumulators
         _a.accum__ = new SingleAccum(
@@ -392,11 +397,11 @@ contract HappyTest is Test {
         }
     }
 
-    function _submitSignatureOnSrc(ChainContext storage src_, bytes memory sig_)
+    function _verifyAndSealOnSrc(ChainContext storage src_, bytes memory sig_)
         private
     {
         hoax(_attester);
-        src_.notary__.submitSignature(address(src_.accum__), sig_);
+        src_.notary__.verifyAndSeal(address(src_.accum__), sig_);
     }
 
     function _submitRootOnDst(
@@ -407,7 +412,7 @@ contract HappyTest is Test {
         bytes32 root_
     ) private {
         hoax(_raju);
-        dst_.notary__.submitRemoteRoot(
+        dst_.notary__.propose(
             src_.chainId,
             address(src_.accum__),
             packetId_,

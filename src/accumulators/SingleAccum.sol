@@ -8,7 +8,7 @@ contract SingleAccum is BaseAccum {
 
     constructor(address socket_, address notary_) BaseAccum(socket_, notary_) {}
 
-    function addMessage(bytes32 packedMessage)
+    function addPackedMessage(bytes32 packedMessage)
         external
         override
         onlyRole(SOCKET_ROLE)

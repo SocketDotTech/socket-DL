@@ -24,7 +24,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     mapping(address => mapping(uint256 => uint256)) private _nonces;
 
     // packedMessage => executeStatus
-    mapping(bytes32 => bool) private _executedMessages;
+    mapping(bytes32 => bool) private executedPackedMessages;
 
     // localPlug => remoteChainId => nextNonce
     mapping(address => mapping(uint256 => uint256)) private _nextNonces;
@@ -34,9 +34,16 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     error NotAttested();
 
-    constructor(uint256 chainId_, address hasher_) {
+    event Executed(bool success, string result);
+
+    constructor(
+        uint256 chainId_,
+        address hasher_,
+        address notary_
+    ) {
         _setHasher(hasher_);
         _chainId = chainId_;
+        _notary = INotary(notary_);
     }
 
     function setNotary(address notary_) external onlyOwner {
@@ -45,10 +52,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     function setHasher(address hasher_) external onlyOwner {
         _setHasher(hasher_);
-    }
-
-    function hasher() external view returns (address) {
-        return address(_hasher);
     }
 
     function outbound(uint256 remoteChainId_, bytes calldata payload_)
@@ -68,7 +71,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             payload_
         );
 
-        IAccumulator(config.accum).addMessage(packedMessage);
+        IAccumulator(config.accum).addPackedMessage(packedMessage);
         emit MessageTransmitted(
             _chainId,
             msg.sender,
@@ -104,8 +107,9 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
         if (!_notary.isAttested(remoteAccum_, packetId_)) revert NotAttested();
 
-        if (_executedMessages[packedMessage]) revert MessageAlreadyExecuted();
-        _executedMessages[packedMessage] = true;
+        if (executedPackedMessages[packedMessage])
+            revert MessageAlreadyExecuted();
+        executedPackedMessages[packedMessage] = true;
 
         if (
             config.isSequential &&
@@ -135,23 +139,16 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             )
         ) revert DappVerificationFailed();
 
-        IPlug(localPlug_).inbound(payload_);
+        try IPlug(localPlug_).inbound(payload_) {
+            emit Executed(true, "");
+        } catch Error(string memory reason) {
+            // catch failing revert() and require()
+            emit Executed(false, reason);
+        }
     }
 
     function dropMessages(uint256 remoteChainId_, uint256 count_) external {
         _nextNonces[msg.sender][remoteChainId_] += count_;
-    }
-
-    function chainId() external view returns (uint256) {
-        return _chainId;
-    }
-
-    function getMessageStatus(bytes32 packedMessage_)
-        public
-        view
-        returns (bool)
-    {
-        return _executedMessages[packedMessage_];
     }
 
     function setInboundConfig(
@@ -188,5 +185,21 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     function _setHasher(address hasher_) private {
         _hasher = IHasher(hasher_);
+    }
+
+    function chainId() external view returns (uint256) {
+        return _chainId;
+    }
+
+    function hasher() external view returns (address) {
+        return address(_hasher);
+    }
+
+    function getMessageStatus(bytes32 packedMessage_)
+        public
+        view
+        returns (bool)
+    {
+        return executedPackedMessages[packedMessage_];
     }
 }

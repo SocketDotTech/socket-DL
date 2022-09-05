@@ -134,7 +134,7 @@ import "../src/utils/SignatureVerifier.sol";
 //         assertEq(_attester.balance, amount);
 //     }
 
-//     function testSubmitSignature() external {
+//     function testVerifyAndSeal() external {
 //         startHoax(_attester);
 //         _notary.addBond{value: _minBondAmount}();
 
@@ -151,7 +151,7 @@ import "../src/utils/SignatureVerifier.sol";
 //         _notary.verifyAndSeal(_accum, _getSignature(digest));
 //     }
 
-//     function testSubmitSignatureWithoutEnoughBond() external {
+//     function testVerifyAndSealWithoutEnoughBond() external {
 //         startHoax(_attester);
 //         _notary.addBond{value: _minBondAmount / 2}();
 
@@ -211,7 +211,7 @@ import "../src/utils/SignatureVerifier.sol";
 //         _notary.grantAttesterRole(_remoteChainId, _attester);
 
 //         hoax(_raju);
-//         _notary.submitRemoteRoot(
+//         _notary.propose(
 //             _remoteChainId,
 //             _accum,
 //             _packetId,
@@ -232,7 +232,7 @@ import "../src/utils/SignatureVerifier.sol";
 
 //         hoax(_raju);
 //         vm.expectRevert(INotary.InvalidAttester.selector);
-//         _notary.submitRemoteRoot(
+//         _notary.propose(
 //             _remoteChainId,
 //             _accum,
 //             _packetId,
