@@ -23,8 +23,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     // localPlug => remoteChainId => nonce
     mapping(address => mapping(uint256 => uint256)) private _nonces;
 
-    // packedMessage => executeStatus
-    mapping(bytes32 => bool) private executedPackedMessages;
+    // msgId => executorAddress
+    mapping(uint256 => address) private executedPackedMessages;
 
     INotary private _notary;
     IHasher private _hasher;
@@ -129,7 +129,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
                 packetId_,
                 root
             )
-        ) revert DappVerificationFailed();
+        ) revert VerificationFailed();
 
         try IPlug(localPlug_).inbound(payload_) {
             emit Executed(true, "");

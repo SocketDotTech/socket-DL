@@ -15,7 +15,7 @@ interface ISocket {
 
     error InvalidProof();
 
-    error DappVerificationFailed();
+    error VerificationFailed();
 
     error MessageAlreadyExecuted();
 
