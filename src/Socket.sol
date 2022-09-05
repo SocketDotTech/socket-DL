@@ -26,9 +26,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     // packedMessage => executeStatus
     mapping(bytes32 => bool) private executedPackedMessages;
 
-    // localPlug => remoteChainId => nextNonce
-    mapping(address => mapping(uint256 => uint256)) private _nextNonces;
-
     INotary private _notary;
     IHasher private _hasher;
 
@@ -111,11 +108,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             revert MessageAlreadyExecuted();
         executedPackedMessages[packedMessage] = true;
 
-        if (
-            config.isSequential &&
-            nonce_ != _nextNonces[localPlug_][remoteChainId_]++
-        ) revert InvalidNonce();
-
         bytes32 root = _notary.getRemoteRoot(
             remoteChainId_,
             remoteAccum_,
@@ -147,16 +139,11 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         }
     }
 
-    function dropMessages(uint256 remoteChainId_, uint256 count_) external {
-        _nextNonces[msg.sender][remoteChainId_] += count_;
-    }
-
     function setInboundConfig(
         uint256 remoteChainId_,
         address remotePlug_,
         address deaccum_,
-        address verifier_,
-        bool isSequential_
+        address verifier_
     ) external override {
         InboundConfig storage config = inboundConfigs[msg.sender][
             remoteChainId_
@@ -164,7 +151,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         config.remotePlug = remotePlug_;
         config.deaccum = deaccum_;
         config.verifier = verifier_;
-        config.isSequential = isSequential_;
 
         // TODO: emit event
     }

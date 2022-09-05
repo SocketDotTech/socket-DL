@@ -82,15 +82,13 @@ contract Counter is IPlug {
         address remotePlug,
         address accum,
         address deaccum,
-        address verifier,
-        bool isSequential
+        address verifier
     ) external onlyOwner {
         ISocket(socket).setInboundConfig(
             remoteChainId,
             remotePlug,
             deaccum,
-            verifier,
-            isSequential
+            verifier
         );
         ISocket(socket).setOutboundConfig(remoteChainId, remotePlug, accum);
     }

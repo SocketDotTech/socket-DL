@@ -19,8 +19,6 @@ interface ISocket {
 
     error MessageAlreadyExecuted();
 
-    error InvalidNonce();
-
     function outbound(uint256 remoteChainId_, bytes calldata payload_) external;
 
     function execute(
@@ -39,7 +37,6 @@ interface ISocket {
         address remotePlug;
         address deaccum;
         address verifier;
-        bool isSequential;
     }
 
     struct OutboundConfig {
@@ -51,8 +48,7 @@ interface ISocket {
         uint256 remoteChainId_,
         address remotePlug_,
         address deaccum_,
-        address verifier_,
-        bool isSequential_
+        address verifier_
     ) external;
 
     function setOutboundConfig(
