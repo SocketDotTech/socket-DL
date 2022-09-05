@@ -30,7 +30,7 @@ interface INotary {
         uint256 indexed packetId
     );
 
-    event PacketPaused(
+    event PausedPacket(
         address indexed accumAddress,
         uint256 indexed packetId,
         address challenger

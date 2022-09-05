@@ -201,7 +201,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
         _isPaused[accumAddress_][packetId_] = true;
 
-        emit PacketPaused(accumAddress_, packetId_, msg.sender);
+        emit PausedPacket(accumAddress_, packetId_, msg.sender);
     }
 
     function acceptPausedPacket(address accumAddress_, uint256 packetId_)
