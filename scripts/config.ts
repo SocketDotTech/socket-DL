@@ -19,7 +19,6 @@ export const waitTime: {
   31338: 0
 }
 
-export const isSequential = true;
 export const isFast = true;
 
 export const srcChainId = 31337;

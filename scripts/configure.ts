@@ -3,7 +3,7 @@ import path from "path";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { isSequential, signerAddress, srcChainId, destChainId, isFast } from "./config";
+import { signerAddress, srcChainId, destChainId, isFast } from "./config";
 import { getInstance } from "./utils";
 
 const deployedAddressPath = path.join(__dirname, "../deployments/");
@@ -43,8 +43,7 @@ export const main = async () => {
       destConfig["counter"],
       accum.address,
       deaccum.address,
-      verifier.address,
-      isSequential
+      verifier.address
     );
     console.log(`Set config role for ${destChainId} chain id!`)
 

@@ -43,7 +43,7 @@ contract PingPongTest is Test {
         uint256 amount;
         bytes payload;
         bytes proof;
-        uint256 nonce;
+        uint256 msgId;
         bytes32 root;
         uint256 packetId;
         bytes sig;
@@ -58,14 +58,14 @@ contract PingPongTest is Test {
         _deploySocketContracts();
         _initAttester();
         _deployPlugContracts();
-        _configPlugContracts(true);
+        _configPlugContracts();
         _initPausers();
 
         _payloadPing = abi.encode(_a.chainId, _PING);
         _payloadPong = abi.encode(_b.chainId, _PONG);
     }
 
-    function _verifyAToB(uint256 nonce_) internal {
+    function _verifyAToB(uint256 msgId_) internal {
         (
             bytes32 root,
             uint256 packetId,
@@ -74,12 +74,12 @@ contract PingPongTest is Test {
 
         _verifyAndSealOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, nonce_, _payloadPing, _PROOF);
+        _executePayloadOnDst(_a, _b, packetId, msgId_, _payloadPing, _PROOF);
 
         assertEq(_b.messenger__.message(), _PING);
     }
 
-    function _verifyBToA(uint256 nonce_) internal {
+    function _verifyBToA(uint256 msgId_) internal {
         (
             bytes32 root,
             uint256 packetId,
@@ -88,7 +88,7 @@ contract PingPongTest is Test {
 
         _verifyAndSealOnSrc(_b, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
-        _executePayloadOnDst(_b, _a, packetId, nonce_, _payloadPong, _PROOF);
+        _executePayloadOnDst(_b, _a, packetId, msgId_, _payloadPong, _PROOF);
 
         assertEq(_a.messenger__.message(), _PONG);
     }
@@ -104,8 +104,11 @@ contract PingPongTest is Test {
 
         uint256 iterations = 5;
         for (uint256 index = 0; index < iterations; index++) {
-            _verifyAToB(index);
-            _verifyBToA(index);
+            uint256 msgIdAToB = (uint64(_b.chainId) << 32) | index;
+            uint256 msgIdBToA = (uint64(_a.chainId) << 32) | index;
+
+            _verifyAToB(msgIdAToB);
+            _verifyBToA(msgIdBToA);
             _reset();
         }
     }
@@ -197,15 +200,14 @@ contract PingPongTest is Test {
         vm.stopPrank();
     }
 
-    function _configPlugContracts(bool isSequential_) private {
+    function _configPlugContracts() private {
         hoax(_counterOwner);
         _a.messenger__.setSocketConfig(
             _b.chainId,
             address(_b.messenger__),
             address(_a.accum__),
             address(_a.deaccum__),
-            address(_a.verifier__),
-            isSequential_
+            address(_a.verifier__)
         );
 
         hoax(_counterOwner);
@@ -214,8 +216,7 @@ contract PingPongTest is Test {
             address(_a.messenger__),
             address(_b.accum__),
             address(_b.deaccum__),
-            address(_b.verifier__),
-            isSequential_
+            address(_b.verifier__)
         );
     }
 
@@ -288,7 +289,7 @@ contract PingPongTest is Test {
         ChainContext storage src_,
         ChainContext storage dst_,
         uint256 packetId_,
-        uint256 nonce_,
+        uint256 msgId_,
         bytes memory payload_,
         bytes memory proof_
     ) private {
@@ -296,7 +297,7 @@ contract PingPongTest is Test {
         dst_.socket__.execute(
             src_.chainId,
             address(dst_.messenger__),
-            nonce_,
+            msgId_,
             _attester,
             address(src_.accum__),
             packetId_,
