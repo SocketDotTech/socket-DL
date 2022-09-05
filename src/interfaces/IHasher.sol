@@ -7,7 +7,7 @@ interface IHasher {
         address srcPlug,
         uint256 dstChainId,
         address dstPlug,
-        uint256 nonce,
+        uint256 msgId,
         bytes calldata payload
     ) external returns (bytes32);
 }

@@ -11,6 +11,12 @@ import "./interfaces/INotary.sol";
 import "./interfaces/IHasher.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
+    enum MessageStatus {
+        NOT_EXECUTED,
+        SUCCESS,
+        FAILED
+    }
+
     // localPlug => remoteChainId => OutboundConfig
     mapping(address => mapping(uint256 => OutboundConfig))
         public outboundConfigs;
@@ -25,6 +31,9 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     // msgId => executorAddress
     mapping(uint256 => address) private executedPackedMessages;
+
+    // msgId => message status
+    mapping(uint256 => MessageStatus) private _messagesStatus;
 
     INotary private _notary;
     IHasher private _hasher;
@@ -59,12 +68,13 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
+        uint256 msgId = (uint64(remoteChainId_) << 32) | nonce;
         bytes32 packedMessage = _hasher.packMessage(
             _chainId,
             msg.sender,
             remoteChainId_,
             config.remotePlug,
-            nonce,
+            msgId,
             payload_
         );
 
@@ -74,7 +84,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             msg.sender,
             remoteChainId_,
             config.remotePlug,
-            nonce,
+            msgId,
             payload_
         );
     }
@@ -82,7 +92,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     function execute(
         uint256 remoteChainId_,
         address localPlug_,
-        uint256 nonce_,
+        uint256 msgId_,
         address attester_,
         address remoteAccum_,
         uint256 packetId_,
@@ -98,15 +108,15 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             config.remotePlug,
             _chainId,
             localPlug_,
-            nonce_,
+            msgId_,
             payload_
         );
 
         if (!_notary.isAttested(remoteAccum_, packetId_)) revert NotAttested();
 
-        if (executedPackedMessages[packedMessage])
+        if (executedPackedMessages[msgId_] != address(0))
             revert MessageAlreadyExecuted();
-        executedPackedMessages[packedMessage] = true;
+        executedPackedMessages[msgId_] = msg.sender;
 
         bytes32 root = _notary.getRemoteRoot(
             remoteChainId_,
@@ -132,9 +142,11 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         ) revert VerificationFailed();
 
         try IPlug(localPlug_).inbound(payload_) {
+            _messagesStatus[msgId_] = MessageStatus.SUCCESS;
             emit Executed(true, "");
         } catch Error(string memory reason) {
             // catch failing revert() and require()
+            _messagesStatus[msgId_] = MessageStatus.FAILED;
             emit Executed(false, reason);
         }
     }
@@ -181,11 +193,11 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         return address(_hasher);
     }
 
-    function getMessageStatus(bytes32 packedMessage_)
-        public
+    function getMessageStatus(uint256 msgId_)
+        external
         view
-        returns (bool)
+        returns (MessageStatus)
     {
-        return executedPackedMessages[packedMessage_];
+        return _messagesStatus[msgId_];
     }
 }

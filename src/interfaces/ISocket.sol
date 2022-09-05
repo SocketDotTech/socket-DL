@@ -7,7 +7,7 @@ interface ISocket {
         address srcPlug,
         uint256 dstChainId,
         address dstPlug,
-        uint256 nonce,
+        uint256 msgId,
         bytes payload
     );
 
@@ -24,7 +24,7 @@ interface ISocket {
     function execute(
         uint256 remoteChainId_,
         address localPlug_,
-        uint256 nonce,
+        uint256 msgId_,
         address attester_,
         address remoteAccum_,
         uint256 packetId_,
