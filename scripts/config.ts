@@ -11,12 +11,6 @@ export const timeout: {
   31337: 0,
   31338: 0
 }
-
-export const waitTime: {
-  [key: number]: number
-} = {
-  31337: 0,
-  31338: 0
 }
 
 export const isFast = true;

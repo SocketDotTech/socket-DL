@@ -26,7 +26,6 @@ contract AdminNotaryTest is Test {
     AdminNotary _notary;
     SignatureVerifier _sigVerifier;
     uint256 private _timeoutInSeconds = 100;
-    uint256 private _waitTimeInSeconds = 10;
 
     function setUp() external {
         _attester = vm.addr(_attesterPrivateKey);
@@ -37,8 +36,7 @@ contract AdminNotaryTest is Test {
         _notary = new AdminNotary(
             address(_sigVerifier),
             _chainId,
-            _timeoutInSeconds,
-            _waitTimeInSeconds
+            _timeoutInSeconds
         );
     }
 
@@ -120,7 +118,7 @@ contract AdminNotaryTest is Test {
         //     _getSignature(altDigest, _altAttesterPrivateKey)
         // );
 
-        skip(_waitTimeInSeconds);
+        skip(_timeoutInSeconds - 1);
 
         // status confirmed
         assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 3);
@@ -277,12 +275,12 @@ contract AdminNotaryTest is Test {
         );
 
         // status confirmed
-        skip(_waitTimeInSeconds);
+        skip(_timeoutInSeconds - 1);
         assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 3);
 
         assertEq(
             _notary._timeRecord(_accum, _packetId),
-            block.timestamp - _waitTimeInSeconds
+            block.timestamp - _timeoutInSeconds
         );
 
         hoax(_raju);

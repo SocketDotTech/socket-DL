@@ -20,7 +20,6 @@ contract HappyTest is Test {
     address constant _pauser = address(5);
     bool constant _isFast = false;
     uint256 private _timeoutInSeconds = 0;
-    uint256 private _waitTimeInSeconds = 0;
     struct ChainContext {
         uint256 chainId;
         Socket socket__;
@@ -253,14 +252,12 @@ contract HappyTest is Test {
         _a.notary__ = new AdminNotary(
             address(_a.sigVerifier__),
             _a.chainId,
-            _timeoutInSeconds,
-            _waitTimeInSeconds
+            _timeoutInSeconds
         );
         _b.notary__ = new AdminNotary(
             address(_b.sigVerifier__),
             _b.chainId,
-            _timeoutInSeconds,
-            _waitTimeInSeconds
+            _timeoutInSeconds
         );
 
         // deploy socket

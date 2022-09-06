@@ -9,7 +9,6 @@ import "../interfaces/ISignatureVerifier.sol";
 contract AdminNotary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
     uint256 public immutable _timeoutInSeconds;
-    uint256 public immutable _waitTimeInSeconds;
     ISignatureVerifier private _signatureVerifier;
 
     // remoteChainId => accumAddress => packetId => root
@@ -68,12 +67,10 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     constructor(
         address signatureVerifier_,
         uint256 chainId_,
-        uint256 timeoutInSeconds_,
-        uint256 waitTimeInSeconds_
+        uint256 timeoutInSeconds_
     ) {
         _chainId = chainId_;
         _timeoutInSeconds = timeoutInSeconds_;
-        _waitTimeInSeconds = waitTimeInSeconds_;
         _signatureVerifier = ISignatureVerifier(signatureVerifier_);
     }
 
@@ -323,7 +320,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
                 _totalAttestors[remoteChainId]
             ) return PacketStatus.PROPOSED;
         } else {
-            if (block.timestamp - packetArrivedAt < _waitTimeInSeconds)
+            if (block.timestamp - packetArrivedAt < _timeoutInSeconds)
                 return PacketStatus.PROPOSED;
         }
 
