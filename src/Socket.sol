@@ -11,6 +11,12 @@ import "./interfaces/INotary.sol";
 import "./interfaces/IHasher.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
+    enum MessageStatus {
+        NOT_EXECUTED,
+        SUCCESS,
+        FAILED
+    }
+
     // localPlug => remoteChainId => OutboundConfig
     mapping(address => mapping(uint256 => OutboundConfig))
         public outboundConfigs;
@@ -23,18 +29,27 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     // localPlug => remoteChainId => nonce
     mapping(address => mapping(uint256 => uint256)) private _nonces;
 
-    // packedMessage => executeStatus
-    mapping(bytes32 => bool) private _executedMessages;
+    // msgId => executorAddress
+    mapping(uint256 => address) private executedPackedMessages;
 
-    // localPlug => remoteChainId => nextNonce
-    mapping(address => mapping(uint256 => uint256)) private _nextNonces;
+    // msgId => message status
+    mapping(uint256 => MessageStatus) private _messagesStatus;
 
     INotary private _notary;
     IHasher private _hasher;
 
-    constructor(uint256 chainId_, address hasher_) {
+    error NotAttested();
+
+    event Executed(bool success, string result);
+
+    constructor(
+        uint256 chainId_,
+        address hasher_,
+        address notary_
+    ) {
         _setHasher(hasher_);
         _chainId = chainId_;
+        _notary = INotary(notary_);
     }
 
     function setNotary(address notary_) external onlyOwner {
@@ -45,10 +60,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         _setHasher(hasher_);
     }
 
-    function hasher() external view returns (address) {
-        return address(_hasher);
-    }
-
     function outbound(uint256 remoteChainId_, bytes calldata payload_)
         external
         override
@@ -57,22 +68,23 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
+        uint256 msgId = (uint64(remoteChainId_) << 32) | nonce;
         bytes32 packedMessage = _hasher.packMessage(
             _chainId,
             msg.sender,
             remoteChainId_,
             config.remotePlug,
-            nonce,
+            msgId,
             payload_
         );
 
-        IAccumulator(config.accum).addMessage(packedMessage);
+        IAccumulator(config.accum).addPackedMessage(packedMessage);
         emit MessageTransmitted(
             _chainId,
             msg.sender,
             remoteChainId_,
             config.remotePlug,
-            nonce,
+            msgId,
             payload_
         );
     }
@@ -80,7 +92,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     function execute(
         uint256 remoteChainId_,
         address localPlug_,
-        uint256 nonce_,
+        uint256 msgId_,
         address attester_,
         address remoteAccum_,
         uint256 packetId_,
@@ -96,17 +108,15 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             config.remotePlug,
             _chainId,
             localPlug_,
-            nonce_,
+            msgId_,
             payload_
         );
 
-        if (_executedMessages[packedMessage]) revert MessageAlreadyExecuted();
-        _executedMessages[packedMessage] = true;
+        if (!_notary.isAttested(remoteAccum_, packetId_)) revert NotAttested();
 
-        if (
-            config.isSequential &&
-            nonce_ != _nextNonces[localPlug_][remoteChainId_]++
-        ) revert InvalidNonce();
+        if (executedPackedMessages[msgId_] != address(0))
+            revert MessageAlreadyExecuted();
+        executedPackedMessages[msgId_] = msg.sender;
 
         bytes32 root = _notary.getRemoteRoot(
             remoteChainId_,
@@ -129,25 +139,23 @@ contract Socket is ISocket, AccessControl(msg.sender) {
                 packetId_,
                 root
             )
-        ) revert DappVerificationFailed();
+        ) revert VerificationFailed();
 
-        IPlug(localPlug_).inbound(payload_);
-    }
-
-    function dropMessages(uint256 remoteChainId_, uint256 count_) external {
-        _nextNonces[msg.sender][remoteChainId_] += count_;
-    }
-
-    function chainId() external view returns (uint256) {
-        return _chainId;
+        try IPlug(localPlug_).inbound(payload_) {
+            _messagesStatus[msgId_] = MessageStatus.SUCCESS;
+            emit Executed(true, "");
+        } catch Error(string memory reason) {
+            // catch failing revert() and require()
+            _messagesStatus[msgId_] = MessageStatus.FAILED;
+            emit Executed(false, reason);
+        }
     }
 
     function setInboundConfig(
         uint256 remoteChainId_,
         address remotePlug_,
         address deaccum_,
-        address verifier_,
-        bool isSequential_
+        address verifier_
     ) external override {
         InboundConfig storage config = inboundConfigs[msg.sender][
             remoteChainId_
@@ -155,7 +163,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         config.remotePlug = remotePlug_;
         config.deaccum = deaccum_;
         config.verifier = verifier_;
-        config.isSequential = isSequential_;
 
         // TODO: emit event
     }
@@ -176,5 +183,21 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     function _setHasher(address hasher_) private {
         _hasher = IHasher(hasher_);
+    }
+
+    function chainId() external view returns (uint256) {
+        return _chainId;
+    }
+
+    function hasher() external view returns (address) {
+        return address(_hasher);
+    }
+
+    function getMessageStatus(uint256 msgId_)
+        external
+        view
+        returns (MessageStatus)
+    {
+        return _messagesStatus[msgId_];
     }
 }

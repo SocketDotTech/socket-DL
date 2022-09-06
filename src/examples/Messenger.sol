@@ -59,15 +59,13 @@ contract Messenger is IPlug {
         address remotePlug_,
         address accum_,
         address deaccum_,
-        address verifier_,
-        bool isSequential_
+        address verifier_
     ) external onlyOwner {
         ISocket(_socket).setInboundConfig(
             remoteChainId_,
             remotePlug_,
             deaccum_,
-            verifier_,
-            isSequential_
+            verifier_
         );
         ISocket(_socket).setOutboundConfig(remoteChainId_, remotePlug_, accum_);
     }

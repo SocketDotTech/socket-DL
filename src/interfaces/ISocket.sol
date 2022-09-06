@@ -7,7 +7,7 @@ interface ISocket {
         address srcPlug,
         uint256 dstChainId,
         address dstPlug,
-        uint256 nonce,
+        uint256 msgId,
         bytes payload
     );
 
@@ -15,18 +15,16 @@ interface ISocket {
 
     error InvalidProof();
 
-    error DappVerificationFailed();
+    error VerificationFailed();
 
     error MessageAlreadyExecuted();
-
-    error InvalidNonce();
 
     function outbound(uint256 remoteChainId_, bytes calldata payload_) external;
 
     function execute(
         uint256 remoteChainId_,
         address localPlug_,
-        uint256 nonce,
+        uint256 msgId_,
         address attester_,
         address remoteAccum_,
         uint256 packetId_,
@@ -39,7 +37,6 @@ interface ISocket {
         address remotePlug;
         address deaccum;
         address verifier;
-        bool isSequential;
     }
 
     struct OutboundConfig {
@@ -51,8 +48,7 @@ interface ISocket {
         uint256 remoteChainId_,
         address remotePlug_,
         address deaccum_,
-        address verifier_,
-        bool isSequential_
+        address verifier_
     ) external;
 
     function setOutboundConfig(

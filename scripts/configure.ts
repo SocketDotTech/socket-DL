@@ -3,7 +3,7 @@ import path from "path";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { isSequential, signerAddress, srcChainId, destChainId } from "./config";
+import { signerAddress, srcChainId, destChainId, isFast } from "./config";
 import { getInstance } from "./utils";
 
 const deployedAddressPath = path.join(__dirname, "../deployments/");
@@ -33,17 +33,19 @@ export const main = async () => {
     const verifier = await getInstance("AcceptWithTimeout", srcConfig["verifier"]);
 
     await notary.connect(socketSigner).grantAttesterRole(destChainId, signerAddress[srcChainId]);
-    console.log(`Granted ${signerAddress[srcChainId]} role for ${destChainId} chain id!`)
+    console.log(`Added ${signerAddress[srcChainId]} as an attester for ${destChainId} chain id!`)
+
+    await notary.addAccumulator(accum.address, destChainId, isFast);
+    console.log(`Added accumulator ${accum.address} to Notary!`)
 
     await counter.connect(counterSigner).setSocketConfig(
       destChainId,
       destConfig["counter"],
       accum.address,
       deaccum.address,
-      verifier.address,
-      isSequential
+      verifier.address
     );
-    console.log(`Granted ${signerAddress[srcChainId]} role for ${destChainId} chain id!`)
+    console.log(`Set config role for ${destChainId} chain id!`)
 
     await verifier.connect(counterSigner).AddPauser(pauserSigner.address, destChainId);
     console.log(`Added pauser ${pauserSigner.address} for ${destChainId} chain id!`)

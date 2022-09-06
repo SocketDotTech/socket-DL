@@ -12,6 +12,14 @@ export const timeout: {
   31338: 0
 }
 
-export const isSequential = true;
+export const waitTime: {
+  [key: number]: number
+} = {
+  31337: 0,
+  31338: 0
+}
+
+export const isFast = true;
+
 export const srcChainId = 31337;
 export const destChainId = 31337;

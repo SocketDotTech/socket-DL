@@ -20,9 +20,9 @@ export const main = async () => {
     // Socket deployments
     const hasher: Contract = await deployContractWithoutArgs("Hasher", socketSigner);
     const signatureVerifier: Contract = await deployContractWithoutArgs("SignatureVerifier", socketSigner);
-
-    const socket: Contract = await deploySocket(hasher, socketSigner);
     const notary: Contract = await deployNotary(signatureVerifier, socketSigner);
+
+    const socket: Contract = await deploySocket(hasher, socketSigner, notary);
 
     const accum: Contract = await deployAccumulator(socket, notary, socketSigner);
     const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
@@ -35,7 +35,7 @@ export const main = async () => {
 
     // configure
     const chainId = await getChainId();
-    await notary.connect(socketSigner).grantAttesterRole(/* remoteChainId */, signerAddress[chainId]);
+    await socket.connect(socketSigner).setNotary(notary.address);
 
     const addresses = {
       hasher: hasher.address,

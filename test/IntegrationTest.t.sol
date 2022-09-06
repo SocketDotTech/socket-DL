@@ -19,7 +19,8 @@ contract HappyTest is Test {
     address constant _raju = address(4);
     address constant _pauser = address(5);
     bool constant _isFast = false;
-
+    uint256 private _timeoutInSeconds = 0;
+    uint256 private _waitTimeInSeconds = 0;
     struct ChainContext {
         uint256 chainId;
         Socket socket__;
@@ -36,7 +37,7 @@ contract HappyTest is Test {
         uint256 amount;
         bytes payload;
         bytes proof;
-        uint256 nonce;
+        uint256 msgId;
         bytes32 root;
         uint256 packetId;
         bytes sig;
@@ -51,7 +52,7 @@ contract HappyTest is Test {
         _deploySocketContracts();
         _initAttester();
         _deployPlugContracts();
-        _configPlugContracts(true);
+        _configPlugContracts();
         _initPausers();
     }
 
@@ -63,14 +64,16 @@ contract HappyTest is Test {
         hoax(_raju);
         _a.counter__.remoteAddOperation(_b.chainId, amount);
         // TODO: get nonce from event
+
+        uint256 msgId = (uint64(_b.chainId) << 32) | 0;
         (
             bytes32 root,
             uint256 packetId,
             bytes memory sig
         ) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, 0, payload, proof);
+        _executePayloadOnDst(_a, _b, packetId, msgId, payload, proof);
 
         assertEq(_b.counter__.counter(), amount);
         assertEq(_a.counter__.counter(), 0);
@@ -90,9 +93,10 @@ contract HappyTest is Test {
             bytes memory sig
         ) = _getLatestSignature(_b);
 
-        _submitSignatureOnSrc(_b, sig);
+        uint256 msgId = (uint64(_a.chainId) << 32) | 0;
+        _verifyAndSealOnSrc(_b, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
-        _executePayloadOnDst(_b, _a, packetId, 0, payload, proof);
+        _executePayloadOnDst(_b, _a, packetId, msgId, payload, proof);
 
         assertEq(_a.counter__.counter(), amount);
         assertEq(_b.counter__.counter(), 0);
@@ -102,12 +106,12 @@ contract HappyTest is Test {
         uint256 addAmount = 100;
         bytes memory addPayload = abi.encode(keccak256("OP_ADD"), addAmount);
         bytes memory addProof = abi.encode(0);
-        uint256 addNonce = 0;
+        uint256 addMsgId = (uint64(_b.chainId) << 32) | 0;
 
         uint256 subAmount = 40;
         bytes memory subPayload = abi.encode(keccak256("OP_SUB"), subAmount);
         bytes memory subProof = abi.encode(0);
-        uint256 subNonce = 1;
+        uint256 subMsgId = (uint64(_b.chainId) << 32) | 1;
 
         bytes32 root;
         uint256 packetId;
@@ -117,96 +121,86 @@ contract HappyTest is Test {
         _a.counter__.remoteAddOperation(_b.chainId, addAmount);
 
         (root, packetId, sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, addNonce, addPayload, addProof);
+        _executePayloadOnDst(_a, _b, packetId, addMsgId, addPayload, addProof);
 
         hoax(_raju);
         _a.counter__.remoteSubOperation(_b.chainId, subAmount);
 
         (root, packetId, sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, subNonce, subPayload, subProof);
+        _executePayloadOnDst(_a, _b, packetId, subMsgId, subPayload, subProof);
 
         assertEq(_b.counter__.counter(), addAmount - subAmount);
         assertEq(_a.counter__.counter(), 0);
     }
 
     function testMessagesOutOfOrderForSequentialConfig() external {
-        _configPlugContracts(true);
+        _configPlugContracts();
 
         MessageContext memory m1;
         m1.amount = 100;
         m1.payload = abi.encode(keccak256("OP_ADD"), m1.amount);
         m1.proof = abi.encode(0);
-        m1.nonce = 0;
+        m1.msgId = (uint64(_b.chainId) << 32) | 0;
 
         hoax(_raju);
         _a.counter__.remoteAddOperation(_b.chainId, m1.amount);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, m1.sig);
+        _verifyAndSealOnSrc(_a, m1.sig);
         _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
 
         MessageContext memory m2;
         m2.amount = 40;
         m2.payload = abi.encode(keccak256("OP_ADD"), m2.amount);
         m2.proof = abi.encode(0);
-        m2.nonce = 1;
+        m2.msgId = (uint64(_b.chainId) << 32) | 1;
 
         hoax(_raju);
         _a.counter__.remoteAddOperation(_b.chainId, m2.amount);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, m2.sig);
+        _verifyAndSealOnSrc(_a, m2.sig);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
-
-        vm.expectRevert(ISocket.InvalidNonce.selector);
-        _executePayloadOnDst(
-            _a,
-            _b,
-            m2.packetId,
-            m2.nonce,
-            m2.payload,
-            m2.proof
-        );
     }
 
     function testMessagesOutOfOrderForNonSequentialConfig() external {
-        _configPlugContracts(false);
+        _configPlugContracts();
 
         MessageContext memory m1;
         m1.amount = 100;
         m1.payload = abi.encode(keccak256("OP_ADD"), m1.amount);
         m1.proof = abi.encode(0);
-        m1.nonce = 0;
+        m1.msgId = (uint64(_b.chainId) << 32) | 0;
 
         hoax(_raju);
         _a.counter__.remoteAddOperation(_b.chainId, m1.amount);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, m1.sig);
+        _verifyAndSealOnSrc(_a, m1.sig);
         _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
 
         MessageContext memory m2;
         m2.amount = 40;
         m2.payload = abi.encode(keccak256("OP_ADD"), m2.amount);
         m2.proof = abi.encode(0);
-        m2.nonce = 1;
+        m2.msgId = (uint64(_b.chainId) << 32) | 1;
 
         hoax(_raju);
         _a.counter__.remoteAddOperation(_b.chainId, m2.amount);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, m2.sig);
+        _verifyAndSealOnSrc(_a, m2.sig);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
 
         _executePayloadOnDst(
             _a,
             _b,
             m2.packetId,
-            m2.nonce,
+            m2.msgId,
             m2.payload,
             m2.proof
         );
@@ -214,7 +208,7 @@ contract HappyTest is Test {
             _a,
             _b,
             m1.packetId,
-            m1.nonce,
+            m1.msgId,
             m1.payload,
             m1.proof
         );
@@ -227,6 +221,7 @@ contract HappyTest is Test {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
+        uint256 msgId = (uint64(_b.chainId) << 32) | 0;
 
         hoax(_raju);
         _a.counter__.remoteAddOperation(_b.chainId, amount);
@@ -235,12 +230,12 @@ contract HappyTest is Test {
             uint256 packetId,
             bytes memory sig
         ) = _getLatestSignature(_a);
-        _submitSignatureOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, 0, payload, proof);
+        _executePayloadOnDst(_a, _b, packetId, msgId, payload, proof);
 
         vm.expectRevert(ISocket.MessageAlreadyExecuted.selector);
-        _executePayloadOnDst(_a, _b, packetId, 0, payload, proof);
+        _executePayloadOnDst(_a, _b, packetId, msgId, payload, proof);
 
         assertEq(_b.counter__.counter(), amount);
         assertEq(_a.counter__.counter(), 0);
@@ -252,18 +247,33 @@ contract HappyTest is Test {
         _a.hasher__ = new Hasher();
         _b.hasher__ = new Hasher();
 
-        // deploy socket
-        _a.socket__ = new Socket(_a.chainId, address(_a.hasher__));
-        _b.socket__ = new Socket(_b.chainId, address(_b.hasher__));
-
         _a.sigVerifier__ = new SignatureVerifier();
         _b.sigVerifier__ = new SignatureVerifier();
 
-        _a.notary__ = new AdminNotary(_a.chainId, address(_a.sigVerifier__));
-        _b.notary__ = new AdminNotary(_b.chainId, address(_b.sigVerifier__));
+        _a.notary__ = new AdminNotary(
+            address(_a.sigVerifier__),
+            _a.chainId,
+            _timeoutInSeconds,
+            _waitTimeInSeconds
+        );
+        _b.notary__ = new AdminNotary(
+            address(_b.sigVerifier__),
+            _b.chainId,
+            _timeoutInSeconds,
+            _waitTimeInSeconds
+        );
 
-        _a.socket__.setNotary(address(_a.notary__));
-        _b.socket__.setNotary(address(_b.notary__));
+        // deploy socket
+        _a.socket__ = new Socket(
+            _a.chainId,
+            address(_a.hasher__),
+            address(_a.notary__)
+        );
+        _b.socket__ = new Socket(
+            _b.chainId,
+            address(_b.hasher__),
+            address(_b.notary__)
+        );
 
         // deploy accumulators
         _a.accum__ = new SingleAccum(
@@ -307,12 +317,10 @@ contract HappyTest is Test {
 
         // deploy verifiers
         _a.verifier__ = new AcceptWithTimeout(
-            0,
             address(_a.socket__),
             _counterOwner
         );
         _b.verifier__ = new AcceptWithTimeout(
-            0,
             address(_b.socket__),
             _counterOwner
         );
@@ -320,15 +328,14 @@ contract HappyTest is Test {
         vm.stopPrank();
     }
 
-    function _configPlugContracts(bool isSequential_) private {
+    function _configPlugContracts() private {
         hoax(_counterOwner);
         _a.counter__.setSocketConfig(
             _b.chainId,
             address(_b.counter__),
             address(_a.accum__),
             address(_a.deaccum__),
-            address(_a.verifier__),
-            isSequential_
+            address(_a.verifier__)
         );
 
         hoax(_counterOwner);
@@ -337,8 +344,7 @@ contract HappyTest is Test {
             address(_a.counter__),
             address(_b.accum__),
             address(_b.deaccum__),
-            address(_b.verifier__),
-            isSequential_
+            address(_b.verifier__)
         );
     }
 
@@ -383,11 +389,11 @@ contract HappyTest is Test {
         }
     }
 
-    function _submitSignatureOnSrc(ChainContext storage src_, bytes memory sig_)
+    function _verifyAndSealOnSrc(ChainContext storage src_, bytes memory sig_)
         private
     {
         hoax(_attester);
-        src_.notary__.submitSignature(address(src_.accum__), sig_);
+        src_.notary__.verifyAndSeal(address(src_.accum__), sig_);
     }
 
     function _submitRootOnDst(
@@ -398,7 +404,7 @@ contract HappyTest is Test {
         bytes32 root_
     ) private {
         hoax(_raju);
-        dst_.notary__.submitRemoteRoot(
+        dst_.notary__.propose(
             src_.chainId,
             address(src_.accum__),
             packetId_,
@@ -411,7 +417,7 @@ contract HappyTest is Test {
         ChainContext storage src_,
         ChainContext storage dst_,
         uint256 packetId_,
-        uint256 nonce_,
+        uint256 msgId_,
         bytes memory payload_,
         bytes memory proof_
     ) private {
@@ -419,7 +425,7 @@ contract HappyTest is Test {
         dst_.socket__.execute(
             src_.chainId,
             address(dst_.counter__),
-            nonce_,
+            msgId_,
             _attester,
             address(src_.accum__),
             packetId_,
