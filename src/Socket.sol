@@ -2,13 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "./interfaces/ISocket.sol";
-import "./utils/AccessControl.sol";
 import "./interfaces/IAccumulator.sol";
 import "./interfaces/IDeaccumulator.sol";
 import "./interfaces/IVerifier.sol";
 import "./interfaces/IPlug.sol";
-import "./interfaces/INotary.sol";
 import "./interfaces/IHasher.sol";
+import "./utils/AccessControl.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
     enum MessageStatus {
@@ -17,14 +16,14 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         FAILED
     }
 
+    uint256 private immutable _chainId;
+
     // localPlug => remoteChainId => OutboundConfig
     mapping(address => mapping(uint256 => OutboundConfig))
         public outboundConfigs;
 
     // localPlug => remoteChainId => InboundConfig
     mapping(address => mapping(uint256 => InboundConfig)) public inboundConfigs;
-
-    uint256 private immutable _chainId;
 
     // localPlug => remoteChainId => nonce
     mapping(address => mapping(uint256 => uint256)) private _nonces;
@@ -35,25 +34,11 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     // msgId => message status
     mapping(uint256 => MessageStatus) private _messagesStatus;
 
-    INotary private _notary;
     IHasher private _hasher;
 
-    error NotAttested();
-
-    event Executed(bool success, string result);
-
-    constructor(
-        uint256 chainId_,
-        address hasher_,
-        address notary_
-    ) {
+    constructor(uint256 chainId_, address hasher_) {
         _setHasher(hasher_);
         _chainId = chainId_;
-        _notary = INotary(notary_);
-    }
-
-    function setNotary(address notary_) external onlyOwner {
-        _notary = INotary(notary_);
     }
 
     function setHasher(address hasher_) external onlyOwner {
@@ -93,7 +78,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         uint256 remoteChainId_,
         address localPlug_,
         uint256 msgId_,
-        address attester_,
         address remoteAccum_,
         uint256 packetId_,
         bytes calldata payload_,
@@ -103,51 +87,39 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_
         ];
 
-        bytes32 packedMessage = _hasher.packMessage(
-            remoteChainId_,
-            config.remotePlug,
-            _chainId,
-            localPlug_,
-            msgId_,
-            payload_
-        );
-
-        if (!_notary.isAttested(remoteAccum_, packetId_)) revert NotAttested();
-
         if (executedPackedMessages[msgId_] != address(0))
             revert MessageAlreadyExecuted();
         executedPackedMessages[msgId_] = msg.sender;
 
-        bytes32 root = _notary.getRemoteRoot(
-            remoteChainId_,
+        (bool isVerified, bytes32 root) = IVerifier(config.verifier).verifyRoot(
             remoteAccum_,
+            remoteChainId_,
             packetId_
         );
+
+        if (!isVerified) revert VerificationFailed();
+
         if (
             !IDeaccumulator(config.deaccum).verifyMessageInclusion(
                 root,
-                packedMessage,
+                _hasher.packMessage(
+                    remoteChainId_,
+                    config.remotePlug,
+                    _chainId,
+                    localPlug_,
+                    msgId_,
+                    payload_
+                ),
                 deaccumProof_
             )
         ) revert InvalidProof();
 
-        if (
-            !IVerifier(config.verifier).verifyRoot(
-                attester_,
-                remoteChainId_,
-                remoteAccum_,
-                packetId_,
-                root
-            )
-        ) revert VerificationFailed();
-
         try IPlug(localPlug_).inbound(payload_) {
             _messagesStatus[msgId_] = MessageStatus.SUCCESS;
             emit Executed(true, "");
-        } catch Error(string memory reason) {
-            // catch failing revert() and require()
+        } catch (bytes memory reason) {
             _messagesStatus[msgId_] = MessageStatus.FAILED;
-            emit Executed(false, reason);
+            emit ExecutedBytes(false, reason);
         }
     }
 

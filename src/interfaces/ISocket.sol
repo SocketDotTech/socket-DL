@@ -11,6 +11,11 @@ interface ISocket {
         bytes payload
     );
 
+    event Executed(bool success, string result);
+    event ExecutedBytes(bool success, bytes result);
+
+    error NotAttested();
+
     error InvalidRemotePlug();
 
     error InvalidProof();
@@ -25,7 +30,6 @@ interface ISocket {
         uint256 remoteChainId_,
         address localPlug_,
         uint256 msgId_,
-        address attester_,
         address remoteAccum_,
         uint256 packetId_,
         bytes calldata payload_,

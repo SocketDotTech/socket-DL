@@ -2,6 +2,13 @@
 pragma solidity ^0.8.0;
 
 interface INotary {
+    enum PacketStatus {
+        NOT_PROPOSED,
+        PROPOSED,
+        PAUSED,
+        CONFIRMED
+    }
+
     event SignatureVerifierSet(address verifier);
 
     event PacketVerifiedAndSealed(
@@ -70,8 +77,22 @@ interface INotary {
         uint256 packetId_
     ) external view returns (bytes32);
 
-    function isAttested(address accumAddress_, uint256 packetId_)
+    function getPacketStatus(
+        address accumAddress_,
+        uint256 remoteChainId_,
+        uint256 packetId_
+    ) external view returns (PacketStatus status);
+
+    function getPacketDetails(
+        address accumAddress_,
+        uint256 remoteChainId_,
+        uint256 packetId_
+    )
         external
         view
-        returns (bool);
+        returns (
+            bool isConfirmed,
+            uint256 packetArrivedAt,
+            bytes32 root
+        );
 }

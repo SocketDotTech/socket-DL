@@ -25,7 +25,6 @@ contract AdminNotaryTest is Test {
 
     AdminNotary _notary;
     SignatureVerifier _sigVerifier;
-    uint256 private _timeoutInSeconds = 100;
 
     function setUp() external {
         _attester = vm.addr(_attesterPrivateKey);
@@ -33,11 +32,7 @@ contract AdminNotaryTest is Test {
         _sigVerifier = new SignatureVerifier();
 
         hoax(_owner);
-        _notary = new AdminNotary(
-            address(_sigVerifier),
-            _chainId,
-            _timeoutInSeconds
-        );
+        _notary = new AdminNotary(address(_sigVerifier), _chainId);
     }
 
     function testDeployment() external {
@@ -53,7 +48,7 @@ contract AdminNotaryTest is Test {
         vm.expectRevert(AdminNotary.AttesterExists.selector);
         _notary.grantAttesterRole(_remoteChainId, _attester);
 
-        assertEq(_notary._totalAttestors(_remoteChainId), 1);
+        assertEq(_notary.totalAttestors(_remoteChainId), 1);
     }
 
     function testRevokeAttesterRole() external {
@@ -65,7 +60,7 @@ contract AdminNotaryTest is Test {
         _notary.revokeAttesterRole(_remoteChainId, _attester);
 
         assertFalse(_notary.hasRole(bytes32(_remoteChainId), _attester));
-        assertEq(_notary._totalAttestors(_remoteChainId), 0);
+        assertEq(_notary.totalAttestors(_remoteChainId), 0);
     }
 
     function testAddAccumulator() external {
@@ -90,7 +85,10 @@ contract AdminNotaryTest is Test {
         );
 
         // status not proposed
-        assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 0);
+        assertEq(
+            uint256(_notary.getPacketStatus(_accum, _remoteChainId, _packetId)),
+            0
+        );
 
         hoax(_raju);
         _notary.propose(
@@ -102,7 +100,10 @@ contract AdminNotaryTest is Test {
         );
 
         // status proposed
-        assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 1);
+        assertEq(
+            uint256(_notary.getPacketStatus(_accum, _remoteChainId, _packetId)),
+            1
+        );
 
         bytes32 altDigest = keccak256(
             abi.encode(_remoteChainId, _accum, _packetId, _root)
@@ -118,15 +119,18 @@ contract AdminNotaryTest is Test {
         //     _getSignature(altDigest, _altAttesterPrivateKey)
         // );
 
-        skip(_timeoutInSeconds - 1);
+        // skip(_timeoutInSeconds - 1);
 
         // status confirmed
-        assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 3);
+        assertEq(
+            uint256(_notary.getPacketStatus(_accum, _remoteChainId, _packetId)),
+            3
+        );
 
-        skip(_timeoutInSeconds);
+        // skip(_timeoutInSeconds);
 
-        // status timed out
-        assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 4);
+        // // status timed out
+        // assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 4);
     }
 
     function testConfirmRootFastPath() external {
@@ -141,7 +145,10 @@ contract AdminNotaryTest is Test {
             abi.encode(_remoteChainId, _accum, _packetId, _root)
         );
         // status not-proposed
-        assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 0);
+        assertEq(
+            uint256(_notary.getPacketStatus(_accum, _remoteChainId, _packetId)),
+            0
+        );
 
         hoax(_raju);
         _notary.propose(
@@ -153,7 +160,10 @@ contract AdminNotaryTest is Test {
         );
 
         // status proposed
-        assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 1);
+        assertEq(
+            uint256(_notary.getPacketStatus(_accum, _remoteChainId, _packetId)),
+            1
+        );
 
         hoax(_raju);
         _notary.confirmRoot(
@@ -165,7 +175,10 @@ contract AdminNotaryTest is Test {
         );
 
         // status confirmed
-        assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 3);
+        assertEq(
+            uint256(_notary.getPacketStatus(_accum, _remoteChainId, _packetId)),
+            3
+        );
     }
 
     function testVerifyAndSeal() external {
@@ -275,12 +288,9 @@ contract AdminNotaryTest is Test {
         );
 
         // status confirmed
-        skip(_timeoutInSeconds - 1);
-        assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 3);
-
         assertEq(
-            _notary._timeRecord(_accum, _packetId),
-            block.timestamp - _timeoutInSeconds
+            uint256(_notary.getPacketStatus(_accum, _remoteChainId, _packetId)),
+            3
         );
 
         hoax(_raju);

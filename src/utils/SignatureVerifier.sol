@@ -20,12 +20,17 @@ contract SignatureVerifier {
         return false;
     }
 
-    function recoverSigner(bytes32 hash_, bytes calldata signature_)
-        external
-        pure
-        returns (address signer)
-    {
-        signer = _recoverSigner(hash_, signature_);
+    function recoverSigner(
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 packetId_,
+        bytes32 root_,
+        bytes calldata signature_
+    ) external pure returns (address signer) {
+        bytes32 digest = keccak256(
+            abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
+        );
+        signer = _recoverSigner(digest, signature_);
     }
 
     function _recoverSigner(bytes32 hash_, bytes memory signature_)

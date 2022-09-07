@@ -6,7 +6,7 @@ import "../src/Socket.sol";
 import "../src/Notary/AdminNotary.sol";
 import "../src/accumulators/SingleAccum.sol";
 import "../src/deaccumulators/SingleDeaccum.sol";
-import "../src/verifiers/AcceptWithTimeout.sol";
+import "../src/verifiers/Verifier.sol";
 import "../src/examples/Messenger.sol";
 import "../src/utils/SignatureVerifier.sol";
 import "../src/utils/Hasher.sol";
@@ -22,6 +22,7 @@ contract PingPongTest is Test {
     address private constant _pauser = address(5);
     address private _attester;
     bool private _isFast = false;
+    uint256 timeoutInSeconds = 0;
 
     bytes private constant _PROOF = abi.encode(0);
     bytes private _payloadPing;
@@ -33,7 +34,7 @@ contract PingPongTest is Test {
         AdminNotary notary__;
         IAccumulator accum__;
         IDeaccumulator deaccum__;
-        AcceptWithTimeout verifier__;
+        Verifier verifier__;
         Messenger messenger__;
         SignatureVerifier sigVerifier__;
         Hasher hasher__;
@@ -122,30 +123,26 @@ contract PingPongTest is Test {
         _a.sigVerifier__ = new SignatureVerifier();
         _b.sigVerifier__ = new SignatureVerifier();
 
-        _a.notary__ = new AdminNotary(
-            address(_a.sigVerifier__),
-            _a.chainId,
-            0,
-            0
+        _a.notary__ = new AdminNotary(address(_a.sigVerifier__), _a.chainId);
+        _b.notary__ = new AdminNotary(address(_b.sigVerifier__), _b.chainId);
+
+        // deploy verifiers
+        _a.verifier__ = new Verifier(
+            address(_a.socket__),
+            _counterOwner,
+            address(_a.notary__),
+            timeoutInSeconds
         );
-        _b.notary__ = new AdminNotary(
-            address(_b.sigVerifier__),
-            _b.chainId,
-            0,
-            0
+        _b.verifier__ = new Verifier(
+            address(_b.socket__),
+            _counterOwner,
+            address(_b.notary__),
+            timeoutInSeconds
         );
 
         // deploy socket
-        _a.socket__ = new Socket(
-            _a.chainId,
-            address(_a.hasher__),
-            address(_a.notary__)
-        );
-        _b.socket__ = new Socket(
-            _b.chainId,
-            address(_b.hasher__),
-            address(_b.notary__)
-        );
+        _a.socket__ = new Socket(_a.chainId, address(_a.hasher__));
+        _b.socket__ = new Socket(_b.chainId, address(_b.hasher__));
 
         // deploy accumulators
         _a.accum__ = new SingleAccum(
@@ -187,16 +184,6 @@ contract PingPongTest is Test {
         _a.messenger__ = new Messenger(address(_a.socket__), _a.chainId);
         _b.messenger__ = new Messenger(address(_b.socket__), _b.chainId);
 
-        // deploy verifiers
-        _a.verifier__ = new AcceptWithTimeout(
-            address(_a.socket__),
-            _counterOwner
-        );
-        _b.verifier__ = new AcceptWithTimeout(
-            address(_b.socket__),
-            _counterOwner
-        );
-
         vm.stopPrank();
     }
 
@@ -223,15 +210,15 @@ contract PingPongTest is Test {
     function _initPausers() private {
         // add pausers
         hoax(_counterOwner);
-        _a.verifier__.AddPauser(_pauser, _b.chainId);
+        _a.verifier__.addPauser(_pauser, _b.chainId);
         hoax(_counterOwner);
-        _b.verifier__.AddPauser(_pauser, _a.chainId);
+        _b.verifier__.addPauser(_pauser, _a.chainId);
 
         // activate remote chains
         hoax(_pauser);
-        _a.verifier__.Activate(_b.chainId);
+        _a.verifier__.activate(_b.chainId);
         hoax(_pauser);
-        _b.verifier__.Activate(_a.chainId);
+        _b.verifier__.activate(_a.chainId);
     }
 
     function _getLatestSignature(ChainContext storage src_)
@@ -298,7 +285,6 @@ contract PingPongTest is Test {
             src_.chainId,
             address(dst_.messenger__),
             msgId_,
-            _attester,
             address(src_.accum__),
             packetId_,
             payload_,

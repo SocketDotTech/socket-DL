@@ -8,42 +8,33 @@ import "../interfaces/ISignatureVerifier.sol";
 
 contract AdminNotary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
-    uint256 public immutable _timeoutInSeconds;
     ISignatureVerifier private _signatureVerifier;
 
     // remoteChainId => accumAddress => packetId => root
     mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
-        private _remoteRoots;
+        public remoteRoots;
 
     // attester => accumAddress => packetId => is attested
     mapping(address => mapping(address => mapping(uint256 => bool)))
-        private _isAttested;
+        public isAttested;
 
     // accumAddress => packetId => total attestations
-    mapping(address => mapping(uint256 => uint256)) public _attestations;
+    mapping(address => mapping(uint256 => uint256)) public attestations;
 
     // accumAddress => packetId => bool (is paused)
-    mapping(address => mapping(uint256 => bool)) public _isPaused;
+    mapping(address => mapping(uint256 => bool)) public isPaused;
 
     // accumAddress => packetId => submitted at
-    mapping(address => mapping(uint256 => uint256)) public _timeRecord;
+    mapping(address => mapping(uint256 => uint256)) public timeRecord;
 
-    // chain => root => (accum, isChallenged, _timeRecord, _attestations, _isAttested(address))
+    // chain => root => (accum, isChallenged, timeRecord, attestations, isAttested(address))
     struct AccumDetails {
         uint256 remoteChainId;
         bool isFast;
     }
 
-    mapping(uint256 => uint256) public _totalAttestors;
-    mapping(address => AccumDetails) public _accumDetails;
-
-    enum PacketStatus {
-        NOT_PROPOSED,
-        PROPOSED,
-        PAUSED,
-        CONFIRMED,
-        TIMED_OUT
-    }
+    mapping(uint256 => uint256) public totalAttestors;
+    mapping(address => AccumDetails) public accumDetails;
 
     error AttesterExists();
 
@@ -63,14 +54,8 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     error RootNotFound();
 
-    // TODO: restrict the timeout durations to a few select options
-    constructor(
-        address signatureVerifier_,
-        uint256 chainId_,
-        uint256 timeoutInSeconds_
-    ) {
+    constructor(address signatureVerifier_, uint256 chainId_) {
         _chainId = chainId_;
-        _timeoutInSeconds = timeoutInSeconds_;
         _signatureVerifier = ISignatureVerifier(signatureVerifier_);
     }
 
@@ -79,9 +64,9 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         uint256 remoteChainId_,
         bool isFast_
     ) external onlyOwner {
-        if (_accumDetails[accumAddress_].remoteChainId != 0)
+        if (accumDetails[accumAddress_].remoteChainId != 0)
             revert AccumAlreadyAdded();
-        _accumDetails[accumAddress_] = AccumDetails(remoteChainId_, isFast_);
+        accumDetails[accumAddress_] = AccumDetails(remoteChainId_, isFast_);
     }
 
     function setSignatureVerifier(address signatureVerifier_)
@@ -98,7 +83,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         (bytes32 root, uint256 packetId) = IAccumulator(accumAddress_)
             .sealPacket();
 
-        address attester = _getAttester(
+        address attester = _signatureVerifier.recoverSigner(
             _chainId,
             accumAddress_,
             packetId,
@@ -108,7 +93,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
         if (
             !_hasRole(
-                _attesterRole(_accumDetails[accumAddress_].remoteChainId),
+                _attesterRole(accumDetails[accumAddress_].remoteChainId),
                 attester
             )
         ) revert InvalidAttester();
@@ -121,7 +106,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         uint256 packetId_,
         bytes calldata signature_
     ) external override {
-        address attester = _getAttester(
+        address attester = _signatureVerifier.recoverSigner(
             _chainId,
             accumAddress_,
             packetId_,
@@ -148,7 +133,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         bytes32 root_,
         bytes calldata signature_
     ) external override {
-        if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
+        if (remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
             revert AlreadyProposed();
 
         _verifyAndUpdateAttestations(
@@ -159,8 +144,8 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             signature_
         );
 
-        _remoteRoots[remoteChainId_][accumAddress_][packetId_] = root_;
-        _timeRecord[accumAddress_][packetId_] = block.timestamp;
+        remoteRoots[remoteChainId_][accumAddress_][packetId_] = root_;
+        timeRecord[accumAddress_][packetId_] = block.timestamp;
         emit Proposed(remoteChainId_, accumAddress_, packetId_, root_);
     }
 
@@ -171,8 +156,8 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         bytes32 root_,
         bytes calldata signature_
     ) external {
-        if (_isPaused[accumAddress_][packetId_]) revert PacketPaused();
-        if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != root_)
+        if (isPaused[accumAddress_][packetId_]) revert PacketPaused();
+        if (remoteRoots[remoteChainId_][accumAddress_][packetId_] != root_)
             revert RootNotFound();
 
         address attester = _verifyAndUpdateAttestations(
@@ -186,43 +171,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         emit RootConfirmed(attester, accumAddress_, packetId_);
     }
 
-    function pausePacketOnDest(
-        uint256 remoteChainId_,
-        address accumAddress_,
-        uint256 packetId_,
-        bytes32 root_
-    ) external {
-        if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != root_)
-            revert RootNotFound();
-        if (_isPaused[accumAddress_][packetId_]) revert PacketPaused();
-
-        _isPaused[accumAddress_][packetId_] = true;
-
-        emit PausedPacket(accumAddress_, packetId_, msg.sender);
-    }
-
-    function acceptPausedPacket(address accumAddress_, uint256 packetId_)
-        external
-        onlyOwner
-    {
-        if (!_isPaused[accumAddress_][packetId_]) revert PacketNotPaused();
-        _isPaused[accumAddress_][packetId_] = false;
-        emit PacketUnpaused(accumAddress_, packetId_);
-    }
-
-    function _getAttester(
-        uint256 remoteChainId_,
-        address accumAddress_,
-        uint256 packetId_,
-        bytes32 root_,
-        bytes calldata signature_
-    ) private returns (address attester) {
-        bytes32 digest = keccak256(
-            abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
-        );
-        attester = _signatureVerifier.recoverSigner(digest, signature_);
-    }
-
     function _verifyAndUpdateAttestations(
         uint256 remoteChainId_,
         address accumAddress_,
@@ -230,7 +178,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         bytes32 root_,
         bytes calldata signature_
     ) private returns (address attester) {
-        attester = _getAttester(
+        attester = _signatureVerifier.recoverSigner(
             remoteChainId_,
             accumAddress_,
             packetId_,
@@ -241,11 +189,82 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         if (!_hasRole(_attesterRole(remoteChainId_), attester))
             revert InvalidAttester();
 
-        if (_isAttested[attester][accumAddress_][packetId_])
+        if (isAttested[attester][accumAddress_][packetId_])
             revert AlreadyAttested();
 
-        _isAttested[attester][accumAddress_][packetId_] = true;
-        _attestations[accumAddress_][packetId_]++;
+        isAttested[attester][accumAddress_][packetId_] = true;
+        attestations[accumAddress_][packetId_]++;
+    }
+
+    function getPacketStatus(
+        address accumAddress_,
+        uint256 remoteChainId_,
+        uint256 packetId_
+    ) public view returns (PacketStatus status) {
+        uint256 packetArrivedAt = timeRecord[accumAddress_][packetId_];
+
+        if (packetArrivedAt == 0) return PacketStatus.NOT_PROPOSED;
+
+        // if paused at dest
+        if (isPaused[accumAddress_][packetId_]) return PacketStatus.PAUSED;
+
+        if (accumDetails[accumAddress_].isFast) {
+            if (
+                attestations[accumAddress_][packetId_] !=
+                totalAttestors[remoteChainId_]
+            ) return PacketStatus.PROPOSED;
+        }
+
+        return PacketStatus.CONFIRMED;
+    }
+
+    function getPacketDetails(
+        address accumAddress_,
+        uint256 remoteChainId_,
+        uint256 packetId_
+    )
+        external
+        view
+        returns (
+            bool isConfirmed,
+            uint256 packetArrivedAt,
+            bytes32 root
+        )
+    {
+        PacketStatus status = getPacketStatus(
+            accumAddress_,
+            remoteChainId_,
+            packetId_
+        );
+
+        if (status == PacketStatus.CONFIRMED) isConfirmed = true;
+        root = remoteRoots[remoteChainId_][accumAddress_][packetId_];
+        packetArrivedAt = timeRecord[accumAddress_][packetId_];
+    }
+
+    function pausePacketOnDest(
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 packetId_,
+        bytes32 root_
+    ) external {
+        if (remoteRoots[remoteChainId_][accumAddress_][packetId_] != root_)
+            revert RootNotFound();
+        if (isPaused[accumAddress_][packetId_]) revert PacketPaused();
+
+        // add check for msg.sender
+        isPaused[accumAddress_][packetId_] = true;
+
+        emit PausedPacket(accumAddress_, packetId_, msg.sender);
+    }
+
+    function acceptPausedPacket(address accumAddress_, uint256 packetId_)
+        external
+        onlyOwner
+    {
+        if (!isPaused[accumAddress_][packetId_]) revert PacketNotPaused();
+        isPaused[accumAddress_][packetId_] = false;
+        emit PacketUnpaused(accumAddress_, packetId_);
     }
 
     function grantAttesterRole(uint256 remoteChainId_, address attester_)
@@ -255,7 +274,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         if (_hasRole(_attesterRole(remoteChainId_), attester_))
             revert AttesterExists();
         _grantRole(_attesterRole(remoteChainId_), attester_);
-        _totalAttestors[remoteChainId_]++;
+        totalAttestors[remoteChainId_]++;
     }
 
     function revokeAttesterRole(uint256 remoteChainId_, address attester_)
@@ -265,7 +284,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         if (!_hasRole(_attesterRole(remoteChainId_), attester_))
             revert AttesterNotFound();
         _revokeRole(_attesterRole(remoteChainId_), attester_);
-        _totalAttestors[remoteChainId_]--;
+        totalAttestors[remoteChainId_]--;
     }
 
     function _setSignatureVerifier(address signatureVerifier_) private {
@@ -282,49 +301,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         view
         returns (AccumDetails memory)
     {
-        return _accumDetails[accumAddress_];
-    }
-
-    function isAttested(address accumAddress_, uint256 packetId_)
-        external
-        view
-        returns (bool)
-    {
-        PacketStatus status = getPacketStatus(accumAddress_, packetId_);
-
-        if (status == PacketStatus.CONFIRMED) return true;
-        return false;
-    }
-
-    function getPacketStatus(address accumAddress_, uint256 packetId_)
-        public
-        view
-        returns (PacketStatus status)
-    {
-        uint256 packetArrivedAt = _timeRecord[accumAddress_][packetId_];
-        if (packetArrivedAt == 0) return PacketStatus.NOT_PROPOSED;
-
-        uint256 remoteChainId = _accumDetails[accumAddress_].remoteChainId;
-
-        // if timed out
-        if (block.timestamp - packetArrivedAt > _timeoutInSeconds)
-            return PacketStatus.TIMED_OUT;
-
-        // if paused at dest
-        if (_isPaused[accumAddress_][packetId_]) return PacketStatus.PAUSED;
-
-        // if not 100% confirmed for fast path or consider wait time for slow path
-        if (_accumDetails[accumAddress_].isFast) {
-            if (
-                _attestations[accumAddress_][packetId_] !=
-                _totalAttestors[remoteChainId]
-            ) return PacketStatus.PROPOSED;
-        } else {
-            if (block.timestamp - packetArrivedAt < _timeoutInSeconds)
-                return PacketStatus.PROPOSED;
-        }
-
-        return PacketStatus.CONFIRMED;
+        return accumDetails[accumAddress_];
     }
 
     function signatureVerifier() external view returns (address) {
@@ -336,7 +313,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         view
         returns (uint256)
     {
-        return _attestations[accumAddress_][packetId_];
+        return attestations[accumAddress_][packetId_];
     }
 
     function getRemoteRoot(
@@ -344,7 +321,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         address accumAddress_,
         uint256 packetId_
     ) external view override returns (bytes32) {
-        return _remoteRoots[remoteChainId_][accumAddress_][packetId_];
+        return remoteRoots[remoteChainId_][accumAddress_][packetId_];
     }
 
     function chainId() external view returns (uint256) {
