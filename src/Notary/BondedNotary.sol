@@ -166,7 +166,7 @@ import "../interfaces/ISignatureVerifier.sol";
 //         _setSignatureVerifier(signatureVerifier_);
 //     }
 
-//     function verifyAndSeal(address accumAddress_, bytes calldata signature_)
+//     function verifyAndSeal(address accumAddress_, uint256 remoteChainId_, bytes calldata signature_)
 //         external
 //         override
 //     {

@@ -45,7 +45,7 @@ contract AdminNotaryTest is Test {
         _notary.grantAttesterRole(_remoteChainId, _attester);
 
         assertTrue(_notary.hasRole(bytes32(_remoteChainId), _attester));
-        vm.expectRevert(AdminNotary.AttesterExists.selector);
+        vm.expectRevert(INotary.AttesterExists.selector);
         _notary.grantAttesterRole(_remoteChainId, _attester);
 
         assertEq(_notary.totalAttestors(_remoteChainId), 1);
@@ -53,7 +53,7 @@ contract AdminNotaryTest is Test {
 
     function testRevokeAttesterRole() external {
         vm.startPrank(_owner);
-        vm.expectRevert(AdminNotary.AttesterNotFound.selector);
+        vm.expectRevert(INotary.AttesterNotFound.selector);
         _notary.revokeAttesterRole(_remoteChainId, _attester);
 
         _notary.grantAttesterRole(_remoteChainId, _attester);
@@ -68,7 +68,7 @@ contract AdminNotaryTest is Test {
         // should add accumulator
         _notary.addAccumulator(_accum, _remoteChainId, true);
 
-        vm.expectRevert(AdminNotary.AccumAlreadyAdded.selector);
+        vm.expectRevert(INotary.AccumAlreadyAdded.selector);
         _notary.addAccumulator(_accum, _remoteChainId, true);
     }
 
@@ -105,9 +105,9 @@ contract AdminNotaryTest is Test {
             1
         );
 
-        bytes32 altDigest = keccak256(
-            abi.encode(_remoteChainId, _accum, _packetId, _root)
-        );
+        // bytes32 altDigest = keccak256(
+        //     abi.encode(_remoteChainId, _accum, _packetId, _root)
+        // );
 
         // hoax(_raju);
         // vm.expectRevert(AdminNotary.NotFastPath.selector);
@@ -201,6 +201,7 @@ contract AdminNotaryTest is Test {
         hoax(_attester);
         _notary.verifyAndSeal(
             _accum,
+            _remoteChainId,
             _getSignature(digest, _attesterPrivateKey)
         );
 
@@ -208,6 +209,7 @@ contract AdminNotaryTest is Test {
         vm.expectRevert(INotary.InvalidAttester.selector);
         _notary.verifyAndSeal(
             _accum,
+            _remoteChainId,
             _getSignature(digest, _altAttesterPrivateKey)
         );
     }
@@ -232,6 +234,7 @@ contract AdminNotaryTest is Test {
         hoax(_attester);
         _notary.verifyAndSeal(
             _accum,
+            _remoteChainId,
             _getSignature(digest, _attesterPrivateKey)
         );
 
@@ -280,7 +283,10 @@ contract AdminNotaryTest is Test {
             _root
         );
 
-        assertEq(_notary.getConfirmations(_accum, _packetId), 1);
+        assertEq(
+            _notary.getConfirmations(_accum, _remoteChainId, _packetId),
+            1
+        );
 
         assertEq(
             _notary.getRemoteRoot(_remoteChainId, _accum, _packetId),

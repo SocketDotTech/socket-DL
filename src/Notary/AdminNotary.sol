@@ -7,52 +7,27 @@ import "../interfaces/IAccumulator.sol";
 import "../interfaces/ISignatureVerifier.sol";
 
 contract AdminNotary is INotary, AccessControl(msg.sender) {
+    struct PacketDetails {
+        bool isPaused;
+        bytes32 remoteRoots;
+        uint256 attestations;
+        uint256 timeRecord;
+    }
+
     uint256 private immutable _chainId;
     ISignatureVerifier private _signatureVerifier;
 
-    // remoteChainId => accumAddress => packetId => root
-    mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
-        public remoteRoots;
+    // attester => accumAddr + chainId + packetId => is attested
+    mapping(address => mapping(uint256 => bool)) public isAttested;
 
-    // attester => accumAddress => packetId => is attested
-    mapping(address => mapping(address => mapping(uint256 => bool)))
-        public isAttested;
-
-    // accumAddress => packetId => total attestations
-    mapping(address => mapping(uint256 => uint256)) public attestations;
-
-    // accumAddress => packetId => bool (is paused)
-    mapping(address => mapping(uint256 => bool)) public isPaused;
-
-    // accumAddress => packetId => submitted at
-    mapping(address => mapping(uint256 => uint256)) public timeRecord;
-
-    // chain => root => (accum, isChallenged, timeRecord, attestations, isAttested(address))
-    struct AccumDetails {
-        uint256 remoteChainId;
-        bool isFast;
-    }
-
+    // chainId => total attesters registered
     mapping(uint256 => uint256) public totalAttestors;
-    mapping(address => AccumDetails) public accumDetails;
 
-    error AttesterExists();
+    // accumAddr + chainId
+    mapping(uint256 => bool) public isFast;
 
-    error AttesterNotFound();
-
-    error AccumAlreadyAdded();
-
-    error AlreadyAttested();
-
-    error NotFastPath();
-
-    error PacketPaused();
-
-    error PacketNotPaused();
-
-    error ZeroAddress();
-
-    error RootNotFound();
+    // accumAddr + chainId + packetId
+    mapping(uint256 => PacketDetails) private _packetDetails;
 
     constructor(address signatureVerifier_, uint256 chainId_) {
         _chainId = chainId_;
@@ -64,9 +39,8 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         uint256 remoteChainId_,
         bool isFast_
     ) external onlyOwner {
-        if (accumDetails[accumAddress_].remoteChainId != 0)
-            revert AccumAlreadyAdded();
-        accumDetails[accumAddress_] = AccumDetails(remoteChainId_, isFast_);
+        uint256 accumId = _pack(accumAddress_, remoteChainId_);
+        isFast[accumId] = isFast_;
     }
 
     function setSignatureVerifier(address signatureVerifier_)
@@ -76,10 +50,11 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         _setSignatureVerifier(signatureVerifier_);
     }
 
-    function verifyAndSeal(address accumAddress_, bytes calldata signature_)
-        external
-        override
-    {
+    function verifyAndSeal(
+        address accumAddress_,
+        uint256 remoteChainId_,
+        bytes calldata signature_
+    ) external override {
         (bytes32 root, uint256 packetId) = IAccumulator(accumAddress_)
             .sealPacket();
 
@@ -91,12 +66,8 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             signature_
         );
 
-        if (
-            !_hasRole(
-                _attesterRole(accumDetails[accumAddress_].remoteChainId),
-                attester
-            )
-        ) revert InvalidAttester();
+        if (!_hasRole(_attesterRole(remoteChainId_), attester))
+            revert InvalidAttester();
         emit PacketVerifiedAndSealed(accumAddress_, packetId, signature_);
     }
 
@@ -133,8 +104,15 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         bytes32 root_,
         bytes calldata signature_
     ) external override {
-        if (remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
-            revert AlreadyProposed();
+        uint256 packedId = _packWithPacketId(
+            accumAddress_,
+            remoteChainId_,
+            packetId_
+        );
+
+        PacketDetails storage packedDetails = _packetDetails[packedId];
+
+        if (packedDetails.remoteRoots != 0) revert AlreadyProposed();
 
         _verifyAndUpdateAttestations(
             remoteChainId_,
@@ -144,8 +122,8 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             signature_
         );
 
-        remoteRoots[remoteChainId_][accumAddress_][packetId_] = root_;
-        timeRecord[accumAddress_][packetId_] = block.timestamp;
+        packedDetails.remoteRoots = root_;
+        packedDetails.timeRecord = block.timestamp;
         emit Proposed(remoteChainId_, accumAddress_, packetId_, root_);
     }
 
@@ -156,8 +134,14 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         bytes32 root_,
         bytes calldata signature_
     ) external {
-        if (isPaused[accumAddress_][packetId_]) revert PacketPaused();
-        if (remoteRoots[remoteChainId_][accumAddress_][packetId_] != root_)
+        uint256 packedId = _packWithPacketId(
+            accumAddress_,
+            remoteChainId_,
+            packetId_
+        );
+
+        if (_packetDetails[packedId].isPaused) revert PacketPaused();
+        if (_packetDetails[packedId].remoteRoots != root_)
             revert RootNotFound();
 
         address attester = _verifyAndUpdateAttestations(
@@ -189,11 +173,17 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         if (!_hasRole(_attesterRole(remoteChainId_), attester))
             revert InvalidAttester();
 
-        if (isAttested[attester][accumAddress_][packetId_])
-            revert AlreadyAttested();
+        uint256 packedId = _packWithPacketId(
+            accumAddress_,
+            remoteChainId_,
+            packetId_
+        );
+        PacketDetails storage packedDetails = _packetDetails[packedId];
 
-        isAttested[attester][accumAddress_][packetId_] = true;
-        attestations[accumAddress_][packetId_]++;
+        if (isAttested[attester][packedId]) revert AlreadyAttested();
+
+        isAttested[attester][packedId] = true;
+        packedDetails.attestations++;
     }
 
     function getPacketStatus(
@@ -201,16 +191,22 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         uint256 remoteChainId_,
         uint256 packetId_
     ) public view returns (PacketStatus status) {
-        uint256 packetArrivedAt = timeRecord[accumAddress_][packetId_];
+        uint256 packedId = _packWithPacketId(
+            accumAddress_,
+            remoteChainId_,
+            packetId_
+        );
+        uint256 accumId = _pack(accumAddress_, remoteChainId_);
+        uint256 packetArrivedAt = _packetDetails[packedId].timeRecord;
 
         if (packetArrivedAt == 0) return PacketStatus.NOT_PROPOSED;
 
         // if paused at dest
-        if (isPaused[accumAddress_][packetId_]) return PacketStatus.PAUSED;
+        if (_packetDetails[packedId].isPaused) return PacketStatus.PAUSED;
 
-        if (accumDetails[accumAddress_].isFast) {
+        if (isFast[accumId]) {
             if (
-                attestations[accumAddress_][packetId_] !=
+                _packetDetails[packedId].attestations !=
                 totalAttestors[remoteChainId_]
             ) return PacketStatus.PROPOSED;
         }
@@ -231,6 +227,11 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             bytes32 root
         )
     {
+        uint256 packedId = _packWithPacketId(
+            accumAddress_,
+            remoteChainId_,
+            packetId_
+        );
         PacketStatus status = getPacketStatus(
             accumAddress_,
             remoteChainId_,
@@ -238,8 +239,8 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         );
 
         if (status == PacketStatus.CONFIRMED) isConfirmed = true;
-        root = remoteRoots[remoteChainId_][accumAddress_][packetId_];
-        packetArrivedAt = timeRecord[accumAddress_][packetId_];
+        root = _packetDetails[packedId].remoteRoots;
+        packetArrivedAt = _packetDetails[packedId].timeRecord;
     }
 
     function pausePacketOnDest(
@@ -248,22 +249,36 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         uint256 packetId_,
         bytes32 root_
     ) external {
-        if (remoteRoots[remoteChainId_][accumAddress_][packetId_] != root_)
-            revert RootNotFound();
-        if (isPaused[accumAddress_][packetId_]) revert PacketPaused();
+        uint256 packedId = _packWithPacketId(
+            accumAddress_,
+            remoteChainId_,
+            packetId_
+        );
+        PacketDetails storage packedDetails = _packetDetails[packedId];
+
+        if (packedDetails.remoteRoots != root_) revert RootNotFound();
+        if (packedDetails.isPaused) revert PacketPaused();
 
         // add check for msg.sender
-        isPaused[accumAddress_][packetId_] = true;
+        packedDetails.isPaused = true;
 
         emit PausedPacket(accumAddress_, packetId_, msg.sender);
     }
 
-    function acceptPausedPacket(address accumAddress_, uint256 packetId_)
-        external
-        onlyOwner
-    {
-        if (!isPaused[accumAddress_][packetId_]) revert PacketNotPaused();
-        isPaused[accumAddress_][packetId_] = false;
+    function acceptPausedPacket(
+        address accumAddress_,
+        uint256 remoteChainId_,
+        uint256 packetId_
+    ) external onlyOwner {
+        uint256 packedId = _packWithPacketId(
+            accumAddress_,
+            remoteChainId_,
+            packetId_
+        );
+        PacketDetails storage packedDetails = _packetDetails[packedId];
+
+        if (!packedDetails.isPaused) revert PacketNotPaused();
+        packedDetails.isPaused = false;
         emit PacketUnpaused(accumAddress_, packetId_);
     }
 
@@ -296,24 +311,21 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         return bytes32(chainId_);
     }
 
-    function getAccumDetails(address accumAddress_)
-        external
-        view
-        returns (AccumDetails memory)
-    {
-        return accumDetails[accumAddress_];
-    }
-
     function signatureVerifier() external view returns (address) {
         return address(_signatureVerifier);
     }
 
-    function getConfirmations(address accumAddress_, uint256 packetId_)
-        external
-        view
-        returns (uint256)
-    {
-        return attestations[accumAddress_][packetId_];
+    function getConfirmations(
+        address accumAddress_,
+        uint256 remoteChainId_,
+        uint256 packetId_
+    ) external view returns (uint256) {
+        uint256 packedId = _packWithPacketId(
+            accumAddress_,
+            remoteChainId_,
+            packetId_
+        );
+        return _packetDetails[packedId].attestations;
     }
 
     function getRemoteRoot(
@@ -321,10 +333,57 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         address accumAddress_,
         uint256 packetId_
     ) external view override returns (bytes32) {
-        return remoteRoots[remoteChainId_][accumAddress_][packetId_];
+        uint256 packedId = _packWithPacketId(
+            accumAddress_,
+            remoteChainId_,
+            packetId_
+        );
+        return _packetDetails[packedId].remoteRoots;
     }
 
     function chainId() external view returns (uint256) {
         return _chainId;
+    }
+
+    function _packWithPacketId(
+        address accumAddr_,
+        uint256 chainId_,
+        uint256 packetId_
+    ) internal pure returns (uint256 packed) {
+        packed =
+            (uint256(uint160(accumAddr_)) << 96) |
+            (chainId_ << 64) |
+            packetId_;
+    }
+
+    function _unpackWithPacketId(uint256 accumId_)
+        internal
+        pure
+        returns (
+            address accumAddr_,
+            uint256 chainId_,
+            uint256 packetId_
+        )
+    {
+        accumAddr_ = address(uint160(accumId_ >> 96));
+        packetId_ = uint64(accumId_);
+        chainId_ = uint32(accumId_ >> 64);
+    }
+
+    function _pack(address accumAddr_, uint256 chainId_)
+        internal
+        pure
+        returns (uint256 packed)
+    {
+        packed = (uint256(uint160(accumAddr_)) << 32) | chainId_;
+    }
+
+    function _unpack(uint256 accumId_)
+        internal
+        pure
+        returns (address accumAddr_, uint256 chainId_)
+    {
+        accumAddr_ = address(uint160(accumId_ >> 32));
+        chainId_ = uint32(accumId_);
     }
 }

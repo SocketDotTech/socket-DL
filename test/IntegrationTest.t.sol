@@ -71,7 +71,7 @@ contract HappyTest is Test {
             uint256 packetId,
             bytes memory sig
         ) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(_a, _b, packetId, msgId, payload, proof);
 
@@ -94,7 +94,7 @@ contract HappyTest is Test {
         ) = _getLatestSignature(_b);
 
         uint256 msgId = (uint64(_a.chainId) << 32) | 0;
-        _verifyAndSealOnSrc(_b, sig);
+        _verifyAndSealOnSrc(_b, _a, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
         _executePayloadOnDst(_b, _a, packetId, msgId, payload, proof);
 
@@ -121,7 +121,7 @@ contract HappyTest is Test {
         _a.counter__.remoteAddOperation(_b.chainId, addAmount);
 
         (root, packetId, sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(_a, _b, packetId, addMsgId, addPayload, addProof);
 
@@ -129,7 +129,7 @@ contract HappyTest is Test {
         _a.counter__.remoteSubOperation(_b.chainId, subAmount);
 
         (root, packetId, sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(_a, _b, packetId, subMsgId, subPayload, subProof);
 
@@ -150,7 +150,7 @@ contract HappyTest is Test {
         _a.counter__.remoteAddOperation(_b.chainId, m1.amount);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, m1.sig);
+        _verifyAndSealOnSrc(_a, _b, m1.sig);
         _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
 
         MessageContext memory m2;
@@ -163,7 +163,7 @@ contract HappyTest is Test {
         _a.counter__.remoteAddOperation(_b.chainId, m2.amount);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, m2.sig);
+        _verifyAndSealOnSrc(_a, _b, m2.sig);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
     }
 
@@ -180,7 +180,7 @@ contract HappyTest is Test {
         _a.counter__.remoteAddOperation(_b.chainId, m1.amount);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, m1.sig);
+        _verifyAndSealOnSrc(_a, _b, m1.sig);
         _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
 
         MessageContext memory m2;
@@ -193,7 +193,7 @@ contract HappyTest is Test {
         _a.counter__.remoteAddOperation(_b.chainId, m2.amount);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, m2.sig);
+        _verifyAndSealOnSrc(_a, _b, m2.sig);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
 
         _executePayloadOnDst(
@@ -230,7 +230,7 @@ contract HappyTest is Test {
             uint256 packetId,
             bytes memory sig
         ) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(_a, _b, packetId, msgId, payload, proof);
 
@@ -375,11 +375,13 @@ contract HappyTest is Test {
         }
     }
 
-    function _verifyAndSealOnSrc(ChainContext storage src_, bytes memory sig_)
-        private
-    {
+    function _verifyAndSealOnSrc(
+        ChainContext storage src_,
+        ChainContext storage dest_,
+        bytes memory sig_
+    ) private {
         hoax(_attester);
-        src_.notary__.verifyAndSeal(address(src_.accum__), sig_);
+        src_.notary__.verifyAndSeal(address(src_.accum__), dest_.chainId, sig_);
     }
 
     function _submitRootOnDst(

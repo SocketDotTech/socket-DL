@@ -73,7 +73,7 @@ contract PingPongTest is Test {
             bytes memory sig
         ) = _getLatestSignature(_a);
 
-        _verifyAndSealOnSrc(_a, sig);
+        _verifyAndSealOnSrc(_a, _b.chainId, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(_a, _b, packetId, msgId_, _payloadPing, _PROOF);
 
@@ -87,7 +87,7 @@ contract PingPongTest is Test {
             bytes memory sig
         ) = _getLatestSignature(_b);
 
-        _verifyAndSealOnSrc(_b, sig);
+        _verifyAndSealOnSrc(_b, _a.chainId, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
         _executePayloadOnDst(_b, _a, packetId, msgId_, _payloadPong, _PROOF);
 
@@ -248,11 +248,13 @@ contract PingPongTest is Test {
         }
     }
 
-    function _verifyAndSealOnSrc(ChainContext storage src_, bytes memory sig_)
-        private
-    {
+    function _verifyAndSealOnSrc(
+        ChainContext storage src_,
+        uint256 chainId,
+        bytes memory sig_
+    ) private {
         hoax(_attester);
-        src_.notary__.verifyAndSeal(address(src_.accum__), sig_);
+        src_.notary__.verifyAndSeal(address(src_.accum__), chainId, sig_);
     }
 
     function _submitRootOnDst(

@@ -53,8 +53,29 @@ interface INotary {
 
     error AlreadyProposed();
 
-    function verifyAndSeal(address accumAddress_, bytes calldata signature_)
-        external;
+    error AttesterExists();
+
+    error AttesterNotFound();
+
+    error AccumAlreadyAdded();
+
+    error AlreadyAttested();
+
+    error NotFastPath();
+
+    error PacketPaused();
+
+    error PacketNotPaused();
+
+    error ZeroAddress();
+
+    error RootNotFound();
+
+    function verifyAndSeal(
+        address accumAddress_,
+        uint256 remoteChainId_,
+        bytes calldata signature_
+    ) external;
 
     function challengeSignature(
         address accumAddress_,
