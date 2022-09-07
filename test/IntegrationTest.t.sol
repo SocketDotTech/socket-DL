@@ -20,6 +20,7 @@ contract HappyTest is Test {
     address constant _pauser = address(5);
     bool constant _isFast = false;
     uint256 private _timeoutInSeconds = 0;
+
     struct ChainContext {
         uint256 chainId;
         Socket socket__;
@@ -407,7 +408,8 @@ contract HappyTest is Test {
         bytes memory proof_
     ) private {
         hoax(_raju);
-        dst_.socket__.execute(
+
+        ISocket.ExecuteParams memory params = ISocket.ExecuteParams(
             src_.chainId,
             address(dst_.counter__),
             msgId_,
@@ -416,5 +418,7 @@ contract HappyTest is Test {
             payload_,
             proof_
         );
+
+        dst_.socket__.execute(params);
     }
 }

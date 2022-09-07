@@ -281,7 +281,7 @@ contract PingPongTest is Test {
         bytes memory proof_
     ) private {
         hoax(_raju);
-        dst_.socket__.execute(
+        ISocket.ExecuteParams memory params = ISocket.ExecuteParams(
             src_.chainId,
             address(dst_.messenger__),
             msgId_,
@@ -290,5 +290,7 @@ contract PingPongTest is Test {
             payload_,
             proof_
         );
+
+        dst_.socket__.execute(params);
     }
 }

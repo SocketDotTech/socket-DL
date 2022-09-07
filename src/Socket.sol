@@ -74,51 +74,49 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         );
     }
 
-    function execute(
-        uint256 remoteChainId_,
-        address localPlug_,
-        uint256 msgId_,
-        address remoteAccum_,
-        uint256 packetId_,
-        bytes calldata payload_,
-        bytes calldata deaccumProof_
-    ) external override {
-        InboundConfig memory config = inboundConfigs[localPlug_][
-            remoteChainId_
-        ];
-
-        if (executedPackedMessages[msgId_] != address(0))
+    function execute(ISocket.ExecuteParams calldata executeParams_)
+        external
+        override
+    {
+        if (executedPackedMessages[executeParams_.msgId] != address(0))
             revert MessageAlreadyExecuted();
-        executedPackedMessages[msgId_] = msg.sender;
+        executedPackedMessages[executeParams_.msgId] = msg.sender;
 
-        (bool isVerified, bytes32 root) = IVerifier(config.verifier).verifyRoot(
-            remoteAccum_,
-            remoteChainId_,
-            packetId_
-        );
+        {
+            InboundConfig memory config = inboundConfigs[
+                executeParams_.localPlug
+            ][executeParams_.remoteChainId];
 
-        if (!isVerified) revert VerificationFailed();
+            (bool isVerified, bytes32 root) = IVerifier(config.verifier)
+                .verifyRoot(
+                    executeParams_.remoteAccum,
+                    executeParams_.remoteChainId,
+                    executeParams_.packetId
+                );
 
-        if (
-            !IDeaccumulator(config.deaccum).verifyMessageInclusion(
-                root,
-                _hasher.packMessage(
-                    remoteChainId_,
-                    config.remotePlug,
-                    _chainId,
-                    localPlug_,
-                    msgId_,
-                    payload_
-                ),
-                deaccumProof_
-            )
-        ) revert InvalidProof();
+            if (!isVerified) revert VerificationFailed();
 
-        try IPlug(localPlug_).inbound(payload_) {
-            _messagesStatus[msgId_] = MessageStatus.SUCCESS;
+            if (
+                !IDeaccumulator(config.deaccum).verifyMessageInclusion(
+                    root,
+                    _hasher.packMessage(
+                        executeParams_.remoteChainId,
+                        config.remotePlug,
+                        _chainId,
+                        executeParams_.localPlug,
+                        executeParams_.msgId,
+                        executeParams_.payload
+                    ),
+                    executeParams_.deaccumProof
+                )
+            ) revert InvalidProof();
+        }
+
+        try IPlug(executeParams_.localPlug).inbound(executeParams_.payload) {
+            _messagesStatus[executeParams_.msgId] = MessageStatus.SUCCESS;
             emit Executed(true, "");
         } catch (bytes memory reason) {
-            _messagesStatus[msgId_] = MessageStatus.FAILED;
+            _messagesStatus[executeParams_.msgId] = MessageStatus.FAILED;
             emit ExecutedBytes(false, reason);
         }
     }

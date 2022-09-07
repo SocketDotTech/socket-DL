@@ -2,6 +2,17 @@
 pragma solidity ^0.8.0;
 
 interface ISocket {
+    // to handle stack too deep
+    struct ExecuteParams {
+        uint256 remoteChainId;
+        address localPlug;
+        uint256 msgId;
+        address remoteAccum;
+        uint256 packetId;
+        bytes payload;
+        bytes deaccumProof;
+    }
+
     event MessageTransmitted(
         uint256 srcChainId,
         address srcPlug,
@@ -26,15 +37,7 @@ interface ISocket {
 
     function outbound(uint256 remoteChainId_, bytes calldata payload_) external;
 
-    function execute(
-        uint256 remoteChainId_,
-        address localPlug_,
-        uint256 msgId_,
-        address remoteAccum_,
-        uint256 packetId_,
-        bytes calldata payload_,
-        bytes calldata deaccumProof_
-    ) external;
+    function execute(ExecuteParams calldata executeParams_) external;
 
     // TODO: add confs and blocking/non-blocking
     struct InboundConfig {
