@@ -126,6 +126,10 @@ contract PingPongTest is Test {
         _a.notary__ = new AdminNotary(address(_a.sigVerifier__), _a.chainId);
         _b.notary__ = new AdminNotary(address(_b.sigVerifier__), _b.chainId);
 
+        // deploy socket
+        _a.socket__ = new Socket(_a.chainId, address(_a.hasher__));
+        _b.socket__ = new Socket(_b.chainId, address(_b.hasher__));
+
         // deploy verifiers
         _a.verifier__ = new Verifier(
             address(_a.socket__),
@@ -139,10 +143,6 @@ contract PingPongTest is Test {
             address(_b.notary__),
             timeoutInSeconds
         );
-
-        // deploy socket
-        _a.socket__ = new Socket(_a.chainId, address(_a.hasher__));
-        _b.socket__ = new Socket(_b.chainId, address(_b.hasher__));
 
         // deploy accumulators
         _a.accum__ = new SingleAccum(

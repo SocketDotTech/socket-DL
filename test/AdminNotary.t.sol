@@ -67,9 +67,6 @@ contract AdminNotaryTest is Test {
         vm.startPrank(_owner);
         // should add accumulator
         _notary.addAccumulator(_accum, _remoteChainId, true);
-
-        vm.expectRevert(INotary.AccumAlreadyAdded.selector);
-        _notary.addAccumulator(_accum, _remoteChainId, true);
     }
 
     function testConfirmRootSlowPath() external {
@@ -99,38 +96,11 @@ contract AdminNotaryTest is Test {
             _getSignature(digest, _attesterPrivateKey)
         );
 
-        // status proposed
-        assertEq(
-            uint256(_notary.getPacketStatus(_accum, _remoteChainId, _packetId)),
-            1
-        );
-
-        // bytes32 altDigest = keccak256(
-        //     abi.encode(_remoteChainId, _accum, _packetId, _root)
-        // );
-
-        // hoax(_raju);
-        // vm.expectRevert(AdminNotary.NotFastPath.selector);
-        // _notary.confirmRoot(
-        //     _remoteChainId,
-        //     _accum,
-        //     _packetId,
-        //     _root,
-        //     _getSignature(altDigest, _altAttesterPrivateKey)
-        // );
-
-        // skip(_timeoutInSeconds - 1);
-
         // status confirmed
         assertEq(
             uint256(_notary.getPacketStatus(_accum, _remoteChainId, _packetId)),
             3
         );
-
-        // skip(_timeoutInSeconds);
-
-        // // status timed out
-        // assertEq(uint256(_notary.getPacketStatus(_accum, _packetId)), 4);
     }
 
     function testConfirmRootFastPath() external {

@@ -1,14 +1,17 @@
-import { ethers } from "hardhat";
+import { ethers, getChainId } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Contract, ContractFactory } from "ethers";
+import { timeout } from "../config";
 
-export default async function deployVerifier(socket: Contract, signer: SignerWithAddress) {
+export default async function deployVerifier(socket: Contract, notary: Contract, signer: SignerWithAddress) {
   try {
-    const Notary: ContractFactory = await ethers.getContractFactory("AcceptWithTimeout");
-    const notaryContract: Contract = await Notary.connect(signer).deploy(socket.address, signer.address);
-    await notaryContract.deployed();
+    const chainId: any = await getChainId();
 
-    return notaryContract;
+    const verifier: ContractFactory = await ethers.getContractFactory("Verifier");
+    const verifierContract: Contract = await verifier.connect(signer).deploy(socket.address, signer.address, notary.address, timeout[chainId]);
+    await verifierContract.deployed();
+
+    return verifierContract;
   } catch (error) {
     throw error;
   }

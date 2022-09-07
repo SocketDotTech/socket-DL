@@ -2,12 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import {Verifier} from "../src/verifiers/Verifier.sol";
+import "../src/verifiers/Verifier.sol";
+import "../src/mocks/MockNotary.sol";
 
 contract VerifierTest is Test {
     address DUMMY_MANAGER = address(1);
     address DUMMY_SOCKET = address(2);
-    address DUMMY_NOTARY = address(3);
     address DUMMY_PAUSER = address(4);
     uint256 chainId = 1;
     uint256 timeoutInSeconds = 100;
@@ -15,10 +15,12 @@ contract VerifierTest is Test {
     Verifier verifier;
 
     function setUp() public {
+        MockNotary notary__ = new MockNotary();
+
         verifier = new Verifier(
             DUMMY_SOCKET,
             DUMMY_MANAGER,
-            DUMMY_NOTARY,
+            address(notary__),
             timeoutInSeconds
         );
         prankAndaddPauser(DUMMY_PAUSER, chainId);

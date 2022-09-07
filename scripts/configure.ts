@@ -30,7 +30,7 @@ export const main = async () => {
     const counter = await getInstance("Counter", srcConfig["counter"]);
     const accum = await getInstance("SingleAccum", srcConfig["accum"]);
     const deaccum = await getInstance("SingleDeaccum", srcConfig["deaccum"]);
-    const verifier = await getInstance("AcceptWithTimeout", srcConfig["verifier"]);
+    const verifier = await getInstance("Verifier", srcConfig["verifier"]);
 
     await notary.connect(socketSigner).grantAttesterRole(destChainId, signerAddress[srcChainId]);
     console.log(`Added ${signerAddress[srcChainId]} as an attester for ${destChainId} chain id!`)
@@ -47,10 +47,10 @@ export const main = async () => {
     );
     console.log(`Set config role for ${destChainId} chain id!`)
 
-    await verifier.connect(counterSigner).AddPauser(pauserSigner.address, destChainId);
+    await verifier.connect(counterSigner).addPauser(pauserSigner.address, destChainId);
     console.log(`Added pauser ${pauserSigner.address} for ${destChainId} chain id!`)
 
-    await verifier.connect(pauserSigner).Activate(destChainId);
+    await verifier.connect(pauserSigner).activate(destChainId);
     console.log(`Activated verifier for ${destChainId} chain id!`)
   } catch (error) {
     console.log("Error while sending transaction", error);

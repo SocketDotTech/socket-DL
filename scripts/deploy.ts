@@ -6,7 +6,6 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithoutArgs, getChainId, storeAddresses } from "../scripts/utils";
 
 import { deployAccumulator, deployCounter, deployNotary, deploySocket, deployVerifier } from "../scripts/contracts";
-import { signerAddress } from "../scripts/config";
 
 export const main = async () => {
   try {
@@ -22,12 +21,12 @@ export const main = async () => {
     const signatureVerifier: Contract = await deployContractWithoutArgs("SignatureVerifier", socketSigner);
     const notary: Contract = await deployNotary(signatureVerifier, socketSigner);
 
-    const socket: Contract = await deploySocket(hasher, socketSigner, notary);
+    const socket: Contract = await deploySocket(hasher, socketSigner);
 
     const accum: Contract = await deployAccumulator(socket, notary, socketSigner);
     const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
 
-    const verifier: Contract = await deployVerifier(socket, counterSigner)
+    const verifier: Contract = await deployVerifier(socket, notary, counterSigner)
 
     // plug deployments
     const counter: Contract = await deployCounter(socket, counterSigner);
@@ -35,7 +34,6 @@ export const main = async () => {
 
     // configure
     const chainId = await getChainId();
-    await socket.connect(socketSigner).setNotary(notary.address);
 
     const addresses = {
       hasher: hasher.address,
