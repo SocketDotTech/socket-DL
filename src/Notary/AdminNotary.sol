@@ -5,8 +5,9 @@ import "../interfaces/INotary.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
 import "../interfaces/ISignatureVerifier.sol";
+import "../utils/ReentrancyGuard.sol";
 
-contract AdminNotary is INotary, AccessControl(msg.sender) {
+contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
     struct PacketDetails {
         bool isPaused;
         bytes32 remoteRoots;
@@ -29,25 +30,32 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     // accumAddr + chainId + packetId
     mapping(uint256 => PacketDetails) private _packetDetails;
 
+    mapping(uint256 => uint256) public attesterDestGasLimit;
+    mapping(uint256 => uint256) public socketGasPrice;
+
+    uint256 public attesterSrcGasLimit;
+    uint256 public bufferPrice;
+
     constructor(address signatureVerifier_, uint256 chainId_) {
         _chainId = chainId_;
         _signatureVerifier = ISignatureVerifier(signatureVerifier_);
     }
 
-    function addAccumulator(
-        address accumAddress_,
-        uint256 remoteChainId_,
-        bool isFast_
-    ) external onlyOwner {
-        uint256 accumId = _pack(accumAddress_, remoteChainId_);
-        isFast[accumId] = isFast_;
+    function setGasPrice(uint256 remoteChainId_, uint256 socketGasPrice_)
+        external
+    {
+        if (!_hasRole(_attesterRole(remoteChainId_), msg.sender))
+            revert InvalidAttester();
+
+        socketGasPrice[remoteChainId_] = socketGasPrice_;
     }
 
-    function setSignatureVerifier(address signatureVerifier_)
+    function setGasDetails(uint256 attesterSrcGasLimit_, uint256 bufferPrice_)
         external
         onlyOwner
     {
-        _setSignatureVerifier(signatureVerifier_);
+        attesterSrcGasLimit = attesterSrcGasLimit_;
+        bufferPrice = bufferPrice_;
     }
 
     function verifyAndSeal(
@@ -343,6 +351,40 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     function chainId() external view returns (uint256) {
         return _chainId;
+    }
+
+    function getFeeDetails(uint256 remoteChainId_)
+        external
+        view
+        returns (
+            uint256,
+            uint256,
+            uint256,
+            uint256
+        )
+    {
+        return (
+            attesterSrcGasLimit,
+            attesterDestGasLimit[remoteChainId_],
+            socketGasPrice[remoteChainId_],
+            bufferPrice
+        );
+    }
+
+    function addAccumulator(
+        address accumAddress_,
+        uint256 remoteChainId_,
+        bool isFast_
+    ) external onlyOwner {
+        uint256 accumId = _pack(accumAddress_, remoteChainId_);
+        isFast[accumId] = isFast_;
+    }
+
+    function setSignatureVerifier(address signatureVerifier_)
+        external
+        onlyOwner
+    {
+        _setSignatureVerifier(signatureVerifier_);
     }
 
     function _packWithPacketId(

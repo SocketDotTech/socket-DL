@@ -9,6 +9,7 @@ interface ISocket {
         uint256 msgId;
         address remoteAccum;
         uint256 packetId;
+        uint256 msgGasLimit;
         bytes payload;
         bytes deaccumProof;
     }
@@ -19,6 +20,7 @@ interface ISocket {
         uint256 dstChainId,
         address dstPlug,
         uint256 msgId,
+        uint256 msgGasLimit,
         bytes payload
     );
 
@@ -35,9 +37,29 @@ interface ISocket {
 
     error MessageAlreadyExecuted();
 
-    function outbound(uint256 remoteChainId_, bytes calldata payload_) external;
+    error InsufficientGasLimit();
 
-    function execute(ExecuteParams calldata executeParams_) external;
+    /**
+     * @notice registers a message
+     * @dev Packs the message and includes it in a packet with accumulator
+     * @param remoteChainId_ the destination chain id
+     * @param msgGasLimit_ the gas limit needed to execute the payload on destination
+     * @param payload_ the data which is needed by plug at inbound call on destination
+     */
+    function outbound(
+        uint256 remoteChainId_,
+        uint256 msgGasLimit_,
+        bytes calldata payload_
+    ) external payable;
+
+    /**
+     * @notice executes a message
+     * @param executeParams_ the details needed for message execution
+     */
+    function execute(
+        ExecuteParams calldata executeParams_,
+        uint256 expectedGasLimit
+    ) external;
 
     // TODO: add confs and blocking/non-blocking
     struct InboundConfig {
@@ -51,6 +73,13 @@ interface ISocket {
         address remotePlug;
     }
 
+    /**
+     * @notice sets the config specific to the plug
+     * @param remoteChainId_ the destination chain id
+     * @param remotePlug_ address of plug present at destination chain to call inbound
+     * @param deaccum_ address of deaccum which is used to verify proof
+     * @param verifier_ address of verifier responsible for final packet validity checks
+     */
     function setInboundConfig(
         uint256 remoteChainId_,
         address remotePlug_,
@@ -58,6 +87,12 @@ interface ISocket {
         address verifier_
     ) external;
 
+    /**
+     * @notice sets the config specific to the plug
+     * @param remoteChainId_ the destination chain id
+     * @param remotePlug_ address of plug present at destination chain to call inbound
+     * @param accum_ address of accumulator which is used for collecting the messages and form packets
+     */
     function setOutboundConfig(
         uint256 remoteChainId_,
         address remotePlug_,

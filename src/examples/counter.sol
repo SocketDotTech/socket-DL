@@ -35,14 +35,22 @@ contract Counter is IPlug {
         _subOperation(amount);
     }
 
-    function remoteAddOperation(uint256 chainId, uint256 amount) external {
+    function remoteAddOperation(
+        uint256 chainId,
+        uint256 amount,
+        uint256 msgGasLimit
+    ) external payable {
         bytes memory payload = abi.encode(OP_ADD, amount);
-        _outbound(chainId, payload);
+        _outbound(chainId, msgGasLimit, payload);
     }
 
-    function remoteSubOperation(uint256 chainId, uint256 amount) external {
+    function remoteSubOperation(
+        uint256 chainId,
+        uint256 amount,
+        uint256 msgGasLimit
+    ) external payable {
         bytes memory payload = abi.encode(OP_SUB, amount);
-        _outbound(chainId, payload);
+        _outbound(chainId, msgGasLimit, payload);
     }
 
     function inbound(bytes calldata payload) external override {
@@ -61,8 +69,12 @@ contract Counter is IPlug {
         }
     }
 
-    function _outbound(uint256 targetChain, bytes memory payload) private {
-        ISocket(socket).outbound(targetChain, payload);
+    function _outbound(
+        uint256 targetChain,
+        uint256 msgGasLimit,
+        bytes memory payload
+    ) private {
+        ISocket(socket).outbound(targetChain, msgGasLimit, payload);
     }
 
     //

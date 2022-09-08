@@ -8,6 +8,7 @@ contract Hasher {
         uint256 dstChainId,
         address dstPlug,
         uint256 msgId,
+        uint256 msgGasLimit,
         bytes calldata payload
     ) external pure returns (bytes32) {
         return
@@ -18,6 +19,7 @@ contract Hasher {
                     dstChainId,
                     dstPlug,
                     msgId,
+                    msgGasLimit,
                     payload
                 )
             );

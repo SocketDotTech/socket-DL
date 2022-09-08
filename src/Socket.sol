@@ -7,6 +7,7 @@ import "./interfaces/IDeaccumulator.sol";
 import "./interfaces/IVerifier.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/IHasher.sol";
+import "./interfaces/IVault.sol";
 import "./utils/AccessControl.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
@@ -35,31 +36,42 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     mapping(uint256 => MessageStatus) private _messagesStatus;
 
     IHasher private _hasher;
+    IVault private _vault;
 
-    constructor(uint256 chainId_, address hasher_) {
+    constructor(
+        uint256 chainId_,
+        address hasher_,
+        address vault_
+    ) {
         _setHasher(hasher_);
         _chainId = chainId_;
+        _vault = IVault(vault_);
     }
 
     function setHasher(address hasher_) external onlyOwner {
         _setHasher(hasher_);
     }
 
-    function outbound(uint256 remoteChainId_, bytes calldata payload_)
-        external
-        override
-    {
+    function outbound(
+        uint256 remoteChainId_,
+        uint256 msgGasLimit_,
+        bytes calldata payload_
+    ) external payable override {
         OutboundConfig memory config = outboundConfigs[msg.sender][
             remoteChainId_
         ];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
         uint256 msgId = (uint64(remoteChainId_) << 32) | nonce;
+
+        _vault.deductFee{value: msg.value}(remoteChainId_, msgGasLimit_);
+
         bytes32 packedMessage = _hasher.packMessage(
             _chainId,
             msg.sender,
             remoteChainId_,
             config.remotePlug,
             msgId,
+            msgGasLimit_,
             payload_
         );
 
@@ -70,47 +82,51 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             remoteChainId_,
             config.remotePlug,
             msgId,
+            msgGasLimit_,
             payload_
         );
     }
 
-    function execute(ISocket.ExecuteParams calldata executeParams_)
-        external
-        override
-    {
+    function execute(
+        ISocket.ExecuteParams calldata executeParams_,
+        uint256 expectedGasLimit
+    ) external override {
         if (executedPackedMessages[executeParams_.msgId] != address(0))
             revert MessageAlreadyExecuted();
+        if (expectedGasLimit > executeParams_.msgGasLimit)
+            revert InsufficientGasLimit();
+
         executedPackedMessages[executeParams_.msgId] = msg.sender;
 
-        {
-            InboundConfig memory config = inboundConfigs[
-                executeParams_.localPlug
-            ][executeParams_.remoteChainId];
+        InboundConfig memory config = inboundConfigs[executeParams_.localPlug][
+            executeParams_.remoteChainId
+        ];
 
-            (bool isVerified, bytes32 root) = IVerifier(config.verifier)
-                .verifyRoot(
-                    executeParams_.remoteAccum,
+        (bool isVerified, bytes32 root) = IVerifier(config.verifier).verifyRoot(
+            executeParams_.remoteAccum,
+            executeParams_.remoteChainId,
+            executeParams_.packetId
+        );
+
+        if (!isVerified) revert VerificationFailed();
+
+        if (
+            !IDeaccumulator(config.deaccum).verifyMessageInclusion(
+                root,
+                _hasher.packMessage(
                     executeParams_.remoteChainId,
-                    executeParams_.packetId
-                );
+                    config.remotePlug,
+                    _chainId,
+                    executeParams_.localPlug,
+                    executeParams_.msgId,
+                    executeParams_.msgGasLimit,
+                    executeParams_.payload
+                ),
+                executeParams_.deaccumProof
+            )
+        ) revert InvalidProof();
 
-            if (!isVerified) revert VerificationFailed();
-
-            if (
-                !IDeaccumulator(config.deaccum).verifyMessageInclusion(
-                    root,
-                    _hasher.packMessage(
-                        executeParams_.remoteChainId,
-                        config.remotePlug,
-                        _chainId,
-                        executeParams_.localPlug,
-                        executeParams_.msgId,
-                        executeParams_.payload
-                    ),
-                    executeParams_.deaccumProof
-                )
-            ) revert InvalidProof();
-        }
+        _vault.mintFee(msg.sender, executeParams_.msgGasLimit * tx.gasprice);
 
         try IPlug(executeParams_.localPlug).inbound(executeParams_.payload) {
             _messagesStatus[executeParams_.msgId] = MessageStatus.SUCCESS;

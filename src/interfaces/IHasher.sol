@@ -8,6 +8,7 @@ interface IHasher {
         uint256 dstChainId,
         address dstPlug,
         uint256 msgId,
+        uint256 msgGasLimit,
         bytes calldata payload
     ) external returns (bytes32);
 }

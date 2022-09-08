@@ -11,14 +11,21 @@ contract Messenger is IPlug {
 
     address private _owner;
     bytes32 private _message;
+    uint256 public msgGasLimit;
 
     bytes32 private constant _PING = keccak256("PING");
     bytes32 private constant _PONG = keccak256("PONG");
 
-    constructor(address socket_, uint256 chainId_) {
+    constructor(
+        address socket_,
+        uint256 chainId_,
+        uint256 msgGasLimit_
+    ) {
         _socket = socket_;
         _chainId = chainId_;
         _owner = msg.sender;
+
+        msgGasLimit = msgGasLimit_;
     }
 
     modifier onlyOwner() {
@@ -79,6 +86,6 @@ contract Messenger is IPlug {
     }
 
     function _outbound(uint256 targetChain_, bytes memory payload_) private {
-        ISocket(_socket).outbound(targetChain_, payload_);
+        ISocket(_socket).outbound(targetChain_, msgGasLimit, payload_);
     }
 }
