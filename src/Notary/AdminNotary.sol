@@ -5,9 +5,8 @@ import "../interfaces/INotary.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
 import "../interfaces/ISignatureVerifier.sol";
-import "../utils/ReentrancyGuard.sol";
 
-contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
+contract AdminNotary is INotary, AccessControl(msg.sender) {
     struct PacketDetails {
         bool isPaused;
         bytes32 remoteRoots;

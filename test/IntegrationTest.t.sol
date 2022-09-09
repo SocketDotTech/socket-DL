@@ -20,6 +20,7 @@ contract HappyTest is Test {
     address constant _pauser = address(5);
     bool constant _isFast = false;
     uint256 private _timeoutInSeconds = 0;
+    uint256 private _msgGasLimit = 10000;
 
     struct ChainContext {
         uint256 chainId;
@@ -62,7 +63,7 @@ contract HappyTest is Test {
         bytes memory proof = abi.encode(0);
 
         hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, amount);
+        _a.counter__.remoteAddOperation(_b.chainId, amount, _msgGasLimit);
         // TODO: get nonce from event
 
         uint256 msgId = (uint64(_b.chainId) << 32) | 0;
@@ -85,7 +86,7 @@ contract HappyTest is Test {
         bytes memory proof = abi.encode(0);
 
         hoax(_raju);
-        _b.counter__.remoteAddOperation(_a.chainId, amount);
+        _b.counter__.remoteAddOperation(_a.chainId, amount, _msgGasLimit);
 
         (
             bytes32 root,
@@ -118,7 +119,7 @@ contract HappyTest is Test {
         bytes memory sig;
 
         hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, addAmount);
+        _a.counter__.remoteAddOperation(_b.chainId, addAmount, _msgGasLimit);
 
         (root, packetId, sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, sig);
@@ -126,7 +127,7 @@ contract HappyTest is Test {
         _executePayloadOnDst(_a, _b, packetId, addMsgId, addPayload, addProof);
 
         hoax(_raju);
-        _a.counter__.remoteSubOperation(_b.chainId, subAmount);
+        _a.counter__.remoteSubOperation(_b.chainId, subAmount, _msgGasLimit);
 
         (root, packetId, sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, sig);
@@ -147,7 +148,7 @@ contract HappyTest is Test {
         m1.msgId = (uint64(_b.chainId) << 32) | 0;
 
         hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, m1.amount);
+        _a.counter__.remoteAddOperation(_b.chainId, m1.amount, _msgGasLimit);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, m1.sig);
@@ -160,7 +161,7 @@ contract HappyTest is Test {
         m2.msgId = (uint64(_b.chainId) << 32) | 1;
 
         hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, m2.amount);
+        _a.counter__.remoteAddOperation(_b.chainId, m2.amount, _msgGasLimit);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, m2.sig);
@@ -177,7 +178,7 @@ contract HappyTest is Test {
         m1.msgId = (uint64(_b.chainId) << 32) | 0;
 
         hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, m1.amount);
+        _a.counter__.remoteAddOperation(_b.chainId, m1.amount, _msgGasLimit);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, m1.sig);
@@ -190,7 +191,7 @@ contract HappyTest is Test {
         m2.msgId = (uint64(_b.chainId) << 32) | 1;
 
         hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, m2.amount);
+        _a.counter__.remoteAddOperation(_b.chainId, m2.amount, _msgGasLimit);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, m2.sig);
@@ -224,7 +225,7 @@ contract HappyTest is Test {
         uint256 msgId = (uint64(_b.chainId) << 32) | 0;
 
         hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, amount);
+        _a.counter__.remoteAddOperation(_b.chainId, amount, _msgGasLimit);
         (
             bytes32 root,
             uint256 packetId,

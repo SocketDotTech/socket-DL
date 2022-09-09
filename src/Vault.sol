@@ -2,11 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../utils/AccessControl.sol";
-import "../interfaces/IVault.sol";
-import "../interfaces/INotary.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./utils/AccessControl.sol";
+import "./interfaces/IVault.sol";
+import "./interfaces/INotary.sol";
 
-contract Vault is IVault, AccessControl(msg.sender), ERC20 {
+contract Vault is IVault, AccessControl, ERC20, ReentrancyGuard {
     address public socket;
     INotary public notary;
 
@@ -16,6 +17,11 @@ contract Vault is IVault, AccessControl(msg.sender), ERC20 {
     bytes32 ATTESTER_ROLE = keccak256("ATTESTER");
 
     error InsufficientFee();
+    error NotMinter();
+
+    event TokenBridged(address account_, uint256 amount_, uint256 chainId_);
+    event Claimed(address account_, uint256 amount_);
+    event FeeDeducted(uint256 amount_);
 
     constructor(
         string memory name_,
@@ -23,7 +29,7 @@ contract Vault is IVault, AccessControl(msg.sender), ERC20 {
         address owner_,
         address notary_
     ) ERC20(name_, symbol_) AccessControl(owner_) {
-        notary = notary_;
+        notary = INotary(notary_);
     }
 
     function deductFee(uint256 remoteChainId_, uint256 msgGasLimit_)
@@ -39,19 +45,17 @@ contract Vault is IVault, AccessControl(msg.sender), ERC20 {
         ) = notary.getFeeDetails(remoteChainId_);
 
         uint256 fee = (attesterSrcGasLimit * tx.gasprice) +
-            (msgGasLimit_ + attesterDestGasLimit[remoteChainId_]) *
+            (msgGasLimit_ + attesterDestGasLimit) *
             socketGasPrice +
             bufferPrice;
 
-        (bool success, ) = address(_vault).call{value: fee}("");
-        require(success, "Transfer failed.");
-
         if (fee > msg.value) revert InsufficientFee();
+        emit FeeDeducted(msg.value);
     }
 
     function mintFee(address executer_, uint256 amount_) external {
         if (!_hasRole(MINTER_ROLE, _msgSender())) revert NotMinter();
-        super._mint(account_, amount_);
+        super._mint(executer_, amount_);
         require(address(this).balance >= totalSupply());
     }
 
