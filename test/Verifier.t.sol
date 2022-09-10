@@ -1,71 +1,69 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
+import "./Setup.sol";
 
-import "forge-std/Test.sol";
-import "../src/verifiers/Verifier.sol";
-import "../src/mocks/MockNotary.sol";
-
-contract VerifierTest is Test {
+contract VerifierTest is Setup {
     address DUMMY_MANAGER = address(1);
     address DUMMY_SOCKET = address(2);
     address DUMMY_PAUSER = address(4);
     uint256 chainId = 1;
+    uint256 destChainId = 2;
+
     uint256 timeoutInSeconds = 100;
 
     Verifier verifier;
+    ChainContext cc;
 
     function setUp() public {
-        MockNotary notary__ = new MockNotary();
+        uint256[] memory attesters = new uint256[](2);
+        attesters[0] = _attesterPrivateKey;
+        attesters[1] = _altAttesterPrivateKey;
 
-        verifier = new Verifier(
+        (cc.sigVerifier__, cc.notary__) = _deployNotary(chainId, _socketOwner);
+
+        cc.verifier__ = new Verifier(
             DUMMY_SOCKET,
             DUMMY_MANAGER,
-            address(notary__),
+            address(cc.notary__),
             timeoutInSeconds
         );
-        prankAndaddPauser(DUMMY_PAUSER, chainId);
-        vm.prank(DUMMY_PAUSER);
-        verifier.activate(chainId);
+
+        _initVerifier(cc, destChainId);
     }
 
     function testDeployment() public {
-        assertEq(verifier.manager(), DUMMY_MANAGER);
-        assertEq(verifier.socket(), DUMMY_SOCKET);
-        bool isActive = verifier.isChainActive(chainId);
+        assertEq(cc.verifier__.manager(), DUMMY_MANAGER);
+        assertEq(cc.verifier__.socket(), DUMMY_SOCKET);
+        bool isActive = cc.verifier__.isChainActive(chainId);
         assertTrue(isActive);
     }
 
     function testPausing() public {
-        bool isPauser = verifier.isPauser(DUMMY_PAUSER, chainId);
+        bool isPauser = cc.verifier__.isPauser(DUMMY_PAUSER, chainId);
         assertTrue(isPauser);
 
         vm.prank(DUMMY_SOCKET);
-        (bool valid, ) = verifier.verifyRoot(address(0), chainId, 0);
+        (bool valid, ) = cc.verifier__.verifyRoot(address(0), chainId, 0);
         assertTrue(valid);
 
         vm.prank(DUMMY_PAUSER);
-        verifier.pause(chainId);
+        cc.verifier__.pause(chainId);
 
-        assertFalse(verifier.isChainActive(chainId));
+        assertFalse(cc.verifier__.isChainActive(chainId));
     }
 
     function testVerifyAfterpause() public {
-        bool isPauser = verifier.isPauser(DUMMY_PAUSER, chainId);
+        bool isPauser = cc.verifier__.isPauser(DUMMY_PAUSER, chainId);
         assertTrue(isPauser);
 
         vm.prank(DUMMY_SOCKET);
-        (bool valid, ) = verifier.verifyRoot(address(0), chainId, 0);
+        (bool valid, ) = cc.verifier__.verifyRoot(address(0), chainId, 0);
         assertTrue(valid);
 
         vm.prank(DUMMY_PAUSER);
-        verifier.pause(chainId);
+        cc.verifier__.pause(chainId);
 
-        (valid, ) = verifier.verifyRoot(address(0), chainId, 0);
+        (valid, ) = cc.verifier__.verifyRoot(address(0), chainId, 0);
         assertFalse(valid);
-    }
-
-    function prankAndaddPauser(address pauser, uint256 chainId_) internal {
-        vm.prank(DUMMY_MANAGER);
-        verifier.addPauser(pauser, chainId_);
     }
 }

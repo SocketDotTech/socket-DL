@@ -10,7 +10,6 @@ import "../src/verifiers/Verifier.sol";
 import "../src/utils/SignatureVerifier.sol";
 import "../src/utils/Hasher.sol";
 import "../src/plugs/Vault.sol";
-import "../src/examples/counter.sol";
 
 contract Setup is Test {
     address constant _socketOwner = address(1);
@@ -18,8 +17,11 @@ contract Setup is Test {
     address constant _raju = address(4);
     address constant _pauser = address(5);
     address _attester;
+    address _altAttester;
 
-    uint256 constant _attesterPrivateKey = uint256(3);
+    uint256 constant _attesterPrivateKey = uint256(1);
+    uint256 constant _altAttesterPrivateKey = uint256(2);
+
     uint256 internal _timeoutInSeconds = 0;
     uint256 internal _msgGasLimit = 10000;
 

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Setup.sol";
+import "../src/examples/Counter.sol";
 
 contract HappyTest is Setup {
     Counter srcCounter__;
