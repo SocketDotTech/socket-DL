@@ -18,6 +18,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     }
 
     uint256 private immutable _chainId;
+    uint256 public executionGasCost;
 
     // localPlug => remoteChainId => OutboundConfig
     mapping(address => mapping(uint256 => OutboundConfig))
@@ -87,14 +88,12 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         );
     }
 
-    function execute(
-        ISocket.ExecuteParams calldata executeParams_,
-        uint256 expectedGasLimit
-    ) external override {
+    function execute(ISocket.ExecuteParams calldata executeParams_)
+        external
+        override
+    {
         if (executedPackedMessages[executeParams_.msgId] != address(0))
             revert MessageAlreadyExecuted();
-        if (expectedGasLimit > executeParams_.msgGasLimit)
-            revert InsufficientGasLimit();
 
         executedPackedMessages[executeParams_.msgId] = msg.sender;
 
@@ -126,9 +125,20 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             )
         ) revert InvalidProof();
 
-        _vault.mintFee(msg.sender, executeParams_.msgGasLimit * tx.gasprice);
+        _vault.mintFee(
+            msg.sender,
+            (executionGasCost + executeParams_.msgGasLimit),
+            executeParams_.remoteChainId
+        );
 
-        try IPlug(executeParams_.localPlug).inbound(executeParams_.payload) {
+        if (gasleft() < executeParams_.msgGasLimit)
+            revert InsufficientGasLimit();
+
+        try
+            IPlug(executeParams_.localPlug).inbound{
+                gas: executeParams_.msgGasLimit
+            }(executeParams_.payload)
+        {
             _messagesStatus[executeParams_.msgId] = MessageStatus.SUCCESS;
             emit Executed(true, "");
         } catch (bytes memory reason) {

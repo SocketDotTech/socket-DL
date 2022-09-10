@@ -29,32 +29,9 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     // accumAddr + chainId + packetId
     mapping(uint256 => PacketDetails) private _packetDetails;
 
-    mapping(uint256 => uint256) public attesterDestGasLimit;
-    mapping(uint256 => uint256) public socketGasPrice;
-
-    uint256 public attesterSrcGasLimit;
-    uint256 public bufferPrice;
-
     constructor(address signatureVerifier_, uint256 chainId_) {
         _chainId = chainId_;
         _signatureVerifier = ISignatureVerifier(signatureVerifier_);
-    }
-
-    function setGasPrice(uint256 remoteChainId_, uint256 socketGasPrice_)
-        external
-    {
-        if (!_hasRole(_attesterRole(remoteChainId_), msg.sender))
-            revert InvalidAttester();
-
-        socketGasPrice[remoteChainId_] = socketGasPrice_;
-    }
-
-    function setGasDetails(uint256 attesterSrcGasLimit_, uint256 bufferPrice_)
-        external
-        onlyOwner
-    {
-        attesterSrcGasLimit = attesterSrcGasLimit_;
-        bufferPrice = bufferPrice_;
     }
 
     function verifyAndSeal(
@@ -350,24 +327,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     function chainId() external view returns (uint256) {
         return _chainId;
-    }
-
-    function getFeeDetails(uint256 remoteChainId_)
-        external
-        view
-        returns (
-            uint256,
-            uint256,
-            uint256,
-            uint256
-        )
-    {
-        return (
-            attesterSrcGasLimit,
-            attesterDestGasLimit[remoteChainId_],
-            socketGasPrice[remoteChainId_],
-            bufferPrice
-        );
     }
 
     function addAccumulator(

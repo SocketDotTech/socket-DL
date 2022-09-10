@@ -56,10 +56,7 @@ interface ISocket {
      * @notice executes a message
      * @param executeParams_ the details needed for message execution
      */
-    function execute(
-        ExecuteParams calldata executeParams_,
-        uint256 expectedGasLimit
-    ) external;
+    function execute(ExecuteParams calldata executeParams_) external;
 
     // TODO: add confs and blocking/non-blocking
     struct InboundConfig {

@@ -116,14 +116,4 @@ interface INotary {
             uint256 packetArrivedAt,
             bytes32 root
         );
-
-    function getFeeDetails(uint256 remoteChainId_)
-        external
-        view
-        returns (
-            uint256,
-            uint256,
-            uint256,
-            uint256
-        );
 }
