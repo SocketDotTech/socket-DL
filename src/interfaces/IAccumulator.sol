@@ -1,26 +1,69 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.0;
 
-abstract contract IAccumulator {
-    bytes32 public SOCKET_ROLE = keccak256("SOCKET_ROLE");
-    bytes32 public NOTARY_ROLE = keccak256("NOTARY_ROLE");
-
+interface IAccumulator {
+    /**
+     * @notice emits the new address of socket
+     * @param socket socket address
+     */
     event SocketSet(address indexed socket);
+
+    /**
+     * @notice emits the new address of notary
+     * @param notary notary address
+     */
     event NotarySet(address indexed notary);
+
+    /**
+     * @notice emits the message details when it arrives
+     * @param packedMessage the message packed with payload, fees and config
+     * @param packetId an incremental id assigned to each new packet
+     * @param newRootHash the packed message hash (to be replaced with the root hash of the merkle tree)
+     */
     event MessageAdded(
         bytes32 packedMessage,
         uint256 packetId,
         bytes32 newRootHash
     );
+
+    /**
+     * @notice emits when the packet is sealed and indicates it can be send to destination
+     * @param rootHash the packed message hash (to be replaced with the root hash of the merkle tree)
+     * @param packetId an incremental id assigned to each new packet
+     */
     event PacketComplete(bytes32 rootHash, uint256 packetId);
 
-    // caller only Socket
-    function addPackedMessage(bytes32 packedMessage) external virtual;
+    /**
+     * @notice adds the packed message to a packet
+     * @dev this should be only executable by socket
+     * @dev it will be later replaced with a function adding each message to a merkle tree
+     * @param packedMessage the message packed with payload, fees and config
+     */
+    function addPackedMessage(bytes32 packedMessage) external;
 
-    function getNextPacket() external view virtual returns (bytes32, uint256);
+    /**
+     * @notice returns the latest packet details
+     * @return root root hash of the latest packet which is not yet sealed
+     * @return packetId latest packet id which is not yet sealed
+     */
+    function getNextPacket()
+        external
+        view
+        returns (bytes32 root, uint256 packetId);
 
-    function getRootById(uint256 id) external view virtual returns (bytes32);
+    /**
+     * @notice returns the root of packet for given id
+     * @param id the id assigned to packet
+     * @return root root hash corresponding to given id
+     */
+    function getRootById(uint256 id) external view returns (bytes32 root);
 
-    // caller only Notary
-    function sealPacket() external virtual returns (bytes32, uint256);
+    /**
+     * @notice seals the packet
+     * @dev also indicates the packet is ready to be shipped and no more messages can be added now.
+     * @dev this should be executable by notary only
+     * @return root root hash of the packet
+     * @return packetId id of the packed sealed
+     */
+    function sealPacket() external returns (bytes32 root, uint256 packetId);
 }

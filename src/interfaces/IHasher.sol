@@ -2,6 +2,16 @@
 pragma solidity >=0.8.0;
 
 interface IHasher {
+    /**
+     * @notice returns the bytes32 hash of the message packed
+     * @param srcChainId src chain id
+     * @param srcPlug address of plug at source
+     * @param dstChainId destination chain id
+     * @param dstPlug address of plug at destination
+     * @param msgId message id assigned at outbound
+     * @param msgGasLimit gas limit which is expected to be consumed by the inbound transaction on plug
+     * @param payload the data packed which is used by inbound for execution
+     */
     function packMessage(
         uint256 srcChainId,
         address srcPlug,

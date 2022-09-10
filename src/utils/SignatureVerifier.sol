@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.0;
+import "../interfaces/ISignatureVerifier.sol";
 
-contract SignatureVerifier {
+contract SignatureVerifier is ISignatureVerifier {
     error InvalidS();
     error InvalidSigLength();
     error InvalidV();
     error ZeroSignerAddress();
 
+    /// @inheritdoc ISignatureVerifier
     function verifySignature(
         bytes32 hash_,
         address signer_,
@@ -20,6 +22,7 @@ contract SignatureVerifier {
         return false;
     }
 
+    /// @inheritdoc ISignatureVerifier
     function recoverSigner(
         uint256 remoteChainId_,
         address accumAddress_,
@@ -33,6 +36,9 @@ contract SignatureVerifier {
         signer = _recoverSigner(digest, signature_);
     }
 
+    /**
+     * @notice returns the address of signer recovered from input signature
+     */
     function _recoverSigner(bytes32 hash_, bytes memory signature_)
         private
         pure
@@ -52,6 +58,9 @@ contract SignatureVerifier {
         if (signer == address(0)) revert ZeroSignerAddress();
     }
 
+    /**
+     * @notice splits the signature into v, r and s.
+     */
     function _splitSignature(bytes memory signature_)
         private
         pure

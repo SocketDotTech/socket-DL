@@ -5,16 +5,26 @@ import "../interfaces/IAccumulator.sol";
 import "../utils/AccessControl.sol";
 
 abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
+    bytes32 public SOCKET_ROLE = keccak256("SOCKET_ROLE");
+    bytes32 public NOTARY_ROLE = keccak256("NOTARY_ROLE");
+
+    /// an incrementing id for each new packet created
     uint256 internal _nextPacket;
+
+    /// maps the packet id with the root hash generated while adding message
     mapping(uint256 => bytes32) internal _roots;
 
     error NoPendingPacket();
 
+    /**
+     * @notice initialises the contract with socket and notary addresses
+     */
     constructor(address socket_, address notary_) {
         _setSocket(socket_);
         _setNotary(notary_);
     }
 
+    /// @inheritdoc IAccumulator
     function sealPacket()
         external
         virtual
@@ -39,6 +49,8 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
         emit NotarySet(notary_);
     }
 
+    /// returns the latest packet details
+    /// @inheritdoc IAccumulator
     function getNextPacket()
         external
         view
@@ -49,6 +61,8 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
         return (_roots[_nextPacket], _nextPacket);
     }
 
+    /// returns the root of packet for given id
+    /// @inheritdoc IAccumulator
     function getRootById(uint256 id)
         external
         view

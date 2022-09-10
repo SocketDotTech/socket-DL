@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.0;
 
-contract Hasher {
+import "../interfaces/IHasher.sol";
+
+contract Hasher is IHasher {
+    /// @inheritdoc IHasher
     function packMessage(
         uint256 srcChainId,
         address srcPlug,
