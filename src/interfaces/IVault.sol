@@ -62,7 +62,7 @@ interface IVault {
      * @param remoteChainId_ dest chain id
      * @param socketGasPrice_ this price is the gas price at destination including the buffer needed.
      */
-    function setGasPrice(uint256 remoteChainId_, uint256 socketGasPrice_)
+    function setSocketGasPrice(uint256 remoteChainId_, uint256 socketGasPrice_)
         external;
 
     /**

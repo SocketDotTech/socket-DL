@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../utils/Ownable.sol";
 import "../interfaces/IVault.sol";
 import "../interfaces/INotary.sol";
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
+import "./SocketGasToken.sol";
 
-contract Vault is IVault, IPlug, ReentrancyGuard, Ownable, ERC20 {
+contract Vault is IVault, IPlug, ReentrancyGuard, Ownable {
     ISocket public socket;
     INotary public notary;
 
@@ -27,12 +27,9 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable, ERC20 {
 
     uint256 public bridgeGasLimit;
 
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        address owner_,
-        address notary_
-    ) ERC20(name_, symbol_) Ownable(owner_) {
+    mapping(uint256 => address) public destTokens;
+
+    constructor(address owner_, address notary_) Ownable(owner_) {
         notary = INotary(notary_);
     }
 
@@ -55,9 +52,25 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable, ERC20 {
         uint256 amount_,
         uint256 remoteChainId_
     ) external {
+        address sgt = _getDestToken(remoteChainId_);
         if (msg.sender != address(socket)) revert OnlySocket();
-        super._mint(executer_, amount_ * socketGasPrice[remoteChainId_]);
-        require(address(this).balance >= totalSupply());
+
+        SocketGasToken(sgt).mint(
+            executer_,
+            amount_ * socketGasPrice[remoteChainId_]
+        );
+        require(address(this).balance >= SocketGasToken(sgt).totalSupply());
+    }
+
+    function _getDestToken(uint256 remoteChainId_)
+        internal
+        returns (address token)
+    {
+        if (token == address(0)) {
+            SocketGasToken sgt = new SocketGasToken(remoteChainId_);
+            destTokens[remoteChainId_] = address(sgt);
+        }
+        return destTokens[remoteChainId_];
     }
 
     function inbound(bytes calldata payload_) external nonReentrant {
@@ -72,9 +85,6 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable, ERC20 {
         (bool success, ) = account_.call{value: amount_}("");
         require(success, "Transfer failed.");
 
-        // As outbound will be sending ETH
-        require(address(this).balance >= totalSupply());
-
         emit Claimed(account_, amount_);
     }
 
@@ -82,7 +92,7 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable, ERC20 {
         external
         payable
     {
-        _burn(_msgSender(), amount);
+        SocketGasToken(destTokens[remoteChainId]).burnFrom(msg.sender, amount);
 
         bytes memory payload = abi.encode(msg.sender, amount);
         _outbound(remoteChainId, payload);
@@ -101,7 +111,7 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable, ERC20 {
         require(success, "Transfer failed.");
     }
 
-    function setGasPrice(uint256 remoteChainId_, uint256 socketGasPrice_)
+    function setSocketGasPrice(uint256 remoteChainId_, uint256 socketGasPrice_)
         external
     {
         if (msg.sender != address(notary)) revert OnlyNotary();

@@ -9,7 +9,7 @@ import "../src/deaccumulators/SingleDeaccum.sol";
 import "../src/verifiers/Verifier.sol";
 import "../src/utils/SignatureVerifier.sol";
 import "../src/utils/Hasher.sol";
-import "../src/plugs/Vault.sol";
+import "../src/vault/Vault.sol";
 
 contract Setup is Test {
     address constant _socketOwner = address(1);
@@ -26,8 +26,6 @@ contract Setup is Test {
     uint256 internal _msgGasLimit = 120000;
 
     bool constant _isFast = false;
-    string _name = "Socket Gas Token";
-    string _symbol = "SGT";
 
     struct ChainContext {
         uint256 chainId;
@@ -145,7 +143,7 @@ contract Setup is Test {
     {
         vm.startPrank(deployer_);
         hasher__ = new Hasher();
-        vault__ = new Vault(_name, _symbol, deployer_, notary_);
+        vault__ = new Vault(deployer_, notary_);
         socket__ = new Socket(chainId_, address(hasher__), address(vault__));
 
         vault__.setSocket(address(socket__));
