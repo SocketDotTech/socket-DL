@@ -198,4 +198,10 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     {
         return _messagesStatus[msgId_];
     }
+
+    // TODO:
+    // function updateSocket() external onlyOwner {
+    //     // transfer ownership of connected contracts to new socket
+    //     // update addresses everywhere
+    // }
 }

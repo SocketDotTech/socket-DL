@@ -155,6 +155,23 @@ interface INotary {
     ) external;
 
     /**
+     * @notice to confirm a packet on destination
+     * @dev depending on paths, it may be a requirement to have on-chain confirmations for a packet
+     * @param remoteChainId_ src chain id
+     * @param accumAddress_ address of accumulator at src
+     * @param packetId_ packed id
+     * @param root_ root hash of packet
+     * @param signature_ signature of proposer
+     */
+    function confirmRoot(
+        uint256 remoteChainId_,
+        address accumAddress_,
+        uint256 packetId_,
+        bytes32 root_,
+        bytes calldata signature_
+    ) external;
+
+    /**
      * @notice returns the root of given packet
      * @param remoteChainId_ dest chain id
      * @param accumAddress_ address of accumulator at src

@@ -33,6 +33,7 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable {
         notary = INotary(notary_);
     }
 
+    /// @inheritdoc IVault
     function deductFee(uint256 remoteChainId_, uint256 msgGasLimit_)
         external
         payable
@@ -47,6 +48,7 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable {
         emit FeeDeducted(fee);
     }
 
+    /// @inheritdoc IVault
     function mintFee(
         address executer_,
         uint256 amount_,
@@ -73,6 +75,7 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable {
         return destTokens[remoteChainId_];
     }
 
+    /// @inheritdoc IPlug
     function inbound(bytes calldata payload_) external nonReentrant {
         require(msg.sender == address(socket), "Counter: Invalid Socket");
         (address to, uint256 amount) = abi.decode(payload_, (address, uint256));
@@ -88,6 +91,7 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable {
         emit Claimed(account_, amount_);
     }
 
+    /// @inheritdoc IVault
     function bridgeTokens(uint256 remoteChainId, uint256 amount)
         external
         payable
@@ -111,6 +115,7 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable {
         require(success, "Transfer failed.");
     }
 
+    /// @inheritdoc IVault
     function setSocketGasPrice(uint256 remoteChainId_, uint256 socketGasPrice_)
         external
     {
@@ -118,6 +123,14 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable {
         socketGasPrice[remoteChainId_] = socketGasPrice_;
     }
 
+    /**
+     * @notice sets the gas details for fee calculation
+     * @param remoteChainId_ dest chain id
+     * @param attesterSrcGasLimit_ gas limit needed for executing verifyAndSeal
+     * @param attesterDestGasLimit_ gas limit needed for executing propose and confirm
+     * @param bufferPrice_ extra price in native token to balance price volatility
+     * @param bridgeGasLimit_ gas limit needed to bridge tokens from socket (used by outbound)
+     */
     function setGasDetails(
         uint256 remoteChainId_,
         uint256 attesterDestGasLimit_,
@@ -131,11 +144,12 @@ contract Vault is IVault, IPlug, ReentrancyGuard, Ownable {
         bridgeGasLimit = bridgeGasLimit_;
     }
 
-    // add function in socket to transfer ownership to new socket if upgraded
+    /// to register new socket if upgraded
     function setSocket(address socket_) external onlyOwner {
         socket = ISocket(socket_);
     }
 
+    /// @inheritdoc IVault
     function getFees(uint256 remoteChainId_, uint256 msgGasLimit_)
         external
         view

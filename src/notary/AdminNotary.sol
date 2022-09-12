@@ -34,6 +34,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         _signatureVerifier = ISignatureVerifier(signatureVerifier_);
     }
 
+    /// @inheritdoc INotary
     function verifyAndSeal(
         address accumAddress_,
         uint256 remoteChainId_,
@@ -55,6 +56,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         emit PacketVerifiedAndSealed(accumAddress_, packetId, signature_);
     }
 
+    /// @inheritdoc INotary
     function challengeSignature(
         address accumAddress_,
         bytes32 root_,
@@ -81,6 +83,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         }
     }
 
+    /// @inheritdoc INotary
     function propose(
         uint256 remoteChainId_,
         address accumAddress_,
@@ -111,6 +114,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         emit Proposed(remoteChainId_, accumAddress_, packetId_, root_);
     }
 
+    /// @inheritdoc INotary
     function confirmRoot(
         uint256 remoteChainId_,
         address accumAddress_,
@@ -170,6 +174,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         packedDetails.attestations++;
     }
 
+    /// @inheritdoc INotary
     function getPacketStatus(
         address accumAddress_,
         uint256 remoteChainId_,
@@ -198,6 +203,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         return PacketStatus.CONFIRMED;
     }
 
+    /// @inheritdoc INotary
     function getPacketDetails(
         address accumAddress_,
         uint256 remoteChainId_,
@@ -227,9 +233,16 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         packetArrivedAt = _packetDetails[packedId].timeRecord;
     }
 
+    /**
+     * @notice pauses the packet on destination
+     * @param accumAddress_ address of accumulator at src
+     * @param remoteChainId_ src chain id
+     * @param packetId_ packed id
+     * @param root_ root hash
+     */
     function pausePacketOnDest(
-        uint256 remoteChainId_,
         address accumAddress_,
+        uint256 remoteChainId_,
         uint256 packetId_,
         bytes32 root_
     ) external {
@@ -249,6 +262,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         emit PausedPacket(accumAddress_, packetId_, msg.sender);
     }
 
+    /**
+     * @notice unpause the packet on destination
+     * @param accumAddress_ address of accumulator at src
+     * @param remoteChainId_ src chain id
+     * @param packetId_ packed id
+     */
     function acceptPausedPacket(
         address accumAddress_,
         uint256 remoteChainId_,
@@ -266,6 +285,11 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         emit PacketUnpaused(accumAddress_, packetId_);
     }
 
+    /**
+     * @notice adds an attester for `remoteChainId_` chain
+     * @param remoteChainId_ dest chain id
+     * @param attester_ attester address
+     */
     function grantAttesterRole(uint256 remoteChainId_, address attester_)
         external
         onlyOwner
@@ -276,6 +300,11 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         totalAttestors[remoteChainId_]++;
     }
 
+    /**
+     * @notice removes an attester from `remoteChainId_` chain list
+     * @param remoteChainId_ dest chain id
+     * @param attester_ attester address
+     */
     function revokeAttesterRole(uint256 remoteChainId_, address attester_)
         external
         onlyOwner
@@ -295,10 +324,19 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         return bytes32(chainId_);
     }
 
+    /**
+     * @notice returns the signature verifier
+     */
     function signatureVerifier() external view returns (address) {
         return address(_signatureVerifier);
     }
 
+    /**
+     * @notice returns the confirmations received by a packet
+     * @param accumAddress_ address of accumulator at src
+     * @param remoteChainId_ src chain id
+     * @param packetId_ packed id
+     */
     function getConfirmations(
         address accumAddress_,
         uint256 remoteChainId_,
@@ -312,6 +350,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         return _packetDetails[packedId].attestations;
     }
 
+    /**
+     * @notice returns the remote root for given `packetId_`
+     * @param accumAddress_ address of accumulator at src
+     * @param remoteChainId_ src chain id
+     * @param packetId_ packed id
+     */
     function getRemoteRoot(
         uint256 remoteChainId_,
         address accumAddress_,
@@ -325,10 +369,19 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         return _packetDetails[packedId].remoteRoots;
     }
 
+    /**
+     * @notice returns the current chain id
+     */
     function chainId() external view returns (uint256) {
         return _chainId;
     }
 
+    /**
+     * @notice adds the accumulator
+     * @param accumAddress_ address of accumulator at src
+     * @param remoteChainId_ src chain id
+     * @param isFast_ indicates the path for accumulator
+     */
     function addAccumulator(
         address accumAddress_,
         uint256 remoteChainId_,
@@ -338,6 +391,10 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         isFast[accumId] = isFast_;
     }
 
+    /**
+     * @notice updates signatureVerifier_
+     * @param signatureVerifier_ address of Signature Verifier
+     */
     function setSignatureVerifier(address signatureVerifier_)
         external
         onlyOwner
