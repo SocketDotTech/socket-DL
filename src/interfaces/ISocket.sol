@@ -14,6 +14,16 @@ interface ISocket {
         bytes deaccumProof;
     }
 
+    /**
+     * @notice emits the message details when a new message arrives at outbound
+     * @param srcChainId src chain id
+     * @param srcPlug src plug address
+     * @param dstChainId dest chain id
+     * @param dstPlug dest plug address
+     * @param msgId message id packed with destChainId and nonce
+     * @param msgGasLimit gas limit needed to execute the inbound at destination
+     * @param payload the data which will be used by inbound at destination
+     */
     event MessageTransmitted(
         uint256 srcChainId,
         address srcPlug,
@@ -24,7 +34,18 @@ interface ISocket {
         bytes payload
     );
 
+    /**
+     * @notice emits the status of message after inbound call
+     * @param success true if message not reverted else false
+     * @param result if message reverts, returns the revert message
+     */
     event Executed(bool success, string result);
+
+    /**
+     * @notice emits the error message in bytes after inbound call
+     * @param success true if message not reverted else false
+     * @param result if message reverts, returns the revert message in bytes
+     */
     event ExecutedBytes(bool success, bytes result);
 
     error NotAttested();
