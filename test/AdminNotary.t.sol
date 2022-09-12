@@ -19,6 +19,9 @@ contract AdminNotaryTest is Setup {
         attesters[0] = _attesterPrivateKey;
         attesters[1] = _altAttesterPrivateKey;
 
+        _attester = vm.addr(_attesterPrivateKey);
+        _altAttester = vm.addr(_altAttesterPrivateKey);
+
         (cc.sigVerifier__, cc.notary__) = _deployNotary(_chainId, _socketOwner);
     }
 

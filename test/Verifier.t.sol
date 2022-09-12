@@ -3,9 +3,7 @@ pragma solidity ^0.8.0;
 import "./Setup.sol";
 
 contract VerifierTest is Setup {
-    address DUMMY_MANAGER = address(1);
     address DUMMY_SOCKET = address(2);
-    address DUMMY_PAUSER = address(4);
     uint256 chainId = 1;
     uint256 destChainId = 2;
 
@@ -15,15 +13,13 @@ contract VerifierTest is Setup {
     ChainContext cc;
 
     function setUp() public {
-        uint256[] memory attesters = new uint256[](2);
-        attesters[0] = _attesterPrivateKey;
-        attesters[1] = _altAttesterPrivateKey;
-
+        cc.chainId = chainId;
         (cc.sigVerifier__, cc.notary__) = _deployNotary(chainId, _socketOwner);
 
+        hoax(_socketOwner);
         cc.verifier__ = new Verifier(
             DUMMY_SOCKET,
-            DUMMY_MANAGER,
+            _plugOwner,
             address(cc.notary__),
             timeoutInSeconds
         );
@@ -32,38 +28,50 @@ contract VerifierTest is Setup {
     }
 
     function testDeployment() public {
-        assertEq(cc.verifier__.manager(), DUMMY_MANAGER);
+        assertEq(cc.verifier__.manager(), _plugOwner);
         assertEq(cc.verifier__.socket(), DUMMY_SOCKET);
-        bool isActive = cc.verifier__.isChainActive(chainId);
+        bool isActive = cc.verifier__.isChainActive(destChainId);
         assertTrue(isActive);
     }
 
     function testPausing() public {
-        bool isPauser = cc.verifier__.isPauser(DUMMY_PAUSER, chainId);
+        bool isPauser = cc.verifier__.isPauser(_pauser, destChainId);
         assertTrue(isPauser);
 
+        vm.mockCall(
+            address(cc.notary__),
+            abi.encodeWithSelector(INotary.getPacketDetails.selector),
+            abi.encode(true, 1, bytes32(0))
+        );
+
         vm.prank(DUMMY_SOCKET);
-        (bool valid, ) = cc.verifier__.verifyRoot(address(0), chainId, 0);
+        (bool valid, ) = cc.verifier__.verifyRoot(address(0), destChainId, 0);
         assertTrue(valid);
 
-        vm.prank(DUMMY_PAUSER);
-        cc.verifier__.pause(chainId);
+        vm.prank(_pauser);
+        cc.verifier__.pause(destChainId);
 
-        assertFalse(cc.verifier__.isChainActive(chainId));
+        assertFalse(cc.verifier__.isChainActive(destChainId));
     }
 
     function testVerifyAfterpause() public {
-        bool isPauser = cc.verifier__.isPauser(DUMMY_PAUSER, chainId);
+        bool isPauser = cc.verifier__.isPauser(_pauser, destChainId);
         assertTrue(isPauser);
 
+        vm.mockCall(
+            address(cc.notary__),
+            abi.encodeWithSelector(INotary.getPacketDetails.selector),
+            abi.encode(true, 1, bytes32(0))
+        );
+
         vm.prank(DUMMY_SOCKET);
-        (bool valid, ) = cc.verifier__.verifyRoot(address(0), chainId, 0);
+        (bool valid, ) = cc.verifier__.verifyRoot(address(0), destChainId, 0);
         assertTrue(valid);
 
-        vm.prank(DUMMY_PAUSER);
-        cc.verifier__.pause(chainId);
+        vm.prank(_pauser);
+        cc.verifier__.pause(destChainId);
 
-        (valid, ) = cc.verifier__.verifyRoot(address(0), chainId, 0);
+        (valid, ) = cc.verifier__.verifyRoot(address(0), destChainId, 0);
         assertFalse(valid);
     }
 }

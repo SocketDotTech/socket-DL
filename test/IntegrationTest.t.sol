@@ -40,6 +40,7 @@ contract HappyTest is Setup {
             address(destCounter__),
             packetId,
             msgId,
+            _msgGasLimit,
             payload,
             proof
         );
@@ -71,6 +72,7 @@ contract HappyTest is Setup {
             address(srcCounter__),
             packetId,
             msgId,
+            _msgGasLimit,
             payload,
             proof
         );
@@ -82,12 +84,10 @@ contract HappyTest is Setup {
     function testRemoteAddAndSubtract() external {
         uint256 addAmount = 100;
         bytes memory addPayload = abi.encode(keccak256("OP_ADD"), addAmount);
-        bytes memory addProof = abi.encode(0);
         uint256 addMsgId = (uint64(_b.chainId) << 32) | 0;
 
         uint256 subAmount = 40;
         bytes memory subPayload = abi.encode(keccak256("OP_SUB"), subAmount);
-        bytes memory subProof = abi.encode(0);
         uint256 subMsgId = (uint64(_b.chainId) << 32) | 1;
 
         bytes32 root;
@@ -106,8 +106,9 @@ contract HappyTest is Setup {
             address(destCounter__),
             packetId,
             addMsgId,
+            _msgGasLimit,
             addPayload,
-            addProof
+            abi.encode(0)
         );
 
         hoax(_raju);
@@ -122,8 +123,9 @@ contract HappyTest is Setup {
             address(destCounter__),
             packetId,
             subMsgId,
+            _msgGasLimit,
             subPayload,
-            subProof
+            abi.encode(0)
         );
 
         assertEq(destCounter__.counter(), addAmount - subAmount);
@@ -195,6 +197,7 @@ contract HappyTest is Setup {
             address(destCounter__),
             m2.packetId,
             m2.msgId,
+            _msgGasLimit,
             m2.payload,
             m2.proof
         );
@@ -204,6 +207,7 @@ contract HappyTest is Setup {
             address(destCounter__),
             m1.packetId,
             m1.msgId,
+            _msgGasLimit,
             m1.payload,
             m1.proof
         );
@@ -233,6 +237,7 @@ contract HappyTest is Setup {
             address(destCounter__),
             packetId,
             msgId,
+            _msgGasLimit,
             payload,
             proof
         );
@@ -244,6 +249,7 @@ contract HappyTest is Setup {
             address(destCounter__),
             packetId,
             msgId,
+            _msgGasLimit,
             payload,
             proof
         );

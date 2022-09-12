@@ -39,6 +39,14 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
         return (root, _nextPacket++);
     }
 
+    function setSocket(address socket_) external onlyOwner {
+        _setSocket(socket_);
+    }
+
+    function setNotary(address notary_) external onlyOwner {
+        _setNotary(notary_);
+    }
+
     function _setSocket(address socket_) private {
         _grantRole(SOCKET_ROLE, socket_);
         emit SocketSet(socket_);

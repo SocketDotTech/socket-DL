@@ -12,7 +12,7 @@ contract PingPongTest is Setup {
     bytes private _payloadPing;
     bytes private _payloadPong;
 
-    uint256 msgGasLimit = 1000;
+    uint256 msgGasLimit = 120000;
 
     Messenger srcMessenger__;
     Messenger destMessenger__;
@@ -24,6 +24,9 @@ contract PingPongTest is Setup {
         _dualChainSetup(attesters);
         _deployPlugContracts();
         _configPlugContracts();
+
+        _payloadPing = abi.encode(_a.chainId, _PING);
+        _payloadPong = abi.encode(_b.chainId, _PONG);
     }
 
     function _verifyAToB(uint256 msgId_) internal {
@@ -41,6 +44,7 @@ contract PingPongTest is Setup {
             address(destMessenger__),
             packetId,
             msgId_,
+            msgGasLimit,
             _payloadPing,
             _PROOF
         );
@@ -63,6 +67,7 @@ contract PingPongTest is Setup {
             address(srcMessenger__),
             packetId,
             msgId_,
+            msgGasLimit,
             _payloadPong,
             _PROOF
         );

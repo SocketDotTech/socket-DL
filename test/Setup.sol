@@ -23,7 +23,7 @@ contract Setup is Test {
     uint256 constant _altAttesterPrivateKey = uint256(2);
 
     uint256 internal _timeoutInSeconds = 0;
-    uint256 internal _msgGasLimit = 10000;
+    uint256 internal _msgGasLimit = 120000;
 
     bool constant _isFast = false;
     string _name = "Socket Gas Token";
@@ -58,8 +58,8 @@ contract Setup is Test {
         _a.chainId = 0x2013AA263;
         _b.chainId = 0x2013AA264;
 
-        _a = _deployContractsOnSingleChain(_b.chainId);
-        _b = _deployContractsOnSingleChain(_a.chainId);
+        _a = _deployContractsOnSingleChain(_a.chainId, _b.chainId);
+        _b = _deployContractsOnSingleChain(_b.chainId, _a.chainId);
 
         _addAttesters(attesters_, _a, _b.chainId);
         _addAttesters(attesters_, _b, _a.chainId);
@@ -98,10 +98,11 @@ contract Setup is Test {
         cc_.verifier__.activate(destChainId_);
     }
 
-    function _deployContractsOnSingleChain(uint256 destChainId_)
-        internal
-        returns (ChainContext memory cc)
-    {
+    function _deployContractsOnSingleChain(
+        uint256 srcChainId_,
+        uint256 destChainId_
+    ) internal returns (ChainContext memory cc) {
+        cc.chainId = srcChainId_;
         (cc.sigVerifier__, cc.notary__) = _deployNotary(
             cc.chainId,
             _socketOwner
@@ -147,6 +148,7 @@ contract Setup is Test {
         vault__ = new Vault(_name, _symbol, deployer_, notary_);
         socket__ = new Socket(chainId_, address(hasher__), address(vault__));
 
+        vault__.setSocket(address(socket__));
         vm.stopPrank();
     }
 
@@ -237,6 +239,7 @@ contract Setup is Test {
         address destPlug_,
         uint256 packetId_,
         uint256 msgId_,
+        uint256 msgGasLimit_,
         bytes memory payload_,
         bytes memory proof_
     ) internal {
@@ -248,7 +251,7 @@ contract Setup is Test {
             msgId_,
             address(src_.accum__),
             packetId_,
-            _msgGasLimit,
+            msgGasLimit_,
             payload_,
             proof_
         );

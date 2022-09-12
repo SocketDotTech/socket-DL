@@ -109,18 +109,20 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
         if (!isVerified) revert VerificationFailed();
 
+        bytes32 packedMessage = _hasher.packMessage(
+            executeParams_.remoteChainId,
+            config.remotePlug,
+            _chainId,
+            executeParams_.localPlug,
+            executeParams_.msgId,
+            executeParams_.msgGasLimit,
+            executeParams_.payload
+        );
+
         if (
             !IDeaccumulator(config.deaccum).verifyMessageInclusion(
                 root,
-                _hasher.packMessage(
-                    executeParams_.remoteChainId,
-                    config.remotePlug,
-                    _chainId,
-                    executeParams_.localPlug,
-                    executeParams_.msgId,
-                    executeParams_.msgGasLimit,
-                    executeParams_.payload
-                ),
+                packedMessage,
                 executeParams_.deaccumProof
             )
         ) revert InvalidProof();

@@ -25,6 +25,19 @@ contract SingleAccumTest is Test {
             _sa.hasRole(_sa.SOCKET_ROLE(), _socket),
             "Socket role not set"
         );
+        assertTrue(
+            _sa.hasRole(_sa.NOTARY_ROLE(), _notary),
+            "Notary role not set"
+        );
+
+        assertFalse(
+            _sa.hasRole(_sa.NOTARY_ROLE(), _socket),
+            "Wrong role not set"
+        );
+        assertFalse(
+            _sa.hasRole(_sa.SOCKET_ROLE(), _notary),
+            "Wrong role not set"
+        );
         _assertPacketById(bytes32(0), 0);
         _assertNextPacket(bytes32(0), 0);
     }
