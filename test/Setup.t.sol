@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 import "../src/Socket.sol";
-import "../src/Notary/AdminNotary.sol";
+import "../src/notaries/AdminNotary.sol";
 import "../src/accumulators/SingleAccum.sol";
 import "../src/deaccumulators/SingleDeaccum.sol";
 import "../src/verifiers/Verifier.sol";

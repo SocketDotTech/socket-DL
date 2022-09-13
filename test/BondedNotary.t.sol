@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../src/Notary/BondedNotary.sol";
+import "../src/notaries/BondedNotary.sol";
 import "../src/interfaces/IAccumulator.sol";
 import "../src/utils/SignatureVerifier.sol";
 
