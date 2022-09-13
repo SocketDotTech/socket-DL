@@ -3,7 +3,7 @@ import path from "path";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { signerAddress, srcChainId, destChainId, isFast } from "./config";
+import { signerAddress, srcChainId, destChainId, isFast, executorAddress } from "./config";
 import { getInstance } from "./utils";
 
 const deployedAddressPath = path.join(__dirname, "../deployments/");
@@ -26,10 +26,11 @@ export const main = async () => {
     const counterSigner: SignerWithAddress = await ethers.getSigner(counterOwner);
     const pauserSigner: SignerWithAddress = await ethers.getSigner(pauser);
 
-    const notary = await getInstance("AdminNotary", srcConfig["notary"]);
-    const counter = await getInstance("Counter", srcConfig["counter"]);
     const accum = await getInstance("SingleAccum", srcConfig["accum"]);
+    const counter = await getInstance("Counter", srcConfig["counter"]);
     const deaccum = await getInstance("SingleDeaccum", srcConfig["deaccum"]);
+    const notary = await getInstance("AdminNotary", srcConfig["notary"]);
+    const socket = await getInstance("Socket", srcConfig["socket"]);
     const verifier = await getInstance("Verifier", srcConfig["verifier"]);
 
     await notary.connect(socketSigner).grantAttesterRole(destChainId, signerAddress[srcChainId]);
@@ -46,6 +47,9 @@ export const main = async () => {
       verifier.address
     );
     console.log(`Set config role for ${destChainId} chain id!`)
+
+    await socket.connect(socketSigner).grantExecutorRole(executorAddress[srcChainId]);
+    console.log(`Assigned executor role to ${executorAddress[srcChainId]}!`)
 
     await verifier.connect(counterSigner).addPauser(pauserSigner.address, destChainId);
     console.log(`Added pauser ${pauserSigner.address} for ${destChainId} chain id!`)
