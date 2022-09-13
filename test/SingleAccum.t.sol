@@ -42,6 +42,26 @@ contract SingleAccumTest is Test {
         _assertNextPacket(bytes32(0), 0);
     }
 
+    function testSetSocket() external {
+        address newSocket = address(8);
+        vm.expectRevert(Ownable.OnlyOwner.selector);
+        _sa.setSocket(newSocket);
+
+        hoax(_owner);
+        _sa.setSocket(newSocket);
+        assertTrue(_sa.hasRole(_sa.SOCKET_ROLE(), newSocket));
+    }
+
+    function testSetNotary() external {
+        address newNotary = address(8);
+        vm.expectRevert(Ownable.OnlyOwner.selector);
+        _sa.setNotary(newNotary);
+
+        hoax(_owner);
+        _sa.setNotary(newNotary);
+        assertTrue(_sa.hasRole(_sa.NOTARY_ROLE(), newNotary));
+    }
+
     function testAddMessage() external {
         _addPackedMessage(_message_0);
         _assertPacketById(_message_0, 0);

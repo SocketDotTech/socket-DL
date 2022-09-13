@@ -23,7 +23,7 @@ contract Setup is Test {
     uint256 constant _altAttesterPrivateKey = uint256(2);
 
     uint256 internal _timeoutInSeconds = 0;
-    uint256 internal _msgGasLimit = 120000;
+    uint256 internal _msgGasLimit = 25548;
 
     bool constant _isFast = false;
 
@@ -107,7 +107,6 @@ contract Setup is Test {
         );
 
         (cc.hasher__, cc.vault__, cc.socket__) = _deploySocket(
-            address(cc.notary__),
             cc.chainId,
             _socketOwner
         );
@@ -122,18 +121,16 @@ contract Setup is Test {
 
         hoax(_socketOwner);
         cc.verifier__ = new Verifier(
-            address(cc.socket__),
             _plugOwner,
             address(cc.notary__),
             _timeoutInSeconds
         );
+
+        hoax(_socketOwner);
+        cc.socket__.grantExecutorRole(_raju);
     }
 
-    function _deploySocket(
-        address notary_,
-        uint256 chainId_,
-        address deployer_
-    )
+    function _deploySocket(uint256 chainId_, address deployer_)
         internal
         returns (
             Hasher hasher__,
@@ -143,10 +140,9 @@ contract Setup is Test {
     {
         vm.startPrank(deployer_);
         hasher__ = new Hasher();
-        vault__ = new Vault(deployer_, notary_);
+        vault__ = new Vault(deployer_);
         socket__ = new Socket(chainId_, address(hasher__), address(vault__));
 
-        vault__.setSocket(address(socket__));
         vm.stopPrank();
     }
 
@@ -255,5 +251,10 @@ contract Setup is Test {
         );
 
         dst_.socket__.execute(params);
+    }
+
+    // to ignore this file from coverage
+    function test() external {
+        assertTrue(true);
     }
 }

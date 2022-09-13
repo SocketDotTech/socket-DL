@@ -4,15 +4,38 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 import "../src/examples/Counter.sol";
 
-contract HappyTest is Setup {
+contract DualChainTest is Setup {
     Counter srcCounter__;
     Counter destCounter__;
 
-    function setUp() external {
+    // the identifiers of the forks
+    uint256 aFork;
+    uint256 bFork;
+
+    function setUp() public {
+        _a.chainId = 1;
+        _b.chainId = 4;
+
+        aFork = vm.createFork(vm.envString("CHAIN1_RPC_URL"));
+        bFork = vm.createFork(vm.envString("CHAIN2_RPC_URL"));
+
         uint256[] memory attesters = new uint256[](1);
         attesters[0] = _attesterPrivateKey;
 
-        _dualChainSetup(attesters);
+        vm.selectFork(aFork);
+        _a = _deployContractsOnSingleChain(_a.chainId, _b.chainId);
+        _addAttesters(attesters, _a, _b.chainId);
+
+        vm.selectFork(bFork);
+        _b = _deployContractsOnSingleChain(_b.chainId, _a.chainId);
+        _addAttesters(attesters, _b, _a.chainId);
+
+        vm.selectFork(aFork);
+        _initVerifier(_a, _b.chainId);
+
+        vm.selectFork(bFork);
+        _initVerifier(_b, _a.chainId);
+
         _deployPlugContracts();
         _configPlugContracts();
     }
@@ -23,9 +46,10 @@ contract HappyTest is Setup {
         bytes memory proof = abi.encode(0);
 
         hoax(_raju);
+        vm.selectFork(aFork);
         srcCounter__.remoteAddOperation(_b.chainId, amount, _msgGasLimit);
-        // TODO: get nonce from event
 
+        // TODO: get nonce from event
         uint256 msgId = (uint64(_b.chainId) << 32) | 0;
         (
             bytes32 root,
@@ -33,6 +57,8 @@ contract HappyTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, sig);
+
+        vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(
             _a,
@@ -46,6 +72,8 @@ contract HappyTest is Setup {
         );
 
         assertEq(destCounter__.counter(), amount);
+
+        vm.selectFork(aFork);
         assertEq(srcCounter__.counter(), 0);
     }
 
@@ -55,6 +83,7 @@ contract HappyTest is Setup {
         bytes memory proof = abi.encode(0);
 
         hoax(_raju);
+        vm.selectFork(bFork);
         destCounter__.remoteAddOperation(_a.chainId, amount, _msgGasLimit);
 
         (
@@ -65,6 +94,8 @@ contract HappyTest is Setup {
 
         uint256 msgId = (uint64(_a.chainId) << 32) | 0;
         _verifyAndSealOnSrc(_b, _a, sig);
+
+        vm.selectFork(aFork);
         _submitRootOnDst(_b, _a, sig, packetId, root);
         _executePayloadOnDst(
             _b,
@@ -78,6 +109,8 @@ contract HappyTest is Setup {
         );
 
         assertEq(srcCounter__.counter(), amount);
+
+        vm.selectFork(bFork);
         assertEq(destCounter__.counter(), 0);
     }
 
@@ -95,10 +128,13 @@ contract HappyTest is Setup {
         bytes memory sig;
 
         hoax(_raju);
+        vm.selectFork(aFork);
         srcCounter__.remoteAddOperation(_b.chainId, addAmount, _msgGasLimit);
 
         (root, packetId, sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, sig);
+
+        vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(
             _a,
@@ -112,10 +148,13 @@ contract HappyTest is Setup {
         );
 
         hoax(_raju);
+        vm.selectFork(aFork);
         srcCounter__.remoteSubOperation(_b.chainId, subAmount, _msgGasLimit);
 
         (root, packetId, sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, sig);
+
+        vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(
             _a,
@@ -129,6 +168,8 @@ contract HappyTest is Setup {
         );
 
         assertEq(destCounter__.counter(), addAmount - subAmount);
+
+        vm.selectFork(aFork);
         assertEq(srcCounter__.counter(), 0);
     }
 
@@ -142,10 +183,13 @@ contract HappyTest is Setup {
         m1.msgId = (uint64(_b.chainId) << 32) | 0;
 
         hoax(_raju);
+        vm.selectFork(aFork);
         srcCounter__.remoteAddOperation(_b.chainId, m1.amount, _msgGasLimit);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, m1.sig);
+
+        vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
 
         MessageContext memory m2;
@@ -155,10 +199,13 @@ contract HappyTest is Setup {
         m2.msgId = (uint64(_b.chainId) << 32) | 1;
 
         hoax(_raju);
+        vm.selectFork(aFork);
         srcCounter__.remoteAddOperation(_b.chainId, m2.amount, _msgGasLimit);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, m2.sig);
+
+        vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
     }
 
@@ -172,10 +219,13 @@ contract HappyTest is Setup {
         m1.msgId = (uint64(_b.chainId) << 32) | 0;
 
         hoax(_raju);
+        vm.selectFork(aFork);
         srcCounter__.remoteAddOperation(_b.chainId, m1.amount, _msgGasLimit);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, m1.sig);
+
+        vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
 
         MessageContext memory m2;
@@ -185,10 +235,13 @@ contract HappyTest is Setup {
         m2.msgId = (uint64(_b.chainId) << 32) | 1;
 
         hoax(_raju);
+        vm.selectFork(aFork);
         srcCounter__.remoteAddOperation(_b.chainId, m2.amount, _msgGasLimit);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, m2.sig);
+
+        vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
 
         _executePayloadOnDst(
@@ -213,6 +266,8 @@ contract HappyTest is Setup {
         );
 
         assertEq(destCounter__.counter(), m1.amount + m2.amount);
+
+        vm.selectFork(aFork);
         assertEq(srcCounter__.counter(), 0);
     }
 
@@ -223,6 +278,7 @@ contract HappyTest is Setup {
         uint256 msgId = (uint64(_b.chainId) << 32) | 0;
 
         hoax(_raju);
+        vm.selectFork(aFork);
         srcCounter__.remoteAddOperation(_b.chainId, amount, _msgGasLimit);
         (
             bytes32 root,
@@ -230,6 +286,8 @@ contract HappyTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, sig);
+
+        vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         _executePayloadOnDst(
             _a,
@@ -255,6 +313,8 @@ contract HappyTest is Setup {
         );
 
         assertEq(destCounter__.counter(), amount);
+
+        vm.selectFork(aFork);
         assertEq(srcCounter__.counter(), 0);
     }
 
@@ -262,7 +322,10 @@ contract HappyTest is Setup {
         vm.startPrank(_plugOwner);
 
         // deploy counters
+        vm.selectFork(aFork);
         srcCounter__ = new Counter(address(_a.socket__));
+
+        vm.selectFork(bFork);
         destCounter__ = new Counter(address(_b.socket__));
 
         vm.stopPrank();
@@ -270,6 +333,7 @@ contract HappyTest is Setup {
 
     function _configPlugContracts() internal {
         hoax(_plugOwner);
+        vm.selectFork(aFork);
         srcCounter__.setSocketConfig(
             _b.chainId,
             address(destCounter__),
@@ -279,6 +343,7 @@ contract HappyTest is Setup {
         );
 
         hoax(_plugOwner);
+        vm.selectFork(bFork);
         destCounter__.setSocketConfig(
             _a.chainId,
             address(srcCounter__),

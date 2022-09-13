@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../src/examples/Messenger.sol";
-import "./Setup.sol";
+import "./Setup.t.sol";
 
 contract PingPongTest is Setup {
     bytes32 private constant _PING = keccak256("PING");
@@ -12,7 +12,7 @@ contract PingPongTest is Setup {
     bytes private _payloadPing;
     bytes private _payloadPong;
 
-    uint256 msgGasLimit = 120000;
+    uint256 msgGasLimit = 115000;
 
     Messenger srcMessenger__;
     Messenger destMessenger__;
