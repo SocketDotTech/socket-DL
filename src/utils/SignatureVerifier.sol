@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 import "../interfaces/ISignatureVerifier.sol";
 
 contract SignatureVerifier is ISignatureVerifier {
@@ -13,7 +13,7 @@ contract SignatureVerifier is ISignatureVerifier {
         bytes32 hash_,
         address signer_,
         bytes calldata signature_
-    ) external pure returns (bool) {
+    ) external pure override returns (bool) {
         address recovered = _recoverSigner(hash_, signature_);
         if (recovered == signer_) {
             return true;
@@ -29,7 +29,7 @@ contract SignatureVerifier is ISignatureVerifier {
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_
-    ) external pure returns (address signer) {
+    ) external pure override returns (address signer) {
         bytes32 digest = keccak256(
             abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
         );

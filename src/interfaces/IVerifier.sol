@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity >=0.8.0;
+pragma solidity 0.8.7;
 
 interface IVerifier {
     /**
@@ -32,7 +32,6 @@ interface IVerifier {
 
     error ZeroAddress();
     error OnlyManager();
-    error OnlySocket();
     error OnlyPauser();
     error PauserAlreadySet();
     error NotPauser();

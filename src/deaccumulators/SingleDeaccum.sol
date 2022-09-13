@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 
 import "../interfaces/IDeaccumulator.sol";
 
@@ -10,7 +10,7 @@ contract SingleDeaccum is IDeaccumulator {
         bytes32 root_,
         bytes32 packedMessage_,
         bytes calldata
-    ) external pure returns (bool) {
+    ) external pure override returns (bool) {
         return root_ == packedMessage_;
     }
 }

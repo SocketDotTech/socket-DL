@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 
 import "../interfaces/INotary.sol";
 import "../utils/AccessControl.sol";
@@ -15,7 +15,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     uint256 private immutable _chainId;
-    ISignatureVerifier private _signatureVerifier;
+    ISignatureVerifier public signatureVerifier;
 
     // attester => accumAddr + chainId + packetId => is attested
     mapping(address => mapping(uint256 => bool)) public isAttested;
@@ -31,7 +31,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     constructor(address signatureVerifier_, uint256 chainId_) {
         _chainId = chainId_;
-        _signatureVerifier = ISignatureVerifier(signatureVerifier_);
+        signatureVerifier = ISignatureVerifier(signatureVerifier_);
     }
 
     /// @inheritdoc INotary
@@ -43,7 +43,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         (bytes32 root, uint256 packetId) = IAccumulator(accumAddress_)
             .sealPacket();
 
-        address attester = _signatureVerifier.recoverSigner(
+        address attester = signatureVerifier.recoverSigner(
             _chainId,
             accumAddress_,
             packetId,
@@ -53,7 +53,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
         if (!_hasRole(_attesterRole(remoteChainId_), attester))
             revert InvalidAttester();
-        emit PacketVerifiedAndSealed(accumAddress_, packetId, signature_);
+        emit PacketVerifiedAndSealed(
+            attester,
+            accumAddress_,
+            packetId,
+            signature_
+        );
     }
 
     /// @inheritdoc INotary
@@ -63,7 +68,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         uint256 packetId_,
         bytes calldata signature_
     ) external override {
-        address attester = _signatureVerifier.recoverSigner(
+        address attester = signatureVerifier.recoverSigner(
             _chainId,
             accumAddress_,
             packetId_,
@@ -72,7 +77,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         );
         bytes32 root = IAccumulator(accumAddress_).getRootById(packetId_);
 
-        if (root == root_) {
+        if (root == root_ && root != bytes32(0)) {
             emit ChallengedSuccessfully(
                 attester,
                 accumAddress_,
@@ -98,8 +103,10 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         );
 
         PacketDetails storage packedDetails = _packetDetails[packedId];
-
         if (packedDetails.remoteRoots != 0) revert AlreadyProposed();
+
+        packedDetails.remoteRoots = root_;
+        packedDetails.timeRecord = block.timestamp;
 
         _verifyAndUpdateAttestations(
             remoteChainId_,
@@ -109,8 +116,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             signature_
         );
 
-        packedDetails.remoteRoots = root_;
-        packedDetails.timeRecord = block.timestamp;
         emit Proposed(remoteChainId_, accumAddress_, packetId_, root_);
     }
 
@@ -121,7 +126,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_
-    ) external {
+    ) external override {
         uint256 packedId = _packWithPacketId(
             accumAddress_,
             remoteChainId_,
@@ -150,7 +155,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         bytes32 root_,
         bytes calldata signature_
     ) private returns (address attester) {
-        attester = _signatureVerifier.recoverSigner(
+        attester = signatureVerifier.recoverSigner(
             remoteChainId_,
             accumAddress_,
             packetId_,
@@ -179,7 +184,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         address accumAddress_,
         uint256 remoteChainId_,
         uint256 packetId_
-    ) public view returns (PacketStatus status) {
+    ) public view override returns (PacketStatus status) {
         uint256 packedId = _packWithPacketId(
             accumAddress_,
             remoteChainId_,
@@ -211,6 +216,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     )
         external
         view
+        override
         returns (
             bool isConfirmed,
             uint256 packetArrivedAt,
@@ -245,7 +251,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         uint256 remoteChainId_,
         uint256 packetId_,
         bytes32 root_
-    ) external {
+    ) external onlyOwner {
         uint256 packedId = _packWithPacketId(
             accumAddress_,
             remoteChainId_,
@@ -256,7 +262,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         if (packedDetails.remoteRoots != root_) revert RootNotFound();
         if (packedDetails.isPaused) revert PacketPaused();
 
-        // add check for msg.sender
         packedDetails.isPaused = true;
 
         emit PausedPacket(accumAddress_, packetId_, msg.sender);
@@ -316,19 +321,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     function _setSignatureVerifier(address signatureVerifier_) private {
-        _signatureVerifier = ISignatureVerifier(signatureVerifier_);
+        signatureVerifier = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
     }
 
     function _attesterRole(uint256 chainId_) internal pure returns (bytes32) {
         return bytes32(chainId_);
-    }
-
-    /**
-     * @notice returns the signature verifier
-     */
-    function signatureVerifier() external view returns (address) {
-        return address(_signatureVerifier);
     }
 
     /**

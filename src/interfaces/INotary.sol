@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 
 interface INotary {
     enum PacketStatus {
@@ -22,6 +22,7 @@ interface INotary {
      * @param signature signature of attester
      */
     event PacketVerifiedAndSealed(
+        address indexed attester,
         address indexed accumAddress,
         uint256 indexed packetId,
         bytes signature

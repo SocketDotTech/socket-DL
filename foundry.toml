@@ -4,7 +4,7 @@ out = 'out'
 libs = ['lib']
 test = 'test'
 
-solc_version = '0.8.15'
+solc_version = '0.8.7'
 optimizer = false
 via_ir = false
 verbosity = 3

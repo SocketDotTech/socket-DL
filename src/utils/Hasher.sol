@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 
 import "../interfaces/IHasher.sol";
 
@@ -13,7 +13,7 @@ contract Hasher is IHasher {
         uint256 msgId,
         uint256 msgGasLimit,
         bytes calldata payload
-    ) external pure returns (bytes32) {
+    ) external pure override returns (bytes32) {
         return
             keccak256(
                 abi.encode(

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
+import "../interfaces/IVault.sol";
 
 contract Counter is IPlug {
     // immutables
@@ -14,8 +15,8 @@ contract Counter is IPlug {
     uint256 public counter;
 
     // application ops
-    bytes32 OP_ADD = keccak256("OP_ADD");
-    bytes32 OP_SUB = keccak256("OP_SUB");
+    bytes32 constant OP_ADD = keccak256("OP_ADD");
+    bytes32 constant OP_SUB = keccak256("OP_SUB");
 
     constructor(address _socket) {
         socket = _socket;
@@ -74,7 +75,11 @@ contract Counter is IPlug {
         uint256 msgGasLimit,
         bytes memory payload
     ) private {
-        ISocket(socket).outbound(targetChain, msgGasLimit, payload);
+        ISocket(socket).outbound{value: msg.value}(
+            targetChain,
+            msgGasLimit,
+            payload
+        );
     }
 
     //

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 
 import "../interfaces/IAccumulator.sol";
 import "../utils/AccessControl.sol";
 
 abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
-    bytes32 public SOCKET_ROLE = keccak256("SOCKET_ROLE");
-    bytes32 public NOTARY_ROLE = keccak256("NOTARY_ROLE");
+    bytes32 public constant SOCKET_ROLE = keccak256("SOCKET_ROLE");
+    bytes32 public constant NOTARY_ROLE = keccak256("NOTARY_ROLE");
 
     /// an incrementing id for each new packet created
     uint256 internal _nextPacket;
