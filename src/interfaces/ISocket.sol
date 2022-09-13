@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
+
+import "./IVault.sol";
 
 interface ISocket {
     // to handle stack too deep
@@ -59,6 +61,10 @@ interface ISocket {
     error MessageAlreadyExecuted();
 
     error InsufficientGasLimit();
+
+    error ExecutorNotFound();
+
+    function vault() external view returns (IVault);
 
     /**
      * @notice registers a message

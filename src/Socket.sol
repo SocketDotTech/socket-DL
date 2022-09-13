@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 
 import "./interfaces/ISocket.sol";
 import "./interfaces/IAccumulator.sol";
@@ -7,7 +7,6 @@ import "./interfaces/IDeaccumulator.sol";
 import "./interfaces/IVerifier.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/IHasher.sol";
-import "./interfaces/IVault.sol";
 import "./utils/AccessControl.sol";
 
 contract Socket is ISocket, AccessControl(msg.sender) {
@@ -18,7 +17,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     }
 
     uint256 private immutable _chainId;
-    uint256 public executionGasCost;
+
+    bytes32 private constant EXECUTOR_ROLE = keccak256("EXECUTOR");
 
     // localPlug => remoteChainId => OutboundConfig
     mapping(address => mapping(uint256 => OutboundConfig))
@@ -36,8 +36,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     // msgId => message status
     mapping(uint256 => MessageStatus) private _messagesStatus;
 
-    IHasher private _hasher;
-    IVault private _vault;
+    IHasher public hasher;
+    IVault public override vault;
 
     constructor(
         uint256 chainId_,
@@ -46,7 +46,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     ) {
         _setHasher(hasher_);
         _chainId = chainId_;
-        _vault = IVault(vault_);
+        vault = IVault(vault_);
     }
 
     function setHasher(address hasher_) external onlyOwner {
@@ -64,9 +64,9 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
         uint256 msgId = (uint64(remoteChainId_) << 32) | nonce;
 
-        _vault.deductFee{value: msg.value}(remoteChainId_, msgGasLimit_);
+        vault.deductFee{value: msg.value}(remoteChainId_, msgGasLimit_);
 
-        bytes32 packedMessage = _hasher.packMessage(
+        bytes32 packedMessage = hasher.packMessage(
             _chainId,
             msg.sender,
             remoteChainId_,
@@ -92,6 +92,8 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         external
         override
     {
+        if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
+
         if (executedPackedMessages[executeParams_.msgId] != address(0))
             revert MessageAlreadyExecuted();
 
@@ -109,7 +111,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
         if (!isVerified) revert VerificationFailed();
 
-        bytes32 packedMessage = _hasher.packMessage(
+        bytes32 packedMessage = hasher.packMessage(
             executeParams_.remoteChainId,
             config.remotePlug,
             _chainId,
@@ -127,15 +129,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             )
         ) revert InvalidProof();
 
-        _vault.mintFee(
-            msg.sender,
-            (executionGasCost + executeParams_.msgGasLimit),
-            executeParams_.remoteChainId
-        );
-
-        if (gasleft() < executeParams_.msgGasLimit)
-            revert InsufficientGasLimit();
-
         try
             IPlug(executeParams_.localPlug).inbound{
                 gas: executeParams_.msgGasLimit
@@ -143,7 +136,12 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         {
             _messagesStatus[executeParams_.msgId] = MessageStatus.SUCCESS;
             emit Executed(true, "");
+        } catch Error(string memory reason) {
+            // catch failing revert() and require()
+            _messagesStatus[executeParams_.msgId] = MessageStatus.FAILED;
+            emit Executed(false, reason);
         } catch (bytes memory reason) {
+            // catch failing assert()
             _messagesStatus[executeParams_.msgId] = MessageStatus.FAILED;
             emit ExecutedBytes(false, reason);
         }
@@ -179,16 +177,28 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         // TODO: emit event
     }
 
+    /**
+     * @notice adds an executor
+     * @param executor_ executor address
+     */
+    function grantExecutorRole(address executor_) external onlyOwner {
+        _grantRole(EXECUTOR_ROLE, executor_);
+    }
+
+    /**
+     * @notice removes an executor from `remoteChainId_` chain list
+     * @param executor_ executor address
+     */
+    function revokeExecutorRole(address executor_) external onlyOwner {
+        _revokeRole(EXECUTOR_ROLE, executor_);
+    }
+
     function _setHasher(address hasher_) private {
-        _hasher = IHasher(hasher_);
+        hasher = IHasher(hasher_);
     }
 
     function chainId() external view returns (uint256) {
         return _chainId;
-    }
-
-    function hasher() external view returns (address) {
-        return address(_hasher);
     }
 
     function getMessageStatus(uint256 msgId_)

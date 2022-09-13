@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 
 // deprecated
 import "../interfaces/INotary.sol";
@@ -183,7 +183,7 @@ import "../interfaces/ISignatureVerifier.sol";
 //             signature_
 //         );
 
-//         emit PacketVerifiedAndSealed(accumAddress_, packetId, signature_);
+//         emit PacketVerifiedAndSealed(attester, accumAddress_, packetId, signature_);
 //     }
 
 //     function challengeSignature(

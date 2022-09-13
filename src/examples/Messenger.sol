@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
+import "../interfaces/IVault.sol";
 
 contract Messenger is IPlug {
     // immutables
@@ -39,6 +40,7 @@ contract Messenger is IPlug {
 
     function sendRemoteMessage(uint256 destChainId_, bytes32 message_)
         external
+        payable
     {
         bytes memory payload = abi.encode(_chainId, message_);
         _outbound(destChainId_, payload);
@@ -86,6 +88,10 @@ contract Messenger is IPlug {
     }
 
     function _outbound(uint256 targetChain_, bytes memory payload_) private {
-        ISocket(_socket).outbound(targetChain_, msgGasLimit, payload_);
+        ISocket(_socket).outbound{value: msg.value}(
+            targetChain_,
+            msgGasLimit,
+            payload_
+        );
     }
 }
