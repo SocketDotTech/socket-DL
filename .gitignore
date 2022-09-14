@@ -1,11 +1,12 @@
 cache/
 out/
 node_modules/
-deployments/
+deployments/31337.json
 
 #Hardhat files
 cache_hardhat/
 artifacts/
+src/types
 
 #Hardhat plugin files
 typechain-types/
