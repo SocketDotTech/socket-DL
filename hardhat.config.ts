@@ -36,7 +36,7 @@ const chainIds = {
   hardhat: 31337,
   mainnet: 1,
   "arbitrum-mainnet": 42161,
-  "arbitrum-rinkeby": 421613,
+  "arbitrum-rinkeby": 421611,
   "optimism-mainnet": 10,
   "optimism-goerli": 420,
   "polygon-mainnet": 137,
@@ -104,6 +104,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       arbitrumOne: process.env.ARBISCAN_API_KEY || "",
+      arbitrumTestnet: process.env.ARBISCAN_API_KEY || "",
       avalanche: process.env.SNOWTRACE_API_KEY || "",
       bsc: process.env.BSCSCAN_API_KEY || "",
       goerli: process.env.ETHERSCAN_API_KEY || "",
@@ -112,6 +113,16 @@ const config: HardhatUserConfig = {
       polygon: process.env.POLYGONSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
     },
+    customChains: [
+      {
+        network: "optimisticEthereum",
+        chainId: chainIds["optimism-goerli"],
+        urls: {
+          apiURL: "https://api-goerli-optimistic.etherscan.io/api",
+          browserURL: "https://goerli-optimism.etherscan.io/"
+        }
+      }
+    ]
   },
   networks: {
     hardhat: {
