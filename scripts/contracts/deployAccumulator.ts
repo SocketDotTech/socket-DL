@@ -1,13 +1,18 @@
 import { ethers } from "hardhat";
 import { ContractFactory, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { verify } from "../utils";
 
 export default async function deployAccumulator(socket: Contract, notary: Contract, signer: SignerWithAddress) {
   try {
-    const Accumulator: ContractFactory = await ethers.getContractFactory("SingleAccum");
-    const accumContract: Contract = await Accumulator.connect(signer).deploy(socket.address, notary.address);
+    const contractName = "SingleAccum";
+    const args = [socket.address, notary.address]
+
+    const Accumulator: ContractFactory = await ethers.getContractFactory(contractName);
+    const accumContract: Contract = await Accumulator.connect(signer).deploy(...args);
     await accumContract.deployed();
 
+    await verify(accumContract.address, contractName, args);
     return accumContract;
   } catch (error) {
     throw error;

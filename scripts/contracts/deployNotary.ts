@@ -1,16 +1,19 @@
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Contract, ContractFactory } from "ethers";
-import { getChainId } from "../utils";
+import { getChainId, verify } from "../utils";
 
 export default async function deployNotary(signatureVerifier: Contract, signer: SignerWithAddress) {
   try {
     const chainId = await getChainId();
-
-    const Notary: ContractFactory = await ethers.getContractFactory("AdminNotary");
-    const notaryContract: Contract = await Notary.connect(signer).deploy(signatureVerifier.address, chainId);
+    const contractName = "AdminNotary";
+    const args = [signatureVerifier.address, chainId]
+  
+    const Notary: ContractFactory = await ethers.getContractFactory(contractName);
+    const notaryContract: Contract = await Notary.connect(signer).deploy(...args);
     await notaryContract.deployed();
 
+    await verify(notaryContract.address, contractName, args);
     return notaryContract;
   } catch (error) {
     throw error;

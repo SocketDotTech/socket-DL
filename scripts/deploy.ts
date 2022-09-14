@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployContractWithoutArgs, getChainId, storeAddresses } from "../scripts/utils";
+import { deployContractWithoutArgs, getChainId, storeAddresses } from "./utils";
 
 import { deployAccumulator, deployCounter, deployNotary, deploySocket, deployVault, deployVerifier } from "../scripts/contracts";
 
