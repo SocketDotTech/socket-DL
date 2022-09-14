@@ -239,18 +239,20 @@ contract Setup is Test {
     ) internal {
         hoax(_raju);
 
-        ISocket.ExecuteParams memory params = ISocket.ExecuteParams(
+        ISocket.VerificationParams memory vParams = ISocket.VerificationParams(
             src_.chainId,
-            destPlug_,
-            msgId_,
             address(src_.accum__),
             packetId_,
-            msgGasLimit_,
-            payload_,
             proof_
         );
 
-        dst_.socket__.execute(params);
+        dst_.socket__.execute(
+            msgGasLimit_,
+            msgId_,
+            destPlug_,
+            payload_,
+            vParams
+        );
     }
 
     // to ignore this file from coverage

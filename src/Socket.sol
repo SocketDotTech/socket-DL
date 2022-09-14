@@ -88,61 +88,74 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         );
     }
 
-    function execute(ISocket.ExecuteParams calldata executeParams_)
-        external
-        override
-    {
+    function execute(
+        uint256 msgGasLimit,
+        uint256 msgId,
+        address localPlug,
+        bytes calldata payload,
+        ISocket.VerificationParams calldata verifyParams_
+    ) external override {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
-
-        if (executedPackedMessages[executeParams_.msgId] != address(0))
+        if (executedPackedMessages[msgId] != address(0))
             revert MessageAlreadyExecuted();
+        executedPackedMessages[msgId] = msg.sender;
 
-        executedPackedMessages[executeParams_.msgId] = msg.sender;
+        bytes32 packedMessage = hasher.packMessage(
+            verifyParams_.remoteChainId,
+            inboundConfigs[localPlug][verifyParams_.remoteChainId].remotePlug,
+            _chainId,
+            localPlug,
+            msgId,
+            msgGasLimit,
+            payload
+        );
 
-        InboundConfig memory config = inboundConfigs[executeParams_.localPlug][
-            executeParams_.remoteChainId
+        _verify(localPlug, packedMessage, verifyParams_);
+        _execute(localPlug, msgGasLimit, msgId, payload);
+    }
+
+    function _verify(
+        address localPlug,
+        bytes32 packedMessage,
+        ISocket.VerificationParams calldata verifyParams_
+    ) internal view {
+        InboundConfig memory config = inboundConfigs[localPlug][
+            verifyParams_.remoteChainId
         ];
 
         (bool isVerified, bytes32 root) = IVerifier(config.verifier).verifyRoot(
-            executeParams_.remoteAccum,
-            executeParams_.remoteChainId,
-            executeParams_.packetId
+            verifyParams_.remoteAccum,
+            verifyParams_.remoteChainId,
+            verifyParams_.packetId
         );
 
         if (!isVerified) revert VerificationFailed();
-
-        bytes32 packedMessage = hasher.packMessage(
-            executeParams_.remoteChainId,
-            config.remotePlug,
-            _chainId,
-            executeParams_.localPlug,
-            executeParams_.msgId,
-            executeParams_.msgGasLimit,
-            executeParams_.payload
-        );
 
         if (
             !IDeaccumulator(config.deaccum).verifyMessageInclusion(
                 root,
                 packedMessage,
-                executeParams_.deaccumProof
+                verifyParams_.deaccumProof
             )
         ) revert InvalidProof();
+    }
 
-        try
-            IPlug(executeParams_.localPlug).inbound{
-                gas: executeParams_.msgGasLimit
-            }(executeParams_.payload)
-        {
-            _messagesStatus[executeParams_.msgId] = MessageStatus.SUCCESS;
+    function _execute(
+        address localPlug,
+        uint256 msgGasLimit,
+        uint256 msgId,
+        bytes calldata payload
+    ) internal {
+        try IPlug(localPlug).inbound{gas: msgGasLimit}(payload) {
+            _messagesStatus[msgId] = MessageStatus.SUCCESS;
             emit Executed(true, "");
         } catch Error(string memory reason) {
             // catch failing revert() and require()
-            _messagesStatus[executeParams_.msgId] = MessageStatus.FAILED;
+            _messagesStatus[msgId] = MessageStatus.FAILED;
             emit Executed(false, reason);
         } catch (bytes memory reason) {
             // catch failing assert()
-            _messagesStatus[executeParams_.msgId] = MessageStatus.FAILED;
+            _messagesStatus[msgId] = MessageStatus.FAILED;
             emit ExecutedBytes(false, reason);
         }
     }

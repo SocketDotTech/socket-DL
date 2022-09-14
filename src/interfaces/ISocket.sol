@@ -5,14 +5,10 @@ import "./IVault.sol";
 
 interface ISocket {
     // to handle stack too deep
-    struct ExecuteParams {
+    struct VerificationParams {
         uint256 remoteChainId;
-        address localPlug;
-        uint256 msgId;
         address remoteAccum;
         uint256 packetId;
-        uint256 msgGasLimit;
-        bytes payload;
         bytes deaccumProof;
     }
 
@@ -81,9 +77,19 @@ interface ISocket {
 
     /**
      * @notice executes a message
-     * @param executeParams_ the details needed for message execution
+     * @param msgGasLimit gas limit needed to execute the inbound at destination
+     * @param msgId message id packed with destChainId and nonce
+     * @param localPlug dest plug address
+     * @param payload the data which is needed by plug at inbound call on destination
+     * @param verifyParams_ the details needed for message verification
      */
-    function execute(ExecuteParams calldata executeParams_) external;
+    function execute(
+        uint256 msgGasLimit,
+        uint256 msgId,
+        address localPlug,
+        bytes calldata payload,
+        ISocket.VerificationParams calldata verifyParams_
+    ) external;
 
     // TODO: add confs and blocking/non-blocking
     struct InboundConfig {
