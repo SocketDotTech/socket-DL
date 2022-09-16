@@ -53,6 +53,13 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         _setHasher(hasher_);
     }
 
+    /**
+     * @notice registers a message
+     * @dev Packs the message and includes it in a packet with accumulator
+     * @param remoteChainId_ the destination chain id
+     * @param msgGasLimit_ the gas limit needed to execute the payload on destination
+     * @param payload_ the data which is needed by plug at inbound call on destination
+     */
     function outbound(
         uint256 remoteChainId_,
         uint256 msgGasLimit_,
@@ -88,6 +95,14 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         );
     }
 
+    /**
+     * @notice executes a message
+     * @param msgGasLimit gas limit needed to execute the inbound at destination
+     * @param msgId message id packed with destChainId and nonce
+     * @param localPlug dest plug address
+     * @param payload the data which is needed by plug at inbound call on destination
+     * @param verifyParams_ the details needed for message verification
+     */
     function execute(
         uint256 msgGasLimit,
         uint256 msgId,
@@ -160,6 +175,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         }
     }
 
+    /// @inheritdoc ISocket
     function setInboundConfig(
         uint256 remoteChainId_,
         address remotePlug_,
@@ -176,6 +192,7 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         // TODO: emit event
     }
 
+    /// @inheritdoc ISocket
     function setOutboundConfig(
         uint256 remoteChainId_,
         address remotePlug_,

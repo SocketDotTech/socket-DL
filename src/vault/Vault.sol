@@ -12,6 +12,7 @@ contract Vault is IVault, Ownable {
         emit FeeDeducted(msg.value);
     }
 
+    /// @inheritdoc IVault
     function claimFee(address account_, uint256 amount_)
         external
         override
@@ -21,6 +22,7 @@ contract Vault is IVault, Ownable {
         require(success, "Transfer failed.");
     }
 
+    /// @inheritdoc IVault
     function getFees(uint256, uint256)
         external
         pure

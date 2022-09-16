@@ -45,16 +45,25 @@ contract Verifier is IVerifier {
         timeoutInSeconds = timeoutInSeconds_;
     }
 
+    /**
+     * @notice pauses chain
+     */
     function pause(uint256 chain) external onlyPauser(chain) {
         isChainActive[chain] = false;
         emit Paused(msg.sender, chain);
     }
 
+    /**
+     * @notice activates chain as a destination for packets
+     */
     function activate(uint256 chain) external onlyPauser(chain) {
         isChainActive[chain] = true;
         emit Unpaused(msg.sender, chain);
     }
 
+    /**
+     * @notice add _newPauser as PAUSER for _incomingChain
+     */
     function addPauser(address _newPauser, uint256 _incomingChain)
         external
         onlyManager
@@ -65,6 +74,9 @@ contract Verifier is IVerifier {
         emit NewPauser(_newPauser, _incomingChain);
     }
 
+    /**
+     * @notice removes _currentPauser from PAUSER role for _incomingChain
+     */
     function removePauser(address _currentPauser, uint256 _incomingChain)
         external
         onlyManager
@@ -75,6 +87,9 @@ contract Verifier is IVerifier {
         emit RemovedPauser(_currentPauser, _incomingChain);
     }
 
+    /**
+     * @notice returns if given _pauser has correct role for _incomingChainId.
+     */
     function isPauser(address _pauser, uint256 _incomingChainId)
         external
         view
@@ -83,6 +98,12 @@ contract Verifier is IVerifier {
         return isPauserForIncomingChain[_pauser][_incomingChainId];
     }
 
+    /**
+     * @notice verifies if the packet satisfies needed checks before execution
+     * @param accumAddress_ address of accumulator at src
+     * @param remoteChainId_ dest chain id
+     * @param packetId_ packet id
+     */
     function verifyRoot(
         address accumAddress_,
         uint256 remoteChainId_,
