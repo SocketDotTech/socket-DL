@@ -145,7 +145,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             signature_
         );
 
-        emit RootConfirmed(attester, accumAddress_, packetId_);
+        emit RootConfirmed(attester, accumAddress_, packetId_, remoteChainId_);
     }
 
     function _verifyAndUpdateAttestations(

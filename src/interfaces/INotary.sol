@@ -88,7 +88,8 @@ interface INotary {
     event RootConfirmed(
         address indexed attester,
         address indexed accumAddress,
-        uint256 indexed packetId
+        uint256 indexed packetId,
+        uint256 remoteChainId_
     );
 
     error InvalidAttester();
