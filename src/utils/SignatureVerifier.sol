@@ -33,6 +33,9 @@ contract SignatureVerifier is ISignatureVerifier {
         bytes32 digest = keccak256(
             abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
         );
+        digest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
+        );
         signer = _recoverSigner(digest, signature_);
     }
 

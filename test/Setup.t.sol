@@ -186,6 +186,9 @@ contract Setup is Test {
         bytes32 digest = keccak256(
             abi.encode(src_.chainId, address(src_.accum__), packetId, root)
         );
+        digest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
+        );
 
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
             _attesterPrivateKey,

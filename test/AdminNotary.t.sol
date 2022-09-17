@@ -431,6 +431,9 @@ contract AdminNotaryTest is Setup {
         internal
         returns (bytes memory sig)
     {
+        digest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
+        );
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(privateKey_, digest);
 
         sig = new bytes(65);
