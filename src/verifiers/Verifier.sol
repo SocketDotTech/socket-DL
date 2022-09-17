@@ -3,11 +3,12 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IVerifier.sol";
 import "../interfaces/INotary.sol";
+import "../Version0.sol";
 
 // defines a timeout
 // allows a "PAUSER" role to stop processing of messages
 // allows an "MANAGER" role to setup "PAUSER"
-contract Verifier is IVerifier {
+contract Verifier is IVerifier, Version0 {
     // immutables
     address public immutable manager;
 

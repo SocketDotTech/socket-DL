@@ -8,8 +8,9 @@ import "./interfaces/IVerifier.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/IHasher.sol";
 import "./utils/AccessControl.sol";
+import "./Version0.sol";
 
-contract Socket is ISocket, AccessControl(msg.sender) {
+contract Socket is ISocket, AccessControl(msg.sender), Version0 {
     enum MessageStatus {
         NOT_EXECUTED,
         SUCCESS,
