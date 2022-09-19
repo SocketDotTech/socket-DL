@@ -4,7 +4,9 @@ import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { signerAddress, srcChainId, destChainId, isFast, executorAddress } from "./config";
-import { getInstance } from "./utils";
+import { getInstance, deployContractWithoutArgs } from "./utils";
+import { deployAccumulator } from "./contracts";
+import { Contract } from "ethers";
 
 const deployedAddressPath = path.join(__dirname, "../deployments/");
 
@@ -26,13 +28,16 @@ export const main = async () => {
     const counterSigner: SignerWithAddress = await ethers.getSigner(counterOwner);
     const pauserSigner: SignerWithAddress = await ethers.getSigner(pauser);
 
-    const accum = await getInstance("SingleAccum", srcConfig["accum"]);
     const counter = await getInstance("Counter", srcConfig["counter"]);
-    const deaccum = await getInstance("SingleDeaccum", srcConfig["deaccum"]);
     const notary = await getInstance("AdminNotary", srcConfig["notary"]);
     const socket = await getInstance("Socket", srcConfig["socket"]);
     const verifier = await getInstance("Verifier", srcConfig["verifier"]);
 
+    const accum: Contract = await deployAccumulator(socket, notary, socketSigner);
+    const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
+
+    console.log(accum.address, deaccum.address, `Deployed accum and deaccum for ${srcChainId} & ${destChainId}`);
+  
     await notary.connect(socketSigner).grantAttesterRole(destChainId, signerAddress[srcChainId]);
     console.log(`Added ${signerAddress[srcChainId]} as an attester for ${destChainId} chain id!`)
 

@@ -5,7 +5,7 @@ import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithoutArgs, getChainId, storeAddresses } from "./utils";
 
-import { deployAccumulator, deployCounter, deployNotary, deploySocket, deployVault, deployVerifier } from "../scripts/contracts";
+import { deployCounter, deployNotary, deploySocket, deployVault, deployVerifier } from "../scripts/contracts";
 
 export const main = async () => {
   try {
@@ -24,9 +24,6 @@ export const main = async () => {
     const vault: Contract = await deployVault(socketSigner);
     const socket: Contract = await deploySocket(hasher, vault, socketSigner);
 
-    const accum: Contract = await deployAccumulator(socket, notary, socketSigner);
-    const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
-
     const verifier: Contract = await deployVerifier(notary, counterSigner)
 
     // plug deployments
@@ -37,9 +34,7 @@ export const main = async () => {
     const chainId = await getChainId();
 
     const addresses = {
-      accum: accum.address,
       counter: counter.address,
-      deaccum: deaccum.address,
       hasher: hasher.address,
       notary: notary.address,
       signatureVerifier: signatureVerifier.address,
