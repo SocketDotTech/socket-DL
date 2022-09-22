@@ -8,9 +8,8 @@ import "./interfaces/IVerifier.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/IHasher.sol";
 import "./utils/AccessControl.sol";
-import "./Version0.sol";
 
-contract Socket is ISocket, AccessControl(msg.sender), Version0 {
+contract Socket is ISocket, AccessControl(msg.sender) {
     enum MessageStatus {
         NOT_EXECUTED,
         SUCCESS,
@@ -32,7 +31,7 @@ contract Socket is ISocket, AccessControl(msg.sender), Version0 {
     mapping(address => mapping(uint256 => uint256)) private _nonces;
 
     // msgId => executorAddress
-    mapping(uint256 => address) private executedPackedMessages;
+    mapping(uint256 => address) private executor;
 
     // msgId => message status
     mapping(uint256 => MessageStatus) private _messagesStatus;
@@ -70,7 +69,13 @@ contract Socket is ISocket, AccessControl(msg.sender), Version0 {
             remoteChainId_
         ];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
-        uint256 msgId = (uint64(remoteChainId_) << 32) | nonce;
+
+        // Packs the src plug, src chain id, dest chain id and nonce
+        // msgId(256) = srcPlug(160) + srcChainId(16) + destChainId(16) + nonce(64)
+        uint256 msgId = (uint256(uint160(msg.sender)) << 96) |
+            (_chainId << 80) |
+            (remoteChainId_ << 64) |
+            nonce;
 
         vault.deductFee{value: msg.value}(remoteChainId_, msgGasLimit_);
 
@@ -99,7 +104,7 @@ contract Socket is ISocket, AccessControl(msg.sender), Version0 {
     /**
      * @notice executes a message
      * @param msgGasLimit gas limit needed to execute the inbound at destination
-     * @param msgId message id packed with destChainId and nonce
+     * @param msgId message id packed with src plug, src chainId, dest chainId and nonce
      * @param localPlug dest plug address
      * @param payload the data which is needed by plug at inbound call on destination
      * @param verifyParams_ the details needed for message verification
@@ -112,9 +117,8 @@ contract Socket is ISocket, AccessControl(msg.sender), Version0 {
         ISocket.VerificationParams calldata verifyParams_
     ) external override {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
-        if (executedPackedMessages[msgId] != address(0))
-            revert MessageAlreadyExecuted();
-        executedPackedMessages[msgId] = msg.sender;
+        if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
+        executor[msgId] = msg.sender;
 
         bytes32 packedMessage = hasher.packMessage(
             verifyParams_.remoteChainId,
