@@ -30,11 +30,11 @@ interface IAccumulator {
     function addPackedMessage(bytes32 packedMessage) external;
 
     /**
-     * @notice returns the latest packet details
+     * @notice returns the latest packet details which needs to be sealed
      * @return root root hash of the latest packet which is not yet sealed
      * @return packetId latest packet id which is not yet sealed
      */
-    function getNextPacket()
+    function getNextPacketToBeSealed()
         external
         view
         returns (bytes32 root, uint256 packetId);

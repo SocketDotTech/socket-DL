@@ -12,9 +12,9 @@ contract Verifier is IVerifier, Ownable {
     event NotarySet(address notary_);
 
     constructor(
+        address owner_,
         address _notary,
-        uint256 timeoutInSeconds_,
-        address owner_
+        uint256 timeoutInSeconds_
     ) Ownable(owner_) {
         notary = INotary(_notary);
 
