@@ -17,16 +17,4 @@ interface ISignatureVerifier {
         bytes32 root_,
         bytes calldata signature_
     ) external returns (address);
-
-    /**
-     * @notice returns if the signature_ is recovered to given signer_
-     * @param hash_ message hash which is signed
-     * @param signer_ signer address
-     * @param signature_ signature which needs to be verified
-     */
-    function verifySignature(
-        bytes32 hash_,
-        address signer_,
-        bytes calldata signature_
-    ) external returns (bool);
 }
