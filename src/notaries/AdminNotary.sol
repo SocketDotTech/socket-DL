@@ -5,17 +5,10 @@ import "../interfaces/INotary.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
 import "../interfaces/ISignatureVerifier.sol";
-import "../Version0.sol";
 
-contract AdminNotary is INotary, AccessControl(msg.sender), Version0 {
-    struct PacketDetails {
-        bool isPaused;
-        bytes32 remoteRoots;
-        uint256 attestations;
-        uint256 timeRecord;
-    }
-
+contract AdminNotary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
+    uint256 public slowAccumWaitTime;
     ISignatureVerifier public signatureVerifier;
 
     // attester => accumAddr + chainId + packetId => is attested
@@ -30,8 +23,14 @@ contract AdminNotary is INotary, AccessControl(msg.sender), Version0 {
     // accumAddr + chainId + packetId
     mapping(uint256 => PacketDetails) private _packetDetails;
 
-    constructor(address signatureVerifier_, uint256 chainId_) {
+    constructor(
+        address signatureVerifier_,
+        uint256 chainId_,
+        uint256 slowAccumWaitTime_
+    ) {
         _chainId = chainId_;
+        //TODO: limits for wait time
+        slowAccumWaitTime = slowAccumWaitTime_;
         signatureVerifier = ISignatureVerifier(signatureVerifier_);
     }
 
@@ -192,18 +191,21 @@ contract AdminNotary is INotary, AccessControl(msg.sender), Version0 {
             packetId_
         );
         uint256 accumId = _pack(accumAddress_, remoteChainId_);
-        uint256 packetArrivedAt = _packetDetails[packedId].timeRecord;
+
+        PacketDetails memory packet = _packetDetails[packedId];
+        uint256 packetArrivedAt = packet.timeRecord;
 
         if (packetArrivedAt == 0) return PacketStatus.NOT_PROPOSED;
 
         // if paused at dest
-        if (_packetDetails[packedId].isPaused) return PacketStatus.PAUSED;
+        if (packet.isPaused) return PacketStatus.PAUSED;
 
         if (isFast[accumId]) {
-            if (
-                _packetDetails[packedId].attestations !=
-                totalAttestors[remoteChainId_]
-            ) return PacketStatus.PROPOSED;
+            if (packet.attestations != totalAttestors[remoteChainId_])
+                return PacketStatus.PROPOSED;
+        } else {
+            if (block.timestamp - packet.timeRecord < slowAccumWaitTime)
+                return PacketStatus.PROPOSED;
         }
 
         return PacketStatus.CONFIRMED;
@@ -236,8 +238,9 @@ contract AdminNotary is INotary, AccessControl(msg.sender), Version0 {
         );
 
         if (status == PacketStatus.CONFIRMED) isConfirmed = true;
-        root = _packetDetails[packedId].remoteRoots;
-        packetArrivedAt = _packetDetails[packedId].timeRecord;
+        PacketDetails memory packet = _packetDetails[packedId];
+        root = packet.remoteRoots;
+        packetArrivedAt = packet.timeRecord;
     }
 
     /**
@@ -264,7 +267,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender), Version0 {
         if (packedDetails.isPaused) revert PacketPaused();
 
         packedDetails.isPaused = true;
-
         emit PausedPacket(accumAddress_, packetId_, msg.sender);
     }
 
