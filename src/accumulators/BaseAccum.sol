@@ -61,14 +61,14 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
 
     /// returns the latest packet details to be sealed
     /// @inheritdoc IAccumulator
-    function getNextPacket()
+    function getNextPacketToBeSealed()
         external
         view
         virtual
         override
         returns (bytes32, uint256)
     {
-        uint256 toSeal = _sealedPackets + 1;
+        uint256 toSeal = _sealedPackets;
         return (_roots[toSeal], toSeal);
     }
 
@@ -82,5 +82,9 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
         returns (bytes32)
     {
         return _roots[id];
+    }
+
+    function getLatestPacketId() external view returns (uint256) {
+        return _packets == 0 ? 0 : _packets - 1;
     }
 }
