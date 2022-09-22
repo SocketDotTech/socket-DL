@@ -3,18 +3,6 @@ pragma solidity 0.8.7;
 
 interface IAccumulator {
     /**
-     * @notice emits the new address of socket
-     * @param socket socket address
-     */
-    event SocketSet(address indexed socket);
-
-    /**
-     * @notice emits the new address of notary
-     * @param notary notary address
-     */
-    event NotarySet(address indexed notary);
-
-    /**
      * @notice emits the message details when it arrives
      * @param packedMessage the message packed with payload, fees and config
      * @param packetId an incremental id assigned to each new packet
