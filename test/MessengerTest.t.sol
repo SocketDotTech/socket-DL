@@ -12,7 +12,7 @@ contract PingPongTest is Setup {
     bytes private _payloadPing;
     bytes private _payloadPong;
 
-    uint256 msgGasLimit = 115000;
+    uint256 msgGasLimit = 130000;
 
     Messenger srcMessenger__;
     Messenger destMessenger__;
@@ -38,6 +38,8 @@ contract PingPongTest is Setup {
 
         _verifyAndSealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
+
+        vm.warp(block.timestamp + _slowAccumWaitTime);
         _executePayloadOnDst(
             _a,
             _b,
@@ -61,6 +63,8 @@ contract PingPongTest is Setup {
 
         _verifyAndSealOnSrc(_b, _a, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         _executePayloadOnDst(
             _b,
             _a,
@@ -84,10 +88,18 @@ contract PingPongTest is Setup {
         hoax(_raju);
         srcMessenger__.sendRemoteMessage(_b.chainId, _PING);
 
-        uint256 iterations = 5;
+        uint256 iterations = 1;
         for (uint256 index = 0; index < iterations; index++) {
-            uint256 msgIdAToB = (uint64(_b.chainId) << 32) | index;
-            uint256 msgIdBToA = (uint64(_a.chainId) << 32) | index;
+            uint256 msgIdAToB = (uint256(uint160(address(srcMessenger__))) <<
+                96) |
+                (_a.chainId << 80) |
+                (_b.chainId << 64) |
+                index;
+            uint256 msgIdBToA = (uint256(uint160(address(destMessenger__))) <<
+                96) |
+                (_b.chainId << 80) |
+                (_a.chainId << 64) |
+                index;
 
             _verifyAToB(msgIdAToB);
             _verifyBToA(msgIdBToA);
