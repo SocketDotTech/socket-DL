@@ -3,9 +3,8 @@ pragma solidity 0.8.7;
 
 import "../utils/Ownable.sol";
 import "../interfaces/IVault.sol";
-import "../Version0.sol";
 
-contract Vault is IVault, Ownable, Version0 {
+contract Vault is IVault, Ownable {
     constructor(address owner_) Ownable(owner_) {}
 
     /// @inheritdoc IVault
