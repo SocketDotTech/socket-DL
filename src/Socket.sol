@@ -168,15 +168,15 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     ) internal {
         try IPlug(localPlug).inbound{gas: msgGasLimit}(payload) {
             _messagesStatus[msgId] = MessageStatus.SUCCESS;
-            emit Executed(true, "");
+            emit ExecutionSuccess(msgId);
         } catch Error(string memory reason) {
             // catch failing revert() and require()
             _messagesStatus[msgId] = MessageStatus.FAILED;
-            emit Executed(false, reason);
+            emit ExecutionFailed(msgId, false, reason);
         } catch (bytes memory reason) {
             // catch failing assert()
             _messagesStatus[msgId] = MessageStatus.FAILED;
-            emit ExecutedBytes(false, reason);
+            emit ExecutionFailedBytes(msgId, false, reason);
         }
     }
 
