@@ -56,4 +56,5 @@ export const contractPath: {
 }
 
 export const isFast = true;
-export const destChainId = 421611;
+export const destChainId = 80001;
+export const totalDestinations = [80001, 420];

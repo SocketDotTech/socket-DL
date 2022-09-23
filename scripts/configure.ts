@@ -2,7 +2,7 @@ import fs from "fs";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { signerAddress, destChainId } from "./config";
+import { signerAddress, destChainId, isFast } from "./config";
 import { getInstance, deployContractWithoutArgs, storeAddresses, deployedAddressPath, getChainId } from "./utils";
 import { deployAccumulator } from "./contracts";
 import { Contract } from "ethers";
@@ -23,28 +23,19 @@ export const main = async () => {
 
     const { socketSigner, counterSigner } = await getSigners();
 
-    // fast and slow accum
-    const fastAccum: Contract = await deployAccumulator(srcConfig["socket"], srcConfig["notary"], socketSigner);
-    const slowAccum: Contract = await deployAccumulator(srcConfig["socket"], srcConfig["notary"], socketSigner);
-    const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
-    console.log(fastAccum.address, slowAccum.address, deaccum.address, `Deployed accum and deaccum for ${srcChainId} & ${destChainId}`);
-
-    srcConfig[`fastAccum-${destChainId}`] = fastAccum.address;
-    srcConfig[`slowAccum-${destChainId}`] = slowAccum.address;
-    srcConfig[`deaccum-${destChainId}`] = deaccum.address;
-    await storeAddresses(srcConfig, srcChainId)
-
     const counter: Contract = await getInstance("Counter", srcConfig["counter"]);
+    const accum = isFast ? srcConfig[`fastAccum-${destChainId}`] : srcConfig[`slowAccum-${destChainId}`];
+
     await counter.connect(counterSigner).setSocketConfig(
       destChainId,
       destConfig["counter"],
-      fastAccum.address,
-      deaccum.address,
+      accum,
+      srcConfig[`deaccum-${destChainId}`],
       srcConfig["verifier"]
     );
     console.log(`Set config role for ${destChainId} chain id!`)
 
-    await configNotary(srcConfig["notary"], fastAccum.address, slowAccum.address, socketSigner)
+    await configNotary(srcConfig["notary"], srcConfig[`fastAccum-${destChainId}`], srcConfig[`slowAccum-${destChainId}`], socketSigner)
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;

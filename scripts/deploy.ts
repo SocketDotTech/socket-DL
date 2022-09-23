@@ -5,8 +5,8 @@ import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithoutArgs, getChainId, storeAddresses } from "./utils";
 
-import { deployCounter, deployNotary, deploySocket, deployVault, deployVerifier } from "../scripts/contracts";
-import { executorAddress } from "./config";
+import { deployAccumulator, deployCounter, deployNotary, deploySocket, deployVault, deployVerifier } from "../scripts/contracts";
+import { executorAddress, totalDestinations } from "./config";
 
 export const main = async () => {
   try {
@@ -45,6 +45,18 @@ export const main = async () => {
       socket: socket.address,
       vault: vault.address,
       verifier: verifier.address
+    }
+
+    // accum & deaccum deployments
+    for (let index = 0; index < totalDestinations.length; index++) {
+      const fastAccum: Contract = await deployAccumulator(socket.address, notary.address, socketSigner);
+      const slowAccum: Contract = await deployAccumulator(socket.address, notary.address, socketSigner);
+      const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
+      console.log(`Deployed accum and deaccum`);
+
+      addresses[`fastAccum-${totalDestinations[index]}`] = fastAccum.address;
+      addresses[`slowAccum-${totalDestinations[index]}`] = slowAccum.address;
+      addresses[`deaccum-${totalDestinations[index]}`] = deaccum.address;
     }
 
     await storeAddresses(addresses, chainId);
