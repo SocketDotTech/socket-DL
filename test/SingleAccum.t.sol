@@ -39,7 +39,7 @@ contract SingleAccumTest is Test {
             "Wrong role not set"
         );
         _assertPacketById(bytes32(0), 0);
-        _assertNextPacket(bytes32(0), 0);
+        _assertPacketToBeSealed(bytes32(0), 0);
     }
 
     function testSetSocket() external {
@@ -65,7 +65,7 @@ contract SingleAccumTest is Test {
     function testAddMessage() external {
         _addPackedMessage(_message_0);
         _assertPacketById(_message_0, 0);
-        _assertNextPacket(_message_0, 0);
+        _assertPacketToBeSealed(_message_0, 0);
     }
 
     function testSealPacket() external {
@@ -81,7 +81,6 @@ contract SingleAccumTest is Test {
 
     function testAddWithoutSeal() external {
         _addPackedMessage(_message_0);
-        vm.expectRevert(SingleAccum.PendingPacket.selector);
         _addPackedMessage(_message_1);
     }
 
@@ -124,10 +123,17 @@ contract SingleAccumTest is Test {
         _sa.sealPacket();
     }
 
-    function _assertNextPacket(bytes32 root_, uint256 packetId_) private {
-        (bytes32 root, uint256 packetId) = _sa.getNextPacket();
+    function _assertPacketToBeSealed(bytes32 root_, uint256 packetId_) private {
+        (bytes32 root, uint256 packetId) = _sa.getNextPacketToBeSealed();
         assertEq(root, root_, "Root Invalid");
         assertEq(packetId, packetId_, "packetId Invalid");
+    }
+
+    function _assertNextPacket(bytes32 root_, uint256 packetId_) private {
+        uint256 nextPacketId = _sa.getLatestPacketId() + 1;
+        bytes32 root = _sa.getRootById(nextPacketId);
+        assertEq(root, root_, "Root Invalid");
+        assertEq(nextPacketId, packetId_, "packetId Invalid");
     }
 
     function _assertPacketById(bytes32 root_, uint256 packetId_) private {

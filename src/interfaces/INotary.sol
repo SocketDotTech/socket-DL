@@ -2,6 +2,13 @@
 pragma solidity 0.8.7;
 
 interface INotary {
+    struct PacketDetails {
+        bool isPaused;
+        bytes32 remoteRoots;
+        uint256 attestations;
+        uint256 timeRecord;
+    }
+
     enum PacketStatus {
         NOT_PROPOSED,
         PROPOSED,

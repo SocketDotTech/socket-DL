@@ -18,8 +18,10 @@ contract SingleAccum is BaseAccum {
         override
         onlyRole(SOCKET_ROLE)
     {
-        if (_roots[_nextPacket] != bytes32(0)) revert PendingPacket();
-        _roots[_nextPacket] = packedMessage;
-        emit MessageAdded(packedMessage, _nextPacket, packedMessage);
+        uint256 packetId = _packets;
+        _roots[packetId] = packedMessage;
+        _packets++;
+
+        emit MessageAdded(packedMessage, packetId, packedMessage);
     }
 }

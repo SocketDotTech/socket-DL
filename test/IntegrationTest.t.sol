@@ -26,7 +26,11 @@ contract HappyTest is Setup {
         srcCounter__.remoteAddOperation(_b.chainId, amount, _msgGasLimit);
         // TODO: get nonce from event
 
-        uint256 msgId = (uint64(_b.chainId) << 32) | 0;
+        uint256 msgId = (uint256(uint160(address(srcCounter__))) << 96) |
+            (_a.chainId << 80) |
+            (_b.chainId << 64) |
+            0;
+
         (
             bytes32 root,
             uint256 packetId,
@@ -34,6 +38,8 @@ contract HappyTest is Setup {
         ) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         _executePayloadOnDst(
             _a,
             _b,
@@ -63,9 +69,14 @@ contract HappyTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(_b);
 
-        uint256 msgId = (uint64(_a.chainId) << 32) | 0;
+        uint256 msgId = (uint256(uint160(address(destCounter__))) << 96) |
+            (_b.chainId << 80) |
+            (_a.chainId << 64) |
+            0;
         _verifyAndSealOnSrc(_b, _a, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         _executePayloadOnDst(
             _b,
             _a,
@@ -84,11 +95,17 @@ contract HappyTest is Setup {
     function testRemoteAddAndSubtract() external {
         uint256 addAmount = 100;
         bytes memory addPayload = abi.encode(keccak256("OP_ADD"), addAmount);
-        uint256 addMsgId = (uint64(_b.chainId) << 32) | 0;
+        uint256 addMsgId = (uint256(uint160(address(srcCounter__))) << 96) |
+            (_a.chainId << 80) |
+            (_b.chainId << 64) |
+            0;
 
         uint256 subAmount = 40;
         bytes memory subPayload = abi.encode(keccak256("OP_SUB"), subAmount);
-        uint256 subMsgId = (uint64(_b.chainId) << 32) | 1;
+        uint256 subMsgId = (uint256(uint160(address(srcCounter__))) << 96) |
+            (_a.chainId << 80) |
+            (_b.chainId << 64) |
+            1;
 
         bytes32 root;
         uint256 packetId;
@@ -100,6 +117,8 @@ contract HappyTest is Setup {
         (root, packetId, sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         _executePayloadOnDst(
             _a,
             _b,
@@ -117,6 +136,8 @@ contract HappyTest is Setup {
         (root, packetId, sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         _executePayloadOnDst(
             _a,
             _b,
@@ -139,7 +160,11 @@ contract HappyTest is Setup {
         m1.amount = 100;
         m1.payload = abi.encode(keccak256("OP_ADD"), m1.amount);
         m1.proof = abi.encode(0);
-        m1.msgId = (uint64(_b.chainId) << 32) | 0;
+        m1.msgId =
+            (uint256(uint160(address(srcCounter__))) << 96) |
+            (_a.chainId << 80) |
+            (_b.chainId << 64) |
+            0;
 
         hoax(_raju);
         srcCounter__.remoteAddOperation(_b.chainId, m1.amount, _msgGasLimit);
@@ -152,7 +177,11 @@ contract HappyTest is Setup {
         m2.amount = 40;
         m2.payload = abi.encode(keccak256("OP_ADD"), m2.amount);
         m2.proof = abi.encode(0);
-        m2.msgId = (uint64(_b.chainId) << 32) | 1;
+        m2.msgId =
+            (uint256(uint160(address(destCounter__))) << 96) |
+            (_b.chainId << 80) |
+            (_a.chainId << 64) |
+            1;
 
         hoax(_raju);
         srcCounter__.remoteAddOperation(_b.chainId, m2.amount, _msgGasLimit);
@@ -169,7 +198,11 @@ contract HappyTest is Setup {
         m1.amount = 100;
         m1.payload = abi.encode(keccak256("OP_ADD"), m1.amount);
         m1.proof = abi.encode(0);
-        m1.msgId = (uint64(_b.chainId) << 32) | 0;
+        m1.msgId =
+            (uint256(uint160(address(srcCounter__))) << 96) |
+            (_a.chainId << 80) |
+            (_b.chainId << 64) |
+            0;
 
         hoax(_raju);
         srcCounter__.remoteAddOperation(_b.chainId, m1.amount, _msgGasLimit);
@@ -182,7 +215,11 @@ contract HappyTest is Setup {
         m2.amount = 40;
         m2.payload = abi.encode(keccak256("OP_ADD"), m2.amount);
         m2.proof = abi.encode(0);
-        m2.msgId = (uint64(_b.chainId) << 32) | 1;
+        m2.msgId =
+            (uint256(uint160(address(srcCounter__))) << 96) |
+            (_a.chainId << 80) |
+            (_b.chainId << 64) |
+            1;
 
         hoax(_raju);
         srcCounter__.remoteAddOperation(_b.chainId, m2.amount, _msgGasLimit);
@@ -190,6 +227,7 @@ contract HappyTest is Setup {
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, m2.sig);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
 
         _executePayloadOnDst(
             _a,
@@ -220,7 +258,10 @@ contract HappyTest is Setup {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
-        uint256 msgId = (uint64(_b.chainId) << 32) | 0;
+        uint256 msgId = (uint256(uint160(address(srcCounter__))) << 96) |
+            (_a.chainId << 80) |
+            (_b.chainId << 64) |
+            0;
 
         hoax(_raju);
         srcCounter__.remoteAddOperation(_b.chainId, amount, _msgGasLimit);
@@ -231,6 +272,8 @@ contract HappyTest is Setup {
         ) = _getLatestSignature(_a);
         _verifyAndSealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         _executePayloadOnDst(
             _a,
             _b,

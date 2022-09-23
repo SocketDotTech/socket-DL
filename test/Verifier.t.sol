@@ -8,7 +8,6 @@ contract VerifierTest is Setup {
     uint256 chainId = 1;
     uint256 destChainId = 2;
     uint256 anotherDestChainId = 3;
-
     uint256 timeoutInSeconds = 100;
 
     Verifier verifier;
@@ -20,87 +19,31 @@ contract VerifierTest is Setup {
 
         hoax(_socketOwner);
         cc.verifier__ = new Verifier(
-            _plugOwner,
+            _socketOwner,
             address(cc.notary__),
             timeoutInSeconds
         );
-
-        _initVerifier(cc, destChainId);
     }
 
     function testDeployment() public {
-        assertEq(cc.verifier__.manager(), _plugOwner);
+        assertEq(cc.verifier__.owner(), _socketOwner);
         assertEq(address(cc.verifier__.notary()), address(cc.notary__));
         assertEq(cc.verifier__.timeoutInSeconds(), timeoutInSeconds);
-
-        bool isActive = cc.verifier__.isChainActive(destChainId);
-        assertTrue(isActive);
     }
 
-    function testPausing() public {
-        hoax(_notAPauser);
-        vm.expectRevert(IVerifier.OnlyPauser.selector);
-        cc.verifier__.pause(destChainId);
+    function testSetNotary() external {
+        address newNotary = address(9);
 
-        bool isPauser = cc.verifier__.isPauser(_pauser, destChainId);
-        assertTrue(isPauser);
+        hoax(_raju);
+        vm.expectRevert(Ownable.OnlyOwner.selector);
+        cc.verifier__.setNotary(newNotary);
 
-        hoax(_pauser);
-        cc.verifier__.pause(destChainId);
-
-        assertFalse(cc.verifier__.isChainActive(destChainId));
-    }
-
-    function testActivate() public {
-        hoax(_pauser);
-        cc.verifier__.pause(destChainId);
-
-        hoax(_notAPauser);
-        vm.expectRevert(IVerifier.OnlyPauser.selector);
-        cc.verifier__.activate(destChainId);
-
-        hoax(_pauser);
-        cc.verifier__.activate(destChainId);
-
-        assertTrue(cc.verifier__.isChainActive(destChainId));
-    }
-
-    function testAddPauser() external {
-        hoax(_notAPauser);
-        vm.expectRevert(IVerifier.OnlyManager.selector);
-        cc.verifier__.addPauser(_pauser, anotherDestChainId);
-
-        vm.startPrank(_plugOwner);
-        vm.expectRevert(IVerifier.PauserAlreadySet.selector);
-        cc.verifier__.addPauser(_pauser, destChainId);
-
-        cc.verifier__.addPauser(_pauser, anotherDestChainId);
-
-        assertTrue(cc.verifier__.isPauser(_pauser, anotherDestChainId));
-    }
-
-    function testRemovePauser() external {
-        hoax(_plugOwner);
-        vm.expectRevert(IVerifier.NotPauser.selector);
-        cc.verifier__.removePauser(_notAPauser, anotherDestChainId);
-
-        hoax(_plugOwner);
-        cc.verifier__.addPauser(_notAPauser, anotherDestChainId);
-
-        hoax(_notAPauser);
-        vm.expectRevert(IVerifier.OnlyManager.selector);
-        cc.verifier__.removePauser(_notAPauser, anotherDestChainId);
-
-        hoax(_plugOwner);
-        cc.verifier__.removePauser(_notAPauser, anotherDestChainId);
-
-        assertFalse(cc.verifier__.isPauser(_notAPauser, anotherDestChainId));
+        hoax(_socketOwner);
+        cc.verifier__.setNotary(newNotary);
+        assertEq(address(cc.verifier__.notary()), newNotary);
     }
 
     function testVerifyRoot() public {
-        bool isPauser = cc.verifier__.isPauser(_pauser, destChainId);
-        assertTrue(isPauser);
-
         vm.mockCall(
             address(cc.notary__),
             abi.encodeWithSelector(INotary.getPacketDetails.selector),
@@ -119,21 +62,8 @@ contract VerifierTest is Setup {
         (valid, ) = cc.verifier__.verifyRoot(address(0), destChainId, 0);
         assertFalse(valid);
 
-        vm.mockCall(
-            address(cc.notary__),
-            abi.encodeWithSelector(INotary.getPacketDetails.selector),
-            abi.encode(true, block.timestamp, bytes32(0))
-        );
-
         vm.warp(1000);
-
         (valid, ) = cc.verifier__.verifyRoot(address(0), destChainId, 0);
-        assertFalse(valid);
-
-        vm.prank(_pauser);
-        cc.verifier__.pause(destChainId);
-
-        (valid, ) = cc.verifier__.verifyRoot(address(0), destChainId, 0);
-        assertFalse(valid);
+        assertTrue(valid);
     }
 }

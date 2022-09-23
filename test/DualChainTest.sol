@@ -13,8 +13,8 @@ contract DualChainTest is Setup {
     uint256 bFork;
 
     function setUp() public {
-        _a.chainId = 1;
-        _b.chainId = 4;
+        _a.chainId = 80001;
+        _b.chainId = 421611;
 
         aFork = vm.createFork(vm.envString("CHAIN1_RPC_URL"));
         bFork = vm.createFork(vm.envString("CHAIN2_RPC_URL"));
@@ -30,12 +30,6 @@ contract DualChainTest is Setup {
         _b = _deployContractsOnSingleChain(_b.chainId, _a.chainId);
         _addAttesters(attesters, _b, _a.chainId);
 
-        vm.selectFork(aFork);
-        _initVerifier(_a, _b.chainId);
-
-        vm.selectFork(bFork);
-        _initVerifier(_b, _a.chainId);
-
         _deployPlugContracts();
         _configPlugContracts();
     }
@@ -50,7 +44,13 @@ contract DualChainTest is Setup {
         srcCounter__.remoteAddOperation(_b.chainId, amount, _msgGasLimit);
 
         // TODO: get nonce from event
-        uint256 msgId = (uint64(_b.chainId) << 32) | 0;
+        uint256 msgId = _packMessageId(
+            address(srcCounter__),
+            _a.chainId,
+            _b.chainId,
+            0
+        );
+
         (
             bytes32 root,
             uint256 packetId,
@@ -60,6 +60,8 @@ contract DualChainTest is Setup {
 
         vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, sig, packetId, root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         _executePayloadOnDst(
             _a,
             _b,
@@ -92,11 +94,18 @@ contract DualChainTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(_b);
 
-        uint256 msgId = (uint64(_a.chainId) << 32) | 0;
+        uint256 msgId = _packMessageId(
+            address(destCounter__),
+            _b.chainId,
+            _a.chainId,
+            0
+        );
         _verifyAndSealOnSrc(_b, _a, sig);
 
         vm.selectFork(aFork);
         _submitRootOnDst(_b, _a, sig, packetId, root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         _executePayloadOnDst(
             _b,
             _a,
@@ -117,11 +126,21 @@ contract DualChainTest is Setup {
     function testRemoteAddAndSubtract() external {
         uint256 addAmount = 100;
         bytes memory addPayload = abi.encode(keccak256("OP_ADD"), addAmount);
-        uint256 addMsgId = (uint64(_b.chainId) << 32) | 0;
+        uint256 addMsgId = _packMessageId(
+            address(srcCounter__),
+            _a.chainId,
+            _b.chainId,
+            0
+        );
 
         uint256 subAmount = 40;
         bytes memory subPayload = abi.encode(keccak256("OP_SUB"), subAmount);
-        uint256 subMsgId = (uint64(_b.chainId) << 32) | 1;
+        uint256 subMsgId = _packMessageId(
+            address(srcCounter__),
+            _a.chainId,
+            _b.chainId,
+            1
+        );
 
         bytes32 root;
         uint256 packetId;
@@ -136,6 +155,8 @@ contract DualChainTest is Setup {
 
         vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, sig, packetId, root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         _executePayloadOnDst(
             _a,
             _b,
@@ -156,6 +177,8 @@ contract DualChainTest is Setup {
 
         vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, sig, packetId, root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         _executePayloadOnDst(
             _a,
             _b,
@@ -180,7 +203,12 @@ contract DualChainTest is Setup {
         m1.amount = 100;
         m1.payload = abi.encode(keccak256("OP_ADD"), m1.amount);
         m1.proof = abi.encode(0);
-        m1.msgId = (uint64(_b.chainId) << 32) | 0;
+        m1.msgId = _packMessageId(
+            address(srcCounter__),
+            _a.chainId,
+            _b.chainId,
+            0
+        );
 
         hoax(_raju);
         vm.selectFork(aFork);
@@ -196,7 +224,12 @@ contract DualChainTest is Setup {
         m2.amount = 40;
         m2.payload = abi.encode(keccak256("OP_ADD"), m2.amount);
         m2.proof = abi.encode(0);
-        m2.msgId = (uint64(_b.chainId) << 32) | 1;
+        m2.msgId = _packMessageId(
+            address(srcCounter__),
+            _a.chainId,
+            _b.chainId,
+            1
+        );
 
         hoax(_raju);
         vm.selectFork(aFork);
@@ -216,7 +249,12 @@ contract DualChainTest is Setup {
         m1.amount = 100;
         m1.payload = abi.encode(keccak256("OP_ADD"), m1.amount);
         m1.proof = abi.encode(0);
-        m1.msgId = (uint64(_b.chainId) << 32) | 0;
+        m1.msgId = _packMessageId(
+            address(srcCounter__),
+            _a.chainId,
+            _b.chainId,
+            0
+        );
 
         hoax(_raju);
         vm.selectFork(aFork);
@@ -232,7 +270,12 @@ contract DualChainTest is Setup {
         m2.amount = 40;
         m2.payload = abi.encode(keccak256("OP_ADD"), m2.amount);
         m2.proof = abi.encode(0);
-        m2.msgId = (uint64(_b.chainId) << 32) | 1;
+        m2.msgId = _packMessageId(
+            address(srcCounter__),
+            _a.chainId,
+            _b.chainId,
+            1
+        );
 
         hoax(_raju);
         vm.selectFork(aFork);
@@ -243,6 +286,7 @@ contract DualChainTest is Setup {
 
         vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
 
         _executePayloadOnDst(
             _a,
@@ -275,7 +319,12 @@ contract DualChainTest is Setup {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
-        uint256 msgId = (uint64(_b.chainId) << 32) | 0;
+        uint256 msgId = _packMessageId(
+            address(srcCounter__),
+            _a.chainId,
+            _b.chainId,
+            0
+        );
 
         hoax(_raju);
         vm.selectFork(aFork);
@@ -289,6 +338,8 @@ contract DualChainTest is Setup {
 
         vm.selectFork(bFork);
         _submitRootOnDst(_a, _b, sig, packetId, root);
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         _executePayloadOnDst(
             _a,
             _b,

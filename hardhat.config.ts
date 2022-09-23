@@ -139,6 +139,9 @@ const config: HardhatUserConfig = {
     },
     pauser: {
       default: 2,
+    },
+    user: {
+      default: 3,
     }
   },
   paths: {
@@ -167,7 +170,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200,
+        runs: 999999,
       },
       // viaIr: true
     },

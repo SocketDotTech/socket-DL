@@ -183,6 +183,7 @@ contract AdminNotaryTest is Setup {
         );
 
         // status confirmed
+        vm.warp(block.timestamp + _slowAccumWaitTime);
         assertEq(
             uint256(
                 cc.notary__.getPacketStatus(_accum, _remoteChainId, _packetId)
@@ -292,6 +293,8 @@ contract AdminNotaryTest is Setup {
             1
         );
 
+        vm.warp(block.timestamp + _slowAccumWaitTime);
+
         (bool isConfirmed, uint256 packetArrivedAt, bytes32 root) = cc
             .notary__
             .getPacketDetails(_accum, _remoteChainId, _packetId);
@@ -299,7 +302,7 @@ contract AdminNotaryTest is Setup {
         // status confirmed
         assertTrue(isConfirmed);
 
-        assertEq(packetArrivedAt, block.timestamp);
+        assertEq(packetArrivedAt, block.timestamp - _slowAccumWaitTime);
         assertEq(root, _root);
 
         assertEq(
@@ -418,6 +421,8 @@ contract AdminNotaryTest is Setup {
 
         hoax(_socketOwner);
         cc.notary__.acceptPausedPacket(_accum, _remoteChainId, _packetId);
+
+        vm.warp(block.timestamp + _slowAccumWaitTime);
 
         assertEq(
             uint256(

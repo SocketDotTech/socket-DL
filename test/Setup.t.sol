@@ -23,6 +23,7 @@ contract Setup is Test {
     uint256 constant _altAttesterPrivateKey = uint256(2);
 
     uint256 internal _timeoutInSeconds = 0;
+    uint256 internal _slowAccumWaitTime = 300;
     uint256 internal _msgGasLimit = 25548;
 
     bool constant _isFast = false;
@@ -61,9 +62,6 @@ contract Setup is Test {
 
         _addAttesters(attesters_, _a, _b.chainId);
         _addAttesters(attesters_, _b, _a.chainId);
-
-        _initVerifier(_a, _b.chainId);
-        _initVerifier(_b, _a.chainId);
     }
 
     function _addAttesters(
@@ -82,18 +80,6 @@ contract Setup is Test {
         }
 
         vm.stopPrank();
-    }
-
-    function _initVerifier(ChainContext memory cc_, uint256 destChainId_)
-        internal
-    {
-        // add pausers
-        hoax(_plugOwner);
-        cc_.verifier__.addPauser(_pauser, destChainId_);
-
-        // activate remote chains
-        hoax(_pauser);
-        cc_.verifier__.activate(destChainId_);
     }
 
     function _deployContractsOnSingleChain(
@@ -152,7 +138,11 @@ contract Setup is Test {
     {
         vm.startPrank(deployer_);
         sigVerifier__ = new SignatureVerifier();
-        notary__ = new AdminNotary(address(sigVerifier__), chainId_);
+        notary__ = new AdminNotary(
+            address(sigVerifier__),
+            chainId_,
+            _slowAccumWaitTime
+        );
 
         vm.stopPrank();
     }
@@ -182,7 +172,7 @@ contract Setup is Test {
             bytes memory sig
         )
     {
-        (root, packetId) = src_.accum__.getNextPacket();
+        (root, packetId) = src_.accum__.getNextPacketToBeSealed();
         bytes32 digest = keccak256(
             abi.encode(src_.chainId, address(src_.accum__), packetId, root)
         );
@@ -256,6 +246,19 @@ contract Setup is Test {
             payload_,
             vParams
         );
+    }
+
+    function _packMessageId(
+        address srcPlug,
+        uint256 srcChainId,
+        uint256 destChainId,
+        uint256 nonce
+    ) internal pure returns (uint256) {
+        return
+            (uint256(uint160(srcPlug)) << 96) |
+            (srcChainId << 80) |
+            (destChainId << 64) |
+            nonce;
     }
 
     // to ignore this file from coverage

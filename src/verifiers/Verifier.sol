@@ -3,100 +3,32 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IVerifier.sol";
 import "../interfaces/INotary.sol";
-import "../Version0.sol";
+import "../utils/Ownable.sol";
 
-// defines a timeout
-// allows a "PAUSER" role to stop processing of messages
-// allows an "MANAGER" role to setup "PAUSER"
-contract Verifier is IVerifier, Version0 {
-    // immutables
-    address public immutable manager;
-
+contract Verifier is IVerifier, Ownable {
     INotary public notary;
     uint256 public immutable timeoutInSeconds;
 
-    // current state of the verifier
-    mapping(uint256 => bool) public isChainActive;
-
-    // pauserState
-    mapping(address => mapping(uint256 => bool))
-        private isPauserForIncomingChain;
-
-    modifier onlyManager() {
-        if (msg.sender != manager) revert OnlyManager();
-        _;
-    }
-
-    modifier onlyPauser(uint256 chain) {
-        if (!isPauserForIncomingChain[msg.sender][chain]) revert OnlyPauser();
-        _;
-    }
+    event NotarySet(address notary_);
 
     constructor(
-        address _manager,
+        address owner_,
         address _notary,
         uint256 timeoutInSeconds_
-    ) {
-        if (_manager == address(0) || _notary == address(0))
-            revert ZeroAddress();
-
-        manager = _manager;
+    ) Ownable(owner_) {
         notary = INotary(_notary);
+
         // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
     }
 
     /**
-     * @notice pauses chain
+     * @notice updates notary
+     * @param notary_ address of Notary
      */
-    function pause(uint256 chain) external onlyPauser(chain) {
-        isChainActive[chain] = false;
-        emit Paused(msg.sender, chain);
-    }
-
-    /**
-     * @notice activates chain as a destination for packets
-     */
-    function activate(uint256 chain) external onlyPauser(chain) {
-        isChainActive[chain] = true;
-        emit Unpaused(msg.sender, chain);
-    }
-
-    /**
-     * @notice add _newPauser as PAUSER for _incomingChain
-     */
-    function addPauser(address _newPauser, uint256 _incomingChain)
-        external
-        onlyManager
-    {
-        if (isPauserForIncomingChain[_newPauser][_incomingChain])
-            revert PauserAlreadySet();
-        isPauserForIncomingChain[_newPauser][_incomingChain] = true;
-        emit NewPauser(_newPauser, _incomingChain);
-    }
-
-    /**
-     * @notice removes _currentPauser from PAUSER role for _incomingChain
-     */
-    function removePauser(address _currentPauser, uint256 _incomingChain)
-        external
-        onlyManager
-    {
-        if (!isPauserForIncomingChain[_currentPauser][_incomingChain])
-            revert NotPauser();
-        isPauserForIncomingChain[_currentPauser][_incomingChain] = false;
-        emit RemovedPauser(_currentPauser, _incomingChain);
-    }
-
-    /**
-     * @notice returns if given _pauser has correct role for _incomingChainId.
-     */
-    function isPauser(address _pauser, uint256 _incomingChainId)
-        external
-        view
-        returns (bool)
-    {
-        return isPauserForIncomingChain[_pauser][_incomingChainId];
+    function setNotary(address notary_) external onlyOwner {
+        notary = INotary(notary_);
+        emit NotarySet(notary_);
     }
 
     /**
@@ -110,18 +42,15 @@ contract Verifier is IVerifier, Version0 {
         uint256 remoteChainId_,
         uint256 packetId_
     ) external view override returns (bool, bytes32) {
-        if (isChainActive[remoteChainId_]) {
-            (bool isConfirmed, uint256 packetArrivedAt, bytes32 root) = notary
-                .getPacketDetails(accumAddress_, remoteChainId_, packetId_);
+        (bool isConfirmed, uint256 packetArrivedAt, bytes32 root) = notary
+            .getPacketDetails(accumAddress_, remoteChainId_, packetId_);
 
-            if (!isConfirmed) return (false, root);
+        if (isConfirmed) return (true, root);
 
-            // if timed out
-            if (block.timestamp - packetArrivedAt > timeoutInSeconds)
-                return (false, root);
-
+        // if timed out
+        if (block.timestamp - packetArrivedAt > timeoutInSeconds)
             return (true, root);
-        }
-        return (false, bytes32(0));
+
+        return (false, root);
     }
 }

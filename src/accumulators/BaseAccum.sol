@@ -9,7 +9,8 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     bytes32 public constant NOTARY_ROLE = keccak256("NOTARY_ROLE");
 
     /// an incrementing id for each new packet created
-    uint256 internal _nextPacket;
+    uint256 internal _packets;
+    uint256 internal _sealedPackets;
 
     /// maps the packet id with the root hash generated while adding message
     mapping(uint256 => bytes32) internal _roots;
@@ -32,11 +33,14 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
         onlyRole(NOTARY_ROLE)
         returns (bytes32, uint256)
     {
-        if (_roots[_nextPacket] == bytes32(0)) revert NoPendingPacket();
-        bytes32 root = _roots[_nextPacket];
+        uint256 packetId = _sealedPackets;
 
-        emit PacketComplete(root, _nextPacket);
-        return (root, _nextPacket++);
+        if (_roots[packetId] == bytes32(0)) revert NoPendingPacket();
+        bytes32 root = _roots[packetId];
+        _sealedPackets++;
+
+        emit PacketComplete(root, packetId);
+        return (root, packetId);
     }
 
     function setSocket(address socket_) external onlyOwner {
@@ -49,24 +53,23 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
 
     function _setSocket(address socket_) private {
         _grantRole(SOCKET_ROLE, socket_);
-        emit SocketSet(socket_);
     }
 
     function _setNotary(address notary_) private {
         _grantRole(NOTARY_ROLE, notary_);
-        emit NotarySet(notary_);
     }
 
-    /// returns the latest packet details
+    /// returns the latest packet details to be sealed
     /// @inheritdoc IAccumulator
-    function getNextPacket()
+    function getNextPacketToBeSealed()
         external
         view
         virtual
         override
         returns (bytes32, uint256)
     {
-        return (_roots[_nextPacket], _nextPacket);
+        uint256 toSeal = _sealedPackets;
+        return (_roots[toSeal], toSeal);
     }
 
     /// returns the root of packet for given id
@@ -79,5 +82,9 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
         returns (bytes32)
     {
         return _roots[id];
+    }
+
+    function getLatestPacketId() external view returns (uint256) {
+        return _packets == 0 ? 0 : _packets - 1;
     }
 }

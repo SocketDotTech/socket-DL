@@ -1,71 +1,72 @@
 import fs from "fs";
-import path from "path";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { signerAddress, srcChainId, destChainId, isFast, executorAddress } from "./config";
-import { getInstance, deployContractWithoutArgs } from "./utils";
+import { signerAddress, destChainId, isFast } from "./config";
+import { getInstance, deployContractWithoutArgs, storeAddresses, deployedAddressPath, getChainId } from "./utils";
 import { deployAccumulator } from "./contracts";
 import { Contract } from "ethers";
 
-const deployedAddressPath = path.join(__dirname, "../deployments/");
-
 export const main = async () => {
   try {
-    if (!srcChainId || !destChainId)
-      throw new Error("Provide chain id");
+    const srcChainId = await getChainId();
+
+    if (!destChainId)
+      throw new Error("Provide destination chain id");
 
     if (!fs.existsSync(deployedAddressPath + srcChainId + ".json") || !fs.existsSync(deployedAddressPath + destChainId + ".json")) {
       throw new Error("Deployed Addresses not found");
     }
 
-    const srcConfig: any = JSON.parse(fs.readFileSync(deployedAddressPath + srcChainId + ".json", "utf-8"));
-    const destConfig: any = JSON.parse(fs.readFileSync(deployedAddressPath + destChainId + ".json", "utf-8"))
+    let srcConfig: JSON = JSON.parse(fs.readFileSync(deployedAddressPath + srcChainId + ".json", "utf-8"));
+    const destConfig: JSON = JSON.parse(fs.readFileSync(deployedAddressPath + destChainId + ".json", "utf-8"))
 
-    const { socketOwner, counterOwner, pauser } = await getNamedAccounts();
+    const { socketSigner, counterSigner } = await getSigners();
 
-    const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
-    const counterSigner: SignerWithAddress = await ethers.getSigner(counterOwner);
-    const pauserSigner: SignerWithAddress = await ethers.getSigner(pauser);
-
-    const counter = await getInstance("Counter", srcConfig["counter"]);
-    const notary = await getInstance("AdminNotary", srcConfig["notary"]);
-    const socket = await getInstance("Socket", srcConfig["socket"]);
-    const verifier = await getInstance("Verifier", srcConfig["verifier"]);
-
-    const accum: Contract = await deployAccumulator(socket, notary, socketSigner);
-    const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
-
-    console.log(accum.address, deaccum.address, `Deployed accum and deaccum for ${srcChainId} & ${destChainId}`);
-  
-    await notary.connect(socketSigner).grantAttesterRole(destChainId, signerAddress[srcChainId]);
-    console.log(`Added ${signerAddress[srcChainId]} as an attester for ${destChainId} chain id!`)
-
-    await notary.addAccumulator(accum.address, destChainId, isFast);
-    console.log(`Added accumulator ${accum.address} to Notary!`)
+    const counter: Contract = await getInstance("Counter", srcConfig["counter"]);
+    const accum = isFast ? srcConfig[`fastAccum-${destChainId}`] : srcConfig[`slowAccum-${destChainId}`];
 
     await counter.connect(counterSigner).setSocketConfig(
       destChainId,
       destConfig["counter"],
-      accum.address,
-      deaccum.address,
-      verifier.address
+      accum,
+      srcConfig[`deaccum-${destChainId}`],
+      srcConfig["verifier"]
     );
     console.log(`Set config role for ${destChainId} chain id!`)
 
-    await socket.connect(socketSigner).grantExecutorRole(executorAddress[srcChainId]);
-    console.log(`Assigned executor role to ${executorAddress[srcChainId]}!`)
-
-    await verifier.connect(counterSigner).addPauser(pauserSigner.address, destChainId);
-    console.log(`Added pauser ${pauserSigner.address} for ${destChainId} chain id!`)
-
-    await verifier.connect(pauserSigner).activate(destChainId);
-    console.log(`Activated verifier for ${destChainId} chain id!`)
+    await configNotary(srcConfig["notary"], srcConfig[`fastAccum-${destChainId}`], srcConfig[`slowAccum-${destChainId}`], socketSigner)
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;
   }
 };
+
+async function configNotary(notaryAddr: string, fastAccumAddr: string, slowAccumAddr: string, socketSigner: SignerWithAddress) {
+  try {
+    const srcChainId = await getChainId();
+    const notary: Contract = await getInstance("AdminNotary", notaryAddr);
+
+    await notary.connect(socketSigner).grantAttesterRole(destChainId, signerAddress[srcChainId]);
+    console.log(`Added ${signerAddress[srcChainId]} as an attester for ${destChainId} chain id!`)
+
+    await notary.connect(socketSigner).addAccumulator(fastAccumAddr, destChainId, true);
+    console.log(`Added fast accumulator ${fastAccumAddr} to Notary!`)
+
+    await notary.connect(socketSigner).addAccumulator(slowAccumAddr, destChainId, false);
+    console.log(`Added slow accumulator ${slowAccumAddr} to Notary!`)
+  } catch (error) {
+    console.log("Error while configuring Notary", error);
+    throw error;
+  }
+}
+
+async function getSigners() {
+  const { socketOwner, counterOwner } = await getNamedAccounts();
+  const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
+  const counterSigner: SignerWithAddress = await ethers.getSigner(counterOwner);
+  return { socketSigner, counterSigner };
+}
 
 main()
   .then(() => process.exit(0))

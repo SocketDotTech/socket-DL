@@ -3,18 +3,6 @@ pragma solidity 0.8.7;
 
 interface IAccumulator {
     /**
-     * @notice emits the new address of socket
-     * @param socket socket address
-     */
-    event SocketSet(address indexed socket);
-
-    /**
-     * @notice emits the new address of notary
-     * @param notary notary address
-     */
-    event NotarySet(address indexed notary);
-
-    /**
      * @notice emits the message details when it arrives
      * @param packedMessage the message packed with payload, fees and config
      * @param packetId an incremental id assigned to each new packet
@@ -42,11 +30,11 @@ interface IAccumulator {
     function addPackedMessage(bytes32 packedMessage) external;
 
     /**
-     * @notice returns the latest packet details
+     * @notice returns the latest packet details which needs to be sealed
      * @return root root hash of the latest packet which is not yet sealed
      * @return packetId latest packet id which is not yet sealed
      */
-    function getNextPacket()
+    function getNextPacketToBeSealed()
         external
         view
         returns (bytes32 root, uint256 packetId);
