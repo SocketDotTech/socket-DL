@@ -21,11 +21,21 @@ export const executorAddress: {
 export const timeout: {
   [key: number]: number
 } = {
-  80001: 0,
-  421611: 0,
-  420: 0,
-  31337: 0,
-  31338: 0
+  80001: 7200,
+  421611: 7200,
+  420: 7200,
+  31337: 7200,
+  31338: 7200
+}
+
+export const slowPathWaitTime: {
+  [key: number]: number
+} = {
+  80001: 3600,
+  421611: 3600,
+  420: 3600,
+  31337: 3600,
+  31338: 3600
 }
 
 export const contractPath: {
@@ -47,5 +57,5 @@ export const contractPath: {
 
 export const isFast = true;
 
-export const srcChainId = 31337;
-export const destChainId = 31337;
+export const srcChainId = 421611;
+export const destChainId = 80001;

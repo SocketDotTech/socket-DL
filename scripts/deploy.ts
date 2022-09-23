@@ -6,6 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithoutArgs, getChainId, storeAddresses } from "./utils";
 
 import { deployCounter, deployNotary, deploySocket, deployVault, deployVerifier } from "../scripts/contracts";
+import { executorAddress } from "./config";
 
 export const main = async () => {
   try {
@@ -16,22 +17,25 @@ export const main = async () => {
     const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
     const counterSigner: SignerWithAddress = await ethers.getSigner(counterOwner);
 
-    // Socket deployments
-    const hasher: Contract = await deployContractWithoutArgs("Hasher", socketSigner);
+    // notary
     const signatureVerifier: Contract = await deployContractWithoutArgs("SignatureVerifier", socketSigner);
     const notary: Contract = await deployNotary(signatureVerifier, socketSigner);
 
+    // socket
+    const hasher: Contract = await deployContractWithoutArgs("Hasher", socketSigner);
     const vault: Contract = await deployVault(socketSigner);
     const socket: Contract = await deploySocket(hasher, vault, socketSigner);
 
-    const verifier: Contract = await deployVerifier(notary, counterSigner)
-
     // plug deployments
+    const verifier: Contract = await deployVerifier(notary, counterSigner)
     const counter: Contract = await deployCounter(socket, counterSigner);
     console.log("Contracts deployed!");
 
     // configure
     const chainId = await getChainId();
+
+    await socket.connect(socketSigner).grantExecutorRole(executorAddress[chainId]);
+    console.log(`Assigned executor role to ${executorAddress[chainId]}!`)
 
     const addresses = {
       counter: counter.address,
