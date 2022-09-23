@@ -1,19 +1,18 @@
 import fs from "fs";
-import path from "path";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { signerAddress, srcChainId, destChainId } from "./config";
-import { getInstance, deployContractWithoutArgs, storeAddresses } from "./utils";
+import { signerAddress, destChainId } from "./config";
+import { getInstance, deployContractWithoutArgs, storeAddresses, deployedAddressPath, getChainId } from "./utils";
 import { deployAccumulator } from "./contracts";
 import { Contract } from "ethers";
 
-const deployedAddressPath = path.join(__dirname, "../deployments/");
-
 export const main = async () => {
   try {
-    if (!srcChainId || !destChainId)
-      throw new Error("Provide chain id");
+    const srcChainId = await getChainId();
+
+    if (!destChainId)
+      throw new Error("Provide destination chain id");
 
     if (!fs.existsSync(deployedAddressPath + srcChainId + ".json") || !fs.existsSync(deployedAddressPath + destChainId + ".json")) {
       throw new Error("Deployed Addresses not found");
@@ -54,6 +53,7 @@ export const main = async () => {
 
 async function configNotary(notaryAddr: string, fastAccumAddr: string, slowAccumAddr: string, socketSigner: SignerWithAddress) {
   try {
+    const srcChainId = await getChainId();
     const notary: Contract = await getInstance("AdminNotary", notaryAddr);
 
     await notary.connect(socketSigner).grantAttesterRole(destChainId, signerAddress[srcChainId]);

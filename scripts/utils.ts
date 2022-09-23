@@ -6,6 +6,8 @@ import { contractPath } from "./config";
 import path from "path";
 import fs from "fs";
 
+export const deployedAddressPath = path.join(__dirname, "../deployments/");
+
 export const deployContractWithoutArgs = async (contractName: string, signer: SignerWithAddress): Promise<Contract> => {
   try {
     const Contract: ContractFactory = await ethers.getContractFactory(contractName);
@@ -22,7 +24,7 @@ export const deployContractWithoutArgs = async (contractName: string, signer: Si
 export const verify = async (address, contractName, args) => {
   try {
     const chainId = await getChainId();
-    if(chainId === 31337) return;
+    if (chainId === 31337) return;
 
     await sleep(30);
     await run("verify:verify", {

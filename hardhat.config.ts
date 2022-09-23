@@ -139,6 +139,9 @@ const config: HardhatUserConfig = {
     },
     pauser: {
       default: 2,
+    },
+    user: {
+      default: 3,
     }
   },
   paths: {

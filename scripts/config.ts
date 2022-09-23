@@ -1,9 +1,9 @@
 export const signerAddress: {
   [key: number]: string
 } = {
-  80001: "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-  421611: "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-  420: "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
+  80001: "0xbb244dd59a34c9ca5c7d0cb9d1c270188b9f45bc",
+  421611: "0x89c59d70d0d2671ca1a36871f6c4c61985677d7b",
+  420: "0x89c59d70d0d2671ca1a36871f6c4c61985677d7b",
   31337: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   31338: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
 }
@@ -11,9 +11,9 @@ export const signerAddress: {
 export const executorAddress: {
   [key: number]: string
 } = {
-  80001: "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-  421611: "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-  420: "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
+  80001: "0xbb244dd59a34c9ca5c7d0cb9d1c270188b9f45bc",
+  421611: "0x89c59d70d0d2671ca1a36871f6c4c61985677d7b",
+  420: "0x89c59d70d0d2671ca1a36871f6c4c61985677d7b",
   31337: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   31338: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
 }
@@ -56,6 +56,4 @@ export const contractPath: {
 }
 
 export const isFast = true;
-
-export const srcChainId = 421611;
-export const destChainId = 80001;
+export const destChainId = 421611;
