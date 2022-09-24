@@ -41,18 +41,16 @@ interface ISocket {
     /**
      * @notice emits the status of message after inbound call
      * @param msgId msg id which is executed
-     * @param success true if message not reverted else false
      * @param result if message reverts, returns the revert message
      */
-    event ExecutionFailed(uint256 msgId, bool success, string result);
+    event ExecutionFailed(uint256 msgId, string result);
 
     /**
      * @notice emits the error message in bytes after inbound call
      * @param msgId msg id which is executed
-     * @param success true if message not reverted else false
      * @param result if message reverts, returns the revert message in bytes
      */
-    event ExecutionFailedBytes(uint256 msgId, bool success, bytes result);
+    event ExecutionFailedBytes(uint256 msgId, bytes result);
 
     error NotAttested();
 

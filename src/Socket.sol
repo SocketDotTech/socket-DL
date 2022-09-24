@@ -172,11 +172,11 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         } catch Error(string memory reason) {
             // catch failing revert() and require()
             _messagesStatus[msgId] = MessageStatus.FAILED;
-            emit ExecutionFailed(msgId, false, reason);
+            emit ExecutionFailed(msgId, reason);
         } catch (bytes memory reason) {
             // catch failing assert()
             _messagesStatus[msgId] = MessageStatus.FAILED;
-            emit ExecutionFailedBytes(msgId, false, reason);
+            emit ExecutionFailedBytes(msgId, reason);
         }
     }
 
