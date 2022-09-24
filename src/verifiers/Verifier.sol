@@ -46,6 +46,7 @@ contract Verifier is IVerifier, Ownable {
             .getPacketDetails(accumAddress_, remoteChainId_, packetId_);
 
         if (isConfirmed) return (true, root);
+        if (packetArrivedAt == 0) return (false, root);
 
         // if timed out
         if (block.timestamp - packetArrivedAt > timeoutInSeconds)
