@@ -3,8 +3,7 @@ import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { signerAddress, destChainId, isFast } from "./config";
-import { getInstance, deployContractWithoutArgs, storeAddresses, deployedAddressPath, getChainId } from "./utils";
-import { deployAccumulator } from "./contracts";
+import { getInstance, deployedAddressPath, getChainId } from "./utils";
 import { Contract } from "ethers";
 
 export const main = async () => {
@@ -33,7 +32,7 @@ export const main = async () => {
       srcConfig[`deaccum-${destChainId}`],
       srcConfig["verifier"]
     );
-    console.log(`Set config role for ${destChainId} chain id!`)
+    console.log(`Set config for ${destChainId} chain id!`)
 
     await configNotary(srcConfig["notary"], srcConfig[`fastAccum-${destChainId}`], srcConfig[`slowAccum-${destChainId}`], socketSigner)
   } catch (error) {
