@@ -7,5 +7,5 @@ interface IPlug {
      * @dev this should be only executable by socket
      * @param payload_ the data which is needed by plug at inbound call on destination
      */
-    function inbound(bytes calldata payload_) external;
+    function inbound(bytes calldata payload_) external payable;
 }

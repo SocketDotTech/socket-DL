@@ -46,7 +46,7 @@ contract Messenger is IPlug {
         _outbound(destChainId_, payload);
     }
 
-    function inbound(bytes calldata payload_) external override {
+    function inbound(bytes calldata payload_) external payable override {
         require(msg.sender == _socket, "Counter: Invalid Socket");
         (uint256 srcChainId, bytes32 msgDecoded) = abi.decode(
             payload_,
