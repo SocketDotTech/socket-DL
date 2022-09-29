@@ -143,11 +143,12 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             verifyParams_.remoteChainId
         ];
 
-        (bool isVerified, bytes32 root) = IVerifier(config.verifier).verifyRoot(
-            verifyParams_.remoteAccum,
-            verifyParams_.remoteChainId,
-            verifyParams_.packetId
-        );
+        (bool isVerified, bytes32 root) = IVerifier(config.verifier)
+            .verifyCommitment(
+                verifyParams_.remoteAccum,
+                verifyParams_.remoteChainId,
+                verifyParams_.packetId
+            );
 
         if (!isVerified) revert VerificationFailed();
 

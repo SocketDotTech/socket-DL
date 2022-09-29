@@ -43,14 +43,18 @@ contract VerifierTest is Setup {
         assertEq(address(cc.verifier__.notary()), newNotary);
     }
 
-    function testVerifyRoot() public {
+    function testVerifyCommitment() public {
         vm.mockCall(
             address(cc.notary__),
             abi.encodeWithSelector(INotary.getPacketDetails.selector),
             abi.encode(true, 1, bytes32(0))
         );
 
-        (bool valid, ) = cc.verifier__.verifyRoot(address(0), destChainId, 0);
+        (bool valid, ) = cc.verifier__.verifyCommitment(
+            address(0),
+            destChainId,
+            0
+        );
         assertTrue(valid);
 
         vm.mockCall(
@@ -59,11 +63,11 @@ contract VerifierTest is Setup {
             abi.encode(false, 1, bytes32(0))
         );
 
-        (valid, ) = cc.verifier__.verifyRoot(address(0), destChainId, 0);
+        (valid, ) = cc.verifier__.verifyCommitment(address(0), destChainId, 0);
         assertFalse(valid);
 
         vm.warp(1000);
-        (valid, ) = cc.verifier__.verifyRoot(address(0), destChainId, 0);
+        (valid, ) = cc.verifier__.verifyCommitment(address(0), destChainId, 0);
         assertTrue(valid);
     }
 }

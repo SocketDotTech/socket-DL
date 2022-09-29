@@ -37,7 +37,7 @@ contract Verifier is IVerifier, Ownable {
      * @param remoteChainId_ dest chain id
      * @param packetId_ packet id
      */
-    function verifyRoot(
+    function verifyCommitment(
         address accumAddress_,
         uint256 remoteChainId_,
         uint256 packetId_
