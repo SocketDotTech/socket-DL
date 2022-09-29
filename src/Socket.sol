@@ -45,12 +45,18 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         address vault_
     ) {
         _setHasher(hasher_);
+        _setVault(vault_);
+
         _chainId = chainId_;
-        vault = IVault(vault_);
+        
     }
 
     function setHasher(address hasher_) external onlyOwner {
         _setHasher(hasher_);
+    }
+
+    function setVault(address vault_) external onlyOwner {
+        _setVault(vault_);
     }
 
     /**
@@ -231,6 +237,10 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     function _setHasher(address hasher_) private {
         hasher = IHasher(hasher_);
+    }
+
+    function _setVault(address vault_) private {
+        vault = IVault(vault_);
     }
 
     function chainId() external view returns (uint256) {

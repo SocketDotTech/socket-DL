@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
-import "../interfaces/IVault.sol";
 
 contract Counter is IPlug {
     // immutables
