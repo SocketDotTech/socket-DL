@@ -32,6 +32,22 @@ interface ISocket {
         bytes payload
     );
 
+    event ConfigAdded(
+        address accum_,
+        address deaccum_,
+        address verifier_,
+        uint256 destChainId_,
+        string accumName_
+    );
+
+    event ConfigUpdated(
+        address accum_,
+        address deaccum_,
+        address verifier_,
+        uint256 destChainId_,
+        string accumName_
+    );
+
     /**
      * @notice emits the status of message after inbound call
      * @param msgId msg id which is executed
@@ -52,6 +68,14 @@ interface ISocket {
      */
     event ExecutionFailedBytes(uint256 msgId, bytes result);
 
+    event InboundConfigSet(
+        address remotePlug,
+        address deaccum,
+        address verifier
+    );
+
+    event OutboundConfigSet(address remotePlug, address accum);
+
     error NotAttested();
 
     error InvalidRemotePlug();
@@ -65,6 +89,10 @@ interface ISocket {
     error InsufficientGasLimit();
 
     error ExecutorNotFound();
+
+    error ConfigExists();
+
+    error NoConfigFound();
 
     function vault() external view returns (IVault);
 
@@ -109,29 +137,33 @@ interface ISocket {
         address remotePlug;
     }
 
+    struct Config {
+        address accum;
+        address deaccum;
+        address verifier;
+    }
+
     /**
      * @notice sets the config specific to the plug
      * @param remoteChainId_ the destination chain id
      * @param remotePlug_ address of plug present at destination chain to call inbound
-     * @param deaccum_ address of deaccum which is used to verify proof
-     * @param verifier_ address of verifier responsible for final packet validity checks
+     * @param configId_ the id of config to be used
      */
     function setInboundConfig(
         uint256 remoteChainId_,
-        address remotePlug_,
-        address deaccum_,
-        address verifier_
+        bytes32 configId_,
+        address remotePlug_
     ) external;
 
     /**
      * @notice sets the config specific to the plug
      * @param remoteChainId_ the destination chain id
      * @param remotePlug_ address of plug present at destination chain to call inbound
-     * @param accum_ address of accumulator which is used for collecting the messages and form packets
+     * @param configId_ the id of config to be used
      */
     function setOutboundConfig(
         uint256 remoteChainId_,
-        address remotePlug_,
-        address accum_
+        bytes32 configId_,
+        address remotePlug_
     ) external;
 }

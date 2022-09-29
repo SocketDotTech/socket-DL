@@ -36,11 +36,16 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     // msgId => message status
     mapping(uint256 => MessageStatus) private _messagesStatus;
 
+    mapping(uint256 => mapping(bytes32 => Config)) public configs;
+
     IHasher public hasher;
     IVault public override vault;
 
+    /**
+     * @param chainId_ current chain id (should not be more than uint16)
+     */
     constructor(
-        uint256 chainId_,
+        uint16 chainId_,
         address hasher_,
         address vault_
     ) {
@@ -48,7 +53,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         _setVault(vault_);
 
         _chainId = chainId_;
-        
     }
 
     function setHasher(address hasher_) external onlyOwner {
@@ -57,6 +61,59 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     function setVault(address vault_) external onlyOwner {
         _setVault(vault_);
+    }
+
+    function addConfig(
+        uint256 destChainId_,
+        address accum_,
+        address deaccum_,
+        address verifier_,
+        string calldata accumName_
+    ) external onlyOwner {
+        if (
+            configs[destChainId_][keccak256(abi.encode(accumName_))].accum !=
+            address(0)
+        ) revert ConfigExists();
+
+        _setConfig(destChainId_, accum_, deaccum_, verifier_, accumName_);
+        emit ConfigAdded(accum_, deaccum_, verifier_, destChainId_, accumName_);
+    }
+
+    function updateConfig(
+        uint256 destChainId_,
+        address accum_,
+        address deaccum_,
+        address verifier_,
+        string calldata accumName_
+    ) external onlyOwner {
+        if (
+            configs[destChainId_][keccak256(abi.encode(accumName_))].accum ==
+            address(0)
+        ) revert NoConfigFound();
+
+        _setConfig(destChainId_, accum_, deaccum_, verifier_, accumName_);
+        emit ConfigUpdated(
+            accum_,
+            deaccum_,
+            verifier_,
+            destChainId_,
+            accumName_
+        );
+    }
+
+    function _setConfig(
+        uint256 destChainId_,
+        address accum_,
+        address deaccum_,
+        address verifier_,
+        string calldata accumName_
+    ) internal {
+        Config storage config = configs[destChainId_][
+            keccak256(abi.encode(accumName_))
+        ];
+        config.accum = accum_;
+        config.deaccum = deaccum_;
+        config.verifier = verifier_;
     }
 
     /**
@@ -190,33 +247,37 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     /// @inheritdoc ISocket
     function setInboundConfig(
         uint256 remoteChainId_,
-        address remotePlug_,
-        address deaccum_,
-        address verifier_
+        bytes32 accumId,
+        address remotePlug_
     ) external override {
-        InboundConfig storage config = inboundConfigs[msg.sender][
+        InboundConfig storage inboundConfig = inboundConfigs[msg.sender][
             remoteChainId_
         ];
-        config.remotePlug = remotePlug_;
-        config.deaccum = deaccum_;
-        config.verifier = verifier_;
 
-        // TODO: emit event
+        Config memory config = configs[remoteChainId_][accumId];
+
+        inboundConfig.remotePlug = remotePlug_;
+        inboundConfig.deaccum = config.deaccum;
+        inboundConfig.verifier = config.verifier;
+
+        emit InboundConfigSet(remotePlug_, config.deaccum, config.verifier);
     }
 
     /// @inheritdoc ISocket
     function setOutboundConfig(
         uint256 remoteChainId_,
-        address remotePlug_,
-        address accum_
+        bytes32 configId_,
+        address remotePlug_
     ) external override {
-        OutboundConfig storage config = outboundConfigs[msg.sender][
+        OutboundConfig storage outboundConfig = outboundConfigs[msg.sender][
             remoteChainId_
         ];
-        config.accum = accum_;
-        config.remotePlug = remotePlug_;
+        Config memory config = configs[remoteChainId_][configId_];
 
-        // TODO: emit event
+        outboundConfig.accum = config.accum;
+        outboundConfig.remotePlug = remotePlug_;
+
+        emit OutboundConfigSet(remotePlug_, config.accum);
     }
 
     /**
@@ -254,10 +315,4 @@ contract Socket is ISocket, AccessControl(msg.sender) {
     {
         return _messagesStatus[msgId_];
     }
-
-    // TODO:
-    // function updateSocket() external onlyOwner {
-    //     // transfer ownership of connected contracts to new socket
-    //     // update addresses everywhere
-    // }
 }

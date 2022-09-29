@@ -65,17 +65,14 @@ contract Messenger is IPlug {
     function setSocketConfig(
         uint256 remoteChainId_,
         address remotePlug_,
-        address accum_,
-        address deaccum_,
-        address verifier_
+        bytes32 accumId
     ) external onlyOwner {
-        ISocket(_socket).setInboundConfig(
+        ISocket(_socket).setInboundConfig(remoteChainId_, accumId, remotePlug_);
+        ISocket(_socket).setOutboundConfig(
             remoteChainId_,
-            remotePlug_,
-            deaccum_,
-            verifier_
+            accumId,
+            remotePlug_
         );
-        ISocket(_socket).setOutboundConfig(remoteChainId_, remotePlug_, accum_);
     }
 
     function message() external view returns (bytes32) {
