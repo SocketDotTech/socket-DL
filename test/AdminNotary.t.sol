@@ -85,7 +85,7 @@ contract AdminNotaryTest is Setup {
         assertEq(cc.notary__.isFast(accumId), true);
     }
 
-    function testVerifyAndSeal() external {
+    function testSeal() external {
         hoax(_socketOwner);
         cc.notary__.addAccumulator(_accum, _remoteChainId, _isFast);
 
@@ -103,7 +103,7 @@ contract AdminNotaryTest is Setup {
         );
 
         hoax(_attester);
-        cc.notary__.verifyAndSeal(
+        cc.notary__.seal(
             _accum,
             _remoteChainId,
             _getSignature(digest, _attesterPrivateKey)
@@ -111,7 +111,7 @@ contract AdminNotaryTest is Setup {
 
         hoax(_attester);
         vm.expectRevert(INotary.InvalidAttester.selector);
-        cc.notary__.verifyAndSeal(
+        cc.notary__.seal(
             _accum,
             _remoteChainId,
             _getSignature(digest, _altAttesterPrivateKey)
@@ -136,7 +136,7 @@ contract AdminNotaryTest is Setup {
         );
 
         hoax(_attester);
-        cc.notary__.verifyAndSeal(
+        cc.notary__.seal(
             _accum,
             _remoteChainId,
             _getSignature(digest, _attesterPrivateKey)

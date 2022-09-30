@@ -127,7 +127,11 @@ contract Setup is Test {
         vm.startPrank(deployer_);
         hasher__ = new Hasher();
         vault__ = new Vault(deployer_);
-        socket__ = new Socket(chainId_, address(hasher__), address(vault__));
+        socket__ = new Socket(
+            uint16(chainId_),
+            address(hasher__),
+            address(vault__)
+        );
 
         vm.stopPrank();
     }
@@ -194,13 +198,13 @@ contract Setup is Test {
         }
     }
 
-    function _verifyAndSealOnSrc(
+    function _sealOnSrc(
         ChainContext storage src_,
         ChainContext storage dest_,
         bytes memory sig_
     ) internal {
         hoax(_attester);
-        src_.notary__.verifyAndSeal(address(src_.accum__), dest_.chainId, sig_);
+        src_.notary__.seal(address(src_.accum__), dest_.chainId, sig_);
     }
 
     function _submitRootOnDst(

@@ -35,8 +35,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     /// @inheritdoc INotary
-    function verifyAndSeal(
-        address accumAddress_,
+    function seal(
         uint256 remoteChainId_,
         bytes calldata signature_
     ) external override {

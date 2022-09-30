@@ -36,7 +36,7 @@ contract HappyTest is Setup {
             uint256 packetId,
             bytes memory sig
         ) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, _b, sig);
+        _sealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
@@ -73,7 +73,7 @@ contract HappyTest is Setup {
             (_b.chainId << 80) |
             (_a.chainId << 64) |
             0;
-        _verifyAndSealOnSrc(_b, _a, sig);
+        _sealOnSrc(_b, _a, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
@@ -115,7 +115,7 @@ contract HappyTest is Setup {
         srcCounter__.remoteAddOperation(_b.chainId, addAmount, _msgGasLimit);
 
         (root, packetId, sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, _b, sig);
+        _sealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
@@ -134,7 +134,7 @@ contract HappyTest is Setup {
         srcCounter__.remoteSubOperation(_b.chainId, subAmount, _msgGasLimit);
 
         (root, packetId, sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, _b, sig);
+        _sealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
@@ -170,7 +170,7 @@ contract HappyTest is Setup {
         srcCounter__.remoteAddOperation(_b.chainId, m1.amount, _msgGasLimit);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, _b, m1.sig);
+        _sealOnSrc(_a, _b, m1.sig);
         _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
 
         MessageContext memory m2;
@@ -187,7 +187,7 @@ contract HappyTest is Setup {
         srcCounter__.remoteAddOperation(_b.chainId, m2.amount, _msgGasLimit);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, _b, m2.sig);
+        _sealOnSrc(_a, _b, m2.sig);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
     }
 
@@ -208,7 +208,7 @@ contract HappyTest is Setup {
         srcCounter__.remoteAddOperation(_b.chainId, m1.amount, _msgGasLimit);
 
         (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, _b, m1.sig);
+        _sealOnSrc(_a, _b, m1.sig);
         _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
 
         MessageContext memory m2;
@@ -225,7 +225,7 @@ contract HappyTest is Setup {
         srcCounter__.remoteAddOperation(_b.chainId, m2.amount, _msgGasLimit);
 
         (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, _b, m2.sig);
+        _sealOnSrc(_a, _b, m2.sig);
         _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
@@ -270,7 +270,7 @@ contract HappyTest is Setup {
             uint256 packetId,
             bytes memory sig
         ) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, _b, sig);
+        _sealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
@@ -316,18 +316,14 @@ contract HappyTest is Setup {
         srcCounter__.setSocketConfig(
             _b.chainId,
             address(destCounter__),
-            address(_a.accum__),
-            address(_a.deaccum__),
-            address(_a.verifier__)
+            bytes32(0)
         );
 
         hoax(_plugOwner);
         destCounter__.setSocketConfig(
             _a.chainId,
             address(srcCounter__),
-            address(_b.accum__),
-            address(_b.deaccum__),
-            address(_b.verifier__)
+            bytes32(0)
         );
     }
 }

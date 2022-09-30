@@ -36,7 +36,7 @@ contract PingPongTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(_a);
 
-        _verifyAndSealOnSrc(_a, _b, sig);
+        _sealOnSrc(_a, _b, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root);
 
         vm.warp(block.timestamp + _slowAccumWaitTime);
@@ -61,7 +61,7 @@ contract PingPongTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(_b);
 
-        _verifyAndSealOnSrc(_b, _a, sig);
+        _sealOnSrc(_b, _a, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
@@ -130,18 +130,14 @@ contract PingPongTest is Setup {
         srcMessenger__.setSocketConfig(
             _b.chainId,
             address(destMessenger__),
-            address(_a.accum__),
-            address(_a.deaccum__),
-            address(_a.verifier__)
+            bytes32(0)
         );
 
         hoax(_plugOwner);
         destMessenger__.setSocketConfig(
             _a.chainId,
             address(srcMessenger__),
-            address(_b.accum__),
-            address(_b.deaccum__),
-            address(_b.verifier__)
+            bytes32(0)
         );
     }
 }

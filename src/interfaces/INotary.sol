@@ -12,8 +12,7 @@ interface INotary {
     enum PacketStatus {
         NOT_PROPOSED,
         PROPOSED,
-        PAUSED,
-        CONFIRMED
+        PAUSED
     }
 
     /**
@@ -127,7 +126,7 @@ interface INotary {
      * @param remoteChainId_ dest chain id
      * @param signature_ signature of attester
      */
-    function verifyAndSeal(
+    function seal(
         address accumAddress_,
         uint256 remoteChainId_,
         bytes calldata signature_
