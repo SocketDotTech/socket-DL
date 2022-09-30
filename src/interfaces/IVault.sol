@@ -8,14 +8,16 @@ interface IVault {
      */
     event FeeDeducted(uint256 amount_);
 
+    event FeesSet(uint256 minFees_, uint256 configId_);
+
     error InsufficientFee();
 
     /**
      * @notice deducts the fee required to bridge the packet using msgGasLimit
      * @param remoteChainId_ dest chain id
-     * @param msgGasLimit_ gas limit needed to execute inbound at remote plug
+     * @param configId_ config used by the plug to calculate the fees
      */
-    function deductFee(uint256 remoteChainId_, uint256 msgGasLimit_)
+    function deductFee(uint256 remoteChainId_, uint256 configId_)
         external
         payable;
 
@@ -34,5 +36,9 @@ interface IVault {
     function getFees(uint256 remoteChainId_, uint256 msgGasLimit_)
         external
         view
+        returns (uint256);
+
+    function setFees(uint256 minFees_, uint256 configId_)
+        external
         returns (uint256);
 }

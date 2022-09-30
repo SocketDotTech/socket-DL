@@ -71,17 +71,13 @@ contract Socket is SocketConfig {
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
 
         // Packs the src plug, src chain id, dest chain id and nonce
-        // msgId(256) = srcPlug(160) + srcChainId(16) + destChainId(16) + nonce(64)
+        // msgId(256) = srcPlug(160) | srcChainId(16) | destChainId(16) | nonce(64)
         uint256 msgId = (uint256(uint160(msg.sender)) << 96) |
-            (_chainId << 80) |
-            (remoteChainId_ << 64) |
-            nonce;
+            (uint256(uint16(_chainId)) << 80) |
+            (uint256(uint16(remoteChainId_)) << 64) |
+            uint256(uint64(nonce));
 
-        vault.deductFee{value: msg.value}(
-            remoteChainId_,
-            msgGasLimit_,
-            config.configId
-        );
+        vault.deductFee{value: msg.value}(remoteChainId_, plugConfig.configId);
 
         bytes32 packedMessage = hasher.packMessage(
             _chainId,
