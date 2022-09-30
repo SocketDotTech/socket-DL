@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./interfaces/ISocket.sol";
 import "./interfaces/IAccumulator.sol";
 import "./interfaces/IDeaccumulator.sol";
 import "./interfaces/IVerifier.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/IHasher.sol";
-import "./utils/AccessControl.sol";
+import "./SocketConfig.sol";
 
-contract Socket is ISocket, AccessControl(msg.sender) {
+contract Socket is SocketConfig {
     enum MessageStatus {
         NOT_EXECUTED,
         SUCCESS,
@@ -20,13 +19,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     bytes32 private constant EXECUTOR_ROLE = keccak256("EXECUTOR");
 
-    // localPlug => remoteChainId => OutboundConfig
-    mapping(address => mapping(uint256 => OutboundConfig))
-        public outboundConfigs;
-
-    // localPlug => remoteChainId => InboundConfig
-    mapping(address => mapping(uint256 => InboundConfig)) public inboundConfigs;
-
     // localPlug => remoteChainId => nonce
     mapping(address => mapping(uint256 => uint256)) private _nonces;
 
@@ -35,8 +27,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
 
     // msgId => message status
     mapping(uint256 => MessageStatus) private _messagesStatus;
-
-    mapping(uint256 => mapping(bytes32 => Config)) public configs;
 
     IHasher public hasher;
     IVault public override vault;
@@ -63,59 +53,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
         _setVault(vault_);
     }
 
-    function addConfig(
-        uint256 destChainId_,
-        address accum_,
-        address deaccum_,
-        address verifier_,
-        string calldata accumName_
-    ) external onlyOwner {
-        if (
-            configs[destChainId_][keccak256(abi.encode(accumName_))].accum !=
-            address(0)
-        ) revert ConfigExists();
-
-        _setConfig(destChainId_, accum_, deaccum_, verifier_, accumName_);
-        emit ConfigAdded(accum_, deaccum_, verifier_, destChainId_, accumName_);
-    }
-
-    function updateConfig(
-        uint256 destChainId_,
-        address accum_,
-        address deaccum_,
-        address verifier_,
-        string calldata accumName_
-    ) external onlyOwner {
-        if (
-            configs[destChainId_][keccak256(abi.encode(accumName_))].accum ==
-            address(0)
-        ) revert NoConfigFound();
-
-        _setConfig(destChainId_, accum_, deaccum_, verifier_, accumName_);
-        emit ConfigUpdated(
-            accum_,
-            deaccum_,
-            verifier_,
-            destChainId_,
-            accumName_
-        );
-    }
-
-    function _setConfig(
-        uint256 destChainId_,
-        address accum_,
-        address deaccum_,
-        address verifier_,
-        string calldata accumName_
-    ) internal {
-        Config storage config = configs[destChainId_][
-            keccak256(abi.encode(accumName_))
-        ];
-        config.accum = accum_;
-        config.deaccum = deaccum_;
-        config.verifier = verifier_;
-    }
-
     /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with accumulator
@@ -140,7 +77,11 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             (remoteChainId_ << 64) |
             nonce;
 
-        vault.deductFee{value: msg.value}(remoteChainId_, msgGasLimit_);
+        vault.deductFee{value: msg.value}(
+            remoteChainId_,
+            msgGasLimit_,
+            config.configId
+        );
 
         bytes32 packedMessage = hasher.packMessage(
             _chainId,
@@ -242,42 +183,6 @@ contract Socket is ISocket, AccessControl(msg.sender) {
             _messagesStatus[msgId] = MessageStatus.FAILED;
             emit ExecutionFailedBytes(msgId, reason);
         }
-    }
-
-    /// @inheritdoc ISocket
-    function setInboundConfig(
-        uint256 remoteChainId_,
-        bytes32 accumId,
-        address remotePlug_
-    ) external override {
-        InboundConfig storage inboundConfig = inboundConfigs[msg.sender][
-            remoteChainId_
-        ];
-
-        Config memory config = configs[remoteChainId_][accumId];
-
-        inboundConfig.remotePlug = remotePlug_;
-        inboundConfig.deaccum = config.deaccum;
-        inboundConfig.verifier = config.verifier;
-
-        emit InboundConfigSet(remotePlug_, config.deaccum, config.verifier);
-    }
-
-    /// @inheritdoc ISocket
-    function setOutboundConfig(
-        uint256 remoteChainId_,
-        bytes32 configId_,
-        address remotePlug_
-    ) external override {
-        OutboundConfig storage outboundConfig = outboundConfigs[msg.sender][
-            remoteChainId_
-        ];
-        Config memory config = configs[remoteChainId_][configId_];
-
-        outboundConfig.accum = config.accum;
-        outboundConfig.remotePlug = remotePlug_;
-
-        emit OutboundConfigSet(remotePlug_, config.accum);
     }
 
     /**

@@ -74,7 +74,11 @@ interface ISocket {
         address verifier
     );
 
-    event OutboundConfigSet(address remotePlug, address accum);
+    event OutboundConfigSet(
+        address remotePlug,
+        address accum,
+        bytes32 configId
+    );
 
     error NotAttested();
 
@@ -135,12 +139,14 @@ interface ISocket {
     struct OutboundConfig {
         address accum;
         address remotePlug;
+        bytes32 configId;
     }
 
     struct Config {
         address accum;
         address deaccum;
         address verifier;
+        bool isSet;
     }
 
     /**
