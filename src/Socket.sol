@@ -65,9 +65,7 @@ contract Socket is SocketConfig {
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable override {
-        OutboundConfig memory config = outboundConfigs[msg.sender][
-            remoteChainId_
-        ];
+        PlugConfig memory plugConfig = plugConfigs[msg.sender][remoteChainId_];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
 
         // Packs the src plug, src chain id, dest chain id and nonce
@@ -83,18 +81,20 @@ contract Socket is SocketConfig {
             _chainId,
             msg.sender,
             remoteChainId_,
-            config.remotePlug,
+            plugConfig.remotePlug,
             msgId,
             msgGasLimit_,
             payload_
         );
 
-        IAccumulator(config.accum).addPackedMessage(packedMessage);
+        IAccumulator(configs[plugConfig.configId].accum).addPackedMessage(
+            packedMessage
+        );
         emit MessageTransmitted(
             _chainId,
             msg.sender,
             remoteChainId_,
-            config.remotePlug,
+            plugConfig.remotePlug,
             msgId,
             msgGasLimit_,
             payload_
@@ -120,9 +120,12 @@ contract Socket is SocketConfig {
         if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
         executor[msgId] = msg.sender;
 
+        PlugConfig memory plugConfig = plugConfigs[localPlug][
+            verifyParams_.remoteChainId
+        ];
         bytes32 packedMessage = hasher.packMessage(
             verifyParams_.remoteChainId,
-            inboundConfigs[localPlug][verifyParams_.remoteChainId].remotePlug,
+            plugConfig.remotePlug,
             _chainId,
             localPlug,
             msgId,
@@ -130,23 +133,22 @@ contract Socket is SocketConfig {
             payload
         );
 
-        _verify(localPlug, packedMessage, verifyParams_);
+        _verify(plugConfig.configId, packedMessage, verifyParams_);
         _execute(localPlug, msgGasLimit, msgId, payload);
     }
 
     function _verify(
-        address localPlug,
+        uint256 configId,
         bytes32 packedMessage,
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
-        InboundConfig memory config = inboundConfigs[localPlug][
-            verifyParams_.remoteChainId
-        ];
+        Config memory config = configs[configId];
 
         (bool isVerified, bytes32 root) = IVerifier(config.verifier)
             .verifyCommitment(
-                verifyParams_.remoteAccum,
+                config.accum,
                 verifyParams_.remoteChainId,
+                configId,
                 verifyParams_.packetId
             );
 

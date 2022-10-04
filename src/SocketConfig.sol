@@ -5,14 +5,9 @@ import "./interfaces/ISocket.sol";
 import "./utils/AccessControl.sol";
 
 abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
-    // localPlug => remoteChainId => OutboundConfig
-    mapping(address => mapping(uint256 => OutboundConfig))
-        public outboundConfigs;
-
-    // localPlug => remoteChainId => InboundConfig
-    mapping(address => mapping(uint256 => InboundConfig)) public inboundConfigs;
-
-    mapping(uint256 => mapping(bytes32 => Config)) public configs;
+    Config[] public configs;
+    mapping(bytes32 => uint256) public override destConfigs;
+    mapping(address => mapping(uint256 => PlugConfig)) public plugConfigs;
 
     function addConfig(
         uint256 destChainId_,
@@ -21,63 +16,54 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         address verifier_,
         string calldata accumName_
     ) external onlyOwner {
-        if (configs[destChainId_][keccak256(abi.encode(accumName_))].isSet)
-            revert ConfigExists();
+        bytes32 destConfigId = keccak256(abi.encode(destChainId_, accumName_));
+        if (destConfigs[destConfigId] != 0) revert ConfigExists();
 
-        _setConfig(destChainId_, accum_, deaccum_, verifier_, accumName_);
-        emit ConfigAdded(accum_, deaccum_, verifier_, destChainId_, accumName_);
+        uint256 configId = _setConfig(accum_, deaccum_, verifier_);
+        destConfigs[destConfigId] = configId;
+
+        emit ConfigAdded(
+            accum_,
+            deaccum_,
+            verifier_,
+            destChainId_,
+            configId,
+            accumName_
+        );
     }
 
     function _setConfig(
-        uint256 destChainId_,
         address accum_,
         address deaccum_,
-        address verifier_,
-        string calldata accumName_
-    ) internal {
-        Config storage config = configs[destChainId_][
-            keccak256(abi.encode(accumName_))
-        ];
+        address verifier_
+    ) internal returns (uint256 configId) {
+        Config storage config;
+
         config.accum = accum_;
         config.deaccum = deaccum_;
         config.verifier = verifier_;
         config.isSet = true;
+
+        configId = configs.length;
+        configs.push(config);
     }
 
     /// @inheritdoc ISocket
-    function setInboundConfig(
+    function setPlugConfig(
         uint256 remoteChainId_,
-        bytes32 configId_,
-        address remotePlug_
+        address remotePlug_,
+        string memory accumName_
     ) external override {
-        InboundConfig storage inboundConfig = inboundConfigs[msg.sender][
-            remoteChainId_
+        uint256 configId = destConfigs[
+            keccak256(abi.encode(remoteChainId_, accumName_))
         ];
+        if (!configs[configId].isSet) revert InvalidConfigId();
 
-        Config memory config = configs[remoteChainId_][configId_];
+        PlugConfig storage plugConfig = plugConfigs[msg.sender][remoteChainId_];
 
-        inboundConfig.remotePlug = remotePlug_;
-        inboundConfig.deaccum = config.deaccum;
-        inboundConfig.verifier = config.verifier;
+        plugConfig.remotePlug = remotePlug_;
+        plugConfig.configId = configId;
 
-        emit InboundConfigSet(remotePlug_, config.deaccum, config.verifier);
-    }
-
-    /// @inheritdoc ISocket
-    function setOutboundConfig(
-        uint256 remoteChainId_,
-        bytes32 configId_,
-        address remotePlug_
-    ) external override {
-        OutboundConfig storage outboundConfig = outboundConfigs[msg.sender][
-            remoteChainId_
-        ];
-        Config memory config = configs[remoteChainId_][configId_];
-
-        outboundConfig.accum = config.accum;
-        outboundConfig.remotePlug = remotePlug_;
-        outboundConfig.configId = configId_;
-
-        emit OutboundConfigSet(remotePlug_, config.accum, configId_);
+        emit PlugConfigSet(remotePlug_, remoteChainId_, configId);
     }
 }

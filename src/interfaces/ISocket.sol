@@ -7,9 +7,21 @@ interface ISocket {
     // to handle stack too deep
     struct VerificationParams {
         uint256 remoteChainId;
-        address remoteAccum;
         uint256 packetId;
         bytes deaccumProof;
+    }
+
+    // TODO: add confs and blocking/non-blocking
+    struct PlugConfig {
+        address remotePlug;
+        uint256 configId;
+    }
+
+    struct Config {
+        address accum;
+        address deaccum;
+        address verifier;
+        bool isSet;
     }
 
     /**
@@ -37,14 +49,7 @@ interface ISocket {
         address deaccum_,
         address verifier_,
         uint256 destChainId_,
-        string accumName_
-    );
-
-    event ConfigUpdated(
-        address accum_,
-        address deaccum_,
-        address verifier_,
-        uint256 destChainId_,
+        uint256 configId_,
         string accumName_
     );
 
@@ -68,16 +73,10 @@ interface ISocket {
      */
     event ExecutionFailedBytes(uint256 msgId, bytes result);
 
-    event InboundConfigSet(
+    event PlugConfigSet(
         address remotePlug,
-        address deaccum,
-        address verifier
-    );
-
-    event OutboundConfigSet(
-        address remotePlug,
-        address accum,
-        bytes32 configId
+        uint256 remoteChainId,
+        uint256 configId
     );
 
     error NotAttested();
@@ -96,9 +95,11 @@ interface ISocket {
 
     error ConfigExists();
 
-    error NoConfigFound();
+    error InvalidConfigId();
 
     function vault() external view returns (IVault);
+
+    function destConfigs(bytes32 configId_) external view returns (uint256);
 
     /**
      * @notice registers a message
@@ -129,47 +130,15 @@ interface ISocket {
         ISocket.VerificationParams calldata verifyParams_
     ) external;
 
-    // TODO: add confs and blocking/non-blocking
-    struct InboundConfig {
-        address remotePlug;
-        address deaccum;
-        address verifier;
-    }
-
-    struct OutboundConfig {
-        address accum;
-        address remotePlug;
-        bytes32 configId;
-    }
-
-    struct Config {
-        address accum;
-        address deaccum;
-        address verifier;
-        bool isSet;
-    }
-
     /**
      * @notice sets the config specific to the plug
      * @param remoteChainId_ the destination chain id
      * @param remotePlug_ address of plug present at destination chain to call inbound
-     * @param configId_ the id of config to be used
+     * @param accumName_ the name of accum to be used
      */
-    function setInboundConfig(
+    function setPlugConfig(
         uint256 remoteChainId_,
-        bytes32 configId_,
-        address remotePlug_
-    ) external;
-
-    /**
-     * @notice sets the config specific to the plug
-     * @param remoteChainId_ the destination chain id
-     * @param remotePlug_ address of plug present at destination chain to call inbound
-     * @param configId_ the id of config to be used
-     */
-    function setOutboundConfig(
-        uint256 remoteChainId_,
-        bytes32 configId_,
-        address remotePlug_
+        address remotePlug_,
+        string memory accumName_
     ) external;
 }
