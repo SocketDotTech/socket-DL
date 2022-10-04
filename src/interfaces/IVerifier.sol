@@ -11,6 +11,7 @@ interface IVerifier {
     function verifyCommitment(
         address accumAddress_,
         uint256 remoteChainId_,
+        uint256 configId_,
         uint256 packetId_
     ) external view returns (bool, bytes32);
 }

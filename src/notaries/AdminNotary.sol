@@ -2,35 +2,25 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/INotary.sol";
-import "../utils/AccessControl.sol";
 import "../interfaces/IAccumulator.sol";
 import "../interfaces/ISignatureVerifier.sol";
+import "../utils/AccessControl.sol";
 
 contract AdminNotary is INotary, AccessControl(msg.sender) {
     uint256 private immutable _chainId;
-    uint256 public slowAccumWaitTime;
     ISignatureVerifier public signatureVerifier;
 
-    // attester => accumAddr + chainId + packetId => is attested
+    // attester => accumAddr|chainId|packetId => is attested
     mapping(address => mapping(uint256 => bool)) public isAttested;
 
     // chainId => total attesters registered
     mapping(uint256 => uint256) public totalAttestors;
 
-    // accumAddr + chainId
-    mapping(uint256 => bool) public isFast;
-
-    // accumAddr + chainId + packetId
+    // accumAddr|chainId|packetId
     mapping(uint256 => PacketDetails) private _packetDetails;
 
-    constructor(
-        address signatureVerifier_,
-        uint256 chainId_,
-        uint256 slowAccumWaitTime_
-    ) {
+    constructor(address signatureVerifier_, uint256 chainId_) {
         _chainId = chainId_;
-        //TODO: limits for wait time
-        slowAccumWaitTime = slowAccumWaitTime_;
         signatureVerifier = ISignatureVerifier(signatureVerifier_);
     }
 
@@ -64,19 +54,22 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     /// @inheritdoc INotary
     function challengeSignature(
-        address accumAddress_,
         bytes32 root_,
         uint256 packetId_,
+        uint256 destChainId_,
+        address accumAddress_,
         bytes calldata signature_
     ) external override {
+        bytes32 root = IAccumulator(accumAddress_).getRootById(packetId_);
+
         address attester = signatureVerifier.recoverSigner(
             _chainId,
+            destChainId_,
             accumAddress_,
             packetId_,
             root_,
             signature_
         );
-        bytes32 root = IAccumulator(accumAddress_).getRootById(packetId_);
 
         if (root == root_ && root != bytes32(0)) {
             emit ChallengedSuccessfully(
@@ -113,6 +106,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             remoteChainId_,
             accumAddress_,
             packetId_,
+            packedId,
             root_,
             signature_
         );
@@ -142,6 +136,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             remoteChainId_,
             accumAddress_,
             packetId_,
+            packedId,
             root_,
             signature_
         );
@@ -153,11 +148,13 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         uint256 remoteChainId_,
         address accumAddress_,
         uint256 packetId_,
+        uint256 packedId,
         bytes32 root_,
         bytes calldata signature_
     ) private returns (address attester) {
         attester = signatureVerifier.recoverSigner(
             remoteChainId_,
+            _chainId,
             accumAddress_,
             packetId_,
             root_,
@@ -167,13 +164,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         if (!_hasRole(_attesterRole(remoteChainId_), attester))
             revert InvalidAttester();
 
-        uint256 packedId = _packWithPacketId(
-            accumAddress_,
-            remoteChainId_,
-            packetId_
-        );
         PacketDetails storage packedDetails = _packetDetails[packedId];
-
         if (isAttested[attester][packedId]) revert AlreadyAttested();
 
         isAttested[attester][packedId] = true;
@@ -191,7 +182,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             remoteChainId_,
             packetId_
         );
-        uint256 accumId = _pack(accumAddress_, remoteChainId_);
 
         PacketDetails memory packet = _packetDetails[packedId];
         uint256 packetArrivedAt = packet.timeRecord;
@@ -201,15 +191,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         // if paused at dest
         if (packet.isPaused) return PacketStatus.PAUSED;
 
-        if (isFast[accumId]) {
-            if (packet.attestations != totalAttestors[remoteChainId_])
-                return PacketStatus.PROPOSED;
-        } else {
-            if (block.timestamp - packet.timeRecord < slowAccumWaitTime)
-                return PacketStatus.PROPOSED;
-        }
-
-        return PacketStatus.CONFIRMED;
+        return PacketStatus.PROPOSED;
     }
 
     /// @inheritdoc INotary
@@ -222,8 +204,9 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         view
         override
         returns (
-            bool isConfirmed,
+            PacketStatus status,
             uint256 packetArrivedAt,
+            uint256 pendingAttestations,
             bytes32 root
         )
     {
@@ -232,16 +215,14 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             remoteChainId_,
             packetId_
         );
-        PacketStatus status = getPacketStatus(
-            accumAddress_,
-            remoteChainId_,
-            packetId_
-        );
+        status = getPacketStatus(accumAddress_, remoteChainId_, packetId_);
 
-        if (status == PacketStatus.CONFIRMED) isConfirmed = true;
         PacketDetails memory packet = _packetDetails[packedId];
         root = packet.remoteRoots;
         packetArrivedAt = packet.timeRecord;
+        pendingAttestations =
+            totalAttestors[remoteChainId_] -
+            packet.attestations;
     }
 
     /**
@@ -305,6 +286,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     {
         if (_hasRole(_attesterRole(remoteChainId_), attester_))
             revert AttesterExists();
+
         _grantRole(_attesterRole(remoteChainId_), attester_);
         totalAttestors[remoteChainId_]++;
     }
@@ -320,6 +302,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     {
         if (!_hasRole(_attesterRole(remoteChainId_), attester_))
             revert AttesterNotFound();
+
         _revokeRole(_attesterRole(remoteChainId_), attester_);
         totalAttestors[remoteChainId_]--;
     }
@@ -376,21 +359,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
      */
     function chainId() external view returns (uint256) {
         return _chainId;
-    }
-
-    /**
-     * @notice adds the accumulator
-     * @param accumAddress_ address of accumulator at src
-     * @param remoteChainId_ src chain id
-     * @param isFast_ indicates the path for accumulator
-     */
-    function addAccumulator(
-        address accumAddress_,
-        uint256 remoteChainId_,
-        bool isFast_
-    ) external onlyOwner {
-        uint256 accumId = _pack(accumAddress_, remoteChainId_);
-        isFast[accumId] = isFast_;
     }
 
     /**

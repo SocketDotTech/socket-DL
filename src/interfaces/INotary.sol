@@ -135,9 +135,10 @@ interface INotary {
      * @param signature_ address of original attester
      */
     function challengeSignature(
-        address accumAddress_,
         bytes32 root_,
         uint256 packetId_,
+        uint256 destChainId_,
+        address accumAddress_,
         bytes calldata signature_
     ) external;
 
@@ -205,8 +206,9 @@ interface INotary {
      * @param accumAddress_ address of accumulator at src
      * @param remoteChainId_ src chain id
      * @param packetId_ packed id
-     * @return isConfirmed true if has required confirmations
+     * @return status packet status
      * @return packetArrivedAt time at which packet was proposed
+     * @return pendingAttestations number of attestations remaining
      * @return root root hash
      */
     function getPacketDetails(
@@ -217,8 +219,9 @@ interface INotary {
         external
         view
         returns (
-            bool isConfirmed,
+            PacketStatus status,
             uint256 packetArrivedAt,
+            uint256 pendingAttestations,
             bytes32 root
         );
 }

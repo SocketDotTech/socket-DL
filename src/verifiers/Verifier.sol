@@ -3,20 +3,30 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IVerifier.sol";
 import "../interfaces/INotary.sol";
+import "../interfaces/ISocket.sol";
+
 import "../utils/Ownable.sol";
 
 contract Verifier is IVerifier, Ownable {
     INotary public notary;
+    ISocket public socket;
+
     uint256 public immutable timeoutInSeconds;
 
+    string private FAST_ACCUM = "FAST";
+    string private SLOW_ACCUM = "SLOW";
+
     event NotarySet(address notary_);
+    event SocketSet(address socket_);
 
     constructor(
         address owner_,
         address _notary,
+        address _socket,
         uint256 timeoutInSeconds_
     ) Ownable(owner_) {
         notary = INotary(_notary);
+        socket = ISocket(_socket);
 
         // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
@@ -32,6 +42,15 @@ contract Verifier is IVerifier, Ownable {
     }
 
     /**
+     * @notice updates socket
+     * @param socket_ address of Socket
+     */
+    function setSocket(address socket_) external onlyOwner {
+        socket = ISocket(socket_);
+        emit SocketSet(socket_);
+    }
+
+    /**
      * @notice verifies if the packet satisfies needed checks before execution
      * @param accumAddress_ address of accumulator at src
      * @param remoteChainId_ dest chain id
@@ -40,17 +59,32 @@ contract Verifier is IVerifier, Ownable {
     function verifyCommitment(
         address accumAddress_,
         uint256 remoteChainId_,
+        uint256 configId_,
         uint256 packetId_
     ) external view override returns (bool, bytes32) {
-        (bool isConfirmed, uint256 packetArrivedAt, bytes32 root) = notary
-            .getPacketDetails(accumAddress_, remoteChainId_, packetId_);
+        bool isFast = socket.destConfigs(
+            keccak256(abi.encode(remoteChainId_, FAST_ACCUM))
+        ) == configId_
+            ? true
+            : false;
 
-        if (isConfirmed) return (true, root);
-        if (packetArrivedAt == 0) return (false, root);
+        (
+            INotary.PacketStatus status,
+            uint256 packetArrivedAt,
+            uint256 pendingAttestations,
+            bytes32 root
+        ) = notary.getPacketDetails(accumAddress_, remoteChainId_, packetId_);
 
-        // if timed out
+        if (status != INotary.PacketStatus.PROPOSED) return (false, root);
+
+        // if timed out, return true irrespective of fast or slow accum
         if (block.timestamp - packetArrivedAt > timeoutInSeconds)
             return (true, root);
+
+        // if fast, check attestations
+        if (isFast) {
+            if (pendingAttestations == 0) return (true, root);
+        }
 
         return (false, root);
     }
