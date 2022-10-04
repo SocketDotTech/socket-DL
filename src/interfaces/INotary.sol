@@ -123,14 +123,9 @@ interface INotary {
     /**
      * @notice verifies the attester and seals a packet
      * @param accumAddress_ address of accumulator at src
-     * @param remoteChainId_ dest chain id
      * @param signature_ signature of attester
      */
-    function seal(
-        address accumAddress_,
-        uint256 remoteChainId_,
-        bytes calldata signature_
-    ) external;
+    function seal(address accumAddress_, bytes calldata signature_) external;
 
     /**
      * @notice challenges a packet at src if wrongly attested

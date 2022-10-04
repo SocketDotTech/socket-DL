@@ -35,15 +35,17 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     /// @inheritdoc INotary
-    function seal(
-        uint256 remoteChainId_,
-        bytes calldata signature_
-    ) external override {
-        (bytes32 root, uint256 packetId) = IAccumulator(accumAddress_)
-            .sealPacket();
+    function seal(address accumAddress_, bytes calldata signature_)
+        external
+        override
+    {
+        (bytes32 root, uint256 packetId, uint256 remoteChainId) = IAccumulator(
+            accumAddress_
+        ).sealPacket();
 
         address attester = signatureVerifier.recoverSigner(
             _chainId,
+            remoteChainId,
             accumAddress_,
             packetId,
             root,
