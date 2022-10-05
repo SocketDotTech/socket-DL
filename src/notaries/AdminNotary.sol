@@ -42,7 +42,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             signature_
         );
 
-        if (!_hasRole(_attesterRole(remoteChainId_), attester))
+        if (!_hasRole(_attesterRole(remoteChainId), attester))
             revert InvalidAttester();
         emit PacketVerifiedAndSealed(
             attester,

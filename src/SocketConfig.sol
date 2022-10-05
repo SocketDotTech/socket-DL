@@ -37,7 +37,7 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         address deaccum_,
         address verifier_
     ) internal returns (uint256 configId) {
-        Config storage config;
+        Config memory config;
 
         config.accum = accum_;
         config.deaccum = deaccum_;
