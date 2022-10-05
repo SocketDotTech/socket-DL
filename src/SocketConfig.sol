@@ -57,7 +57,7 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         uint256 configId = destConfigs[
             keccak256(abi.encode(remoteChainId_, accumName_))
         ];
-        if (!configs[configId].isSet) revert InvalidConfigId();
+        if (configId == 0) revert InvalidConfigId();
 
         PlugConfig storage plugConfig = plugConfigs[msg.sender][remoteChainId_];
 
@@ -65,5 +65,39 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         plugConfig.configId = configId;
 
         emit PlugConfigSet(remotePlug_, remoteChainId_, configId);
+    }
+
+    function getConfig(uint256 index)
+        external
+        view
+        returns (
+            address,
+            address,
+            address,
+            bool
+        )
+    {
+        Config memory config = configs[index];
+        return (config.accum, config.deaccum, config.verifier, config.isSet);
+    }
+
+    function getPlugConfig(uint256 remoteChainId_, address plug_)
+        external
+        view
+        returns (
+            address accum,
+            address deaccum,
+            address verifier,
+            uint256 configId
+        )
+    {
+        PlugConfig memory plugConfig = plugConfigs[plug_][remoteChainId_];
+        Config memory config = configs[plugConfig.configId];
+        return (
+            config.accum,
+            config.deaccum,
+            config.verifier,
+            plugConfig.configId
+        );
     }
 }
