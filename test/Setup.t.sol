@@ -101,16 +101,19 @@ contract Setup is Test {
             cc.notary__,
             address(cc.socket__),
             _socketOwner,
-            destChainId_,
-            _isFast
+            destChainId_
         );
 
         hoax(_socketOwner);
         cc.verifier__ = new Verifier(
             _plugOwner,
             address(cc.notary__),
+            address(cc.socket__),
             _timeoutInSeconds
         );
+
+        // todo:
+        // notary__.addAccumulator(address(accum__), destChainId_, isFast_);
 
         hoax(_socketOwner);
         cc.socket__.grantExecutorRole(_raju);
@@ -142,11 +145,7 @@ contract Setup is Test {
     {
         vm.startPrank(deployer_);
         sigVerifier__ = new SignatureVerifier();
-        notary__ = new AdminNotary(
-            address(sigVerifier__),
-            chainId_,
-            _slowAccumWaitTime
-        );
+        notary__ = new AdminNotary(address(sigVerifier__), chainId_);
 
         vm.stopPrank();
     }
@@ -155,20 +154,20 @@ contract Setup is Test {
         AdminNotary notary__,
         address socket_,
         address deployer_,
-        uint256 destChainId_,
-        bool isFast_
+        uint256 destChainId_
     ) internal returns (SingleAccum accum__, SingleDeaccum deaccum__) {
         vm.startPrank(deployer_);
 
-        accum__ = new SingleAccum(socket_, address(notary__));
+        accum__ = new SingleAccum(socket_, address(notary__), destChainId_);
         deaccum__ = new SingleDeaccum();
-
-        notary__.addAccumulator(address(accum__), destChainId_, isFast_);
 
         vm.stopPrank();
     }
 
-    function _getLatestSignature(ChainContext storage src_)
+    function _getLatestSignature(
+        ChainContext storage src_,
+        uint256 destChainId_
+    )
         internal
         returns (
             bytes32 root,
@@ -178,7 +177,13 @@ contract Setup is Test {
     {
         (root, packetId) = src_.accum__.getNextPacketToBeSealed();
         bytes32 digest = keccak256(
-            abi.encode(src_.chainId, address(src_.accum__), packetId, root)
+            abi.encode(
+                src_.chainId,
+                destChainId_,
+                address(src_.accum__),
+                packetId,
+                root
+            )
         );
         digest = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
@@ -198,13 +203,9 @@ contract Setup is Test {
         }
     }
 
-    function _sealOnSrc(
-        ChainContext storage src_,
-        ChainContext storage dest_,
-        bytes memory sig_
-    ) internal {
+    function _sealOnSrc(ChainContext storage src_, bytes memory sig_) internal {
         hoax(_attester);
-        src_.notary__.seal(address(src_.accum__), dest_.chainId, sig_);
+        src_.notary__.seal(address(src_.accum__), sig_);
     }
 
     function _submitRootOnDst(
@@ -238,7 +239,6 @@ contract Setup is Test {
 
         ISocket.VerificationParams memory vParams = ISocket.VerificationParams(
             src_.chainId,
-            address(src_.accum__),
             packetId_,
             proof_
         );
