@@ -36,7 +36,7 @@ const chainIds = {
   hardhat: 31337,
   mainnet: 1,
   "arbitrum-mainnet": 42161,
-  "arbitrum-rinkeby": 421611,
+  "arbitrum-goerli": 421613,
   "optimism-mainnet": 10,
   "optimism-goerli": 420,
   "polygon-mainnet": 137,
@@ -46,8 +46,8 @@ const chainIds = {
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
   let jsonRpcUrl: string;
   switch (chain) {
-    case "arbitrum-rinkeby":
-      jsonRpcUrl = "https://rinkeby.arbitrum.io/rpc";
+    case "arbitrum-goerli":
+      jsonRpcUrl = "https://goerli-rollup.arbitrum.io/rpc";
       break;
     case "optimism-goerli":
       jsonRpcUrl = "https://goerli.optimism.io";
@@ -86,7 +86,7 @@ function getRemappings() {
 let liveNetworks = {};
 if (mnemonic && infuraApiKey && isProduction) {
   liveNetworks = {
-    "arbitrum-rinkeby": getChainConfig("arbitrum-rinkeby"),
+    "arbitrum-goerli": getChainConfig("arbitrum-goerli"),
     "optimism-goerli": getChainConfig("optimism-goerli"),
     "polygon-mainnet": getChainConfig("polygon-mainnet"),
     arbitrum: getChainConfig("arbitrum-mainnet"),
