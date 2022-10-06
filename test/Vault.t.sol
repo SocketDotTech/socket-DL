@@ -7,8 +7,9 @@ import "../src/vault/Vault.sol";
 contract VaultTest is Test {
     address constant _owner = address(1);
     address constant _raju = address(2);
-    uint256 constant minFees = 1000;
-    uint256 constant configId = 0;
+    uint256 constant _minFees = 1000;
+    uint256 constant _configId = 0;
+    uint256 constant _remoteChainId = 0x0001;
 
     Vault _vault;
 
@@ -25,22 +26,22 @@ contract VaultTest is Test {
 
     function testDeductFee() external {
         hoax(_owner);
-        _vault.setFees(minFees, configId);
+        _vault.setFees(_minFees, _configId);
 
         vm.expectRevert(IVault.NotEnoughFees.selector);
-        _vault.deductFee{value: 10}(0, configId);
+        _vault.deductFee{value: 10}(0, _configId);
 
         vm.expectEmit(true, false, false, false);
-        emit FeeDeducted(minFees);
+        emit FeeDeducted(_minFees);
 
-        _vault.deductFee{value: minFees}(0, configId);
-        assertEq(address(_vault).balance, minFees);
+        _vault.deductFee{value: _minFees}(0, _configId);
+        assertEq(address(_vault).balance, _minFees);
     }
 
     function testClaimFee() external {
         hoax(_owner);
-        _vault.setFees(minFees, configId);
-        _vault.deductFee{value: minFees}(0, configId);
+        _vault.setFees(_minFees, _configId);
+        _vault.deductFee{value: _minFees}(0, _configId);
 
         hoax(_raju);
         vm.expectRevert(Ownable.OnlyOwner.selector);
@@ -59,13 +60,13 @@ contract VaultTest is Test {
     function testSetFees() external {
         hoax(_raju);
         vm.expectRevert(Ownable.OnlyOwner.selector);
-        _vault.setFees(minFees, configId);
+        _vault.setFees(_minFees, _configId);
 
-        assertEq(_vault.getFees(configId), 0);
+        assertEq(_vault.getFees(_configId), 0);
 
         hoax(_owner);
-        _vault.setFees(minFees, configId);
+        _vault.setFees(_minFees, _configId);
 
-        assertEq(_vault.getFees(configId), minFees);
+        assertEq(_vault.getFees(_configId), _minFees);
     }
 }

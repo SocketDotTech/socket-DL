@@ -16,16 +16,11 @@ contract VerifierTest is Setup {
     function setUp() public {
         cc.chainId = chainId;
         (cc.sigVerifier__, cc.notary__) = _deployNotary(chainId, _socketOwner);
-        (cc.hasher__, cc.vault__, cc.socket__) = _deploySocket(
-            cc.chainId,
-            _socketOwner
-        );
 
         hoax(_socketOwner);
         cc.verifier__ = new Verifier(
             _socketOwner,
             address(cc.notary__),
-            address(cc.socket__),
             timeoutInSeconds
         );
     }
@@ -33,7 +28,6 @@ contract VerifierTest is Setup {
     function testDeployment() public {
         assertEq(cc.verifier__.owner(), _socketOwner);
         assertEq(address(cc.verifier__.notary()), address(cc.notary__));
-        assertEq(address(cc.verifier__.socket()), address(cc.socket__));
 
         assertEq(cc.verifier__.timeoutInSeconds(), timeoutInSeconds);
     }
@@ -50,18 +44,6 @@ contract VerifierTest is Setup {
         assertEq(address(cc.verifier__.notary()), newNotary);
     }
 
-    function testSetSocket() external {
-        address newSocket = address(9);
-
-        hoax(_raju);
-        vm.expectRevert(Ownable.OnlyOwner.selector);
-        cc.verifier__.setSocket(newSocket);
-
-        hoax(_socketOwner);
-        cc.verifier__.setSocket(newSocket);
-        assertEq(address(cc.verifier__.socket()), newSocket);
-    }
-
     function testVerifyCommitmentNotProposed() public {
         // less attestations
         vm.mockCall(
@@ -70,29 +52,17 @@ contract VerifierTest is Setup {
             abi.encode(0, 1, 0, bytes32(0))
         );
 
-        vm.mockCall(
-            address(cc.socket__),
-            abi.encodeWithSelector(ISocket.destConfigs.selector),
-            abi.encode(0)
-        );
-
         // without timeout
         (bool valid, ) = cc.verifier__.verifyCommitment(
             address(0),
             destChainId,
-            0,
+            1,
             0
         );
         assertFalse(valid);
     }
 
     function testVerifyCommitmentFastPath() public {
-        vm.mockCall(
-            address(cc.socket__),
-            abi.encodeWithSelector(ISocket.destConfigs.selector),
-            abi.encode(0)
-        );
-
         // before timeout
         // less attestations
         vm.mockCall(
@@ -103,7 +73,7 @@ contract VerifierTest is Setup {
         (bool valid, ) = cc.verifier__.verifyCommitment(
             address(0),
             destChainId,
-            0,
+            1,
             0
         );
         assertFalse(valid);
@@ -117,7 +87,7 @@ contract VerifierTest is Setup {
         (valid, ) = cc.verifier__.verifyCommitment(
             address(0),
             destChainId,
-            0,
+            1,
             0
         );
         assertTrue(valid);
@@ -133,19 +103,13 @@ contract VerifierTest is Setup {
         (valid, ) = cc.verifier__.verifyCommitment(
             address(0),
             destChainId,
-            0,
+            1,
             0
         );
         assertTrue(valid);
     }
 
     function testVerifyCommitmentSlowPath() public {
-        vm.mockCall(
-            address(cc.socket__),
-            abi.encodeWithSelector(ISocket.destConfigs.selector),
-            abi.encode(2)
-        );
-
         // before timeout
         vm.mockCall(
             address(cc.notary__),
@@ -155,7 +119,7 @@ contract VerifierTest is Setup {
         (bool valid, ) = cc.verifier__.verifyCommitment(
             address(0),
             destChainId,
-            0,
+            2,
             0
         );
         assertFalse(valid);
@@ -169,7 +133,7 @@ contract VerifierTest is Setup {
         (valid, ) = cc.verifier__.verifyCommitment(
             address(0),
             destChainId,
-            0,
+            2,
             0
         );
         assertFalse(valid);
@@ -184,7 +148,7 @@ contract VerifierTest is Setup {
         (valid, ) = cc.verifier__.verifyCommitment(
             address(0),
             destChainId,
-            0,
+            2,
             0
         );
         assertTrue(valid);

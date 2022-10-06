@@ -43,14 +43,13 @@ contract SocketTest is Setup {
         bytes32 destConfigId = keccak256(abi.encode(_destChainId, accumName));
         assertEq(_a.socket__.destConfigs(destConfigId), 1);
 
-        (address accum, address deaccum, address verifier, bool isSet) = _a
+        (address accum, address deaccum, address verifier) = _a
             .socket__
             .getConfig(1);
 
         assertEq(accum, accum_);
         assertEq(deaccum, deaccum_);
         assertEq(verifier, verifier_);
-        assertTrue(isSet);
 
         hoax(_socketOwner);
         vm.expectRevert(ISocket.ConfigExists.selector);
