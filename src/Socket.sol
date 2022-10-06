@@ -149,7 +149,7 @@ contract Socket is SocketConfig {
 
         (bool isVerified, bytes32 root) = IVerifier(config.verifier)
             .verifyCommitment(
-                config.accum,
+                verifyParams_.accum,
                 verifyParams_.remoteChainId,
                 configId,
                 verifyParams_.packetId
