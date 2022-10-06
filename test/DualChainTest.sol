@@ -7,6 +7,10 @@ import "../src/examples/Counter.sol";
 contract DualChainTest is Setup {
     Counter srcCounter__;
     Counter destCounter__;
+    uint256 minFees = 10000;
+    uint256 addAmount = 100;
+    uint256 subAmount = 40;
+    bool isFast = true;
 
     // the identifiers of the forks
     uint256 aFork;
@@ -14,7 +18,7 @@ contract DualChainTest is Setup {
 
     function setUp() public {
         _a.chainId = 80001;
-        _b.chainId = 421611;
+        _b.chainId = 420;
 
         aFork = vm.createFork(vm.envString("CHAIN1_RPC_URL"));
         bFork = vm.createFork(vm.envString("CHAIN2_RPC_URL"));
@@ -35,6 +39,9 @@ contract DualChainTest is Setup {
     }
 
     function testRemoteAddFromAtoB() external {
+        address accum = isFast
+            ? address(_a.fastAccum__)
+            : address(_a.slowAccum__);
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
@@ -55,11 +62,11 @@ contract DualChainTest is Setup {
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a);
-        _sealOnSrc(_a, _b, sig);
+        ) = _getLatestSignature(_a, accum, _b.chainId);
+        _sealOnSrc(_a, accum, sig);
 
         vm.selectFork(bFork);
-        _submitRootOnDst(_a, _b, sig, packetId, root);
+        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
         _executePayloadOnDst(
@@ -69,6 +76,7 @@ contract DualChainTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            accum,
             payload,
             proof
         );
@@ -83,6 +91,9 @@ contract DualChainTest is Setup {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
+        address accum = isFast
+            ? address(_b.fastAccum__)
+            : address(_b.slowAccum__);
 
         hoax(_raju);
         vm.selectFork(bFork);
@@ -92,7 +103,7 @@ contract DualChainTest is Setup {
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_b);
+        ) = _getLatestSignature(_b, accum, _a.chainId);
 
         uint256 msgId = _packMessageId(
             address(destCounter__),
@@ -100,10 +111,10 @@ contract DualChainTest is Setup {
             _a.chainId,
             0
         );
-        _sealOnSrc(_b, _a, sig);
+        _sealOnSrc(_b, accum, sig);
 
         vm.selectFork(aFork);
-        _submitRootOnDst(_b, _a, sig, packetId, root);
+        _submitRootOnDst(_b, _a, sig, packetId, root, accum);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
         _executePayloadOnDst(
@@ -113,6 +124,7 @@ contract DualChainTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            accum,
             payload,
             proof
         );
@@ -124,7 +136,6 @@ contract DualChainTest is Setup {
     }
 
     function testRemoteAddAndSubtract() external {
-        uint256 addAmount = 100;
         bytes memory addPayload = abi.encode(keccak256("OP_ADD"), addAmount);
         uint256 addMsgId = _packMessageId(
             address(srcCounter__),
@@ -132,8 +143,10 @@ contract DualChainTest is Setup {
             _b.chainId,
             0
         );
+        address accum = isFast
+            ? address(_a.fastAccum__)
+            : address(_a.slowAccum__);
 
-        uint256 subAmount = 40;
         bytes memory subPayload = abi.encode(keccak256("OP_SUB"), subAmount);
         uint256 subMsgId = _packMessageId(
             address(srcCounter__),
@@ -150,11 +163,11 @@ contract DualChainTest is Setup {
         vm.selectFork(aFork);
         srcCounter__.remoteAddOperation(_b.chainId, addAmount, _msgGasLimit);
 
-        (root, packetId, sig) = _getLatestSignature(_a);
-        _sealOnSrc(_a, _b, sig);
+        (root, packetId, sig) = _getLatestSignature(_a, accum, _b.chainId);
+        _sealOnSrc(_a, accum, sig);
 
         vm.selectFork(bFork);
-        _submitRootOnDst(_a, _b, sig, packetId, root);
+        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
         _executePayloadOnDst(
@@ -164,6 +177,7 @@ contract DualChainTest is Setup {
             packetId,
             addMsgId,
             _msgGasLimit,
+            accum,
             addPayload,
             abi.encode(0)
         );
@@ -172,11 +186,11 @@ contract DualChainTest is Setup {
         vm.selectFork(aFork);
         srcCounter__.remoteSubOperation(_b.chainId, subAmount, _msgGasLimit);
 
-        (root, packetId, sig) = _getLatestSignature(_a);
-        _sealOnSrc(_a, _b, sig);
+        (root, packetId, sig) = _getLatestSignature(_a, accum, _b.chainId);
+        _sealOnSrc(_a, accum, sig);
 
         vm.selectFork(bFork);
-        _submitRootOnDst(_a, _b, sig, packetId, root);
+        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
         _executePayloadOnDst(
@@ -186,130 +200,12 @@ contract DualChainTest is Setup {
             packetId,
             subMsgId,
             _msgGasLimit,
+            accum,
             subPayload,
             abi.encode(0)
         );
 
         assertEq(destCounter__.counter(), addAmount - subAmount);
-
-        vm.selectFork(aFork);
-        assertEq(srcCounter__.counter(), 0);
-    }
-
-    function testMessagesOutOfOrderForSequentialConfig() external {
-        _configPlugContracts();
-
-        MessageContext memory m1;
-        m1.amount = 100;
-        m1.payload = abi.encode(keccak256("OP_ADD"), m1.amount);
-        m1.proof = abi.encode(0);
-        m1.msgId = _packMessageId(
-            address(srcCounter__),
-            _a.chainId,
-            _b.chainId,
-            0
-        );
-
-        hoax(_raju);
-        vm.selectFork(aFork);
-        srcCounter__.remoteAddOperation(_b.chainId, m1.amount, _msgGasLimit);
-
-        (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _sealOnSrc(_a, _b, m1.sig);
-
-        vm.selectFork(bFork);
-        _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
-
-        MessageContext memory m2;
-        m2.amount = 40;
-        m2.payload = abi.encode(keccak256("OP_ADD"), m2.amount);
-        m2.proof = abi.encode(0);
-        m2.msgId = _packMessageId(
-            address(srcCounter__),
-            _a.chainId,
-            _b.chainId,
-            1
-        );
-
-        hoax(_raju);
-        vm.selectFork(aFork);
-        srcCounter__.remoteAddOperation(_b.chainId, m2.amount, _msgGasLimit);
-
-        (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _sealOnSrc(_a, _b, m2.sig);
-
-        vm.selectFork(bFork);
-        _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
-    }
-
-    function testMessagesOutOfOrderForNonSequentialConfig() external {
-        _configPlugContracts();
-
-        MessageContext memory m1;
-        m1.amount = 100;
-        m1.payload = abi.encode(keccak256("OP_ADD"), m1.amount);
-        m1.proof = abi.encode(0);
-        m1.msgId = _packMessageId(
-            address(srcCounter__),
-            _a.chainId,
-            _b.chainId,
-            0
-        );
-
-        hoax(_raju);
-        vm.selectFork(aFork);
-        srcCounter__.remoteAddOperation(_b.chainId, m1.amount, _msgGasLimit);
-
-        (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _sealOnSrc(_a, _b, m1.sig);
-
-        vm.selectFork(bFork);
-        _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
-
-        MessageContext memory m2;
-        m2.amount = 40;
-        m2.payload = abi.encode(keccak256("OP_ADD"), m2.amount);
-        m2.proof = abi.encode(0);
-        m2.msgId = _packMessageId(
-            address(srcCounter__),
-            _a.chainId,
-            _b.chainId,
-            1
-        );
-
-        hoax(_raju);
-        vm.selectFork(aFork);
-        srcCounter__.remoteAddOperation(_b.chainId, m2.amount, _msgGasLimit);
-
-        (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _sealOnSrc(_a, _b, m2.sig);
-
-        vm.selectFork(bFork);
-        _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
-        vm.warp(block.timestamp + _slowAccumWaitTime);
-
-        _executePayloadOnDst(
-            _a,
-            _b,
-            address(destCounter__),
-            m2.packetId,
-            m2.msgId,
-            _msgGasLimit,
-            m2.payload,
-            m2.proof
-        );
-        _executePayloadOnDst(
-            _a,
-            _b,
-            address(destCounter__),
-            m1.packetId,
-            m1.msgId,
-            _msgGasLimit,
-            m1.payload,
-            m1.proof
-        );
-
-        assertEq(destCounter__.counter(), m1.amount + m2.amount);
 
         vm.selectFork(aFork);
         assertEq(srcCounter__.counter(), 0);
@@ -325,6 +221,9 @@ contract DualChainTest is Setup {
             _b.chainId,
             0
         );
+        address accum = isFast
+            ? address(_a.fastAccum__)
+            : address(_a.slowAccum__);
 
         hoax(_raju);
         vm.selectFork(aFork);
@@ -333,11 +232,11 @@ contract DualChainTest is Setup {
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a);
-        _sealOnSrc(_a, _b, sig);
+        ) = _getLatestSignature(_a, accum, _b.chainId);
+        _sealOnSrc(_a, accum, sig);
 
         vm.selectFork(bFork);
-        _submitRootOnDst(_a, _b, sig, packetId, root);
+        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
         _executePayloadOnDst(
@@ -347,6 +246,7 @@ contract DualChainTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            accum,
             payload,
             proof
         );
@@ -359,6 +259,7 @@ contract DualChainTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            accum,
             payload,
             proof
         );
@@ -383,12 +284,14 @@ contract DualChainTest is Setup {
     }
 
     function _configPlugContracts() internal {
+        string memory accumName = isFast ? fastAccumName : slowAccumName;
+
         hoax(_plugOwner);
         vm.selectFork(aFork);
         srcCounter__.setSocketConfig(
             _b.chainId,
             address(destCounter__),
-            bytes32(0)
+            accumName
         );
 
         hoax(_plugOwner);
@@ -396,7 +299,7 @@ contract DualChainTest is Setup {
         destCounter__.setSocketConfig(
             _a.chainId,
             address(srcCounter__),
-            bytes32(0)
+            accumName
         );
     }
 }

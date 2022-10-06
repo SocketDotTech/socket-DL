@@ -28,10 +28,6 @@ contract Setup is Test {
     string internal fastAccumName = "FAST";
     string internal slowAccumName = "SLOW";
 
-    uint256 internal minFees = 10000;
-
-    bool constant _isFast = false;
-
     struct ChainContext {
         uint256 chainId;
         uint256 slowAccumConfigId;
@@ -60,9 +56,11 @@ contract Setup is Test {
     ChainContext _a;
     ChainContext _b;
 
-    function _dualChainSetup(uint256[] memory attesters_) internal {
-        _a.chainId = 0x2013AA263;
-        _b.chainId = 0x2013AA264;
+    function _dualChainSetup(uint256[] memory attesters_, uint256 minFees_)
+        internal
+    {
+        _a.chainId = uint16(uint256(0x2013AA263));
+        _b.chainId = uint16(uint256(0x2013AA264));
 
         _a = _deployContractsOnSingleChain(_a.chainId, _b.chainId);
         _b = _deployContractsOnSingleChain(_b.chainId, _a.chainId);
@@ -76,10 +74,12 @@ contract Setup is Test {
         _setConfig(_b, _a.chainId);
 
         // setup minfees in vault for diff accum for all dest chains
-        _a.vault__.setFees(minFees, _a.fastAccumConfigId);
-        _a.vault__.setFees(minFees, _a.slowAccumConfigId);
-        _b.vault__.setFees(minFees, _b.fastAccumConfigId);
-        _b.vault__.setFees(minFees, _b.slowAccumConfigId);
+        vm.startPrank(_socketOwner);
+        _a.vault__.setFees(minFees_, _a.fastAccumConfigId);
+        _a.vault__.setFees(minFees_, _a.slowAccumConfigId);
+        _b.vault__.setFees(minFees_, _b.fastAccumConfigId);
+        _b.vault__.setFees(minFees_, _b.slowAccumConfigId);
+        vm.stopPrank();
     }
 
     function _addAttesters(
@@ -143,6 +143,7 @@ contract Setup is Test {
     function _setConfig(ChainContext storage cc_, uint256 destChainId_)
         internal
     {
+        hoax(_socketOwner);
         cc_.fastAccumConfigId = cc_.socket__.addConfig(
             destChainId_,
             address(cc_.fastAccum__),
@@ -151,6 +152,7 @@ contract Setup is Test {
             fastAccumName
         );
 
+        hoax(_socketOwner);
         cc_.slowAccumConfigId = cc_.socket__.addConfig(
             destChainId_,
             address(cc_.slowAccum__),
@@ -207,7 +209,7 @@ contract Setup is Test {
 
     function _getLatestSignature(
         ChainContext storage src_,
-        bool isFast,
+        address accum_,
         uint256 destChainId_
     )
         internal
@@ -217,18 +219,10 @@ contract Setup is Test {
             bytes memory sig
         )
     {
-        IAccumulator accum = isFast ? src_.fastAccum__ : src_.slowAccum__;
-
-        (root, packetId) = accum.getNextPacketToBeSealed();
+        (root, packetId) = IAccumulator(accum_).getNextPacketToBeSealed();
 
         bytes32 digest = keccak256(
-            abi.encode(
-                src_.chainId,
-                destChainId_,
-                address(accum),
-                packetId,
-                root
-            )
+            abi.encode(src_.chainId, destChainId_, accum_, packetId, root)
         );
         digest = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
@@ -276,6 +270,7 @@ contract Setup is Test {
         uint256 packetId_,
         uint256 msgId_,
         uint256 msgGasLimit_,
+        address accum_,
         bytes memory payload_,
         bytes memory proof_
     ) internal {
@@ -284,6 +279,7 @@ contract Setup is Test {
         ISocket.VerificationParams memory vParams = ISocket.VerificationParams(
             src_.chainId,
             packetId_,
+            accum_,
             proof_
         );
 

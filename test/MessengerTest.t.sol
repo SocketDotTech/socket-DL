@@ -11,6 +11,7 @@ contract PingPongTest is Setup {
     bytes private constant _PROOF = abi.encode(0);
     bytes private _payloadPing;
     bytes private _payloadPong;
+    bool private isFast = true;
 
     uint256 msgGasLimit = 130000;
 
@@ -21,7 +22,8 @@ contract PingPongTest is Setup {
         uint256[] memory attesters = new uint256[](1);
         attesters[0] = _attesterPrivateKey;
 
-        _dualChainSetup(attesters);
+        // kept fees 0 to avoid revert at inbound<>outbound
+        _dualChainSetup(attesters, 0);
         _deployPlugContracts();
         _configPlugContracts();
 
@@ -30,14 +32,17 @@ contract PingPongTest is Setup {
     }
 
     function _verifyAToB(uint256 msgId_) internal {
+        address accum = isFast
+            ? address(_a.fastAccum__)
+            : address(_a.slowAccum__);
         (
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a);
+        ) = _getLatestSignature(_a, accum, _b.chainId);
 
-        _sealOnSrc(_a, _b, sig);
-        _submitRootOnDst(_a, _b, sig, packetId, root);
+        _sealOnSrc(_a, accum, sig);
+        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
 
         vm.warp(block.timestamp + _slowAccumWaitTime);
         _executePayloadOnDst(
@@ -47,6 +52,7 @@ contract PingPongTest is Setup {
             packetId,
             msgId_,
             msgGasLimit,
+            accum,
             _payloadPing,
             _PROOF
         );
@@ -55,14 +61,18 @@ contract PingPongTest is Setup {
     }
 
     function _verifyBToA(uint256 msgId_) internal {
+        address accum = isFast
+            ? address(_b.fastAccum__)
+            : address(_b.slowAccum__);
+
         (
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_b);
+        ) = _getLatestSignature(_b, accum, _a.chainId);
 
-        _sealOnSrc(_b, _a, sig);
-        _submitRootOnDst(_b, _a, sig, packetId, root);
+        _sealOnSrc(_b, accum, sig);
+        _submitRootOnDst(_b, _a, sig, packetId, root, accum);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
         _executePayloadOnDst(
@@ -72,6 +82,7 @@ contract PingPongTest is Setup {
             packetId,
             msgId_,
             msgGasLimit,
+            accum,
             _payloadPong,
             _PROOF
         );
@@ -88,7 +99,7 @@ contract PingPongTest is Setup {
         hoax(_raju);
         srcMessenger__.sendRemoteMessage(_b.chainId, _PING);
 
-        uint256 iterations = 1;
+        uint256 iterations = 5;
         for (uint256 index = 0; index < iterations; index++) {
             uint256 msgIdAToB = (uint256(uint160(address(srcMessenger__))) <<
                 96) |
@@ -126,18 +137,19 @@ contract PingPongTest is Setup {
     }
 
     function _configPlugContracts() private {
+        string memory accumName = isFast ? fastAccumName : slowAccumName;
         hoax(_plugOwner);
         srcMessenger__.setSocketConfig(
             _b.chainId,
             address(destMessenger__),
-            bytes32(0)
+            accumName
         );
 
         hoax(_plugOwner);
         destMessenger__.setSocketConfig(
             _a.chainId,
             address(srcMessenger__),
-            bytes32(0)
+            accumName
         );
     }
 }
