@@ -49,10 +49,10 @@ export const main = async () => {
 
     // accum & deaccum deployments
     for (let index = 0; index < totalDestinations.length; index++) {
-      const fastAccum: Contract = await deployAccumulator(socket.address, notary.address, socketSigner);
-      const slowAccum: Contract = await deployAccumulator(socket.address, notary.address, socketSigner);
+      const fastAccum: Contract = await deployAccumulator(socket.address, notary.address, totalDestinations[index], socketSigner);
+      const slowAccum: Contract = await deployAccumulator(socket.address, notary.address, totalDestinations[index], socketSigner);
       const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
-      console.log(`Deployed accum and deaccum`);
+      console.log(`Deployed accum and deaccum for ${totalDestinations[index]} chain id`);
 
       addresses[`fastAccum-${totalDestinations[index]}`] = fastAccum.address;
       addresses[`slowAccum-${totalDestinations[index]}`] = slowAccum.address;
