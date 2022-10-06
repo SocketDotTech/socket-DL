@@ -15,11 +15,11 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         address deaccum_,
         address verifier_,
         string calldata accumName_
-    ) external onlyOwner {
+    ) external onlyOwner returns (uint256 configId) {
         bytes32 destConfigId = keccak256(abi.encode(destChainId_, accumName_));
         if (destConfigs[destConfigId] != 0) revert ConfigExists();
 
-        uint256 configId = _setConfig(accum_, deaccum_, verifier_);
+        configId = _setConfig(accum_, deaccum_, verifier_);
         destConfigs[destConfigId] = configId;
 
         emit ConfigAdded(
@@ -42,7 +42,6 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         config.accum = accum_;
         config.deaccum = deaccum_;
         config.verifier = verifier_;
-        config.isSet = true;
 
         configId = configs.length;
         configs.push(config);
@@ -73,12 +72,11 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         returns (
             address,
             address,
-            address,
-            bool
+            address
         )
     {
         Config memory config = configs[index];
-        return (config.accum, config.deaccum, config.verifier, config.isSet);
+        return (config.accum, config.deaccum, config.verifier);
     }
 
     function getPlugConfig(uint256 remoteChainId_, address plug_)

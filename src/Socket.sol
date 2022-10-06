@@ -45,7 +45,7 @@ contract Socket is SocketConfig {
         _chainId = chainId_;
 
         // initialise 0th index
-        configs.push(Config(address(0), address(0), address(0), true));
+        configs.push(Config(address(0), address(0), address(0)));
     }
 
     function setHasher(address hasher_) external onlyOwner {

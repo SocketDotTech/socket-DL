@@ -35,5 +35,10 @@ interface IVault {
      */
     function getFees(uint256 configId_) external view returns (uint256);
 
+    /**
+     * @notice updates the fee required to bridge a message for give chain and config
+     * @param minFees_ fees
+     * @param configId_ config for which fees is needed
+     */
     function setFees(uint256 minFees_, uint256 configId_) external;
 }

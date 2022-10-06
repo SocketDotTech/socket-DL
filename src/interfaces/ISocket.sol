@@ -21,7 +21,6 @@ interface ISocket {
         address accum;
         address deaccum;
         address verifier;
-        bool isSet;
     }
 
     /**
