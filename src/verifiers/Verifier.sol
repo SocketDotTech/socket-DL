@@ -3,25 +3,28 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IVerifier.sol";
 import "../interfaces/INotary.sol";
+import "../interfaces/ISocket.sol";
 
 import "../utils/Ownable.sol";
 
 contract Verifier is IVerifier, Ownable {
     INotary public notary;
-
+    ISocket public socket;
+    string public fastAccumName;
     uint256 public immutable timeoutInSeconds;
 
-    uint256 private FAST_ACCUM_CONFIG_ID = 1;
-    uint256 private SLOW_ACCUM_CONFIG_ID = 2;
-
     event NotarySet(address notary_);
+    event SocketSet(address socket_);
 
     constructor(
         address owner_,
         address _notary,
+        address _socket,
         uint256 timeoutInSeconds_
     ) Ownable(owner_) {
         notary = INotary(_notary);
+        socket = ISocket(_socket);
+        fastAccumName = "FAST";
 
         // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
@@ -37,6 +40,15 @@ contract Verifier is IVerifier, Ownable {
     }
 
     /**
+     * @notice updates socket
+     * @param socket_ address of Socket
+     */
+    function setSocket(address socket_) external onlyOwner {
+        socket = ISocket(socket_);
+        emit SocketSet(socket_);
+    }
+
+    /**
      * @notice verifies if the packet satisfies needed checks before execution
      * @param accumAddress_ address of accumulator at src
      * @param remoteChainId_ dest chain id
@@ -49,7 +61,11 @@ contract Verifier is IVerifier, Ownable {
         uint256 configId_,
         uint256 packetId_
     ) external view override returns (bool, bytes32) {
-        bool isFast = FAST_ACCUM_CONFIG_ID == configId_ ? true : false;
+        bool isFast = socket.destConfigs(
+            keccak256(abi.encode(remoteChainId_, fastAccumName))
+        ) == configId_
+            ? true
+            : false;
 
         (
             INotary.PacketStatus status,
