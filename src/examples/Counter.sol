@@ -89,6 +89,7 @@ contract Counter is IPlug {
     }
 
     function _subOperation(uint256 amount) private {
+        require(counter > amount, "CounterMock: Subtraction Overflow");
         counter -= amount;
     }
 

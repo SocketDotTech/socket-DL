@@ -21,6 +21,7 @@ contract VerifierTest is Setup {
         cc.verifier__ = new Verifier(
             _socketOwner,
             address(cc.notary__),
+            address(cc.socket__),
             timeoutInSeconds
         );
     }
@@ -28,6 +29,7 @@ contract VerifierTest is Setup {
     function testDeployment() public {
         assertEq(cc.verifier__.owner(), _socketOwner);
         assertEq(address(cc.verifier__.notary()), address(cc.notary__));
+        assertEq(address(cc.verifier__.socket()), address(cc.socket__));
 
         assertEq(cc.verifier__.timeoutInSeconds(), timeoutInSeconds);
     }
@@ -44,7 +46,25 @@ contract VerifierTest is Setup {
         assertEq(address(cc.verifier__.notary()), newNotary);
     }
 
+    function testSetSocket() external {
+        address newSocket = address(9);
+
+        hoax(_raju);
+        vm.expectRevert(Ownable.OnlyOwner.selector);
+        cc.verifier__.setSocket(newSocket);
+
+        hoax(_socketOwner);
+        cc.verifier__.setSocket(newSocket);
+        assertEq(address(cc.verifier__.socket()), newSocket);
+    }
+
     function testVerifyCommitmentNotProposed() public {
+        vm.mockCall(
+            address(cc.socket__),
+            abi.encodeWithSelector(ISocket.destConfigs.selector),
+            abi.encode(1)
+        );
+
         // less attestations
         vm.mockCall(
             address(cc.notary__),
@@ -63,6 +83,12 @@ contract VerifierTest is Setup {
     }
 
     function testVerifyCommitmentFastPath() public {
+        vm.mockCall(
+            address(cc.socket__),
+            abi.encodeWithSelector(ISocket.destConfigs.selector),
+            abi.encode(1)
+        );
+
         // before timeout
         // less attestations
         vm.mockCall(
@@ -110,6 +136,12 @@ contract VerifierTest is Setup {
     }
 
     function testVerifyCommitmentSlowPath() public {
+        vm.mockCall(
+            address(cc.socket__),
+            abi.encodeWithSelector(ISocket.destConfigs.selector),
+            abi.encode(2)
+        );
+
         // before timeout
         vm.mockCall(
             address(cc.notary__),
@@ -119,7 +151,7 @@ contract VerifierTest is Setup {
         (bool valid, ) = cc.verifier__.verifyCommitment(
             address(0),
             destChainId,
-            2,
+            1,
             0
         );
         assertFalse(valid);
@@ -133,7 +165,7 @@ contract VerifierTest is Setup {
         (valid, ) = cc.verifier__.verifyCommitment(
             address(0),
             destChainId,
-            2,
+            1,
             0
         );
         assertFalse(valid);
@@ -148,7 +180,7 @@ contract VerifierTest is Setup {
         (valid, ) = cc.verifier__.verifyCommitment(
             address(0),
             destChainId,
-            2,
+            1,
             0
         );
         assertTrue(valid);

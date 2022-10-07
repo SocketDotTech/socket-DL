@@ -133,6 +133,7 @@ contract Setup is Test {
         cc.verifier__ = new Verifier(
             _plugOwner,
             address(cc.notary__),
+            address(cc.socket__),
             _timeoutInSeconds
         );
 
@@ -219,6 +220,27 @@ contract Setup is Test {
             bytes memory sig
         )
     {
+        (root, packetId, sig) = _getLatestSignatureForSigner(
+            src_,
+            accum_,
+            destChainId_,
+            _attesterPrivateKey
+        );
+    }
+
+    function _getLatestSignatureForSigner(
+        ChainContext storage src_,
+        address accum_,
+        uint256 destChainId_,
+        uint256 privateKey_
+    )
+        internal
+        returns (
+            bytes32 root,
+            uint256 packetId,
+            bytes memory sig
+        )
+    {
         (root, packetId) = IAccumulator(accum_).getNextPacketToBeSealed();
 
         bytes32 digest = keccak256(
@@ -228,10 +250,7 @@ contract Setup is Test {
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
         );
 
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _attesterPrivateKey,
-            digest
-        );
+        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(privateKey_, digest);
         sig = new bytes(65);
         bytes1 v32 = bytes1(sigV);
 

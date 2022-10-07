@@ -145,15 +145,6 @@ contract AdminNotaryTest is Setup {
         hoax(_socketOwner);
         cc.notary__.grantAttesterRole(_remoteChainId, _attester);
 
-        vm.mockCall(
-            _accum,
-            abi.encodeWithSelector(IAccumulator.sealPacket.selector),
-            abi.encode(_root, _packetId, _remoteChainId)
-        );
-
-        hoax(_attester);
-        cc.notary__.seal(_accum, _getSignature(sp));
-
         bytes memory altSign = _getSignature(
             SignatureParams(
                 _chainId,
@@ -164,6 +155,27 @@ contract AdminNotaryTest is Setup {
                 _attesterPrivateKey
             )
         );
+
+        // TODO: check if event is not emitted
+        // if the roots is bytes32(0), the event will not be emitted
+        hoax(_raju);
+        vm.expectRevert();
+        cc.notary__.challengeSignature(
+            _root,
+            _packetId,
+            _remoteChainId,
+            _accum,
+            altSign
+        );
+
+        vm.mockCall(
+            _accum,
+            abi.encodeWithSelector(IAccumulator.sealPacket.selector),
+            abi.encode(_root, _packetId, _remoteChainId)
+        );
+
+        hoax(_attester);
+        cc.notary__.seal(_accum, _getSignature(sp));
 
         // if the roots don't match, the event will not be emitted
         hoax(_raju);
