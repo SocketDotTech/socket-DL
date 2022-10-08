@@ -6,9 +6,11 @@ import "./interfaces/IDeaccumulator.sol";
 import "./interfaces/IVerifier.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/IHasher.sol";
+import "./utils/ReentrancyGuard.sol";
+
 import "./SocketConfig.sol";
 
-contract Socket is SocketConfig {
+contract Socket is SocketConfig, ReentrancyGuard {
     enum MessageStatus {
         NOT_EXECUTED,
         SUCCESS,
@@ -118,7 +120,7 @@ contract Socket is SocketConfig {
         address localPlug,
         bytes calldata payload,
         ISocket.VerificationParams calldata verifyParams_
-    ) external override {
+    ) external override nonReentrant {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
         if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
         executor[msgId] = msg.sender;
