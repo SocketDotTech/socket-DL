@@ -27,7 +27,7 @@ export const main = async () => {
     const socket: Contract = await deploySocket(hasher, vault, socketSigner);
 
     // plug deployments
-    const verifier: Contract = await deployVerifier(notary, counterSigner)
+    const verifier: Contract = await deployVerifier(notary, socket, counterSigner)
     const counter: Contract = await deployCounter(socket, counterSigner);
     console.log("Contracts deployed!");
 

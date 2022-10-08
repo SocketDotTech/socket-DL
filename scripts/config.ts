@@ -28,16 +28,6 @@ export const timeout: {
   31338: 7200
 }
 
-export const slowPathWaitTime: {
-  [key: number]: number
-} = {
-  80001: 3600,
-  421613: 3600,
-  420: 3600,
-  31337: 3600,
-  31338: 3600
-}
-
 export const contractPath: {
   [key: string]: string
 } = {
