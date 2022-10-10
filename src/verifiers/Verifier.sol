@@ -10,7 +10,7 @@ import "../utils/Ownable.sol";
 contract Verifier is IVerifier, Ownable {
     INotary public notary;
     ISocket public socket;
-    string public fastAccumName;
+    string public fastIntegrationType;
     uint256 public immutable timeoutInSeconds;
 
     event NotarySet(address notary_);
@@ -24,7 +24,7 @@ contract Verifier is IVerifier, Ownable {
     ) Ownable(owner_) {
         notary = INotary(_notary);
         socket = ISocket(_socket);
-        fastAccumName = "FAST";
+        fastIntegrationType = "FAST";
 
         // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
@@ -62,7 +62,7 @@ contract Verifier is IVerifier, Ownable {
         uint256 packetId_
     ) external view override returns (bool, bytes32) {
         bool isFast = socket.destConfigs(
-            keccak256(abi.encode(remoteChainId_, fastAccumName))
+            keccak256(abi.encode(remoteChainId_, fastIntegrationType))
         ) == configId_
             ? true
             : false;

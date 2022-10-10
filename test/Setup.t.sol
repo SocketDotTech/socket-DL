@@ -25,8 +25,8 @@ contract Setup is Test {
     uint256 internal _timeoutInSeconds = 0;
     uint256 internal _slowAccumWaitTime = 300;
     uint256 internal _msgGasLimit = 25548;
-    string internal fastAccumName = "FAST";
-    string internal slowAccumName = "SLOW";
+    string internal fastIntegrationType = "FAST";
+    string internal slowIntegrationType = "SLOW";
 
     struct ChainContext {
         uint256 chainId;
@@ -150,7 +150,7 @@ contract Setup is Test {
             address(cc_.fastAccum__),
             address(cc_.deaccum__),
             address(cc_.verifier__),
-            fastAccumName
+            fastIntegrationType
         );
 
         hoax(_socketOwner);
@@ -159,7 +159,7 @@ contract Setup is Test {
             address(cc_.slowAccum__),
             address(cc_.deaccum__),
             address(cc_.verifier__),
-            slowAccumName
+            slowIntegrationType
         );
     }
 

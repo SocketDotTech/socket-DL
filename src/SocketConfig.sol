@@ -14,9 +14,9 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         address accum_,
         address deaccum_,
         address verifier_,
-        string calldata accumName_
+        string calldata integrationType_
     ) external onlyOwner returns (uint256 configId) {
-        bytes32 destConfigId = keccak256(abi.encode(destChainId_, accumName_));
+        bytes32 destConfigId = keccak256(abi.encode(destChainId_, integrationType_));
         if (destConfigs[destConfigId] != 0) revert ConfigExists();
 
         configId = _setConfig(accum_, deaccum_, verifier_);
@@ -28,7 +28,7 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
             verifier_,
             destChainId_,
             configId,
-            accumName_
+            integrationType_
         );
     }
 
@@ -51,10 +51,10 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     function setPlugConfig(
         uint256 remoteChainId_,
         address remotePlug_,
-        string memory accumName_
+        string memory integrationType_
     ) external override {
         uint256 configId = destConfigs[
-            keccak256(abi.encode(remoteChainId_, accumName_))
+            keccak256(abi.encode(remoteChainId_, integrationType_))
         ];
         if (configId == 0) revert InvalidConfigId();
 

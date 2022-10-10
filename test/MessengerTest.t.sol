@@ -137,19 +137,19 @@ contract PingPongTest is Setup {
     }
 
     function _configPlugContracts() private {
-        string memory accumName = isFast ? fastAccumName : slowAccumName;
+        string memory integrationType = isFast ? fastIntegrationType : slowIntegrationType;
         hoax(_plugOwner);
         srcMessenger__.setSocketConfig(
             _b.chainId,
             address(destMessenger__),
-            accumName
+            integrationType
         );
 
         hoax(_plugOwner);
         destMessenger__.setSocketConfig(
             _a.chainId,
             address(srcMessenger__),
-            accumName
+            integrationType
         );
     }
 }

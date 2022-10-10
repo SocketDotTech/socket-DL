@@ -6,7 +6,7 @@ import "./Setup.t.sol";
 contract SocketTest is Setup {
     uint256 constant srcChainId_ = 0x2013AA263;
     uint256 constant _destChainId = 0x2013AA264;
-    string constant accumName = "FAST";
+    string constant integrationType = "FAST";
     bytes32 private constant EXECUTOR_ROLE = keccak256("EXECUTOR");
 
     address accum_ = address(1);
@@ -28,7 +28,7 @@ contract SocketTest is Setup {
             accum_,
             deaccum_,
             verifier_,
-            accumName
+            integrationType
         );
 
         hoax(_socketOwner);
@@ -37,10 +37,10 @@ contract SocketTest is Setup {
             accum_,
             deaccum_,
             verifier_,
-            accumName
+            integrationType
         );
 
-        bytes32 destConfigId = keccak256(abi.encode(_destChainId, accumName));
+        bytes32 destConfigId = keccak256(abi.encode(_destChainId, integrationType));
         assertEq(_a.socket__.destConfigs(destConfigId), 1);
 
         (address accum, address deaccum, address verifier) = _a
@@ -58,14 +58,14 @@ contract SocketTest is Setup {
             accum_,
             deaccum_,
             verifier_,
-            accumName
+            integrationType
         );
     }
 
     function testSetPlugConfig() external {
         hoax(_raju);
         vm.expectRevert(ISocket.InvalidConfigId.selector);
-        _a.socket__.setPlugConfig(_destChainId, _raju, accumName);
+        _a.socket__.setPlugConfig(_destChainId, _raju, integrationType);
 
         hoax(_socketOwner);
         _a.socket__.addConfig(
@@ -73,11 +73,11 @@ contract SocketTest is Setup {
             accum_,
             deaccum_,
             verifier_,
-            accumName
+            integrationType
         );
 
         hoax(_raju);
-        _a.socket__.setPlugConfig(_destChainId, _raju, accumName);
+        _a.socket__.setPlugConfig(_destChainId, _raju, integrationType);
 
         (
             address accum,

@@ -97,9 +97,9 @@ contract Counter is IPlug {
     function setSocketConfig(
         uint256 remoteChainId,
         address remotePlug,
-        string calldata accumName
+        string calldata integrationType
     ) external onlyOwner {
-        ISocket(socket).setPlugConfig(remoteChainId, remotePlug, accumName);
+        ISocket(socket).setPlugConfig(remoteChainId, remotePlug, integrationType);
     }
 
     function setupComplete() external {

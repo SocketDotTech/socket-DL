@@ -569,19 +569,19 @@ contract HappyTest is Setup {
     }
 
     function _configPlugContracts(bool isFast_) internal {
-        string memory accumName = isFast_ ? fastAccumName : slowAccumName;
+        string memory integrationType = isFast_ ? fastIntegrationType : slowIntegrationType;
         hoax(_plugOwner);
         srcCounter__.setSocketConfig(
             _b.chainId,
             address(destCounter__),
-            accumName
+            integrationType
         );
 
         hoax(_plugOwner);
         destCounter__.setSocketConfig(
             _a.chainId,
             address(srcCounter__),
-            accumName
+            integrationType
         );
     }
 

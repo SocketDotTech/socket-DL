@@ -50,7 +50,7 @@ interface ISocket {
         address verifier_,
         uint256 destChainId_,
         uint256 configId_,
-        string accumName_
+        string integrationType_
     );
 
     /**
@@ -134,11 +134,11 @@ interface ISocket {
      * @notice sets the config specific to the plug
      * @param remoteChainId_ the destination chain id
      * @param remotePlug_ address of plug present at destination chain to call inbound
-     * @param accumName_ the name of accum to be used
+     * @param integrationType_ the name of accum to be used
      */
     function setPlugConfig(
         uint256 remoteChainId_,
         address remotePlug_,
-        string memory accumName_
+        string memory integrationType_
     ) external;
 }

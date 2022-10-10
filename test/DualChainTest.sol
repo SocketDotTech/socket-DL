@@ -284,14 +284,14 @@ contract DualChainTest is Setup {
     }
 
     function _configPlugContracts() internal {
-        string memory accumName = isFast ? fastAccumName : slowAccumName;
+        string memory integrationType = isFast ? fastIntegrationType : slowIntegrationType;
 
         hoax(_plugOwner);
         vm.selectFork(aFork);
         srcCounter__.setSocketConfig(
             _b.chainId,
             address(destCounter__),
-            accumName
+            integrationType
         );
 
         hoax(_plugOwner);
@@ -299,7 +299,7 @@ contract DualChainTest is Setup {
         destCounter__.setSocketConfig(
             _a.chainId,
             address(srcCounter__),
-            accumName
+            integrationType
         );
     }
 }
