@@ -284,7 +284,9 @@ contract DualChainTest is Setup {
     }
 
     function _configPlugContracts() internal {
-        string memory integrationType = isFast ? fastIntegrationType : slowIntegrationType;
+        string memory integrationType = isFast
+            ? fastIntegrationType
+            : slowIntegrationType;
 
         hoax(_plugOwner);
         vm.selectFork(aFork);

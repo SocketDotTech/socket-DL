@@ -16,7 +16,9 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         address verifier_,
         string calldata integrationType_
     ) external onlyOwner returns (uint256 configId) {
-        bytes32 destConfigId = keccak256(abi.encode(destChainId_, integrationType_));
+        bytes32 destConfigId = keccak256(
+            abi.encode(destChainId_, integrationType_)
+        );
         if (destConfigs[destConfigId] != 0) revert ConfigExists();
 
         configId = _setConfig(accum_, deaccum_, verifier_);

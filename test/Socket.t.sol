@@ -40,7 +40,9 @@ contract SocketTest is Setup {
             integrationType
         );
 
-        bytes32 destConfigId = keccak256(abi.encode(_destChainId, integrationType));
+        bytes32 destConfigId = keccak256(
+            abi.encode(_destChainId, integrationType)
+        );
         assertEq(_a.socket__.destConfigs(destConfigId), 1);
 
         (address accum, address deaccum, address verifier) = _a

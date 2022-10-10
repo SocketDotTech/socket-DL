@@ -67,7 +67,11 @@ contract Messenger is IPlug {
         address remotePlug,
         string calldata integrationType
     ) external onlyOwner {
-        ISocket(_socket).setPlugConfig(remoteChainId, remotePlug, integrationType);
+        ISocket(_socket).setPlugConfig(
+            remoteChainId,
+            remotePlug,
+            integrationType
+        );
     }
 
     function message() external view returns (bytes32) {

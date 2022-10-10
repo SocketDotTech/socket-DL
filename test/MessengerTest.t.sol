@@ -137,7 +137,9 @@ contract PingPongTest is Setup {
     }
 
     function _configPlugContracts() private {
-        string memory integrationType = isFast ? fastIntegrationType : slowIntegrationType;
+        string memory integrationType = isFast
+            ? fastIntegrationType
+            : slowIntegrationType;
         hoax(_plugOwner);
         srcMessenger__.setSocketConfig(
             _b.chainId,

@@ -569,7 +569,9 @@ contract HappyTest is Setup {
     }
 
     function _configPlugContracts(bool isFast_) internal {
-        string memory integrationType = isFast_ ? fastIntegrationType : slowIntegrationType;
+        string memory integrationType = isFast_
+            ? fastIntegrationType
+            : slowIntegrationType;
         hoax(_plugOwner);
         srcCounter__.setSocketConfig(
             _b.chainId,
