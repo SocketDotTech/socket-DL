@@ -10,7 +10,7 @@ import "../utils/Ownable.sol";
 contract Verifier is IVerifier, Ownable {
     INotary public notary;
     ISocket public socket;
-    string public fastIntegrationType;
+    string public integrationType;
     uint256 public immutable timeoutInSeconds;
 
     event NotarySet(address notary_);
@@ -18,13 +18,14 @@ contract Verifier is IVerifier, Ownable {
 
     constructor(
         address owner_,
-        address _notary,
-        address _socket,
-        uint256 timeoutInSeconds_
+        address notary_,
+        address socket_,
+        uint256 timeoutInSeconds_,
+        string memory integrationType_
     ) Ownable(owner_) {
-        notary = INotary(_notary);
-        socket = ISocket(_socket);
-        fastIntegrationType = "FAST";
+        notary = INotary(notary_);
+        socket = ISocket(socket_);
+        integrationType = integrationType_;
 
         // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
@@ -52,18 +53,16 @@ contract Verifier is IVerifier, Ownable {
      * @notice verifies if the packet satisfies needed checks before execution
      * @param accumAddress_ address of accumulator at src
      * @param remoteChainId_ dest chain id
-     * @param configId_ config set for plug
      * @param packetId_ packet id
+     * @param integrationType_ integration type for plug
      */
     function verifyCommitment(
         address accumAddress_,
         uint256 remoteChainId_,
-        uint256 configId_,
-        uint256 packetId_
+        uint256 packetId_,
+        bytes32 integrationType_
     ) external view override returns (bool, bytes32) {
-        bool isFast = socket.destConfigs(
-            keccak256(abi.encode(remoteChainId_, fastIntegrationType))
-        ) == configId_
+        bool isFast = keccak256(abi.encode(integrationType)) == integrationType_
             ? true
             : false;
 
