@@ -37,17 +37,17 @@ contract Messenger is IPlug {
         _updateMessage(message_);
     }
 
-    function sendRemoteMessage(uint256 destChainId_, bytes32 message_)
+    function sendRemoteMessage(uint256 remoteChainId_, bytes32 message_)
         external
         payable
     {
         bytes memory payload = abi.encode(_chainId, message_);
-        _outbound(destChainId_, payload);
+        _outbound(remoteChainId_, payload);
     }
 
     function inbound(bytes calldata payload_) external payable override {
         require(msg.sender == _socket, "Counter: Invalid Socket");
-        (uint256 srcChainId, bytes32 msgDecoded) = abi.decode(
+        (uint256 localChainId, bytes32 msgDecoded) = abi.decode(
             payload_,
             (uint256, bytes32)
         );
@@ -58,7 +58,7 @@ contract Messenger is IPlug {
             _chainId,
             msgDecoded == _PING ? _PONG : _PING
         );
-        _outbound(srcChainId, newPayload);
+        _outbound(localChainId, newPayload);
     }
 
     // settings

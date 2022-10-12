@@ -13,7 +13,7 @@ contract AdminNotaryTest is Setup {
     uint256 _remoteChainId = 0x2013AA264;
 
     struct SignatureParams {
-        uint256 srcChainId;
+        uint256 localChainId;
         uint256 remoteChainId;
         address accum;
         uint256 packetId;
@@ -22,7 +22,7 @@ contract AdminNotaryTest is Setup {
     }
 
     SignatureParams sp;
-    SignatureParams destSp;
+    SignatureParams remoteSp;
 
     ChainContext cc;
 
@@ -45,7 +45,7 @@ contract AdminNotaryTest is Setup {
             _attesterPrivateKey
         );
 
-        destSp = SignatureParams(
+        remoteSp = SignatureParams(
             _remoteChainId,
             _chainId,
             _accum,
@@ -198,7 +198,7 @@ contract AdminNotaryTest is Setup {
             _accum,
             _packetId,
             _root,
-            _getSignature(destSp)
+            _getSignature(remoteSp)
         );
 
         assertEq(
@@ -247,7 +247,7 @@ contract AdminNotaryTest is Setup {
             _accum,
             _packetId,
             _root,
-            _getSignature(destSp)
+            _getSignature(remoteSp)
         );
     }
 
@@ -272,7 +272,7 @@ contract AdminNotaryTest is Setup {
             _accum,
             _packetId,
             _root,
-            _getSignature(destSp)
+            _getSignature(remoteSp)
         );
 
         hoax(_raju);
@@ -281,7 +281,7 @@ contract AdminNotaryTest is Setup {
             _accum,
             _packetId,
             _root,
-            _getSignature(destSp)
+            _getSignature(remoteSp)
         );
 
         // status proposed
@@ -308,7 +308,7 @@ contract AdminNotaryTest is Setup {
             _accum,
             _packetId,
             _root,
-            _getSignature(destSp)
+            _getSignature(remoteSp)
         );
 
         bytes memory altSign = _getSignature(
@@ -323,7 +323,12 @@ contract AdminNotaryTest is Setup {
         );
 
         hoax(_socketOwner);
-        cc.notary__.pausePacketOnDest(_accum, _remoteChainId, _packetId, _root);
+        cc.notary__.pausePacketOnRemote(
+            _accum,
+            _remoteChainId,
+            _packetId,
+            _root
+        );
 
         hoax(_raju);
         vm.expectRevert(INotary.PacketPaused.selector);
@@ -356,13 +361,18 @@ contract AdminNotaryTest is Setup {
         assertEq(pendingAttestations, 0);
     }
 
-    function testPausePacketOnDest() external {
+    function testPausePacketOnRemote() external {
         hoax(_socketOwner);
         cc.notary__.grantAttesterRole(_remoteChainId, _attester);
 
         hoax(_socketOwner);
         vm.expectRevert(INotary.RootNotFound.selector);
-        cc.notary__.pausePacketOnDest(_accum, _remoteChainId, _packetId, _root);
+        cc.notary__.pausePacketOnRemote(
+            _accum,
+            _remoteChainId,
+            _packetId,
+            _root
+        );
 
         hoax(_raju);
         cc.notary__.propose(
@@ -370,15 +380,25 @@ contract AdminNotaryTest is Setup {
             _accum,
             _packetId,
             _root,
-            _getSignature(destSp)
+            _getSignature(remoteSp)
         );
 
         hoax(_raju);
         vm.expectRevert(Ownable.OnlyOwner.selector);
-        cc.notary__.pausePacketOnDest(_accum, _remoteChainId, _packetId, _root);
+        cc.notary__.pausePacketOnRemote(
+            _accum,
+            _remoteChainId,
+            _packetId,
+            _root
+        );
 
         hoax(_socketOwner);
-        cc.notary__.pausePacketOnDest(_accum, _remoteChainId, _packetId, _root);
+        cc.notary__.pausePacketOnRemote(
+            _accum,
+            _remoteChainId,
+            _packetId,
+            _root
+        );
 
         assertEq(
             uint256(
@@ -389,7 +409,12 @@ contract AdminNotaryTest is Setup {
 
         hoax(_socketOwner);
         vm.expectRevert(INotary.PacketPaused.selector);
-        cc.notary__.pausePacketOnDest(_accum, _remoteChainId, _packetId, _root);
+        cc.notary__.pausePacketOnRemote(
+            _accum,
+            _remoteChainId,
+            _packetId,
+            _root
+        );
     }
 
     function testAcceptPausedPacket() external {
@@ -402,7 +427,7 @@ contract AdminNotaryTest is Setup {
             _accum,
             _packetId,
             _root,
-            _getSignature(destSp)
+            _getSignature(remoteSp)
         );
 
         hoax(_socketOwner);
@@ -410,7 +435,12 @@ contract AdminNotaryTest is Setup {
         cc.notary__.acceptPausedPacket(_accum, _remoteChainId, _packetId);
 
         hoax(_socketOwner);
-        cc.notary__.pausePacketOnDest(_accum, _remoteChainId, _packetId, _root);
+        cc.notary__.pausePacketOnRemote(
+            _accum,
+            _remoteChainId,
+            _packetId,
+            _root
+        );
 
         hoax(_raju);
         vm.expectRevert(Ownable.OnlyOwner.selector);
@@ -435,7 +465,7 @@ contract AdminNotaryTest is Setup {
     {
         bytes32 digest = keccak256(
             abi.encode(
-                sp_.srcChainId,
+                sp_.localChainId,
                 sp_.remoteChainId,
                 sp_.accum,
                 sp_.packetId,

@@ -6,7 +6,7 @@ import "../src/examples/Counter.sol";
 
 contract HappyTest is Setup {
     Counter srcCounter__;
-    Counter destCounter__;
+    Counter dstCounter__;
     uint256 minFees = 10000;
     uint256 addAmount = 100;
     uint256 subAmount = 40;
@@ -77,7 +77,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -94,7 +94,7 @@ contract HappyTest is Setup {
         // revert execution if packet paused
         {
             hoax(_socketOwner);
-            _b.notary__.pausePacketOnDest(accum, _a.chainId, packetId, root);
+            _b.notary__.pausePacketOnRemote(accum, _a.chainId, packetId, root);
 
             assertEq(
                 uint256(
@@ -107,7 +107,7 @@ contract HappyTest is Setup {
             _executePayloadOnDst(
                 _a,
                 _b,
-                address(destCounter__),
+                address(dstCounter__),
                 packetId,
                 msgId,
                 _msgGasLimit,
@@ -129,7 +129,7 @@ contract HappyTest is Setup {
             _executePayloadOnDst(
                 _a,
                 _b,
-                address(destCounter__),
+                address(dstCounter__),
                 packetId,
                 msgId,
                 _msgGasLimit,
@@ -147,7 +147,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -156,14 +156,14 @@ contract HappyTest is Setup {
             proof
         );
 
-        assertEq(destCounter__.counter(), amount);
+        assertEq(dstCounter__.counter(), amount);
         assertEq(srcCounter__.counter(), 0);
 
         vm.expectRevert(ISocket.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -182,7 +182,7 @@ contract HappyTest is Setup {
             : address(_b.slowAccum__);
 
         hoax(_raju);
-        destCounter__.remoteAddOperation{value: minFees}(
+        dstCounter__.remoteAddOperation{value: minFees}(
             _a.chainId,
             amount,
             _msgGasLimit
@@ -194,7 +194,7 @@ contract HappyTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(_b, accum, _a.chainId);
 
-        uint256 msgId = (uint256(uint160(address(destCounter__))) << 96) |
+        uint256 msgId = (uint256(uint160(address(dstCounter__))) << 96) |
             (_b.chainId << 80) |
             (_a.chainId << 64) |
             0;
@@ -214,7 +214,7 @@ contract HappyTest is Setup {
         );
 
         assertEq(srcCounter__.counter(), amount);
-        assertEq(destCounter__.counter(), 0);
+        assertEq(dstCounter__.counter(), 0);
     }
 
     function testRemoteAddAndSubtract() external {
@@ -255,7 +255,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             addMsgId,
             _msgGasLimit,
@@ -278,7 +278,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             subMsgId,
             _msgGasLimit,
@@ -287,7 +287,7 @@ contract HappyTest is Setup {
             abi.encode(0)
         );
 
-        assertEq(destCounter__.counter(), addAmount - subAmount);
+        assertEq(dstCounter__.counter(), addAmount - subAmount);
         assertEq(srcCounter__.counter(), 0);
     }
 
@@ -320,7 +320,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -333,7 +333,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -342,7 +342,7 @@ contract HappyTest is Setup {
             proof
         );
 
-        assertEq(destCounter__.counter(), amount);
+        assertEq(dstCounter__.counter(), amount);
         assertEq(srcCounter__.counter(), 0);
     }
 
@@ -376,7 +376,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             msgGasLimit,
@@ -414,7 +414,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -477,7 +477,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -493,7 +493,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -502,7 +502,7 @@ contract HappyTest is Setup {
             proof
         );
 
-        assertEq(destCounter__.counter(), amount);
+        assertEq(dstCounter__.counter(), amount);
         assertEq(srcCounter__.counter(), 0);
     }
 
@@ -531,7 +531,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -545,7 +545,7 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -554,7 +554,7 @@ contract HappyTest is Setup {
             proof
         );
 
-        assertEq(destCounter__.counter(), amount);
+        assertEq(dstCounter__.counter(), amount);
         assertEq(srcCounter__.counter(), 0);
     }
 
@@ -563,7 +563,7 @@ contract HappyTest is Setup {
 
         // deploy counters
         srcCounter__ = new Counter(address(_a.socket__));
-        destCounter__ = new Counter(address(_b.socket__));
+        dstCounter__ = new Counter(address(_b.socket__));
 
         vm.stopPrank();
     }
@@ -575,12 +575,12 @@ contract HappyTest is Setup {
         hoax(_plugOwner);
         srcCounter__.setSocketConfig(
             _b.chainId,
-            address(destCounter__),
+            address(dstCounter__),
             integrationType
         );
 
         hoax(_plugOwner);
-        destCounter__.setSocketConfig(
+        dstCounter__.setSocketConfig(
             _a.chainId,
             address(srcCounter__),
             integrationType

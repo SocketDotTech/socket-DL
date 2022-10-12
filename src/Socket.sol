@@ -58,9 +58,9 @@ contract Socket is SocketConfig, ReentrancyGuard {
     /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with accumulator
-     * @param remoteChainId_ the destination chain id
-     * @param msgGasLimit_ the gas limit needed to execute the payload on destination
-     * @param payload_ the data which is needed by plug at inbound call on destination
+     * @param remoteChainId_ the remote chain id
+     * @param msgGasLimit_ the gas limit needed to execute the payload on remote
+     * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
         uint256 remoteChainId_,
@@ -70,8 +70,8 @@ contract Socket is SocketConfig, ReentrancyGuard {
         PlugConfig memory plugConfig = plugConfigs[msg.sender][remoteChainId_];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
 
-        // Packs the src plug, src chain id, dest chain id and nonce
-        // msgId(256) = srcPlug(160) | srcChainId(16) | destChainId(16) | nonce(64)
+        // Packs the local plug, local chain id, remote chain id and nonce
+        // msgId(256) = localPlug(160) | localChainId(16) | remoteChainId(16) | nonce(64)
         uint256 msgId = (uint256(uint160(msg.sender)) << 96) |
             (uint256(uint16(_chainId)) << 80) |
             (uint256(uint16(remoteChainId_)) << 64) |
@@ -106,10 +106,10 @@ contract Socket is SocketConfig, ReentrancyGuard {
 
     /**
      * @notice executes a message
-     * @param msgGasLimit gas limit needed to execute the inbound at destination
-     * @param msgId message id packed with src plug, src chainId, dest chainId and nonce
-     * @param localPlug dest plug address
-     * @param payload the data which is needed by plug at inbound call on destination
+     * @param msgGasLimit gas limit needed to execute the inbound at remote
+     * @param msgId message id packed with local plug, local chainId, remote chainId and nonce
+     * @param localPlug remote plug address
+     * @param payload the data which is needed by plug at inbound call on remote
      * @param verifyParams_ the details needed for message verification
      */
     function execute(

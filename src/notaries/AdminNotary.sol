@@ -56,7 +56,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     function challengeSignature(
         bytes32 root_,
         uint256 packetId_,
-        uint256 destChainId_,
+        uint256 remoteChainId_,
         address accumAddress_,
         bytes calldata signature_
     ) external override {
@@ -64,7 +64,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
         address attester = signatureVerifier.recoverSigner(
             _chainId,
-            destChainId_,
+            remoteChainId_,
             accumAddress_,
             packetId_,
             root_,
@@ -188,7 +188,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
         if (packetArrivedAt == 0) return PacketStatus.NOT_PROPOSED;
 
-        // if paused at dest
+        // if paused at remote
         if (packet.isPaused) return PacketStatus.PAUSED;
 
         return PacketStatus.PROPOSED;
@@ -226,13 +226,13 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     /**
-     * @notice pauses the packet on destination
-     * @param accumAddress_ address of accumulator at src
-     * @param remoteChainId_ src chain id
+     * @notice pauses the packet on remote
+     * @param accumAddress_ address of accumulator at remote
+     * @param remoteChainId_ remote chain id
      * @param packetId_ packed id
      * @param root_ root hash
      */
-    function pausePacketOnDest(
+    function pausePacketOnRemote(
         address accumAddress_,
         uint256 remoteChainId_,
         uint256 packetId_,
@@ -253,9 +253,9 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     /**
-     * @notice unpause the packet on destination
-     * @param accumAddress_ address of accumulator at src
-     * @param remoteChainId_ src chain id
+     * @notice unpause the packet on remote
+     * @param accumAddress_ address of accumulator at remote
+     * @param remoteChainId_ remote chain id
      * @param packetId_ packed id
      */
     function acceptPausedPacket(
@@ -277,7 +277,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     /**
      * @notice adds an attester for `remoteChainId_` chain
-     * @param remoteChainId_ dest chain id
+     * @param remoteChainId_ remote chain id
      * @param attester_ attester address
      */
     function grantAttesterRole(uint256 remoteChainId_, address attester_)
@@ -293,7 +293,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     /**
      * @notice removes an attester from `remoteChainId_` chain list
-     * @param remoteChainId_ dest chain id
+     * @param remoteChainId_ remote chain id
      * @param attester_ attester address
      */
     function revokeAttesterRole(uint256 remoteChainId_, address attester_)
@@ -318,8 +318,8 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     /**
      * @notice returns the confirmations received by a packet
-     * @param accumAddress_ address of accumulator at src
-     * @param remoteChainId_ src chain id
+     * @param accumAddress_ address of accumulator at remote
+     * @param remoteChainId_ remote chain id
      * @param packetId_ packed id
      */
     function getConfirmations(
@@ -337,8 +337,8 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     /**
      * @notice returns the remote root for given `packetId_`
-     * @param accumAddress_ address of accumulator at src
-     * @param remoteChainId_ src chain id
+     * @param accumAddress_ address of accumulator at remote
+     * @param remoteChainId_ remote chain id
      * @param packetId_ packed id
      */
     function getRemoteRoot(

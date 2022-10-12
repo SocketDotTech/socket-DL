@@ -5,7 +5,7 @@ interface IPlug {
     /**
      * @notice executes the message received from source chain
      * @dev this should be only executable by socket
-     * @param payload_ the data which is needed by plug at inbound call on destination
+     * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function inbound(bytes calldata payload_) external payable;
 }

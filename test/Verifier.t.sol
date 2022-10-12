@@ -6,8 +6,8 @@ contract VerifierTest is Setup {
     address _notAPauser = address(10);
 
     uint256 chainId = 1;
-    uint256 destChainId = 2;
-    uint256 anotherDestChainId = 3;
+    uint256 remoteChainId = 2;
+    uint256 anotherRemoteChainId = 3;
     uint256 timeoutInSeconds = 100;
 
     Verifier verifier;
@@ -61,7 +61,7 @@ contract VerifierTest is Setup {
     function testVerifyCommitmentNotProposed() public {
         vm.mockCall(
             address(cc.socket__),
-            abi.encodeWithSelector(ISocket.destConfigs.selector),
+            abi.encodeWithSelector(ISocket.remoteConfigs.selector),
             abi.encode(1)
         );
 
@@ -75,7 +75,7 @@ contract VerifierTest is Setup {
         // without timeout
         (bool valid, ) = cc.verifier__.verifyCommitment(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
             0
         );
@@ -85,7 +85,7 @@ contract VerifierTest is Setup {
     function testVerifyCommitmentFastPath() public {
         vm.mockCall(
             address(cc.socket__),
-            abi.encodeWithSelector(ISocket.destConfigs.selector),
+            abi.encodeWithSelector(ISocket.remoteConfigs.selector),
             abi.encode(1)
         );
 
@@ -98,7 +98,7 @@ contract VerifierTest is Setup {
         );
         (bool valid, ) = cc.verifier__.verifyCommitment(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
             0
         );
@@ -112,7 +112,7 @@ contract VerifierTest is Setup {
         );
         (valid, ) = cc.verifier__.verifyCommitment(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
             0
         );
@@ -128,7 +128,7 @@ contract VerifierTest is Setup {
         vm.warp(timeoutInSeconds + 20);
         (valid, ) = cc.verifier__.verifyCommitment(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
             0
         );
@@ -138,7 +138,7 @@ contract VerifierTest is Setup {
     function testVerifyCommitmentSlowPath() public {
         vm.mockCall(
             address(cc.socket__),
-            abi.encodeWithSelector(ISocket.destConfigs.selector),
+            abi.encodeWithSelector(ISocket.remoteConfigs.selector),
             abi.encode(2)
         );
 
@@ -150,7 +150,7 @@ contract VerifierTest is Setup {
         );
         (bool valid, ) = cc.verifier__.verifyCommitment(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
             0
         );
@@ -164,7 +164,7 @@ contract VerifierTest is Setup {
         );
         (valid, ) = cc.verifier__.verifyCommitment(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
             0
         );
@@ -179,7 +179,7 @@ contract VerifierTest is Setup {
         vm.warp(timeoutInSeconds + 20);
         (valid, ) = cc.verifier__.verifyCommitment(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
             0
         );

@@ -51,8 +51,8 @@ contract Verifier is IVerifier, Ownable {
 
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param accumAddress_ address of accumulator at src
-     * @param remoteChainId_ dest chain id
+     * @param accumAddress_ address of accumulator at remote
+     * @param remoteChainId_ remote chain id
      * @param packetId_ packet id
      * @param integrationType_ integration type for plug
      */

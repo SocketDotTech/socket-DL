@@ -23,17 +23,17 @@ interface ISocket {
 
     /**
      * @notice emits the message details when a new message arrives at outbound
-     * @param srcChainId src chain id
-     * @param srcPlug src plug address
-     * @param dstChainId dest chain id
-     * @param dstPlug dest plug address
-     * @param msgId message id packed with destChainId and nonce
-     * @param msgGasLimit gas limit needed to execute the inbound at destination
-     * @param payload the data which will be used by inbound at destination
+     * @param localChainId local chain id
+     * @param localPlug local plug address
+     * @param dstChainId remote chain id
+     * @param dstPlug remote plug address
+     * @param msgId message id packed with remoteChainId and nonce
+     * @param msgGasLimit gas limit needed to execute the inbound at remote
+     * @param payload the data which will be used by inbound at remote
      */
     event MessageTransmitted(
-        uint256 srcChainId,
-        address srcPlug,
+        uint256 localChainId,
+        address localPlug,
         uint256 dstChainId,
         address dstPlug,
         uint256 msgId,
@@ -45,7 +45,7 @@ interface ISocket {
         address accum_,
         address deaccum_,
         address verifier_,
-        uint256 destChainId_,
+        uint256 remoteChainId_,
         bytes32 integrationType_
     );
 
@@ -98,9 +98,9 @@ interface ISocket {
     /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with accumulator
-     * @param remoteChainId_ the destination chain id
-     * @param msgGasLimit_ the gas limit needed to execute the payload on destination
-     * @param payload_ the data which is needed by plug at inbound call on destination
+     * @param remoteChainId_ the remote chain id
+     * @param msgGasLimit_ the gas limit needed to execute the payload on remote
+     * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
         uint256 remoteChainId_,
@@ -110,10 +110,10 @@ interface ISocket {
 
     /**
      * @notice executes a message
-     * @param msgGasLimit gas limit needed to execute the inbound at destination
-     * @param msgId message id packed with destChainId and nonce
-     * @param localPlug dest plug address
-     * @param payload the data which is needed by plug at inbound call on destination
+     * @param msgGasLimit gas limit needed to execute the inbound at remote
+     * @param msgId message id packed with remoteChainId and nonce
+     * @param localPlug remote plug address
+     * @param payload the data which is needed by plug at inbound call on remote
      * @param verifyParams_ the details needed for message verification
      */
     function execute(
@@ -126,8 +126,8 @@ interface ISocket {
 
     /**
      * @notice sets the config specific to the plug
-     * @param remoteChainId_ the destination chain id
-     * @param remotePlug_ address of plug present at destination chain to call inbound
+     * @param remoteChainId_ the remote chain id
+     * @param remotePlug_ address of plug present at remote chain to call inbound
      * @param integrationType_ the name of accum to be used
      */
     function setPlugConfig(

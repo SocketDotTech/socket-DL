@@ -6,7 +6,7 @@ import "../src/examples/Counter.sol";
 
 contract DualChainTest is Setup {
     Counter srcCounter__;
-    Counter destCounter__;
+    Counter dstCounter__;
     uint256 minFees = 10000;
     uint256 addAmount = 100;
     uint256 subAmount = 40;
@@ -72,7 +72,7 @@ contract DualChainTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -81,7 +81,7 @@ contract DualChainTest is Setup {
             proof
         );
 
-        assertEq(destCounter__.counter(), amount);
+        assertEq(dstCounter__.counter(), amount);
 
         vm.selectFork(aFork);
         assertEq(srcCounter__.counter(), 0);
@@ -97,7 +97,7 @@ contract DualChainTest is Setup {
 
         hoax(_raju);
         vm.selectFork(bFork);
-        destCounter__.remoteAddOperation(_a.chainId, amount, _msgGasLimit);
+        dstCounter__.remoteAddOperation(_a.chainId, amount, _msgGasLimit);
 
         (
             bytes32 root,
@@ -106,7 +106,7 @@ contract DualChainTest is Setup {
         ) = _getLatestSignature(_b, accum, _a.chainId);
 
         uint256 msgId = _packMessageId(
-            address(destCounter__),
+            address(dstCounter__),
             _b.chainId,
             _a.chainId,
             0
@@ -132,7 +132,7 @@ contract DualChainTest is Setup {
         assertEq(srcCounter__.counter(), amount);
 
         vm.selectFork(bFork);
-        assertEq(destCounter__.counter(), 0);
+        assertEq(dstCounter__.counter(), 0);
     }
 
     function testRemoteAddAndSubtract() external {
@@ -173,7 +173,7 @@ contract DualChainTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             addMsgId,
             _msgGasLimit,
@@ -196,7 +196,7 @@ contract DualChainTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             subMsgId,
             _msgGasLimit,
@@ -205,7 +205,7 @@ contract DualChainTest is Setup {
             abi.encode(0)
         );
 
-        assertEq(destCounter__.counter(), addAmount - subAmount);
+        assertEq(dstCounter__.counter(), addAmount - subAmount);
 
         vm.selectFork(aFork);
         assertEq(srcCounter__.counter(), 0);
@@ -242,7 +242,7 @@ contract DualChainTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -255,7 +255,7 @@ contract DualChainTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destCounter__),
+            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -264,7 +264,7 @@ contract DualChainTest is Setup {
             proof
         );
 
-        assertEq(destCounter__.counter(), amount);
+        assertEq(dstCounter__.counter(), amount);
 
         vm.selectFork(aFork);
         assertEq(srcCounter__.counter(), 0);
@@ -278,7 +278,7 @@ contract DualChainTest is Setup {
         srcCounter__ = new Counter(address(_a.socket__));
 
         vm.selectFork(bFork);
-        destCounter__ = new Counter(address(_b.socket__));
+        dstCounter__ = new Counter(address(_b.socket__));
 
         vm.stopPrank();
     }
@@ -292,13 +292,13 @@ contract DualChainTest is Setup {
         vm.selectFork(aFork);
         srcCounter__.setSocketConfig(
             _b.chainId,
-            address(destCounter__),
+            address(dstCounter__),
             integrationType
         );
 
         hoax(_plugOwner);
         vm.selectFork(bFork);
-        destCounter__.setSocketConfig(
+        dstCounter__.setSocketConfig(
             _a.chainId,
             address(srcCounter__),
             integrationType

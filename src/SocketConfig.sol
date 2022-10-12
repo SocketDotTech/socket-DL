@@ -11,7 +11,7 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     mapping(bytes32 => mapping(uint256 => address)) public deaccums;
     mapping(bytes32 => mapping(uint256 => bool)) public configExists;
 
-    // plug => remoteChainId => config(verifiers, accums, deaccums, destPlug)
+    // plug => remoteChainId => config(verifiers, accums, deaccums, remotePlug)
     mapping(address => mapping(uint256 => PlugConfig)) public plugConfigs;
 
     function addConfig(
