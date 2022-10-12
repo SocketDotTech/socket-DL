@@ -8,7 +8,7 @@ interface IVerifier {
      * @param remoteChainId_ dest chain id
      * @param packetId_ packet id
      */
-    function verifyCommitment(
+    function verifyPacket(
         address accumAddress_,
         uint256 remoteChainId_,
         uint256 packetId_,

@@ -56,7 +56,7 @@ contract Verifier is IVerifier, Ownable {
      * @param packetId_ packet id
      * @param integrationType_ integration type for plug
      */
-    function verifyCommitment(
+    function verifyPacket(
         address accumAddress_,
         uint256 remoteChainId_,
         uint256 packetId_,
