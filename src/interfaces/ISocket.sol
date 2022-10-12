@@ -15,13 +15,10 @@ interface ISocket {
     // TODO: add confs and blocking/non-blocking
     struct PlugConfig {
         address remotePlug;
-        uint256 configId;
-    }
-
-    struct Config {
         address accum;
         address deaccum;
         address verifier;
+        bytes32 integrationType;
     }
 
     /**
@@ -49,8 +46,7 @@ interface ISocket {
         address deaccum_,
         address verifier_,
         uint256 destChainId_,
-        uint256 configId_,
-        string integrationType_
+        bytes32 integrationType_
     );
 
     /**
@@ -76,7 +72,7 @@ interface ISocket {
     event PlugConfigSet(
         address remotePlug,
         uint256 remoteChainId,
-        uint256 configId
+        bytes32 integrationType
     );
 
     error NotAttested();
@@ -95,11 +91,9 @@ interface ISocket {
 
     error ConfigExists();
 
-    error InvalidConfigId();
+    error InvalidIntegrationType();
 
     function vault() external view returns (IVault);
-
-    function destConfigs(bytes32 configId_) external view returns (uint256);
 
     /**
      * @notice registers a message
