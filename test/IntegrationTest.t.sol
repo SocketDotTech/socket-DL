@@ -60,10 +60,10 @@ contract HappyTest is Setup {
             _a.notary__.revokeAttesterRole(_b.chainId, attester);
             vm.expectRevert(INotary.InvalidAttester.selector);
             _sealOnSrc(_a, accum, sig);
-        }
 
-        hoax(_socketOwner);
-        _a.notary__.grantAttesterRole(_b.chainId, attester);
+            hoax(_socketOwner);
+            _a.notary__.grantAttesterRole(_b.chainId, attester);
+        }
 
         _sealOnSrc(_a, accum, sig);
 
@@ -238,7 +238,7 @@ contract HappyTest is Setup {
         bytes memory sig;
 
         hoax(_raju);
-        vm.expectRevert(IVault.NotEnoughFees.selector);
+        vm.expectRevert(Vault.NotEnoughFees.selector);
         srcCounter__.remoteAddOperation(_b.chainId, addAmount, _msgGasLimit);
 
         hoax(_raju);
@@ -572,6 +572,7 @@ contract HappyTest is Setup {
         string memory integrationType = isFast_
             ? fastIntegrationType
             : slowIntegrationType;
+
         hoax(_plugOwner);
         srcCounter__.setSocketConfig(
             _b.chainId,

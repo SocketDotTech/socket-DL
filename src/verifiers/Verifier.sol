@@ -10,8 +10,11 @@ import "../utils/Ownable.sol";
 contract Verifier is IVerifier, Ownable {
     INotary public notary;
     ISocket public socket;
-    string public integrationType;
     uint256 public immutable timeoutInSeconds;
+
+    // this integration type is set for fast accum
+    // it is compared against the passed accum type to decide packet verification mode
+    bytes32 public integrationType;
 
     event NotarySet(address notary_);
     event SocketSet(address socket_);
@@ -21,7 +24,7 @@ contract Verifier is IVerifier, Ownable {
         address notary_,
         address socket_,
         uint256 timeoutInSeconds_,
-        string memory integrationType_
+        bytes32 integrationType_
     ) Ownable(owner_) {
         notary = INotary(notary_);
         socket = ISocket(socket_);
@@ -62,9 +65,7 @@ contract Verifier is IVerifier, Ownable {
         uint256 packetId_,
         bytes32 integrationType_
     ) external view override returns (bool, bytes32) {
-        bool isFast = keccak256(abi.encode(integrationType)) == integrationType_
-            ? true
-            : false;
+        bool isFast = integrationType == integrationType_ ? true : false;
 
         (
             INotary.PacketStatus status,
@@ -74,7 +75,6 @@ contract Verifier is IVerifier, Ownable {
         ) = notary.getPacketDetails(accumAddress_, remoteChainId_, packetId_);
 
         if (status != INotary.PacketStatus.PROPOSED) return (false, root);
-
         // if timed out, return true irrespective of fast or slow accum
         if (block.timestamp - packetArrivedAt > timeoutInSeconds)
             return (true, root);

@@ -30,8 +30,8 @@ contract Setup is Test {
 
     struct ChainContext {
         uint256 chainId;
-        uint256 slowAccumConfigId;
-        uint256 fastAccumConfigId;
+        bytes32 slowAccumType;
+        bytes32 fastAccumType;
         AdminNotary notary__;
         Hasher hasher__;
         IAccumulator fastAccum__;
@@ -75,10 +75,10 @@ contract Setup is Test {
 
         // setup minfees in vault for diff accum for all remote chains
         vm.startPrank(_socketOwner);
-        _a.vault__.setFees(minFees_, _a.fastAccumConfigId);
-        _a.vault__.setFees(minFees_, _a.slowAccumConfigId);
-        _b.vault__.setFees(minFees_, _b.fastAccumConfigId);
-        _b.vault__.setFees(minFees_, _b.slowAccumConfigId);
+        _a.vault__.setFees(minFees_, _a.fastAccumType);
+        _a.vault__.setFees(minFees_, _a.slowAccumType);
+        _b.vault__.setFees(minFees_, _b.fastAccumType);
+        _b.vault__.setFees(minFees_, _b.slowAccumType);
         vm.stopPrank();
     }
 
@@ -134,7 +134,8 @@ contract Setup is Test {
             _plugOwner,
             address(cc.notary__),
             address(cc.socket__),
-            _timeoutInSeconds
+            _timeoutInSeconds,
+            keccak256(abi.encode(fastIntegrationType))
         );
 
         hoax(_socketOwner);
@@ -145,7 +146,7 @@ contract Setup is Test {
         internal
     {
         hoax(_socketOwner);
-        cc_.fastAccumConfigId = cc_.socket__.addConfig(
+        cc_.fastAccumType = cc_.socket__.addConfig(
             remoteChainId_,
             address(cc_.fastAccum__),
             address(cc_.deaccum__),
@@ -154,7 +155,7 @@ contract Setup is Test {
         );
 
         hoax(_socketOwner);
-        cc_.slowAccumConfigId = cc_.socket__.addConfig(
+        cc_.slowAccumType = cc_.socket__.addConfig(
             remoteChainId_,
             address(cc_.slowAccum__),
             address(cc_.deaccum__),
