@@ -101,16 +101,8 @@ contract PingPongTest is Setup {
 
         uint256 iterations = 5;
         for (uint256 index = 0; index < iterations; index++) {
-            uint256 msgIdAToB = (uint256(uint160(address(srcMessenger__))) <<
-                96) |
-                (_a.chainSlug << 80) |
-                (_b.chainSlug << 64) |
-                index;
-            uint256 msgIdBToA = (uint256(uint160(address(dstMessenger__))) <<
-                96) |
-                (_b.chainSlug << 80) |
-                (_a.chainSlug << 64) |
-                index;
+            uint256 msgIdAToB = _packMessageId(_a.chainSlug, index);
+            uint256 msgIdBToA = _packMessageId(_b.chainSlug, index);
 
             _verifyAToB(msgIdAToB);
             _verifyBToA(msgIdBToA);

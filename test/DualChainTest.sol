@@ -57,12 +57,7 @@ contract DualChainTest is Setup {
             _msgGasLimit
         );
 
-        uint256 msgId = _packMessageId(
-            address(srcCounter__),
-            _a.chainSlug,
-            _b.chainSlug,
-            0
-        );
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
 
         (
             bytes32 root,

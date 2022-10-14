@@ -59,8 +59,8 @@ contract Setup is Test {
     function _dualChainSetup(uint256[] memory attesters_, uint256 minFees_)
         internal
     {
-        _a.chainSlug = uint16(uint256(0x2013AA263));
-        _b.chainSlug = uint16(uint256(0x2013AA264));
+        _a.chainSlug = uint32(uint256(0x2013AA263));
+        _b.chainSlug = uint32(uint256(0x2013AA264));
 
         _a = _deployContractsOnSingleChain(_a.chainSlug, _b.chainSlug);
         _b = _deployContractsOnSingleChain(_b.chainSlug, _a.chainSlug);
@@ -176,7 +176,7 @@ contract Setup is Test {
         hasher__ = new Hasher();
         vault__ = new Vault(deployer_);
         socket__ = new Socket(
-            uint16(chainSlug_),
+            uint32(chainSlug_),
             address(hasher__),
             address(vault__)
         );
@@ -312,17 +312,12 @@ contract Setup is Test {
         );
     }
 
-    function _packMessageId(
-        address srcPlug,
-        uint256 srcChainSlug,
-        uint256 remoteChainSlug,
-        uint256 nonce
-    ) internal pure returns (uint256) {
-        return
-            (uint256(uint160(srcPlug)) << 96) |
-            (srcChainSlug << 80) |
-            (remoteChainSlug << 64) |
-            nonce;
+    function _packMessageId(uint256 srcChainSlug, uint256 nonce)
+        internal
+        pure
+        returns (uint256)
+    {
+        return (srcChainSlug << 224) | nonce;
     }
 
     // to ignore this file from coverage

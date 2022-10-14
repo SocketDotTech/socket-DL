@@ -42,10 +42,7 @@ contract HappyTest is Setup {
         );
         // TODO: get nonce from event
 
-        uint256 msgId = (uint256(uint160(address(srcCounter__))) << 96) |
-            (_a.chainSlug << 80) |
-            (_b.chainSlug << 64) |
-            0;
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
 
         (
             bytes32 root,
@@ -199,10 +196,7 @@ contract HappyTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(_b, accum, _a.chainSlug);
 
-        uint256 msgId = (uint256(uint160(address(dstCounter__))) << 96) |
-            (_b.chainSlug << 80) |
-            (_a.chainSlug << 64) |
-            0;
+        uint256 msgId = _packMessageId(_b.chainSlug, 0);
         _sealOnSrc(_b, accum, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root, accum);
 
@@ -224,16 +218,10 @@ contract HappyTest is Setup {
 
     function testRemoteAddAndSubtract() external {
         bytes memory addPayload = abi.encode(keccak256("OP_ADD"), addAmount);
-        uint256 addMsgId = (uint256(uint160(address(srcCounter__))) << 96) |
-            (_a.chainSlug << 80) |
-            (_b.chainSlug << 64) |
-            0;
+        uint256 addMsgId = _packMessageId(_a.chainSlug, 0);
 
         bytes memory subPayload = abi.encode(keccak256("OP_SUB"), subAmount);
-        uint256 subMsgId = (uint256(uint160(address(srcCounter__))) << 96) |
-            (_a.chainSlug << 80) |
-            (_b.chainSlug << 64) |
-            1;
+        uint256 subMsgId = _packMessageId(_a.chainSlug, 1);
         address accum = isFast
             ? address(_a.fastAccum__)
             : address(_a.slowAccum__);
@@ -300,10 +288,7 @@ contract HappyTest is Setup {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
-        uint256 msgId = (uint256(uint160(address(srcCounter__))) << 96) |
-            (_a.chainSlug << 80) |
-            (_b.chainSlug << 64) |
-            0;
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
         address accum = isFast
             ? address(_a.fastAccum__)
             : address(_a.slowAccum__);
@@ -355,10 +340,7 @@ contract HappyTest is Setup {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
-        uint256 msgId = (uint256(uint160(address(srcCounter__))) << 96) |
-            (_a.chainSlug << 80) |
-            (_b.chainSlug << 64) |
-            0;
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
         address accum = isFast
             ? address(_a.fastAccum__)
             : address(_a.slowAccum__);
@@ -395,10 +377,7 @@ contract HappyTest is Setup {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_SUB"), amount);
         bytes memory proof = abi.encode(0);
-        uint256 msgId = (uint256(uint160(address(srcCounter__))) << 96) |
-            (_a.chainSlug << 80) |
-            (_b.chainSlug << 64) |
-            0;
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
         address accum = isFast
             ? address(_a.fastAccum__)
             : address(_a.slowAccum__);
@@ -442,10 +421,7 @@ contract HappyTest is Setup {
             _msgGasLimit
         );
 
-        uint256 msgId = (uint256(uint160(address(srcCounter__))) << 96) |
-            (_a.chainSlug << 80) |
-            (_b.chainSlug << 64) |
-            0;
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
 
         // add attesters
         address newAttester = vm.addr(uint256(10));
@@ -525,10 +501,7 @@ contract HappyTest is Setup {
             _msgGasLimit
         );
 
-        uint256 msgId = (uint256(uint160(address(srcCounter__))) << 96) |
-            (_a.chainSlug << 80) |
-            (_b.chainSlug << 64) |
-            0;
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
 
         (uint256 packetId, ) = _attesterChecks(accum);
 
