@@ -55,36 +55,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     /// @inheritdoc INotary
-    function challengeSignature(
-        bytes32 root_,
-        uint256 packetId_,
-        uint256 remoteChainSlug_,
-        address accumAddress_,
-        bytes calldata signature_
-    ) external override {
-        bytes32 root = IAccumulator(accumAddress_).getRootById(packetId_);
-
-        address attester = signatureVerifier.recoverSigner(
-            _chainSlug,
-            remoteChainSlug_,
-            accumAddress_,
-            packetId_,
-            root_,
-            signature_
-        );
-
-        if (root == root_ && root != bytes32(0)) {
-            emit ChallengedSuccessfully(
-                attester,
-                accumAddress_,
-                packetId_,
-                msg.sender,
-                0
-            );
-        }
-    }
-
-    /// @inheritdoc INotary
     function propose(
         uint256 remoteChainSlug_,
         address accumAddress_,
@@ -230,56 +200,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         pendingAttestations =
             totalAttestors[remoteChainSlug_] -
             packet.attestations;
-    }
-
-    /**
-     * @notice pauses the packet on remote
-     * @param accumAddress_ address of accumulator at remote
-     * @param remoteChainSlug_ remote chain id
-     * @param packetId_ packed id
-     * @param root_ root hash
-     */
-    function pausePacketOnRemote(
-        address accumAddress_,
-        uint256 remoteChainSlug_,
-        uint256 packetId_,
-        bytes32 root_
-    ) external onlyOwner {
-        uint256 packedId = _packWithPacketId(
-            accumAddress_,
-            remoteChainSlug_,
-            packetId_
-        );
-        PacketDetails storage packedDetails = _packetDetails[packedId];
-
-        if (packedDetails.remoteRoots != root_) revert RootNotFound();
-        if (packedDetails.isPaused) revert PacketPaused();
-
-        packedDetails.isPaused = true;
-        emit PausedPacket(accumAddress_, packetId_, msg.sender);
-    }
-
-    /**
-     * @notice unpause the packet on remote
-     * @param accumAddress_ address of accumulator at remote
-     * @param remoteChainSlug_ remote chain id
-     * @param packetId_ packed id
-     */
-    function acceptPausedPacket(
-        address accumAddress_,
-        uint256 remoteChainSlug_,
-        uint256 packetId_
-    ) external onlyOwner {
-        uint256 packedId = _packWithPacketId(
-            accumAddress_,
-            remoteChainSlug_,
-            packetId_
-        );
-        PacketDetails storage packedDetails = _packetDetails[packedId];
-
-        if (!packedDetails.isPaused) revert PacketNotPaused();
-        packedDetails.isPaused = false;
-        emit PacketUnpaused(accumAddress_, packetId_);
     }
 
     /**
