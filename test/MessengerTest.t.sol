@@ -42,7 +42,7 @@ contract PingPongTest is Setup {
         ) = _getLatestSignature(_a, accum, _b.chainSlug);
 
         _sealOnSrc(_a, accum, sig);
-        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
+        _submitRootOnDst(_b, sig, packetId, root);
 
         vm.warp(block.timestamp + _slowAccumWaitTime);
         _executePayloadOnDst(
@@ -52,7 +52,6 @@ contract PingPongTest is Setup {
             packetId,
             msgId_,
             msgGasLimit,
-            accum,
             _payloadPing,
             _PROOF
         );
@@ -72,7 +71,7 @@ contract PingPongTest is Setup {
         ) = _getLatestSignature(_b, accum, _a.chainSlug);
 
         _sealOnSrc(_b, accum, sig);
-        _submitRootOnDst(_b, _a, sig, packetId, root, accum);
+        _submitRootOnDst(_a, sig, packetId, root);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
         _executePayloadOnDst(
@@ -82,7 +81,6 @@ contract PingPongTest is Setup {
             packetId,
             msgId_,
             msgGasLimit,
-            accum,
             _payloadPong,
             _PROOF
         );

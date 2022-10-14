@@ -15,7 +15,6 @@ contract Setup is Test {
     address constant _socketOwner = address(1);
     address constant _plugOwner = address(2);
     address constant _raju = address(4);
-    address constant _pauser = address(5);
     address _attester;
     address _altAttester;
 
@@ -221,31 +220,26 @@ contract Setup is Test {
             bytes memory sig
         )
     {
-        (root, packetId, sig) = _getLatestSignatureForSigner(
-            src_,
-            accum_,
+        uint256 id;
+        (root, id) = IAccumulator(accum_).getNextPacketToBeSealed();
+        packetId = _getPackedId(accum_, src_.chainSlug, id);
+
+        sig = _createSignature(
             remoteChainSlug_,
-            _attesterPrivateKey
+            packetId,
+            _attesterPrivateKey,
+            root
         );
     }
 
-    function _getLatestSignatureForSigner(
-        ChainContext storage src_,
-        address accum_,
+    function _createSignature(
         uint256 remoteChainSlug_,
-        uint256 privateKey_
-    )
-        internal
-        returns (
-            bytes32 root,
-            uint256 packetId,
-            bytes memory sig
-        )
-    {
-        (root, packetId) = IAccumulator(accum_).getNextPacketToBeSealed();
-
+        uint256 packetId_,
+        uint256 privateKey_,
+        bytes32 root_
+    ) internal returns (bytes memory sig) {
         bytes32 digest = keccak256(
-            abi.encode(src_.chainSlug, remoteChainSlug_, accum_, packetId, root)
+            abi.encode(remoteChainSlug_, packetId_, root_)
         );
         digest = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
@@ -272,15 +266,13 @@ contract Setup is Test {
     }
 
     function _submitRootOnDst(
-        ChainContext storage src_,
         ChainContext storage dst_,
         bytes memory sig_,
         uint256 packetId_,
-        bytes32 root_,
-        address accum_
+        bytes32 root_
     ) internal {
         hoax(_raju);
-        dst_.notary__.propose(src_.chainSlug, accum_, packetId_, root_, sig_);
+        dst_.notary__.propose(packetId_, root_, sig_);
     }
 
     function _executePayloadOnDst(
@@ -290,7 +282,6 @@ contract Setup is Test {
         uint256 packetId_,
         uint256 msgId_,
         uint256 msgGasLimit_,
-        address accum_,
         bytes memory payload_,
         bytes memory proof_
     ) internal {
@@ -299,7 +290,6 @@ contract Setup is Test {
         ISocket.VerificationParams memory vParams = ISocket.VerificationParams(
             src_.chainSlug,
             packetId_,
-            accum_,
             proof_
         );
 
@@ -318,6 +308,14 @@ contract Setup is Test {
         returns (uint256)
     {
         return (srcChainSlug << 224) | nonce;
+    }
+
+    function _getPackedId(
+        address accumAddr_,
+        uint256 chainSlug_,
+        uint256 id_
+    ) internal pure returns (uint256) {
+        return (uint256(uint160(accumAddr_)) << 96) | (chainSlug_ << 64) | id_;
     }
 
     // to ignore this file from coverage

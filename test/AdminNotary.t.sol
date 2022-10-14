@@ -6,23 +6,16 @@ import "./Setup.t.sol";
 contract AdminNotaryTest is Setup {
     address constant _accum = address(4);
     bytes32 constant _root = bytes32(uint256(5));
-    uint256 constant _packetId = uint256(6);
+    uint256 constant _id = uint256(6);
 
     bytes32 constant _altRoot = bytes32(uint256(8));
-    uint256 _chainSlug = 0x2013AA263;
-    uint256 _remoteChainSlug = 0x2013AA264;
+    uint256 _chainSlug = 1;
+    uint256 _remoteChainSlug = 2;
 
-    struct SignatureParams {
-        uint256 localChainSlug;
-        uint256 remoteChainSlug;
-        address accum;
-        uint256 packetId;
-        bytes32 root;
-        uint256 privateKey;
-    }
-
-    SignatureParams sp;
-    SignatureParams remoteSp;
+    uint256 private _localPacketId;
+    uint256 private _remotePacketId;
+    bytes private localSig;
+    bytes private remoteSig;
 
     ChainContext cc;
 
@@ -39,22 +32,20 @@ contract AdminNotaryTest is Setup {
             _socketOwner
         );
 
-        sp = SignatureParams(
-            _chainSlug,
+        _localPacketId = _getPackedId(_accum, _chainSlug, _id);
+        localSig = _createSignature(
             _remoteChainSlug,
-            _accum,
-            _packetId,
-            _root,
-            _attesterPrivateKey
+            _localPacketId,
+            _attesterPrivateKey,
+            _root
         );
 
-        remoteSp = SignatureParams(
-            _remoteChainSlug,
+        _remotePacketId = _getPackedId(_accum, _remoteChainSlug, _id);
+        remoteSig = _createSignature(
             _chainSlug,
-            _accum,
-            _packetId,
-            _root,
-            _attesterPrivateKey
+            _remotePacketId,
+            _attesterPrivateKey,
+            _root
         );
     }
 
@@ -111,31 +102,27 @@ contract AdminNotaryTest is Setup {
         vm.mockCall(
             _accum,
             abi.encodeWithSelector(IAccumulator.sealPacket.selector),
-            abi.encode(_altRoot, _packetId, _remoteChainSlug)
+            abi.encode(_altRoot, _id, _remoteChainSlug)
         );
 
         hoax(_attester);
         vm.expectRevert(INotary.InvalidAttester.selector);
-        cc.notary__.seal(_accum, _getSignature(sp));
+        cc.notary__.seal(_accum, localSig);
 
         // correct packet sealed
         vm.mockCall(
             _accum,
             abi.encodeWithSelector(IAccumulator.sealPacket.selector),
-            abi.encode(_root, _packetId, _remoteChainSlug)
+            abi.encode(_root, _id, _remoteChainSlug)
         );
         hoax(_attester);
-        cc.notary__.seal(_accum, _getSignature(sp));
+        cc.notary__.seal(_accum, localSig);
 
-        bytes memory altSign = _getSignature(
-            SignatureParams(
-                _chainSlug,
-                _remoteChainSlug,
-                _accum,
-                _packetId,
-                _root,
-                _altAttesterPrivateKey
-            )
+        bytes memory altSign = _createSignature(
+            _remoteChainSlug,
+            _localPacketId,
+            _altAttesterPrivateKey,
+            _root
         );
 
         // invalid attester
@@ -144,114 +131,39 @@ contract AdminNotaryTest is Setup {
         cc.notary__.seal(_accum, altSign);
     }
 
-    function testChallengeSignature() external {
-        hoax(_socketOwner);
-        cc.notary__.grantAttesterRole(_remoteChainSlug, _attester);
-
-        bytes memory altSign = _getSignature(
-            SignatureParams(
-                _chainSlug,
-                _remoteChainSlug,
-                _accum,
-                _packetId,
-                _altRoot,
-                _attesterPrivateKey
-            )
-        );
-
-        // TODO: check if event is not emitted
-        // if the roots is bytes32(0), the event will not be emitted
-        hoax(_raju);
-        vm.expectRevert();
-        cc.notary__.challengeSignature(
-            _root,
-            _packetId,
-            _remoteChainSlug,
-            _accum,
-            altSign
-        );
-
-        vm.mockCall(
-            _accum,
-            abi.encodeWithSelector(IAccumulator.sealPacket.selector),
-            abi.encode(_root, _packetId, _remoteChainSlug)
-        );
-
-        hoax(_attester);
-        cc.notary__.seal(_accum, _getSignature(sp));
-
-        // if the roots don't match, the event will not be emitted
-        hoax(_raju);
-        cc.notary__.challengeSignature(
-            _altRoot,
-            _packetId,
-            _remoteChainSlug,
-            _accum,
-            altSign
-        );
-    }
-
     function testPropose() external {
         hoax(_socketOwner);
         cc.notary__.grantAttesterRole(_remoteChainSlug, _attester);
 
         hoax(_raju);
-        cc.notary__.propose(
-            _remoteChainSlug,
-            _accum,
-            _packetId,
-            _root,
-            _getSignature(remoteSp)
-        );
+        cc.notary__.propose(_remotePacketId, _root, remoteSig);
 
-        assertEq(
-            cc.notary__.getRemoteRoot(_remoteChainSlug, _accum, _packetId),
-            _root
-        );
-
-        assertEq(
-            cc.notary__.getConfirmations(_accum, _remoteChainSlug, _packetId),
-            1
-        );
+        assertEq(cc.notary__.getRemoteRoot(_remotePacketId), _root);
+        assertEq(cc.notary__.getConfirmations(_remotePacketId), 1);
 
         (
             INotary.PacketStatus status,
             uint256 packetArrivedAt,
             ,
             bytes32 root
-        ) = cc.notary__.getPacketDetails(_accum, _remoteChainSlug, _packetId);
+        ) = cc.notary__.getPacketDetails(_remotePacketId);
 
         // status proposed
         assertEq(uint256(status), 1);
         assertEq(root, _root);
         assertEq(packetArrivedAt, block.timestamp);
 
-        assertEq(
-            cc.notary__.getRemoteRoot(_remoteChainSlug, _accum, _packetId),
-            _root
-        );
+        assertEq(cc.notary__.getRemoteRoot(_remotePacketId), _root);
 
         hoax(_raju);
         vm.expectRevert(INotary.AlreadyProposed.selector);
-        cc.notary__.propose(
-            _remoteChainSlug,
-            _accum,
-            _packetId,
-            _root,
-            _getSignature(sp)
-        );
+        cc.notary__.propose(_remotePacketId, _root, remoteSig);
     }
 
     function testProposeWithoutRole() external {
         hoax(_raju);
         vm.expectRevert(INotary.InvalidAttester.selector);
-        cc.notary__.propose(
-            _remoteChainSlug,
-            _accum,
-            _packetId,
-            _root,
-            _getSignature(remoteSp)
-        );
+        cc.notary__.propose(_localPacketId, _root, localSig);
     }
 
     function testConfirmRoot() external {
@@ -261,44 +173,20 @@ contract AdminNotaryTest is Setup {
         cc.notary__.grantAttesterRole(_remoteChainSlug, _altAttester);
 
         // status not-proposed
-        assertEq(
-            uint256(
-                cc.notary__.getPacketStatus(_accum, _remoteChainSlug, _packetId)
-            ),
-            0
-        );
+        assertEq(uint256(cc.notary__.getPacketStatus(_remotePacketId)), 0);
 
         hoax(_socketOwner);
         vm.expectRevert(INotary.RootNotFound.selector);
-        cc.notary__.confirmRoot(
-            _remoteChainSlug,
-            _accum,
-            _packetId,
-            _root,
-            _getSignature(remoteSp)
-        );
+        cc.notary__.confirmRoot(_remotePacketId, _root, remoteSig);
 
         hoax(_raju);
-        cc.notary__.propose(
-            _remoteChainSlug,
-            _accum,
-            _packetId,
-            _root,
-            _getSignature(remoteSp)
-        );
+        cc.notary__.propose(_remotePacketId, _root, remoteSig);
 
         // status proposed
-        assertEq(
-            uint256(
-                cc.notary__.getPacketStatus(_accum, _remoteChainSlug, _packetId)
-            ),
-            1
-        );
+        assertEq(uint256(cc.notary__.getPacketStatus(_remotePacketId)), 1);
 
         (, , uint256 pendingAttestations, ) = cc.notary__.getPacketDetails(
-            _accum,
-            _remoteChainSlug,
-            _packetId
+            _remotePacketId
         );
 
         // one pending attestations
@@ -306,190 +194,23 @@ contract AdminNotaryTest is Setup {
 
         hoax(_raju);
         vm.expectRevert(INotary.AlreadyAttested.selector);
-        cc.notary__.confirmRoot(
-            _remoteChainSlug,
-            _accum,
-            _packetId,
-            _root,
-            _getSignature(remoteSp)
-        );
+        cc.notary__.confirmRoot(_remotePacketId, _root, remoteSig);
 
-        bytes memory altSign = _getSignature(
-            SignatureParams(
-                _remoteChainSlug,
-                _chainSlug,
-                _accum,
-                _packetId,
-                _root,
-                _altAttesterPrivateKey
-            )
-        );
-
-        hoax(_socketOwner);
-        cc.notary__.pausePacketOnRemote(
-            _accum,
-            _remoteChainSlug,
-            _packetId,
+        bytes memory altSign = _createSignature(
+            _chainSlug,
+            _remotePacketId,
+            _altAttesterPrivateKey,
             _root
         );
 
         hoax(_raju);
-        vm.expectRevert(INotary.PacketPaused.selector);
-        cc.notary__.confirmRoot(
-            _remoteChainSlug,
-            _accum,
-            _packetId,
-            _root,
-            altSign
-        );
-
-        hoax(_socketOwner);
-        cc.notary__.acceptPausedPacket(_accum, _remoteChainSlug, _packetId);
-        hoax(_raju);
-        cc.notary__.confirmRoot(
-            _remoteChainSlug,
-            _accum,
-            _packetId,
-            _root,
-            altSign
-        );
+        cc.notary__.confirmRoot(_remotePacketId, _root, altSign);
 
         (, , pendingAttestations, ) = cc.notary__.getPacketDetails(
-            _accum,
-            _remoteChainSlug,
-            _packetId
+            _remotePacketId
         );
 
         // no pending attestations
         assertEq(pendingAttestations, 0);
-    }
-
-    function testPausePacketOnRemote() external {
-        hoax(_socketOwner);
-        cc.notary__.grantAttesterRole(_remoteChainSlug, _attester);
-
-        hoax(_socketOwner);
-        vm.expectRevert(INotary.RootNotFound.selector);
-        cc.notary__.pausePacketOnRemote(
-            _accum,
-            _remoteChainSlug,
-            _packetId,
-            _root
-        );
-
-        hoax(_raju);
-        cc.notary__.propose(
-            _remoteChainSlug,
-            _accum,
-            _packetId,
-            _root,
-            _getSignature(remoteSp)
-        );
-
-        hoax(_raju);
-        vm.expectRevert(Ownable.OnlyOwner.selector);
-        cc.notary__.pausePacketOnRemote(
-            _accum,
-            _remoteChainSlug,
-            _packetId,
-            _root
-        );
-
-        hoax(_socketOwner);
-        cc.notary__.pausePacketOnRemote(
-            _accum,
-            _remoteChainSlug,
-            _packetId,
-            _root
-        );
-
-        assertEq(
-            uint256(
-                cc.notary__.getPacketStatus(_accum, _remoteChainSlug, _packetId)
-            ),
-            2
-        );
-
-        hoax(_socketOwner);
-        vm.expectRevert(INotary.PacketPaused.selector);
-        cc.notary__.pausePacketOnRemote(
-            _accum,
-            _remoteChainSlug,
-            _packetId,
-            _root
-        );
-    }
-
-    function testAcceptPausedPacket() external {
-        hoax(_socketOwner);
-        cc.notary__.grantAttesterRole(_remoteChainSlug, _attester);
-
-        hoax(_raju);
-        cc.notary__.propose(
-            _remoteChainSlug,
-            _accum,
-            _packetId,
-            _root,
-            _getSignature(remoteSp)
-        );
-
-        hoax(_socketOwner);
-        vm.expectRevert(INotary.PacketNotPaused.selector);
-        cc.notary__.acceptPausedPacket(_accum, _remoteChainSlug, _packetId);
-
-        hoax(_socketOwner);
-        cc.notary__.pausePacketOnRemote(
-            _accum,
-            _remoteChainSlug,
-            _packetId,
-            _root
-        );
-
-        hoax(_raju);
-        vm.expectRevert(Ownable.OnlyOwner.selector);
-        cc.notary__.acceptPausedPacket(_accum, _remoteChainSlug, _packetId);
-
-        hoax(_socketOwner);
-        cc.notary__.acceptPausedPacket(_accum, _remoteChainSlug, _packetId);
-
-        vm.warp(block.timestamp + _slowAccumWaitTime);
-
-        assertEq(
-            uint256(
-                cc.notary__.getPacketStatus(_accum, _remoteChainSlug, _packetId)
-            ),
-            1
-        );
-    }
-
-    function _getSignature(SignatureParams memory sp_)
-        internal
-        returns (bytes memory sig)
-    {
-        bytes32 digest = keccak256(
-            abi.encode(
-                sp_.localChainSlug,
-                sp_.remoteChainSlug,
-                sp_.accum,
-                sp_.packetId,
-                sp_.root
-            )
-        );
-        digest = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
-        );
-
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            sp_.privateKey,
-            digest
-        );
-        sig = new bytes(65);
-        bytes1 v32 = bytes1(sigV);
-
-        assembly {
-            mstore(add(sig, 96), v32)
-            mstore(add(sig, 32), sigR)
-            mstore(add(sig, 64), sigS)
-        }
     }
 }

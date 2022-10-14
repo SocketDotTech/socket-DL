@@ -71,12 +71,7 @@ contract VerifierTest is Setup {
         );
 
         // without timeout
-        (bool valid, ) = verifier__.verifyPacket(
-            address(0),
-            remoteChainSlug,
-            1,
-            integrationType
-        );
+        (bool valid, ) = verifier__.verifyPacket(1, integrationType);
         assertFalse(valid);
     }
 
@@ -88,12 +83,7 @@ contract VerifierTest is Setup {
             abi.encodeWithSelector(INotary.getPacketDetails.selector),
             abi.encode(1, 1, 1, bytes32(0))
         );
-        (bool valid, ) = verifier__.verifyPacket(
-            address(0),
-            remoteChainSlug,
-            1,
-            integrationType
-        );
+        (bool valid, ) = verifier__.verifyPacket(1, integrationType);
         assertFalse(valid);
 
         // full attestations
@@ -102,12 +92,7 @@ contract VerifierTest is Setup {
             abi.encodeWithSelector(INotary.getPacketDetails.selector),
             abi.encode(1, 1, 0, bytes32(0))
         );
-        (valid, ) = verifier__.verifyPacket(
-            address(0),
-            remoteChainSlug,
-            1,
-            integrationType
-        );
+        (valid, ) = verifier__.verifyPacket(1, integrationType);
         assertTrue(valid);
 
         // after timeout
@@ -118,12 +103,7 @@ contract VerifierTest is Setup {
             abi.encode(1, 1, 1, bytes32(0))
         );
         vm.warp(timeoutInSeconds + 20);
-        (valid, ) = verifier__.verifyPacket(
-            address(0),
-            remoteChainSlug,
-            1,
-            integrationType
-        );
+        (valid, ) = verifier__.verifyPacket(1, integrationType);
         assertTrue(valid);
     }
 
@@ -135,12 +115,7 @@ contract VerifierTest is Setup {
             abi.encodeWithSelector(INotary.getPacketDetails.selector),
             abi.encode(1, 1, 1, bytes32(0))
         );
-        (bool valid, ) = verifier__.verifyPacket(
-            address(0),
-            remoteChainSlug,
-            1,
-            slow
-        );
+        (bool valid, ) = verifier__.verifyPacket(1, slow);
         assertFalse(valid);
 
         // full attestations
@@ -149,12 +124,7 @@ contract VerifierTest is Setup {
             abi.encodeWithSelector(INotary.getPacketDetails.selector),
             abi.encode(1, 1, 0, bytes32(0))
         );
-        (valid, ) = verifier__.verifyPacket(
-            address(0),
-            remoteChainSlug,
-            1,
-            slow
-        );
+        (valid, ) = verifier__.verifyPacket(1, slow);
         assertFalse(valid);
 
         // after timeout
@@ -164,12 +134,7 @@ contract VerifierTest is Setup {
             abi.encode(1, 1, 1, bytes32(0))
         );
         vm.warp(timeoutInSeconds + 20);
-        (valid, ) = verifier__.verifyPacket(
-            address(0),
-            remoteChainSlug,
-            1,
-            slow
-        );
+        (valid, ) = verifier__.verifyPacket(1, slow);
         assertTrue(valid);
     }
 }

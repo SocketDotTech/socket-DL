@@ -65,10 +65,7 @@ contract HappyTest is Setup {
         _sealOnSrc(_a, accum, sig);
 
         // revert execution if packet not proposed
-        assertEq(
-            uint256(_b.notary__.getPacketStatus(accum, _a.chainSlug, packetId)),
-            0
-        );
+        assertEq(uint256(_b.notary__.getPacketStatus(packetId)), 0);
 
         vm.expectRevert(ISocket.VerificationFailed.selector);
         _executePayloadOnDst(
@@ -78,49 +75,14 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
 
-        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
+        _submitRootOnDst(_b, sig, packetId, root);
 
         vm.expectRevert(INotary.AlreadyProposed.selector);
-        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
-
-        // revert execution if packet paused
-        {
-            hoax(_socketOwner);
-            _b.notary__.pausePacketOnRemote(
-                accum,
-                _a.chainSlug,
-                packetId,
-                root
-            );
-
-            assertEq(
-                uint256(
-                    _b.notary__.getPacketStatus(accum, _a.chainSlug, packetId)
-                ),
-                2
-            );
-
-            vm.expectRevert(ISocket.VerificationFailed.selector);
-            _executePayloadOnDst(
-                _a,
-                _b,
-                address(dstCounter__),
-                packetId,
-                msgId,
-                _msgGasLimit,
-                accum,
-                payload,
-                proof
-            );
-
-            hoax(_socketOwner);
-            _b.notary__.acceptPausedPacket(accum, _a.chainSlug, packetId);
-        }
+        _submitRootOnDst(_b, sig, packetId, root);
 
         // without executor role
         {
@@ -135,7 +97,6 @@ contract HappyTest is Setup {
                 packetId,
                 msgId,
                 _msgGasLimit,
-                accum,
                 payload,
                 proof
             );
@@ -153,7 +114,6 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
@@ -169,7 +129,6 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
@@ -198,7 +157,7 @@ contract HappyTest is Setup {
 
         uint256 msgId = _packMessageId(_b.chainSlug, 0);
         _sealOnSrc(_b, accum, sig);
-        _submitRootOnDst(_b, _a, sig, packetId, root, accum);
+        _submitRootOnDst(_a, sig, packetId, root);
 
         _executePayloadOnDst(
             _b,
@@ -207,7 +166,6 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
@@ -243,7 +201,7 @@ contract HappyTest is Setup {
 
         (root, packetId, sig) = _getLatestSignature(_a, accum, _b.chainSlug);
         _sealOnSrc(_a, accum, sig);
-        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
+        _submitRootOnDst(_b, sig, packetId, root);
 
         _executePayloadOnDst(
             _a,
@@ -252,7 +210,6 @@ contract HappyTest is Setup {
             packetId,
             addMsgId,
             _msgGasLimit,
-            accum,
             addPayload,
             abi.encode(0)
         );
@@ -266,7 +223,7 @@ contract HappyTest is Setup {
 
         (root, packetId, sig) = _getLatestSignature(_a, accum, _b.chainSlug);
         _sealOnSrc(_a, accum, sig);
-        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
+        _submitRootOnDst(_b, sig, packetId, root);
 
         _executePayloadOnDst(
             _a,
@@ -275,7 +232,6 @@ contract HappyTest is Setup {
             packetId,
             subMsgId,
             _msgGasLimit,
-            accum,
             subPayload,
             abi.encode(0)
         );
@@ -305,7 +261,7 @@ contract HappyTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(_a, accum, _b.chainSlug);
         _sealOnSrc(_a, accum, sig);
-        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
+        _submitRootOnDst(_b, sig, packetId, root);
 
         _executePayloadOnDst(
             _a,
@@ -314,7 +270,6 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
@@ -327,7 +282,6 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
@@ -367,7 +321,6 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             msgGasLimit,
-            accum,
             payload,
             proof
         );
@@ -402,7 +355,6 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
@@ -431,28 +383,12 @@ contract HappyTest is Setup {
         (uint256 packetId, bytes32 root) = _attesterChecks(accum);
 
         // get signature
-        bytes memory sig;
-        {
-            bytes32 digest = keccak256(
-                abi.encode(_a.chainSlug, _b.chainSlug, accum, packetId, root)
-            );
-            digest = keccak256(
-                abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
-            );
-
-            (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-                uint256(10),
-                digest
-            );
-            sig = new bytes(65);
-            bytes1 v32 = bytes1(sigV);
-
-            assembly {
-                mstore(add(sig, 96), v32)
-                mstore(add(sig, 32), sigR)
-                mstore(add(sig, 64), sigS)
-            }
-        }
+        bytes memory sig = _createSignature(
+            _b.chainSlug,
+            packetId,
+            uint256(10),
+            root
+        );
 
         vm.expectRevert(ISocket.VerificationFailed.selector);
         _executePayloadOnDst(
@@ -462,14 +398,13 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
 
         // attest
         hoax(newAttester);
-        _b.notary__.confirmRoot(_a.chainSlug, accum, packetId, root, sig);
+        _b.notary__.confirmRoot(packetId, root, sig);
 
         _executePayloadOnDst(
             _a,
@@ -478,7 +413,6 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
@@ -513,7 +447,6 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
@@ -527,7 +460,6 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
@@ -573,6 +505,6 @@ contract HappyTest is Setup {
         bytes memory sig;
         (root, packetId, sig) = _getLatestSignature(_a, accum, _b.chainSlug);
         _sealOnSrc(_a, accum, sig);
-        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
+        _submitRootOnDst(_b, sig, packetId, root);
     }
 }

@@ -67,7 +67,7 @@ contract DualChainTest is Setup {
         _sealOnSrc(_a, accum, sig);
 
         vm.selectFork(bFork);
-        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
+        _submitRootOnDst(_b, sig, packetId, root);
 
         _executePayloadOnDst(
             _a,
@@ -76,7 +76,6 @@ contract DualChainTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
-            accum,
             payload,
             proof
         );
