@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 interface INotary {
     struct PacketDetails {
-        bool isPaused;
         bytes32 remoteRoots;
         uint256 attestations;
         uint256 timeRecord;
@@ -11,8 +10,7 @@ interface INotary {
 
     enum PacketStatus {
         NOT_PROPOSED,
-        PROPOSED,
-        PAUSED
+        PROPOSED
     }
 
     /**
@@ -67,10 +65,6 @@ interface INotary {
     error AlreadyAttested();
 
     error NotFastPath();
-
-    error PacketPaused();
-
-    error PacketNotPaused();
 
     error ZeroAddress();
 

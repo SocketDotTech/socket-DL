@@ -79,7 +79,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         bytes32 root_,
         bytes calldata signature_
     ) external override {
-        if (_packetDetails[packetId_].isPaused) revert PacketPaused();
         if (_packetDetails[packetId_].remoteRoots != root_)
             revert RootNotFound();
 
@@ -97,6 +96,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         bytes32 root_,
         bytes calldata signature_
     ) private returns (address attester) {
+        uint256 remoteChainSlug = _getChainSlug(packetId_);
         attester = signatureVerifier.recoverSigner(
             _chainSlug,
             packetId_,
@@ -104,7 +104,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             signature_
         );
 
-        if (!_hasRole(_attesterRole(_getChainSlug(packetId_)), attester))
+        if (!_hasRole(_attesterRole(remoteChainSlug), attester))
             revert InvalidAttester();
 
         PacketDetails storage packedDetails = _packetDetails[packetId_];
@@ -125,10 +125,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         uint256 packetArrivedAt = packet.timeRecord;
 
         if (packetArrivedAt == 0) return PacketStatus.NOT_PROPOSED;
-
-        // if paused at remote
-        if (packet.isPaused) return PacketStatus.PAUSED;
-
         return PacketStatus.PROPOSED;
     }
 
@@ -247,7 +243,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     function _getChainSlug(uint256 packetId_)
         internal
-        pure
+        view
         returns (uint256 chainSlug_)
     {
         chainSlug_ = uint32(packetId_ >> 64);
