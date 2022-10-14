@@ -8,7 +8,6 @@ interface ISocket {
     struct VerificationParams {
         uint256 remoteChainSlug;
         uint256 packetId;
-        address accum;
         bytes deaccumProof;
     }
 

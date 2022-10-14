@@ -143,12 +143,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
         (bool isVerified, bytes32 root) = IVerifier(plugConfig.verifier)
-            .verifyPacket(
-                verifyParams_.accum,
-                verifyParams_.remoteChainSlug,
-                verifyParams_.packetId,
-                plugConfig.integrationType
-            );
+            .verifyPacket(verifyParams_.packetId, plugConfig.integrationType);
 
         if (!isVerified) revert VerificationFailed();
 
