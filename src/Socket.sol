@@ -20,9 +20,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
     uint256 private immutable _chainSlug;
 
     bytes32 private constant EXECUTOR_ROLE = keccak256("EXECUTOR");
-
-    // localPlug => remoteChainSlug => nonce
-    mapping(address => mapping(uint256 => uint256)) private _nonces;
+    uint256 private _nonces;
 
     // msgId => executorAddress
     mapping(uint256 => address) private executor;
@@ -37,7 +35,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
      * @param chainSlug_ socket chain slug (should not be more than uint32)
      */
     constructor(
-        uint16 chainSlug_,
+        uint32 chainSlug_,
         address hasher_,
         address vault_
     ) {
@@ -70,14 +68,11 @@ contract Socket is SocketConfig, ReentrancyGuard {
         PlugConfig memory plugConfig = plugConfigs[msg.sender][
             remoteChainSlug_
         ];
-        uint256 nonce = _nonces[msg.sender][remoteChainSlug_]++;
 
         // Packs the local plug, local chain id, remote chain id and nonce
-        // msgId(256) = localPlug(160) | localChainSlug(16) | remoteChainSlug(16) | nonce(64)
-        uint256 msgId = (uint256(uint160(msg.sender)) << 96) |
-            (uint256(uint16(_chainSlug)) << 80) |
-            (uint256(uint16(remoteChainSlug_)) << 64) |
-            uint256(uint64(nonce));
+        // _nonces++ will take care of msg id overflow as well
+        // msgId(256) = localChainSlug(32) | nonce(224)
+        uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _nonces++;
 
         vault.deductFee{value: msg.value}(
             remoteChainSlug_,
