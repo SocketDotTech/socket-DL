@@ -234,11 +234,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         totalAttestors[remoteChainSlug_]--;
     }
 
-    function _setSignatureVerifier(address signatureVerifier_) private {
-        signatureVerifier = ISignatureVerifier(signatureVerifier_);
-        emit SignatureVerifierSet(signatureVerifier_);
-    }
-
     function _attesterRole(uint256 chainSlug_) internal pure returns (bytes32) {
         return bytes32(chainSlug_);
     }
@@ -296,7 +291,8 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         external
         onlyOwner
     {
-        _setSignatureVerifier(signatureVerifier_);
+        signatureVerifier = ISignatureVerifier(signatureVerifier_);
+        emit SignatureVerifierSet(signatureVerifier_);
     }
 
     function _packWithPacketId(
@@ -307,29 +303,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         packed =
             (uint256(uint160(accumAddr_)) << 96) |
             (chainSlug_ << 64) |
-            packetId_;
-    }
-
-    function _unpackWithPacketId(uint256 accumId_)
-        internal
-        pure
-        returns (
-            address accumAddr_,
-            uint256 chainSlug_,
-            uint256 packetId_
-        )
-    {
-        accumAddr_ = address(uint160(accumId_ >> 96));
-        packetId_ = uint64(accumId_);
-        chainSlug_ = uint32(accumId_ >> 64);
-    }
-
-    function _pack(address accumAddr_, uint256 chainSlug_)
-        internal
-        pure
-        returns (uint256 packed)
-    {
-        packed = (uint256(uint160(accumAddr_)) << 32) | chainSlug_;
+            id_;
     }
 
     function _unpack(uint256 accumId_)
