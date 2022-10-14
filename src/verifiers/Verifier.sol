@@ -55,13 +55,13 @@ contract Verifier is IVerifier, Ownable {
     /**
      * @notice verifies if the packet satisfies needed checks before execution
      * @param accumAddress_ address of accumulator at remote
-     * @param remoteChainId_ remote chain id
+     * @param remoteChainSlug_ remote chain id
      * @param packetId_ packet id
      * @param integrationType_ integration type for plug
      */
     function verifyPacket(
         address accumAddress_,
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         uint256 packetId_,
         bytes32 integrationType_
     ) external view override returns (bool, bytes32) {
@@ -72,7 +72,7 @@ contract Verifier is IVerifier, Ownable {
             uint256 packetArrivedAt,
             uint256 pendingAttestations,
             bytes32 root
-        ) = notary.getPacketDetails(accumAddress_, remoteChainId_, packetId_);
+        ) = notary.getPacketDetails(accumAddress_, remoteChainSlug_, packetId_);
 
         if (status != INotary.PacketStatus.PROPOSED) return (false, root);
         // if timed out, return true irrespective of fast or slow accum

@@ -52,13 +52,13 @@ interface IAccumulator {
      * @dev this should be executable by notary only
      * @return root root hash of the packet
      * @return packetId id of the packed sealed
-     * @return remoteChainId remote chain id for the packet sealed
+     * @return remoteChainSlug remote chain id for the packet sealed
      */
     function sealPacket()
         external
         returns (
             bytes32 root,
             uint256 packetId,
-            uint256 remoteChainId
+            uint256 remoteChainSlug
         );
 }

@@ -27,8 +27,8 @@ contract PingPongTest is Setup {
         _deployPlugContracts();
         _configPlugContracts();
 
-        _payloadPing = abi.encode(_a.chainId, _PING);
-        _payloadPong = abi.encode(_b.chainId, _PONG);
+        _payloadPing = abi.encode(_a.chainSlug, _PING);
+        _payloadPong = abi.encode(_b.chainSlug, _PONG);
     }
 
     function _verifyAToB(uint256 msgId_) internal {
@@ -39,7 +39,7 @@ contract PingPongTest is Setup {
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a, accum, _b.chainId);
+        ) = _getLatestSignature(_a, accum, _b.chainSlug);
 
         _sealOnSrc(_a, accum, sig);
         _submitRootOnDst(_a, _b, sig, packetId, root, accum);
@@ -69,7 +69,7 @@ contract PingPongTest is Setup {
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_b, accum, _a.chainId);
+        ) = _getLatestSignature(_b, accum, _a.chainSlug);
 
         _sealOnSrc(_b, accum, sig);
         _submitRootOnDst(_b, _a, sig, packetId, root, accum);
@@ -97,19 +97,19 @@ contract PingPongTest is Setup {
 
     function testPingPong() external {
         hoax(_raju);
-        srcMessenger__.sendRemoteMessage(_b.chainId, _PING);
+        srcMessenger__.sendRemoteMessage(_b.chainSlug, _PING);
 
         uint256 iterations = 5;
         for (uint256 index = 0; index < iterations; index++) {
             uint256 msgIdAToB = (uint256(uint160(address(srcMessenger__))) <<
                 96) |
-                (_a.chainId << 80) |
-                (_b.chainId << 64) |
+                (_a.chainSlug << 80) |
+                (_b.chainSlug << 64) |
                 index;
             uint256 msgIdBToA = (uint256(uint160(address(dstMessenger__))) <<
                 96) |
-                (_b.chainId << 80) |
-                (_a.chainId << 64) |
+                (_b.chainSlug << 80) |
+                (_a.chainSlug << 64) |
                 index;
 
             _verifyAToB(msgIdAToB);
@@ -124,12 +124,12 @@ contract PingPongTest is Setup {
         // deploy counters
         srcMessenger__ = new Messenger(
             address(_a.socket__),
-            _a.chainId,
+            _a.chainSlug,
             msgGasLimit
         );
         dstMessenger__ = new Messenger(
             address(_b.socket__),
-            _b.chainId,
+            _b.chainSlug,
             msgGasLimit
         );
 
@@ -142,14 +142,14 @@ contract PingPongTest is Setup {
             : slowIntegrationType;
         hoax(_plugOwner);
         srcMessenger__.setSocketConfig(
-            _b.chainId,
+            _b.chainSlug,
             address(dstMessenger__),
             integrationType
         );
 
         hoax(_plugOwner);
         dstMessenger__.setSocketConfig(
-            _a.chainId,
+            _a.chainSlug,
             address(srcMessenger__),
             integrationType
         );

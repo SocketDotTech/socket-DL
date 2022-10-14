@@ -5,62 +5,67 @@ import "./interfaces/ISocket.sol";
 import "./utils/AccessControl.sol";
 
 abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
-    // integrationType => remoteChainId => address
+    // integrationType => remoteChainSlug => address
     mapping(bytes32 => mapping(uint256 => address)) public verifiers;
     mapping(bytes32 => mapping(uint256 => address)) public accums;
     mapping(bytes32 => mapping(uint256 => address)) public deaccums;
     mapping(bytes32 => mapping(uint256 => bool)) public configExists;
 
-    // plug => remoteChainId => config(verifiers, accums, deaccums, remotePlug)
+    // plug => remoteChainSlug => config(verifiers, accums, deaccums, remotePlug)
     mapping(address => mapping(uint256 => PlugConfig)) public plugConfigs;
 
     function addConfig(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address accum_,
         address deaccum_,
         address verifier_,
         string calldata integrationType_
     ) external returns (bytes32 integrationType) {
         integrationType = keccak256(abi.encode(integrationType_));
-        if (configExists[integrationType][remoteChainId_])
+        if (configExists[integrationType][remoteChainSlug_])
             revert ConfigExists();
 
-        verifiers[integrationType][remoteChainId_] = verifier_;
-        accums[integrationType][remoteChainId_] = accum_;
-        deaccums[integrationType][remoteChainId_] = deaccum_;
-        configExists[integrationType][remoteChainId_] = true;
+        verifiers[integrationType][remoteChainSlug_] = verifier_;
+        accums[integrationType][remoteChainSlug_] = accum_;
+        deaccums[integrationType][remoteChainSlug_] = deaccum_;
+        configExists[integrationType][remoteChainSlug_] = true;
 
         emit ConfigAdded(
             accum_,
             deaccum_,
             verifier_,
-            remoteChainId_,
+            remoteChainSlug_,
             integrationType
         );
     }
 
     /// @inheritdoc ISocket
     function setPlugConfig(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address remotePlug_,
         string memory integrationType_
     ) external override {
         bytes32 integrationType = keccak256(abi.encode(integrationType_));
-        if (!configExists[integrationType][remoteChainId_])
+        if (!configExists[integrationType][remoteChainSlug_])
             revert InvalidIntegrationType();
 
-        PlugConfig storage plugConfig = plugConfigs[msg.sender][remoteChainId_];
+        PlugConfig storage plugConfig = plugConfigs[msg.sender][
+            remoteChainSlug_
+        ];
 
         plugConfig.remotePlug = remotePlug_;
-        plugConfig.accum = accums[integrationType][remoteChainId_];
-        plugConfig.deaccum = deaccums[integrationType][remoteChainId_];
-        plugConfig.verifier = verifiers[integrationType][remoteChainId_];
+        plugConfig.accum = accums[integrationType][remoteChainSlug_];
+        plugConfig.deaccum = deaccums[integrationType][remoteChainSlug_];
+        plugConfig.verifier = verifiers[integrationType][remoteChainSlug_];
         plugConfig.integrationType = integrationType;
 
-        emit PlugConfigSet(remotePlug_, remoteChainId_, integrationType);
+        emit PlugConfigSet(remotePlug_, remoteChainSlug_, integrationType);
     }
 
-    function getConfigs(uint256 remoteChainId_, string memory integrationType_)
+    function getConfigs(
+        uint256 remoteChainSlug_,
+        string memory integrationType_
+    )
         external
         view
         returns (
@@ -71,13 +76,13 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     {
         bytes32 integrationType = keccak256(abi.encode(integrationType_));
         return (
-            accums[integrationType][remoteChainId_],
-            deaccums[integrationType][remoteChainId_],
-            verifiers[integrationType][remoteChainId_]
+            accums[integrationType][remoteChainSlug_],
+            deaccums[integrationType][remoteChainSlug_],
+            verifiers[integrationType][remoteChainSlug_]
         );
     }
 
-    function getPlugConfig(uint256 remoteChainId_, address plug_)
+    function getPlugConfig(uint256 remoteChainSlug_, address plug_)
         external
         view
         returns (
@@ -87,7 +92,7 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
             address remotePlug
         )
     {
-        PlugConfig memory plugConfig = plugConfigs[plug_][remoteChainId_];
+        PlugConfig memory plugConfig = plugConfigs[plug_][remoteChainSlug_];
         return (
             plugConfig.accum,
             plugConfig.deaccum,

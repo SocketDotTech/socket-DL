@@ -7,8 +7,8 @@ contract SignatureVerifier is ISignatureVerifier {
 
     /// @inheritdoc ISignatureVerifier
     function recoverSigner(
-        uint256 srcChainId_,
-        uint256 destChainId_,
+        uint256 srcChainSlug_,
+        uint256 destChainSlug_,
         address accumAddress_,
         uint256 packetId_,
         bytes32 root_,
@@ -16,8 +16,8 @@ contract SignatureVerifier is ISignatureVerifier {
     ) external pure override returns (address signer) {
         bytes32 digest = keccak256(
             abi.encode(
-                srcChainId_,
-                destChainId_,
+                srcChainSlug_,
+                destChainSlug_,
                 accumAddress_,
                 packetId_,
                 root_

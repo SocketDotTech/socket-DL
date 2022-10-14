@@ -3,8 +3,8 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 
 contract VerifierTest is Setup {
-    uint256 chainId = 1;
-    uint256 remoteChainId = 2;
+    uint256 chainSlug = 1;
+    uint256 remoteChainSlug = 2;
     uint256 timeoutInSeconds = 100;
     bytes32 integrationType = keccak256(abi.encode("INTEGRATION_TYPE"));
 
@@ -12,8 +12,11 @@ contract VerifierTest is Setup {
     ChainContext cc;
 
     function setUp() public {
-        cc.chainId = chainId;
-        (cc.sigVerifier__, cc.notary__) = _deployNotary(chainId, _socketOwner);
+        cc.chainSlug = chainSlug;
+        (cc.sigVerifier__, cc.notary__) = _deployNotary(
+            chainSlug,
+            _socketOwner
+        );
 
         hoax(_socketOwner);
         verifier__ = new Verifier(
@@ -70,7 +73,7 @@ contract VerifierTest is Setup {
         // without timeout
         (bool valid, ) = verifier__.verifyPacket(
             address(0),
-            remoteChainId,
+            remoteChainSlug,
             1,
             integrationType
         );
@@ -87,7 +90,7 @@ contract VerifierTest is Setup {
         );
         (bool valid, ) = verifier__.verifyPacket(
             address(0),
-            remoteChainId,
+            remoteChainSlug,
             1,
             integrationType
         );
@@ -101,7 +104,7 @@ contract VerifierTest is Setup {
         );
         (valid, ) = verifier__.verifyPacket(
             address(0),
-            remoteChainId,
+            remoteChainSlug,
             1,
             integrationType
         );
@@ -117,7 +120,7 @@ contract VerifierTest is Setup {
         vm.warp(timeoutInSeconds + 20);
         (valid, ) = verifier__.verifyPacket(
             address(0),
-            remoteChainId,
+            remoteChainSlug,
             1,
             integrationType
         );
@@ -134,7 +137,7 @@ contract VerifierTest is Setup {
         );
         (bool valid, ) = verifier__.verifyPacket(
             address(0),
-            remoteChainId,
+            remoteChainSlug,
             1,
             slow
         );
@@ -146,7 +149,12 @@ contract VerifierTest is Setup {
             abi.encodeWithSelector(INotary.getPacketDetails.selector),
             abi.encode(1, 1, 0, bytes32(0))
         );
-        (valid, ) = verifier__.verifyPacket(address(0), remoteChainId, 1, slow);
+        (valid, ) = verifier__.verifyPacket(
+            address(0),
+            remoteChainSlug,
+            1,
+            slow
+        );
         assertFalse(valid);
 
         // after timeout
@@ -156,7 +164,12 @@ contract VerifierTest is Setup {
             abi.encode(1, 1, 1, bytes32(0))
         );
         vm.warp(timeoutInSeconds + 20);
-        (valid, ) = verifier__.verifyPacket(address(0), remoteChainId, 1, slow);
+        (valid, ) = verifier__.verifyPacket(
+            address(0),
+            remoteChainSlug,
+            1,
+            slow
+        );
         assertTrue(valid);
     }
 }

@@ -7,20 +7,20 @@ import "../interfaces/ISignatureVerifier.sol";
 import "../utils/AccessControl.sol";
 
 contract AdminNotary is INotary, AccessControl(msg.sender) {
-    uint256 private immutable _chainId;
+    uint256 private immutable _chainSlug;
     ISignatureVerifier public signatureVerifier;
 
-    // attester => accumAddr|chainId|packetId => is attested
+    // attester => accumAddr|chainSlug|packetId => is attested
     mapping(address => mapping(uint256 => bool)) public isAttested;
 
-    // chainId => total attesters registered
+    // chainSlug => total attesters registered
     mapping(uint256 => uint256) public totalAttestors;
 
-    // accumAddr|chainId|packetId
+    // accumAddr|chainSlug|packetId
     mapping(uint256 => PacketDetails) private _packetDetails;
 
-    constructor(address signatureVerifier_, uint256 chainId_) {
-        _chainId = chainId_;
+    constructor(address signatureVerifier_, uint256 chainSlug_) {
+        _chainSlug = chainSlug_;
         signatureVerifier = ISignatureVerifier(signatureVerifier_);
     }
 
@@ -29,20 +29,22 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         external
         override
     {
-        (bytes32 root, uint256 packetId, uint256 remoteChainId) = IAccumulator(
-            accumAddress_
-        ).sealPacket();
+        (
+            bytes32 root,
+            uint256 packetId,
+            uint256 remoteChainSlug
+        ) = IAccumulator(accumAddress_).sealPacket();
 
         address attester = signatureVerifier.recoverSigner(
-            _chainId,
-            remoteChainId,
+            _chainSlug,
+            remoteChainSlug,
             accumAddress_,
             packetId,
             root,
             signature_
         );
 
-        if (!_hasRole(_attesterRole(remoteChainId), attester))
+        if (!_hasRole(_attesterRole(remoteChainSlug), attester))
             revert InvalidAttester();
         emit PacketVerifiedAndSealed(
             attester,
@@ -56,15 +58,15 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     function challengeSignature(
         bytes32 root_,
         uint256 packetId_,
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address accumAddress_,
         bytes calldata signature_
     ) external override {
         bytes32 root = IAccumulator(accumAddress_).getRootById(packetId_);
 
         address attester = signatureVerifier.recoverSigner(
-            _chainId,
-            remoteChainId_,
+            _chainSlug,
+            remoteChainSlug_,
             accumAddress_,
             packetId_,
             root_,
@@ -84,7 +86,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     /// @inheritdoc INotary
     function propose(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address accumAddress_,
         uint256 packetId_,
         bytes32 root_,
@@ -92,7 +94,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     ) external override {
         uint256 packedId = _packWithPacketId(
             accumAddress_,
-            remoteChainId_,
+            remoteChainSlug_,
             packetId_
         );
 
@@ -103,7 +105,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         packedDetails.timeRecord = block.timestamp;
 
         _verifyAndUpdateAttestations(
-            remoteChainId_,
+            remoteChainSlug_,
             accumAddress_,
             packetId_,
             packedId,
@@ -111,12 +113,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             signature_
         );
 
-        emit Proposed(remoteChainId_, accumAddress_, packetId_, root_);
+        emit Proposed(remoteChainSlug_, accumAddress_, packetId_, root_);
     }
 
     /// @inheritdoc INotary
     function confirmRoot(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address accumAddress_,
         uint256 packetId_,
         bytes32 root_,
@@ -124,7 +126,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     ) external override {
         uint256 packedId = _packWithPacketId(
             accumAddress_,
-            remoteChainId_,
+            remoteChainSlug_,
             packetId_
         );
 
@@ -133,7 +135,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             revert RootNotFound();
 
         address attester = _verifyAndUpdateAttestations(
-            remoteChainId_,
+            remoteChainSlug_,
             accumAddress_,
             packetId_,
             packedId,
@@ -141,11 +143,16 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             signature_
         );
 
-        emit RootConfirmed(attester, accumAddress_, packetId_, remoteChainId_);
+        emit RootConfirmed(
+            attester,
+            accumAddress_,
+            packetId_,
+            remoteChainSlug_
+        );
     }
 
     function _verifyAndUpdateAttestations(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address accumAddress_,
         uint256 packetId_,
         uint256 packedId,
@@ -153,15 +160,15 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         bytes calldata signature_
     ) private returns (address attester) {
         attester = signatureVerifier.recoverSigner(
-            remoteChainId_,
-            _chainId,
+            remoteChainSlug_,
+            _chainSlug,
             accumAddress_,
             packetId_,
             root_,
             signature_
         );
 
-        if (!_hasRole(_attesterRole(remoteChainId_), attester))
+        if (!_hasRole(_attesterRole(remoteChainSlug_), attester))
             revert InvalidAttester();
 
         PacketDetails storage packedDetails = _packetDetails[packedId];
@@ -174,12 +181,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     /// @inheritdoc INotary
     function getPacketStatus(
         address accumAddress_,
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         uint256 packetId_
     ) public view override returns (PacketStatus status) {
         uint256 packedId = _packWithPacketId(
             accumAddress_,
-            remoteChainId_,
+            remoteChainSlug_,
             packetId_
         );
 
@@ -197,7 +204,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     /// @inheritdoc INotary
     function getPacketDetails(
         address accumAddress_,
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         uint256 packetId_
     )
         external
@@ -212,35 +219,35 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     {
         uint256 packedId = _packWithPacketId(
             accumAddress_,
-            remoteChainId_,
+            remoteChainSlug_,
             packetId_
         );
-        status = getPacketStatus(accumAddress_, remoteChainId_, packetId_);
+        status = getPacketStatus(accumAddress_, remoteChainSlug_, packetId_);
 
         PacketDetails memory packet = _packetDetails[packedId];
         root = packet.remoteRoots;
         packetArrivedAt = packet.timeRecord;
         pendingAttestations =
-            totalAttestors[remoteChainId_] -
+            totalAttestors[remoteChainSlug_] -
             packet.attestations;
     }
 
     /**
      * @notice pauses the packet on remote
      * @param accumAddress_ address of accumulator at remote
-     * @param remoteChainId_ remote chain id
+     * @param remoteChainSlug_ remote chain id
      * @param packetId_ packed id
      * @param root_ root hash
      */
     function pausePacketOnRemote(
         address accumAddress_,
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         uint256 packetId_,
         bytes32 root_
     ) external onlyOwner {
         uint256 packedId = _packWithPacketId(
             accumAddress_,
-            remoteChainId_,
+            remoteChainSlug_,
             packetId_
         );
         PacketDetails storage packedDetails = _packetDetails[packedId];
@@ -255,17 +262,17 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     /**
      * @notice unpause the packet on remote
      * @param accumAddress_ address of accumulator at remote
-     * @param remoteChainId_ remote chain id
+     * @param remoteChainSlug_ remote chain id
      * @param packetId_ packed id
      */
     function acceptPausedPacket(
         address accumAddress_,
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         uint256 packetId_
     ) external onlyOwner {
         uint256 packedId = _packWithPacketId(
             accumAddress_,
-            remoteChainId_,
+            remoteChainSlug_,
             packetId_
         );
         PacketDetails storage packedDetails = _packetDetails[packedId];
@@ -276,35 +283,35 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     /**
-     * @notice adds an attester for `remoteChainId_` chain
-     * @param remoteChainId_ remote chain id
+     * @notice adds an attester for `remoteChainSlug_` chain
+     * @param remoteChainSlug_ remote chain id
      * @param attester_ attester address
      */
-    function grantAttesterRole(uint256 remoteChainId_, address attester_)
+    function grantAttesterRole(uint256 remoteChainSlug_, address attester_)
         external
         onlyOwner
     {
-        if (_hasRole(_attesterRole(remoteChainId_), attester_))
+        if (_hasRole(_attesterRole(remoteChainSlug_), attester_))
             revert AttesterExists();
 
-        _grantRole(_attesterRole(remoteChainId_), attester_);
-        totalAttestors[remoteChainId_]++;
+        _grantRole(_attesterRole(remoteChainSlug_), attester_);
+        totalAttestors[remoteChainSlug_]++;
     }
 
     /**
-     * @notice removes an attester from `remoteChainId_` chain list
-     * @param remoteChainId_ remote chain id
+     * @notice removes an attester from `remoteChainSlug_` chain list
+     * @param remoteChainSlug_ remote chain id
      * @param attester_ attester address
      */
-    function revokeAttesterRole(uint256 remoteChainId_, address attester_)
+    function revokeAttesterRole(uint256 remoteChainSlug_, address attester_)
         external
         onlyOwner
     {
-        if (!_hasRole(_attesterRole(remoteChainId_), attester_))
+        if (!_hasRole(_attesterRole(remoteChainSlug_), attester_))
             revert AttesterNotFound();
 
-        _revokeRole(_attesterRole(remoteChainId_), attester_);
-        totalAttestors[remoteChainId_]--;
+        _revokeRole(_attesterRole(remoteChainSlug_), attester_);
+        totalAttestors[remoteChainSlug_]--;
     }
 
     function _setSignatureVerifier(address signatureVerifier_) private {
@@ -312,24 +319,24 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         emit SignatureVerifierSet(signatureVerifier_);
     }
 
-    function _attesterRole(uint256 chainId_) internal pure returns (bytes32) {
-        return bytes32(chainId_);
+    function _attesterRole(uint256 chainSlug_) internal pure returns (bytes32) {
+        return bytes32(chainSlug_);
     }
 
     /**
      * @notice returns the confirmations received by a packet
      * @param accumAddress_ address of accumulator at remote
-     * @param remoteChainId_ remote chain id
+     * @param remoteChainSlug_ remote chain id
      * @param packetId_ packed id
      */
     function getConfirmations(
         address accumAddress_,
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         uint256 packetId_
     ) external view returns (uint256) {
         uint256 packedId = _packWithPacketId(
             accumAddress_,
-            remoteChainId_,
+            remoteChainSlug_,
             packetId_
         );
         return _packetDetails[packedId].attestations;
@@ -338,17 +345,17 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     /**
      * @notice returns the remote root for given `packetId_`
      * @param accumAddress_ address of accumulator at remote
-     * @param remoteChainId_ remote chain id
+     * @param remoteChainSlug_ remote chain id
      * @param packetId_ packed id
      */
     function getRemoteRoot(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address accumAddress_,
         uint256 packetId_
     ) external view override returns (bytes32) {
         uint256 packedId = _packWithPacketId(
             accumAddress_,
-            remoteChainId_,
+            remoteChainSlug_,
             packetId_
         );
         return _packetDetails[packedId].remoteRoots;
@@ -357,8 +364,8 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     /**
      * @notice returns the current chain id
      */
-    function chainId() external view returns (uint256) {
-        return _chainId;
+    function chainSlug() external view returns (uint256) {
+        return _chainSlug;
     }
 
     /**
@@ -374,12 +381,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     function _packWithPacketId(
         address accumAddr_,
-        uint256 chainId_,
+        uint256 chainSlug_,
         uint256 packetId_
     ) internal pure returns (uint256 packed) {
         packed =
             (uint256(uint160(accumAddr_)) << 96) |
-            (chainId_ << 64) |
+            (chainSlug_ << 64) |
             packetId_;
     }
 
@@ -388,29 +395,29 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
         pure
         returns (
             address accumAddr_,
-            uint256 chainId_,
+            uint256 chainSlug_,
             uint256 packetId_
         )
     {
         accumAddr_ = address(uint160(accumId_ >> 96));
         packetId_ = uint64(accumId_);
-        chainId_ = uint32(accumId_ >> 64);
+        chainSlug_ = uint32(accumId_ >> 64);
     }
 
-    function _pack(address accumAddr_, uint256 chainId_)
+    function _pack(address accumAddr_, uint256 chainSlug_)
         internal
         pure
         returns (uint256 packed)
     {
-        packed = (uint256(uint160(accumAddr_)) << 32) | chainId_;
+        packed = (uint256(uint160(accumAddr_)) << 32) | chainSlug_;
     }
 
     function _unpack(uint256 accumId_)
         internal
         pure
-        returns (address accumAddr_, uint256 chainId_)
+        returns (address accumAddr_, uint256 chainSlug_)
     {
         accumAddr_ = address(uint160(accumId_ >> 32));
-        chainId_ = uint32(accumId_);
+        chainSlug_ = uint32(accumId_);
     }
 }

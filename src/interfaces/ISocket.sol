@@ -6,7 +6,7 @@ import "./IVault.sol";
 interface ISocket {
     // to handle stack too deep
     struct VerificationParams {
-        uint256 remoteChainId;
+        uint256 remoteChainSlug;
         uint256 packetId;
         address accum;
         bytes deaccumProof;
@@ -23,18 +23,18 @@ interface ISocket {
 
     /**
      * @notice emits the message details when a new message arrives at outbound
-     * @param localChainId local chain id
+     * @param localChainSlug local chain id
      * @param localPlug local plug address
-     * @param dstChainId remote chain id
+     * @param dstChainSlug remote chain id
      * @param dstPlug remote plug address
-     * @param msgId message id packed with remoteChainId and nonce
+     * @param msgId message id packed with remoteChainSlug and nonce
      * @param msgGasLimit gas limit needed to execute the inbound at remote
      * @param payload the data which will be used by inbound at remote
      */
     event MessageTransmitted(
-        uint256 localChainId,
+        uint256 localChainSlug,
         address localPlug,
-        uint256 dstChainId,
+        uint256 dstChainSlug,
         address dstPlug,
         uint256 msgId,
         uint256 msgGasLimit,
@@ -45,7 +45,7 @@ interface ISocket {
         address accum_,
         address deaccum_,
         address verifier_,
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         bytes32 integrationType_
     );
 
@@ -71,7 +71,7 @@ interface ISocket {
 
     event PlugConfigSet(
         address remotePlug,
-        uint256 remoteChainId,
+        uint256 remoteChainSlug,
         bytes32 integrationType
     );
 
@@ -98,12 +98,12 @@ interface ISocket {
     /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with accumulator
-     * @param remoteChainId_ the remote chain id
+     * @param remoteChainSlug_ the remote chain id
      * @param msgGasLimit_ the gas limit needed to execute the payload on remote
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable;
@@ -111,7 +111,7 @@ interface ISocket {
     /**
      * @notice executes a message
      * @param msgGasLimit gas limit needed to execute the inbound at remote
-     * @param msgId message id packed with remoteChainId and nonce
+     * @param msgId message id packed with remoteChainSlug and nonce
      * @param localPlug remote plug address
      * @param payload the data which is needed by plug at inbound call on remote
      * @param verifyParams_ the details needed for message verification
@@ -126,12 +126,12 @@ interface ISocket {
 
     /**
      * @notice sets the config specific to the plug
-     * @param remoteChainId_ the remote chain id
+     * @param remoteChainSlug_ the remote chain id
      * @param remotePlug_ address of plug present at remote chain to call inbound
      * @param integrationType_ the name of accum to be used
      */
     function setPlugConfig(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address remotePlug_,
         string memory integrationType_
     ) external;

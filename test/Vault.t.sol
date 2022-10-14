@@ -8,7 +8,7 @@ contract VaultTest is Test {
     address constant _owner = address(1);
     address constant _raju = address(2);
     uint256 constant _minFees = 1000;
-    uint256 constant _remoteChainId = 0x0001;
+    uint256 constant _remoteChainSlug = 0x0001;
     bytes32 constant _integrationType =
         keccak256(abi.encode("INTEGRATION_TYPE"));
 

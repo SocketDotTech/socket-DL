@@ -52,12 +52,12 @@ interface INotary {
 
     /**
      * @notice emits the packet details when proposed at remote
-     * @param remoteChainId src chain id
+     * @param remoteChainSlug src chain id
      * @param accumAddress address of accumulator at src
      * @param packetId packed id
      */
     event Proposed(
-        uint256 indexed remoteChainId,
+        uint256 indexed remoteChainSlug,
         address indexed accumAddress,
         uint256 indexed packetId,
         bytes32 root
@@ -95,7 +95,7 @@ interface INotary {
         address indexed attester,
         address indexed accumAddress,
         uint256 indexed packetId,
-        uint256 remoteChainId_
+        uint256 remoteChainSlug_
     );
 
     error InvalidAttester();
@@ -137,21 +137,21 @@ interface INotary {
     function challengeSignature(
         bytes32 root_,
         uint256 packetId_,
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address accumAddress_,
         bytes calldata signature_
     ) external;
 
     /**
      * @notice to propose a new packet
-     * @param remoteChainId_ src chain id
+     * @param remoteChainSlug_ src chain id
      * @param accumAddress_ address of accumulator at src
      * @param packetId_ packed id
      * @param root_ root hash of packet
      * @param signature_ signature of proposer
      */
     function propose(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address accumAddress_,
         uint256 packetId_,
         bytes32 root_,
@@ -161,14 +161,14 @@ interface INotary {
     /**
      * @notice to confirm a packet on remote
      * @dev depending on paths, it may be a requirement to have on-chain confirmations for a packet
-     * @param remoteChainId_ src chain id
+     * @param remoteChainSlug_ src chain id
      * @param accumAddress_ address of accumulator at src
      * @param packetId_ packed id
      * @param root_ root hash of packet
      * @param signature_ signature of proposer
      */
     function confirmRoot(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address accumAddress_,
         uint256 packetId_,
         bytes32 root_,
@@ -177,13 +177,13 @@ interface INotary {
 
     /**
      * @notice returns the root of given packet
-     * @param remoteChainId_ remote chain id
+     * @param remoteChainSlug_ remote chain id
      * @param accumAddress_ address of accumulator at src
      * @param packetId_ packed id
      * @return root_ root hash
      */
     function getRemoteRoot(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         address accumAddress_,
         uint256 packetId_
     ) external view returns (bytes32 root_);
@@ -191,20 +191,20 @@ interface INotary {
     /**
      * @notice returns the packet status
      * @param accumAddress_ address of accumulator at src
-     * @param remoteChainId_ src chain id
+     * @param remoteChainSlug_ src chain id
      * @param packetId_ packed id
      * @return status_ status as enum PacketStatus
      */
     function getPacketStatus(
         address accumAddress_,
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         uint256 packetId_
     ) external view returns (PacketStatus status_);
 
     /**
      * @notice returns the packet details needed by verifier
      * @param accumAddress_ address of accumulator at src
-     * @param remoteChainId_ src chain id
+     * @param remoteChainSlug_ src chain id
      * @param packetId_ packed id
      * @return status packet status
      * @return packetArrivedAt time at which packet was proposed
@@ -213,7 +213,7 @@ interface INotary {
      */
     function getPacketDetails(
         address accumAddress_,
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         uint256 packetId_
     )
         external

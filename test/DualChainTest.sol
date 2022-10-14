@@ -21,8 +21,8 @@ contract DualChainTest is Setup {
     uint256 bFork;
 
     function setUp() public {
-        _a.chainId = 1;
-        _b.chainId = 2;
+        _a.chainSlug = 1;
+        _b.chainSlug = 2;
 
         aFork = vm.createFork(vm.envString("CHAIN1_RPC_URL"));
         bFork = vm.createFork(vm.envString("CHAIN2_RPC_URL"));
@@ -31,14 +31,14 @@ contract DualChainTest is Setup {
         attesters[0] = _attesterPrivateKey;
 
         vm.selectFork(aFork);
-        _a = _deployContractsOnSingleChain(_a.chainId, _b.chainId);
-        _addAttesters(attesters, _a, _b.chainId);
-        _setConfig(_a, _b.chainId);
+        _a = _deployContractsOnSingleChain(_a.chainSlug, _b.chainSlug);
+        _addAttesters(attesters, _a, _b.chainSlug);
+        _setConfig(_a, _b.chainSlug);
 
         vm.selectFork(bFork);
-        _b = _deployContractsOnSingleChain(_b.chainId, _a.chainId);
-        _addAttesters(attesters, _b, _a.chainId);
-        _setConfig(_b, _a.chainId);
+        _b = _deployContractsOnSingleChain(_b.chainSlug, _a.chainSlug);
+        _addAttesters(attesters, _b, _a.chainSlug);
+        _setConfig(_b, _a.chainSlug);
 
         _deployPlugContracts();
         _configPlugContracts();
@@ -52,15 +52,15 @@ contract DualChainTest is Setup {
         hoax(_raju);
         vm.selectFork(aFork);
         srcCounter__.remoteAddOperation{value: minFees}(
-            _b.chainId,
+            _b.chainSlug,
             amount,
             _msgGasLimit
         );
 
         uint256 msgId = _packMessageId(
             address(srcCounter__),
-            _a.chainId,
-            _b.chainId,
+            _a.chainSlug,
+            _b.chainSlug,
             0
         );
 
@@ -68,7 +68,7 @@ contract DualChainTest is Setup {
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a, accum, _b.chainId);
+        ) = _getLatestSignature(_a, accum, _b.chainSlug);
         _sealOnSrc(_a, accum, sig);
 
         vm.selectFork(bFork);
@@ -114,14 +114,14 @@ contract DualChainTest is Setup {
 
         vm.selectFork(aFork);
         srcCounter__.setSocketConfig(
-            _b.chainId,
+            _b.chainSlug,
             address(dstCounter__),
             integrationType
         );
 
         vm.selectFork(bFork);
         dstCounter__.setSocketConfig(
-            _a.chainId,
+            _a.chainSlug,
             address(srcCounter__),
             integrationType
         );
