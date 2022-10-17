@@ -12,8 +12,8 @@ contract SingleAccum is BaseAccum {
     constructor(
         address socket_,
         address notary_,
-        uint256 destChainId_
-    ) BaseAccum(socket_, notary_, destChainId_) {}
+        uint256 remoteChainId_
+    ) BaseAccum(socket_, notary_, remoteChainId_) {}
 
     /// adds the packed message to a packet
     /// @inheritdoc IAccumulator

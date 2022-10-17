@@ -5,7 +5,7 @@ interface ISignatureVerifier {
     /**
      * @notice returns the address of signer recovered from input signature
      * @param srcChainId_ source chain id
-     * @param destChainId_ destination chain id
+     * @param dstChainId_ remote chain id
      * @param accumAddress_ accumulator address
      * @param packetId_ packet id
      * @param root_ root hash of merkle tree
@@ -13,7 +13,7 @@ interface ISignatureVerifier {
      */
     function recoverSigner(
         uint256 srcChainId_,
-        uint256 destChainId_,
+        uint256 dstChainId_,
         address accumAddress_,
         uint256 packetId_,
         bytes32 root_,

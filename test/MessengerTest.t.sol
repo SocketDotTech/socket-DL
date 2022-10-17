@@ -16,7 +16,7 @@ contract PingPongTest is Setup {
     uint256 msgGasLimit = 130000;
 
     Messenger srcMessenger__;
-    Messenger destMessenger__;
+    Messenger dstMessenger__;
 
     function setUp() external {
         uint256[] memory attesters = new uint256[](1);
@@ -48,7 +48,7 @@ contract PingPongTest is Setup {
         _executePayloadOnDst(
             _a,
             _b,
-            address(destMessenger__),
+            address(dstMessenger__),
             packetId,
             msgId_,
             msgGasLimit,
@@ -57,7 +57,7 @@ contract PingPongTest is Setup {
             _PROOF
         );
 
-        assertEq(destMessenger__.message(), _PING);
+        assertEq(dstMessenger__.message(), _PING);
     }
 
     function _verifyBToA(uint256 msgId_) internal {
@@ -91,7 +91,7 @@ contract PingPongTest is Setup {
     }
 
     function _reset() internal {
-        destMessenger__.sendLocalMessage(bytes32(0));
+        dstMessenger__.sendLocalMessage(bytes32(0));
         srcMessenger__.sendLocalMessage(bytes32(0));
     }
 
@@ -106,7 +106,7 @@ contract PingPongTest is Setup {
                 (_a.chainId << 80) |
                 (_b.chainId << 64) |
                 index;
-            uint256 msgIdBToA = (uint256(uint160(address(destMessenger__))) <<
+            uint256 msgIdBToA = (uint256(uint160(address(dstMessenger__))) <<
                 96) |
                 (_b.chainId << 80) |
                 (_a.chainId << 64) |
@@ -127,7 +127,7 @@ contract PingPongTest is Setup {
             _a.chainId,
             msgGasLimit
         );
-        destMessenger__ = new Messenger(
+        dstMessenger__ = new Messenger(
             address(_b.socket__),
             _b.chainId,
             msgGasLimit
@@ -143,12 +143,12 @@ contract PingPongTest is Setup {
         hoax(_plugOwner);
         srcMessenger__.setSocketConfig(
             _b.chainId,
-            address(destMessenger__),
+            address(dstMessenger__),
             integrationType
         );
 
         hoax(_plugOwner);
-        destMessenger__.setSocketConfig(
+        dstMessenger__.setSocketConfig(
             _a.chainId,
             address(srcMessenger__),
             integrationType

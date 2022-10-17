@@ -3,14 +3,12 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 
 contract VerifierTest is Setup {
-    address _notAPauser = address(10);
-
     uint256 chainId = 1;
-    uint256 destChainId = 2;
-    uint256 anotherDestChainId = 3;
+    uint256 remoteChainId = 2;
     uint256 timeoutInSeconds = 100;
+    bytes32 integrationType = keccak256(abi.encode("INTEGRATION_TYPE"));
 
-    Verifier verifier;
+    Verifier verifier__;
     ChainContext cc;
 
     function setUp() public {
@@ -18,20 +16,23 @@ contract VerifierTest is Setup {
         (cc.sigVerifier__, cc.notary__) = _deployNotary(chainId, _socketOwner);
 
         hoax(_socketOwner);
-        cc.verifier__ = new Verifier(
+        verifier__ = new Verifier(
             _socketOwner,
             address(cc.notary__),
             address(cc.socket__),
-            timeoutInSeconds
+            timeoutInSeconds,
+            integrationType
         );
     }
 
     function testDeployment() public {
-        assertEq(cc.verifier__.owner(), _socketOwner);
-        assertEq(address(cc.verifier__.notary()), address(cc.notary__));
-        assertEq(address(cc.verifier__.socket()), address(cc.socket__));
+        assertEq(verifier__.owner(), _socketOwner);
 
-        assertEq(cc.verifier__.timeoutInSeconds(), timeoutInSeconds);
+        assertEq(address(verifier__.notary()), address(cc.notary__));
+        assertEq(address(verifier__.socket()), address(cc.socket__));
+
+        assertEq(verifier__.timeoutInSeconds(), timeoutInSeconds);
+        assertEq(verifier__.integrationType(), integrationType);
     }
 
     function testSetNotary() external {
@@ -39,11 +40,11 @@ contract VerifierTest is Setup {
 
         hoax(_raju);
         vm.expectRevert(Ownable.OnlyOwner.selector);
-        cc.verifier__.setNotary(newNotary);
+        verifier__.setNotary(newNotary);
 
         hoax(_socketOwner);
-        cc.verifier__.setNotary(newNotary);
-        assertEq(address(cc.verifier__.notary()), newNotary);
+        verifier__.setNotary(newNotary);
+        assertEq(address(verifier__.notary()), newNotary);
     }
 
     function testSetSocket() external {
@@ -51,20 +52,14 @@ contract VerifierTest is Setup {
 
         hoax(_raju);
         vm.expectRevert(Ownable.OnlyOwner.selector);
-        cc.verifier__.setSocket(newSocket);
+        verifier__.setSocket(newSocket);
 
         hoax(_socketOwner);
-        cc.verifier__.setSocket(newSocket);
-        assertEq(address(cc.verifier__.socket()), newSocket);
+        verifier__.setSocket(newSocket);
+        assertEq(address(verifier__.socket()), newSocket);
     }
 
     function testVerifyCommitmentNotProposed() public {
-        vm.mockCall(
-            address(cc.socket__),
-            abi.encodeWithSelector(ISocket.destConfigs.selector),
-            abi.encode(1)
-        );
-
         // less attestations
         vm.mockCall(
             address(cc.notary__),
@@ -73,22 +68,16 @@ contract VerifierTest is Setup {
         );
 
         // without timeout
-        (bool valid, ) = cc.verifier__.verifyCommitment(
+        (bool valid, ) = verifier__.verifyPacket(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
-            0
+            integrationType
         );
         assertFalse(valid);
     }
 
     function testVerifyCommitmentFastPath() public {
-        vm.mockCall(
-            address(cc.socket__),
-            abi.encodeWithSelector(ISocket.destConfigs.selector),
-            abi.encode(1)
-        );
-
         // before timeout
         // less attestations
         vm.mockCall(
@@ -96,11 +85,11 @@ contract VerifierTest is Setup {
             abi.encodeWithSelector(INotary.getPacketDetails.selector),
             abi.encode(1, 1, 1, bytes32(0))
         );
-        (bool valid, ) = cc.verifier__.verifyCommitment(
+        (bool valid, ) = verifier__.verifyPacket(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
-            0
+            integrationType
         );
         assertFalse(valid);
 
@@ -110,11 +99,11 @@ contract VerifierTest is Setup {
             abi.encodeWithSelector(INotary.getPacketDetails.selector),
             abi.encode(1, 1, 0, bytes32(0))
         );
-        (valid, ) = cc.verifier__.verifyCommitment(
+        (valid, ) = verifier__.verifyPacket(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
-            0
+            integrationType
         );
         assertTrue(valid);
 
@@ -126,33 +115,28 @@ contract VerifierTest is Setup {
             abi.encode(1, 1, 1, bytes32(0))
         );
         vm.warp(timeoutInSeconds + 20);
-        (valid, ) = cc.verifier__.verifyCommitment(
+        (valid, ) = verifier__.verifyPacket(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
-            0
+            integrationType
         );
         assertTrue(valid);
     }
 
     function testVerifyCommitmentSlowPath() public {
-        vm.mockCall(
-            address(cc.socket__),
-            abi.encodeWithSelector(ISocket.destConfigs.selector),
-            abi.encode(2)
-        );
-
+        bytes32 slow = keccak256(abi.encode("SLOW_INTEGRATION_TYPE"));
         // before timeout
         vm.mockCall(
             address(cc.notary__),
             abi.encodeWithSelector(INotary.getPacketDetails.selector),
             abi.encode(1, 1, 1, bytes32(0))
         );
-        (bool valid, ) = cc.verifier__.verifyCommitment(
+        (bool valid, ) = verifier__.verifyPacket(
             address(0),
-            destChainId,
+            remoteChainId,
             1,
-            0
+            slow
         );
         assertFalse(valid);
 
@@ -162,12 +146,7 @@ contract VerifierTest is Setup {
             abi.encodeWithSelector(INotary.getPacketDetails.selector),
             abi.encode(1, 1, 0, bytes32(0))
         );
-        (valid, ) = cc.verifier__.verifyCommitment(
-            address(0),
-            destChainId,
-            1,
-            0
-        );
+        (valid, ) = verifier__.verifyPacket(address(0), remoteChainId, 1, slow);
         assertFalse(valid);
 
         // after timeout
@@ -177,12 +156,7 @@ contract VerifierTest is Setup {
             abi.encode(1, 1, 1, bytes32(0))
         );
         vm.warp(timeoutInSeconds + 20);
-        (valid, ) = cc.verifier__.verifyCommitment(
-            address(0),
-            destChainId,
-            1,
-            0
-        );
+        (valid, ) = verifier__.verifyPacket(address(0), remoteChainId, 1, slow);
         assertTrue(valid);
     }
 }

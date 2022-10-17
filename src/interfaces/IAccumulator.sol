@@ -15,7 +15,7 @@ interface IAccumulator {
     );
 
     /**
-     * @notice emits when the packet is sealed and indicates it can be send to destination
+     * @notice emits when the packet is sealed and indicates it can be send to remote
      * @param rootHash the packed message hash (to be replaced with the root hash of the merkle tree)
      * @param packetId an incremental id assigned to each new packet
      */
@@ -52,13 +52,13 @@ interface IAccumulator {
      * @dev this should be executable by notary only
      * @return root root hash of the packet
      * @return packetId id of the packed sealed
-     * @return destChainId dest chain id for the packet sealed
+     * @return remoteChainId remote chain id for the packet sealed
      */
     function sealPacket()
         external
         returns (
             bytes32 root,
             uint256 packetId,
-            uint256 destChainId
+            uint256 remoteChainId
         );
 }

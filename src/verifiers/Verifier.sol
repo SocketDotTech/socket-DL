@@ -10,21 +10,25 @@ import "../utils/Ownable.sol";
 contract Verifier is IVerifier, Ownable {
     INotary public notary;
     ISocket public socket;
-    string public fastIntegrationType;
     uint256 public immutable timeoutInSeconds;
+
+    // this integration type is set for fast accum
+    // it is compared against the passed accum type to decide packet verification mode
+    bytes32 public integrationType;
 
     event NotarySet(address notary_);
     event SocketSet(address socket_);
 
     constructor(
         address owner_,
-        address _notary,
-        address _socket,
-        uint256 timeoutInSeconds_
+        address notary_,
+        address socket_,
+        uint256 timeoutInSeconds_,
+        bytes32 integrationType_
     ) Ownable(owner_) {
-        notary = INotary(_notary);
-        socket = ISocket(_socket);
-        fastIntegrationType = "FAST";
+        notary = INotary(notary_);
+        socket = ISocket(socket_);
+        integrationType = integrationType_;
 
         // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
@@ -50,22 +54,18 @@ contract Verifier is IVerifier, Ownable {
 
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param accumAddress_ address of accumulator at src
-     * @param remoteChainId_ dest chain id
-     * @param configId_ config set for plug
+     * @param accumAddress_ address of accumulator at remote
+     * @param remoteChainId_ remote chain id
      * @param packetId_ packet id
+     * @param integrationType_ integration type for plug
      */
-    function verifyCommitment(
+    function verifyPacket(
         address accumAddress_,
         uint256 remoteChainId_,
-        uint256 configId_,
-        uint256 packetId_
+        uint256 packetId_,
+        bytes32 integrationType_
     ) external view override returns (bool, bytes32) {
-        bool isFast = socket.destConfigs(
-            keccak256(abi.encode(remoteChainId_, fastIntegrationType))
-        ) == configId_
-            ? true
-            : false;
+        bool isFast = integrationType == integrationType_ ? true : false;
 
         (
             INotary.PacketStatus status,
@@ -75,7 +75,6 @@ contract Verifier is IVerifier, Ownable {
         ) = notary.getPacketDetails(accumAddress_, remoteChainId_, packetId_);
 
         if (status != INotary.PacketStatus.PROPOSED) return (false, root);
-
         // if timed out, return true irrespective of fast or slow accum
         if (block.timestamp - packetArrivedAt > timeoutInSeconds)
             return (true, root);

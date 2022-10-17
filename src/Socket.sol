@@ -45,9 +45,6 @@ contract Socket is SocketConfig, ReentrancyGuard {
         _setVault(vault_);
 
         _chainId = chainId_;
-
-        // initialise 0th index
-        configs.push(Config(address(0), address(0), address(0)));
     }
 
     function setHasher(address hasher_) external onlyOwner {
@@ -61,9 +58,9 @@ contract Socket is SocketConfig, ReentrancyGuard {
     /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with accumulator
-     * @param remoteChainId_ the destination chain id
-     * @param msgGasLimit_ the gas limit needed to execute the payload on destination
-     * @param payload_ the data which is needed by plug at inbound call on destination
+     * @param remoteChainId_ the remote chain id
+     * @param msgGasLimit_ the gas limit needed to execute the payload on remote
+     * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
         uint256 remoteChainId_,
@@ -73,14 +70,17 @@ contract Socket is SocketConfig, ReentrancyGuard {
         PlugConfig memory plugConfig = plugConfigs[msg.sender][remoteChainId_];
         uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
 
-        // Packs the src plug, src chain id, dest chain id and nonce
-        // msgId(256) = srcPlug(160) | srcChainId(16) | destChainId(16) | nonce(64)
+        // Packs the local plug, local chain id, remote chain id and nonce
+        // msgId(256) = localPlug(160) | localChainId(16) | remoteChainId(16) | nonce(64)
         uint256 msgId = (uint256(uint160(msg.sender)) << 96) |
             (uint256(uint16(_chainId)) << 80) |
             (uint256(uint16(remoteChainId_)) << 64) |
             uint256(uint64(nonce));
 
-        vault.deductFee{value: msg.value}(remoteChainId_, plugConfig.configId);
+        vault.deductFee{value: msg.value}(
+            remoteChainId_,
+            plugConfig.integrationType
+        );
 
         bytes32 packedMessage = hasher.packMessage(
             _chainId,
@@ -92,9 +92,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
             payload_
         );
 
-        IAccumulator(configs[plugConfig.configId].accum).addPackedMessage(
-            packedMessage
-        );
+        IAccumulator(plugConfig.accum).addPackedMessage(packedMessage);
         emit MessageTransmitted(
             _chainId,
             msg.sender,
@@ -108,10 +106,10 @@ contract Socket is SocketConfig, ReentrancyGuard {
 
     /**
      * @notice executes a message
-     * @param msgGasLimit gas limit needed to execute the inbound at destination
-     * @param msgId message id packed with src plug, src chainId, dest chainId and nonce
-     * @param localPlug dest plug address
-     * @param payload the data which is needed by plug at inbound call on destination
+     * @param msgGasLimit gas limit needed to execute the inbound at remote
+     * @param msgId message id packed with local plug, local chainId, remote chainId and nonce
+     * @param localPlug remote plug address
+     * @param payload the data which is needed by plug at inbound call on remote
      * @param verifyParams_ the details needed for message verification
      */
     function execute(
@@ -138,29 +136,27 @@ contract Socket is SocketConfig, ReentrancyGuard {
             payload
         );
 
-        _verify(plugConfig.configId, packedMessage, verifyParams_);
+        _verify(packedMessage, plugConfig, verifyParams_);
         _execute(localPlug, msgGasLimit, msgId, payload);
     }
 
     function _verify(
-        uint256 configId,
         bytes32 packedMessage,
+        PlugConfig memory plugConfig,
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
-        Config memory config = configs[configId];
-
-        (bool isVerified, bytes32 root) = IVerifier(config.verifier)
-            .verifyCommitment(
+        (bool isVerified, bytes32 root) = IVerifier(plugConfig.verifier)
+            .verifyPacket(
                 verifyParams_.accum,
                 verifyParams_.remoteChainId,
-                configId,
-                verifyParams_.packetId
+                verifyParams_.packetId,
+                plugConfig.integrationType
             );
 
         if (!isVerified) revert VerificationFailed();
 
         if (
-            !IDeaccumulator(config.deaccum).verifyMessageInclusion(
+            !IDeaccumulator(plugConfig.deaccum).verifyMessageInclusion(
                 root,
                 packedMessage,
                 verifyParams_.deaccumProof
