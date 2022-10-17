@@ -29,7 +29,7 @@ contract VaultTest is Test {
         hoax(_owner);
         _vault.setFees(_minFees, _integrationType);
 
-        vm.expectRevert(Vault.NotEnoughFees.selector);
+        vm.expectRevert(Vault.InsufficientFees.selector);
         _vault.deductFee{value: 10}(0, _integrationType);
 
         vm.expectEmit(true, false, false, false);

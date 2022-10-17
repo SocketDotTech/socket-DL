@@ -81,7 +81,7 @@ contract HappyTest is Setup {
 
         _submitRootOnDst(_b, sig, packetId, root);
 
-        vm.expectRevert(INotary.AlreadyProposed.selector);
+        vm.expectRevert(INotary.AlreadyAttested.selector);
         _submitRootOnDst(_b, sig, packetId, root);
 
         // without executor role
@@ -189,7 +189,7 @@ contract HappyTest is Setup {
         bytes memory sig;
 
         hoax(_raju);
-        vm.expectRevert(Vault.NotEnoughFees.selector);
+        vm.expectRevert(Vault.InsufficientFees.selector);
         srcCounter__.remoteAddOperation(_b.chainSlug, addAmount, _msgGasLimit);
 
         hoax(_raju);
@@ -404,7 +404,7 @@ contract HappyTest is Setup {
 
         // attest
         hoax(newAttester);
-        _b.notary__.confirmRoot(packetId, root, sig);
+        _b.notary__.attest(packetId, root, sig);
 
         _executePayloadOnDst(
             _a,

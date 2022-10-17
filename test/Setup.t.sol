@@ -272,7 +272,7 @@ contract Setup is Test {
         bytes32 root_
     ) internal {
         hoax(_raju);
-        dst_.notary__.propose(packetId_, root_, sig_);
+        dst_.notary__.attest(packetId_, root_, sig_);
     }
 
     function _executePayloadOnDst(
