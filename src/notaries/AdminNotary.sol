@@ -70,7 +70,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             revert InvalidAttester();
 
         _updatePacketDetails(attester, packetId_, root_);
-        emit RootConfirmed(attester, packetId_, root_);
+        emit PacketAttested(attester, packetId_);
     }
 
     function _updatePacketDetails(
@@ -85,7 +85,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
             packedDetails.remoteRoots = root_;
             packedDetails.timeRecord = block.timestamp;
 
-            emit Proposed(packetId_);
+            emit PacketProposed(packetId_, root_);
         }
 
         isAttested[attester_][packetId_] = true;
@@ -221,7 +221,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
 
     function _getChainSlug(uint256 packetId_)
         internal
-        view
+        pure
         returns (uint256 chainSlug_)
     {
         chainSlug_ = uint32(packetId_ >> 64);

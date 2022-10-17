@@ -35,40 +35,22 @@ interface INotary {
 
     /**
      * @notice emits the packet details when proposed at remote
-     * @param attester address of attester
      * @param packetId packet id
      * @param root packet root
      */
-    event Proposed(
-        address indexed attester,
-        uint256 indexed packetId,
-        bytes32 root
-    );
+    event PacketProposed(uint256 indexed packetId, bytes32 root);
 
     /**
-     * @notice emits when a root is confirmed by attester at remote
+     * @notice emits when a packet is attested by attester at remote
      * @param attester address of attester
      * @param packetId packet id
      */
-    event RootConfirmed(address indexed attester, uint256 indexed packetId);
+    event PacketAttested(address indexed attester, uint256 indexed packetId);
 
     error InvalidAttester();
-
-    error AlreadyProposed();
-
     error AttesterExists();
-
     error AttesterNotFound();
-
-    error AccumAlreadyAdded();
-
     error AlreadyAttested();
-
-    error NotFastPath();
-
-    error ZeroAddress();
-
-    error RootNotFound();
 
     /**
      * @notice verifies the attester and seals a packet
@@ -83,20 +65,7 @@ interface INotary {
      * @param root_ root hash of packet
      * @param signature_ signature of proposer
      */
-    function propose(
-        uint256 packetId_,
-        bytes32 root_,
-        bytes calldata signature_
-    ) external;
-
-    /**
-     * @notice to confirm a packet on remote
-     * @dev depending on paths, it may be a requirement to have on-chain confirmations for a packet
-     * @param packetId_ packet id
-     * @param root_ root hash of packet
-     * @param signature_ signature of proposer
-     */
-    function confirmRoot(
+    function attest(
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_
