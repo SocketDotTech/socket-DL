@@ -25,14 +25,17 @@ contract Setup is Test {
     uint256 internal _timeoutInSeconds = 0;
     uint256 internal _slowAccumWaitTime = 300;
     uint256 internal _msgGasLimit = 25548;
-
-    bool constant _isFast = false;
+    string internal fastIntegrationType = "FAST";
+    string internal slowIntegrationType = "SLOW";
 
     struct ChainContext {
         uint256 chainId;
+        bytes32 slowAccumType;
+        bytes32 fastAccumType;
         AdminNotary notary__;
         Hasher hasher__;
-        IAccumulator accum__;
+        IAccumulator fastAccum__;
+        IAccumulator slowAccum__;
         IDeaccumulator deaccum__;
         SignatureVerifier sigVerifier__;
         Socket socket__;
@@ -53,21 +56,36 @@ contract Setup is Test {
     ChainContext _a;
     ChainContext _b;
 
-    function _dualChainSetup(uint256[] memory attesters_) internal {
-        _a.chainId = 0x2013AA263;
-        _b.chainId = 0x2013AA264;
+    function _dualChainSetup(uint256[] memory attesters_, uint256 minFees_)
+        internal
+    {
+        _a.chainId = uint16(uint256(0x2013AA263));
+        _b.chainId = uint16(uint256(0x2013AA264));
 
         _a = _deployContractsOnSingleChain(_a.chainId, _b.chainId);
         _b = _deployContractsOnSingleChain(_b.chainId, _a.chainId);
 
+        // setup attesters
         _addAttesters(attesters_, _a, _b.chainId);
         _addAttesters(attesters_, _b, _a.chainId);
+
+        // add fast and slow config for all remoteChains
+        _setConfig(_a, _b.chainId);
+        _setConfig(_b, _a.chainId);
+
+        // setup minfees in vault for diff accum for all remote chains
+        vm.startPrank(_socketOwner);
+        _a.vault__.setFees(minFees_, _a.fastAccumType);
+        _a.vault__.setFees(minFees_, _a.slowAccumType);
+        _b.vault__.setFees(minFees_, _b.fastAccumType);
+        _b.vault__.setFees(minFees_, _b.slowAccumType);
+        vm.stopPrank();
     }
 
     function _addAttesters(
         uint256[] memory attesterPrivateKey_,
         ChainContext memory cc_,
-        uint256 destChainId_
+        uint256 remoteChainId_
     ) internal {
         vm.startPrank(_socketOwner);
 
@@ -76,17 +94,17 @@ contract Setup is Test {
             // deduce attester address from private key
             attester = vm.addr(attesterPrivateKey_[index]);
             // grant attester role
-            cc_.notary__.grantAttesterRole(destChainId_, attester);
+            cc_.notary__.grantAttesterRole(remoteChainId_, attester);
         }
 
         vm.stopPrank();
     }
 
     function _deployContractsOnSingleChain(
-        uint256 srcChainId_,
-        uint256 destChainId_
+        uint256 localChainId_,
+        uint256 remoteChainId_
     ) internal returns (ChainContext memory cc) {
-        cc.chainId = srcChainId_;
+        cc.chainId = localChainId_;
         (cc.sigVerifier__, cc.notary__) = _deployNotary(
             cc.chainId,
             _socketOwner
@@ -97,23 +115,53 @@ contract Setup is Test {
             _socketOwner
         );
 
-        (cc.accum__, cc.deaccum__) = _deployAccumDeaccum(
+        (cc.fastAccum__, cc.deaccum__) = _deployAccumDeaccum(
             cc.notary__,
             address(cc.socket__),
             _socketOwner,
-            destChainId_,
-            _isFast
+            remoteChainId_
+        );
+
+        (cc.slowAccum__, cc.deaccum__) = _deployAccumDeaccum(
+            cc.notary__,
+            address(cc.socket__),
+            _socketOwner,
+            remoteChainId_
         );
 
         hoax(_socketOwner);
         cc.verifier__ = new Verifier(
             _plugOwner,
             address(cc.notary__),
-            _timeoutInSeconds
+            address(cc.socket__),
+            _timeoutInSeconds,
+            keccak256(abi.encode(fastIntegrationType))
         );
 
         hoax(_socketOwner);
         cc.socket__.grantExecutorRole(_raju);
+    }
+
+    function _setConfig(ChainContext storage cc_, uint256 remoteChainId_)
+        internal
+    {
+        hoax(_socketOwner);
+        cc_.fastAccumType = cc_.socket__.addConfig(
+            remoteChainId_,
+            address(cc_.fastAccum__),
+            address(cc_.deaccum__),
+            address(cc_.verifier__),
+            fastIntegrationType
+        );
+
+        hoax(_socketOwner);
+        cc_.slowAccumType = cc_.socket__.addConfig(
+            remoteChainId_,
+            address(cc_.slowAccum__),
+            address(cc_.deaccum__),
+            address(cc_.verifier__),
+            slowIntegrationType
+        );
     }
 
     function _deploySocket(uint256 chainId_, address deployer_)
@@ -127,7 +175,11 @@ contract Setup is Test {
         vm.startPrank(deployer_);
         hasher__ = new Hasher();
         vault__ = new Vault(deployer_);
-        socket__ = new Socket(chainId_, address(hasher__), address(vault__));
+        socket__ = new Socket(
+            uint16(chainId_),
+            address(hasher__),
+            address(vault__)
+        );
 
         vm.stopPrank();
     }
@@ -138,11 +190,7 @@ contract Setup is Test {
     {
         vm.startPrank(deployer_);
         sigVerifier__ = new SignatureVerifier();
-        notary__ = new AdminNotary(
-            address(sigVerifier__),
-            chainId_,
-            _slowAccumWaitTime
-        );
+        notary__ = new AdminNotary(address(sigVerifier__), chainId_);
 
         vm.stopPrank();
     }
@@ -151,20 +199,21 @@ contract Setup is Test {
         AdminNotary notary__,
         address socket_,
         address deployer_,
-        uint256 destChainId_,
-        bool isFast_
+        uint256 remoteChainId_
     ) internal returns (SingleAccum accum__, SingleDeaccum deaccum__) {
         vm.startPrank(deployer_);
 
-        accum__ = new SingleAccum(socket_, address(notary__));
+        accum__ = new SingleAccum(socket_, address(notary__), remoteChainId_);
         deaccum__ = new SingleDeaccum();
-
-        notary__.addAccumulator(address(accum__), destChainId_, isFast_);
 
         vm.stopPrank();
     }
 
-    function _getLatestSignature(ChainContext storage src_)
+    function _getLatestSignature(
+        ChainContext storage src_,
+        address accum_,
+        uint256 remoteChainId_
+    )
         internal
         returns (
             bytes32 root,
@@ -172,18 +221,37 @@ contract Setup is Test {
             bytes memory sig
         )
     {
-        (root, packetId) = src_.accum__.getNextPacketToBeSealed();
+        (root, packetId, sig) = _getLatestSignatureForSigner(
+            src_,
+            accum_,
+            remoteChainId_,
+            _attesterPrivateKey
+        );
+    }
+
+    function _getLatestSignatureForSigner(
+        ChainContext storage src_,
+        address accum_,
+        uint256 remoteChainId_,
+        uint256 privateKey_
+    )
+        internal
+        returns (
+            bytes32 root,
+            uint256 packetId,
+            bytes memory sig
+        )
+    {
+        (root, packetId) = IAccumulator(accum_).getNextPacketToBeSealed();
+
         bytes32 digest = keccak256(
-            abi.encode(src_.chainId, address(src_.accum__), packetId, root)
+            abi.encode(src_.chainId, remoteChainId_, accum_, packetId, root)
         );
         digest = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
         );
 
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _attesterPrivateKey,
-            digest
-        );
+        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(privateKey_, digest);
         sig = new bytes(65);
         bytes1 v32 = bytes1(sigV);
 
@@ -194,13 +262,13 @@ contract Setup is Test {
         }
     }
 
-    function _verifyAndSealOnSrc(
+    function _sealOnSrc(
         ChainContext storage src_,
-        ChainContext storage dest_,
+        address accum,
         bytes memory sig_
     ) internal {
         hoax(_attester);
-        src_.notary__.verifyAndSeal(address(src_.accum__), dest_.chainId, sig_);
+        src_.notary__.seal(accum, sig_);
     }
 
     function _submitRootOnDst(
@@ -208,25 +276,21 @@ contract Setup is Test {
         ChainContext storage dst_,
         bytes memory sig_,
         uint256 packetId_,
-        bytes32 root_
+        bytes32 root_,
+        address accum_
     ) internal {
         hoax(_raju);
-        dst_.notary__.propose(
-            src_.chainId,
-            address(src_.accum__),
-            packetId_,
-            root_,
-            sig_
-        );
+        dst_.notary__.propose(src_.chainId, accum_, packetId_, root_, sig_);
     }
 
     function _executePayloadOnDst(
         ChainContext storage src_,
         ChainContext storage dst_,
-        address destPlug_,
+        address remotePlug_,
         uint256 packetId_,
         uint256 msgId_,
         uint256 msgGasLimit_,
+        address accum_,
         bytes memory payload_,
         bytes memory proof_
     ) internal {
@@ -234,15 +298,15 @@ contract Setup is Test {
 
         ISocket.VerificationParams memory vParams = ISocket.VerificationParams(
             src_.chainId,
-            address(src_.accum__),
             packetId_,
+            accum_,
             proof_
         );
 
         dst_.socket__.execute(
             msgGasLimit_,
             msgId_,
-            destPlug_,
+            remotePlug_,
             payload_,
             vParams
         );
@@ -251,13 +315,13 @@ contract Setup is Test {
     function _packMessageId(
         address srcPlug,
         uint256 srcChainId,
-        uint256 destChainId,
+        uint256 remoteChainId,
         uint256 nonce
     ) internal pure returns (uint256) {
         return
             (uint256(uint160(srcPlug)) << 96) |
             (srcChainId << 80) |
-            (destChainId << 64) |
+            (remoteChainId << 64) |
             nonce;
     }
 

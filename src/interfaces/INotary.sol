@@ -12,8 +12,7 @@ interface INotary {
     enum PacketStatus {
         NOT_PROPOSED,
         PROPOSED,
-        PAUSED,
-        CONFIRMED
+        PAUSED
     }
 
     /**
@@ -24,7 +23,7 @@ interface INotary {
 
     /**
      * @notice emits the verification and seal confirmation of a packet
-     * @param accumAddress address of accumulator at src
+     * @param accumAddress address of accumulator at local
      * @param packetId packed id
      * @param signature signature of attester
      */
@@ -52,7 +51,7 @@ interface INotary {
     );
 
     /**
-     * @notice emits the packet details when proposed at destination
+     * @notice emits the packet details when proposed at remote
      * @param remoteChainId src chain id
      * @param accumAddress address of accumulator at src
      * @param packetId packed id
@@ -87,7 +86,7 @@ interface INotary {
     );
 
     /**
-     * @notice emits when a root is confirmed by attester at dest
+     * @notice emits when a root is confirmed by attester at remote
      * @param attester address of packet attester
      * @param accumAddress address of accumulator at src
      * @param packetId packed id
@@ -123,27 +122,23 @@ interface INotary {
 
     /**
      * @notice verifies the attester and seals a packet
-     * @param accumAddress_ address of accumulator at src
-     * @param remoteChainId_ dest chain id
+     * @param accumAddress_ address of accumulator at local
      * @param signature_ signature of attester
      */
-    function verifyAndSeal(
-        address accumAddress_,
-        uint256 remoteChainId_,
-        bytes calldata signature_
-    ) external;
+    function seal(address accumAddress_, bytes calldata signature_) external;
 
     /**
-     * @notice challenges a packet at src if wrongly attested
-     * @param accumAddress_ address of accumulator at src
+     * @notice challenges a packet at local if wrongly attested
+     * @param accumAddress_ address of accumulator at local
      * @param root_ root hash of packet
      * @param packetId_ packed id
      * @param signature_ address of original attester
      */
     function challengeSignature(
-        address accumAddress_,
         bytes32 root_,
         uint256 packetId_,
+        uint256 remoteChainId_,
+        address accumAddress_,
         bytes calldata signature_
     ) external;
 
@@ -164,7 +159,7 @@ interface INotary {
     ) external;
 
     /**
-     * @notice to confirm a packet on destination
+     * @notice to confirm a packet on remote
      * @dev depending on paths, it may be a requirement to have on-chain confirmations for a packet
      * @param remoteChainId_ src chain id
      * @param accumAddress_ address of accumulator at src
@@ -182,7 +177,7 @@ interface INotary {
 
     /**
      * @notice returns the root of given packet
-     * @param remoteChainId_ dest chain id
+     * @param remoteChainId_ remote chain id
      * @param accumAddress_ address of accumulator at src
      * @param packetId_ packed id
      * @return root_ root hash
@@ -211,8 +206,9 @@ interface INotary {
      * @param accumAddress_ address of accumulator at src
      * @param remoteChainId_ src chain id
      * @param packetId_ packed id
-     * @return isConfirmed true if has required confirmations
+     * @return status packet status
      * @return packetArrivedAt time at which packet was proposed
+     * @return pendingAttestations number of attestations remaining
      * @return root root hash
      */
     function getPacketDetails(
@@ -223,8 +219,9 @@ interface INotary {
         external
         view
         returns (
-            bool isConfirmed,
+            PacketStatus status,
             uint256 packetArrivedAt,
+            uint256 pendingAttestations,
             bytes32 root
         );
 }

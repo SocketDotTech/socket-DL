@@ -6,7 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithoutArgs, getChainId, storeAddresses } from "./utils";
 
 import { deployAccumulator, deployCounter, deployNotary, deploySocket, deployVault, deployVerifier } from "../scripts/contracts";
-import { executorAddress, totalDestinations } from "./config";
+import { executorAddress, totalRemoteChains } from "./config";
 
 export const main = async () => {
   try {
@@ -27,7 +27,7 @@ export const main = async () => {
     const socket: Contract = await deploySocket(hasher, vault, socketSigner);
 
     // plug deployments
-    const verifier: Contract = await deployVerifier(notary, counterSigner)
+    const verifier: Contract = await deployVerifier(notary, socket, counterSigner)
     const counter: Contract = await deployCounter(socket, counterSigner);
     console.log("Contracts deployed!");
 
@@ -48,15 +48,15 @@ export const main = async () => {
     }
 
     // accum & deaccum deployments
-    for (let index = 0; index < totalDestinations.length; index++) {
-      const fastAccum: Contract = await deployAccumulator(socket.address, notary.address, socketSigner);
-      const slowAccum: Contract = await deployAccumulator(socket.address, notary.address, socketSigner);
+    for (let index = 0; index < totalRemoteChains.length; index++) {
+      const fastAccum: Contract = await deployAccumulator(socket.address, notary.address, totalRemoteChains[index], socketSigner);
+      const slowAccum: Contract = await deployAccumulator(socket.address, notary.address, totalRemoteChains[index], socketSigner);
       const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
-      console.log(`Deployed accum and deaccum`);
+      console.log(`Deployed accum and deaccum for ${totalRemoteChains[index]} chain id`);
 
-      addresses[`fastAccum-${totalDestinations[index]}`] = fastAccum.address;
-      addresses[`slowAccum-${totalDestinations[index]}`] = slowAccum.address;
-      addresses[`deaccum-${totalDestinations[index]}`] = deaccum.address;
+      addresses[`fastAccum-${totalRemoteChains[index]}`] = fastAccum.address;
+      addresses[`slowAccum-${totalRemoteChains[index]}`] = slowAccum.address;
+      addresses[`deaccum-${totalRemoteChains[index]}`] = deaccum.address;
     }
 
     await storeAddresses(addresses, chainId);

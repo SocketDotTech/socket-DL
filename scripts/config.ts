@@ -1,9 +1,9 @@
 export const signerAddress: {
   [key: number]: string
 } = {
-  80001: "0xbb244dd59a34c9ca5c7d0cb9d1c270188b9f45bc",
-  421611: "0x89c59d70d0d2671ca1a36871f6c4c61985677d7b",
-  420: "0x89c59d70d0d2671ca1a36871f6c4c61985677d7b",
+  80001: "0x4b53d8d45fe48e0039db40bc21f0a3fc70d0a922",
+  421613: "0x39ea4452f2fb4861b28cf1db42a089afbcc1dbd5",
+  420: "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
   31337: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   31338: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
 }
@@ -11,9 +11,9 @@ export const signerAddress: {
 export const executorAddress: {
   [key: number]: string
 } = {
-  80001: "0xbb244dd59a34c9ca5c7d0cb9d1c270188b9f45bc",
-  421611: "0x89c59d70d0d2671ca1a36871f6c4c61985677d7b",
-  420: "0x89c59d70d0d2671ca1a36871f6c4c61985677d7b",
+  80001: "0x4b53d8d45fe48e0039db40bc21f0a3fc70d0a922",
+  421613: "0x39ea4452f2fb4861b28cf1db42a089afbcc1dbd5",
+  420: "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
   31337: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   31338: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
 }
@@ -22,20 +22,10 @@ export const timeout: {
   [key: number]: number
 } = {
   80001: 7200,
-  421611: 7200,
+  421613: 7200,
   420: 7200,
   31337: 7200,
   31338: 7200
-}
-
-export const slowPathWaitTime: {
-  [key: number]: number
-} = {
-  80001: 3600,
-  421611: 3600,
-  420: 3600,
-  31337: 3600,
-  31338: 3600
 }
 
 export const contractPath: {
@@ -56,5 +46,5 @@ export const contractPath: {
 }
 
 export const isFast = true;
-export const destChainId = 80001;
-export const totalDestinations = [80001, 420];
+export const remoteChainId = 80001;
+export const totalRemoteChains = [80001, 420];

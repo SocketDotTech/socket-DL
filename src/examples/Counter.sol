@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
-import "../interfaces/IVault.sol";
 
 contract Counter is IPlug {
     // immutables
@@ -90,6 +89,7 @@ contract Counter is IPlug {
     }
 
     function _subOperation(uint256 amount) private {
+        require(counter > amount, "CounterMock: Subtraction Overflow");
         counter -= amount;
     }
 
@@ -97,17 +97,13 @@ contract Counter is IPlug {
     function setSocketConfig(
         uint256 remoteChainId,
         address remotePlug,
-        address accum,
-        address deaccum,
-        address verifier
+        string calldata integrationType
     ) external onlyOwner {
-        ISocket(socket).setInboundConfig(
+        ISocket(socket).setPlugConfig(
             remoteChainId,
             remotePlug,
-            deaccum,
-            verifier
+            integrationType
         );
-        ISocket(socket).setOutboundConfig(remoteChainId, remotePlug, accum);
     }
 
     function setupComplete() external {

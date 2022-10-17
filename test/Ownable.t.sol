@@ -49,6 +49,7 @@ contract OwnableTest is Test {
         hoax(_owner);
         _mo.nominateOwner(_newOwner);
 
+        assertEq(_mo.nominee(), _newOwner);
         hoax(_bob);
         vm.expectRevert(Ownable.OnlyNominee.selector);
         _mo.claimOwner();

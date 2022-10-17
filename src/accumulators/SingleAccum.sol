@@ -9,7 +9,11 @@ contract SingleAccum is BaseAccum {
     /**
      * @notice initialises the contract with socket and notary addresses
      */
-    constructor(address socket_, address notary_) BaseAccum(socket_, notary_) {}
+    constructor(
+        address socket_,
+        address notary_,
+        uint256 remoteChainId_
+    ) BaseAccum(socket_, notary_, remoteChainId_) {}
 
     /// adds the packed message to a packet
     /// @inheritdoc IAccumulator

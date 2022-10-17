@@ -7,6 +7,11 @@ import "../src/vault/Vault.sol";
 contract VaultTest is Test {
     address constant _owner = address(1);
     address constant _raju = address(2);
+    uint256 constant _minFees = 1000;
+    uint256 constant _remoteChainId = 0x0001;
+    bytes32 constant _integrationType =
+        keccak256(abi.encode("INTEGRATION_TYPE"));
+
     Vault _vault;
 
     event FeeDeducted(uint256 amount_);
@@ -21,14 +26,23 @@ contract VaultTest is Test {
     }
 
     function testDeductFee() external {
+        hoax(_owner);
+        _vault.setFees(_minFees, _integrationType);
+
+        vm.expectRevert(Vault.NotEnoughFees.selector);
+        _vault.deductFee{value: 10}(0, _integrationType);
+
         vm.expectEmit(true, false, false, false);
-        emit FeeDeducted(1000);
-        _vault.deductFee{value: 1000}(0, 0);
-        assertEq(address(_vault).balance, 1000);
+        emit FeeDeducted(_minFees);
+
+        _vault.deductFee{value: _minFees}(0, _integrationType);
+        assertEq(address(_vault).balance, _minFees);
     }
 
     function testClaimFee() external {
-        _vault.deductFee{value: 1000}(0, 0);
+        hoax(_owner);
+        _vault.setFees(_minFees, _integrationType);
+        _vault.deductFee{value: _minFees}(0, _integrationType);
 
         hoax(_raju);
         vm.expectRevert(Ownable.OnlyOwner.selector);
@@ -44,7 +58,16 @@ contract VaultTest is Test {
         assertEq(finalBal - initBal, 1000);
     }
 
-    function testGetFees() external {
-        assertEq(_vault.getFees(0, 0), 0);
+    function testSetFees() external {
+        hoax(_raju);
+        vm.expectRevert(Ownable.OnlyOwner.selector);
+        _vault.setFees(_minFees, _integrationType);
+
+        assertEq(_vault.getFees(_integrationType), 0);
+
+        hoax(_owner);
+        _vault.setFees(_minFees, _integrationType);
+
+        assertEq(_vault.getFees(_integrationType), _minFees);
     }
 }

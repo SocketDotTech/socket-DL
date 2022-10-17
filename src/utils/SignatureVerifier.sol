@@ -7,14 +7,21 @@ contract SignatureVerifier is ISignatureVerifier {
 
     /// @inheritdoc ISignatureVerifier
     function recoverSigner(
-        uint256 remoteChainId_,
+        uint256 srcChainId_,
+        uint256 destChainId_,
         address accumAddress_,
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_
     ) external pure override returns (address signer) {
         bytes32 digest = keccak256(
-            abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
+            abi.encode(
+                srcChainId_,
+                destChainId_,
+                accumAddress_,
+                packetId_,
+                root_
+            )
         );
         digest = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)

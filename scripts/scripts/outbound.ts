@@ -4,7 +4,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { getInstance, getChainId, deployedAddressPath } from "../utils";
 import { Contract } from "ethers";
-import { destChainId } from "../config";
+import { remoteChainId } from "../config";
 
 export const main = async () => {
   try {
@@ -22,9 +22,9 @@ export const main = async () => {
     const signer: SignerWithAddress = await ethers.getSigner(user);
 
     const counter: Contract = await getInstance("Counter", config["counter"]);
-    await counter.connect(signer).remoteAddOperation(destChainId, amount, msgGasLimit);
+    await counter.connect(signer).remoteAddOperation(remoteChainId, amount, msgGasLimit);
 
-    console.log(`Sent remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${destChainId}`);
+    console.log(`Sent remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`);
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;

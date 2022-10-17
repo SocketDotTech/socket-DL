@@ -7,29 +7,46 @@ interface ISocket {
     // to handle stack too deep
     struct VerificationParams {
         uint256 remoteChainId;
-        address remoteAccum;
         uint256 packetId;
+        address accum;
         bytes deaccumProof;
+    }
+
+    // TODO: add confs and blocking/non-blocking
+    struct PlugConfig {
+        address remotePlug;
+        address accum;
+        address deaccum;
+        address verifier;
+        bytes32 integrationType;
     }
 
     /**
      * @notice emits the message details when a new message arrives at outbound
-     * @param srcChainId src chain id
-     * @param srcPlug src plug address
-     * @param dstChainId dest chain id
-     * @param dstPlug dest plug address
-     * @param msgId message id packed with destChainId and nonce
-     * @param msgGasLimit gas limit needed to execute the inbound at destination
-     * @param payload the data which will be used by inbound at destination
+     * @param localChainId local chain id
+     * @param localPlug local plug address
+     * @param dstChainId remote chain id
+     * @param dstPlug remote plug address
+     * @param msgId message id packed with remoteChainId and nonce
+     * @param msgGasLimit gas limit needed to execute the inbound at remote
+     * @param payload the data which will be used by inbound at remote
      */
     event MessageTransmitted(
-        uint256 srcChainId,
-        address srcPlug,
+        uint256 localChainId,
+        address localPlug,
         uint256 dstChainId,
         address dstPlug,
         uint256 msgId,
         uint256 msgGasLimit,
         bytes payload
+    );
+
+    event ConfigAdded(
+        address accum_,
+        address deaccum_,
+        address verifier_,
+        uint256 remoteChainId_,
+        bytes32 integrationType_
     );
 
     /**
@@ -52,6 +69,12 @@ interface ISocket {
      */
     event ExecutionFailedBytes(uint256 msgId, bytes result);
 
+    event PlugConfigSet(
+        address remotePlug,
+        uint256 remoteChainId,
+        bytes32 integrationType
+    );
+
     error NotAttested();
 
     error InvalidRemotePlug();
@@ -66,14 +89,18 @@ interface ISocket {
 
     error ExecutorNotFound();
 
+    error ConfigExists();
+
+    error InvalidIntegrationType();
+
     function vault() external view returns (IVault);
 
     /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with accumulator
-     * @param remoteChainId_ the destination chain id
-     * @param msgGasLimit_ the gas limit needed to execute the payload on destination
-     * @param payload_ the data which is needed by plug at inbound call on destination
+     * @param remoteChainId_ the remote chain id
+     * @param msgGasLimit_ the gas limit needed to execute the payload on remote
+     * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
         uint256 remoteChainId_,
@@ -83,10 +110,10 @@ interface ISocket {
 
     /**
      * @notice executes a message
-     * @param msgGasLimit gas limit needed to execute the inbound at destination
-     * @param msgId message id packed with destChainId and nonce
-     * @param localPlug dest plug address
-     * @param payload the data which is needed by plug at inbound call on destination
+     * @param msgGasLimit gas limit needed to execute the inbound at remote
+     * @param msgId message id packed with remoteChainId and nonce
+     * @param localPlug remote plug address
+     * @param payload the data which is needed by plug at inbound call on remote
      * @param verifyParams_ the details needed for message verification
      */
     function execute(
@@ -97,41 +124,15 @@ interface ISocket {
         ISocket.VerificationParams calldata verifyParams_
     ) external;
 
-    // TODO: add confs and blocking/non-blocking
-    struct InboundConfig {
-        address remotePlug;
-        address deaccum;
-        address verifier;
-    }
-
-    struct OutboundConfig {
-        address accum;
-        address remotePlug;
-    }
-
     /**
      * @notice sets the config specific to the plug
-     * @param remoteChainId_ the destination chain id
-     * @param remotePlug_ address of plug present at destination chain to call inbound
-     * @param deaccum_ address of deaccum which is used to verify proof
-     * @param verifier_ address of verifier responsible for final packet validity checks
+     * @param remoteChainId_ the remote chain id
+     * @param remotePlug_ address of plug present at remote chain to call inbound
+     * @param integrationType_ the name of accum to be used
      */
-    function setInboundConfig(
+    function setPlugConfig(
         uint256 remoteChainId_,
         address remotePlug_,
-        address deaccum_,
-        address verifier_
-    ) external;
-
-    /**
-     * @notice sets the config specific to the plug
-     * @param remoteChainId_ the destination chain id
-     * @param remotePlug_ address of plug present at destination chain to call inbound
-     * @param accum_ address of accumulator which is used for collecting the messages and form packets
-     */
-    function setOutboundConfig(
-        uint256 remoteChainId_,
-        address remotePlug_,
-        address accum_
+        string memory integrationType_
     ) external;
 }

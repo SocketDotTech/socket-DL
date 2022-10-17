@@ -2,58 +2,52 @@ import fs from "fs";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { signerAddress, destChainId, isFast } from "./config";
+import { signerAddress, remoteChainId, isFast } from "./config";
 import { getInstance, deployedAddressPath, getChainId } from "./utils";
 import { Contract } from "ethers";
 
 export const main = async () => {
   try {
-    const srcChainId = await getChainId();
+    const localChainId = await getChainId();
 
-    if (!destChainId)
-      throw new Error("Provide destination chain id");
+    if (!remoteChainId)
+      throw new Error("Provide remote chain id");
 
-    if (!fs.existsSync(deployedAddressPath + srcChainId + ".json") || !fs.existsSync(deployedAddressPath + destChainId + ".json")) {
+    if (!fs.existsSync(deployedAddressPath + localChainId + ".json") || !fs.existsSync(deployedAddressPath + remoteChainId + ".json")) {
       throw new Error("Deployed Addresses not found");
     }
 
-    let srcConfig: JSON = JSON.parse(fs.readFileSync(deployedAddressPath + srcChainId + ".json", "utf-8"));
-    const destConfig: JSON = JSON.parse(fs.readFileSync(deployedAddressPath + destChainId + ".json", "utf-8"))
+    let localConfig: JSON = JSON.parse(fs.readFileSync(deployedAddressPath + localChainId + ".json", "utf-8"));
+    const remoteConfig: JSON = JSON.parse(fs.readFileSync(deployedAddressPath + remoteChainId + ".json", "utf-8"))
 
     const { socketSigner, counterSigner } = await getSigners();
 
-    const counter: Contract = await getInstance("Counter", srcConfig["counter"]);
-    const accum = isFast ? srcConfig[`fastAccum-${destChainId}`] : srcConfig[`slowAccum-${destChainId}`];
+    const counter: Contract = await getInstance("Counter", localConfig["counter"]);
+    const socket: Contract = await getInstance("Socket", localConfig["socket"]);
+
+    const accum = isFast ? "FAST" : "SLOW"
+    await configSocket(socket, socketSigner, remoteChainId, localConfig);
+    await configNotary(localConfig["notary"], socketSigner)
 
     await counter.connect(counterSigner).setSocketConfig(
-      destChainId,
-      destConfig["counter"],
-      accum,
-      srcConfig[`deaccum-${destChainId}`],
-      srcConfig["verifier"]
+      remoteChainId,
+      remoteConfig["counter"],
+      accum
     );
-    console.log(`Set config for ${destChainId} chain id!`)
+    console.log(`Set config for ${remoteChainId} chain id!`)
 
-    await configNotary(srcConfig["notary"], srcConfig[`fastAccum-${destChainId}`], srcConfig[`slowAccum-${destChainId}`], socketSigner)
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;
   }
 };
 
-async function configNotary(notaryAddr: string, fastAccumAddr: string, slowAccumAddr: string, socketSigner: SignerWithAddress) {
+async function configNotary(notaryAddr: string, socketSigner: SignerWithAddress) {
   try {
-    const srcChainId = await getChainId();
+    const localChainId = await getChainId();
     const notary: Contract = await getInstance("AdminNotary", notaryAddr);
-
-    await notary.connect(socketSigner).grantAttesterRole(destChainId, signerAddress[srcChainId]);
-    console.log(`Added ${signerAddress[srcChainId]} as an attester for ${destChainId} chain id!`)
-
-    await notary.connect(socketSigner).addAccumulator(fastAccumAddr, destChainId, true);
-    console.log(`Added fast accumulator ${fastAccumAddr} to Notary!`)
-
-    await notary.connect(socketSigner).addAccumulator(slowAccumAddr, destChainId, false);
-    console.log(`Added slow accumulator ${slowAccumAddr} to Notary!`)
+    await notary.connect(socketSigner).grantAttesterRole(remoteChainId, signerAddress[localChainId]);
+    console.log(`Added ${signerAddress[localChainId]} as an attester for ${remoteChainId} chain id!`)
   } catch (error) {
     console.log("Error while configuring Notary", error);
     throw error;
@@ -65,6 +59,32 @@ async function getSigners() {
   const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
   const counterSigner: SignerWithAddress = await ethers.getSigner(counterOwner);
   return { socketSigner, counterSigner };
+}
+
+async function configSocket(socket: Contract, socketSigner: SignerWithAddress, remoteChainId: number, localConfig: JSON) {
+  try {
+    await socket.connect(socketSigner).addConfig(
+      remoteChainId,
+      localConfig[`fastAccum-${remoteChainId}`],
+      localConfig[`deaccum-${remoteChainId}`],
+      localConfig["verifier"],
+      "FAST"
+    );
+
+    await socket.connect(socketSigner).addConfig(
+      remoteChainId,
+      localConfig[`slowAccum-${remoteChainId}`],
+      localConfig[`deaccum-${remoteChainId}`],
+      localConfig["verifier"],
+      "SLOW"
+    );
+
+    console.log(`Added slow and fast config for ${remoteChainId} chain id!`)
+
+  } catch (error) {
+    console.log("Error while configuring socket", error);
+    throw error;
+  }
 }
 
 main()

@@ -11,17 +11,19 @@ contract PingPongTest is Setup {
     bytes private constant _PROOF = abi.encode(0);
     bytes private _payloadPing;
     bytes private _payloadPong;
+    bool private isFast = true;
 
     uint256 msgGasLimit = 130000;
 
     Messenger srcMessenger__;
-    Messenger destMessenger__;
+    Messenger dstMessenger__;
 
     function setUp() external {
         uint256[] memory attesters = new uint256[](1);
         attesters[0] = _attesterPrivateKey;
 
-        _dualChainSetup(attesters);
+        // kept fees 0 to avoid revert at inbound<>outbound
+        _dualChainSetup(attesters, 0);
         _deployPlugContracts();
         _configPlugContracts();
 
@@ -30,39 +32,47 @@ contract PingPongTest is Setup {
     }
 
     function _verifyAToB(uint256 msgId_) internal {
+        address accum = isFast
+            ? address(_a.fastAccum__)
+            : address(_a.slowAccum__);
         (
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a);
+        ) = _getLatestSignature(_a, accum, _b.chainId);
 
-        _verifyAndSealOnSrc(_a, _b, sig);
-        _submitRootOnDst(_a, _b, sig, packetId, root);
+        _sealOnSrc(_a, accum, sig);
+        _submitRootOnDst(_a, _b, sig, packetId, root, accum);
 
         vm.warp(block.timestamp + _slowAccumWaitTime);
         _executePayloadOnDst(
             _a,
             _b,
-            address(destMessenger__),
+            address(dstMessenger__),
             packetId,
             msgId_,
             msgGasLimit,
+            accum,
             _payloadPing,
             _PROOF
         );
 
-        assertEq(destMessenger__.message(), _PING);
+        assertEq(dstMessenger__.message(), _PING);
     }
 
     function _verifyBToA(uint256 msgId_) internal {
+        address accum = isFast
+            ? address(_b.fastAccum__)
+            : address(_b.slowAccum__);
+
         (
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_b);
+        ) = _getLatestSignature(_b, accum, _a.chainId);
 
-        _verifyAndSealOnSrc(_b, _a, sig);
-        _submitRootOnDst(_b, _a, sig, packetId, root);
+        _sealOnSrc(_b, accum, sig);
+        _submitRootOnDst(_b, _a, sig, packetId, root, accum);
         vm.warp(block.timestamp + _slowAccumWaitTime);
 
         _executePayloadOnDst(
@@ -72,6 +82,7 @@ contract PingPongTest is Setup {
             packetId,
             msgId_,
             msgGasLimit,
+            accum,
             _payloadPong,
             _PROOF
         );
@@ -80,7 +91,7 @@ contract PingPongTest is Setup {
     }
 
     function _reset() internal {
-        destMessenger__.sendLocalMessage(bytes32(0));
+        dstMessenger__.sendLocalMessage(bytes32(0));
         srcMessenger__.sendLocalMessage(bytes32(0));
     }
 
@@ -88,14 +99,14 @@ contract PingPongTest is Setup {
         hoax(_raju);
         srcMessenger__.sendRemoteMessage(_b.chainId, _PING);
 
-        uint256 iterations = 1;
+        uint256 iterations = 5;
         for (uint256 index = 0; index < iterations; index++) {
             uint256 msgIdAToB = (uint256(uint160(address(srcMessenger__))) <<
                 96) |
                 (_a.chainId << 80) |
                 (_b.chainId << 64) |
                 index;
-            uint256 msgIdBToA = (uint256(uint160(address(destMessenger__))) <<
+            uint256 msgIdBToA = (uint256(uint160(address(dstMessenger__))) <<
                 96) |
                 (_b.chainId << 80) |
                 (_a.chainId << 64) |
@@ -116,7 +127,7 @@ contract PingPongTest is Setup {
             _a.chainId,
             msgGasLimit
         );
-        destMessenger__ = new Messenger(
+        dstMessenger__ = new Messenger(
             address(_b.socket__),
             _b.chainId,
             msgGasLimit
@@ -126,22 +137,21 @@ contract PingPongTest is Setup {
     }
 
     function _configPlugContracts() private {
+        string memory integrationType = isFast
+            ? fastIntegrationType
+            : slowIntegrationType;
         hoax(_plugOwner);
         srcMessenger__.setSocketConfig(
             _b.chainId,
-            address(destMessenger__),
-            address(_a.accum__),
-            address(_a.deaccum__),
-            address(_a.verifier__)
+            address(dstMessenger__),
+            integrationType
         );
 
         hoax(_plugOwner);
-        destMessenger__.setSocketConfig(
+        dstMessenger__.setSocketConfig(
             _a.chainId,
             address(srcMessenger__),
-            address(_b.accum__),
-            address(_b.deaccum__),
-            address(_b.verifier__)
+            integrationType
         );
     }
 }

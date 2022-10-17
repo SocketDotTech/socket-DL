@@ -5,30 +5,59 @@ import "../utils/Ownable.sol";
 import "../interfaces/IVault.sol";
 
 contract Vault is IVault, Ownable {
+    // config index from socket => fees
+    mapping(bytes32 => uint256) public minFees;
+
+    error InsufficientFee();
+    error NotEnoughFees();
+
+    /**
+     * @notice emits when fee is deducted at outbound
+     * @param amount_ total fee amount
+     */
+    event FeeDeducted(uint256 amount_);
+    event FeesSet(uint256 minFees_, bytes32 integrationType_);
+
     constructor(address owner_) Ownable(owner_) {}
 
     /// @inheritdoc IVault
-    function deductFee(uint256, uint256) external payable override {
+    function deductFee(uint256, bytes32 integrationType_)
+        external
+        payable
+        override
+    {
+        if (msg.value < minFees[integrationType_]) revert NotEnoughFees();
         emit FeeDeducted(msg.value);
     }
 
-    /// @inheritdoc IVault
-    function claimFee(address account_, uint256 amount_)
+    /**
+     * @notice updates the fee required to bridge a message for give chain and config
+     * @param minFees_ fees
+     * @param integrationType_ config for which fees is needed
+     */
+    function setFees(uint256 minFees_, bytes32 integrationType_)
         external
-        override
         onlyOwner
     {
+        minFees[integrationType_] = minFees_;
+        emit FeesSet(minFees_, integrationType_);
+    }
+
+    /**
+     * @notice transfers the `amount_` ETH to `account_`
+     * @param account_ address to transfer ETH
+     * @param amount_ amount to transfer
+     */
+    function claimFee(address account_, uint256 amount_) external onlyOwner {
         (bool success, ) = account_.call{value: amount_}("");
         require(success, "Transfer failed.");
     }
 
-    /// @inheritdoc IVault
-    function getFees(uint256, uint256)
-        external
-        pure
-        override
-        returns (uint256)
-    {
-        return 0;
+    /**
+     * @notice returns the fee required to bridge a message
+     * @param integrationType_ config for which fees is needed
+     */
+    function getFees(bytes32 integrationType_) external view returns (uint256) {
+        return minFees[integrationType_];
     }
 }

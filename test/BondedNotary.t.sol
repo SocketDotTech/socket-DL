@@ -134,7 +134,7 @@ import "../src/utils/SignatureVerifier.sol";
 //         assertEq(_attester.balance, amount);
 //     }
 
-//     function testVerifyAndSeal() external {
+//     function testSeal() external {
 //         startHoax(_attester);
 //         _notary.addBond{value: _minBondAmount}();
 
@@ -148,10 +148,10 @@ import "../src/utils/SignatureVerifier.sol";
 //             abi.encode(_chainId, _accum, _packetId, _root)
 //         );
 
-//         _notary.verifyAndSeal(_accum, _getSignature(digest));
+//         _notary.seal(_accum, _getSignature(digest));
 //     }
 
-//     function testVerifyAndSealWithoutEnoughBond() external {
+//     function testSealWithoutEnoughBond() external {
 //         startHoax(_attester);
 //         _notary.addBond{value: _minBondAmount / 2}();
 
@@ -166,7 +166,7 @@ import "../src/utils/SignatureVerifier.sol";
 //         );
 
 //         vm.expectRevert(INotary.InvalidBond.selector);
-//         _notary.verifyAndSeal(_accum, _getSignature(digest));
+//         _notary.seal(_accum, _getSignature(digest));
 //     }
 
 //     function testChallengeSignature() external {
@@ -183,7 +183,7 @@ import "../src/utils/SignatureVerifier.sol";
 //             abi.encode(_chainId, _accum, _packetId, _root)
 //         );
 
-//         _notary.verifyAndSeal(_accum, _getSignature(digest));
+//         _notary.seal(_accum, _getSignature(digest));
 
 //         bytes32 altDigest = keccak256(
 //             abi.encode(_chainId, _accum, _packetId, _altRoot)

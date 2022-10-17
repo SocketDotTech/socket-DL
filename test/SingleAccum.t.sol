@@ -12,15 +12,19 @@ contract SingleAccumTest is Test {
     bytes32 constant _message_1 = bytes32(uint256(5));
     bytes32 constant _message_2 = bytes32(uint256(6));
     address constant _notary = address(7);
+    uint256 constant _remoteChainId = 1;
+
     SingleAccum _sa;
 
     function setUp() external {
         hoax(_owner);
-        _sa = new SingleAccum(_socket, _notary);
+        _sa = new SingleAccum(_socket, _notary, _remoteChainId);
     }
 
     function testSetUp() external {
         assertEq(_sa.owner(), _owner, "Owner not set");
+        assertEq(_sa.remoteChainId(), _remoteChainId, "remoteChainId not set");
+
         assertTrue(
             _sa.hasRole(_sa.SOCKET_ROLE(), _socket),
             "Socket role not set"
@@ -86,11 +90,31 @@ contract SingleAccumTest is Test {
 
     function testAddMessageMultiple() external {
         _addPackedMessage(_message_0);
-        _sealPacket();
         _addPackedMessage(_message_1);
-        _sealPacket();
         _addPackedMessage(_message_2);
+
+        assertEq(_sa.getLatestPacketId(), 2);
+        (, uint256 packetToSeal) = _sa.getNextPacketToBeSealed();
+        assertEq(packetToSeal, 0);
+
+        // message_0
         _sealPacket();
+        (, packetToSeal) = _sa.getNextPacketToBeSealed();
+        assertEq(packetToSeal, 1);
+
+        // message_1
+        _sealPacket();
+        (, packetToSeal) = _sa.getNextPacketToBeSealed();
+        assertEq(packetToSeal, 2);
+
+        // message_2
+        (bytes32 root, uint256 packetId, uint256 remoteChainId) = _sealPacket();
+        (, packetToSeal) = _sa.getNextPacketToBeSealed();
+        assertEq(packetToSeal, 3);
+
+        assertEq(root, _message_2);
+        assertEq(packetId, 2);
+        assertEq(remoteChainId, _remoteChainId);
 
         _assertPacketById(_message_0, 0);
         _assertPacketById(_message_1, 1);
@@ -146,8 +170,15 @@ contract SingleAccumTest is Test {
         _sa.addPackedMessage(packedMessage);
     }
 
-    function _sealPacket() private {
+    function _sealPacket()
+        private
+        returns (
+            bytes32 root,
+            uint256 packetId,
+            uint256 remoteChainId
+        )
+    {
         hoax(_notary);
-        _sa.sealPacket();
+        (root, packetId, remoteChainId) = _sa.sealPacket();
     }
 }
