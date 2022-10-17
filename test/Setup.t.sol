@@ -74,10 +74,10 @@ contract Setup is Test {
 
         // setup minfees in vault for diff accum for all remote chains
         vm.startPrank(_socketOwner);
-        _a.vault__.setFees(minFees_, _a.fastAccumType);
-        _a.vault__.setFees(minFees_, _a.slowAccumType);
-        _b.vault__.setFees(minFees_, _b.fastAccumType);
-        _b.vault__.setFees(minFees_, _b.slowAccumType);
+        _a.vault__.setFees(minFees_, _b.chainSlug, _a.fastAccumType);
+        _a.vault__.setFees(minFees_, _b.chainSlug, _a.slowAccumType);
+        _b.vault__.setFees(minFees_, _a.chainSlug, _b.fastAccumType);
+        _b.vault__.setFees(minFees_, _a.chainSlug, _b.slowAccumType);
         vm.stopPrank();
     }
 

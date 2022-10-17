@@ -5,8 +5,8 @@ import "../utils/Ownable.sol";
 import "../interfaces/IVault.sol";
 
 contract Vault is IVault, Ownable {
-    // config index from socket => fees
-    mapping(bytes32 => uint256) public minFees;
+    // integration type from socket => remote chain slug => fees
+    mapping(bytes32 => mapping(uint256 => uint256)) public minFees;
 
     error InsufficientFees();
 
@@ -15,17 +15,22 @@ contract Vault is IVault, Ownable {
      * @param amount_ total fee amount
      */
     event FeeDeducted(uint256 amount_);
-    event FeesSet(uint256 minFees_, bytes32 integrationType_);
+    event FeesSet(
+        uint256 minFees_,
+        uint256 remoteChainSlug_,
+        bytes32 integrationType_
+    );
 
     constructor(address owner_) Ownable(owner_) {}
 
     /// @inheritdoc IVault
-    function deductFee(uint256, bytes32 integrationType_)
+    function deductFee(uint256 remoteChainSlug_, bytes32 integrationType_)
         external
         payable
         override
     {
-        if (msg.value < minFees[integrationType_]) revert InsufficientFees();
+        if (msg.value < minFees[integrationType_][remoteChainSlug_])
+            revert InsufficientFees();
         emit FeeDeducted(msg.value);
     }
 
@@ -33,13 +38,15 @@ contract Vault is IVault, Ownable {
      * @notice updates the fee required to bridge a message for give chain and config
      * @param minFees_ fees
      * @param integrationType_ config for which fees is needed
+     * @param integrationType_ config for which fees is needed
      */
-    function setFees(uint256 minFees_, bytes32 integrationType_)
-        external
-        onlyOwner
-    {
-        minFees[integrationType_] = minFees_;
-        emit FeesSet(minFees_, integrationType_);
+    function setFees(
+        uint256 minFees_,
+        uint256 remoteChainSlug_,
+        bytes32 integrationType_
+    ) external onlyOwner {
+        minFees[integrationType_][remoteChainSlug_] = minFees_;
+        emit FeesSet(minFees_, remoteChainSlug_, integrationType_);
     }
 
     /**
@@ -56,7 +63,11 @@ contract Vault is IVault, Ownable {
      * @notice returns the fee required to bridge a message
      * @param integrationType_ config for which fees is needed
      */
-    function getFees(bytes32 integrationType_) external view returns (uint256) {
-        return minFees[integrationType_];
+    function getFees(bytes32 integrationType_, uint256 remoteChainSlug_)
+        external
+        view
+        returns (uint256)
+    {
+        return minFees[integrationType_][remoteChainSlug_];
     }
 }
