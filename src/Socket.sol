@@ -39,6 +39,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         address hasher_,
         address vault_
     ) {
+        require(chainSlug_ <= type(uint32).max, "chain slug more than uint32");
         _setHasher(hasher_);
         _setVault(vault_);
 

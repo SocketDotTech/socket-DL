@@ -20,6 +20,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     mapping(uint256 => PacketDetails) private _packetDetails;
 
     constructor(address signatureVerifier_, uint256 chainSlug_) {
+        require(chainSlug_ <= type(uint32).max, "chain slug more than uint32");
         _chainSlug = chainSlug_;
         signatureVerifier = ISignatureVerifier(signatureVerifier_);
     }
