@@ -165,10 +165,10 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     /**
-     * @notice returns the confirmations received by a packet
+     * @notice returns the attestations received by a packet
      * @param packetId_ packed id
      */
-    function getConfirmations(uint256 packetId_)
+    function getAttestationCount(uint256 packetId_)
         external
         view
         returns (uint256)
