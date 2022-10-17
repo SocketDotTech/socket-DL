@@ -5,8 +5,9 @@ import "../interfaces/INotary.sol";
 import "../interfaces/IAccumulator.sol";
 import "../interfaces/ISignatureVerifier.sol";
 import "../utils/AccessControl.sol";
+import "../utils/ReentrancyGuard.sol";
 
-contract AdminNotary is INotary, AccessControl(msg.sender) {
+contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
     uint256 private immutable _chainSlug;
     ISignatureVerifier public signatureVerifier;
 
@@ -29,6 +30,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     function seal(address accumAddress_, bytes calldata signature_)
         external
         override
+        nonReentrant
     {
         (bytes32 root, uint256 id, uint256 remoteChainSlug) = IAccumulator(
             accumAddress_

@@ -55,6 +55,7 @@ contract Vault is IVault, Ownable {
      * @param amount_ amount to transfer
      */
     function claimFee(address account_, uint256 amount_) external onlyOwner {
+        require(account_ != address(0));
         (bool success, ) = account_.call{value: amount_}("");
         require(success, "Transfer failed.");
     }
