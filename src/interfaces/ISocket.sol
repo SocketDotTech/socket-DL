@@ -74,17 +74,11 @@ interface ISocket {
         bytes32 integrationType
     );
 
-    error NotAttested();
-
-    error InvalidRemotePlug();
-
     error InvalidProof();
 
     error VerificationFailed();
 
     error MessageAlreadyExecuted();
-
-    error InsufficientGasLimit();
 
     error ExecutorNotFound();
 

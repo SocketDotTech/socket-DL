@@ -4,8 +4,6 @@ pragma solidity 0.8.7;
 import "./BaseAccum.sol";
 
 contract SingleAccum is BaseAccum {
-    error PendingPacket();
-
     /**
      * @notice initialises the contract with socket and notary addresses
      */

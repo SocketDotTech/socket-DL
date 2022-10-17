@@ -8,8 +8,7 @@ contract Vault is IVault, Ownable {
     // config index from socket => fees
     mapping(bytes32 => uint256) public minFees;
 
-    error InsufficientFee();
-    error NotEnoughFees();
+    error InsufficientFees();
 
     /**
      * @notice emits when fee is deducted at outbound
@@ -26,7 +25,7 @@ contract Vault is IVault, Ownable {
         payable
         override
     {
-        if (msg.value < minFees[integrationType_]) revert NotEnoughFees();
+        if (msg.value < minFees[integrationType_]) revert InsufficientFees();
         emit FeeDeducted(msg.value);
     }
 
