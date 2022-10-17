@@ -53,64 +53,41 @@ contract AdminNotary is INotary, AccessControl(msg.sender) {
     }
 
     /// @inheritdoc INotary
-    function propose(
+    function attest(
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_
     ) external override {
-        PacketDetails storage packedDetails = _packetDetails[packetId_];
-        if (packedDetails.remoteRoots != 0) revert AlreadyProposed();
-
-        packedDetails.remoteRoots = root_;
-        packedDetails.timeRecord = block.timestamp;
-
-        address attester = _verifyAndUpdateAttestations(
-            packetId_,
-            root_,
-            signature_
-        );
-
-        emit Proposed(attester, packetId_, root_);
-    }
-
-    /// @inheritdoc INotary
-    function confirmRoot(
-        uint256 packetId_,
-        bytes32 root_,
-        bytes calldata signature_
-    ) external override {
-        if (_packetDetails[packetId_].remoteRoots != root_)
-            revert RootNotFound();
-
-        address attester = _verifyAndUpdateAttestations(
-            packetId_,
-            root_,
-            signature_
-        );
-
-        emit RootConfirmed(attester, packetId_);
-    }
-
-    function _verifyAndUpdateAttestations(
-        uint256 packetId_,
-        bytes32 root_,
-        bytes calldata signature_
-    ) private returns (address attester) {
-        uint256 remoteChainSlug = _getChainSlug(packetId_);
-        attester = signatureVerifier.recoverSigner(
+        address attester = signatureVerifier.recoverSigner(
             _chainSlug,
             packetId_,
             root_,
             signature_
         );
 
-        if (!_hasRole(_attesterRole(remoteChainSlug), attester))
+        if (!_hasRole(_attesterRole(_getChainSlug(packetId_)), attester))
             revert InvalidAttester();
 
-        PacketDetails storage packedDetails = _packetDetails[packetId_];
-        if (isAttested[attester][packetId_]) revert AlreadyAttested();
+        _updatePacketDetails(attester, packetId_, root_);
+        emit RootConfirmed(attester, packetId_, root_);
+    }
 
-        isAttested[attester][packetId_] = true;
+    function _updatePacketDetails(
+        address attester_,
+        uint256 packetId_,
+        bytes32 root_
+    ) private {
+        PacketDetails storage packedDetails = _packetDetails[packetId_];
+        if (isAttested[attester_][packetId_]) revert AlreadyAttested();
+
+        if (_packetDetails[packetId_].remoteRoots != root_) {
+            packedDetails.remoteRoots = root_;
+            packedDetails.timeRecord = block.timestamp;
+
+            emit Proposed(packetId_);
+        }
+
+        isAttested[attester_][packetId_] = true;
         packedDetails.attestations++;
     }
 
