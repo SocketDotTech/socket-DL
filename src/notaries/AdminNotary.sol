@@ -83,12 +83,13 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
         PacketDetails storage packedDetails = _packetDetails[packetId_];
         if (isAttested[attester_][packetId_]) revert AlreadyAttested();
 
-        if (_packetDetails[packetId_].remoteRoots != root_) {
+        if (_packetDetails[packetId_].remoteRoots == bytes32(0)) {
             packedDetails.remoteRoots = root_;
             packedDetails.timeRecord = block.timestamp;
 
             emit PacketProposed(packetId_, root_);
-        }
+        } else if (_packetDetails[packetId_].remoteRoots != root_)
+            revert RootNotFound();
 
         isAttested[attester_][packetId_] = true;
         packedDetails.attestations++;

@@ -51,6 +51,7 @@ interface INotary {
     error AttesterExists();
     error AttesterNotFound();
     error AlreadyAttested();
+    error RootNotFound();
 
     /**
      * @notice verifies the attester and seals a packet
