@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 
 contract SocketTest is Setup {
-    uint256 constant srcChainId_ = 0x2013AA263;
-    uint256 constant dstChainId = 0x2013AA264;
+    uint256 constant srcChainSlug_ = 0x2013AA263;
+    uint256 constant dstChainSlug = 0x2013AA264;
     string constant integrationType = "FAST";
     bytes32 private constant EXECUTOR_ROLE = keccak256("EXECUTOR");
 
@@ -15,13 +15,13 @@ contract SocketTest is Setup {
         uint256[] memory attesters = new uint256[](1);
         attesters[0] = _attesterPrivateKey;
 
-        _a = _deployContractsOnSingleChain(srcChainId_, dstChainId);
+        _a = _deployContractsOnSingleChain(srcChainSlug_, dstChainSlug);
     }
 
     function testAddConfig() external {
         hoax(_socketOwner);
         _a.socket__.addConfig(
-            dstChainId,
+            dstChainSlug,
             address(_a.fastAccum__),
             address(_a.deaccum__),
             address(_a.verifier__),
@@ -30,7 +30,7 @@ contract SocketTest is Setup {
 
         (address accum, address deaccum, address verifier) = _a
             .socket__
-            .getConfigs(dstChainId, integrationType);
+            .getConfigs(dstChainSlug, integrationType);
 
         assertEq(accum, address(_a.fastAccum__));
         assertEq(deaccum, address(_a.deaccum__));
@@ -39,7 +39,7 @@ contract SocketTest is Setup {
         hoax(_socketOwner);
         vm.expectRevert(ISocket.ConfigExists.selector);
         _a.socket__.addConfig(
-            dstChainId,
+            dstChainSlug,
             address(_a.fastAccum__),
             address(_a.deaccum__),
             address(_a.verifier__),
@@ -50,10 +50,10 @@ contract SocketTest is Setup {
     function testSetPlugConfig() external {
         hoax(_raju);
         vm.expectRevert(ISocket.InvalidIntegrationType.selector);
-        _a.socket__.setPlugConfig(dstChainId, _raju, integrationType);
+        _a.socket__.setPlugConfig(dstChainSlug, _raju, integrationType);
 
         _a.socket__.addConfig(
-            dstChainId,
+            dstChainSlug,
             address(_a.fastAccum__),
             address(_a.deaccum__),
             address(_a.verifier__),
@@ -61,14 +61,14 @@ contract SocketTest is Setup {
         );
 
         hoax(_raju);
-        _a.socket__.setPlugConfig(dstChainId, _raju, integrationType);
+        _a.socket__.setPlugConfig(dstChainSlug, _raju, integrationType);
 
         (
             address accum,
             address deaccum,
             address verifier,
             address remotePlug
-        ) = _a.socket__.getPlugConfig(dstChainId, _raju);
+        ) = _a.socket__.getPlugConfig(dstChainSlug, _raju);
 
         assertEq(accum, address(_a.fastAccum__));
         assertEq(deaccum, address(_a.deaccum__));
@@ -127,6 +127,6 @@ contract SocketTest is Setup {
     function testOutboundWithoutConfig() external {
         // should revert if no config set
         vm.expectRevert();
-        _a.socket__.outbound(dstChainId, msgGasLimit, bytes("payload"));
+        _a.socket__.outbound(dstChainSlug, msgGasLimit, bytes("payload"));
     }
 }

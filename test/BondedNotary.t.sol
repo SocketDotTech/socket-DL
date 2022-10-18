@@ -18,8 +18,8 @@ import "../src/utils/SignatureVerifier.sol";
 
 //     uint256 constant _minBondAmount = 100e18;
 //     uint256 constant _bondClaimDelay = 1 weeks;
-//     uint256 constant _chainId = 0x2013AA263;
-//     uint256 constant _remoteChainId = 0x2013AA264;
+//     uint256 constant _chainSlug = 0x2013AA263;
+//     uint256 constant _remoteChainSlug = 0x2013AA264;
 
 //     BondedNotary _notary;
 //     SignatureVerifier _sigVerifier;
@@ -32,7 +32,7 @@ import "../src/utils/SignatureVerifier.sol";
 //         _notary = new BondedNotary(
 //             _minBondAmount,
 //             _bondClaimDelay,
-//             _chainId,
+//             _chainSlug,
 //             address(_sigVerifier)
 //         );
 //     }
@@ -41,7 +41,7 @@ import "../src/utils/SignatureVerifier.sol";
 //         assertEq(_notary.owner(), _owner);
 //         assertEq(_notary.minBondAmount(), _minBondAmount);
 //         assertEq(_notary.bondClaimDelay(), _bondClaimDelay);
-//         assertEq(_notary.chainId(), _chainId);
+//         assertEq(_notary.chainSlug(), _chainSlug);
 //     }
 
 //     function testAddBond() external {
@@ -145,7 +145,7 @@ import "../src/utils/SignatureVerifier.sol";
 //         );
 
 //         bytes32 digest = keccak256(
-//             abi.encode(_chainId, _accum, _packetId, _root)
+//             abi.encode(_chainSlug, _accum, _packetId, _root)
 //         );
 
 //         _notary.seal(_accum, _getSignature(digest));
@@ -162,7 +162,7 @@ import "../src/utils/SignatureVerifier.sol";
 //         );
 
 //         bytes32 digest = keccak256(
-//             abi.encode(_chainId, _accum, _packetId, _root)
+//             abi.encode(_chainSlug, _accum, _packetId, _root)
 //         );
 
 //         vm.expectRevert(INotary.InvalidBond.selector);
@@ -180,13 +180,13 @@ import "../src/utils/SignatureVerifier.sol";
 //         );
 
 //         bytes32 digest = keccak256(
-//             abi.encode(_chainId, _accum, _packetId, _root)
+//             abi.encode(_chainSlug, _accum, _packetId, _root)
 //         );
 
 //         _notary.seal(_accum, _getSignature(digest));
 
 //         bytes32 altDigest = keccak256(
-//             abi.encode(_chainId, _accum, _packetId, _altRoot)
+//             abi.encode(_chainSlug, _accum, _packetId, _altRoot)
 //         );
 
 //         hoax(_raju, 0);
@@ -204,15 +204,15 @@ import "../src/utils/SignatureVerifier.sol";
 
 //     function testSubmitRemoteRoot() external {
 //         bytes32 digest = keccak256(
-//             abi.encode(_remoteChainId, _accum, _packetId, _root)
+//             abi.encode(_remoteChainSlug, _accum, _packetId, _root)
 //         );
 
 //         hoax(_owner);
-//         _notary.grantAttesterRole(_remoteChainId, _attester);
+//         _notary.grantAttesterRole(_remoteChainSlug, _attester);
 
 //         hoax(_raju);
 //         _notary.propose(
-//             _remoteChainId,
+//             _remoteChainSlug,
 //             _accum,
 //             _packetId,
 //             _root,
@@ -220,20 +220,20 @@ import "../src/utils/SignatureVerifier.sol";
 //         );
 
 //         assertEq(
-//             _notary.getRemoteRoot(_remoteChainId, _accum, _packetId),
+//             _notary.getRemoteRoot(_remoteChainSlug, _accum, _packetId),
 //             _root
 //         );
 //     }
 
 //     function testSubmitRemoteRootWithoutRole() external {
 //         bytes32 digest = keccak256(
-//             abi.encode(_remoteChainId, _accum, _packetId, _root)
+//             abi.encode(_remoteChainSlug, _accum, _packetId, _root)
 //         );
 
 //         hoax(_raju);
 //         vm.expectRevert(INotary.InvalidAttester.selector);
 //         _notary.propose(
-//             _remoteChainId,
+//             _remoteChainSlug,
 //             _accum,
 //             _packetId,
 //             _root,

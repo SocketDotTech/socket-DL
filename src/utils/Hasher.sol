@@ -6,9 +6,9 @@ import "../interfaces/IHasher.sol";
 contract Hasher is IHasher {
     /// @inheritdoc IHasher
     function packMessage(
-        uint256 srcChainId,
+        uint256 srcChainSlug,
         address srcPlug,
-        uint256 dstChainId,
+        uint256 dstChainSlug,
         address dstPlug,
         uint256 msgId,
         uint256 msgGasLimit,
@@ -17,9 +17,9 @@ contract Hasher is IHasher {
         return
             keccak256(
                 abi.encode(
-                    srcChainId,
+                    srcChainSlug,
                     srcPlug,
-                    dstChainId,
+                    dstChainSlug,
                     dstPlug,
                     msgId,
                     msgGasLimit,

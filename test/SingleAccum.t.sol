@@ -12,18 +12,22 @@ contract SingleAccumTest is Test {
     bytes32 constant _message_1 = bytes32(uint256(5));
     bytes32 constant _message_2 = bytes32(uint256(6));
     address constant _notary = address(7);
-    uint256 constant _remoteChainId = 1;
+    uint256 constant _remoteChainSlug = 1;
 
     SingleAccum _sa;
 
     function setUp() external {
         hoax(_owner);
-        _sa = new SingleAccum(_socket, _notary, _remoteChainId);
+        _sa = new SingleAccum(_socket, _notary, _remoteChainSlug);
     }
 
     function testSetUp() external {
         assertEq(_sa.owner(), _owner, "Owner not set");
-        assertEq(_sa.remoteChainId(), _remoteChainId, "remoteChainId not set");
+        assertEq(
+            _sa.remoteChainSlug(),
+            _remoteChainSlug,
+            "remoteChainSlug not set"
+        );
 
         assertTrue(
             _sa.hasRole(_sa.SOCKET_ROLE(), _socket),
@@ -108,13 +112,17 @@ contract SingleAccumTest is Test {
         assertEq(packetToSeal, 2);
 
         // message_2
-        (bytes32 root, uint256 packetId, uint256 remoteChainId) = _sealPacket();
+        (
+            bytes32 root,
+            uint256 packetId,
+            uint256 remoteChainSlug
+        ) = _sealPacket();
         (, packetToSeal) = _sa.getNextPacketToBeSealed();
         assertEq(packetToSeal, 3);
 
         assertEq(root, _message_2);
         assertEq(packetId, 2);
-        assertEq(remoteChainId, _remoteChainId);
+        assertEq(remoteChainSlug, _remoteChainSlug);
 
         _assertPacketById(_message_0, 0);
         _assertPacketById(_message_1, 1);
@@ -175,10 +183,10 @@ contract SingleAccumTest is Test {
         returns (
             bytes32 root,
             uint256 packetId,
-            uint256 remoteChainId
+            uint256 remoteChainSlug
         )
     {
         hoax(_notary);
-        (root, packetId, remoteChainId) = _sa.sealPacket();
+        (root, packetId, remoteChainSlug) = _sa.sealPacket();
     }
 }

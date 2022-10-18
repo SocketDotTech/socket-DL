@@ -35,7 +35,7 @@ import "../interfaces/ISignatureVerifier.sol";
 
 //     uint256 private _minBondAmount;
 //     uint256 private _bondClaimDelay;
-//     uint256 private immutable _chainId;
+//     uint256 private immutable _chainSlug;
 //     ISignatureVerifier private _signatureVerifier;
 
 //     // attester => bond amount
@@ -52,7 +52,7 @@ import "../interfaces/ISignatureVerifier.sol";
 //     mapping(address => mapping(address => mapping(uint256 => bytes32)))
 //         private _localSignatures;
 
-//     // remoteChainId => accumAddress => packetId => root
+//     // remoteChainSlug => accumAddress => packetId => root
 //     mapping(uint256 => mapping(address => mapping(uint256 => bytes32)))
 //         private _remoteRoots;
 
@@ -71,13 +71,13 @@ import "../interfaces/ISignatureVerifier.sol";
 //     constructor(
 //         uint256 minBondAmount_,
 //         uint256 bondClaimDelay_,
-//         uint256 chainId_,
+//         uint256 chainSlug_,
 //         address signatureVerifier_
 //     ) {
 //         _setMinBondAmount(minBondAmount_);
 //         _setBondClaimDelay(bondClaimDelay_);
 //         _setSignatureVerifier(signatureVerifier_);
-//         _chainId = chainId_;
+//         _chainSlug = chainSlug_;
 //     }
 
 //     function addBond() external payable override {
@@ -131,8 +131,8 @@ import "../interfaces/ISignatureVerifier.sol";
 //         return address(_signatureVerifier);
 //     }
 
-//     function chainId() external view returns (uint256) {
-//         return _chainId;
+//     function chainSlug() external view returns (uint256) {
+//         return _chainSlug;
 //     }
 
 //     function getBond(address attester) external view returns (uint256) {
@@ -166,7 +166,7 @@ import "../interfaces/ISignatureVerifier.sol";
 //         _setSignatureVerifier(signatureVerifier_);
 //     }
 
-//     function seal(address accumAddress_, uint256 remoteChainId_, bytes calldata signature_)
+//     function seal(address accumAddress_, uint256 remoteChainSlug_, bytes calldata signature_)
 //         external
 //         override
 //     {
@@ -174,7 +174,7 @@ import "../interfaces/ISignatureVerifier.sol";
 //             .sealPacket();
 
 //         bytes32 digest = keccak256(
-//             abi.encode(_chainId, accumAddress_, packetId, root)
+//             abi.encode(_chainSlug, accumAddress_, packetId, root)
 //         );
 //         address attester = _signatureVerifier.recoverSigner(digest, signature_);
 
@@ -193,7 +193,7 @@ import "../interfaces/ISignatureVerifier.sol";
 //         bytes calldata signature_
 //     ) external override {
 //         bytes32 digest = keccak256(
-//             abi.encode(_chainId, accumAddress_, packetId_, root_)
+//             abi.encode(_chainSlug, accumAddress_, packetId_, root_)
 //         );
 //         address attester = _signatureVerifier.recoverSigner(digest, signature_);
 //         bytes32 oldSig = _localSignatures[attester][accumAddress_][packetId_];
@@ -227,26 +227,26 @@ import "../interfaces/ISignatureVerifier.sol";
 //     }
 
 //     function propose(
-//         uint256 remoteChainId_,
+//         uint256 remoteChainSlug_,
 //         address accumAddress_,
 //         uint256 packetId_,
 //         bytes32 root_,
 //         bytes calldata signature_
 //     ) external override {
 //         bytes32 digest = keccak256(
-//             abi.encode(remoteChainId_, accumAddress_, packetId_, root_)
+//             abi.encode(remoteChainSlug_, accumAddress_, packetId_, root_)
 //         );
 //         address attester = _signatureVerifier.recoverSigner(digest, signature_);
 
-//         if (!_hasRole(_attesterRole(remoteChainId_), attester))
+//         if (!_hasRole(_attesterRole(remoteChainSlug_), attester))
 //             revert InvalidAttester();
 
-//         if (_remoteRoots[remoteChainId_][accumAddress_][packetId_] != 0)
+//         if (_remoteRoots[remoteChainSlug_][accumAddress_][packetId_] != 0)
 //             revert AlreadyProposed();
 
-//         _remoteRoots[remoteChainId_][accumAddress_][packetId_] = root_;
+//         _remoteRoots[remoteChainSlug_][accumAddress_][packetId_] = root_;
 //         emit Proposed(
-//             remoteChainId_,
+//             remoteChainSlug_,
 //             accumAddress_,
 //             packetId_,
 //             root_
@@ -254,28 +254,28 @@ import "../interfaces/ISignatureVerifier.sol";
 //     }
 
 //     function getRemoteRoot(
-//         uint256 remoteChainId_,
+//         uint256 remoteChainSlug_,
 //         address accumAddress_,
 //         uint256 packetId_
 //     ) external view override returns (bytes32) {
-//         return _remoteRoots[remoteChainId_][accumAddress_][packetId_];
+//         return _remoteRoots[remoteChainSlug_][accumAddress_][packetId_];
 //     }
 
-//     function grantAttesterRole(uint256 remoteChainId_, address attester_)
+//     function grantAttesterRole(uint256 remoteChainSlug_, address attester_)
 //         external
 //         onlyOwner
 //     {
-//         _grantRole(_attesterRole(remoteChainId_), attester_);
+//         _grantRole(_attesterRole(remoteChainSlug_), attester_);
 //     }
 
-//     function revokeAttesterRole(uint256 remoteChainId_, address attester_)
+//     function revokeAttesterRole(uint256 remoteChainSlug_, address attester_)
 //         external
 //         onlyOwner
 //     {
-//         _revokeRole(_attesterRole(remoteChainId_), attester_);
+//         _revokeRole(_attesterRole(remoteChainSlug_), attester_);
 //     }
 
-//     function _attesterRole(uint256 chainId_) internal pure returns (bytes32) {
-//         return bytes32(chainId_);
+//     function _attesterRole(uint256 chainSlug_) internal pure returns (bytes32) {
+//         return bytes32(chainSlug_);
 //     }
 // }

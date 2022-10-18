@@ -17,12 +17,10 @@ contract Socket is SocketConfig, ReentrancyGuard {
         FAILED
     }
 
-    uint256 private immutable _chainId;
+    uint256 private immutable _chainSlug;
 
     bytes32 private constant EXECUTOR_ROLE = keccak256("EXECUTOR");
-
-    // localPlug => remoteChainId => nonce
-    mapping(address => mapping(uint256 => uint256)) private _nonces;
+    uint256 private _nonces;
 
     // msgId => executorAddress
     mapping(uint256 => address) private executor;
@@ -34,17 +32,17 @@ contract Socket is SocketConfig, ReentrancyGuard {
     IVault public override vault;
 
     /**
-     * @param chainId_ current chain id (should not be more than uint16)
+     * @param chainSlug_ socket chain slug (should not be more than uint32)
      */
     constructor(
-        uint16 chainId_,
+        uint32 chainSlug_,
         address hasher_,
         address vault_
     ) {
         _setHasher(hasher_);
         _setVault(vault_);
 
-        _chainId = chainId_;
+        _chainSlug = chainSlug_;
     }
 
     function setHasher(address hasher_) external onlyOwner {
@@ -58,34 +56,33 @@ contract Socket is SocketConfig, ReentrancyGuard {
     /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with accumulator
-     * @param remoteChainId_ the remote chain id
+     * @param remoteChainSlug_ the remote chain id
      * @param msgGasLimit_ the gas limit needed to execute the payload on remote
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
-        uint256 remoteChainId_,
+        uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable override {
-        PlugConfig memory plugConfig = plugConfigs[msg.sender][remoteChainId_];
-        uint256 nonce = _nonces[msg.sender][remoteChainId_]++;
+        PlugConfig memory plugConfig = plugConfigs[msg.sender][
+            remoteChainSlug_
+        ];
 
         // Packs the local plug, local chain id, remote chain id and nonce
-        // msgId(256) = localPlug(160) | localChainId(16) | remoteChainId(16) | nonce(64)
-        uint256 msgId = (uint256(uint160(msg.sender)) << 96) |
-            (uint256(uint16(_chainId)) << 80) |
-            (uint256(uint16(remoteChainId_)) << 64) |
-            uint256(uint64(nonce));
+        // _nonces++ will take care of msg id overflow as well
+        // msgId(256) = localChainSlug(32) | nonce(224)
+        uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _nonces++;
 
         vault.deductFee{value: msg.value}(
-            remoteChainId_,
+            remoteChainSlug_,
             plugConfig.integrationType
         );
 
         bytes32 packedMessage = hasher.packMessage(
-            _chainId,
+            _chainSlug,
             msg.sender,
-            remoteChainId_,
+            remoteChainSlug_,
             plugConfig.remotePlug,
             msgId,
             msgGasLimit_,
@@ -94,9 +91,9 @@ contract Socket is SocketConfig, ReentrancyGuard {
 
         IAccumulator(plugConfig.accum).addPackedMessage(packedMessage);
         emit MessageTransmitted(
-            _chainId,
+            _chainSlug,
             msg.sender,
-            remoteChainId_,
+            remoteChainSlug_,
             plugConfig.remotePlug,
             msgId,
             msgGasLimit_,
@@ -107,7 +104,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
     /**
      * @notice executes a message
      * @param msgGasLimit gas limit needed to execute the inbound at remote
-     * @param msgId message id packed with local plug, local chainId, remote chainId and nonce
+     * @param msgId message id packed with local plug, local chainSlug, remote ChainSlug and nonce
      * @param localPlug remote plug address
      * @param payload the data which is needed by plug at inbound call on remote
      * @param verifyParams_ the details needed for message verification
@@ -124,12 +121,12 @@ contract Socket is SocketConfig, ReentrancyGuard {
         executor[msgId] = msg.sender;
 
         PlugConfig memory plugConfig = plugConfigs[localPlug][
-            verifyParams_.remoteChainId
+            verifyParams_.remoteChainSlug
         ];
         bytes32 packedMessage = hasher.packMessage(
-            verifyParams_.remoteChainId,
+            verifyParams_.remoteChainSlug,
             plugConfig.remotePlug,
-            _chainId,
+            _chainSlug,
             localPlug,
             msgId,
             msgGasLimit,
@@ -146,12 +143,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
         (bool isVerified, bytes32 root) = IVerifier(plugConfig.verifier)
-            .verifyPacket(
-                verifyParams_.accum,
-                verifyParams_.remoteChainId,
-                verifyParams_.packetId,
-                plugConfig.integrationType
-            );
+            .verifyPacket(verifyParams_.packetId, plugConfig.integrationType);
 
         if (!isVerified) revert VerificationFailed();
 
@@ -193,7 +185,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
     }
 
     /**
-     * @notice removes an executor from `remoteChainId_` chain list
+     * @notice removes an executor from `remoteChainSlug_` chain list
      * @param executor_ executor address
      */
     function revokeExecutorRole(address executor_) external onlyOwner {
@@ -208,8 +200,8 @@ contract Socket is SocketConfig, ReentrancyGuard {
         vault = IVault(vault_);
     }
 
-    function chainId() external view returns (uint256) {
-        return _chainId;
+    function chainSlug() external view returns (uint256) {
+        return _chainSlug;
     }
 
     function getMessageStatus(uint256 msgId_)

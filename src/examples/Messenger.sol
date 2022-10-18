@@ -7,7 +7,7 @@ import "../interfaces/ISocket.sol";
 contract Messenger is IPlug {
     // immutables
     address private immutable _socket;
-    uint256 private immutable _chainId;
+    uint256 private immutable _chainSlug;
 
     address private _owner;
     bytes32 private _message;
@@ -18,11 +18,11 @@ contract Messenger is IPlug {
 
     constructor(
         address socket_,
-        uint256 chainId_,
+        uint256 chainSlug_,
         uint256 msgGasLimit_
     ) {
         _socket = socket_;
-        _chainId = chainId_;
+        _chainSlug = chainSlug_;
         _owner = msg.sender;
 
         msgGasLimit = msgGasLimit_;
@@ -37,17 +37,17 @@ contract Messenger is IPlug {
         _updateMessage(message_);
     }
 
-    function sendRemoteMessage(uint256 remoteChainId_, bytes32 message_)
+    function sendRemoteMessage(uint256 remoteChainSlug_, bytes32 message_)
         external
         payable
     {
-        bytes memory payload = abi.encode(_chainId, message_);
-        _outbound(remoteChainId_, payload);
+        bytes memory payload = abi.encode(_chainSlug, message_);
+        _outbound(remoteChainSlug_, payload);
     }
 
     function inbound(bytes calldata payload_) external payable override {
         require(msg.sender == _socket, "Counter: Invalid Socket");
-        (uint256 localChainId, bytes32 msgDecoded) = abi.decode(
+        (uint256 localChainSlug, bytes32 msgDecoded) = abi.decode(
             payload_,
             (uint256, bytes32)
         );
@@ -55,20 +55,20 @@ contract Messenger is IPlug {
         _updateMessage(msgDecoded);
 
         bytes memory newPayload = abi.encode(
-            _chainId,
+            _chainSlug,
             msgDecoded == _PING ? _PONG : _PING
         );
-        _outbound(localChainId, newPayload);
+        _outbound(localChainSlug, newPayload);
     }
 
     // settings
     function setSocketConfig(
-        uint256 remoteChainId,
+        uint256 remoteChainSlug,
         address remotePlug,
         string calldata integrationType
     ) external onlyOwner {
         ISocket(_socket).setPlugConfig(
-            remoteChainId,
+            remoteChainSlug,
             remotePlug,
             integrationType
         );
