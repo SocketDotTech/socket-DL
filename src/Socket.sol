@@ -20,6 +20,8 @@ contract Socket is SocketConfig, ReentrancyGuard {
     uint256 private immutable _chainSlug;
 
     bytes32 private constant EXECUTOR_ROLE = keccak256("EXECUTOR");
+
+    // incrementing nonce, should be handled in next socket version.
     uint256 private _messageCount;
 
     // msgId => executorAddress

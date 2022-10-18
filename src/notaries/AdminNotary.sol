@@ -32,11 +32,13 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
         override
         nonReentrant
     {
-        (bytes32 root, uint256 id, uint256 remoteChainSlug) = IAccumulator(
-            accumAddress_
-        ).sealPacket();
+        (
+            bytes32 root,
+            uint256 packetCount,
+            uint256 remoteChainSlug
+        ) = IAccumulator(accumAddress_).sealPacket();
 
-        uint256 packetId = _getPacketId(accumAddress_, _chainSlug, id);
+        uint256 packetId = _getPacketId(accumAddress_, _chainSlug, packetCount);
 
         address attester = signatureVerifier.recoverSigner(
             remoteChainSlug,
@@ -214,12 +216,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
     function _getPacketId(
         address accumAddr_,
         uint256 chainSlug_,
-        uint256 id_
+        uint256 packetCount_
     ) internal pure returns (uint256 packetId) {
         packetId =
-            (uint256(uint160(accumAddr_)) << 96) |
-            (chainSlug_ << 64) |
-            id_;
+            (chainSlug_ << 224) |
+            (uint256(uint160(accumAddr_)) << 64) |
+            packetCount_;
     }
 
     function _getChainSlug(uint256 packetId_)
@@ -227,6 +229,6 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
         pure
         returns (uint256 chainSlug_)
     {
-        chainSlug_ = uint32(packetId_ >> 64);
+        chainSlug_ = uint32(packetId_ >> 224);
     }
 }

@@ -315,7 +315,7 @@ contract Setup is Test {
         uint256 chainSlug_,
         uint256 id_
     ) internal pure returns (uint256) {
-        return (uint256(uint160(accumAddr_)) << 96) | (chainSlug_ << 64) | id_;
+        return (chainSlug_ << 224) | (uint256(uint160(accumAddr_)) << 64) | id_;
     }
 
     // to ignore this file from coverage
