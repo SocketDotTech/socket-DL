@@ -2,7 +2,7 @@ import fs from "fs";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { signerAddress, remoteChainId, isFast } from "./config";
+import { attesterAddress, remoteChainId, isFast, fastIntegration, slowIntegration } from "./config";
 import { getInstance, deployedAddressPath, getChainId } from "./utils";
 import { Contract } from "ethers";
 
@@ -25,7 +25,7 @@ export const main = async () => {
     const counter: Contract = await getInstance("Counter", localConfig["counter"]);
     const socket: Contract = await getInstance("Socket", localConfig["socket"]);
 
-    const accum = isFast ? "FAST" : "SLOW"
+    const accum = isFast ? fastIntegration : slowIntegration
     await configSocket(socket, socketSigner, remoteChainId, localConfig);
     await configNotary(localConfig["notary"], socketSigner)
 
@@ -46,8 +46,8 @@ async function configNotary(notaryAddr: string, socketSigner: SignerWithAddress)
   try {
     const localChainId = await getChainId();
     const notary: Contract = await getInstance("AdminNotary", notaryAddr);
-    await notary.connect(socketSigner).grantAttesterRole(remoteChainId, signerAddress[localChainId]);
-    console.log(`Added ${signerAddress[localChainId]} as an attester for ${remoteChainId} chain id!`)
+    await notary.connect(socketSigner).grantAttesterRole(remoteChainId, attesterAddress[localChainId]);
+    console.log(`Added ${attesterAddress[localChainId]} as an attester for ${remoteChainId} chain id!`)
   } catch (error) {
     console.log("Error while configuring Notary", error);
     throw error;
@@ -68,7 +68,7 @@ async function configSocket(socket: Contract, socketSigner: SignerWithAddress, r
       localConfig[`fastAccum-${remoteChainId}`],
       localConfig[`deaccum-${remoteChainId}`],
       localConfig["verifier"],
-      "FAST"
+      fastIntegration
     );
 
     await socket.connect(socketSigner).addConfig(
@@ -76,7 +76,7 @@ async function configSocket(socket: Contract, socketSigner: SignerWithAddress, r
       localConfig[`slowAccum-${remoteChainId}`],
       localConfig[`deaccum-${remoteChainId}`],
       localConfig["verifier"],
-      "SLOW"
+      slowIntegration
     );
 
     console.log(`Added slow and fast config for ${remoteChainId} chain id!`)

@@ -1,4 +1,4 @@
-export const signerAddress: {
+export const attesterAddress: {
   [key: number]: string
 } = {
   80001: "0x4b53d8d45fe48e0039db40bc21f0a3fc70d0a922",
@@ -44,6 +44,9 @@ export const contractPath: {
   "BondedNotary": "src/notaries/BondedNotary.sol",
   "Socket": "src/Socket.sol",
 }
+
+export const fastIntegration = "FAST";
+export const slowIntegration = "SLOW";
 
 export const isFast = true;
 export const remoteChainId = 80001;
