@@ -96,6 +96,22 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
         packedDetails.attestations++;
     }
 
+    /**
+     * @notice updates root for given packet id
+     * @param packetId_ id of packet to be updated
+     * @param newRoot_ new root
+     */
+    function setSignatureVerifier(uint256 packetId_, bytes32 newRoot_)
+        external
+        onlyOwner
+    {
+        PacketDetails storage packedDetails = _packetDetails[packetId_];
+        bytes32 oldRoot = packedDetails.remoteRoots;
+        packedDetails.remoteRoots = newRoot_;
+
+        emit PacketRootUpdated(packetId_, oldRoot, newRoot_);
+    }
+
     /// @inheritdoc INotary
     function getPacketStatus(uint256 packetId_)
         public

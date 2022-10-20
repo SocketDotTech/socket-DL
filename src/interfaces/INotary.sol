@@ -47,6 +47,14 @@ interface INotary {
      */
     event PacketAttested(address indexed attester, uint256 indexed packetId);
 
+    /**
+     * @notice emits the root details when root is replaced by owner
+     * @param packetId packet id
+     * @param oldRoot old root
+     * @param newRoot old root
+     */
+    event PacketRootUpdated(uint256 packetId, bytes32 oldRoot, bytes32 newRoot);
+
     error InvalidAttester();
     error AttesterExists();
     error AttesterNotFound();
