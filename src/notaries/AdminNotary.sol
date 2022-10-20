@@ -101,7 +101,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
      * @param packetId_ id of packet to be updated
      * @param newRoot_ new root
      */
-    function setSignatureVerifier(uint256 packetId_, bytes32 newRoot_)
+    function updatePacketRoot(uint256 packetId_, bytes32 newRoot_)
         external
         onlyOwner
     {
