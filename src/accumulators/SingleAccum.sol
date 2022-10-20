@@ -10,7 +10,7 @@ contract SingleAccum is BaseAccum {
     constructor(
         address socket_,
         address notary_,
-        uint256 remoteChainSlug_
+        uint32 remoteChainSlug_
     ) BaseAccum(socket_, notary_, remoteChainSlug_) {}
 
     /// adds the packed message to a packet

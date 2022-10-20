@@ -18,7 +18,7 @@ contract SingleAccumTest is Test {
 
     function setUp() external {
         hoax(_owner);
-        _sa = new SingleAccum(_socket, _notary, _remoteChainSlug);
+        _sa = new SingleAccum(_socket, _notary, uint32(_remoteChainSlug));
     }
 
     function testSetUp() external {

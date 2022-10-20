@@ -24,12 +24,8 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     constructor(
         address socket_,
         address notary_,
-        uint256 remoteChainSlug_
+        uint32 remoteChainSlug_
     ) {
-        require(
-            remoteChainSlug_ <= type(uint32).max,
-            "chain slug more than uint32"
-        );
         _setSocket(socket_);
         _setNotary(notary_);
 

@@ -189,7 +189,7 @@ contract Setup is Test {
     {
         vm.startPrank(deployer_);
         sigVerifier__ = new SignatureVerifier();
-        notary__ = new AdminNotary(address(sigVerifier__), chainSlug_);
+        notary__ = new AdminNotary(address(sigVerifier__), uint32(chainSlug_));
 
         vm.stopPrank();
     }
@@ -202,7 +202,11 @@ contract Setup is Test {
     ) internal returns (SingleAccum accum__, SingleDeaccum deaccum__) {
         vm.startPrank(deployer_);
 
-        accum__ = new SingleAccum(socket_, address(notary__), remoteChainSlug_);
+        accum__ = new SingleAccum(
+            socket_,
+            address(notary__),
+            uint32(remoteChainSlug_)
+        );
         deaccum__ = new SingleDeaccum();
 
         vm.stopPrank();
