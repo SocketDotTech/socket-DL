@@ -81,7 +81,7 @@ contract HappyTest is Setup {
 
         _submitRootOnDst(_b, sig, packetId, root);
 
-        vm.expectRevert(INotary.AlreadyProposed.selector);
+        vm.expectRevert(INotary.AlreadyAttested.selector);
         _submitRootOnDst(_b, sig, packetId, root);
 
         // without executor role
@@ -105,6 +105,8 @@ contract HappyTest is Setup {
             _b.socket__.grantExecutorRole(_raju);
         }
 
+        assertEq(uint256(_b.socket__.getMessageStatus(msgId)), 0);
+
         vm.expectEmit(true, false, false, false);
         emit ExecutionSuccess(msgId);
         _executePayloadOnDst(
@@ -120,6 +122,7 @@ contract HappyTest is Setup {
 
         assertEq(dstCounter__.counter(), amount);
         assertEq(srcCounter__.counter(), 0);
+        assertEq(uint256(_b.socket__.getMessageStatus(msgId)), 1);
 
         vm.expectRevert(ISocket.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
@@ -189,7 +192,7 @@ contract HappyTest is Setup {
         bytes memory sig;
 
         hoax(_raju);
-        vm.expectRevert(Vault.NotEnoughFees.selector);
+        vm.expectRevert(Vault.InsufficientFees.selector);
         srcCounter__.remoteAddOperation(_b.chainSlug, addAmount, _msgGasLimit);
 
         hoax(_raju);
@@ -310,6 +313,8 @@ contract HappyTest is Setup {
 
         (uint256 packetId, ) = _attesterChecks(accum);
 
+        assertEq(uint256(_b.socket__.getMessageStatus(msgId)), 0);
+
         // ExecutionFailedBytes with out of gas
         vm.expectEmit(true, true, false, false);
         emit ExecutionFailedBytes(msgId, "0x");
@@ -324,6 +329,8 @@ contract HappyTest is Setup {
             payload,
             proof
         );
+
+        assertEq(uint256(_b.socket__.getMessageStatus(msgId)), 2);
     }
 
     function testExecuteWithExecutionFailure() external {
@@ -343,6 +350,7 @@ contract HappyTest is Setup {
         );
 
         (uint256 packetId, ) = _attesterChecks(accum);
+        assertEq(uint256(_b.socket__.getMessageStatus(msgId)), 0);
 
         // ExecutionFailed with error decoded as string
         vm.expectEmit(true, true, false, false);
@@ -358,6 +366,8 @@ contract HappyTest is Setup {
             payload,
             proof
         );
+
+        assertEq(uint256(_b.socket__.getMessageStatus(msgId)), 2);
     }
 
     function testRemoteAddFromAtoBFastPath() external {
@@ -404,7 +414,7 @@ contract HappyTest is Setup {
 
         // attest
         hoax(newAttester);
-        _b.notary__.confirmRoot(packetId, root, sig);
+        _b.notary__.attest(packetId, root, sig);
 
         _executePayloadOnDst(
             _a,

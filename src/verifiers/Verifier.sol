@@ -14,7 +14,7 @@ contract Verifier is IVerifier, Ownable {
 
     // this integration type is set for fast accum
     // it is compared against the passed accum type to decide packet verification mode
-    bytes32 public integrationType;
+    bytes32 public immutable fastIntegrationType;
 
     event NotarySet(address notary_);
     event SocketSet(address socket_);
@@ -24,11 +24,11 @@ contract Verifier is IVerifier, Ownable {
         address notary_,
         address socket_,
         uint256 timeoutInSeconds_,
-        bytes32 integrationType_
+        bytes32 fastIntegrationType_
     ) Ownable(owner_) {
         notary = INotary(notary_);
         socket = ISocket(socket_);
-        integrationType = integrationType_;
+        fastIntegrationType = fastIntegrationType_;
 
         // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
@@ -55,15 +55,17 @@ contract Verifier is IVerifier, Ownable {
     /**
      * @notice verifies if the packet satisfies needed checks before execution
      * @param packetId_ packet id
-     * @param integrationType_ integration type for plug
+     * @param fastIntegrationType_ integration type for plug
      */
-    function verifyPacket(uint256 packetId_, bytes32 integrationType_)
+    function verifyPacket(uint256 packetId_, bytes32 fastIntegrationType_)
         external
         view
         override
         returns (bool, bytes32)
     {
-        bool isFast = integrationType == integrationType_ ? true : false;
+        bool isFast = fastIntegrationType == fastIntegrationType_
+            ? true
+            : false;
 
         (
             INotary.PacketStatus status,

@@ -24,7 +24,7 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     constructor(
         address socket_,
         address notary_,
-        uint256 remoteChainSlug_
+        uint32 remoteChainSlug_
     ) {
         _setSocket(socket_);
         _setNotary(notary_);

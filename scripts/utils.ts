@@ -47,6 +47,9 @@ export const getChainId = async (): Promise<number> => {
   return Number(network.config.chainId)
 }
 
+export const integrationType = (integrationName: string) =>
+ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["string"], [integrationName]));
+
 export const storeAddresses = async (addresses: Object, chainId: number) => {
   const dirPath = path.join(__dirname, "../deployments");
   if (!fs.existsSync(dirPath)) {

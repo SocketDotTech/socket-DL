@@ -74,10 +74,10 @@ contract Setup is Test {
 
         // setup minfees in vault for diff accum for all remote chains
         vm.startPrank(_socketOwner);
-        _a.vault__.setFees(minFees_, _a.fastAccumType);
-        _a.vault__.setFees(minFees_, _a.slowAccumType);
-        _b.vault__.setFees(minFees_, _b.fastAccumType);
-        _b.vault__.setFees(minFees_, _b.slowAccumType);
+        _a.vault__.setFees(minFees_, _b.chainSlug, _a.fastAccumType);
+        _a.vault__.setFees(minFees_, _b.chainSlug, _a.slowAccumType);
+        _b.vault__.setFees(minFees_, _a.chainSlug, _b.fastAccumType);
+        _b.vault__.setFees(minFees_, _a.chainSlug, _b.slowAccumType);
         vm.stopPrank();
     }
 
@@ -189,7 +189,7 @@ contract Setup is Test {
     {
         vm.startPrank(deployer_);
         sigVerifier__ = new SignatureVerifier();
-        notary__ = new AdminNotary(address(sigVerifier__), chainSlug_);
+        notary__ = new AdminNotary(address(sigVerifier__), uint32(chainSlug_));
 
         vm.stopPrank();
     }
@@ -202,7 +202,11 @@ contract Setup is Test {
     ) internal returns (SingleAccum accum__, SingleDeaccum deaccum__) {
         vm.startPrank(deployer_);
 
-        accum__ = new SingleAccum(socket_, address(notary__), remoteChainSlug_);
+        accum__ = new SingleAccum(
+            socket_,
+            address(notary__),
+            uint32(remoteChainSlug_)
+        );
         deaccum__ = new SingleDeaccum();
 
         vm.stopPrank();
@@ -272,7 +276,7 @@ contract Setup is Test {
         bytes32 root_
     ) internal {
         hoax(_raju);
-        dst_.notary__.propose(packetId_, root_, sig_);
+        dst_.notary__.attest(packetId_, root_, sig_);
     }
 
     function _executePayloadOnDst(
@@ -315,7 +319,7 @@ contract Setup is Test {
         uint256 chainSlug_,
         uint256 id_
     ) internal pure returns (uint256) {
-        return (uint256(uint160(accumAddr_)) << 96) | (chainSlug_ << 64) | id_;
+        return (chainSlug_ << 224) | (uint256(uint160(accumAddr_)) << 64) | id_;
     }
 
     // to ignore this file from coverage

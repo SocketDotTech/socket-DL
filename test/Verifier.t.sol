@@ -35,7 +35,7 @@ contract VerifierTest is Setup {
         assertEq(address(verifier__.socket()), address(cc.socket__));
 
         assertEq(verifier__.timeoutInSeconds(), timeoutInSeconds);
-        assertEq(verifier__.integrationType(), integrationType);
+        assertEq(verifier__.fastIntegrationType(), integrationType);
     }
 
     function testSetNotary() external {

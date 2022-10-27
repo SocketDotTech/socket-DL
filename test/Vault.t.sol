@@ -27,22 +27,22 @@ contract VaultTest is Test {
 
     function testDeductFee() external {
         hoax(_owner);
-        _vault.setFees(_minFees, _integrationType);
+        _vault.setFees(_minFees, _remoteChainSlug, _integrationType);
 
-        vm.expectRevert(Vault.NotEnoughFees.selector);
-        _vault.deductFee{value: 10}(0, _integrationType);
+        vm.expectRevert(Vault.InsufficientFees.selector);
+        _vault.deductFee{value: 10}(_remoteChainSlug, _integrationType);
 
         vm.expectEmit(true, false, false, false);
         emit FeeDeducted(_minFees);
 
-        _vault.deductFee{value: _minFees}(0, _integrationType);
+        _vault.deductFee{value: _minFees}(_remoteChainSlug, _integrationType);
         assertEq(address(_vault).balance, _minFees);
     }
 
     function testClaimFee() external {
         hoax(_owner);
-        _vault.setFees(_minFees, _integrationType);
-        _vault.deductFee{value: _minFees}(0, _integrationType);
+        _vault.setFees(_minFees, _remoteChainSlug, _integrationType);
+        _vault.deductFee{value: _minFees}(_remoteChainSlug, _integrationType);
 
         hoax(_raju);
         vm.expectRevert(Ownable.OnlyOwner.selector);
@@ -61,13 +61,13 @@ contract VaultTest is Test {
     function testSetFees() external {
         hoax(_raju);
         vm.expectRevert(Ownable.OnlyOwner.selector);
-        _vault.setFees(_minFees, _integrationType);
+        _vault.setFees(_minFees, _remoteChainSlug, _integrationType);
 
-        assertEq(_vault.getFees(_integrationType), 0);
+        assertEq(_vault.getFees(_integrationType, _remoteChainSlug), 0);
 
         hoax(_owner);
-        _vault.setFees(_minFees, _integrationType);
+        _vault.setFees(_minFees, _remoteChainSlug, _integrationType);
 
-        assertEq(_vault.getFees(_integrationType), _minFees);
+        assertEq(_vault.getFees(_integrationType, _remoteChainSlug), _minFees);
     }
 }

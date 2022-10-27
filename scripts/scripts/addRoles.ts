@@ -4,7 +4,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { getInstance, getChainId, deployedAddressPath } from "../utils";
 import { Contract } from "ethers";
-import { remoteChainId, executorAddress, signerAddress } from "../config";
+import { remoteChainId, executorAddress, attesterAddress } from "../config";
 
 export const main = async () => {
   try {
@@ -22,7 +22,7 @@ export const main = async () => {
     const notary: Contract = await getInstance("AdminNotary", config["notary"]);
     const socket: Contract = await getInstance("Socket", config["socket"]);
 
-    await notary.connect(signer).grantAttesterRole(remoteChainId, signerAddress[chainId]);
+    await notary.connect(signer).grantAttesterRole(remoteChainId, attesterAddress[chainId]);
     await socket.connect(signer).grantExecutorRole(executorAddress[chainId]);
     console.log(`Assigned roles to ${executorAddress[chainId]}!`)
   } catch (error) {

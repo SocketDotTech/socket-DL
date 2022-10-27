@@ -131,15 +131,17 @@ contract AdminNotaryTest is Setup {
         cc.notary__.seal(_accum, altSign);
     }
 
-    function testPropose() external {
+    function testAttest() external {
         hoax(_socketOwner);
         cc.notary__.grantAttesterRole(_remoteChainSlug, _attester);
+        hoax(_socketOwner);
+        cc.notary__.grantAttesterRole(_remoteChainSlug, _altAttester);
 
         hoax(_raju);
-        cc.notary__.propose(_remotePacketId, _root, remoteSig);
+        cc.notary__.attest(_remotePacketId, _root, remoteSig);
 
         assertEq(cc.notary__.getRemoteRoot(_remotePacketId), _root);
-        assertEq(cc.notary__.getConfirmations(_remotePacketId), 1);
+        assertEq(cc.notary__.getAttestationCount(_remotePacketId), 1);
 
         (
             INotary.PacketStatus status,
@@ -156,45 +158,14 @@ contract AdminNotaryTest is Setup {
         assertEq(cc.notary__.getRemoteRoot(_remotePacketId), _root);
 
         hoax(_raju);
-        vm.expectRevert(INotary.AlreadyProposed.selector);
-        cc.notary__.propose(_remotePacketId, _root, remoteSig);
-    }
+        vm.expectRevert(INotary.AlreadyAttested.selector);
+        cc.notary__.attest(_remotePacketId, _root, remoteSig);
 
-    function testProposeWithoutRole() external {
-        hoax(_raju);
-        vm.expectRevert(INotary.InvalidAttester.selector);
-        cc.notary__.propose(_localPacketId, _root, localSig);
-    }
-
-    function testConfirmRoot() external {
-        hoax(_socketOwner);
-        cc.notary__.grantAttesterRole(_remoteChainSlug, _attester);
-        hoax(_socketOwner);
-        cc.notary__.grantAttesterRole(_remoteChainSlug, _altAttester);
-
-        // status not-proposed
-        assertEq(uint256(cc.notary__.getPacketStatus(_remotePacketId)), 0);
-
-        hoax(_socketOwner);
-        vm.expectRevert(INotary.RootNotFound.selector);
-        cc.notary__.confirmRoot(_remotePacketId, _root, remoteSig);
-
-        hoax(_raju);
-        cc.notary__.propose(_remotePacketId, _root, remoteSig);
-
-        // status proposed
-        assertEq(uint256(cc.notary__.getPacketStatus(_remotePacketId)), 1);
-
+        // one pending attestations
         (, , uint256 pendingAttestations, ) = cc.notary__.getPacketDetails(
             _remotePacketId
         );
-
-        // one pending attestations
         assertEq(pendingAttestations, 1);
-
-        hoax(_raju);
-        vm.expectRevert(INotary.AlreadyAttested.selector);
-        cc.notary__.confirmRoot(_remotePacketId, _root, remoteSig);
 
         bytes memory altSign = _createSignature(
             _chainSlug,
@@ -204,7 +175,7 @@ contract AdminNotaryTest is Setup {
         );
 
         hoax(_raju);
-        cc.notary__.confirmRoot(_remotePacketId, _root, altSign);
+        cc.notary__.attest(_remotePacketId, _root, altSign);
 
         (, , pendingAttestations, ) = cc.notary__.getPacketDetails(
             _remotePacketId
@@ -212,5 +183,11 @@ contract AdminNotaryTest is Setup {
 
         // no pending attestations
         assertEq(pendingAttestations, 0);
+    }
+
+    function testAttestWithoutRole() external {
+        hoax(_raju);
+        vm.expectRevert(INotary.InvalidAttester.selector);
+        cc.notary__.attest(_localPacketId, _root, localSig);
     }
 }
