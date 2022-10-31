@@ -2,7 +2,7 @@ import fs from "fs";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { getInstance, deployContractWithoutArgs, getChainId, deployedAddressPath } from "../utils";
+import { getInstance, deployContractWithoutArgs, getChainId, deployedAddressPath } from "../../utils";
 import { Contract } from "ethers";
 
 export const main = async () => {
