@@ -26,7 +26,7 @@ contract Setup is Test {
     uint256 internal _msgGasLimit = 25548;
     string internal fastIntegrationType = "FAST";
     string internal slowIntegrationType = "SLOW";
-
+    uint256[] testArr = [1];
     struct ChainContext {
         uint256 chainSlug;
         bytes32 slowAccumType;
@@ -266,7 +266,7 @@ contract Setup is Test {
         bytes memory sig_
     ) internal {
         hoax(_attester);
-        src_.notary__.seal(accum, sig_);
+        src_.notary__.seal(accum, testArr, sig_);
     }
 
     function _submitRootOnDst(
