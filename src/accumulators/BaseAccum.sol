@@ -32,28 +32,6 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
         remoteChainSlug = remoteChainSlug_;
     }
 
-    /// @inheritdoc IAccumulator
-    function sealPacket()
-        external
-        virtual
-        override
-        onlyRole(NOTARY_ROLE)
-        returns (
-            bytes32,
-            uint256,
-            uint256
-        )
-    {
-        uint256 packetId = _sealedPackets;
-
-        if (_roots[packetId] == bytes32(0)) revert NoPendingPacket();
-        bytes32 root = _roots[packetId];
-        _sealedPackets++;
-
-        emit PacketComplete(root, packetId);
-        return (root, packetId, remoteChainSlug);
-    }
-
     function setSocket(address socket_) external onlyOwner {
         _setSocket(socket_);
     }

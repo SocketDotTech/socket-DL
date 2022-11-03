@@ -26,4 +26,26 @@ contract SingleAccum is BaseAccum {
 
         emit MessageAdded(packedMessage, packetId, packedMessage);
     }
+
+    function sealPacket(uint256[] calldata, bytes calldata)
+        external
+        payable
+        virtual
+        override
+        onlyRole(NOTARY_ROLE)
+        returns (
+            bytes32,
+            uint256,
+            uint256
+        )
+    {
+        uint256 packetId = _sealedPackets;
+
+        if (_roots[packetId] == bytes32(0)) revert NoPendingPacket();
+        bytes32 root = _roots[packetId];
+        _sealedPackets++;
+
+        emit PacketComplete(root, packetId);
+        return (root, packetId, remoteChainSlug);
+    }
 }

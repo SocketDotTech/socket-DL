@@ -54,8 +54,12 @@ interface IAccumulator {
      * @return packetId id of the packed sealed
      * @return remoteChainSlug remote chain id for the packet sealed
      */
-    function sealPacket()
+    function sealPacket(
+        uint256[] calldata bridgeParams,
+        bytes calldata signature_
+    )
         external
+        payable
         returns (
             bytes32 root,
             uint256 packetId,
