@@ -26,16 +26,19 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
     }
 
     /// @inheritdoc INotary
-    function seal(address accumAddress_, bytes calldata signature_)
-        external
-        override
-        nonReentrant
-    {
+    function seal(
+        address accumAddress_,
+        uint256[] calldata bridgeParams,
+        bytes calldata signature_
+    ) external payable override nonReentrant {
         (
             bytes32 root,
             uint256 packetCount,
             uint256 remoteChainSlug
-        ) = IAccumulator(accumAddress_).sealPacket();
+        ) = IAccumulator(accumAddress_).sealPacket{value: msg.value}(
+                bridgeParams,
+                signature_
+            );
 
         uint256 packetId = _getPacketId(accumAddress_, _chainSlug, packetCount);
 

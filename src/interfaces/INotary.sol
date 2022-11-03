@@ -66,7 +66,11 @@ interface INotary {
      * @param accumAddress_ address of accumulator at local
      * @param signature_ signature of attester
      */
-    function seal(address accumAddress_, bytes calldata signature_) external;
+    function seal(
+        address accumAddress_,
+        uint256[] calldata bridgeParams,
+        bytes calldata signature_
+    ) external payable;
 
     /**
      * @notice to propose a new packet
