@@ -6,7 +6,7 @@ import { contractPath } from "./config";
 import path from "path";
 import fs from "fs";
 
-export const deployedAddressPath = path.join(__dirname, "../deployments/");
+export const deployedAddressPath = path.join(__dirname, "../../deployments/");
 
 export const deployContractWithoutArgs = async (contractName: string, signer: SignerWithAddress): Promise<Contract> => {
   try {
