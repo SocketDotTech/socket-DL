@@ -9,6 +9,8 @@ contract ArbitrumL1Accum is BaseAccum {
     address public remoteNotary;
     address public remoteRefundAddress;
     address public callValueRefundAddress;
+
+    uint256 private immutable _chainSlug;
     IInbox public inbox;
 
     event RetryableTicketCreated(uint256 indexed ticketId);
@@ -17,9 +19,12 @@ contract ArbitrumL1Accum is BaseAccum {
         address socket_,
         address notary_,
         address inbox_,
-        uint32 remoteChainSlug_
+        uint32 remoteChainSlug_,
+        uint32 chainSlug_
     ) BaseAccum(socket_, notary_, remoteChainSlug_) {
         inbox = IInbox(inbox_);
+
+        _chainSlug = chainSlug_;
         remoteRefundAddress = msg.sender;
         callValueRefundAddress = msg.sender;
     }
@@ -63,13 +68,24 @@ contract ArbitrumL1Accum is BaseAccum {
             bridgeParams[2], // gasPriceBid
             abi.encodeWithSelector(
                 INotary.attest.selector,
-                _sealedPackets,
+                _getPacketId(_sealedPackets),
                 _roots[_sealedPackets],
                 signature_
             )
         );
 
         emit RetryableTicketCreated(ticketID);
+    }
+
+    function _getPacketId(uint256 packetCount_)
+        internal
+        view
+        returns (uint256 packetId)
+    {
+        packetId =
+            (_chainSlug << 224) |
+            (uint256(uint160(address(this))) << 64) |
+            packetCount_;
     }
 
     function addPackedMessage(bytes32 packedMessage)
