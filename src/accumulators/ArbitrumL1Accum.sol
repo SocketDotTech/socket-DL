@@ -7,11 +7,8 @@ import "../interfaces/native-bridge/IInbox.sol";
 
 contract ArbitrumL1Accum is BaseAccum {
     address public remoteNotary;
-    uint256 public maxSubmissionCost = 1000;
-    uint256 public maxGas = 1000;
-    uint256 public gasPriceBid = 1000;
-    address public remoteRefundAddress = address(1);
-    address public callValueRefundAddress = address(2);
+    address public remoteRefundAddress;
+    address public callValueRefundAddress;
     IInbox public inbox;
 
     event RetryableTicketCreated(uint256 indexed ticketId);
@@ -20,11 +17,11 @@ contract ArbitrumL1Accum is BaseAccum {
         address socket_,
         address notary_,
         address inbox_,
-        address remoteNotary_,
         uint32 remoteChainSlug_
     ) BaseAccum(socket_, notary_, remoteChainSlug_) {
-        remoteNotary = remoteNotary_;
         inbox = IInbox(inbox_);
+        remoteRefundAddress = msg.sender;
+        callValueRefundAddress = msg.sender;
     }
 
     function setRemoteNotary(address notary_) external onlyOwner {
@@ -46,24 +43,17 @@ contract ArbitrumL1Accum is BaseAccum {
         )
     {
         if (_roots[_sealedPackets] == bytes32(0)) revert NoPendingPacket();
-        bytes memory data = abi.encodeWithSelector(
-            INotary.attest.selector,
-            _sealedPackets,
-            _roots[_sealedPackets],
-            signature_
-        );
-        uint256 ticketID = sendL2Message(bridgeParams, data);
+        sendL2Message(bridgeParams, signature_);
 
-        emit RetryableTicketCreated(ticketID);
         emit PacketComplete(_roots[_sealedPackets], _sealedPackets);
         return (_roots[_sealedPackets], _sealedPackets++, remoteChainSlug);
     }
 
-    function sendL2Message(uint256[] calldata bridgeParams, bytes memory data)
-        internal
-        returns (uint256 ticketID)
-    {
-        ticketID = inbox.createRetryableTicket{value: msg.value}(
+    function sendL2Message(
+        uint256[] calldata bridgeParams,
+        bytes calldata signature_
+    ) internal {
+        uint256 ticketID = inbox.createRetryableTicket{value: msg.value}(
             remoteNotary,
             0, // no value needed for attest
             bridgeParams[0], // maxSubmissionCost
@@ -71,8 +61,15 @@ contract ArbitrumL1Accum is BaseAccum {
             callValueRefundAddress,
             bridgeParams[1], // maxGas
             bridgeParams[2], // gasPriceBid
-            data
+            abi.encodeWithSelector(
+                INotary.attest.selector,
+                _sealedPackets,
+                _roots[_sealedPackets],
+                signature_
+            )
         );
+
+        emit RetryableTicketCreated(ticketID);
     }
 
     function addPackedMessage(bytes32 packedMessage)

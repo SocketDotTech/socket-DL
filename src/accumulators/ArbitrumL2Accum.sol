@@ -7,12 +7,6 @@ import "../interfaces/native-bridge/IArbSys.sol";
 
 contract ArbitrumL2Accum is BaseAccum {
     address public remoteNotary;
-    uint256 public maxSubmissionCost = 1000;
-    uint256 public maxGas = 1000;
-    uint256 public gasPriceBid = 1000;
-    address public remoteRefundAddress = address(1);
-    address public callValueRefundAddress = address(2);
-
     IArbSys constant arbsys = IArbSys(address(100));
 
     event L2ToL1TxCreated(uint256 indexed withdrawalId);
@@ -20,11 +14,8 @@ contract ArbitrumL2Accum is BaseAccum {
     constructor(
         address socket_,
         address notary_,
-        address remoteNotary_,
         uint32 remoteChainSlug_
-    ) BaseAccum(socket_, notary_, remoteChainSlug_) {
-        remoteNotary = remoteNotary_;
-    }
+    ) BaseAccum(socket_, notary_, remoteChainSlug_) {}
 
     function setRemoteNotary(address notary_) external onlyOwner {
         remoteNotary = notary_;
