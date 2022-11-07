@@ -1,5 +1,5 @@
 {
-  "name": "@socket.tech/socket-dl",
+  "name": "@socket.tech/dl-core",
   "license": "UNLICENSED",
   "version": "0.0.1",
   "description": "Smart contracts for socket data layer.",
