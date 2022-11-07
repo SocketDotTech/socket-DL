@@ -5,6 +5,7 @@ import { Address } from "hardhat-deploy/dist/types";
 import { contractPath } from "./config";
 import path from "path";
 import fs from "fs";
+import { ChainSocketAddresses, DeploymentAddresses } from "./types";
 
 export const deployedAddressPath = path.join(__dirname, "../deployments/");
 
@@ -50,14 +51,25 @@ export const getChainId = async (): Promise<number> => {
 export const integrationType = (integrationName: string) =>
 ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["string"], [integrationName]));
 
-export const storeAddresses = async (addresses: Object, chainId: number) => {
+export const storeAddresses = async (addresses: ChainSocketAddresses, chainId: number) => {
   const dirPath = path.join(__dirname, "../deployments");
   if (!fs.existsSync(dirPath)) {
     await fs.promises.mkdir(dirPath);
   }
 
+  const addressesPath = __dirname + '/../deployments/addresses.json'
+
+  const outputExists = fs.existsSync(addressesPath)
+  let deploymentAddresses: DeploymentAddresses = {}
+  if (outputExists) {
+    const deploymentAddressesString = fs.readFileSync(addressesPath, 'utf-8')
+    deploymentAddresses = JSON.parse(deploymentAddressesString)
+  }
+
+  deploymentAddresses[chainId] = addresses
+
   fs.writeFileSync(
-    __dirname + `/../deployments/${chainId}.json`,
-    JSON.stringify(addresses)
+    addressesPath,
+    JSON.stringify(deploymentAddresses, null, 2)
   );
 }
