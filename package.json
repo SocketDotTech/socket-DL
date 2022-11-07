@@ -1,10 +1,11 @@
 {
   "name": "@socket.tech/socket-dl",
   "license": "UNLICENSED",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Smart contracts for socket data layer.",
   "files": [
-    "src/**/*.sol"
+    "src/**/*.sol",
+    "deployments/addresses.json"
   ],
   "repository": {
     "type": "git",
