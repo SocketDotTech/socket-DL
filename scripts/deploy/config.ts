@@ -31,7 +31,8 @@ export const timeout: {
   31337: 7200,
   31338: 7200,
   137: 7200,
-  56: 7200
+  56: 7200,
+  5: 7200
 }
 
 export const contractPath: {
@@ -39,6 +40,8 @@ export const contractPath: {
 } = {
   "BaseAccum": "src/accumulators/BaseAccum.sol",
   "SingleAccum": "src/accumulators/SingleAccum.sol",
+  "ArbitrumL1Accum": "src/accumulators/ArbitrumL1Accum.sol",
+  "ArbitrumL2Accum": "src/accumulators/ArbitrumL2Accum.sol",
   "SingleDeaccum": "src/deaccumulators/SingleDeaccum.sol",
   "Counter": "src/examples/Counter.sol",
   "Messenger": "src/examples/Messenger.sol",
@@ -53,6 +56,7 @@ export const contractPath: {
 
 export const fastIntegration = "FAST";
 export const slowIntegration = "SLOW";
+export const arbNativeBridgeIntegration = "ARBITRUM_NATIVE_BRIDGE";
 
 export const isFast = true;
 export const remoteChainId = 420;

@@ -5,7 +5,7 @@ import "@typechain/hardhat";
 import "hardhat-preprocessor";
 import "hardhat-deploy";
 
-import {config as dotenvConfig} from "dotenv";
+import { config as dotenvConfig } from "dotenv";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
@@ -121,6 +121,14 @@ const config: HardhatUserConfig = {
           apiURL: "https://api-goerli-optimistic.etherscan.io/api",
           browserURL: "https://goerli-optimism.etherscan.io/"
         }
+      },
+      {
+        network: "arbitrumTestnet",
+        chainId: chainIds["arbitrum-goerli"],
+        urls: {
+          apiURL: "https://api-goerli.arbiscan.io/api",
+          browserURL: "https://goerli.arbiscan.io/"
+        }
       }
     ]
   },
@@ -172,7 +180,7 @@ const config: HardhatUserConfig = {
         enabled: true,
         runs: 999999,
       },
-      // viaIr: true
+      // viaIR: true
     },
   }
 };
