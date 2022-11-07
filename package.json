@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "description": "Smart contracts for socket data layer.",
   "files": [
-    "src/**/*.sol",
+    "artifacts/**/*.json",
+    "artifacts/**/*.dbg.json",
     "deployments/addresses.json"
   ],
   "repository": {
