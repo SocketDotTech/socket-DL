@@ -7,6 +7,7 @@ import { deployContractWithoutArgs, getChainId, storeAddresses } from "./utils";
 
 import { deployAccumulator, deployCounter, deployNotary, deploySocket, deployVault, deployVerifier } from "../scripts/contracts";
 import { executorAddress, totalRemoteChains } from "./config";
+import { ChainAddresses, ChainSocketAddresses } from './types'
 
 export const main = async () => {
   try {
@@ -37,26 +38,35 @@ export const main = async () => {
     await socket.connect(socketSigner).grantExecutorRole(executorAddress[chainId]);
     console.log(`Assigned executor role to ${executorAddress[chainId]}!`)
 
-    const addresses = {
+    // accum & deaccum deployments
+    let fastAccumAddresses: ChainAddresses = {};
+    let slowAccumAddresses: ChainAddresses = {};
+    let deaccumAddresses: ChainAddresses = {};
+
+    for (let index = 0; index < totalRemoteChains.length; index++) {
+      const remoteChain = totalRemoteChains[index]
+
+      const fastAccum: Contract = await deployAccumulator(socket.address, notary.address, remoteChain, socketSigner);
+      const slowAccum: Contract = await deployAccumulator(socket.address, notary.address, remoteChain, socketSigner);
+      const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
+      console.log(`Deployed accum and deaccum for ${remoteChain} chain id`);
+
+      fastAccumAddresses[remoteChain] = fastAccum.address;
+      slowAccumAddresses[remoteChain] = slowAccum.address;
+      deaccumAddresses[remoteChain] = deaccum.address;
+    }
+
+    const addresses: ChainSocketAddresses = {
       counter: counter.address,
       hasher: hasher.address,
       notary: notary.address,
       signatureVerifier: signatureVerifier.address,
       socket: socket.address,
       vault: vault.address,
-      verifier: verifier.address
-    }
-
-    // accum & deaccum deployments
-    for (let index = 0; index < totalRemoteChains.length; index++) {
-      const fastAccum: Contract = await deployAccumulator(socket.address, notary.address, totalRemoteChains[index], socketSigner);
-      const slowAccum: Contract = await deployAccumulator(socket.address, notary.address, totalRemoteChains[index], socketSigner);
-      const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
-      console.log(`Deployed accum and deaccum for ${totalRemoteChains[index]} chain id`);
-
-      addresses[`fastAccum-${totalRemoteChains[index]}`] = fastAccum.address;
-      addresses[`slowAccum-${totalRemoteChains[index]}`] = slowAccum.address;
-      addresses[`deaccum-${totalRemoteChains[index]}`] = deaccum.address;
+      verifier: verifier.address,
+      fastAccum: fastAccumAddresses,
+      slowAccum: slowAccumAddresses,
+      deaccum: deaccumAddresses
     }
 
     await storeAddresses(addresses, chainId);
