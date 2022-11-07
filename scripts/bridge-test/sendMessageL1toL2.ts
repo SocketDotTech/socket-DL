@@ -1,25 +1,17 @@
 import fs from "fs";
-import { getInstance, deployedAddressPath } from "../deploy/utils";
 import { Contract, providers, Wallet, BigNumber, utils } from "ethers";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { hexValue, hexZeroPad } from 'ethers/lib/utils';
-
 import { hexDataLength } from '@ethersproject/bytes'
-import {
-  L1ToL2MessageGasEstimator,
-} from '@arbitrum/sdk/dist/lib/message/L1ToL2MessageGasEstimator'
-import {
-  L1TransactionReceipt,
-  L1ToL2MessageStatus
-} from '@arbitrum/sdk'
+import { L1ToL2MessageGasEstimator } from '@arbitrum/sdk/dist/lib/message/L1ToL2MessageGasEstimator'
+import { L1TransactionReceipt, L1ToL2MessageStatus } from '@arbitrum/sdk'
+
+import { getInstance, deployedAddressPath } from "../deploy/utils";
+import { packPacketId } from "../deploy/scripts/packetId";
 
 // get providers for source and destination
 const walletPrivateKey = process.env.DEVNET_PRIVKEY
 const l1Provider = new providers.JsonRpcProvider(process.env.L1RPC)
 const l2Provider = new providers.JsonRpcProvider(process.env.L2RPC)
-
-const l1Wallet = new Wallet(walletPrivateKey, l1Provider)
-const l2Wallet = new Wallet(walletPrivateKey, l2Provider)
 
 const amount = 100
 const msgGasLimit = 150000
@@ -27,19 +19,17 @@ const proof = "0x000000000000000000000000000000000000000000000000000000000000000
 const localChainId = 5;
 const remoteChainId = 421613;
 
+const l1Wallet = new Wallet(walletPrivateKey, l1Provider)
+const l2Wallet = new Wallet(walletPrivateKey, l2Provider)
+
 export const main = async () => {
   try {
-    if (!remoteChainId)
-      throw new Error("Provide remote chain id");
-
     if (!fs.existsSync(deployedAddressPath + localChainId + ".json") || !fs.existsSync(deployedAddressPath + remoteChainId + ".json")) {
       throw new Error("Deployed Addresses not found");
     }
 
     const l1Config: JSON = JSON.parse(fs.readFileSync(deployedAddressPath + localChainId + ".json", "utf-8"));
-    console.log(l1Config)
     const l2Config: JSON = JSON.parse(fs.readFileSync(deployedAddressPath + remoteChainId + ".json", "utf-8"))
-    console.log(l2Config)
 
     // get socket contracts for both chains
     // counter l1, counter l2, seal, execute
@@ -53,53 +43,24 @@ export const main = async () => {
 
     // outbound
     const outboundTx = await l1Counter.remoteAddOperation(remoteChainId, amount, msgGasLimit);
-    await outboundTx.wait()
+    const outboundTxReceipt = await outboundTx.wait()
 
     // seal
-    const payload = keccak256(defaultAbiCoder.encode(["bytes32", "uint256"], [utils.solidityKeccak256(["string"], ["OP_ADD"]), amount]));
-    const packetId = packPacketId(localChainId, arbitrumAccumL1.address, "0")
-    const msgId = packMsgId(localChainId, "0");
-
-    console.log([
-      localChainId,
-      l1Config["counter"],
-      remoteChainId,
-      l2Config["counter"],
-      msgId,
-      msgGasLimit,
-      payload
-    ])
-
-    const root = keccak256(defaultAbiCoder.encode(
-      [
-        "uint256",
-        "address",
-        "uint256",
-        "address",
-        "uint256",
-        "uint256",
-        "bytes"
-      ],
-      [
-        localChainId,
-        l1Config["counter"],
-        remoteChainId,
-        l2Config["counter"],
-        msgId,
-        msgGasLimit,
-        payload
-      ]
-    ));
+    const { packetId, newRootHash } = arbitrumAccumL1.interface.decodeEventLog("MessageAdded", outboundTxReceipt.events[1].data)
+    const { payload, msgId } = l2Socket.interface.decodeEventLog("MessageTransmitted", outboundTxReceipt.events[2].data)
+    const packedPacketId = packPacketId(localChainId, arbitrumAccumL1.address, packetId)
 
     const digest = keccak256(
       defaultAbiCoder.encode(
         ["uint256", "uint256", "bytes32"],
-        [remoteChainId, packetId, root]
+        [remoteChainId, packedPacketId, newRootHash]
       )
     );
     const signature = await l1Wallet.signMessage(arrayify(digest));
+    const { bridgeParams, callValue } = await getBridgeParams(packedPacketId, newRootHash, signature, arbitrumAccumL1.address, l2Config["notary"]);
 
-    const { bridgeParams, callValue } = await getBridgeParams(packetId, root, signature, arbitrumAccumL1.address, l2Config["notary"]);
+    console.log(`Sealing with params ${arbitrumAccumL1.address, bridgeParams, signature, callValue}`)
+
     const sealTx = await l1Notary.seal(arbitrumAccumL1.address, bridgeParams, signature, {
       value: callValue,
     });
@@ -140,7 +101,7 @@ export const main = async () => {
       payload,
       [
         localChainId,
-        packetId,
+        packedPacketId,
         proof
       ]
     )
@@ -229,26 +190,3 @@ export const getBridgeParams = async (packetNonce, root, signature, from, to) =>
 
   return { bridgeParams: [submissionPriceWei, maxGas, gasPriceBid], callValue }
 }
-
-export const packPacketId = (
-  chainSlug: number,
-  accumAddr: string,
-  packetNonce: string
-): string => {
-  const nonce = BigNumber.from(packetNonce).toHexString();
-  const nonceHex = nonce.length <= 16 ? hexZeroPad(nonce, 8).substring(2,) : nonce.substring(2,);
-  const id = BigNumber.from(chainSlug).toHexString() + hexValue(accumAddr).substring(2,) + nonceHex;
-
-  return BigNumber.from(id).toString();
-};
-
-export const packMsgId = (
-  chainSlug: number,
-  msgNonce: string
-): string => {
-  const nonce = BigNumber.from(msgNonce).toHexString();
-  const nonceHex = nonce.length <= 16 ? hexZeroPad(nonce, 8).substring(2,) : nonce.substring(2,);
-  const id = BigNumber.from(chainSlug).toHexString() + nonceHex;
-
-  return BigNumber.from(id).toString();
-};
