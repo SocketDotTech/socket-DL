@@ -132,7 +132,6 @@ contract Setup is Test {
         cc.verifier__ = new Verifier(
             _plugOwner,
             address(cc.notary__),
-            address(cc.socket__),
             _timeoutInSeconds,
             keccak256(abi.encode(fastIntegrationType))
         );

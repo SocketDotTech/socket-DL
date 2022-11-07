@@ -22,7 +22,6 @@ contract VerifierTest is Setup {
         verifier__ = new Verifier(
             _socketOwner,
             address(cc.notary__),
-            address(cc.socket__),
             timeoutInSeconds,
             integrationType
         );
@@ -32,7 +31,6 @@ contract VerifierTest is Setup {
         assertEq(verifier__.owner(), _socketOwner);
 
         assertEq(address(verifier__.notary()), address(cc.notary__));
-        assertEq(address(verifier__.socket()), address(cc.socket__));
 
         assertEq(verifier__.timeoutInSeconds(), timeoutInSeconds);
         assertEq(verifier__.fastIntegrationType(), integrationType);
@@ -48,18 +46,6 @@ contract VerifierTest is Setup {
         hoax(_socketOwner);
         verifier__.setNotary(newNotary);
         assertEq(address(verifier__.notary()), newNotary);
-    }
-
-    function testSetSocket() external {
-        address newSocket = address(9);
-
-        hoax(_raju);
-        vm.expectRevert(Ownable.OnlyOwner.selector);
-        verifier__.setSocket(newSocket);
-
-        hoax(_socketOwner);
-        verifier__.setSocket(newSocket);
-        assertEq(address(verifier__.socket()), newSocket);
     }
 
     function testVerifyCommitmentNotProposed() public {
