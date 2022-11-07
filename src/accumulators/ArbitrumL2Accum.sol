@@ -7,6 +7,8 @@ import "../interfaces/native-bridge/IArbSys.sol";
 
 contract ArbitrumL2Accum is BaseAccum {
     address public remoteNotary;
+    uint256 public immutable _chainSlug;
+
     IArbSys constant arbsys = IArbSys(address(100));
 
     event L2ToL1TxCreated(uint256 indexed withdrawalId);
@@ -14,8 +16,11 @@ contract ArbitrumL2Accum is BaseAccum {
     constructor(
         address socket_,
         address notary_,
-        uint32 remoteChainSlug_
-    ) BaseAccum(socket_, notary_, remoteChainSlug_) {}
+        uint32 remoteChainSlug_,
+        uint32 chainSlug_
+    ) BaseAccum(socket_, notary_, remoteChainSlug_) {
+        _chainSlug = chainSlug_;
+    }
 
     function setRemoteNotary(address notary_) external onlyOwner {
         remoteNotary = notary_;
@@ -35,7 +40,7 @@ contract ArbitrumL2Accum is BaseAccum {
         if (_roots[_sealedPackets] == bytes32(0)) revert NoPendingPacket();
         bytes memory data = abi.encodeWithSelector(
             INotary.attest.selector,
-            _sealedPackets,
+            _getPacketId(_sealedPackets),
             _roots[_sealedPackets],
             signature_
         );
@@ -45,6 +50,17 @@ contract ArbitrumL2Accum is BaseAccum {
         emit L2ToL1TxCreated(withdrawalId);
         emit PacketComplete(_roots[_sealedPackets], _sealedPackets);
         return (_roots[_sealedPackets], _sealedPackets++, remoteChainSlug);
+    }
+
+    function _getPacketId(uint256 packetCount_)
+        internal
+        view
+        returns (uint256 packetId)
+    {
+        packetId =
+            (_chainSlug << 224) |
+            (uint256(uint160(address(this))) << 64) |
+            packetCount_;
     }
 
     function addPackedMessage(bytes32 packedMessage)

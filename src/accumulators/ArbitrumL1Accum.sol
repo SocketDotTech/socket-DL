@@ -10,7 +10,7 @@ contract ArbitrumL1Accum is BaseAccum {
     address public remoteRefundAddress;
     address public callValueRefundAddress;
 
-    uint256 private immutable _chainSlug;
+    uint256 public immutable _chainSlug;
     IInbox public inbox;
 
     event RetryableTicketCreated(uint256 indexed ticketId);
