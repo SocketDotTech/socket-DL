@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
+import "./IBridge.sol";
+
 interface IInbox {
     /**
      * @notice Put a message in the L2 inbox that can be reexecuted for some fixed amount of time if it reverts
@@ -54,4 +56,6 @@ interface IInbox {
         uint256 maxFeePerGas,
         bytes calldata data
     ) external payable returns (uint256);
+
+     function bridge() external view returns (IBridge);
 }
