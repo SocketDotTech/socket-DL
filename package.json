@@ -1,11 +1,16 @@
 {
-  "name": "@socket.tech/socket-dl",
+  "name": "@socket.tech/dl-core",
   "license": "UNLICENSED",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Smart contracts for socket data layer.",
   "files": [
-    "src/**/*.sol"
+    "artifacts/**/*.json",
+    "artifacts/**/*.dbg.json",
+    "deployments/addresses.json"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SocketDotTech/socket-DL.git"
