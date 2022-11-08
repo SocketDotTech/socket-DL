@@ -6,6 +6,7 @@ import "../interfaces/IAccumulator.sol";
 import "../interfaces/ISignatureVerifier.sol";
 import "../utils/AccessControl.sol";
 import "../utils/ReentrancyGuard.sol";
+
 import "../libraries/AddressAliasHelper.sol";
 import "../interfaces/native-bridge/IInbox.sol";
 import "../interfaces/native-bridge/IOutbox.sol";
@@ -47,8 +48,7 @@ contract NativeBridgeNotary is INotary, AccessControl, ReentrancyGuard {
             uint256 packetCount,
             uint256 remoteChainSlug
         ) = IAccumulator(accumAddress_).sealPacket{value: msg.value}(
-                bridgeParams,
-                signature_
+                bridgeParams
             );
 
         uint256 packetId = _getPacketId(accumAddress_, _chainSlug, packetCount);

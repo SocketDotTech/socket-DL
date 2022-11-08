@@ -36,8 +36,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
             uint256 packetCount,
             uint256 remoteChainSlug
         ) = IAccumulator(accumAddress_).sealPacket{value: msg.value}(
-                bridgeParams,
-                signature_
+                bridgeParams
             );
 
         uint256 packetId = _getPacketId(accumAddress_, _chainSlug, packetCount);

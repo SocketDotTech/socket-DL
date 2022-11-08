@@ -27,7 +27,7 @@ contract SingleAccum is BaseAccum {
         emit MessageAdded(packedMessage, packetId, packedMessage);
     }
 
-    function sealPacket(uint256[] calldata, bytes calldata)
+    function sealPacket(uint256[] calldata)
         external
         payable
         virtual

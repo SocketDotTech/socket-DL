@@ -57,5 +57,5 @@ interface IInbox {
         bytes calldata data
     ) external payable returns (uint256);
 
-     function bridge() external view returns (IBridge);
+    function bridge() external view returns (IBridge);
 }

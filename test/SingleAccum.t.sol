@@ -153,7 +153,7 @@ contract SingleAccumTest is Test {
             )
         );
         hoax(_raju);
-        _sa.sealPacket(testArr, bytes("random"));
+        _sa.sealPacket(testArr);
     }
 
     function _assertPacketToBeSealed(bytes32 root_, uint256 packetId_) private {
@@ -188,9 +188,6 @@ contract SingleAccumTest is Test {
         )
     {
         hoax(_notary);
-        (root, packetId, remoteChainSlug) = _sa.sealPacket(
-            testArr,
-            bytes("random")
-        );
+        (root, packetId, remoteChainSlug) = _sa.sealPacket(testArr);
     }
 }

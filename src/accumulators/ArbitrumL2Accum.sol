@@ -26,7 +26,7 @@ contract ArbitrumL2Accum is BaseAccum {
         remoteNotary = notary_;
     }
 
-    function sealPacket(uint256[] calldata, bytes calldata signature_)
+    function sealPacket(uint256[] calldata)
         external
         payable
         override
@@ -42,7 +42,7 @@ contract ArbitrumL2Accum is BaseAccum {
             INotary.attest.selector,
             _getPacketId(_sealedPackets),
             _roots[_sealedPackets],
-            signature_
+            bytes("")
         );
 
         uint256 withdrawalId = arbsys.sendTxToL1(remoteNotary, data);

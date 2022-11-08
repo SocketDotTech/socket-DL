@@ -33,10 +33,7 @@ contract ArbitrumL1Accum is BaseAccum {
         remoteNotary = notary_;
     }
 
-    function sealPacket(
-        uint256[] calldata bridgeParams,
-        bytes calldata signature_
-    )
+    function sealPacket(uint256[] calldata bridgeParams)
         external
         payable
         override
@@ -48,32 +45,36 @@ contract ArbitrumL1Accum is BaseAccum {
         )
     {
         if (_roots[_sealedPackets] == bytes32(0)) revert NoPendingPacket();
-        sendL2Message(bridgeParams, signature_);
+        bytes memory data = abi.encodeWithSelector(
+            INotary.attest.selector,
+            _getPacketId(_sealedPackets),
+            _roots[_sealedPackets],
+            bytes("")
+        );
+
+        sendL2Message(bridgeParams, data);
 
         emit PacketComplete(_roots[_sealedPackets], _sealedPackets);
         return (_roots[_sealedPackets], _sealedPackets++, remoteChainSlug);
     }
 
-    function sendL2Message(
-        uint256[] calldata bridgeParams,
-        bytes calldata signature_
-    ) internal {
+    function sendL2Message(uint256[] calldata bridgeParams, bytes memory data)
+        internal
+    {
+        // to avoid stack too deep
+        address callValueRefund = callValueRefundAddress;
+        address remoteRefund = remoteRefundAddress;
+
         uint256 ticketID = inbox.createRetryableTicket{value: msg.value}(
             remoteNotary,
             0, // no value needed for attest
             bridgeParams[0], // maxSubmissionCost
-            remoteRefundAddress,
-            callValueRefundAddress,
+            remoteRefund,
+            callValueRefund,
             bridgeParams[1], // maxGas
             bridgeParams[2], // gasPriceBid
-            abi.encodeWithSelector(
-                INotary.attest.selector,
-                _getPacketId(_sealedPackets),
-                _roots[_sealedPackets],
-                signature_
-            )
+            data
         );
-
         emit RetryableTicketCreated(ticketID);
     }
 
