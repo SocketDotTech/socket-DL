@@ -2,12 +2,12 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ContractFactory, Contract } from "ethers";
 import { network, ethers, run } from "hardhat";
 import { Address } from "hardhat-deploy/dist/types";
-import { contractPath } from "./config";
+import { contractPath } from "../constants/config";
 import path from "path";
 import fs from "fs";
 import { ChainSocketAddresses, DeploymentAddresses } from "./types";
 
-export const deployedAddressPath = path.join(__dirname, "../../deployments/");
+export const deployedAddressPath = path.join(__dirname, "../deployments/");
 
 export const deployContractWithoutArgs = async (contractName: string, signer: SignerWithAddress): Promise<Contract> => {
   try {
@@ -27,7 +27,7 @@ export const verify = async (address, contractName, args) => {
     const chainId = await getChainId();
     if (chainId === 31337) return;
 
-    await sleep(30);
+    await sleep(20);
     await run("verify:verify", {
       address,
       contract: `${contractPath[contractName]}:${contractName}`,
@@ -49,7 +49,7 @@ export const getChainId = async (): Promise<number> => {
 }
 
 export const integrationType = (integrationName: string) =>
-ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["string"], [integrationName]));
+  ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["string"], [integrationName]));
 
 export const storeAddresses = async (addresses: ChainSocketAddresses, chainId: number) => {
   const dirPath = path.join(__dirname, "../deployments");
@@ -73,3 +73,13 @@ export const storeAddresses = async (addresses: ChainSocketAddresses, chainId: n
     JSON.stringify(deploymentAddresses, null, 2)
   );
 }
+
+export const createObj = function (obj, keys, value) {
+  if (keys.length === 1) {
+    obj[keys[0]] = value;
+  } else {
+    const key = keys.shift();
+    obj[key] = createObj(typeof obj[key] === 'undefined' ? {} : obj[key], keys, value);
+  }
+  return obj;
+};

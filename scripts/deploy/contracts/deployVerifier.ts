@@ -1,21 +1,24 @@
-import { ethers, getChainId } from "hardhat";
+import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Contract, ContractFactory } from "ethers";
-import { timeout, fastIntegration } from "../config";
+import { fastIntegration } from "../../constants/config";
 import { verify, integrationType } from "../utils";
 
-export default async function deployVerifier(notary: Contract, socket: Contract, signer: SignerWithAddress) {
+export default async function deployVerifier(contractName: string, timeout: number, notary: Contract, signer: SignerWithAddress) {
   try {
-    const chainId: any = await getChainId();
-    const contractName = "Verifier";
-    const args = [signer.address, notary.address, socket.address, timeout[chainId], integrationType(fastIntegration)]
+    let args;
+
+    if (contractName === "Verifier") {
+      args = [signer.address, notary.address, timeout, integrationType(fastIntegration)]
+    } else if (contractName === "NativeBridgeVerifier") {
+      args = [signer.address, notary.address]
+    }
 
     const verifier: ContractFactory = await ethers.getContractFactory(contractName);
     const verifierContract: Contract = await verifier.connect(signer).deploy(...args);
     await verifierContract.deployed();
 
     await verify(verifierContract.address, contractName, args);
-
     return verifierContract;
   } catch (error) {
     throw error;
