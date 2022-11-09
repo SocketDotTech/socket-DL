@@ -4,7 +4,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { getInstance, getChainId, deployedAddressPath } from "../utils";
 import { Contract } from "ethers";
-import { remoteChainId, executorAddress, attesterAddress } from "../config";
+import { executorAddress, attesterAddress } from "../config";
+
+const remoteChainId = "";
 
 export const main = async () => {
   try {
