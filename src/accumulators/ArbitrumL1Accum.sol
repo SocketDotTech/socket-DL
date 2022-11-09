@@ -14,6 +14,11 @@ contract ArbitrumL1Accum is BaseAccum {
     IInbox public inbox;
 
     event RetryableTicketCreated(uint256 indexed ticketId);
+    event UpdatedNotary(address notary_);
+    event UpdatedRefundAddresses(
+        address remoteRefundAddress_,
+        address callValueRefundAddress_
+    );
 
     constructor(
         address socket_,
@@ -29,10 +34,6 @@ contract ArbitrumL1Accum is BaseAccum {
         callValueRefundAddress = msg.sender;
     }
 
-    function setRemoteNotary(address notary_) external onlyOwner {
-        remoteNotary = notary_;
-    }
-
     function sealPacket(uint256[] calldata bridgeParams)
         external
         payable
@@ -44,18 +45,21 @@ contract ArbitrumL1Accum is BaseAccum {
             uint256
         )
     {
-        if (_roots[_sealedPackets] == bytes32(0)) revert NoPendingPacket();
+        uint256 packetId = _sealedPackets++;
+        bytes32 root = _roots[packetId];
+        if (root == bytes32(0)) revert NoPendingPacket();
+
         bytes memory data = abi.encodeWithSelector(
             INotary.attest.selector,
-            _getPacketId(_sealedPackets),
-            _roots[_sealedPackets],
+            _getPacketId(packetId),
+            root,
             bytes("")
         );
 
         sendL2Message(bridgeParams, data);
 
-        emit PacketComplete(_roots[_sealedPackets], _sealedPackets);
-        return (_roots[_sealedPackets], _sealedPackets++, remoteChainSlug);
+        emit PacketComplete(root, packetId);
+        return (root, packetId, remoteChainSlug);
     }
 
     function sendL2Message(uint256[] calldata bridgeParams, bytes memory data)
@@ -78,17 +82,6 @@ contract ArbitrumL1Accum is BaseAccum {
         emit RetryableTicketCreated(ticketID);
     }
 
-    function _getPacketId(uint256 packetCount_)
-        internal
-        view
-        returns (uint256 packetId)
-    {
-        packetId =
-            (_chainSlug << 224) |
-            (uint256(uint160(address(this))) << 64) |
-            packetCount_;
-    }
-
     function addPackedMessage(bytes32 packedMessage)
         external
         override
@@ -99,5 +92,35 @@ contract ArbitrumL1Accum is BaseAccum {
         _packets++;
 
         emit MessageAdded(packedMessage, packetId, packedMessage);
+    }
+
+    function setRemoteNotary(address notary_) external onlyOwner {
+        remoteNotary = notary_;
+
+        emit UpdatedNotary(notary_);
+    }
+
+    function updateRefundAddresses(
+        address remoteRefundAddress_,
+        address callValueRefundAddress_
+    ) external onlyOwner {
+        remoteRefundAddress = remoteRefundAddress_;
+        callValueRefundAddress = callValueRefundAddress_;
+
+        emit UpdatedRefundAddresses(
+            remoteRefundAddress_,
+            callValueRefundAddress_
+        );
+    }
+
+    function _getPacketId(uint256 packetCount_)
+        internal
+        view
+        returns (uint256 packetId)
+    {
+        packetId =
+            (_chainSlug << 224) |
+            (uint256(uint160(address(this))) << 64) |
+            packetCount_;
     }
 }

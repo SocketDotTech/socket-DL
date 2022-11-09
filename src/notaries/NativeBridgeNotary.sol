@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
+import "../utils/AccessControl.sol";
+import "../utils/ReentrancyGuard.sol";
+import "../libraries/AddressAliasHelper.sol";
+
 import "../interfaces/INotary.sol";
 import "../interfaces/IAccumulator.sol";
 import "../interfaces/ISignatureVerifier.sol";
-import "../utils/AccessControl.sol";
-import "../utils/ReentrancyGuard.sol";
-
-import "../libraries/AddressAliasHelper.sol";
 import "../interfaces/native-bridge/IInbox.sol";
 import "../interfaces/native-bridge/IOutbox.sol";
 import "../interfaces/native-bridge/IBridge.sol";
@@ -136,16 +136,18 @@ contract NativeBridgeNotary is INotary, AccessControl, ReentrancyGuard {
         view
         override
         returns (
-            PacketStatus status,
+            PacketStatus,
             uint256,
             uint256,
-            bytes32 root
+            bytes32
         )
     {
-        root = _remoteRoots[packetId_];
-        status = root == bytes32(0)
+        bytes32 root = _remoteRoots[packetId_];
+        PacketStatus status = root == bytes32(0)
             ? PacketStatus.NOT_PROPOSED
             : PacketStatus.PROPOSED;
+
+        return (status, 0, 0, root);
     }
 
     /**

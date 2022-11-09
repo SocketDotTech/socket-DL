@@ -6,7 +6,7 @@ import "../interfaces/INotary.sol";
 
 import "../utils/Ownable.sol";
 
-contract NativeBridge is IVerifier, Ownable {
+contract NativeBridgeVerifier is IVerifier, Ownable {
     INotary public notary;
     event NotarySet(address notary_);
 

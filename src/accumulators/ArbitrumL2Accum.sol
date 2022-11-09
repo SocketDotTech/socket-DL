@@ -37,19 +37,22 @@ contract ArbitrumL2Accum is BaseAccum {
             uint256
         )
     {
-        if (_roots[_sealedPackets] == bytes32(0)) revert NoPendingPacket();
+        uint256 packetId = _sealedPackets++;
+        bytes32 root = _roots[packetId];
+
+        if (root == bytes32(0)) revert NoPendingPacket();
         bytes memory data = abi.encodeWithSelector(
             INotary.attest.selector,
-            _getPacketId(_sealedPackets),
-            _roots[_sealedPackets],
+            _getPacketId(packetId),
+            root,
             bytes("")
         );
 
         uint256 withdrawalId = arbsys.sendTxToL1(remoteNotary, data);
 
         emit L2ToL1TxCreated(withdrawalId);
-        emit PacketComplete(_roots[_sealedPackets], _sealedPackets);
-        return (_roots[_sealedPackets], _sealedPackets++, remoteChainSlug);
+        emit PacketComplete(root, packetId);
+        return (root, packetId, remoteChainSlug);
     }
 
     function _getPacketId(uint256 packetCount_)
