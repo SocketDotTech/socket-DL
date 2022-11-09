@@ -12,6 +12,7 @@ contract ArbitrumL2Accum is BaseAccum {
     IArbSys constant arbsys = IArbSys(address(100));
 
     event L2ToL1TxCreated(uint256 indexed withdrawalId);
+    event UpdatedNotary(address notary_);
 
     constructor(
         address socket_,
@@ -24,6 +25,7 @@ contract ArbitrumL2Accum is BaseAccum {
 
     function setRemoteNotary(address notary_) external onlyOwner {
         remoteNotary = notary_;
+        emit UpdatedNotary(notary_);
     }
 
     function sealPacket(uint256[] calldata)

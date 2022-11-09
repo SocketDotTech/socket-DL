@@ -96,7 +96,6 @@ contract ArbitrumL1Accum is BaseAccum {
 
     function setRemoteNotary(address notary_) external onlyOwner {
         remoteNotary = notary_;
-
         emit UpdatedNotary(notary_);
     }
 

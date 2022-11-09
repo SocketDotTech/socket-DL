@@ -24,6 +24,8 @@ contract NativeBridgeNotary is INotary, AccessControl, ReentrancyGuard {
     // accumAddr|chainSlug|packetId
     mapping(uint256 => bytes32) private _remoteRoots;
 
+    event UpdatedRemoteTarget(address remoteTarget);
+
     constructor(
         address signatureVerifier_,
         uint32 chainSlug_,
@@ -35,6 +37,11 @@ contract NativeBridgeNotary is INotary, AccessControl, ReentrancyGuard {
 
         remoteTarget = remoteTarget_;
         inbox = IInbox(inbox_);
+    }
+
+    function updateRemoteTarget(address remoteTarget_) external onlyOwner {
+        remoteTarget = remoteTarget_;
+        emit UpdatedRemoteTarget(remoteTarget_);
     }
 
     /// @inheritdoc INotary
