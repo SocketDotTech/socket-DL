@@ -12,6 +12,7 @@ import { resolve } from "path";
 import fs from "fs";
 
 import "./tasks/accounts";
+import { chainIds, getJsonRpcUrl } from "./scripts/constants/networks";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -29,41 +30,7 @@ if (!infuraApiKey && isProduction) {
   throw new Error("Please set your INFURA_API_KEY in a .env file");
 }
 
-const chainIds = {
-  avalanche: 43114,
-  bsc: 56,
-  goerli: 5,
-  hardhat: 31337,
-  mainnet: 1,
-  "arbitrum-mainnet": 42161,
-  "arbitrum-goerli": 421613,
-  "optimism-mainnet": 10,
-  "optimism-goerli": 420,
-  "polygon-mainnet": 137,
-  "polygon-mumbai": 80001,
-};
-
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
-  let jsonRpcUrl: string;
-  switch (chain) {
-    case "arbitrum-goerli":
-      jsonRpcUrl = "https://goerli-rollup.arbitrum.io/rpc";
-      break;
-    case "optimism-goerli":
-      jsonRpcUrl = "https://goerli.optimism.io";
-      break;
-    case "polygon-mumbai":
-      jsonRpcUrl = "https://matic-mumbai.chainstacklabs.com";
-      break;
-    case "avalanche":
-      jsonRpcUrl = "https://api.avax.network/ext/bc/C/rpc";
-      break;
-    case "bsc":
-      jsonRpcUrl = "https://bsc-dataseed1.binance.org";
-      break;
-    default:
-      jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
-  }
   return {
     accounts: {
       count: 10,
@@ -71,7 +38,7 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       path: "m/44'/60'/0'/0",
     },
     chainId: chainIds[chain],
-    url: jsonRpcUrl,
+    url: getJsonRpcUrl(chain),
   };
 }
 
@@ -180,7 +147,7 @@ const config: HardhatUserConfig = {
         enabled: true,
         runs: 999999,
       },
-      // viaIR: true
+      viaIR: true
     },
   }
 };
