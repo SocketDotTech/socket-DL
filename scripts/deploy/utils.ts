@@ -7,7 +7,7 @@ import path from "path";
 import fs from "fs";
 import { ChainSocketAddresses, DeploymentAddresses } from "./types";
 
-export const deployedAddressPath = path.join(__dirname, "../deployments/");
+export const deployedAddressPath = path.join(__dirname, '/../../deployments/addresses.json');
 
 export const deployContractWithoutArgs = async (contractName: string, signer: SignerWithAddress): Promise<Contract> => {
   try {
@@ -52,24 +52,22 @@ export const integrationType = (integrationName: string) =>
   ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["string"], [integrationName]));
 
 export const storeAddresses = async (addresses: ChainSocketAddresses, chainId: number) => {
-  const dirPath = path.join(__dirname, "../deployments");
+  const dirPath = path.join(__dirname, "../../deployments");
   if (!fs.existsSync(dirPath)) {
     await fs.promises.mkdir(dirPath);
   }
 
-  const addressesPath = __dirname + '/../deployments/addresses.json'
-
-  const outputExists = fs.existsSync(addressesPath)
+  const outputExists = fs.existsSync(deployedAddressPath)
   let deploymentAddresses: DeploymentAddresses = {}
   if (outputExists) {
-    const deploymentAddressesString = fs.readFileSync(addressesPath, 'utf-8')
+    const deploymentAddressesString = fs.readFileSync(deployedAddressPath, 'utf-8')
     deploymentAddresses = JSON.parse(deploymentAddressesString)
   }
 
   deploymentAddresses[chainId] = addresses
 
   fs.writeFileSync(
-    addressesPath,
+    deployedAddressPath,
     JSON.stringify(deploymentAddresses, null, 2)
   );
 }

@@ -25,12 +25,22 @@ if (!remoteChain)
 if (localChain === remoteChain)
   throw new Error("Wrong chains");
 
-if (!fs.existsSync(deployedAddressPath + chainIds[localChain] + ".json") || !fs.existsSync(deployedAddressPath + chainIds[remoteChain] + ".json")) {
+if (!fs.existsSync(deployedAddressPath)) {
+  throw new Error("addresses.json not found");
+}
+
+const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
+
+if (
+  !addresses[chainIds[localChain]] || !addresses[chainIds[remoteChain]]
+) {
   throw new Error("Deployed Addresses not found");
 }
 
-let localConfig: JSON = JSON.parse(fs.readFileSync(deployedAddressPath + chainIds[localChain] + ".json", "utf-8"));
-const remoteConfig: JSON = JSON.parse(fs.readFileSync(deployedAddressPath + chainIds[remoteChain] + ".json", "utf-8"))
+let localConfig: JSON = addresses[chainIds[localChain]];
+const remoteConfig: JSON = addresses[chainIds[remoteChain]];
+
+console.log(localConfig, remoteConfig)
 
 async function getSigners() {
   const { socketOwner, counterOwner } = await getNamedAccounts();
