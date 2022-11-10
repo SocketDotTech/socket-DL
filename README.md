@@ -60,6 +60,10 @@ npx hardhat run scripts/deploy.ts
 ```
 - This will store addresses in deployments/ folder in root which are used to configure the contracts later for each remote chain.
 
+### Publish
+
+To publish, make sure contracts are compiled, run `yarn abi`. Then publish as normal.
+
 ### IDE Setup
 It is recommended to setup the ide to work with solidity development. In case of VSCode, [Solidity](https://marketplace.visualstudio.com/items?itemName=JuanBlanco.solidity) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) plugins should work best when configured using following settings -
 ```json=
