@@ -28,7 +28,7 @@ contract OptimismReceiver is NativeBridgeNotary {
         uint32 chainSlug_,
         address remoteTarget_
     ) NativeBridgeNotary(signatureVerifier_, chainSlug_, remoteTarget_) {
-        isL2 = (chainSlug_ == 10 || chainSlug_ == 420) ? true : false;
+        isL2 = (block.chainid == 10 || block.chainid == 420) ? true : false;
         OVM_L2_CROSS_DOMAIN_MESSENGER = ovmL2CrossDomainMessenger;
     }
 }

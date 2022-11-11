@@ -54,7 +54,7 @@ contract PolygonReceiver is NativeBridgeNotary, IFxMessageProcessor {
         uint32 chainSlug_,
         address remoteTarget_
     ) NativeBridgeNotary(signatureVerifier_, chainSlug_, remoteTarget_) {
-        isL2 = (chainSlug_ == 137 || chainSlug_ == 80001) ? true : false;
+        isL2 = (block.chainid == 137 || block.chainid == 80001) ? true : false;
         _fxRootSender = fxRootSender;
         _fxChild = fxChild;
     }

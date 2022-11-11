@@ -32,7 +32,9 @@ contract ArbitrumReceiver is NativeBridgeNotary {
         address remoteTarget_,
         address inbox_
     ) NativeBridgeNotary(signatureVerifier_, chainSlug_, remoteTarget_) {
-        isL2 = (chainSlug_ == 42161 || chainSlug_ == 421613) ? true : false;
+        isL2 = (block.chainid == 42161 || block.chainid == 421613)
+            ? true
+            : false;
         inbox = IInbox(inbox_);
     }
 }
