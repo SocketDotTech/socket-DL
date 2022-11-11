@@ -4,6 +4,7 @@ import "@nomiclabs/hardhat-etherscan";
 import "@typechain/hardhat";
 import "hardhat-preprocessor";
 import "hardhat-deploy";
+import "hardhat-abi-exporter";
 
 import {config as dotenvConfig} from "dotenv";
 import type { HardhatUserConfig } from "hardhat/config";
@@ -101,6 +102,10 @@ if (mnemonic && infuraApiKey && isProduction) {
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
+  abiExporter: {
+    path: 'artifacts/abi',
+    flat: true
+  },
   etherscan: {
     apiKey: {
       arbitrumOne: process.env.ARBISCAN_API_KEY || "",
