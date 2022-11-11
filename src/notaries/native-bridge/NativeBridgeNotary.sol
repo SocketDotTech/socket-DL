@@ -1,42 +1,41 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../utils/AccessControl.sol";
-import "../utils/ReentrancyGuard.sol";
-import "../libraries/AddressAliasHelper.sol";
+import "../../utils/AccessControl.sol";
+import "../../utils/ReentrancyGuard.sol";
 
-import "../interfaces/INotary.sol";
-import "../interfaces/IAccumulator.sol";
-import "../interfaces/ISignatureVerifier.sol";
-import "../interfaces/native-bridge/IInbox.sol";
-import "../interfaces/native-bridge/IOutbox.sol";
-import "../interfaces/native-bridge/IBridge.sol";
+import "../../interfaces/INotary.sol";
+import "../../interfaces/IAccumulator.sol";
+import "../../interfaces/ISignatureVerifier.sol";
 
-contract NativeBridgeNotary is INotary, AccessControl, ReentrancyGuard {
+abstract contract NativeBridgeNotary is
+    INotary,
+    AccessControl,
+    ReentrancyGuard
+{
+    address public remoteTarget;
     uint256 private immutable _chainSlug;
     ISignatureVerifier public signatureVerifier;
-
-    address public remoteTarget;
-    IInbox public inbox;
-
-    error InvalidSender();
 
     // accumAddr|chainSlug|packetId
     mapping(uint256 => bytes32) private _remoteRoots;
 
     event UpdatedRemoteTarget(address remoteTarget);
+    error InvalidSender();
+
+    modifier onlyRemoteAccumulator() virtual {
+        _;
+    }
 
     constructor(
         address signatureVerifier_,
         uint32 chainSlug_,
-        address remoteTarget_,
-        address inbox_
+        address remoteTarget_
     ) AccessControl(msg.sender) {
         _chainSlug = chainSlug_;
         signatureVerifier = ISignatureVerifier(signatureVerifier_);
 
         remoteTarget = remoteTarget_;
-        inbox = IInbox(inbox_);
     }
 
     function updateRemoteTarget(address remoteTarget_) external onlyOwner {
@@ -82,31 +81,16 @@ contract NativeBridgeNotary is INotary, AccessControl, ReentrancyGuard {
         uint256 packetId_,
         bytes32 root_,
         bytes calldata
-    ) external override {
-        _verifySender();
+    ) external override onlyRemoteAccumulator {
+        _attest(packetId_, root_);
+    }
 
+    function _attest(uint256 packetId_, bytes32 root_) internal {
         if (_remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
         _remoteRoots[packetId_] = root_;
 
         emit PacketProposed(packetId_, root_);
         emit PacketAttested(msg.sender, packetId_);
-    }
-
-    function _verifySender() internal view {
-        //check sender address
-        if (
-            (_chainSlug == 42161 || _chainSlug == 421613) &&
-            msg.sender != AddressAliasHelper.applyL1ToL2Alias(remoteTarget)
-        ) revert InvalidAttester();
-
-        if (_chainSlug == 1 || _chainSlug == 5) {
-            IBridge bridge = inbox.bridge();
-            if (msg.sender != address(bridge)) revert InvalidSender();
-
-            IOutbox outbox = IOutbox(bridge.activeOutbox());
-            address l2Sender = outbox.l2ToL1Sender();
-            if (l2Sender != remoteTarget) revert InvalidAttester();
-        }
     }
 
     /**
