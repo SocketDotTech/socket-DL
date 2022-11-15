@@ -4,7 +4,7 @@ export const attesterAddress: {
   "polygon-mainnet": "0x8eCEfE7dd4F86D4a96Ff89eBB34C3c6F7871c4c7",
   "bsc": "0x5FB308DdF9f2df0f2b9916C4b7Ba8915B3a5A565",
   "polygon-mumbai": "0x4b53d8d45fe48e0039db40bc21f0a3fc70d0a922",
-  "arbitrum-goerli": "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
+  "arbitrum-goerli": "0x9bf84fdaa350f37ac8cb82d0042bba624b1be775",
   "optimism-goerli": "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
   "goerli": "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
   "hardhat": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
@@ -16,7 +16,7 @@ export const executorAddress: {
   "polygon-mainnet": "0x8eCEfE7dd4F86D4a96Ff89eBB34C3c6F7871c4c7",
   "bsc": "0x5FB308DdF9f2df0f2b9916C4b7Ba8915B3a5A565",
   "polygon-mumbai": "0x4b53d8d45fe48e0039db40bc21f0a3fc70d0a922",
-  "arbitrum-goerli": "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
+  "arbitrum-goerli": "0x9bf84fdaa350f37ac8cb82d0042bba624b1be775",
   "optimism-goerli": "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
   "goerli": "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
   "hardhat": "0x5FbDB2315678afecb367f032d93F642f64180aa3"

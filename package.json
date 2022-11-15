@@ -47,6 +47,7 @@
     "@ethersproject/bytes": "^5.7.0",
     "arb-shared-dependencies": "^1.0.0",
     "dotenv": "^16.0.1",
+    "hardhat-change-network": "^0.0.7",
     "hardhat-deploy": "^0.11.12"
   }
 }

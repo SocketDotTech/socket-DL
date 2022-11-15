@@ -20,7 +20,11 @@ export interface ChainSocketAddresses {
   Vault: string,
   Verifier: string,
   SingleAccum: IntegrationTypeAddresses,
-  SingleDeaccum: IntegrationTypeAddresses
+  SingleDeaccum: string,
+  ArbitrumL1Accum?: string,
+  ArbitrumL2Accum?: string,
+  NativeBridgeNotary?: IntegrationTypeAddresses,
+  NativeBridgeVerifier?: string
 }
 
 export type DeploymentAddresses = { [chainId in ChainId]?: ChainSocketAddresses }

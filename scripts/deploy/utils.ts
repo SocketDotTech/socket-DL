@@ -22,7 +22,7 @@ export const deployContractWithoutArgs = async (contractName: string, signer: Si
   }
 }
 
-export const verify = async (address, contractName, args) => {
+export const verify = async (address: string, contractName: string, args: any[]) => {
   try {
     const chainId = await getChainId();
     if (chainId === 31337) return;
@@ -65,7 +65,6 @@ export const storeAddresses = async (addresses: ChainSocketAddresses, chainId: n
   }
 
   deploymentAddresses[chainId] = addresses
-
   fs.writeFileSync(
     deployedAddressPath,
     JSON.stringify(deploymentAddresses, null, 2)
