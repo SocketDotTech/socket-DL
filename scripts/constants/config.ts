@@ -37,22 +37,34 @@ export const timeout: {
 export const contractPath: {
   [key: string]: string
 } = {
-  "BaseAccum": "src/accumulators/BaseAccum.sol",
-  "SingleAccum": "src/accumulators/SingleAccum.sol",
-  "ArbitrumL1Accum": "src/accumulators/ArbitrumL1Accum.sol",
-  "ArbitrumL2Accum": "src/accumulators/ArbitrumL2Accum.sol",
-  "SingleDeaccum": "src/deaccumulators/SingleDeaccum.sol",
   "Counter": "src/examples/Counter.sol",
-  "Messenger": "src/examples/Messenger.sol",
   "Hasher": "src/utils/Hasher.sol",
+  "Messenger": "src/examples/Messenger.sol",
   "SignatureVerifier": "src/utils/SignatureVerifier.sol",
-  "Vault": "src/vault/Vault.sol",
-  "Verifier": "src/verifiers/Verifier.sol",
-  "AdminNotary": "src/notaries/AdminNotary.sol",
-  "BondedNotary": "src/notaries/BondedNotary.sol",
+  "SingleDeaccum": "src/deaccumulators/SingleDeaccum.sol",
   "Socket": "src/Socket.sol",
+  "Vault": "src/vault/Vault.sol",
+  // accum
+  "ArbitrumL1Accum": "src/accumulators/native-bridge/arbitrum/ArbitrumL1Accum.sol",
+  "ArbitrumL2Accum": "src/accumulators/native-bridge/arbitrum/ArbitrumL2Accum.sol",
+  "OptimismAccum": "src/accumulators/native-bridge/optimism/OptimismAccum.sol",
+  "PolygonChildAccum": "src/accumulators/native-bridge/polygon/PolygonChildAccum.sol",
+  "PolygonRootAccum": "src/accumulators/native-bridge/polygon/PolygonRootAccum.sol",
+  "SingleAccum": "src/accumulators/SingleAccum.sol",
+  // notaries
+  "AdminNotary": "src/notaries/AdminNotary.sol",
+  "ArbitrumReceiver": "src/notaries/native-bridge/ArbitrumReceiver.sol",
+  "BondedNotary": "src/notaries/BondedNotary.sol",
+  "OptimismReceiver": "src/notaries/native-bridge/OptimismReceiver.sol",
+  "PolygonChildReceiver": "src/notaries/native-bridge/PolygonChildReceiver.sol",
+  "PolygonRootReceiver": "src/notaries/native-bridge/PolygonRootReceiver.sol",
+  // verifiers
+  "NativeBridgeVerifier": "src/verifiers/NativeBridgeVerifier.sol",
+  "Verifier": "src/verifiers/Verifier.sol",
 }
 
 export const fastIntegration = "FAST";
 export const slowIntegration = "SLOW";
-export const arbNativeBridgeIntegration = "ARBITRUM_NATIVE_BRIDGE";
+export const arbNativeBridgeIntegration = "ARBITRUM_NATIVE_BRIDGE_CONFIG";
+export const optimismNativeBridgeIntegration = "OPTIMISM_NATIVE_BRIDGE_CONFIG";
+export const polygonNativeBridgeIntegration = "POLYGON_NATIVE_BRIDGE_CONFIG";
