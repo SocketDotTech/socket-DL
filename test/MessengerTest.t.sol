@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "../src/examples/Messenger.sol";
+import "../contracts/examples/Messenger.sol";
 import "./Setup.t.sol";
 
 contract PingPongTest is Setup {

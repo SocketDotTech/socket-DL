@@ -6,7 +6,7 @@ import "hardhat-preprocessor";
 import "hardhat-deploy";
 import "hardhat-abi-exporter";
 
-import {config as dotenvConfig} from "dotenv";
+import { config as dotenvConfig } from "dotenv";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
@@ -103,8 +103,8 @@ if (mnemonic && infuraApiKey && isProduction) {
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   abiExporter: {
-    path: 'artifacts/abi',
-    flat: true
+    path: "artifacts/abi",
+    flat: true,
   },
   etherscan: {
     apiKey: {
@@ -124,10 +124,10 @@ const config: HardhatUserConfig = {
         chainId: chainIds["optimism-goerli"],
         urls: {
           apiURL: "https://api-goerli-optimistic.etherscan.io/api",
-          browserURL: "https://goerli-optimism.etherscan.io/"
-        }
-      }
-    ]
+          browserURL: "https://goerli-optimism.etherscan.io/",
+        },
+      },
+    ],
   },
   networks: {
     hardhat: {
@@ -147,10 +147,10 @@ const config: HardhatUserConfig = {
     },
     user: {
       default: 3,
-    }
+    },
   },
   paths: {
-    sources: "./src",
+    sources: "./contracts",
     cache: "./cache_hardhat",
     artifacts: "./artifacts",
     tests: "./test",
@@ -179,7 +179,7 @@ const config: HardhatUserConfig = {
       },
       // viaIr: true
     },
-  }
+  },
 };
 
 export default config;

@@ -5,9 +5,16 @@ import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithoutArgs, getChainId, storeAddresses } from "./utils";
 
-import { deployAccumulator, deployCounter, deployNotary, deploySocket, deployVault, deployVerifier } from "../scripts/contracts";
+import {
+  deployAccumulator,
+  deployCounter,
+  deployNotary,
+  deploySocket,
+  deployVault,
+  deployVerifier,
+} from "../scripts/contracts";
 import { executorAddress, totalRemoteChains } from "./config";
-import { ChainAddresses, ChainSocketAddresses } from './types'
+import { ChainAddresses, ChainSocketAddresses } from "../src/types";
 
 export const main = async () => {
   try {
@@ -16,27 +23,44 @@ export const main = async () => {
     const { socketOwner, counterOwner } = await getNamedAccounts();
 
     const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
-    const counterSigner: SignerWithAddress = await ethers.getSigner(counterOwner);
+    const counterSigner: SignerWithAddress = await ethers.getSigner(
+      counterOwner
+    );
 
     // notary
-    const signatureVerifier: Contract = await deployContractWithoutArgs("SignatureVerifier", socketSigner);
-    const notary: Contract = await deployNotary(signatureVerifier, socketSigner);
+    const signatureVerifier: Contract = await deployContractWithoutArgs(
+      "SignatureVerifier",
+      socketSigner
+    );
+    const notary: Contract = await deployNotary(
+      signatureVerifier,
+      socketSigner
+    );
 
     // socket
-    const hasher: Contract = await deployContractWithoutArgs("Hasher", socketSigner);
+    const hasher: Contract = await deployContractWithoutArgs(
+      "Hasher",
+      socketSigner
+    );
     const vault: Contract = await deployVault(socketSigner);
     const socket: Contract = await deploySocket(hasher, vault, socketSigner);
 
     // plug deployments
-    const verifier: Contract = await deployVerifier(notary, socket, counterSigner)
+    const verifier: Contract = await deployVerifier(
+      notary,
+      socket,
+      counterSigner
+    );
     const counter: Contract = await deployCounter(socket, counterSigner);
     console.log("Contracts deployed!");
 
     // configure
     const chainId = await getChainId();
 
-    await socket.connect(socketSigner).grantExecutorRole(executorAddress[chainId]);
-    console.log(`Assigned executor role to ${executorAddress[chainId]}!`)
+    await socket
+      .connect(socketSigner)
+      .grantExecutorRole(executorAddress[chainId]);
+    console.log(`Assigned executor role to ${executorAddress[chainId]}!`);
 
     // accum & deaccum deployments
     let fastAccumAddresses: ChainAddresses = {};
@@ -44,11 +68,24 @@ export const main = async () => {
     let deaccumAddresses: ChainAddresses = {};
 
     for (let index = 0; index < totalRemoteChains.length; index++) {
-      const remoteChain = totalRemoteChains[index]
+      const remoteChain = totalRemoteChains[index];
 
-      const fastAccum: Contract = await deployAccumulator(socket.address, notary.address, remoteChain, socketSigner);
-      const slowAccum: Contract = await deployAccumulator(socket.address, notary.address, remoteChain, socketSigner);
-      const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
+      const fastAccum: Contract = await deployAccumulator(
+        socket.address,
+        notary.address,
+        remoteChain,
+        socketSigner
+      );
+      const slowAccum: Contract = await deployAccumulator(
+        socket.address,
+        notary.address,
+        remoteChain,
+        socketSigner
+      );
+      const deaccum: Contract = await deployContractWithoutArgs(
+        "SingleDeaccum",
+        socketSigner
+      );
       console.log(`Deployed accum and deaccum for ${remoteChain} chain id`);
 
       fastAccumAddresses[remoteChain] = fastAccum.address;
@@ -66,8 +103,8 @@ export const main = async () => {
       verifier: verifier.address,
       fastAccum: fastAccumAddresses,
       slowAccum: slowAccumAddresses,
-      deaccum: deaccumAddresses
-    }
+      deaccum: deaccumAddresses,
+    };
 
     await storeAddresses(addresses, chainId);
   } catch (error) {

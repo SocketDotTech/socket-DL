@@ -2,9 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../src/notaries/BondedNotary.sol";
-import "../src/interfaces/IAccumulator.sol";
-import "../src/utils/SignatureVerifier.sol";
+import "../contracts/notaries/BondedNotary.sol";
+import "../contracts/interfaces/IAccumulator.sol";
+import "../contracts/utils/SignatureVerifier.sol";
 
 // contract BondedNotaryTest is Test {
 //     address constant _owner = address(1);

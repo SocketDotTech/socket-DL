@@ -12,3 +12,5 @@ src/types
 typechain-types/
 
 .env
+
+dist/
