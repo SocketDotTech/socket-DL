@@ -41,7 +41,7 @@
   },
   "scripts": {
     "lint": "prettier --write **.sol",
-    "build": "tsc --project lib.tsconfig.json",
+    "build": "hardhat export-abi && tsc --project lib.tsconfig.json",
     "abi": "hardhat export-abi"
   },
   "pre-commit": [

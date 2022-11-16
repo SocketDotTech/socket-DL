@@ -1,3 +1,4 @@
+dist/
 cache/
 out/
 node_modules/
@@ -12,5 +13,3 @@ src/types
 typechain-types/
 
 .env
-
-dist/
