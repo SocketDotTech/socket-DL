@@ -3,18 +3,22 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
+import "../utils/Ownable.sol";
 
-contract Messenger is IPlug {
+contract Messenger is IPlug, Ownable(msg.sender) {
     // immutables
     address private immutable _socket;
     uint256 private immutable _chainSlug;
 
-    address private _owner;
     bytes32 private _message;
     uint256 public msgGasLimit;
 
     bytes32 private constant _PING = keccak256("PING");
     bytes32 private constant _PONG = keccak256("PONG");
+
+    uint256 public constant SOCKET_FEE = 0.001 ether;
+
+    error NoSocketFee();
 
     constructor(
         address socket_,
@@ -23,14 +27,14 @@ contract Messenger is IPlug {
     ) {
         _socket = socket_;
         _chainSlug = chainSlug_;
-        _owner = msg.sender;
 
         msgGasLimit = msgGasLimit_;
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "can only be called by owner");
-        _;
+    receive() external payable {}
+
+    function removeGas(address payable receiver_) external onlyOwner {
+        receiver_.transfer(address(this).balance);
     }
 
     function sendLocalMessage(bytes32 message_) external {
@@ -83,7 +87,8 @@ contract Messenger is IPlug {
     }
 
     function _outbound(uint256 targetChain_, bytes memory payload_) private {
-        ISocket(_socket).outbound{value: msg.value}(
+        if (!(address(this).balance >= SOCKET_FEE)) revert NoSocketFee();
+        ISocket(_socket).outbound{value: SOCKET_FEE}(
             targetChain_,
             msgGasLimit,
             payload_
