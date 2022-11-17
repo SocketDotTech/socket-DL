@@ -103,7 +103,7 @@ if (mnemonic && infuraApiKey && isProduction) {
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   abiExporter: {
-    path: "dist/abi",
+    path: "artifacts/abi",
     flat: true,
   },
   etherscan: {

@@ -6,7 +6,8 @@
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "artifacts/abi"
   ],
   "publishConfig": {
     "access": "public"
