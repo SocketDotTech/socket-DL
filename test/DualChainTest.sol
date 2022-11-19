@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Setup.t.sol";
-import "../src/examples/Counter.sol";
+import "../contracts/examples/Counter.sol";
 
 contract DualChainTest is Setup {
     Counter srcCounter__;

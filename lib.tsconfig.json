@@ -8,12 +8,5 @@
     "declaration": true,
     "resolveJsonModule": true
   },
-  "include": [
-    "./src",
-    "./tasks",
-    "./test",
-    "./typechain-types",
-    "scratchpad/configure.ts"
-  ],
-  "files": ["./hardhat.config.ts"]
+  "include": ["./src"]
 }
