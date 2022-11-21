@@ -24,10 +24,23 @@ function getAccumAddress(
     : deploymentAddresses[srcChainId]?.slowAccum[dstChainId];
 
   if (!accumAddress) {
-    throw new Error(`Accum address for ${srcChainId}-${dstChainId} not found`);
+    throw new Error(`Accumulator address for ${srcChainId}-${dstChainId} not found`);
   }
 
   return accumAddress;
 }
 
-export { deploymentAddresses, getNotaryAddress, getAccumAddress };
+function getDeAccumAddress(
+  srcChainId: ChainId,
+  dstChainId: ChainId
+) {
+  const deAccumAddress = deploymentAddresses[dstChainId]?.deaccum[srcChainId];
+
+  if (!deAccumAddress) {
+    throw new Error(`De Accumulator address for ${srcChainId}-${dstChainId} not found`);
+  }
+
+  return deAccumAddress
+}
+
+export { deploymentAddresses, getNotaryAddress, getAccumAddress, getDeAccumAddress };
