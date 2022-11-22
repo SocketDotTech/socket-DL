@@ -8,6 +8,7 @@ import { chainIds } from "../constants/networks"
 
 import { deployCounter, deploySocket, deployVault } from "./contracts";
 import { executorAddress } from "../constants/config";
+import { ChainSocketAddresses } from "./types";
 
 /**
  * Deploys network-independent socket contracts
@@ -22,26 +23,23 @@ export const main = async () => {
     const counterSigner: SignerWithAddress = await ethers.getSigner(counterOwner);
 
     const network = hre.network.name;
-    const addresses = {}
-
     const signatureVerifier: Contract = await deployContractWithoutArgs("SignatureVerifier", socketSigner);
-    addresses["SignatureVerifier"] = signatureVerifier.address;
-
     const hasher: Contract = await deployContractWithoutArgs("Hasher", socketSigner);
-    addresses["Hasher"] = hasher.address;
-
     const vault: Contract = await deployVault(socketSigner);
-    addresses["Vault"] = vault.address;
-
     const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
-    addresses[`SingleDeaccum`] = deaccum.address;
-
     const socket: Contract = await deploySocket(chainIds[network], hasher, vault, socketSigner);
-    addresses["Socket"] = socket.address;
 
     // plug deployments
     const counter: Contract = await deployCounter(socket, counterSigner);
-    addresses["Counter"] = counter.address;
+
+    let addresses: ChainSocketAddresses = {
+      Counter: counter.address,
+      Hasher: hasher.address,
+      SignatureVerifier: signatureVerifier.address,
+      Socket: socket.address,
+      Vault: vault.address,
+      SingleDeaccum: deaccum.address
+    }
     console.log("Contracts deployed!");
 
     // configure

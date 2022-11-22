@@ -68,3 +68,102 @@ export const slowIntegration = "SLOW";
 export const arbNativeBridgeIntegration = "ARBITRUM_NATIVE_BRIDGE_CONFIG";
 export const optimismNativeBridgeIntegration = "OPTIMISM_NATIVE_BRIDGE_CONFIG";
 export const polygonNativeBridgeIntegration = "POLYGON_NATIVE_BRIDGE_CONFIG";
+
+export const contractNames = (integrationType: string, srcChain: string, dstChain: string) => {
+  let contracts = {
+    "arbitrum-goerli": {
+      "goerli": {
+        integrationType: arbNativeBridgeIntegration,
+        accum: "ArbitrumL2Accum",
+        verifier: "NativeBridgeVerifier",
+        notary: "ArbitrumReceiver",
+      }
+    },
+    "arbitrum-mainnet": {
+      "mainnet": {
+        integrationType: arbNativeBridgeIntegration,
+        accum: "ArbitrumL2Accum",
+        verifier: "NativeBridgeVerifier",
+        notary: "ArbitrumReceiver",
+      }
+    },
+    "optimism-mainnet": {
+      "mainnet": {
+        integrationType: optimismNativeBridgeIntegration,
+        accum: "OptimismAccum",
+        verifier: "NativeBridgeVerifier",
+        notary: "OptimismReceiver",
+      }
+    },
+    "optimism-goerli": {
+      "goerli": {
+        integrationType: optimismNativeBridgeIntegration,
+        accum: "OptimismAccum",
+        verifier: "NativeBridgeVerifier",
+        notary: "OptimismReceiver",
+      }
+    },
+    "polygon-mainnet": {
+      "mainnet": {
+        integrationType: polygonNativeBridgeIntegration,
+        accum: "PolygonChildAccum",
+        verifier: "NativeBridgeVerifier",
+        notary: "PolygonChildReceiver",
+      }
+    },
+    "polygon-mumbai": {
+      "goerli": {
+        integrationType: polygonNativeBridgeIntegration,
+        accum: "PolygonChildAccum",
+        verifier: "NativeBridgeVerifier",
+        notary: "PolygonChildReceiver",
+      }
+    },
+    "goerli": {
+      "arbitrum-goerli": {
+        integrationType: arbNativeBridgeIntegration,
+        accum: "ArbitrumL1Accum",
+        verifier: "NativeBridgeVerifier",
+        notary: "ArbitrumReceiver",
+      },
+      "optimism-goerli": {
+        integrationType: optimismNativeBridgeIntegration,
+        accum: "OptimismAccum",
+        verifier: "NativeBridgeVerifier",
+        notary: "OptimismReceiver",
+      },
+      "polygon-mumbai": {
+        integrationType: polygonNativeBridgeIntegration,
+        accum: "PolygonRootAccum",
+        verifier: "NativeBridgeVerifier",
+        notary: "PolygonRootReceiver"
+      }
+    },
+    "mainnet": {
+      "arbitrum-mainnet": {
+        integrationType: arbNativeBridgeIntegration,
+        accum: "ArbitrumL1Accum",
+        verifier: "NativeBridgeVerifier",
+        notary: "ArbitrumReceiver",
+      },
+      "optimism-mainnet": {
+        integrationType: optimismNativeBridgeIntegration,
+        accum: "OptimismAccum",
+        verifier: "NativeBridgeVerifier",
+        notary: "OptimismReceiver",
+      },
+      "polygon-mainnet": {
+        integrationType: polygonNativeBridgeIntegration,
+        accum: "PolygonRootAccum",
+        verifier: "NativeBridgeVerifier",
+        notary: "PolygonRootReceiver"
+      },
+    },
+    "default": { integrationType, accum: "SingleAccum", verifier: "Verifier", notary: "AdminNotary" }
+  }
+
+  if (integrationType === fastIntegration || integrationType === slowIntegration) return contracts["default"];
+  if (!contracts[srcChain] || !contracts[srcChain][dstChain]) return contracts["default"];
+
+  return contracts[srcChain][dstChain];
+}
