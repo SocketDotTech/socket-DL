@@ -19,7 +19,7 @@ contract PolygonChildAccum is NativeBridgeAccum, FxBaseChildTunnel {
     /**
      * @param data - encoded data to be sent to remote notary
      */
-    function sendL2Message(uint256[] calldata, bytes memory data)
+    function _sendMessage(uint256[] calldata, bytes memory data)
         internal
         override
     {
@@ -31,5 +31,7 @@ contract PolygonChildAccum is NativeBridgeAccum, FxBaseChildTunnel {
         uint256 stateId,
         address sender,
         bytes memory message
-    ) internal override {}
+    ) internal override {
+        revert("Cannot process message here!");
+    }
 }

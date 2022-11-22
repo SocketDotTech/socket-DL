@@ -142,6 +142,18 @@ abstract contract NativeBridgeNotary is
     }
 
     /**
+     * @notice returns the attestations received by a packet
+     * @param packetId_ packed id
+     */
+    function getAttestationCount(uint256 packetId_)
+        external
+        view
+        returns (uint256)
+    {
+        return 1;
+    }
+
+    /**
      * @notice returns the remote root for given `packetId_`
      * @param packetId_ packed id
      */

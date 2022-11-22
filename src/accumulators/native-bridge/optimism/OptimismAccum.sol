@@ -32,7 +32,7 @@ contract OptimismAccum is NativeBridgeAccum {
      * @param bridgeParams - only one index, gas limit needed to execute data
      * @param data - encoded data to be sent to remote notary
      */
-    function sendL2Message(uint256[] calldata bridgeParams, bytes memory data)
+    function _sendMessage(uint256[] calldata bridgeParams, bytes memory data)
         internal
         override
     {

@@ -9,7 +9,6 @@ contract ArbitrumL1Accum is NativeBridgeAccum {
     address public callValueRefundAddress;
     IInbox public inbox;
 
-    event RetryableTicketCreated(uint256 indexed ticketId);
     event UpdatedInboxAddress(address inbox_);
     event UpdatedRefundAddresses(
         address remoteRefundAddress_,
@@ -28,7 +27,7 @@ contract ArbitrumL1Accum is NativeBridgeAccum {
         callValueRefundAddress = msg.sender;
     }
 
-    function sendL2Message(uint256[] calldata bridgeParams, bytes memory data)
+    function _sendMessage(uint256[] calldata bridgeParams, bytes memory data)
         internal
         override
     {
@@ -36,7 +35,7 @@ contract ArbitrumL1Accum is NativeBridgeAccum {
         address callValueRefund = callValueRefundAddress;
         address remoteRefund = remoteRefundAddress;
 
-        uint256 ticketID = inbox.createRetryableTicket{value: msg.value}(
+        inbox.createRetryableTicket{value: msg.value}(
             remoteNotary,
             0, // no value needed for attest
             bridgeParams[0], // maxSubmissionCost
@@ -46,7 +45,6 @@ contract ArbitrumL1Accum is NativeBridgeAccum {
             bridgeParams[2], // gasPriceBid
             data
         );
-        emit RetryableTicketCreated(ticketID);
     }
 
     function updateRefundAddresses(

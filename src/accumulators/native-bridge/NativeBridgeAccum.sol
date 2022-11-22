@@ -19,7 +19,7 @@ abstract contract NativeBridgeAccum is BaseAccum {
         _chainSlug = chainSlug_;
     }
 
-    function sendL2Message(uint256[] calldata bridgeParams, bytes memory data)
+    function _sendMessage(uint256[] calldata bridgeParams, bytes memory data)
         internal
         virtual;
 
@@ -45,7 +45,7 @@ abstract contract NativeBridgeAccum is BaseAccum {
             bytes("")
         );
 
-        sendL2Message(bridgeParams, data);
+        _sendMessage(bridgeParams, data);
 
         emit PacketComplete(root, packetId);
         return (root, packetId, remoteChainSlug);

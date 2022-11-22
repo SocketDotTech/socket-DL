@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
+import "../utils/AccessControl.sol";
+import "../utils/ReentrancyGuard.sol";
 import "../interfaces/INotary.sol";
 import "../interfaces/IAccumulator.sol";
 import "../interfaces/ISignatureVerifier.sol";
-import "../utils/AccessControl.sol";
-import "../utils/ReentrancyGuard.sol";
 
 contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
     uint256 private immutable _chainSlug;
