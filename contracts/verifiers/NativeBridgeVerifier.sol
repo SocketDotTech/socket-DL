@@ -27,10 +27,12 @@ contract NativeBridgeVerifier is IVerifier, Ownable {
      * @notice verifies if the packet satisfies needed checks before execution
      * @param packetId_ packet id
      */
-    function verifyPacket(
-        uint256 packetId_,
-        bytes32
-    ) external view override returns (bool, bytes32) {
+    function verifyPacket(uint256 packetId_, bytes32)
+        external
+        view
+        override
+        returns (bool, bytes32)
+    {
         (INotary.PacketStatus status, , , bytes32 root) = notary
             .getPacketDetails(packetId_);
 

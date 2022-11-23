@@ -29,8 +29,16 @@ contract ArbitrumL1Accum is NativeBridgeAccum {
 
     function _sendMessage(
         uint256[] calldata bridgeParams,
-        bytes memory data
+        uint256 packetId,
+        bytes32 root
     ) internal override {
+        bytes memory data = abi.encodeWithSelector(
+            INotary.attest.selector,
+            packetId,
+            root,
+            bytes("")
+        );
+
         // to avoid stack too deep
         address callValueRefund = callValueRefundAddress;
         address remoteRefund = remoteRefundAddress;

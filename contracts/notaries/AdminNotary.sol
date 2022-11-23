@@ -103,10 +103,10 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
      * @param packetId_ id of packet to be updated
      * @param newRoot_ new root
      */
-    function updatePacketRoot(
-        uint256 packetId_,
-        bytes32 newRoot_
-    ) external onlyOwner {
+    function updatePacketRoot(uint256 packetId_, bytes32 newRoot_)
+        external
+        onlyOwner
+    {
         PacketDetails storage packedDetails = _packetDetails[packetId_];
         bytes32 oldRoot = packedDetails.remoteRoots;
         packedDetails.remoteRoots = newRoot_;
@@ -115,9 +115,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
     }
 
     /// @inheritdoc INotary
-    function getPacketStatus(
-        uint256 packetId_
-    ) public view override returns (PacketStatus status) {
+    function getPacketStatus(uint256 packetId_)
+        public
+        view
+        override
+        returns (PacketStatus status)
+    {
         PacketDetails memory packet = _packetDetails[packetId_];
         uint256 packetArrivedAt = packet.timeRecord;
 
@@ -126,9 +129,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
     }
 
     /// @inheritdoc INotary
-    function getPacketDetails(
-        uint256 packetId_
-    )
+    function getPacketDetails(uint256 packetId_)
         external
         view
         override
@@ -154,10 +155,10 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
      * @param remoteChainSlug_ remote chain id
      * @param attester_ attester address
      */
-    function grantAttesterRole(
-        uint256 remoteChainSlug_,
-        address attester_
-    ) external onlyOwner {
+    function grantAttesterRole(uint256 remoteChainSlug_, address attester_)
+        external
+        onlyOwner
+    {
         if (_hasRole(_attesterRole(remoteChainSlug_), attester_))
             revert AttesterExists();
 
@@ -170,10 +171,10 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
      * @param remoteChainSlug_ remote chain id
      * @param attester_ attester address
      */
-    function revokeAttesterRole(
-        uint256 remoteChainSlug_,
-        address attester_
-    ) external onlyOwner {
+    function revokeAttesterRole(uint256 remoteChainSlug_, address attester_)
+        external
+        onlyOwner
+    {
         if (!_hasRole(_attesterRole(remoteChainSlug_), attester_))
             revert AttesterNotFound();
 
@@ -189,9 +190,11 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
      * @notice returns the attestations received by a packet
      * @param packetId_ packed id
      */
-    function getAttestationCount(
-        uint256 packetId_
-    ) external view returns (uint256) {
+    function getAttestationCount(uint256 packetId_)
+        external
+        view
+        returns (uint256)
+    {
         return _packetDetails[packetId_].attestations;
     }
 
@@ -199,9 +202,12 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
      * @notice returns the remote root for given `packetId_`
      * @param packetId_ packed id
      */
-    function getRemoteRoot(
-        uint256 packetId_
-    ) external view override returns (bytes32) {
+    function getRemoteRoot(uint256 packetId_)
+        external
+        view
+        override
+        returns (bytes32)
+    {
         return _packetDetails[packetId_].remoteRoots;
     }
 
@@ -216,9 +222,10 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
      * @notice updates signatureVerifier_
      * @param signatureVerifier_ address of Signature Verifier
      */
-    function setSignatureVerifier(
-        address signatureVerifier_
-    ) external onlyOwner {
+    function setSignatureVerifier(address signatureVerifier_)
+        external
+        onlyOwner
+    {
         signatureVerifier = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
     }
@@ -234,9 +241,11 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
             packetCount_;
     }
 
-    function _getChainSlug(
-        uint256 packetId_
-    ) internal pure returns (uint256 chainSlug_) {
+    function _getChainSlug(uint256 packetId_)
+        internal
+        pure
+        returns (uint256 chainSlug_)
+    {
         chainSlug_ = uint32(packetId_ >> 224);
     }
 }

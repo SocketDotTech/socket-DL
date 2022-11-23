@@ -21,38 +21,35 @@ abstract contract NativeBridgeAccum is BaseAccum {
 
     function _sendMessage(
         uint256[] calldata bridgeParams,
-        bytes memory data
+        uint256 packetId,
+        bytes32 root
     ) internal virtual;
 
-    function sealPacket(
-        uint256[] calldata bridgeParams
-    )
+    function sealPacket(uint256[] calldata bridgeParams)
         external
         payable
         override
         onlyRole(NOTARY_ROLE)
-        returns (bytes32, uint256, uint256)
+        returns (
+            bytes32,
+            uint256,
+            uint256
+        )
     {
         uint256 packetId = _sealedPackets++;
         bytes32 root = _roots[packetId];
         if (root == bytes32(0)) revert NoPendingPacket();
-
-        bytes memory data = abi.encodeWithSelector(
-            INotary.attest.selector,
-            _getPacketId(packetId),
-            root,
-            bytes("")
-        );
-
-        _sendMessage(bridgeParams, data);
+        _sendMessage(bridgeParams, _getPacketId(packetId), root);
 
         emit PacketComplete(root, packetId);
         return (root, packetId, remoteChainSlug);
     }
 
-    function addPackedMessage(
-        bytes32 packedMessage
-    ) external override onlyRole(SOCKET_ROLE) {
+    function addPackedMessage(bytes32 packedMessage)
+        external
+        override
+        onlyRole(SOCKET_ROLE)
+    {
         uint256 packetId = _packets;
         _roots[packetId] = packedMessage;
         _packets++;
@@ -65,9 +62,11 @@ abstract contract NativeBridgeAccum is BaseAccum {
         emit UpdatedNotary(notary_);
     }
 
-    function _getPacketId(
-        uint256 packetCount_
-    ) internal view returns (uint256 packetId) {
+    function _getPacketId(uint256 packetCount_)
+        internal
+        view
+        returns (uint256 packetId)
+    {
         packetId =
             (_chainSlug << 224) |
             (uint256(uint160(address(this))) << 64) |

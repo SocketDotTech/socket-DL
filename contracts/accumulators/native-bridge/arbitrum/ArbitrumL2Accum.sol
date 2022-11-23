@@ -17,8 +17,15 @@ contract ArbitrumL2Accum is NativeBridgeAccum {
 
     function _sendMessage(
         uint256[] calldata,
-        bytes memory data
+        uint256 packetId,
+        bytes32 root
     ) internal override {
+        bytes memory data = abi.encodeWithSelector(
+            INotary.attest.selector,
+            packetId,
+            root,
+            bytes("")
+        );
         arbsys.sendTxToL1(remoteNotary, data);
     }
 }

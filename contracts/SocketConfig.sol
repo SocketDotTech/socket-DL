@@ -65,7 +65,15 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     function getConfigs(
         uint256 remoteChainSlug_,
         string memory integrationType_
-    ) external view returns (address, address, address) {
+    )
+        external
+        view
+        returns (
+            address,
+            address,
+            address
+        )
+    {
         bytes32 integrationType = keccak256(abi.encode(integrationType_));
         return (
             accums[integrationType][remoteChainSlug_],
@@ -74,10 +82,7 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         );
     }
 
-    function getPlugConfig(
-        uint256 remoteChainSlug_,
-        address plug_
-    )
+    function getPlugConfig(uint256 remoteChainSlug_, address plug_)
         external
         view
         returns (

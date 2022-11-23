@@ -13,7 +13,7 @@ contract ArbitrumReceiver is NativeBridgeNotary {
 
     modifier onlyRemoteAccumulator() override {
         if (isL2) {
-            if (remoteTarget != AddressAliasHelper.applyL1ToL2Alias(msg.sender))
+            if (msg.sender != AddressAliasHelper.applyL1ToL2Alias(remoteTarget))
                 revert InvalidAttester();
         } else {
             IBridge bridge = inbox.bridge();

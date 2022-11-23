@@ -24,10 +24,11 @@ contract Vault is IVault, Ownable {
     constructor(address owner_) Ownable(owner_) {}
 
     /// @inheritdoc IVault
-    function deductFee(
-        uint256 remoteChainSlug_,
-        bytes32 integrationType_
-    ) external payable override {
+    function deductFee(uint256 remoteChainSlug_, bytes32 integrationType_)
+        external
+        payable
+        override
+    {
         if (msg.value < minFees[integrationType_][remoteChainSlug_])
             revert InsufficientFees();
         emit FeeDeducted(msg.value);
@@ -63,10 +64,11 @@ contract Vault is IVault, Ownable {
      * @notice returns the fee required to bridge a message
      * @param integrationType_ config for which fees is needed
      */
-    function getFees(
-        bytes32 integrationType_,
-        uint256 remoteChainSlug_
-    ) external view returns (uint256) {
+    function getFees(bytes32 integrationType_, uint256 remoteChainSlug_)
+        external
+        view
+        returns (uint256)
+    {
         return minFees[integrationType_][remoteChainSlug_];
     }
 }

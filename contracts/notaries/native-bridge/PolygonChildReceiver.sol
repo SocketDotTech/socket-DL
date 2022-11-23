@@ -27,6 +27,7 @@ contract PolygonChildReceiver is NativeBridgeNotary, FxBaseChildTunnel {
         bytes calldata data
     ) internal override {
         if (rootMessageSender != remoteTarget) revert InvalidAttester();
+
         (uint256 packetId, bytes32 root, ) = abi.decode(
             data,
             (uint256, bytes32, bytes)
