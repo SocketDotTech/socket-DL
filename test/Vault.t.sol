@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../src/vault/Vault.sol";
+import "../contracts/vault/Vault.sol";
 
 contract VaultTest is Test {
     address constant _owner = address(1);

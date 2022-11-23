@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "../src/examples/Messenger.sol";
+import "../contracts/examples/Messenger.sol";
 import "./Setup.t.sol";
 
 contract PingPongTest is Setup {
     bytes32 private constant _PING = keccak256("PING");
     bytes32 private constant _PONG = keccak256("PONG");
+    uint256 private constant ITERATIONS = 5;
 
     bytes private constant _PROOF = abi.encode(0);
     bytes private _payloadPing;
     bytes private _payloadPong;
     bool private isFast = true;
 
-    uint256 msgGasLimit = 130000;
+    uint256 msgGasLimit = 140000;
 
     Messenger srcMessenger__;
     Messenger dstMessenger__;
@@ -93,12 +94,37 @@ contract PingPongTest is Setup {
         srcMessenger__.sendLocalMessage(bytes32(0));
     }
 
+    function testAdminRemoveGas() external {
+        uint256 initialContractBal = address(srcMessenger__).balance;
+        uint256 initialRajuBal = _raju.balance;
+        assertGt(initialContractBal, 0, "Messenger has no balance");
+
+        hoax(_plugOwner);
+        srcMessenger__.removeGas(payable(_raju));
+
+        assertEq(
+            address(srcMessenger__).balance,
+            0,
+            "Messenger has balance after remove"
+        );
+        assertEq(
+            _raju.balance,
+            initialRajuBal + initialContractBal,
+            "Raju did not receive full gas"
+        );
+    }
+
+    function testRajuRemoveGas() external {
+        hoax(_raju);
+        vm.expectRevert(Ownable.OnlyOwner.selector);
+        srcMessenger__.removeGas(payable(_raju));
+    }
+
     function testPingPong() external {
         hoax(_raju);
         srcMessenger__.sendRemoteMessage(_b.chainSlug, _PING);
 
-        uint256 iterations = 5;
-        for (uint256 index = 0; index < iterations; index++) {
+        for (uint256 index = 0; index < ITERATIONS; index++) {
             uint256 msgIdAToB = _packMessageId(_a.chainSlug, index);
             uint256 msgIdBToA = _packMessageId(_b.chainSlug, index);
 
@@ -127,21 +153,26 @@ contract PingPongTest is Setup {
     }
 
     function _configPlugContracts() private {
+        uint256 socketFee = srcMessenger__.SOCKET_FEE();
+        vm.deal(_plugOwner, socketFee * ITERATIONS * 4);
+        vm.startPrank(_plugOwner);
         string memory integrationType = isFast
             ? fastIntegrationType
             : slowIntegrationType;
-        hoax(_plugOwner);
         srcMessenger__.setSocketConfig(
             _b.chainSlug,
             address(dstMessenger__),
             integrationType
         );
+        payable(srcMessenger__).transfer(socketFee * ITERATIONS * 2);
 
-        hoax(_plugOwner);
         dstMessenger__.setSocketConfig(
             _a.chainSlug,
             address(srcMessenger__),
             integrationType
         );
+        payable(dstMessenger__).transfer(socketFee * ITERATIONS * 2);
+
+        vm.stopPrank();
     }
 }

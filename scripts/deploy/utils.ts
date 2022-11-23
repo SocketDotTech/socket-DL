@@ -7,11 +7,19 @@ import path from "path";
 import fs from "fs";
 import { ChainSocketAddresses, DeploymentAddresses } from "./types";
 
-export const deployedAddressPath = path.join(__dirname, '/../../deployments/addresses.json');
+export const deployedAddressPath = path.join(
+  __dirname,
+  "/../../deployments/addresses.json"
+);
 
-export const deployContractWithoutArgs = async (contractName: string, signer: SignerWithAddress): Promise<Contract> => {
+export const deployContractWithoutArgs = async (
+  contractName: string,
+  signer: SignerWithAddress
+): Promise<Contract> => {
   try {
-    const Contract: ContractFactory = await ethers.getContractFactory(contractName);
+    const Contract: ContractFactory = await ethers.getContractFactory(
+      contractName
+    );
     const contractInstance: Contract = await Contract.connect(signer).deploy();
     await contractInstance.deployed();
     await verify(contractInstance.address, contractName, []);
@@ -20,9 +28,13 @@ export const deployContractWithoutArgs = async (contractName: string, signer: Si
   } catch (error) {
     throw error;
   }
-}
+};
 
-export const verify = async (address: string, contractName: string, args: any[]) => {
+export const verify = async (
+  address: string,
+  contractName: string,
+  args: any[]
+) => {
   try {
     const chainId = await getChainId();
     if (chainId === 31337) return;
@@ -36,47 +48,61 @@ export const verify = async (address: string, contractName: string, args: any[])
   } catch (error) {
     console.log("Error during verification", error);
   }
-}
+};
 
 export const sleep = (delay) =>
   new Promise((resolve) => setTimeout(resolve, delay * 1000));
 
-export const getInstance = async (contractName: string, address: Address) => (await ethers.getContractFactory(contractName)).attach(address)
+export const getInstance = async (contractName: string, address: Address) =>
+  (await ethers.getContractFactory(contractName)).attach(address);
 
 export const getChainId = async (): Promise<number> => {
-  if (network.config.chainId === undefined) throw new Error("chain id not found");
-  return Number(network.config.chainId)
-}
+  if (network.config.chainId === undefined)
+    throw new Error("chain id not found");
+  return Number(network.config.chainId);
+};
 
 export const integrationType = (integrationName: string) =>
-  ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["string"], [integrationName]));
+  ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(["string"], [integrationName])
+  );
 
-export const storeAddresses = async (addresses: ChainSocketAddresses, chainId: number) => {
+export const storeAddresses = async (
+  addresses: ChainSocketAddresses,
+  chainId: number
+) => {
   const dirPath = path.join(__dirname, "../../deployments");
   if (!fs.existsSync(dirPath)) {
     await fs.promises.mkdir(dirPath);
   }
 
-  const outputExists = fs.existsSync(deployedAddressPath)
-  let deploymentAddresses: DeploymentAddresses = {}
+  const outputExists = fs.existsSync(deployedAddressPath);
+  let deploymentAddresses: DeploymentAddresses = {};
   if (outputExists) {
-    const deploymentAddressesString = fs.readFileSync(deployedAddressPath, 'utf-8')
-    deploymentAddresses = JSON.parse(deploymentAddressesString)
+    const deploymentAddressesString = fs.readFileSync(
+      deployedAddressPath,
+      "utf-8"
+    );
+    deploymentAddresses = JSON.parse(deploymentAddressesString);
   }
 
-  deploymentAddresses[chainId] = addresses
+  deploymentAddresses[chainId] = addresses;
   fs.writeFileSync(
     deployedAddressPath,
     JSON.stringify(deploymentAddresses, null, 2)
   );
-}
+};
 
 export const createObj = function (obj, keys, value) {
   if (keys.length === 1) {
     obj[keys[0]] = value;
   } else {
     const key = keys.shift();
-    obj[key] = createObj(typeof obj[key] === 'undefined' ? {} : obj[key], keys, value);
+    obj[key] = createObj(
+      typeof obj[key] === "undefined" ? {} : obj[key],
+      keys,
+      value
+    );
   }
   return obj;
 };

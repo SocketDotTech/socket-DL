@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../src/accumulators/SingleAccum.sol";
+import "../contracts/accumulators/SingleAccum.sol";
 
 contract SingleAccumTest is Test {
     address constant _owner = address(1);

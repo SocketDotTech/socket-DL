@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithoutArgs, storeAddresses } from "./utils";
-import { chainIds } from "../constants/networks"
+import { chainIds } from "../constants/networks";
 
 import { deployCounter, deploySocket, deployVault } from "./contracts";
 import { executorAddress } from "../constants/config";
@@ -20,14 +20,30 @@ export const main = async () => {
     const { socketOwner, counterOwner } = await getNamedAccounts();
 
     const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
-    const counterSigner: SignerWithAddress = await ethers.getSigner(counterOwner);
+    const counterSigner: SignerWithAddress = await ethers.getSigner(
+      counterOwner
+    );
 
     const network = hre.network.name;
-    const signatureVerifier: Contract = await deployContractWithoutArgs("SignatureVerifier", socketSigner);
-    const hasher: Contract = await deployContractWithoutArgs("Hasher", socketSigner);
+    const signatureVerifier: Contract = await deployContractWithoutArgs(
+      "SignatureVerifier",
+      socketSigner
+    );
+    const hasher: Contract = await deployContractWithoutArgs(
+      "Hasher",
+      socketSigner
+    );
     const vault: Contract = await deployVault(socketSigner);
-    const deaccum: Contract = await deployContractWithoutArgs("SingleDeaccum", socketSigner);
-    const socket: Contract = await deploySocket(chainIds[network], hasher, vault, socketSigner);
+    const deaccum: Contract = await deployContractWithoutArgs(
+      "SingleDeaccum",
+      socketSigner
+    );
+    const socket: Contract = await deploySocket(
+      chainIds[network],
+      hasher,
+      vault,
+      socketSigner
+    );
 
     // plug deployments
     const counter: Contract = await deployCounter(socket, counterSigner);
@@ -38,13 +54,15 @@ export const main = async () => {
       SignatureVerifier: signatureVerifier.address,
       Socket: socket.address,
       Vault: vault.address,
-      SingleDeaccum: deaccum.address
-    }
+      SingleDeaccum: deaccum.address,
+    };
     console.log("Contracts deployed!");
 
     // configure
-    await socket.connect(socketSigner).grantExecutorRole(executorAddress[network]);
-    console.log(`Assigned executor role to ${executorAddress[network]} !`)
+    await socket
+      .connect(socketSigner)
+      .grantExecutorRole(executorAddress[network]);
+    console.log(`Assigned executor role to ${executorAddress[network]} !`);
 
     await storeAddresses(addresses, chainIds[network]);
   } catch (error) {

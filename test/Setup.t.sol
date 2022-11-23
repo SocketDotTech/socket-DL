@@ -2,14 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../src/Socket.sol";
-import "../src/notaries/AdminNotary.sol";
-import "../src/accumulators/SingleAccum.sol";
-import "../src/deaccumulators/SingleDeaccum.sol";
-import "../src/verifiers/Verifier.sol";
-import "../src/utils/SignatureVerifier.sol";
-import "../src/utils/Hasher.sol";
-import "../src/vault/Vault.sol";
+import "../contracts/Socket.sol";
+import "../contracts/notaries/AdminNotary.sol";
+import "../contracts/accumulators/SingleAccum.sol";
+import "../contracts/deaccumulators/SingleDeaccum.sol";
+import "../contracts/verifiers/Verifier.sol";
+import "../contracts/utils/SignatureVerifier.sol";
+import "../contracts/utils/Hasher.sol";
+import "../contracts/vault/Vault.sol";
 
 contract Setup is Test {
     address constant _socketOwner = address(1);
