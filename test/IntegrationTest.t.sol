@@ -508,9 +508,10 @@ contract HappyTest is Setup {
         );
     }
 
-    function _attesterChecks(
-        address accum
-    ) internal returns (uint256 packetId, bytes32 root) {
+    function _attesterChecks(address accum)
+        internal
+        returns (uint256 packetId, bytes32 root)
+    {
         bytes memory sig;
         (root, packetId, sig) = _getLatestSignature(_a, accum, _b.chainSlug);
         _sealOnSrc(_a, accum, sig);
