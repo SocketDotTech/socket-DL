@@ -20,11 +20,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
 
     error NoSocketFee();
 
-    constructor(
-        address socket_,
-        uint256 chainSlug_,
-        uint256 msgGasLimit_
-    ) {
+    constructor(address socket_, uint256 chainSlug_, uint256 msgGasLimit_) {
         _socket = socket_;
         _chainSlug = chainSlug_;
 
@@ -41,10 +37,10 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         _updateMessage(message_);
     }
 
-    function sendRemoteMessage(uint256 remoteChainSlug_, bytes32 message_)
-        external
-        payable
-    {
+    function sendRemoteMessage(
+        uint256 remoteChainSlug_,
+        bytes32 message_
+    ) external payable {
         bytes memory payload = abi.encode(_chainSlug, message_);
         _outbound(remoteChainSlug_, payload);
     }

@@ -15,10 +15,10 @@ contract ArbitrumL2Accum is NativeBridgeAccum {
         uint32 chainSlug_
     ) NativeBridgeAccum(socket_, notary_, remoteChainSlug_, chainSlug_) {}
 
-    function _sendMessage(uint256[] calldata, bytes memory data)
-        internal
-        override
-    {
+    function _sendMessage(
+        uint256[] calldata,
+        bytes memory data
+    ) internal override {
         arbsys.sendTxToL1(remoteNotary, data);
     }
 }

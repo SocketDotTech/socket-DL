@@ -6,8 +6,8 @@ interface IVerifier {
      * @notice verifies if the packet satisfies needed checks before execution
      * @param packetId_ packet id
      */
-    function verifyPacket(uint256 packetId_, bytes32 integrationType_)
-        external
-        view
-        returns (bool, bytes32);
+    function verifyPacket(
+        uint256 packetId_,
+        bytes32 integrationType_
+    ) external view returns (bool, bytes32);
 }

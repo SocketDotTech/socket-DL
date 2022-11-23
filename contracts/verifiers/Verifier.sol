@@ -43,12 +43,10 @@ contract Verifier is IVerifier, Ownable {
      * @param packetId_ packet id
      * @param fastIntegrationType_ integration type for plug
      */
-    function verifyPacket(uint256 packetId_, bytes32 fastIntegrationType_)
-        external
-        view
-        override
-        returns (bool, bytes32)
-    {
+    function verifyPacket(
+        uint256 packetId_,
+        bytes32 fastIntegrationType_
+    ) external view override returns (bool, bytes32) {
         bool isFast = fastIntegrationType == fastIntegrationType_
             ? true
             : false;

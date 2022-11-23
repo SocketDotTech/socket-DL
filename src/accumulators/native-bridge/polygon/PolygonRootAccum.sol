@@ -20,10 +20,10 @@ contract PolygonRootAccum is NativeBridgeAccum, FxBaseRootTunnel {
     /**
      * @param data - encoded data to be sent to remote notary
      */
-    function _sendMessage(uint256[] calldata, bytes memory data)
-        internal
-        override
-    {
+    function _sendMessage(
+        uint256[] calldata,
+        bytes memory data
+    ) internal override {
         bytes memory fxData = abi.encode(address(this), remoteNotary, data);
         _sendMessageToChild(fxData);
     }

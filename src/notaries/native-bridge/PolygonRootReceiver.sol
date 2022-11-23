@@ -20,11 +20,9 @@ contract PolygonRootReceiver is NativeBridgeNotary, FxBaseRootTunnel {
         FxBaseRootTunnel(checkpointManager_, fxRoot_)
     {}
 
-    function _processMessageFromChild(bytes memory data)
-        internal
-        override
-        onlyRemoteAccumulator
-    {
+    function _processMessageFromChild(
+        bytes memory data
+    ) internal override onlyRemoteAccumulator {
         (uint256 packetId, bytes32 root, ) = abi.decode(
             data,
             (uint256, bytes32, bytes)
