@@ -6,9 +6,11 @@ import { verify } from "../utils";
 export default async function deployVault(signer: SignerWithAddress) {
   try {
     const contractName = "Vault";
-    const args = [signer.address]
+    const args = [signer.address];
 
-    const vault: ContractFactory = await ethers.getContractFactory(contractName);
+    const vault: ContractFactory = await ethers.getContractFactory(
+      contractName
+    );
     const vaultContract: Contract = await vault.connect(signer).deploy(...args);
     await vaultContract.deployed();
 

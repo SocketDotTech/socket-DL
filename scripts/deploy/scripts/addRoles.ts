@@ -16,7 +16,9 @@ export const main = async () => {
       throw new Error("Deployed Addresses not found");
     }
 
-    const config: any = JSON.parse(fs.readFileSync(deployedAddressPath + chainId + ".json", "utf-8"));
+    const config: any = JSON.parse(
+      fs.readFileSync(deployedAddressPath + chainId + ".json", "utf-8")
+    );
 
     const { socketOwner } = await getNamedAccounts();
     const signer: SignerWithAddress = await ethers.getSigner(socketOwner);
@@ -24,9 +26,11 @@ export const main = async () => {
     const notary: Contract = await getInstance("AdminNotary", config["notary"]);
     const socket: Contract = await getInstance("Socket", config["socket"]);
 
-    await notary.connect(signer).grantAttesterRole(remoteChainId, attesterAddress[chainId]);
+    await notary
+      .connect(signer)
+      .grantAttesterRole(remoteChainId, attesterAddress[chainId]);
     await socket.connect(signer).grantExecutorRole(executorAddress[chainId]);
-    console.log(`Assigned roles to ${executorAddress[chainId]}!`)
+    console.log(`Assigned roles to ${executorAddress[chainId]}!`);
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;

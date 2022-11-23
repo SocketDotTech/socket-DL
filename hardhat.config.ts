@@ -92,18 +92,18 @@ const config: HardhatUserConfig = {
         chainId: chainIds["optimism-goerli"],
         urls: {
           apiURL: "https://api-goerli-optimistic.etherscan.io/api",
-          browserURL: "https://goerli-optimism.etherscan.io/"
-        }
+          browserURL: "https://goerli-optimism.etherscan.io/",
+        },
       },
       {
         network: "arbitrumTestnet",
         chainId: chainIds["arbitrum-goerli"],
         urls: {
           apiURL: "https://api-goerli.arbiscan.io/api",
-          browserURL: "https://goerli.arbiscan.io/"
-        }
-      }
-    ]
+          browserURL: "https://goerli.arbiscan.io/",
+        },
+      },
+    ],
   },
   networks: {
     hardhat: {
