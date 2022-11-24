@@ -14,20 +14,20 @@ export default async function deployNotary(
   try {
     let args = {
       AdminNotary: [signatureVerifier, chainIds[chain]],
-      ArbitrumReceiver: [
+      ArbitrumNotary: [
         signatureVerifier,
         chainIds[chain],
         remoteTarget,
         bridgeConsts.inbox[chain],
       ],
-      OptimismReceiver: [signatureVerifier, chainIds[chain], remoteTarget],
-      PolygonChildReceiver: [
+      OptimismNotary: [signatureVerifier, chainIds[chain], remoteTarget],
+      PolygonL2Notary: [
         signatureVerifier,
         chainIds[chain],
         remoteTarget,
         bridgeConsts.fxChild[chain],
       ],
-      PolygonRootReceiver: [
+      PolygonL1Notary: [
         bridgeConsts.checkpointManager[chain],
         bridgeConsts.fxRoot[chain],
         signatureVerifier,
@@ -35,6 +35,8 @@ export default async function deployNotary(
         remoteTarget,
       ],
     };
+
+    console.log(args[contractName]);
 
     const Notary: ContractFactory = await ethers.getContractFactory(
       contractName

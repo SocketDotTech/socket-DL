@@ -10,8 +10,7 @@ import {
   fastIntegration,
   slowIntegration,
   contractNames,
-  polygonNativeBridgeIntegration,
-  optimismNativeBridgeIntegration,
+  nativeBridgeIntegration
 } from "../constants";
 import {
   getInstance,
@@ -19,30 +18,28 @@ import {
   storeAddresses,
   createObj,
   getChainId,
+  getNotaryAddress,
+  getVerifierAddress
 } from "./utils";
 import { deployNotary, deployAccumulator, deployVerifier } from "./contracts";
 import { ChainSocketAddresses } from "./types";
 
-const localChain: keyof typeof chainIds = "";
-const remoteChain: keyof typeof chainIds = "";
-const config = [];
-const configForCounter = "";
+const localChain: keyof typeof chainIds = "hardhat";
+const remoteChain: keyof typeof chainIds = "hardhat";
+const config = [fastIntegration, slowIntegration];
+const configForCounter = fastIntegration;
 
 if (!localChain) throw new Error("Provide local chain id");
-
 if (!remoteChain) throw new Error("Provide remote chain id");
-
-if (localChain === remoteChain) throw new Error("Wrong chains");
+// if (localChain === remoteChain) throw new Error("Wrong chains");
 
 if (!fs.existsSync(deployedAddressPath)) {
   throw new Error("addresses.json not found");
 }
-
 if (config.length === 0 && configForCounter === "")
   throw new Error("No configuration provided");
 
 const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
-
 if (!addresses[chainIds[localChain]] || !addresses[chainIds[remoteChain]]) {
   throw new Error("Deployed Addresses not found");
 }
@@ -57,29 +54,21 @@ const getSigners = async () => {
   return { socketSigner, counterSigner };
 };
 
-const notaryAddress = (notary, chainId, config) =>
-  notary === "AdminNotary" ? config[notary] : config[notary]?.[chainId];
+const remoteNotary = (notaryName: string) => {
+  let remoteNotary = getNotaryAddress(
+    notaryName,
+    chainIds[localChain],
+    remoteConfig
+  );
 
-const remoteTarget = (notaryName: string) => {
-  let remoteTarget = constants.AddressZero;
-  if (
-    remoteConfig[notaryName] ||
-    remoteConfig[notaryName]?.[chainIds[localChain]]
-  ) {
-    remoteTarget = notaryAddress(
-      notaryName,
-      chainIds[localChain],
-      remoteConfig
-    );
-  }
-
-  return remoteTarget;
+  if (!remoteNotary) return constants.AddressZero;
+  return remoteNotary;
 };
 
-const deployLocalNotary = async (notaryName, socketSigner) => {
+const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
   try {
     let notary;
-    const address = notaryAddress(
+    const address = getNotaryAddress(
       notaryName,
       chainIds[remoteChain],
       localConfig
@@ -90,7 +79,7 @@ const deployLocalNotary = async (notaryName, socketSigner) => {
         notaryName,
         localChain,
         localConfig["SignatureVerifier"],
-        remoteTarget(notaryName),
+        remoteNotary(notaryName),
         socketSigner
       );
       const grantAttesterRoleTx = await notary
@@ -100,77 +89,105 @@ const deployLocalNotary = async (notaryName, socketSigner) => {
 
       if (notaryName === "AdminNotary") {
         localConfig[notaryName] = notary.address;
-      } else
-        localConfig = createObj(
-          localConfig,
-          [notaryName, chainIds[remoteChain]],
-          notary.address
-        );
+      }
+
+      localConfig = createObj(
+        localConfig,
+        ["integrations", chainIds[remoteChain], integrationType, "notary"],
+        notary.address
+      );
     } else {
       notary = await getInstance(notaryName, address);
+      if (!config["integrations"]?.[chainIds[remoteChain]]?.[integrationType]?.["notary"])
+        localConfig = createObj(
+          localConfig,
+          ["integrations", chainIds[remoteChain], integrationType, "notary"],
+          notary.address
+        );
     }
     return notary;
   } catch (error) {
     throw new Error(
-      `Error while deploying accum contract: ${notaryName}: ${error}`
+      `Error while deploying notary contract: ${notaryName}: ${error}`
     );
   }
 };
 
 const deployLocalAccum = async (
-  accumName,
   configurationType,
   notaryAddress,
   socketSigner
 ) => {
   try {
     let accum;
-    if (!localConfig[accumName]?.[configurationType]?.[chainIds[remoteChain]]) {
+    if (!localConfig["integrations"]?.[chainIds[remoteChain]]?.[configurationType]?.["accum"]) {
       accum = await deployAccumulator(
-        accumName,
-        localChain,
         localConfig["Socket"],
         notaryAddress,
         remoteChain,
         socketSigner
       );
+
       localConfig = createObj(
         localConfig,
-        [accumName, configurationType, chainIds[remoteChain]],
+        ["integrations", chainIds[remoteChain], configurationType, "accum"],
         accum.address
       );
+
     } else {
       accum = await getInstance(
-        accumName,
-        localConfig[accumName][configurationType][chainIds[remoteChain]]
+        "SingleAccum",
+        localConfig["integrations"]?.[chainIds[remoteChain]]?.[configurationType]?.["accum"]
       );
     }
 
     return accum;
   } catch (error) {
     throw new Error(
-      `Error while deploying accum contract: ${accumName}: ${error}`
+      `Error while deploying accum contract: ${error}`
     );
   }
 };
 
 const deployLocalVerifier = async (
+  integrationType,
   verifierName,
   notaryAddress,
   socketSigner
 ) => {
   try {
     let verifier;
-    if (!localConfig[verifierName]) {
+    const address = getVerifierAddress(
+      verifierName,
+      chainIds[remoteChain],
+      localConfig
+    );
+
+    if (!address) {
       verifier = await deployVerifier(
         verifierName,
         timeout[localChain],
         notaryAddress,
         socketSigner
       );
-      localConfig[verifierName] = verifier.address;
+
+      if (verifierName === "Verifier") {
+        localConfig[verifierName] = verifier.address;
+      }
+
+      localConfig = createObj(
+        localConfig,
+        ["integrations", chainIds[remoteChain], integrationType, "verifier"],
+        verifier.address
+      );
     } else {
-      verifier = await getInstance(verifierName, localConfig[verifierName]);
+      verifier = await getInstance(verifierName, address);
+      if (!config["integrations"]?.[chainIds[remoteChain]]?.[integrationType]?.["verifier"])
+        localConfig = createObj(
+          localConfig,
+          ["integrations", chainIds[remoteChain], integrationType, "verifier"],
+          verifier.address
+        );
     }
 
     return verifier;
@@ -183,78 +200,51 @@ const deployLocalVerifier = async (
 
 const setupContracts = async (
   localNotary,
-  localAccum,
   localNotaryName,
   socketSigner
 ) => {
   // check if remote notary and accum exists
-  const { notary, accum, integrationType } = contractNames(
+  const { notary, integrationType } = contractNames(
     "",
     remoteChain,
     localChain
   );
 
-  const remoteNotaryAddress = notaryAddress(
+  const remoteNotaryAddress = getNotaryAddress(
     notary,
     chainIds[localChain],
     remoteConfig
   );
-  const remoteAccumAddress =
-    remoteConfig[accum]?.[integrationType]?.[chainIds[localChain]];
 
-  if (!remoteNotaryAddress || !remoteAccumAddress) return;
-
+  if (!remoteNotaryAddress) return;
   const remoteNotary: Contract = await getInstance(notary, remoteNotaryAddress);
-  const remoteAccum = await getInstance(accum, remoteAccumAddress);
 
   await hre.changeNetwork(remoteChain);
   const signers = await getSigners();
-  let updateRemoteTargetTx = await remoteNotary
+  let updateRemoteNotaryTx = await remoteNotary
     .connect(signers.socketSigner)
-    .updateRemoteTarget(localAccum.address);
-  await updateRemoteTargetTx.wait();
-
-  let setRemoteNotaryTx = await remoteAccum
-    .connect(signers.socketSigner)
-    .setRemoteNotary(localNotary.address);
-  await setRemoteNotaryTx.wait();
+    .updateRemoteNotary(localNotary.address);
+  await updateRemoteNotaryTx.wait();
 
   // set fxchild for l2 to l1 comm
-  if (integrationType === polygonNativeBridgeIntegration) {
-    if (notary === "PolygonRootReceiver") {
-      const setFxChildTunnelTx = await remoteNotary
-        .connect(signers.socketSigner)
-        .setFxChildTunnel(localAccum.address);
-      await setFxChildTunnelTx.wait();
-    }
-  }
-
-  // set inbox
-  if (integrationType === polygonNativeBridgeIntegration) {
-    if (notary === "PolygonRootReceiver") {
-      const setFxChildTunnelTx = await remoteNotary
-        .connect(signers.socketSigner)
-        .setFxChildTunnel(localAccum.address);
-      await setFxChildTunnelTx.wait();
-    }
+  if (notary === "PolygonL1Notary") {
+    const setFxChildTunnelTx = await remoteNotary
+      .connect(signers.socketSigner)
+      .setFxChildTunnel(localNotary.address);
+    await setFxChildTunnelTx.wait();
   }
 
   await hre.changeNetwork(localChain);
-  updateRemoteTargetTx = await localNotary
+  updateRemoteNotaryTx = await localNotary
     .connect(socketSigner)
-    .updateRemoteTarget(remoteAccumAddress);
-  await updateRemoteTargetTx.wait();
-
-  setRemoteNotaryTx = await localAccum
-    .connect(socketSigner)
-    .setRemoteNotary(remoteNotaryAddress);
-  await setRemoteNotaryTx.wait();
+    .updateRemoteNotary(remoteNotary.address);
+  await updateRemoteNotaryTx.wait();
 
   // set fxchild for l2 to l1 comm
-  if (localNotaryName === "PolygonRootReceiver") {
+  if (localNotaryName === "PolygonL1Notary") {
     const setFxChildTunnelTx = await localNotary
       .connect(socketSigner)
-      .setFxChildTunnel(remoteAccum.address);
+      .setFxChildTunnel(remoteNotary.address);
     await setFxChildTunnelTx.wait();
   }
 };
@@ -274,20 +264,21 @@ const setupConfig = async (
     throw new Error("Given Configuration not supported");
 
   console.log(
-    `Deploying contracts: ${contracts.accum}, ${contracts.notary}, ${contracts.verifier} for ${contracts.integrationType} integration type`
+    `Deploying contracts: SingleAccum, ${contracts.notary}, ${contracts.verifier} for ${contracts.integrationType} integration type`
   );
 
   let notary: Contract = await deployLocalNotary(
+    configurationType,
     contracts.notary,
     socketSigner
   );
   let verifier = await deployLocalVerifier(
+    configurationType,
     contracts.verifier,
     notary.address,
     socketSigner
   );
   let accum = await deployLocalAccum(
-    contracts.accum,
     configurationType,
     notary.address,
     socketSigner
@@ -298,7 +289,7 @@ const setupConfig = async (
     configurationType !== fastIntegration &&
     configurationType !== slowIntegration
   )
-    await setupContracts(notary, accum, contracts.notary, socketSigner);
+    await setupContracts(notary, contracts.notary, socketSigner);
 
   // add config to socket
   const socket: Contract = await getInstance("Socket", localConfig["Socket"]);

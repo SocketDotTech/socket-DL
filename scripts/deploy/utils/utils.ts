@@ -2,14 +2,14 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ContractFactory, Contract } from "ethers";
 import { network, ethers, run } from "hardhat";
 import { Address } from "hardhat-deploy/dist/types";
-import { contractPath } from "../constants/config";
+import { contractPath } from "../../constants/config";
 import path from "path";
 import fs from "fs";
-import { ChainSocketAddresses, DeploymentAddresses } from "./types";
+import { ChainSocketAddresses, DeploymentAddresses } from "../types";
 
 export const deployedAddressPath = path.join(
   __dirname,
-  "/../../deployments/addresses.json"
+  "/../../../deployments/addresses.json"
 );
 
 export const deployContractWithoutArgs = async (

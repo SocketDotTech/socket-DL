@@ -126,9 +126,9 @@ export const main = async () => {
 
     const l1Accum: Contract = (
       await getInstance(
-        contracts.accum,
-        l1Config[contracts.accum]?.[contracts.integrationType]?.[
-          chainIds[remoteChain]
+        "SingleAccum",
+        l1Config["SingleAccum"]?.[contracts.integrationType]?.[
+        chainIds[remoteChain]
         ]
       )
     ).connect(l1Wallet);
@@ -175,12 +175,11 @@ export const main = async () => {
       newRootHash,
       "0x",
       l1Accum.address,
-      l2Config["ArbitrumReceiver"]?.[chainIds[localChain]]
+      l2Config["ArbitrumNotary"]?.[chainIds[localChain]]
     );
 
     console.log(
-      `Sealing with params ${
-        (l1Accum.address, bridgeParams, signature, callValue)
+      `Sealing with params ${(l1Accum.address, bridgeParams, signature, callValue)
       }`
     );
 

@@ -33,8 +33,8 @@ export const main = async () => {
 
     const l1Accum: Contract = (
       await getInstance(
-        contracts.accum,
-        l1Config[contracts.accum]?.[contracts.integrationType]?.[
+        "SingleAccum",
+        l1Config["SingleAccum"]?.[contracts.integrationType]?.[
           chainIds[remoteChain]
         ]
       )

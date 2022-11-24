@@ -37,151 +37,111 @@ export const timeout: {
 export const contractPath: {
   [key: string]: string;
 } = {
-  Counter: "src/examples/Counter.sol",
-  Hasher: "src/utils/Hasher.sol",
-  Messenger: "src/examples/Messenger.sol",
-  SignatureVerifier: "src/utils/SignatureVerifier.sol",
-  SingleDeaccum: "src/deaccumulators/SingleDeaccum.sol",
-  Socket: "src/Socket.sol",
-  Vault: "src/vault/Vault.sol",
-  // accum
-  ArbitrumL1Accum:
-    "src/accumulators/native-bridge/arbitrum/ArbitrumL1Accum.sol",
-  ArbitrumL2Accum:
-    "src/accumulators/native-bridge/arbitrum/ArbitrumL2Accum.sol",
-  OptimismAccum: "src/accumulators/native-bridge/optimism/OptimismAccum.sol",
-  PolygonChildAccum:
-    "src/accumulators/native-bridge/polygon/PolygonChildAccum.sol",
-  PolygonRootAccum:
-    "src/accumulators/native-bridge/polygon/PolygonRootAccum.sol",
-  SingleAccum: "src/accumulators/SingleAccum.sol",
+  Counter: "contracts/examples/Counter.sol",
+  Hasher: "contracts/utils/Hasher.sol",
+  Messenger: "contracts/examples/Messenger.sol",
+  SignatureVerifier: "contracts/utils/SignatureVerifier.sol",
+  SingleDeaccum: "contracts/deaccumulators/SingleDeaccum.sol",
+  Socket: "contracts/Socket.sol",
+  Vault: "contracts/vault/Vault.sol",
+  SingleAccum: "contracts/accumulators/SingleAccum.sol",
   // notaries
-  AdminNotary: "src/notaries/AdminNotary.sol",
-  ArbitrumReceiver: "src/notaries/native-bridge/ArbitrumReceiver.sol",
-  BondedNotary: "src/notaries/BondedNotary.sol",
-  OptimismReceiver: "src/notaries/native-bridge/OptimismReceiver.sol",
-  PolygonChildReceiver: "src/notaries/native-bridge/PolygonChildReceiver.sol",
-  PolygonRootReceiver: "src/notaries/native-bridge/PolygonRootReceiver.sol",
+  AdminNotary: "contracts/notaries/AdminNotary.sol",
+  ArbitrumNotary: "contracts/notaries/native-bridge/ArbitrumNotary.sol",
+  BondedNotary: "contracts/notaries/BondedNotary.sol",
+  OptimismNotary: "contracts/notaries/native-bridge/OptimismNotary.sol",
+  PolygonL2Notary: "contracts/notaries/native-bridge/PolygonL2Notary.sol",
+  PolygonL1Notary: "contracts/notaries/native-bridge/PolygonL1Notary.sol",
   // verifiers
-  NativeBridgeVerifier: "src/verifiers/NativeBridgeVerifier.sol",
-  Verifier: "src/verifiers/Verifier.sol",
+  NativeBridgeVerifier: "contracts/verifiers/NativeBridgeVerifier.sol",
+  Verifier: "contracts/verifiers/Verifier.sol",
 };
 
 export const fastIntegration = "FAST";
 export const slowIntegration = "SLOW";
-export const arbNativeBridgeIntegration = "ARBITRUM_NATIVE_BRIDGE_CONFIG";
-export const optimismNativeBridgeIntegration = "OPTIMISM_NATIVE_BRIDGE_CONFIG";
-export const polygonNativeBridgeIntegration = "POLYGON_NATIVE_BRIDGE_CONFIG";
+export const nativeBridgeIntegration = "NATIVE";
+
+const notaries = {
+  "arbitrum-goerli": {
+    goerli: {
+      notary: "ArbitrumNotary",
+    },
+  },
+  "arbitrum-mainnet": {
+    mainnet: {
+      notary: "ArbitrumNotary",
+    },
+  },
+  "optimism-mainnet": {
+    mainnet: {
+      notary: "OptimismNotary",
+    },
+  },
+  "optimism-goerli": {
+    goerli: {
+      notary: "OptimismNotary",
+    },
+  },
+  "polygon-mainnet": {
+    mainnet: {
+      notary: "PolygonL2Notary",
+    },
+  },
+  "polygon-mumbai": {
+    goerli: {
+      notary: "PolygonL2Notary",
+    },
+  },
+  goerli: {
+    "arbitrum-goerli": {
+      notary: "ArbitrumNotary",
+    },
+    "optimism-goerli": {
+      notary: "OptimismNotary",
+    },
+    "polygon-mumbai": {
+      notary: "PolygonL1Notary",
+    },
+  },
+  mainnet: {
+    "arbitrum-mainnet": {
+      notary: "ArbitrumNotary",
+    },
+    "optimism-mainnet": {
+      notary: "OptimismNotary",
+    },
+    "polygon-mainnet": {
+      notary: "PolygonL1Notary",
+    },
+  }
+};
 
 export const contractNames = (
   integrationType: string,
   srcChain: string,
   dstChain: string
 ) => {
-  let contracts = {
-    "arbitrum-goerli": {
-      goerli: {
-        integrationType: arbNativeBridgeIntegration,
-        accum: "ArbitrumL2Accum",
-        verifier: "NativeBridgeVerifier",
-        notary: "ArbitrumReceiver",
-      },
-    },
-    "arbitrum-mainnet": {
-      mainnet: {
-        integrationType: arbNativeBridgeIntegration,
-        accum: "ArbitrumL2Accum",
-        verifier: "NativeBridgeVerifier",
-        notary: "ArbitrumReceiver",
-      },
-    },
-    "optimism-mainnet": {
-      mainnet: {
-        integrationType: optimismNativeBridgeIntegration,
-        accum: "OptimismAccum",
-        verifier: "NativeBridgeVerifier",
-        notary: "OptimismReceiver",
-      },
-    },
-    "optimism-goerli": {
-      goerli: {
-        integrationType: optimismNativeBridgeIntegration,
-        accum: "OptimismAccum",
-        verifier: "NativeBridgeVerifier",
-        notary: "OptimismReceiver",
-      },
-    },
-    "polygon-mainnet": {
-      mainnet: {
-        integrationType: polygonNativeBridgeIntegration,
-        accum: "PolygonChildAccum",
-        verifier: "NativeBridgeVerifier",
-        notary: "PolygonChildReceiver",
-      },
-    },
-    "polygon-mumbai": {
-      goerli: {
-        integrationType: polygonNativeBridgeIntegration,
-        accum: "PolygonChildAccum",
-        verifier: "NativeBridgeVerifier",
-        notary: "PolygonChildReceiver",
-      },
-    },
-    goerli: {
-      "arbitrum-goerli": {
-        integrationType: arbNativeBridgeIntegration,
-        accum: "ArbitrumL1Accum",
-        verifier: "NativeBridgeVerifier",
-        notary: "ArbitrumReceiver",
-      },
-      "optimism-goerli": {
-        integrationType: optimismNativeBridgeIntegration,
-        accum: "OptimismAccum",
-        verifier: "NativeBridgeVerifier",
-        notary: "OptimismReceiver",
-      },
-      "polygon-mumbai": {
-        integrationType: polygonNativeBridgeIntegration,
-        accum: "PolygonRootAccum",
-        verifier: "NativeBridgeVerifier",
-        notary: "PolygonRootReceiver",
-      },
-    },
-    mainnet: {
-      "arbitrum-mainnet": {
-        integrationType: arbNativeBridgeIntegration,
-        accum: "ArbitrumL1Accum",
-        verifier: "NativeBridgeVerifier",
-        notary: "ArbitrumReceiver",
-      },
-      "optimism-mainnet": {
-        integrationType: optimismNativeBridgeIntegration,
-        accum: "OptimismAccum",
-        verifier: "NativeBridgeVerifier",
-        notary: "OptimismReceiver",
-      },
-      "polygon-mainnet": {
-        integrationType: polygonNativeBridgeIntegration,
-        accum: "PolygonRootAccum",
-        verifier: "NativeBridgeVerifier",
-        notary: "PolygonRootReceiver",
-      },
+  const contracts = {
+    natives: {
+      integrationType: nativeBridgeIntegration,
+      verifier: "NativeBridgeVerifier",
+      notary: notaries[srcChain][dstChain],
     },
     default: {
       integrationType,
-      accum: "SingleAccum",
       verifier: "Verifier",
-      notary: "AdminNotary",
+      notary: "AdminNotary"
     },
-  };
+  }
 
   if (
     integrationType === fastIntegration ||
     integrationType === slowIntegration
   )
     return contracts["default"];
-  if (!contracts[srcChain] || !contracts[srcChain][dstChain])
+
+  if (!contracts[srcChain]?.[dstChain])
     return contracts["default"];
 
-  return contracts[srcChain][dstChain];
+  return contracts["natives"];
 };
