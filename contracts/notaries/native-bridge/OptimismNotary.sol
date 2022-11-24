@@ -1,19 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../NativeBridgeAccum.sol";
-import "../../../interfaces/native-bridge/ICrossDomainMessenger.sol";
+import "../../interfaces/native-bridge/ICrossDomainMessenger.sol";
+import "./NativeBridgeNotary.sol";
 
-contract OptimismAccum is NativeBridgeAccum {
+contract OptimismNotary is NativeBridgeNotary {
     ICrossDomainMessenger public crossDomainMessenger;
+    bool public isL2;
+
+    modifier onlyRemoteAccumulator() override {
+        if (
+            msg.sender != address(crossDomainMessenger) &&
+            crossDomainMessenger.xDomainMessageSender() != remoteNotary
+        ) revert InvalidSender();
+        _;
+    }
 
     constructor(
-        address socket_,
-        address notary_,
-        uint32 remoteChainSlug_,
-        uint32 chainSlug_
-    ) NativeBridgeAccum(socket_, notary_, remoteChainSlug_, chainSlug_) {
+        address signatureVerifier_,
+        uint32 chainSlug_,
+        address remoteNotary_
+    ) NativeBridgeNotary(signatureVerifier_, chainSlug_, remoteNotary_) {
         if ((block.chainid == 10 || block.chainid == 420)) {
+            isL2 = true;
             crossDomainMessenger = ICrossDomainMessenger(
                 0x4200000000000000000000000000000000000007
             );

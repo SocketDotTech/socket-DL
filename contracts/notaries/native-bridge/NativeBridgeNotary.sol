@@ -13,14 +13,14 @@ abstract contract NativeBridgeNotary is
     AccessControl,
     ReentrancyGuard
 {
-    address public remoteTarget;
+    address public remoteNotary;
     uint256 private immutable _chainSlug;
     ISignatureVerifier public signatureVerifier;
 
     // accumAddr|chainSlug|packetId
     mapping(uint256 => bytes32) private _remoteRoots;
 
-    event UpdatedRemoteTarget(address remoteTarget);
+    event UpdatedRemoteNotary(address remoteNotary);
     error InvalidSender();
 
     modifier onlyRemoteAccumulator() virtual {
@@ -30,18 +30,24 @@ abstract contract NativeBridgeNotary is
     constructor(
         address signatureVerifier_,
         uint32 chainSlug_,
-        address remoteTarget_
+        address remoteNotary_
     ) AccessControl(msg.sender) {
         _chainSlug = chainSlug_;
         signatureVerifier = ISignatureVerifier(signatureVerifier_);
 
-        remoteTarget = remoteTarget_;
+        remoteNotary = remoteNotary_;
     }
 
-    function updateRemoteTarget(address remoteTarget_) external onlyOwner {
-        remoteTarget = remoteTarget_;
-        emit UpdatedRemoteTarget(remoteTarget_);
+    function updateRemoteNotary(address remoteNotary_) external onlyOwner {
+        remoteNotary = remoteNotary_;
+        emit UpdatedRemoteNotary(remoteNotary_);
     }
+
+    function _sendMessage(
+        uint256[] calldata bridgeParams,
+        uint256 packetId,
+        bytes32 root
+    ) internal virtual;
 
     /// @inheritdoc INotary
     function seal(
@@ -53,11 +59,10 @@ abstract contract NativeBridgeNotary is
             bytes32 root,
             uint256 packetCount,
             uint256 remoteChainSlug
-        ) = IAccumulator(accumAddress_).sealPacket{value: msg.value}(
-                bridgeParams
-            );
+        ) = IAccumulator(accumAddress_).sealPacket();
 
         uint256 packetId = _getPacketId(accumAddress_, _chainSlug, packetCount);
+        _sendMessage(bridgeParams, packetId, root);
 
         address attester = signatureVerifier.recoverSigner(
             remoteChainSlug,
@@ -98,10 +103,10 @@ abstract contract NativeBridgeNotary is
      * @param packetId_ id of packet to be updated
      * @param newRoot_ new root
      */
-    function updatePacketRoot(uint256 packetId_, bytes32 newRoot_)
-        external
-        onlyOwner
-    {
+    function updatePacketRoot(
+        uint256 packetId_,
+        bytes32 newRoot_
+    ) external onlyOwner {
         bytes32 oldRoot = _remoteRoots[packetId_];
         _remoteRoots[packetId_] = newRoot_;
 
@@ -109,12 +114,9 @@ abstract contract NativeBridgeNotary is
     }
 
     /// @inheritdoc INotary
-    function getPacketStatus(uint256 packetId_)
-        external
-        view
-        override
-        returns (PacketStatus status)
-    {
+    function getPacketStatus(
+        uint256 packetId_
+    ) external view override returns (PacketStatus status) {
         return
             _remoteRoots[packetId_] == bytes32(0)
                 ? PacketStatus.NOT_PROPOSED
@@ -122,17 +124,9 @@ abstract contract NativeBridgeNotary is
     }
 
     /// @inheritdoc INotary
-    function getPacketDetails(uint256 packetId_)
-        external
-        view
-        override
-        returns (
-            PacketStatus,
-            uint256,
-            uint256,
-            bytes32
-        )
-    {
+    function getPacketDetails(
+        uint256 packetId_
+    ) external view override returns (PacketStatus, uint256, uint256, bytes32) {
         bytes32 root = _remoteRoots[packetId_];
         PacketStatus status = root == bytes32(0)
             ? PacketStatus.NOT_PROPOSED
@@ -145,11 +139,9 @@ abstract contract NativeBridgeNotary is
      * @notice returns the attestations received by a packet
      * @param packetId_ packed id
      */
-    function getAttestationCount(uint256 packetId_)
-        external
-        view
-        returns (uint256)
-    {
+    function getAttestationCount(
+        uint256 packetId_
+    ) external view returns (uint256) {
         return 1;
     }
 
@@ -157,12 +149,9 @@ abstract contract NativeBridgeNotary is
      * @notice returns the remote root for given `packetId_`
      * @param packetId_ packed id
      */
-    function getRemoteRoot(uint256 packetId_)
-        external
-        view
-        override
-        returns (bytes32)
-    {
+    function getRemoteRoot(
+        uint256 packetId_
+    ) external view override returns (bytes32) {
         return _remoteRoots[packetId_];
     }
 
@@ -171,10 +160,10 @@ abstract contract NativeBridgeNotary is
      * @param remoteChainSlug_ remote chain id
      * @param attester_ attester address
      */
-    function grantAttesterRole(uint256 remoteChainSlug_, address attester_)
-        external
-        onlyOwner
-    {
+    function grantAttesterRole(
+        uint256 remoteChainSlug_,
+        address attester_
+    ) external onlyOwner {
         if (_hasRole(_attesterRole(remoteChainSlug_), attester_))
             revert AttesterExists();
 
@@ -186,10 +175,10 @@ abstract contract NativeBridgeNotary is
      * @param remoteChainSlug_ remote chain id
      * @param attester_ attester address
      */
-    function revokeAttesterRole(uint256 remoteChainSlug_, address attester_)
-        external
-        onlyOwner
-    {
+    function revokeAttesterRole(
+        uint256 remoteChainSlug_,
+        address attester_
+    ) external onlyOwner {
         if (!_hasRole(_attesterRole(remoteChainSlug_), attester_))
             revert AttesterNotFound();
 
@@ -211,10 +200,9 @@ abstract contract NativeBridgeNotary is
      * @notice updates signatureVerifier_
      * @param signatureVerifier_ address of Signature Verifier
      */
-    function setSignatureVerifier(address signatureVerifier_)
-        external
-        onlyOwner
-    {
+    function setSignatureVerifier(
+        address signatureVerifier_
+    ) external onlyOwner {
         signatureVerifier = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
     }
@@ -230,11 +218,9 @@ abstract contract NativeBridgeNotary is
             packetCount_;
     }
 
-    function _getChainSlug(uint256 packetId_)
-        internal
-        pure
-        returns (uint256 chainSlug_)
-    {
+    function _getChainSlug(
+        uint256 packetId_
+    ) internal pure returns (uint256 chainSlug_) {
         chainSlug_ = uint32(packetId_ >> 224);
     }
 }
