@@ -65,6 +65,7 @@ if (mnemonic && infuraApiKey && isProduction) {
     mainnet: getChainConfig("mainnet"),
     optimism: getChainConfig("optimism-mainnet"),
     "polygon-mumbai": getChainConfig("polygon-mumbai"),
+    "bsc-testnet": getChainConfig("bsc-testnet"),
   };
 }
 
