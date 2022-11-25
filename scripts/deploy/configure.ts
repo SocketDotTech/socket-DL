@@ -35,6 +35,9 @@ export const main = async () => {
       }
 
       // add a config to plugs on local and remote
+      console.log(
+        `Setting config ${chainSetups[index]["configForCounter"]} for ${chainIds[remoteChain]} chain id!`
+      );
       const counter: Contract = await getInstance(
         "Counter",
         counters.localCounter
@@ -47,9 +50,6 @@ export const main = async () => {
           chainSetups[index]["configForCounter"]
         );
       await tx.wait();
-      console.log(
-        `Set config ${chainSetups[index]["configForCounter"]} for ${chainIds[remoteChain]} chain id!`
-      );
     }
   } catch (error) {
     console.log("Error while sending transaction", error);

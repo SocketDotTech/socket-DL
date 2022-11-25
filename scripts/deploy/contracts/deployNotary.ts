@@ -36,8 +36,6 @@ export default async function deployNotary(
       ],
     };
 
-    console.log(args[contractName]);
-
     const Notary: ContractFactory = await ethers.getContractFactory(
       contractName
     );

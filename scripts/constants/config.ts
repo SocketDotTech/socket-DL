@@ -6,7 +6,7 @@ export const attesterAddress: {
   "polygon-mumbai": "0x4b53d8d45fe48e0039db40bc21f0a3fc70d0a922",
   "arbitrum-goerli": "0x9bf84fdaa350f37ac8cb82d0042bba624b1be775",
   "optimism-goerli": "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
-  goerli: "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
+  goerli: "0x3c16684415d0fd630e7f6866021db43ca96479c4",
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
 };
 
@@ -18,7 +18,7 @@ export const executorAddress: {
   "polygon-mumbai": "0x4b53d8d45fe48e0039db40bc21f0a3fc70d0a922",
   "arbitrum-goerli": "0x9bf84fdaa350f37ac8cb82d0042bba624b1be775",
   "optimism-goerli": "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
-  goerli: "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
+  goerli: "0x3c16684415d0fd630e7f6866021db43ca96479c4",
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
 };
 
@@ -59,7 +59,7 @@ export const contractPath: {
 
 export const fastIntegration = "FAST";
 export const slowIntegration = "SLOW";
-export const nativeBridgeIntegration = "NATIVE";
+export const nativeBridgeIntegration = "NATIVE_BRIDGE";
 
 const notaries = {
   "arbitrum-goerli": {
@@ -121,27 +121,20 @@ export const contractNames = (
   srcChain: string,
   dstChain: string
 ) => {
-  const contracts = {
-    natives: {
-      integrationType: nativeBridgeIntegration,
-      verifier: "NativeBridgeVerifier",
-      notary: notaries[srcChain][dstChain],
-    },
-    default: {
+  if (
+    integrationType === fastIntegration ||
+    integrationType === slowIntegration ||
+    !notaries[srcChain]?.[dstChain]?.["notary"]
+  )
+    return {
       integrationType,
       verifier: "Verifier",
       notary: "AdminNotary"
-    },
-  }
+    };
 
-  if (
-    integrationType === fastIntegration ||
-    integrationType === slowIntegration
-  )
-    return contracts["default"];
-
-  if (!contracts[srcChain]?.[dstChain])
-    return contracts["default"];
-
-  return contracts["natives"];
+  return {
+    integrationType: nativeBridgeIntegration,
+    verifier: "NativeBridgeVerifier",
+    notary: notaries[srcChain][dstChain]["notary"],
+  };
 };

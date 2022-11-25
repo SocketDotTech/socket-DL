@@ -71,9 +71,8 @@ export const storeAddresses = async (
   addresses: ChainSocketAddresses,
   chainId: number
 ) => {
-  const dirPath = path.join(__dirname, "../../deployments");
-  if (!fs.existsSync(dirPath)) {
-    await fs.promises.mkdir(dirPath);
+  if (!fs.existsSync(deployedAddressPath)) {
+    await fs.promises.mkdir(deployedAddressPath);
   }
 
   const outputExists = fs.existsSync(deployedAddressPath);

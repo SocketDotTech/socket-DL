@@ -1,7 +1,7 @@
 import fs from "fs";
 import hre from "hardhat";
 
-import { Contract } from "ethers";
+import { constants, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import {
@@ -86,11 +86,14 @@ const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
     );
 
     if (!address) {
+      let remoteNotary = getNotaryAddress(notaryName, chainIds[localChain], remoteConfig)
+      if(!remoteNotary) remoteNotary = constants.AddressZero;
+
       notary = await deployNotary(
         notaryName,
         localChain,
         localConfig["SignatureVerifier"],
-        getNotaryAddress(notaryName, chainIds[localChain], remoteConfig),
+        remoteNotary,
         socketSigner
       );
       const grantAttesterRoleTx = await notary
@@ -269,18 +272,23 @@ export const setupConfig = async (
     await setupContracts(notary, contracts.notary, socketSigner);
 
   // add config to socket
+  console.log("Setting config in Socket");
   const socket: Contract = await getInstance("Socket", localConfig["Socket"]);
-  const addConfigTx = await socket
-    .connect(socketSigner)
-    .addConfig(
-      chainIds[remoteChain],
-      accum.address,
-      localConfig["SingleDeaccum"],
-      verifier.address,
-      configurationType
-    );
-  await addConfigTx.wait();
+  const socketConfig = await socket.getConfigs(chainIds[remoteChain], configurationType);
 
-  await storeAddresses(localConfig, chainIds[localChain]);
+  if (socketConfig[0] === constants.AddressZero) {
+    const addConfigTx = await socket
+      .connect(socketSigner)
+      .addConfig(
+        chainIds[remoteChain],
+        accum.address,
+        localConfig["SingleDeaccum"],
+        verifier.address,
+        configurationType
+      );
+    await addConfigTx.wait();
+    await storeAddresses(localConfig, chainIds[localChain]);
+  }
+
   return { localCounter: localConfig["Counter"], remoteCounter: remoteConfig["Counter"] }
 };
