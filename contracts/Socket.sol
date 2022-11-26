@@ -63,7 +63,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
     /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with accumulator
-     * @param remoteChainSlug_ the remote chain id
+     * @param remoteChainSlug_ the remote chain slug
      * @param msgGasLimit_ the gas limit needed to execute the payload on remote
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
@@ -76,7 +76,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
             remoteChainSlug_
         ];
 
-        // Packs the local plug, local chain id, remote chain id and nonce
+        // Packs the local plug, local chain slug, remote chain slug and nonce
         // _messageCount++ will take care of msg id overflow as well
         // msgId(256) = localChainSlug(32) | nonce(224)
         uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;

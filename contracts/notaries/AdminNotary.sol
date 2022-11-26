@@ -149,7 +149,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
 
     /**
      * @notice adds an attester for `remoteChainSlug_` chain
-     * @param remoteChainSlug_ remote chain id
+     * @param remoteChainSlug_ remote chain slug
      * @param attester_ attester address
      */
     function grantAttesterRole(
@@ -165,7 +165,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
 
     /**
      * @notice removes an attester from `remoteChainSlug_` chain list
-     * @param remoteChainSlug_ remote chain id
+     * @param remoteChainSlug_ remote chain slug
      * @param attester_ attester address
      */
     function revokeAttesterRole(
@@ -204,7 +204,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
     }
 
     /**
-     * @notice returns the current chain id
+     * @notice returns the current chain slug
      */
     function chainSlug() external view returns (uint256) {
         return _chainSlug;

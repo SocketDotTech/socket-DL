@@ -4,9 +4,9 @@ pragma solidity 0.8.7;
 interface IHasher {
     /**
      * @notice returns the bytes32 hash of the message packed
-     * @param srcChainSlug src chain id
+     * @param srcChainSlug src chain slug
      * @param srcPlug address of plug at source
-     * @param dstChainSlug remote chain id
+     * @param dstChainSlug remote chain slug
      * @param dstPlug address of plug at remote
      * @param msgId message id assigned at outbound
      * @param msgGasLimit gas limit which is expected to be consumed by the inbound transaction on plug
