@@ -37,7 +37,7 @@ contract SocketTest is Setup {
         assertEq(verifier, address(_a.verifier__));
 
         hoax(_socketOwner);
-        vm.expectRevert(ISocket.ConfigExists.selector);
+        vm.expectRevert(SocketConfig.ConfigExists.selector);
         _a.socket__.addConfig(
             dstChainSlug,
             address(_a.fastAccum__),
@@ -49,7 +49,7 @@ contract SocketTest is Setup {
 
     function testSetPlugConfig() external {
         hoax(_raju);
-        vm.expectRevert(ISocket.InvalidIntegrationType.selector);
+        vm.expectRevert(SocketConfig.InvalidIntegrationType.selector);
         _a.socket__.setPlugConfig(dstChainSlug, _raju, integrationType);
 
         _a.socket__.addConfig(

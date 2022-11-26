@@ -5,6 +5,14 @@ import "./interfaces/ISocket.sol";
 import "./utils/AccessControl.sol";
 
 abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
+    struct PlugConfig {
+        address remotePlug;
+        address accum;
+        address deaccum;
+        address verifier;
+        bytes32 integrationType;
+    }
+
     // integrationType => remoteChainSlug => address
     mapping(bytes32 => mapping(uint256 => address)) public verifiers;
     mapping(bytes32 => mapping(uint256 => address)) public accums;
@@ -13,6 +21,17 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
 
     // plug => remoteChainSlug => config(verifiers, accums, deaccums, remotePlug)
     mapping(address => mapping(uint256 => PlugConfig)) public plugConfigs;
+
+    event ConfigAdded(
+        address accum_,
+        address deaccum_,
+        address verifier_,
+        uint256 remoteChainSlug_,
+        bytes32 integrationType_
+    );
+
+    error ConfigExists();
+    error InvalidIntegrationType();
 
     function addConfig(
         uint256 remoteChainSlug_,

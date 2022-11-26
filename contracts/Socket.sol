@@ -4,6 +4,7 @@ pragma solidity 0.8.7;
 import "./interfaces/IAccumulator.sol";
 import "./interfaces/IDeaccumulator.sol";
 import "./interfaces/IVerifier.sol";
+import "./interfaces/IVault.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/IHasher.sol";
 import "./utils/ReentrancyGuard.sol";
@@ -16,6 +17,14 @@ contract Socket is SocketConfig, ReentrancyGuard {
         SUCCESS,
         FAILED
     }
+
+    error InvalidProof();
+
+    error VerificationFailed();
+
+    error MessageAlreadyExecuted();
+
+    error ExecutorNotFound();
 
     uint256 private immutable _chainSlug;
 
@@ -31,7 +40,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
     mapping(uint256 => MessageStatus) private _messagesStatus;
 
     IHasher public hasher;
-    IVault public override vault;
+    IVault public vault;
 
     /**
      * @param chainSlug_ socket chain slug (should not be more than uint32)
@@ -210,6 +219,10 @@ contract Socket is SocketConfig, ReentrancyGuard {
 
     function chainSlug() external view returns (uint256) {
         return _chainSlug;
+    }
+
+    function getVault() external view override returns (address) {
+        return address(vault);
     }
 
     function getMessageStatus(
