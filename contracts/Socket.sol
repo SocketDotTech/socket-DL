@@ -19,6 +19,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
     }
 
     error InvalidProof();
+    error InvalidRetry();
 
     error VerificationFailed();
 
@@ -26,16 +27,13 @@ contract Socket is SocketConfig, ReentrancyGuard {
 
     error ExecutorNotFound();
 
-    uint256 private immutable _chainSlug;
+    uint256 public immutable _chainSlug;
+    // incrementing nonce, should be handled in next socket version.
+    uint256 public _messageCount;
 
     bytes32 private constant EXECUTOR_ROLE = keccak256("EXECUTOR");
-
-    // incrementing nonce, should be handled in next socket version.
-    uint256 private _messageCount;
-
     // msgId => executorAddress
-    mapping(uint256 => address) private executor;
-
+    mapping(uint256 => address) public executor;
     // msgId => message status
     mapping(uint256 => MessageStatus) private _messagesStatus;
 
@@ -71,7 +69,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes calldata payload_
-    ) external payable override {
+    ) external payable virtual override {
         PlugConfig memory plugConfig = plugConfigs[msg.sender][
             remoteChainSlug_
         ];
@@ -109,6 +107,11 @@ contract Socket is SocketConfig, ReentrancyGuard {
         );
     }
 
+    function retry(uint256 msgId_, uint256 newMsgGasLimit_) external payable {
+        vault.deductRetryFee{value: msg.value}();
+        emit MessageRetried(msgId_, newMsgGasLimit_, msg.value);
+    }
+
     /**
      * @notice executes a message
      * @param msgGasLimit gas limit needed to execute the inbound at remote
@@ -123,14 +126,14 @@ contract Socket is SocketConfig, ReentrancyGuard {
         address localPlug,
         bytes calldata payload,
         ISocket.VerificationParams calldata verifyParams_
-    ) external override nonReentrant {
+    ) external virtual override nonReentrant {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
         if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
         executor[msgId] = msg.sender;
-
         PlugConfig memory plugConfig = plugConfigs[localPlug][
             verifyParams_.remoteChainSlug
         ];
+
         bytes32 packedMessage = hasher.packMessage(
             verifyParams_.remoteChainSlug,
             plugConfig.remotePlug,
@@ -146,6 +149,43 @@ contract Socket is SocketConfig, ReentrancyGuard {
             localPlug,
             verifyParams_.remoteChainSlug,
             msgGasLimit,
+            msgId,
+            payload
+        );
+    }
+
+    function retryExecute(
+        uint256 newMsgGasLimit,
+        uint256 msgId,
+        uint256 msgGasLimit,
+        address localPlug,
+        bytes calldata payload,
+        ISocket.VerificationParams calldata verifyParams_
+    ) external payable {
+        if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
+        if (_messagesStatus[msgId] != MessageStatus.FAILED)
+            revert InvalidRetry();
+        executor[msgId] = msg.sender;
+
+        PlugConfig memory plugConfig = plugConfigs[localPlug][
+            verifyParams_.remoteChainSlug
+        ];
+
+        bytes32 packedMessage = hasher.packMessage(
+            verifyParams_.remoteChainSlug,
+            plugConfig.remotePlug,
+            _chainSlug,
+            localPlug,
+            msgId,
+            msgGasLimit,
+            payload
+        );
+
+        _verify(packedMessage, plugConfig, verifyParams_);
+        _execute(
+            localPlug,
+            verifyParams_.remoteChainSlug,
+            newMsgGasLimit,
             msgId,
             payload
         );

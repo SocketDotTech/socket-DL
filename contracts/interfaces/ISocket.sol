@@ -57,6 +57,18 @@ interface ISocket {
     );
 
     /**
+     * @notice emits when a msg is retried with updated fees
+     * @param msgId_ msg id to be retried
+     * @param newMsgGasLimit_ new gas limit to execute a message
+     * @param fees_ additional fees sent
+     */
+    event MessageRetried(
+        uint256 msgId_,
+        uint256 newMsgGasLimit_,
+        uint256 fees_
+    );
+
+    /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with accumulator
      * @param remoteChainSlug_ the remote chain slug

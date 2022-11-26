@@ -11,4 +11,9 @@ interface IVault {
         uint256 remoteChainSlug_,
         bytes32 integrationType_
     ) external payable;
+
+    /**
+     * @notice deducts the fee required to retry a message which is already executed but failed.
+     */
+    function deductRetryFee() external payable;
 }
