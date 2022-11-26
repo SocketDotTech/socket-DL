@@ -53,7 +53,10 @@ contract Counter is IPlug {
         _outbound(chainSlug, msgGasLimit, payload);
     }
 
-    function inbound(bytes calldata payload) external payable override {
+    function inbound(
+        uint256,
+        bytes calldata payload
+    ) external payable override {
         require(msg.sender == socket, "Counter: Invalid Socket");
         (bytes32 operationType, uint256 amount) = abi.decode(
             payload,

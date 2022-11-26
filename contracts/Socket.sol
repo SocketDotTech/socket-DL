@@ -133,7 +133,13 @@ contract Socket is SocketConfig, ReentrancyGuard {
         );
 
         _verify(packedMessage, plugConfig, verifyParams_);
-        _execute(localPlug, msgGasLimit, msgId, payload);
+        _execute(
+            localPlug,
+            verifyParams_.remoteChainSlug,
+            msgGasLimit,
+            msgId,
+            payload
+        );
     }
 
     function _verify(
@@ -157,11 +163,14 @@ contract Socket is SocketConfig, ReentrancyGuard {
 
     function _execute(
         address localPlug,
+        uint256 remoteChainSlug,
         uint256 msgGasLimit,
         uint256 msgId,
         bytes calldata payload
     ) internal {
-        try IPlug(localPlug).inbound{gas: msgGasLimit}(payload) {
+        try
+            IPlug(localPlug).inbound{gas: msgGasLimit}(remoteChainSlug, payload)
+        {
             _messagesStatus[msgId] = MessageStatus.SUCCESS;
             emit ExecutionSuccess(msgId);
         } catch Error(string memory reason) {
