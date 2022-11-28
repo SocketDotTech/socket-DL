@@ -180,11 +180,7 @@ contract SingleAccumTest is Test {
 
     function _sealPacket()
         private
-        returns (
-            bytes32 root,
-            uint256 packetId,
-            uint256 remoteChainSlug
-        )
+        returns (bytes32 root, uint256 packetId, uint256 remoteChainSlug)
     {
         hoax(_notary);
         (root, packetId, remoteChainSlug) = _sa.sealPacket();

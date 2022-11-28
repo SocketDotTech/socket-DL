@@ -66,7 +66,11 @@ interface INotary {
      * @param accumAddress_ address of accumulator at local
      * @param signature_ signature of attester
      */
-    function seal(address accumAddress_, bytes calldata signature_) external;
+    function seal(
+        address accumAddress_,
+        uint256[] calldata bridgeParams,
+        bytes calldata signature_
+    ) external payable;
 
     /**
      * @notice to propose a new packet
@@ -85,20 +89,18 @@ interface INotary {
      * @param packetId_ packet id
      * @return root_ root hash
      */
-    function getRemoteRoot(uint256 packetId_)
-        external
-        view
-        returns (bytes32 root_);
+    function getRemoteRoot(
+        uint256 packetId_
+    ) external view returns (bytes32 root_);
 
     /**
      * @notice returns the packet status
      * @param packetId_ packet id
      * @return status_ status as enum PacketStatus
      */
-    function getPacketStatus(uint256 packetId_)
-        external
-        view
-        returns (PacketStatus status_);
+    function getPacketStatus(
+        uint256 packetId_
+    ) external view returns (PacketStatus status_);
 
     /**
      * @notice returns the packet details needed by verifier
@@ -108,7 +110,9 @@ interface INotary {
      * @return pendingAttestations number of attestations remaining
      * @return root root hash
      */
-    function getPacketDetails(uint256 packetId_)
+    function getPacketDetails(
+        uint256 packetId_
+    )
         external
         view
         returns (

@@ -15,15 +15,30 @@ contract SingleAccum is BaseAccum {
 
     /// adds the packed message to a packet
     /// @inheritdoc IAccumulator
-    function addPackedMessage(bytes32 packedMessage)
-        external
-        override
-        onlyRole(SOCKET_ROLE)
-    {
+    function addPackedMessage(
+        bytes32 packedMessage
+    ) external override onlyRole(SOCKET_ROLE) {
         uint256 packetId = _packets;
         _roots[packetId] = packedMessage;
         _packets++;
 
         emit MessageAdded(packedMessage, packetId, packedMessage);
+    }
+
+    function sealPacket()
+        external
+        virtual
+        override
+        onlyRole(NOTARY_ROLE)
+        returns (bytes32, uint256, uint256)
+    {
+        uint256 packetId = _sealedPackets;
+
+        if (_roots[packetId] == bytes32(0)) revert NoPendingPacket();
+        bytes32 root = _roots[packetId];
+        _sealedPackets++;
+
+        emit PacketComplete(root, packetId);
+        return (root, packetId, remoteChainSlug);
     }
 }

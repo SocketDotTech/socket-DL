@@ -7,7 +7,8 @@ interface IVault {
      * @param remoteChainSlug_ remote chain id
      * @param integrationType_ for the given message
      */
-    function deductFee(uint256 remoteChainSlug_, bytes32 integrationType_)
-        external
-        payable;
+    function deductFee(
+        uint256 remoteChainSlug_,
+        bytes32 integrationType_
+    ) external payable;
 }

@@ -2,12 +2,15 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ContractFactory, Contract } from "ethers";
 import { network, ethers, run } from "hardhat";
 import { Address } from "hardhat-deploy/dist/types";
-import { contractPath } from "./config";
+import { contractPath } from "../../constants/config";
 import path from "path";
 import fs from "fs";
-import { ChainSocketAddresses, DeploymentAddresses } from "../src/types";
+import { ChainSocketAddresses, DeploymentAddresses } from "../types";
 
-export const deployedAddressPath = path.join(__dirname, "../deployments/");
+export const deployedAddressPath = path.join(
+  __dirname,
+  "/../../../deployments/addresses.json"
+);
 
 export const deployContractWithoutArgs = async (
   contractName: string,
@@ -27,12 +30,16 @@ export const deployContractWithoutArgs = async (
   }
 };
 
-export const verify = async (address, contractName, args) => {
+export const verify = async (
+  address: string,
+  contractName: string,
+  args: any[]
+) => {
   try {
     const chainId = await getChainId();
     if (chainId === 31337) return;
 
-    await sleep(30);
+    await sleep(20);
     await run("verify:verify", {
       address,
       contract: `${contractPath[contractName]}:${contractName}`,
@@ -64,21 +71,37 @@ export const storeAddresses = async (
   addresses: ChainSocketAddresses,
   chainId: number
 ) => {
-  const dirPath = path.join(__dirname, "../deployments");
-  if (!fs.existsSync(dirPath)) {
-    await fs.promises.mkdir(dirPath);
+  if (!fs.existsSync(deployedAddressPath)) {
+    await fs.promises.mkdir(deployedAddressPath);
   }
 
-  const addressesPath = __dirname + "/../deployments/addresses.json";
-
-  const outputExists = fs.existsSync(addressesPath);
+  const outputExists = fs.existsSync(deployedAddressPath);
   let deploymentAddresses: DeploymentAddresses = {};
   if (outputExists) {
-    const deploymentAddressesString = fs.readFileSync(addressesPath, "utf-8");
+    const deploymentAddressesString = fs.readFileSync(
+      deployedAddressPath,
+      "utf-8"
+    );
     deploymentAddresses = JSON.parse(deploymentAddressesString);
   }
 
   deploymentAddresses[chainId] = addresses;
+  fs.writeFileSync(
+    deployedAddressPath,
+    JSON.stringify(deploymentAddresses, null, 2)
+  );
+};
 
-  fs.writeFileSync(addressesPath, JSON.stringify(deploymentAddresses, null, 2));
+export const createObj = function (obj, keys, value) {
+  if (keys.length === 1) {
+    obj[keys[0]] = value;
+  } else {
+    const key = keys.shift();
+    obj[key] = createObj(
+      typeof obj[key] === "undefined" ? {} : obj[key],
+      keys,
+      value
+    );
+  }
+  return obj;
 };

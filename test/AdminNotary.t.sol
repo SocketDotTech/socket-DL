@@ -107,7 +107,7 @@ contract AdminNotaryTest is Setup {
 
         hoax(_attester);
         vm.expectRevert(INotary.InvalidAttester.selector);
-        cc.notary__.seal(_accum, localSig);
+        cc.notary__.seal(_accum, testArr, localSig);
 
         // correct packet sealed
         vm.mockCall(
@@ -116,7 +116,7 @@ contract AdminNotaryTest is Setup {
             abi.encode(_root, _id, _remoteChainSlug)
         );
         hoax(_attester);
-        cc.notary__.seal(_accum, localSig);
+        cc.notary__.seal(_accum, testArr, localSig);
 
         bytes memory altSign = _createSignature(
             _remoteChainSlug,
@@ -128,7 +128,7 @@ contract AdminNotaryTest is Setup {
         // invalid attester
         hoax(_attester);
         vm.expectRevert(INotary.InvalidAttester.selector);
-        cc.notary__.seal(_accum, altSign);
+        cc.notary__.seal(_accum, testArr, altSign);
     }
 
     function testAttest() external {

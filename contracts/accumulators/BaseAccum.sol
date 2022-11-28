@@ -21,37 +21,11 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     /**
      * @notice initialises the contract with socket and notary addresses
      */
-    constructor(
-        address socket_,
-        address notary_,
-        uint32 remoteChainSlug_
-    ) {
+    constructor(address socket_, address notary_, uint32 remoteChainSlug_) {
         _setSocket(socket_);
         _setNotary(notary_);
 
         remoteChainSlug = remoteChainSlug_;
-    }
-
-    /// @inheritdoc IAccumulator
-    function sealPacket()
-        external
-        virtual
-        override
-        onlyRole(NOTARY_ROLE)
-        returns (
-            bytes32,
-            uint256,
-            uint256
-        )
-    {
-        uint256 packetId = _sealedPackets;
-
-        if (_roots[packetId] == bytes32(0)) revert NoPendingPacket();
-        bytes32 root = _roots[packetId];
-        _sealedPackets++;
-
-        emit PacketComplete(root, packetId);
-        return (root, packetId, remoteChainSlug);
     }
 
     function setSocket(address socket_) external onlyOwner {
@@ -85,13 +59,9 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
 
     /// returns the root of packet for given id
     /// @inheritdoc IAccumulator
-    function getRootById(uint256 id)
-        external
-        view
-        virtual
-        override
-        returns (bytes32)
-    {
+    function getRootById(
+        uint256 id
+    ) external view virtual override returns (bytes32) {
         return _roots[id];
     }
 

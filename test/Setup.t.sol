@@ -26,7 +26,7 @@ contract Setup is Test {
     uint256 internal _msgGasLimit = 25548;
     string internal fastIntegrationType = "FAST";
     string internal slowIntegrationType = "SLOW";
-
+    uint256[] testArr = [1];
     struct ChainContext {
         uint256 chainSlug;
         bytes32 slowAccumType;
@@ -55,9 +55,10 @@ contract Setup is Test {
     ChainContext _a;
     ChainContext _b;
 
-    function _dualChainSetup(uint256[] memory attesters_, uint256 minFees_)
-        internal
-    {
+    function _dualChainSetup(
+        uint256[] memory attesters_,
+        uint256 minFees_
+    ) internal {
         _a.chainSlug = uint32(uint256(0x2013AA263));
         _b.chainSlug = uint32(uint256(0x2013AA264));
 
@@ -132,7 +133,6 @@ contract Setup is Test {
         cc.verifier__ = new Verifier(
             _plugOwner,
             address(cc.notary__),
-            address(cc.socket__),
             _timeoutInSeconds,
             keccak256(abi.encode(fastIntegrationType))
         );
@@ -141,9 +141,10 @@ contract Setup is Test {
         cc.socket__.grantExecutorRole(_raju);
     }
 
-    function _setConfig(ChainContext storage cc_, uint256 remoteChainSlug_)
-        internal
-    {
+    function _setConfig(
+        ChainContext storage cc_,
+        uint256 remoteChainSlug_
+    ) internal {
         hoax(_socketOwner);
         cc_.fastAccumType = cc_.socket__.addConfig(
             remoteChainSlug_,
@@ -163,14 +164,10 @@ contract Setup is Test {
         );
     }
 
-    function _deploySocket(uint256 chainSlug_, address deployer_)
-        internal
-        returns (
-            Hasher hasher__,
-            Vault vault__,
-            Socket socket__
-        )
-    {
+    function _deploySocket(
+        uint256 chainSlug_,
+        address deployer_
+    ) internal returns (Hasher hasher__, Vault vault__, Socket socket__) {
         vm.startPrank(deployer_);
         hasher__ = new Hasher();
         vault__ = new Vault(deployer_);
@@ -183,10 +180,10 @@ contract Setup is Test {
         vm.stopPrank();
     }
 
-    function _deployNotary(uint256 chainSlug_, address deployer_)
-        internal
-        returns (SignatureVerifier sigVerifier__, AdminNotary notary__)
-    {
+    function _deployNotary(
+        uint256 chainSlug_,
+        address deployer_
+    ) internal returns (SignatureVerifier sigVerifier__, AdminNotary notary__) {
         vm.startPrank(deployer_);
         sigVerifier__ = new SignatureVerifier();
         notary__ = new AdminNotary(address(sigVerifier__), uint32(chainSlug_));
@@ -216,14 +213,7 @@ contract Setup is Test {
         ChainContext storage src_,
         address accum_,
         uint256 remoteChainSlug_
-    )
-        internal
-        returns (
-            bytes32 root,
-            uint256 packetId,
-            bytes memory sig
-        )
-    {
+    ) internal returns (bytes32 root, uint256 packetId, bytes memory sig) {
         uint256 id;
         (root, id) = IAccumulator(accum_).getNextPacketToBeSealed();
         packetId = _getPackedId(accum_, src_.chainSlug, id);
@@ -266,7 +256,7 @@ contract Setup is Test {
         bytes memory sig_
     ) internal {
         hoax(_attester);
-        src_.notary__.seal(accum, sig_);
+        src_.notary__.seal(accum, testArr, sig_);
     }
 
     function _submitRootOnDst(
@@ -306,11 +296,10 @@ contract Setup is Test {
         );
     }
 
-    function _packMessageId(uint256 srcChainSlug, uint256 nonce)
-        internal
-        pure
-        returns (uint256)
-    {
+    function _packMessageId(
+        uint256 srcChainSlug,
+        uint256 nonce
+    ) internal pure returns (uint256) {
         return (srcChainSlug << 224) | nonce;
     }
 

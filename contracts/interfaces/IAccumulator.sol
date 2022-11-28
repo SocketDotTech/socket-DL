@@ -56,9 +56,5 @@ interface IAccumulator {
      */
     function sealPacket()
         external
-        returns (
-            bytes32 root,
-            uint256 packetId,
-            uint256 remoteChainSlug
-        );
+        returns (bytes32 root, uint256 packetId, uint256 remoteChainSlug);
 }

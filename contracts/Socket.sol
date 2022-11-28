@@ -36,11 +36,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
     /**
      * @param chainSlug_ socket chain slug (should not be more than uint32)
      */
-    constructor(
-        uint32 chainSlug_,
-        address hasher_,
-        address vault_
-    ) {
+    constructor(uint32 chainSlug_, address hasher_, address vault_) {
         _setHasher(hasher_);
         _setVault(vault_);
 
@@ -207,11 +203,9 @@ contract Socket is SocketConfig, ReentrancyGuard {
         return _chainSlug;
     }
 
-    function getMessageStatus(uint256 msgId_)
-        external
-        view
-        returns (MessageStatus)
-    {
+    function getMessageStatus(
+        uint256 msgId_
+    ) external view returns (MessageStatus) {
         return _messagesStatus[msgId_];
     }
 }
