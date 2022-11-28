@@ -22,9 +22,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
     error InvalidRetry();
 
     error VerificationFailed();
-
     error MessageAlreadyExecuted();
-
     error ExecutorNotFound();
 
     uint256 public immutable _chainSlug;
@@ -130,6 +128,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
         if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
         executor[msgId] = msg.sender;
+
         PlugConfig memory plugConfig = plugConfigs[localPlug][
             verifyParams_.remoteChainSlug
         ];
