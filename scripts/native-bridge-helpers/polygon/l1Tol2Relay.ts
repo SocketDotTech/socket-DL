@@ -34,9 +34,7 @@ export const main = async () => {
     const l1Accum: Contract = (
       await getInstance(
         "SingleAccum",
-        l1Config["SingleAccum"]?.[contracts.integrationType]?.[
-          chainIds[remoteChain]
-        ]
+        l1Config["integrations"]?.[chainIds[remoteChain]]?.[contracts.integrationType]?.["accum"]
       )
     ).connect(l1Wallet);
 

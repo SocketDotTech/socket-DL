@@ -36,9 +36,7 @@ export const main = async () => {
     const l1Accum: Contract = (
       await getInstance(
         "SingleAccum",
-        l1Config["SingleAccum"]?.[contracts.integrationType]?.[
-          chainIds[remoteChain]
-        ]
+        l1Config["integrations"]?.[chainIds[remoteChain]]?.[contracts.integrationType]?.["accum"]
       )
     ).connect(l1Wallet);
 
@@ -77,8 +75,7 @@ export const main = async () => {
     const callValue = 0;
 
     console.log(
-      `Sealing with params ${
-        (l1Accum.address, bridgeParams, signature, callValue)
+      `Sealing with params ${(l1Accum.address, bridgeParams, signature, callValue)
       }`
     );
 

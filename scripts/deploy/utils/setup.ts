@@ -8,8 +8,6 @@ import {
   chainIds,
   attesterAddress,
   timeout,
-  fastIntegration,
-  slowIntegration,
   contractNames,
 } from "../../constants";
 import {
@@ -22,6 +20,7 @@ import {
   getSigners
 } from "./";
 import { deployNotary, deployAccumulator, deployVerifier } from "../contracts";
+import { IntegrationTypes } from "../../../src";
 
 let localChain, remoteChain, localConfig, remoteConfig;
 
@@ -87,7 +86,7 @@ const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
 
     if (!address) {
       let remoteNotary = getNotaryAddress(notaryName, chainIds[localChain], remoteConfig)
-      if(!remoteNotary) remoteNotary = constants.AddressZero;
+      if (!remoteNotary) remoteNotary = constants.AddressZero;
 
       notary = await deployNotary(
         notaryName,
@@ -266,8 +265,8 @@ export const setupConfig = async (
 
   // optional notary and accum settings
   if (
-    configurationType !== fastIntegration &&
-    configurationType !== slowIntegration
+    configurationType !== IntegrationTypes.fastIntegration &&
+    configurationType !== IntegrationTypes.slowIntegration
   )
     await setupContracts(notary, contracts.notary, socketSigner);
 
