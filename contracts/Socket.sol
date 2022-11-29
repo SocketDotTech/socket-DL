@@ -4,6 +4,7 @@ pragma solidity 0.8.7;
 import "./interfaces/IAccumulator.sol";
 import "./interfaces/IDeaccumulator.sol";
 import "./interfaces/IVerifier.sol";
+import "./interfaces/IVault.sol";
 import "./interfaces/IPlug.sol";
 import "./interfaces/IHasher.sol";
 import "./utils/ReentrancyGuard.sol";
@@ -17,21 +18,25 @@ contract Socket is SocketConfig, ReentrancyGuard {
         FAILED
     }
 
-    uint256 private immutable _chainSlug;
+    error InvalidProof();
+    error InvalidRetry();
+
+    error VerificationFailed();
+    error MessageAlreadyExecuted();
+    error ExecutorNotFound();
+
+    uint256 public immutable _chainSlug;
+    // incrementing nonce, should be handled in next socket version.
+    uint256 public _messageCount;
 
     bytes32 private constant EXECUTOR_ROLE = keccak256("EXECUTOR");
-
-    // incrementing nonce, should be handled in next socket version.
-    uint256 private _messageCount;
-
     // msgId => executorAddress
-    mapping(uint256 => address) private executor;
-
+    mapping(uint256 => address) public executor;
     // msgId => message status
     mapping(uint256 => MessageStatus) private _messagesStatus;
 
     IHasher public hasher;
-    IVault public override vault;
+    IVault public vault;
 
     /**
      * @param chainSlug_ socket chain slug (should not be more than uint32)
@@ -54,7 +59,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
     /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with accumulator
-     * @param remoteChainSlug_ the remote chain id
+     * @param remoteChainSlug_ the remote chain slug
      * @param msgGasLimit_ the gas limit needed to execute the payload on remote
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
@@ -67,14 +72,14 @@ contract Socket is SocketConfig, ReentrancyGuard {
             remoteChainSlug_
         ];
 
-        // Packs the local plug, local chain id, remote chain id and nonce
+        // Packs the local plug, local chain slug, remote chain slug and nonce
         // _messageCount++ will take care of msg id overflow as well
         // msgId(256) = localChainSlug(32) | nonce(224)
         uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
 
         vault.deductFee{value: msg.value}(
             remoteChainSlug_,
-            plugConfig.integrationType
+            plugConfig.outboundIntegrationType
         );
 
         bytes32 packedMessage = hasher.packMessage(
@@ -100,6 +105,14 @@ contract Socket is SocketConfig, ReentrancyGuard {
         );
     }
 
+    function retry(
+        uint256 msgId_,
+        uint256 newMsgGasLimit_
+    ) external payable override {
+        vault.deductRetryFee{value: msg.value}();
+        emit MessageRetried(msgId_, newMsgGasLimit_, msg.value);
+    }
+
     /**
      * @notice executes a message
      * @param msgGasLimit gas limit needed to execute the inbound at remote
@@ -122,6 +135,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         PlugConfig memory plugConfig = plugConfigs[localPlug][
             verifyParams_.remoteChainSlug
         ];
+
         bytes32 packedMessage = hasher.packMessage(
             verifyParams_.remoteChainSlug,
             plugConfig.remotePlug,
@@ -133,7 +147,50 @@ contract Socket is SocketConfig, ReentrancyGuard {
         );
 
         _verify(packedMessage, plugConfig, verifyParams_);
-        _execute(localPlug, msgGasLimit, msgId, payload);
+        _execute(
+            localPlug,
+            verifyParams_.remoteChainSlug,
+            msgGasLimit,
+            msgId,
+            payload
+        );
+    }
+
+    function retryExecute(
+        uint256 newMsgGasLimit,
+        uint256 msgId,
+        uint256 msgGasLimit,
+        address localPlug,
+        bytes calldata payload,
+        ISocket.VerificationParams calldata verifyParams_
+    ) external override nonReentrant {
+        if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
+        if (_messagesStatus[msgId] != MessageStatus.FAILED)
+            revert InvalidRetry();
+        executor[msgId] = msg.sender;
+
+        PlugConfig memory plugConfig = plugConfigs[localPlug][
+            verifyParams_.remoteChainSlug
+        ];
+
+        bytes32 packedMessage = hasher.packMessage(
+            verifyParams_.remoteChainSlug,
+            plugConfig.remotePlug,
+            _chainSlug,
+            localPlug,
+            msgId,
+            msgGasLimit,
+            payload
+        );
+
+        _verify(packedMessage, plugConfig, verifyParams_);
+        _execute(
+            localPlug,
+            verifyParams_.remoteChainSlug,
+            newMsgGasLimit,
+            msgId,
+            payload
+        );
     }
 
     function _verify(
@@ -142,7 +199,10 @@ contract Socket is SocketConfig, ReentrancyGuard {
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
         (bool isVerified, bytes32 root) = IVerifier(plugConfig.verifier)
-            .verifyPacket(verifyParams_.packetId, plugConfig.integrationType);
+            .verifyPacket(
+                verifyParams_.packetId,
+                plugConfig.inboundIntegrationType
+            );
 
         if (!isVerified) revert VerificationFailed();
 
@@ -157,11 +217,14 @@ contract Socket is SocketConfig, ReentrancyGuard {
 
     function _execute(
         address localPlug,
+        uint256 remoteChainSlug,
         uint256 msgGasLimit,
         uint256 msgId,
         bytes calldata payload
     ) internal {
-        try IPlug(localPlug).inbound{gas: msgGasLimit}(payload) {
+        try
+            IPlug(localPlug).inbound{gas: msgGasLimit}(remoteChainSlug, payload)
+        {
             _messagesStatus[msgId] = MessageStatus.SUCCESS;
             emit ExecutionSuccess(msgId);
         } catch Error(string memory reason) {

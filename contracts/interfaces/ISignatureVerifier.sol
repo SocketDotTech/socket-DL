@@ -4,7 +4,7 @@ pragma solidity 0.8.7;
 interface ISignatureVerifier {
     /**
      * @notice returns the address of signer recovered from input signature
-     * @param dstChainSlug_ remote chain id
+     * @param dstChainSlug_ remote chain slug
      * @param packetId_ packet id
      * @param root_ root hash of merkle tree
      * @param signature_ signature

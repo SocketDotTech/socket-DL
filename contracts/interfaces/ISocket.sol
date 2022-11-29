@@ -1,30 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.7;
 
-import "./IVault.sol";
-
 interface ISocket {
-    // to handle stack too deep
-    struct VerificationParams {
-        uint256 remoteChainSlug;
-        uint256 packetId;
-        bytes deaccumProof;
-    }
-
-    // TODO: add confs and blocking/non-blocking
-    struct PlugConfig {
-        address remotePlug;
-        address accum;
-        address deaccum;
-        address verifier;
-        bytes32 integrationType;
-    }
-
     /**
      * @notice emits the message details when a new message arrives at outbound
-     * @param localChainSlug local chain id
+     * @param localChainSlug local chain slug
      * @param localPlug local plug address
-     * @param dstChainSlug remote chain id
+     * @param dstChainSlug remote chain slug
      * @param dstPlug remote plug address
      * @param msgId message id packed with remoteChainSlug and nonce
      * @param msgGasLimit gas limit needed to execute the inbound at remote
@@ -40,14 +22,6 @@ interface ISocket {
         uint256 msgGasLimit,
         uint256 fees,
         bytes payload
-    );
-
-    event ConfigAdded(
-        address accum_,
-        address deaccum_,
-        address verifier_,
-        uint256 remoteChainSlug_,
-        bytes32 integrationType_
     );
 
     /**
@@ -70,30 +44,36 @@ interface ISocket {
      */
     event ExecutionFailedBytes(uint256 msgId, bytes result);
 
+    /**
+     * @notice emits the config set by a plug for a remoteChainSlug
+     * @param remotePlug address of plug on remote chain
+     * @param remoteChainSlug remote chain slug
+     * @param inboundIntegrationType inbound integration type (set in socket config, plug can choose any)
+     * @param outboundIntegrationType outbound integration type (set in socket config, plug can choose any)
+     */
     event PlugConfigSet(
         address remotePlug,
         uint256 remoteChainSlug,
-        bytes32 integrationType
+        bytes32 inboundIntegrationType,
+        bytes32 outboundIntegrationType
     );
 
-    error InvalidProof();
-
-    error VerificationFailed();
-
-    error MessageAlreadyExecuted();
-
-    error ExecutorNotFound();
-
-    error ConfigExists();
-
-    error InvalidIntegrationType();
-
-    function vault() external view returns (IVault);
+    /**
+     * @notice emits when a msg is retried with updated fees
+     * @param msgId_ msg id to be retried
+     * @param newMsgGasLimit_ new gas limit to execute a message
+     * @param fees_ additional fees sent
+     */
+    event MessageRetried(
+        uint256 msgId_,
+        uint256 newMsgGasLimit_,
+        uint256 fees_
+    );
 
     /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with accumulator
-     * @param remoteChainSlug_ the remote chain id
+     * @param remoteChainSlug_ the remote chain slug
      * @param msgGasLimit_ the gas limit needed to execute the payload on remote
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
@@ -103,11 +83,17 @@ interface ISocket {
         bytes calldata payload_
     ) external payable;
 
+    struct VerificationParams {
+        uint256 remoteChainSlug;
+        uint256 packetId;
+        bytes deaccumProof;
+    }
+
     /**
      * @notice executes a message
      * @param msgGasLimit gas limit needed to execute the inbound at remote
      * @param msgId message id packed with remoteChainSlug and nonce
-     * @param localPlug remote plug address
+     * @param localPlug local plug address
      * @param payload the data which is needed by plug at inbound call on remote
      * @param verifyParams_ the details needed for message verification
      */
@@ -121,13 +107,26 @@ interface ISocket {
 
     /**
      * @notice sets the config specific to the plug
-     * @param remoteChainSlug_ the remote chain id
+     * @param remoteChainSlug_ the remote chain slug
      * @param remotePlug_ address of plug present at remote chain to call inbound
-     * @param integrationType_ the name of accum to be used
+     * @param inboundIntegrationType_ the name of config to use for receiving messages
+     * @param outboundIntegrationType_ the name of config to use for sending messages
      */
     function setPlugConfig(
         uint256 remoteChainSlug_,
         address remotePlug_,
-        string memory integrationType_
+        string memory inboundIntegrationType_,
+        string memory outboundIntegrationType_
+    ) external;
+
+    function retry(uint256 msgId_, uint256 newMsgGasLimit_) external payable;
+
+    function retryExecute(
+        uint256 newMsgGasLimit,
+        uint256 msgId,
+        uint256 msgGasLimit,
+        address localPlug,
+        bytes calldata payload,
+        ISocket.VerificationParams calldata verifyParams_
     ) external;
 }

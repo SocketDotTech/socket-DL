@@ -18,7 +18,7 @@ path_pattern = 'test/Socket.t.sol'
 [profile.prod]
 optimizer = true
 optimizer_runs = 200
-via_ir = true
+via_ir = false
 
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config

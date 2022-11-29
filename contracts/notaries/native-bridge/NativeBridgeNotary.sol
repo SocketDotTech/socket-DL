@@ -137,11 +137,8 @@ abstract contract NativeBridgeNotary is
 
     /**
      * @notice returns the attestations received by a packet
-     * @param packetId_ packed id
      */
-    function getAttestationCount(
-        uint256 packetId_
-    ) external view returns (uint256) {
+    function getAttestationCount(uint256) external view returns (uint256) {
         return 1;
     }
 
@@ -157,7 +154,7 @@ abstract contract NativeBridgeNotary is
 
     /**
      * @notice adds an attester for `remoteChainSlug_` chain
-     * @param remoteChainSlug_ remote chain id
+     * @param remoteChainSlug_ remote chain slug
      * @param attester_ attester address
      */
     function grantAttesterRole(
@@ -171,8 +168,8 @@ abstract contract NativeBridgeNotary is
     }
 
     /**
-     * @notice removes an attester from `remoteChainSlug_` chain list
-     * @param remoteChainSlug_ remote chain id
+     * @notice removes an attester from `remoteChainSlug_` attester list
+     * @param remoteChainSlug_ remote chain slug
      * @param attester_ attester address
      */
     function revokeAttesterRole(
@@ -190,7 +187,7 @@ abstract contract NativeBridgeNotary is
     }
 
     /**
-     * @notice returns the current chain id
+     * @notice returns the current chain slug
      */
     function chainSlug() external view returns (uint256) {
         return _chainSlug;

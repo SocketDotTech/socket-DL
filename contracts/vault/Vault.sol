@@ -33,6 +33,11 @@ contract Vault is IVault, Ownable {
         emit FeeDeducted(msg.value);
     }
 
+    function deductRetryFee() external payable override {
+        if (msg.value == 0) revert InsufficientFees();
+        emit FeeDeducted(msg.value);
+    }
+
     /**
      * @notice updates the fee required to bridge a message for give chain and config
      * @param minFees_ fees

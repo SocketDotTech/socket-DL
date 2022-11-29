@@ -45,7 +45,10 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         _outbound(remoteChainSlug_, payload);
     }
 
-    function inbound(bytes calldata payload_) external payable override {
+    function inbound(
+        uint256,
+        bytes calldata payload_
+    ) external payable override {
         require(msg.sender == _socket, "Counter: Invalid Socket");
         (uint256 localChainSlug, bytes32 msgDecoded) = abi.decode(
             payload_,
@@ -70,6 +73,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         ISocket(_socket).setPlugConfig(
             remoteChainSlug,
             remotePlug,
+            integrationType,
             integrationType
         );
     }
