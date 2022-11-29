@@ -28,7 +28,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
     /// @inheritdoc INotary
     function seal(
         address accumAddress_,
-        uint256[] calldata bridgeParams,
+        uint256[] calldata,
         bytes calldata signature_
     ) external payable override nonReentrant {
         (

@@ -115,5 +115,14 @@ interface ISocket {
         string memory integrationType_
     ) external;
 
-    function getVault() external view returns (address);
+    function retry(uint256 msgId_, uint256 newMsgGasLimit_) external payable;
+
+    function retryExecute(
+        uint256 newMsgGasLimit,
+        uint256 msgId,
+        uint256 msgGasLimit,
+        address localPlug,
+        bytes calldata payload,
+        ISocket.VerificationParams calldata verifyParams_
+    ) external;
 }

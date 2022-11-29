@@ -67,7 +67,8 @@ contract SocketTest is Setup {
             address accum,
             address deaccum,
             address verifier,
-            address remotePlug
+            address remotePlug,
+
         ) = _a.socket__.getPlugConfig(dstChainSlug, _raju);
 
         assertEq(accum, address(_a.fastAccum__));

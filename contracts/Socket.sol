@@ -67,7 +67,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes calldata payload_
-    ) external payable virtual override {
+    ) external payable override {
         PlugConfig memory plugConfig = plugConfigs[msg.sender][
             remoteChainSlug_
         ];
@@ -105,7 +105,10 @@ contract Socket is SocketConfig, ReentrancyGuard {
         );
     }
 
-    function retry(uint256 msgId_, uint256 newMsgGasLimit_) external payable {
+    function retry(
+        uint256 msgId_,
+        uint256 newMsgGasLimit_
+    ) external payable override {
         vault.deductRetryFee{value: msg.value}();
         emit MessageRetried(msgId_, newMsgGasLimit_, msg.value);
     }
@@ -124,7 +127,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         address localPlug,
         bytes calldata payload,
         ISocket.VerificationParams calldata verifyParams_
-    ) external virtual override nonReentrant {
+    ) external override nonReentrant {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
         if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
         executor[msgId] = msg.sender;
@@ -160,7 +163,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         address localPlug,
         bytes calldata payload,
         ISocket.VerificationParams calldata verifyParams_
-    ) external payable {
+    ) external nonReentrant override {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
         if (_messagesStatus[msgId] != MessageStatus.FAILED)
             revert InvalidRetry();
@@ -258,10 +261,6 @@ contract Socket is SocketConfig, ReentrancyGuard {
 
     function chainSlug() external view returns (uint256) {
         return _chainSlug;
-    }
-
-    function getVault() external view override returns (address) {
-        return address(vault);
     }
 
     function getMessageStatus(

@@ -103,7 +103,8 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
             address accum,
             address deaccum,
             address verifier,
-            address remotePlug
+            address remotePlug,
+            bytes32 integrationType
         )
     {
         PlugConfig memory plugConfig = plugConfigs[plug_][remoteChainSlug_];
@@ -111,7 +112,8 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
             plugConfig.accum,
             plugConfig.deaccum,
             plugConfig.verifier,
-            plugConfig.remotePlug
+            plugConfig.remotePlug,
+            plugConfig.integrationType
         );
     }
 }
