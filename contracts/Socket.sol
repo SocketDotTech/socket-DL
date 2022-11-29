@@ -163,7 +163,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         address localPlug,
         bytes calldata payload,
         ISocket.VerificationParams calldata verifyParams_
-    ) external nonReentrant override {
+    ) external override nonReentrant {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
         if (_messagesStatus[msgId] != MessageStatus.FAILED)
             revert InvalidRetry();
