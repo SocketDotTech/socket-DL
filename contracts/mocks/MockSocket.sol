@@ -14,7 +14,7 @@ interface IPlug {
     ) external payable;
 }
 
-contract MockAccessControl {
+contract MockSocket {
     uint256 public immutable _chainSlug;
 
     error WrongRemotePlug();
