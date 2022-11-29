@@ -79,7 +79,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
 
         vault.deductFee{value: msg.value}(
             remoteChainSlug_,
-            plugConfig.integrationType
+            plugConfig.outboundIntegrationType
         );
 
         bytes32 packedMessage = hasher.packMessage(
@@ -199,7 +199,10 @@ contract Socket is SocketConfig, ReentrancyGuard {
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
         (bool isVerified, bytes32 root) = IVerifier(plugConfig.verifier)
-            .verifyPacket(verifyParams_.packetId, plugConfig.integrationType);
+            .verifyPacket(
+                verifyParams_.packetId,
+                plugConfig.inboundIntegrationType
+            );
 
         if (!isVerified) revert VerificationFailed();
 

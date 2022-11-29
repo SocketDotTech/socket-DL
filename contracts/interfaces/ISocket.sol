@@ -48,12 +48,14 @@ interface ISocket {
      * @notice emits the config set by a plug for a remoteChainSlug
      * @param remotePlug address of plug on remote chain
      * @param remoteChainSlug remote chain slug
-     * @param integrationType integration type (set in socket config, plug can choose any)
+     * @param inboundIntegrationType inbound integration type (set in socket config, plug can choose any)
+     * @param outboundIntegrationType outbound integration type (set in socket config, plug can choose any)
      */
     event PlugConfigSet(
         address remotePlug,
         uint256 remoteChainSlug,
-        bytes32 integrationType
+        bytes32 inboundIntegrationType,
+        bytes32 outboundIntegrationType
     );
 
     /**
@@ -107,12 +109,14 @@ interface ISocket {
      * @notice sets the config specific to the plug
      * @param remoteChainSlug_ the remote chain slug
      * @param remotePlug_ address of plug present at remote chain to call inbound
-     * @param integrationType_ the name of accum to be used
+     * @param inboundIntegrationType_ the name of config to use for receiving messages
+     * @param outboundIntegrationType_ the name of config to use for sending messages
      */
     function setPlugConfig(
         uint256 remoteChainSlug_,
         address remotePlug_,
-        string memory integrationType_
+        string memory inboundIntegrationType_,
+        string memory outboundIntegrationType_
     ) external;
 
     function retry(uint256 msgId_, uint256 newMsgGasLimit_) external payable;

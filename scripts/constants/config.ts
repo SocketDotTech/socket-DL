@@ -1,3 +1,5 @@
+import { IntegrationTypes } from "../../src/types";
+
 export const attesterAddress: {
   [key: string]: string;
 } = {
@@ -56,10 +58,6 @@ export const contractPath: {
   NativeBridgeVerifier: "contracts/verifiers/NativeBridgeVerifier.sol",
   Verifier: "contracts/verifiers/Verifier.sol",
 };
-
-export const fastIntegration = "FAST";
-export const slowIntegration = "SLOW";
-export const nativeBridgeIntegration = "NATIVE_BRIDGE";
 
 const notaries = {
   "arbitrum-goerli": {
@@ -122,8 +120,8 @@ export const contractNames = (
   dstChain: string
 ) => {
   if (
-    integrationType === fastIntegration ||
-    integrationType === slowIntegration ||
+    integrationType === IntegrationTypes.fastIntegration ||
+    integrationType === IntegrationTypes.fastIntegration ||
     !notaries[srcChain]?.[dstChain]?.["notary"]
   )
     return {
@@ -133,7 +131,7 @@ export const contractNames = (
     };
 
   return {
-    integrationType: nativeBridgeIntegration,
+    integrationType: IntegrationTypes.nativeIntegration,
     verifier: "NativeBridgeVerifier",
     notary: notaries[srcChain][dstChain]["notary"],
   };

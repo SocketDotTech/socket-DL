@@ -1,8 +1,8 @@
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Contract, ContractFactory } from "ethers";
-import { fastIntegration } from "../../constants/config";
 import { verify, integrationType } from "../utils";
+import { IntegrationTypes } from "../../../src"
 
 export default async function deployVerifier(
   contractName: string,
@@ -18,7 +18,7 @@ export default async function deployVerifier(
         signer.address,
         notaryAddress,
         timeout,
-        integrationType(fastIntegration),
+        integrationType(IntegrationTypes.fastIntegration),
       ];
     } else if (contractName === "NativeBridgeVerifier") {
       args = [signer.address, notaryAddress];

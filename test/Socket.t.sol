@@ -50,7 +50,12 @@ contract SocketTest is Setup {
     function testSetPlugConfig() external {
         hoax(_raju);
         vm.expectRevert(SocketConfig.InvalidIntegrationType.selector);
-        _a.socket__.setPlugConfig(dstChainSlug, _raju, integrationType);
+        _a.socket__.setPlugConfig(
+            dstChainSlug,
+            _raju,
+            integrationType,
+            integrationType
+        );
 
         _a.socket__.addConfig(
             dstChainSlug,
@@ -61,13 +66,19 @@ contract SocketTest is Setup {
         );
 
         hoax(_raju);
-        _a.socket__.setPlugConfig(dstChainSlug, _raju, integrationType);
+        _a.socket__.setPlugConfig(
+            dstChainSlug,
+            _raju,
+            integrationType,
+            integrationType
+        );
 
         (
             address accum,
             address deaccum,
             address verifier,
             address remotePlug,
+            ,
 
         ) = _a.socket__.getPlugConfig(dstChainSlug, _raju);
 
