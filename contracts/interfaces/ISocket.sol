@@ -17,7 +17,8 @@ interface ISocket {
         address accum;
         address deaccum;
         address verifier;
-        bytes32 integrationType;
+        bytes32 inboundIntegrationType;
+        bytes32 outboundIntegrationType;
     }
 
     /**
@@ -73,7 +74,8 @@ interface ISocket {
     event PlugConfigSet(
         address remotePlug,
         uint256 remoteChainSlug,
-        bytes32 integrationType
+        bytes32 inboundIntegrationType,
+        bytes32 outboundIntegrationType
     );
 
     error InvalidProof();
@@ -123,11 +125,13 @@ interface ISocket {
      * @notice sets the config specific to the plug
      * @param remoteChainSlug_ the remote chain id
      * @param remotePlug_ address of plug present at remote chain to call inbound
-     * @param integrationType_ the name of accum to be used
+     * @param inboundIntegrationType_ the name of config to use for receiving messages
+     * @param outboundIntegrationType_ the name of config to use for sending messages
      */
     function setPlugConfig(
         uint256 remoteChainSlug_,
         address remotePlug_,
-        string memory integrationType_
+        string memory inboundIntegrationType_,
+        string memory outboundIntegrationType_
     ) external;
 }
