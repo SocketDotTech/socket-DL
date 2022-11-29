@@ -70,6 +70,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         ISocket(_socket).setPlugConfig(
             remoteChainSlug,
             remotePlug,
+            integrationType,
             integrationType
         );
     }

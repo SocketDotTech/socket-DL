@@ -102,6 +102,7 @@ contract Counter is IPlug {
         ISocket(socket).setPlugConfig(
             remoteChainSlug,
             remotePlug,
+            integrationType,
             integrationType
         );
     }
