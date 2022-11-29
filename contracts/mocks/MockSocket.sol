@@ -1,7 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/IPlug.sol";
+interface IPlug {
+    /**
+     * @notice executes the message received from source chain
+     * @dev this should be only executable by socket
+     * @param srcChainSlug_ chain slug of source
+     * @param payload_ the data which is needed by plug at inbound call on remote
+     */
+    function inbound(
+        uint256 srcChainSlug_,
+        bytes calldata payload_
+    ) external payable;
+}
 
 contract MockAccessControl {
     uint256 public immutable _chainSlug;
@@ -11,7 +22,8 @@ contract MockAccessControl {
 
     struct PlugConfig {
         address remotePlug;
-        bytes32 integrationType;
+        bytes32 inboundIntegrationType;
+        bytes32 outboundIntegrationType;
     }
 
     // integrationType => remoteChainSlug => address
@@ -21,35 +33,42 @@ contract MockAccessControl {
 
     error InvalidIntegrationType();
 
-    constructor(uint32 chainSlug_, uint256 remoteChainSlug_) {
-        _chainSlug = chainSlug_;
+    constructor() {
+        _chainSlug = 1;
 
-        configExists[keccak256(abi.encode("FAST"))][remoteChainSlug_] = true;
-        configExists[keccak256(abi.encode("SLOW"))][remoteChainSlug_] = true;
-        configExists[keccak256(abi.encode("NATIVE_BRIDGE"))][
-            remoteChainSlug_
-        ] = true;
+        configExists[keccak256(abi.encode("FAST"))][1] = true;
+        configExists[keccak256(abi.encode("SLOW"))][1] = true;
+        configExists[keccak256(abi.encode("NATIVE_BRIDGE"))][1] = true;
 
-        configExists[keccak256(abi.encode("FAST"))][chainSlug_] = true;
-        configExists[keccak256(abi.encode("SLOW"))][chainSlug_] = true;
-        configExists[keccak256(abi.encode("NATIVE_BRIDGE"))][chainSlug_] = true;
+        configExists[keccak256(abi.encode("FAST"))][2] = true;
+        configExists[keccak256(abi.encode("SLOW"))][2] = true;
+        configExists[keccak256(abi.encode("NATIVE_BRIDGE"))][2] = true;
     }
 
     function setPlugConfig(
         uint256 remoteChainSlug_,
         address remotePlug_,
-        string memory integrationType_
+        string memory inboundIntegrationType_,
+        string memory outboundIntegrationType_
     ) external {
-        bytes32 integrationType = keccak256(abi.encode(integrationType_));
-        if (!configExists[integrationType][remoteChainSlug_])
-            revert InvalidIntegrationType();
+        bytes32 inboundIntegrationType = keccak256(
+            abi.encode(inboundIntegrationType_)
+        );
+        bytes32 outboundIntegrationType = keccak256(
+            abi.encode(outboundIntegrationType_)
+        );
+        if (
+            !configExists[inboundIntegrationType][remoteChainSlug_] ||
+            !configExists[outboundIntegrationType][remoteChainSlug_]
+        ) revert InvalidIntegrationType();
 
         PlugConfig storage plugConfig = plugConfigs[msg.sender][
             remoteChainSlug_
         ];
 
         plugConfig.remotePlug = remotePlug_;
-        plugConfig.integrationType = integrationType;
+        plugConfig.inboundIntegrationType = inboundIntegrationType;
+        plugConfig.outboundIntegrationType = outboundIntegrationType;
     }
 
     function getPlugConfig(
@@ -63,7 +82,8 @@ contract MockAccessControl {
             address deaccum,
             address verifier,
             address remotePlug,
-            bytes32 integrationType
+            bytes32 outboundIntegrationType,
+            bytes32 inboundIntegrationType
         )
     {
         PlugConfig memory plugConfig = plugConfigs[plug_][remoteChainSlug_];
@@ -72,7 +92,8 @@ contract MockAccessControl {
             address(0),
             address(0),
             plugConfig.remotePlug,
-            plugConfig.integrationType
+            plugConfig.outboundIntegrationType,
+            plugConfig.inboundIntegrationType
         );
     }
 
@@ -90,8 +111,13 @@ contract MockAccessControl {
         ];
 
         if (dstPlugConfig.remotePlug != msg.sender) revert WrongRemotePlug();
-        if (dstPlugConfig.integrationType == srcPlugConfig.integrationType)
-            revert WrongIntegrationType();
+        if (
+            srcPlugConfig.outboundIntegrationType !=
+            dstPlugConfig.inboundIntegrationType &&
+            srcPlugConfig.inboundIntegrationType !=
+            dstPlugConfig.outboundIntegrationType
+        ) revert WrongIntegrationType();
+
         IPlug(srcPlugConfig.remotePlug).inbound{gas: msgGasLimit_}(
             _chainSlug,
             payload_
