@@ -121,7 +121,7 @@ export const contractNames = (
 ) => {
   if (
     integrationType === IntegrationTypes.fastIntegration ||
-    integrationType === IntegrationTypes.fastIntegration ||
+    integrationType === IntegrationTypes.slowIntegration ||
     !notaries[srcChain]?.[dstChain]?.["notary"]
   )
     return {

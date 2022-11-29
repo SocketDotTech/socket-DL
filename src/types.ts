@@ -35,9 +35,9 @@ export interface ChainSocketAddresses {
   Socket: string;
   Vault: string;
   SingleDeaccum: string;
-  AdminNotary: string;
-  Verifier: string;
-  integrations: Integrations;
+  AdminNotary?: string;
+  Verifier?: string;
+  integrations?: Integrations;
 }
 
 export type DeploymentAddresses = {

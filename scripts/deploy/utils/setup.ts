@@ -251,17 +251,22 @@ export const setupConfig = async (
     contracts.notary,
     socketSigner
   );
+  console.log(`Notary deployed at: ${notary.address}`)
+
   let verifier = await deployLocalVerifier(
     configurationType,
     contracts.verifier,
     notary.address,
     socketSigner
   );
+  console.log(`Verifier deployed at: ${verifier.address}`)
+
   let accum = await deployLocalAccum(
     configurationType,
     notary.address,
     socketSigner
   );
+  console.log(`Accum deployed at: ${accum.address}`)
 
   // optional notary and accum settings
   if (

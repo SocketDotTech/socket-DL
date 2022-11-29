@@ -8,7 +8,7 @@ import { chainIds } from "../constants/networks";
 
 import { deployCounter, deploySocket, deployVault } from "./contracts";
 import { executorAddress } from "../constants/config";
-import { ChainSocketAddresses } from "./types";
+import { ChainSocketAddresses } from "../../src";
 
 /**
  * Deploys network-independent socket contracts
