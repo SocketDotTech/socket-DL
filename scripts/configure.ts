@@ -46,7 +46,8 @@ async function configNotary(notaryAddr: string, socketSigner: SignerWithAddress)
   try {
     const localChainId = await getChainId();
     const notary: Contract = await getInstance("AdminNotary", notaryAddr);
-    await notary.connect(socketSigner).grantAttesterRole(remoteChainId, attesterAddress[localChainId]);
+    const tx = await notary.connect(socketSigner).grantAttesterRole(remoteChainId, attesterAddress[localChainId]);
+    await tx.wait();
     console.log(`Added ${attesterAddress[localChainId]} as an attester for ${remoteChainId} chain id!`)
   } catch (error) {
     console.log("Error while configuring Notary", error);
@@ -63,21 +64,25 @@ async function getSigners() {
 
 async function configSocket(socket: Contract, socketSigner: SignerWithAddress, remoteChainId: number, localConfig: JSON) {
   try {
-    await socket.connect(socketSigner).addConfig(
+    let tx = await socket.connect(socketSigner).addConfig(
       remoteChainId,
       localConfig[`fastAccum-${remoteChainId}`],
-      localConfig[`deaccum-${remoteChainId}`],
+      localConfig[`deaccum`],
       localConfig["verifier"],
       fastIntegration
     );
 
-    await socket.connect(socketSigner).addConfig(
+    await tx.wait();
+
+    tx = await socket.connect(socketSigner).addConfig(
       remoteChainId,
       localConfig[`slowAccum-${remoteChainId}`],
-      localConfig[`deaccum-${remoteChainId}`],
+      localConfig[`deaccum`],
       localConfig["verifier"],
       slowIntegration
     );
+
+    await tx.wait();
 
     console.log(`Added slow and fast config for ${remoteChainId} chain id!`)
 
