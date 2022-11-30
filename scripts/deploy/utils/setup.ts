@@ -21,6 +21,7 @@ import {
 } from "./";
 import { deployNotary, deployAccumulator, deployVerifier } from "../contracts";
 import { IntegrationTypes } from "../../../src";
+import { hexZeroPad } from "@ethersproject/bytes";
 
 let localChain, remoteChain, localConfig, remoteConfig;
 
@@ -95,10 +96,6 @@ const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
         remoteNotary,
         socketSigner
       );
-      const grantAttesterRoleTx = await notary
-        .connect(socketSigner)
-        .grantAttesterRole(chainIds[remoteChain], attesterAddress[localChain]);
-      await grantAttesterRoleTx.wait();
 
       if (notaryName === "AdminNotary") {
         localConfig[notaryName] = notary.address;
@@ -118,6 +115,15 @@ const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
           notary.address
         );
     }
+
+    const hasRole = await notary.hasRole(hexZeroPad(chainIds[remoteChain].toHexString(), 32), attesterAddress[localChain]);
+    if (!hasRole) {
+      const grantAttesterRoleTx = await notary
+        .connect(socketSigner)
+        .grantAttesterRole(chainIds[remoteChain], attesterAddress[localChain]);
+      await grantAttesterRoleTx.wait();
+    }
+
     return notary;
   } catch (error) {
     throw new Error(
