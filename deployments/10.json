@@ -1,0 +1,16 @@
+{
+  "counter": "0xa418d0ccfb62fe888acf655e54d88e09059bd6c8",
+  "hasher": "0x98472cdb864dedcf13a560ec2b79745a6063a3ac",
+  "notary": "0x9814d1e6751adae2d60ff16f987ae02a25c87224",
+  "signatureVerifier": "0x47140353947bc127c9cf36fabd61112c8fb8db2a",
+  "socket": "0xa5b593ae839b3fe47983fc28da602a6deefbbc9d",
+  "vault": "0x834ee253f0b926dcc1d03ebaeafec3a3d1ee4a86",
+  "verifier": "0x61d921abcae610e38fb6e5f12ac6b7337e42f2bd",
+  "deaccum": "0xe804b3f393ec5d2d04bac6deed7744beb243e763",
+  "fastAccum-56": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+  "slowAccum-56": "0xA418D0cCFB62FE888aCf655e54d88E09059bD6c8",
+  "fastAccum-137": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+  "slowAccum-137": "0x323684c3556480F94F9232A1525eAD02fde4F0d1",
+  "fastAccum-42161": "0xeDCaf50c533F8fB411568f569F47a4a706A99B84",
+  "slowAccum-42161": "0x571614C396B5E95Bc3373b7cC61C8e770443A0A4"
+}
