@@ -38,6 +38,7 @@ export const main = async () => {
     const l2ToL1Msg = messages[0];
 
     const status = await l2ToL1Msg.status(l2Provider);
+    console.log(status, ": status (0- unconfirmed, 1- confirmed, 2- executed)");
     /**
      * Check if already executed
      */

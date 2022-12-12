@@ -81,48 +81,48 @@ export const config = {
     {
       "remoteChain": "optimism-goerli",
       "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
-      "configForCounter": fastIntegration
+      "configForCounter": IntegrationTypes.fastIntegration
     },
     {
       "remoteChain": "bsc-testnet",
-      "config": [fastIntegration, IntegrationTypes.slowIntegration],
-      "configForCounter": fastIntegration
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
     },
   ],
   "bsc-testnet": [
     {
       "remoteChain": "goerli",
-      "config": [fastIntegration, IntegrationTypes.slowIntegration],
-      "configForCounter": fastIntegration
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
     },
     {
       "remoteChain": "arbitrum-goerli",
-      "config": [fastIntegration, IntegrationTypes.slowIntegration],
-      "configForCounter": fastIntegration
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
     },
     {
       "remoteChain": "optimism-goerli",
-      "config": [fastIntegration, IntegrationTypes.slowIntegration],
-      "configForCounter": fastIntegration
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
     },
     {
       "remoteChain": "polygon-mumbai",
-      "config": [fastIntegration, IntegrationTypes.slowIntegration],
-      "configForCounter": fastIntegration
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
     },
   ],
   "polygon-mainnet": [
     {
       "remoteChain": "bsc",
-      "config": [fastIntegration, IntegrationTypes.slowIntegration],
-      "configForCounter": fastIntegration
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
     },
   ],
   bsc: [
     {
       "remoteChain": "polygon-mainnet",
-      "config": [fastIntegration, IntegrationTypes.slowIntegration],
-      "configForCounter": fastIntegration
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
     },
   ]
 }
