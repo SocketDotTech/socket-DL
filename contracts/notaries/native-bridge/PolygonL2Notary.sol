@@ -31,14 +31,13 @@ contract PolygonL2Notary is NativeBridgeNotary, FxBaseChildTunnel {
         bytes32 root
     ) internal override {
         bytes memory data = abi.encode(packetId, root, bytes(""));
-        bytes memory fxData = abi.encode(address(this), remoteNotary, data);
-        _sendMessageToRoot(fxData);
+        _sendMessageToRoot(data);
     }
 
     function _processMessageFromRoot(
-        uint256,
+        uint256 id,
         address rootMessageSender,
-        bytes calldata data
+        bytes memory data
     ) internal override {
         if (rootMessageSender != remoteNotary) revert InvalidAttester();
         (uint256 packetId, bytes32 root, ) = abi.decode(

@@ -25,12 +25,8 @@ contract PolygonL1Notary is NativeBridgeNotary, FxBaseRootTunnel {
     function _processMessageFromChild(
         bytes memory message
     ) internal override onlyRemoteAccumulator {
-        (, , bytes memory data) = abi.decode(
-            message,
-            (uint256, bytes32, bytes)
-        );
         (uint256 packetId, bytes32 root, ) = abi.decode(
-            data,
+            message,
             (uint256, bytes32, bytes)
         );
         _attest(packetId, root);
@@ -46,8 +42,7 @@ contract PolygonL1Notary is NativeBridgeNotary, FxBaseRootTunnel {
         bytes32 root
     ) internal override {
         bytes memory data = abi.encode(packetId, root, bytes(""));
-        bytes memory fxData = abi.encode(address(this), remoteNotary, data);
-        _sendMessageToChild(fxData);
+        _sendMessageToChild(data);
     }
 
     // set fxChildTunnel if not set already
