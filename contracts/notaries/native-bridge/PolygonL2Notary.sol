@@ -34,12 +34,14 @@ contract PolygonL2Notary is NativeBridgeNotary, FxBaseChildTunnel {
         _sendMessageToRoot(data);
     }
 
+    /**
+     * validate sender verifies if `rootMessageSender` is the root contract (notary) on L1.
+     */
     function _processMessageFromRoot(
-        uint256 id,
+        uint256,
         address rootMessageSender,
         bytes memory data
-    ) internal override {
-        if (rootMessageSender != remoteNotary) revert InvalidAttester();
+    ) internal override validateSender(rootMessageSender) {
         (uint256 packetId, bytes32 root, ) = abi.decode(
             data,
             (uint256, bytes32, bytes)
