@@ -1,232 +1,662 @@
 {
-  "5": {
-    "Counter": "0x643105248b0929EE45CeC6aa60111bcbea4213d1",
-    "Hasher": "0x9773954b3a530568C0F6c7179f4656BF5eF89a3a",
-    "SignatureVerifier": "0x7727f1C58D37C69CB1Ec22E4fD1A9BBc251c1Cfb",
-    "Socket": "0x848e692c03890E915F727419f71fAE6A2bcca9E6",
-    "Vault": "0x494A9da5F191EE6BDb6d9D0f95d880Db9a3b04fb",
-    "SingleDeaccum": "0x24A7c25Fc9a6F640B1Fd6ABD7De7F74109A27cb9",
-    "AdminNotary": "0x409F315ed0c680430fC6515350995f1a334f3bdf",
+  "1": {
+    "Counter": "0x320Cd79c54927Fe130427bD4492b6c6068D075E3",
+    "Hasher": "0x9814d1E6751ADAE2D60fF16f987ae02a25C87224",
+    "SignatureVerifier": "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A",
+    "Socket": "0xa5b593aE839b3fe47983Fc28da602a6dEEfBBc9D",
+    "Vault": "0x98472CDb864DedcF13a560Ec2b79745a6063A3aC",
+    "SingleDeaccum": "0x834Ee253f0B926DCc1d03EbAeAfEc3a3D1eE4a86",
+    "AdminNotary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
     "integrations": {
-      "420": {
+      "10": {
         "FAST": {
-          "notary": "0x409F315ed0c680430fC6515350995f1a334f3bdf",
-          "verifier": "0x2a292Abc2F497b8C20dda13309D8ca0053a39879",
-          "accum": "0x421d2AfA1A082ae59d47e844F77365Be08a4c722"
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0x88fd79Fa0030d38437b6c4077AD8f1c4e4a18C92"
         },
         "SLOW": {
-          "notary": "0x409F315ed0c680430fC6515350995f1a334f3bdf",
-          "verifier": "0x2a292Abc2F497b8C20dda13309D8ca0053a39879",
-          "accum": "0xBc10eD760DB98F2107c7F1ed0153AE379Df380D1"
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0x151b980575Aff0b4AA9c327F476681d2E0FB36f3"
         },
         "NATIVE_BRIDGE": {
-          "notary": "0x10cfBbFaF37AD46aDF4F783D02Ac57806eaD620b",
-          "verifier": "0x8Fa3310f68b75Ec3Ed03E17013BCFBFacbDC6ac1",
-          "accum": "0xCEB721BF38F373FBf60dB0816d32e7CDd557B4E4"
+          "accum": "0xA90d1A1C11807c3632d7E227d2b055DD38AD3659",
+          "notary": "0x68e0B4C64F427D3a3526e6088bA52e2003426303",
+          "verifier": "0xEA59E2b1539b514290dD3dCEa989Ea36279aC6F2"
+        }
+      },
+      "56": {
+        "FAST": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0xCA9Ea302739796C223a2D6B95efB9c0Cf9E9D468"
+        },
+        "SLOW": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0xEd7f855da2609ede9659709612a743E8b415F9D2"
+        }
+      },
+      "137": {
+        "FAST": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0x323684c3556480F94F9232A1525eAD02fde4F0d1"
+        },
+        "SLOW": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0x571614C396B5E95Bc3373b7cC61C8e770443A0A4"
+        },
+        "NATIVE_BRIDGE": {
+          "notary": "0x4f960040E588B8A7a76a4d0066F55EB432e3B1b2",
+          "verifier": "0xbf40F1c17471C04eaca8927252bCF2360082c901",
+          "accum": "0x38e55351Dc02320A555b137e559D71f213694c15"
+        }
+      },
+      "42161": {
+        "FAST": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0xB9EDe9aaEaA40e35033ABBC872D141950d08cc4d"
+        },
+        "SLOW": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0xAE9bE0eA6DD7B53C88665Cb2EFf7d40dFD51cf91"
+        },
+        "NATIVE_BRIDGE": {
+          "notary": "0xaDDaC77B80C990A87906C4273902be5EC7f25B42",
+          "verifier": "0xA53185E856916228505372F1E3333BbbB4AC2063",
+          "accum": "0x918ECe20236B9d8C2AA1742540246D6F9a9eB081"
+        }
+      }
+    },
+    "Verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461"
+  },
+  "5": {
+    "Counter": "0x34589f985f4054bbd05CaE38675561472f30b220",
+    "Hasher": "0x13d221a5A418ad0A37621E9cdAA3e29558610C81",
+    "SignatureVerifier": "0x1939db9f6b81b131E3543f7A6ED994048338647e",
+    "Socket": "0xd91A67768E27Bf2d017D2699c8C65c3e7A4AA01B",
+    "Vault": "0xdeBE773a9890dB02A03328b0b354984d949b3e77",
+    "SingleDeaccum": "0x492728DbAC544Db1E2Aa1203DA3fc13a71DEaD6a",
+    "AdminNotary": "0xB85026346D0952A8f409AC1010F8A0744C7EBb08",
+    "integrations": {
+      "97": {
+        "FAST": {
+          "notary": "0xB85026346D0952A8f409AC1010F8A0744C7EBb08",
+          "verifier": "0x0237f36a3c550De629dC1574a6374671640c3080",
+          "accum": "0x38FD0c261a5F7C9cB69ae98A5221419Cd5c2c147"
+        },
+        "SLOW": {
+          "notary": "0xB85026346D0952A8f409AC1010F8A0744C7EBb08",
+          "verifier": "0x0237f36a3c550De629dC1574a6374671640c3080",
+          "accum": "0x3648725DD3357c6d65724f40819A32831a52F55A"
+        }
+      },
+      "420": {
+        "FAST": {
+          "notary": "0xB85026346D0952A8f409AC1010F8A0744C7EBb08",
+          "verifier": "0x0237f36a3c550De629dC1574a6374671640c3080",
+          "accum": "0x3f43AE1B4ad3fc64152DB4534111e09A40847533"
+        },
+        "SLOW": {
+          "notary": "0xB85026346D0952A8f409AC1010F8A0744C7EBb08",
+          "verifier": "0x0237f36a3c550De629dC1574a6374671640c3080",
+          "accum": "0xdAF01D42eeA6bd3F62926Ac848b4436d78328626"
+        },
+        "NATIVE_BRIDGE": {
+          "notary": "0xf47122534222892E876EB81549B0dcac0F93dC2C",
+          "verifier": "0x1A8Ad97F468652005f65b0FF6B432FFf177d5E46",
+          "accum": "0xd17A64B37b432Bc344420D12eD086c5E6BEC1a30"
         }
       },
       "80001": {
         "FAST": {
-          "notary": "0x409F315ed0c680430fC6515350995f1a334f3bdf",
-          "verifier": "0x2a292Abc2F497b8C20dda13309D8ca0053a39879",
-          "accum": "0xd0e3066e9a9C9834c67D8c6570d9F58552e7a0DE"
+          "notary": "0xB85026346D0952A8f409AC1010F8A0744C7EBb08",
+          "verifier": "0x0237f36a3c550De629dC1574a6374671640c3080",
+          "accum": "0x3806223ff349973e18A4fFD121dF24c4c6C7039d"
         },
         "SLOW": {
-          "notary": "0x409F315ed0c680430fC6515350995f1a334f3bdf",
-          "verifier": "0x2a292Abc2F497b8C20dda13309D8ca0053a39879",
-          "accum": "0x1624B5B9ffe05eBb3F25C8e362e73C2a6760f528"
+          "notary": "0xB85026346D0952A8f409AC1010F8A0744C7EBb08",
+          "verifier": "0x0237f36a3c550De629dC1574a6374671640c3080",
+          "accum": "0x630D794C1ac0ebbbE0709EA5AF3241157ba9e04F"
         },
         "NATIVE_BRIDGE": {
-          "notary": "0x0c0Df3BD6b1C3C2b26b56836be50b10b51B7C64d",
-          "verifier": "0xf3344A8ca0b512b4e0744B6FFD4bF4A238A67722",
-          "accum": "0x50a3E13FC8E68d223C84A63D2b0edB1d3C3E6841"
+          "notary": "0xD4dA9Ab0E23A8176Fd2E35792892D577c8ace164",
+          "verifier": "0x7FD1661b4c4ca10928d05B13220b1F46F1E0DB58",
+          "accum": "0x858C13578f1163991Ee4d515a2063BB6943dE90f"
         }
       },
       "421613": {
         "FAST": {
-          "notary": "0x409F315ed0c680430fC6515350995f1a334f3bdf",
-          "verifier": "0x2a292Abc2F497b8C20dda13309D8ca0053a39879",
-          "accum": "0x2b863CDA83e855078c702233E215884c4d0200dE"
+          "notary": "0xB85026346D0952A8f409AC1010F8A0744C7EBb08",
+          "verifier": "0x0237f36a3c550De629dC1574a6374671640c3080",
+          "accum": "0xA45b7B7894C9ee7FbBc5C57F4e0DF775aC09D3C0"
         },
         "SLOW": {
-          "notary": "0x409F315ed0c680430fC6515350995f1a334f3bdf",
-          "verifier": "0x2a292Abc2F497b8C20dda13309D8ca0053a39879",
-          "accum": "0x7b75d55f9A8c7082C973cBa88fD518b4C995835C"
+          "notary": "0xB85026346D0952A8f409AC1010F8A0744C7EBb08",
+          "verifier": "0x0237f36a3c550De629dC1574a6374671640c3080",
+          "accum": "0x2659B668B98c9512782dCF71fe10cE574f846790"
         },
         "NATIVE_BRIDGE": {
-          "notary": "0x5a5a25F48742f9d3D0F11b09ED96DBe4E3cCe7b5",
-          "verifier": "0x3eCd7e3Ae0A74d15EcCDc8A047e9190ccA596D04",
-          "accum": "0x729951D37302286D8394e819246c71cc8A790701"
+          "notary": "0x1eE7aeaf8742fe5C9f84c50971d91dD1A38B7D81",
+          "verifier": "0xf101C6D3d5604F10ABD5269BaB2DFc0908A4C1e8",
+          "accum": "0x3eDD28A2c1B751c69fD352577e0D742016b2bf72"
         }
       }
     },
-    "Verifier": "0x2a292Abc2F497b8C20dda13309D8ca0053a39879"
+    "Verifier": "0x0237f36a3c550De629dC1574a6374671640c3080"
+  },
+  "10": {
+    "Counter": "0x320Cd79c54927Fe130427bD4492b6c6068D075E3",
+    "Hasher": "0xf3f8fce53d03a0c421638eca5eeeacceadfc57ab",
+    "SignatureVerifier": "0xe63bc038f4be3af3efc6318e3cac39f60d700526",
+    "Socket": "0x50cd99661c604da8d36db001e86df976e13a7cf0",
+    "Vault": "0x19791877c020f7cd5ca1c97bdd5d268a52dbb0ff",
+    "SingleDeaccum": "0xfc2140e9a83693cbd8b54c42aff83ecb627c2ec7",
+    "AdminNotary": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE",
+    "integrations": {
+      "1": {
+        "FAST": {
+          "notary": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE",
+          "verifier": "0xB39Cb89dfD708115616fdA1a2735613931B14181",
+          "accum": "0x62AbC07A0F7Bfa7AE049dd867a65F21227193872"
+        },
+        "SLOW": {
+          "notary": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE",
+          "verifier": "0xB39Cb89dfD708115616fdA1a2735613931B14181",
+          "accum": "0x919a93E0cFa7b962f1bb1353a049a6f427A6a5D4"
+        },
+        "NATIVE_BRIDGE": {
+          "notary": "0xb49553A6D6597808ac069f1E5a44eE6773DD0b86",
+          "verifier": "0xE0D31cba148BFa4A459f2E0FdD2d3f6d7EDd4B1F",
+          "accum": "0x5C9ae38ebe47Ef0E8711eAdFC6E17b1e589C91dF"
+        }
+      },
+      "56": {
+        "FAST": {
+          "notary": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE",
+          "verifier": "0xB39Cb89dfD708115616fdA1a2735613931B14181",
+          "accum": "0x03D51955216a7E6F301e0613515fA86A6f3d59A9"
+        },
+        "SLOW": {
+          "notary": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE",
+          "verifier": "0xB39Cb89dfD708115616fdA1a2735613931B14181",
+          "accum": "0x166953654e3b38C53A7e79B3813104AfABE63582"
+        }
+      },
+      "137": {
+        "FAST": {
+          "notary": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE",
+          "verifier": "0xB39Cb89dfD708115616fdA1a2735613931B14181",
+          "accum": "0x1d6E46fd4DFdfe063f9096Dc2C0862D36A25b1aD"
+        },
+        "SLOW": {
+          "notary": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE",
+          "verifier": "0xB39Cb89dfD708115616fdA1a2735613931B14181",
+          "accum": "0xfCa282147D5E9b14c208D09dbEbC7Eb5C3814dC5"
+        }
+      },
+      "42161": {
+        "FAST": {
+          "notary": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE",
+          "verifier": "0xB39Cb89dfD708115616fdA1a2735613931B14181",
+          "accum": "0x0777Ab388f065FC3CdB96008C701751827Ee171B"
+        },
+        "SLOW": {
+          "notary": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE",
+          "verifier": "0xB39Cb89dfD708115616fdA1a2735613931B14181",
+          "accum": "0x59AcE34e5c47aEe3ec8feF2A89DcF14Ac98538C9"
+        }
+      }
+    },
+    "Verifier": "0xB39Cb89dfD708115616fdA1a2735613931B14181"
+  },
+  "56": {
+    "Counter": "0x87E54C7AF2Ed4f9e12a358484C03B3667A417a80",
+    "Hasher": "0xEDF6dB2f3BC8deE014762e0141EE4CA19d685dBd",
+    "SignatureVerifier": "0xB9EDe9aaEaA40e35033ABBC872D141950d08cc4d",
+    "Socket": "0xaDDaC77B80C990A87906C4273902be5EC7f25B42",
+    "Vault": "0xAE9bE0eA6DD7B53C88665Cb2EFf7d40dFD51cf91",
+    "SingleDeaccum": "0x0f8F4E665221528e6a444458dd098216E9ec7807",
+    "AdminNotary": "0xA53185E856916228505372F1E3333BbbB4AC2063",
+    "integrations": {
+      "1": {
+        "FAST": {
+          "notary": "0xA53185E856916228505372F1E3333BbbB4AC2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0xe63Bc038f4bE3aF3efC6318e3CAc39F60d700526"
+        },
+        "SLOW": {
+          "notary": "0xA53185E856916228505372F1E3333BbbB4AC2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x19791877C020f7Cd5Ca1c97bdd5D268a52dbB0ff"
+        }
+      },
+      "10": {
+        "FAST": {
+          "notary": "0xA53185E856916228505372F1E3333BbbB4AC2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x5D3F469BEA637c5017Df408fF25AA8B9BC6e6400"
+        },
+        "SLOW": {
+          "notary": "0xA53185E856916228505372F1E3333BbbB4AC2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x59511A1b8C5F42936402a13E854F5aa87e64fc71"
+        }
+      },
+      "137": {
+        "FAST": {
+          "notary": "0xA53185E856916228505372F1E3333BbbB4AC2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x5D563646c656157A8a255b18083e99F4872e0402"
+        },
+        "SLOW": {
+          "notary": "0xA53185E856916228505372F1E3333BbbB4AC2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x90d62Da288bF4AD0EaC4bdE5b773DC5e19FFBC0E"
+        }
+      },
+      "42161": {
+        "FAST": {
+          "notary": "0xA53185E856916228505372F1E3333BbbB4AC2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x9C0763930BcA7DDb9275B5e0D67500aE6dFD3A00"
+        },
+        "SLOW": {
+          "notary": "0xA53185E856916228505372F1E3333BbbB4AC2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0xc68EF89A141Ca6ee27520fF68faC45a0aF9E23d1"
+        }
+      }
+    },
+    "Verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B"
+  },
+  "97": {
+    "Counter": "0x320Cd79c54927Fe130427bD4492b6c6068D075E3",
+    "Hasher": "0x9814d1E6751ADAE2D60fF16f987ae02a25C87224",
+    "SignatureVerifier": "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A",
+    "Socket": "0xa5b593aE839b3fe47983Fc28da602a6dEEfBBc9D",
+    "Vault": "0x98472CDb864DedcF13a560Ec2b79745a6063A3aC",
+    "SingleDeaccum": "0x834Ee253f0B926DCc1d03EbAeAfEc3a3D1eE4a86",
+    "AdminNotary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+    "integrations": {
+      "5": {
+        "FAST": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0x323684c3556480F94F9232A1525eAD02fde4F0d1"
+        },
+        "SLOW": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0x571614C396B5E95Bc3373b7cC61C8e770443A0A4"
+        }
+      },
+      "420": {
+        "FAST": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0xCb0308e4eE03EE67BBda15EebdE09526F3072306"
+        },
+        "SLOW": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0xCA9Ea302739796C223a2D6B95efB9c0Cf9E9D468"
+        }
+      },
+      "80001": {
+        "FAST": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0xeBc0357398a403b78F2Ce5B08CDc10E01f35BBDc"
+        },
+        "SLOW": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0x88fd79Fa0030d38437b6c4077AD8f1c4e4a18C92"
+        }
+      },
+      "421613": {
+        "FAST": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0x4f960040E588B8A7a76a4d0066F55EB432e3B1b2"
+        },
+        "SLOW": {
+          "notary": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+          "verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+          "accum": "0xbf40F1c17471C04eaca8927252bCF2360082c901"
+        }
+      }
+    },
+    "Verifier": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461"
+  },
+  "137": {
+    "Counter": "0x08f47Af4FB9Ab119e6Dd2C43994B9131E2AA91e2",
+    "Hasher": "0xEDF6dB2f3BC8deE014762e0141EE4CA19d685dBd",
+    "SignatureVerifier": "0xB9EDe9aaEaA40e35033ABBC872D141950d08cc4d",
+    "Socket": "0xaDDaC77B80C990A87906C4273902be5EC7f25B42",
+    "Vault": "0xAE9bE0eA6DD7B53C88665Cb2EFf7d40dFD51cf91",
+    "SingleDeaccum": "0x0f8F4E665221528e6a444458dd098216E9ec7807",
+    "AdminNotary": "0xa53185e856916228505372f1e3333bbbb4ac2063",
+    "integrations": {
+      "1": {
+        "FAST": {
+          "notary": "0xa53185e856916228505372f1e3333bbbb4ac2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0xe63Bc038f4bE3aF3efC6318e3CAc39F60d700526"
+        },
+        "SLOW": {
+          "notary": "0xa53185e856916228505372f1e3333bbbb4ac2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x19791877C020f7Cd5Ca1c97bdd5D268a52dbB0ff"
+        },
+        "NATIVE_BRIDGE": {
+          "notary": "0x50cD99661C604da8d36Db001e86Df976E13A7Cf0",
+          "verifier": "0x6b4338D5adCB6704E235E7BCeDBbaaD602a0340a",
+          "accum": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE"
+        }
+      },
+      "10": {
+        "FAST": {
+          "notary": "0xa53185e856916228505372f1e3333bbbb4ac2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x5D3F469BEA637c5017Df408fF25AA8B9BC6e6400"
+        },
+        "SLOW": {
+          "notary": "0xa53185e856916228505372f1e3333bbbb4ac2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x59511A1b8C5F42936402a13E854F5aa87e64fc71"
+        }
+      },
+      "56": {
+        "FAST": {
+          "notary": "0xa53185e856916228505372f1e3333bbbb4ac2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x5D563646c656157A8a255b18083e99F4872e0402"
+        },
+        "SLOW": {
+          "notary": "0xa53185e856916228505372f1e3333bbbb4ac2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x90d62Da288bF4AD0EaC4bdE5b773DC5e19FFBC0E"
+        }
+      },
+      "42161": {
+        "FAST": {
+          "notary": "0xa53185e856916228505372f1e3333bbbb4ac2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0x9C0763930BcA7DDb9275B5e0D67500aE6dFD3A00"
+        },
+        "SLOW": {
+          "notary": "0xa53185e856916228505372f1e3333bbbb4ac2063",
+          "verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B",
+          "accum": "0xc68EF89A141Ca6ee27520fF68faC45a0aF9E23d1"
+        }
+      }
+    },
+    "Verifier": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B"
   },
   "420": {
-    "Counter": "0x687Aa9BA5CBD26F6553d7C34461F3db12781E34F",
-    "Hasher": "0x495b0A49c98a61535c381B7729d3485bc02aC89D",
-    "SignatureVerifier": "0x4Cfcb1Dd6a7B17E8470650DDaeb9089f9D0B8192",
-    "Socket": "0xD727bC48E412d576607b9563045E4D8Ace6aF972",
-    "Vault": "0x861c376E5e71C509dB7f5755ce5a7AB15eFaFDbf",
-    "SingleDeaccum": "0x3F781F3FbFcB142fbB976336087d45C682f37513",
-    "AdminNotary": "0xE006DBFCEBb37BB575908d262A0057D19A2C378F",
+    "Counter": "0xeE37AeD412692e22b13E735668d1734F617bDA36",
+    "Hasher": "0xBdE960555C7F179b2Cb74829a3435506EB4C118B",
+    "SignatureVerifier": "0xA71139A226EAEb707FA379352F387eF66Abd2894",
+    "Socket": "0xbC6f5B3233aB3Ef3b4640445Ee977BD640fd0e81",
+    "Vault": "0xa5A13B2647c0260a886f190Ee2778c89d87C4B93",
+    "SingleDeaccum": "0x1338a8c46494061164Bd5f0eB7F6610A227cC81B",
+    "AdminNotary": "0x44Eb722Ea1d95929603EB9544793d3B30a9Bb9D8",
     "integrations": {
       "5": {
         "FAST": {
-          "notary": "0xE006DBFCEBb37BB575908d262A0057D19A2C378F",
-          "verifier": "0xE13f57ce005C370E4cBA98632A8603403220A3c6",
-          "accum": "0x078A31CfDBa1bD6008d05bD0B3D0735c4E84F355"
+          "notary": "0x44Eb722Ea1d95929603EB9544793d3B30a9Bb9D8",
+          "verifier": "0x7ac9148477FA1E399b29A4d45DD5d036174DF1aE",
+          "accum": "0x6141a620E10a136f846Ee49e4d9c64a2491228f5"
         },
         "SLOW": {
-          "notary": "0xE006DBFCEBb37BB575908d262A0057D19A2C378F",
-          "verifier": "0xE13f57ce005C370E4cBA98632A8603403220A3c6",
-          "accum": "0x7727f1C58D37C69CB1Ec22E4fD1A9BBc251c1Cfb"
+          "notary": "0x44Eb722Ea1d95929603EB9544793d3B30a9Bb9D8",
+          "verifier": "0x7ac9148477FA1E399b29A4d45DD5d036174DF1aE",
+          "accum": "0x473CDD0e0294BaAC73486C48c7Ae161Bb3FddAe6"
         },
         "NATIVE_BRIDGE": {
-          "notary": "0x494A9da5F191EE6BDb6d9D0f95d880Db9a3b04fb",
-          "verifier": "0x848e692c03890E915F727419f71fAE6A2bcca9E6",
-          "accum": "0xe7A7793C52bD63a53dE76AadF23A923F601D1CDC"
+          "notary": "0xEb68bAA73abFBc8Aa7094df7a919B85BDBe68164",
+          "verifier": "0x2323E93AaD5E7488d8b1b65A29c2f41957Bfa1aC",
+          "accum": "0x5C9728e9250a2DfA4B20Ba4F6D4AcbE909a97305"
+        }
+      },
+      "97": {
+        "FAST": {
+          "notary": "0x44Eb722Ea1d95929603EB9544793d3B30a9Bb9D8",
+          "verifier": "0x7ac9148477FA1E399b29A4d45DD5d036174DF1aE",
+          "accum": "0x4920f80464088449c1FDbd4750fa720468968217"
+        },
+        "SLOW": {
+          "notary": "0x44Eb722Ea1d95929603EB9544793d3B30a9Bb9D8",
+          "verifier": "0x7ac9148477FA1E399b29A4d45DD5d036174DF1aE",
+          "accum": "0xa86CEf23fF39AC101a6Aca5e3a170b6aC2D98c70"
         }
       },
       "80001": {
         "FAST": {
-          "notary": "0xE006DBFCEBb37BB575908d262A0057D19A2C378F",
-          "verifier": "0xE13f57ce005C370E4cBA98632A8603403220A3c6",
-          "accum": "0xaB48847c4A8Abd748FC4A22e5783659255EF7Fd0"
+          "notary": "0x44Eb722Ea1d95929603EB9544793d3B30a9Bb9D8",
+          "verifier": "0x7ac9148477FA1E399b29A4d45DD5d036174DF1aE",
+          "accum": "0xC3e2006a7E31c4c467aAC29d7A5175E2D4b5841A"
         },
         "SLOW": {
-          "notary": "0xE006DBFCEBb37BB575908d262A0057D19A2C378F",
-          "verifier": "0xE13f57ce005C370E4cBA98632A8603403220A3c6",
-          "accum": "0x5251811Fd70CE4e05a4483184C66F9c9071F7444"
+          "notary": "0x44Eb722Ea1d95929603EB9544793d3B30a9Bb9D8",
+          "verifier": "0x7ac9148477FA1E399b29A4d45DD5d036174DF1aE",
+          "accum": "0xA424753B9290a47678dA2093F57e72FA839344BA"
         }
       },
       "421613": {
         "FAST": {
-          "notary": "0xE006DBFCEBb37BB575908d262A0057D19A2C378F",
-          "verifier": "0xE13f57ce005C370E4cBA98632A8603403220A3c6",
-          "accum": "0x409F315ed0c680430fC6515350995f1a334f3bdf"
+          "notary": "0x44Eb722Ea1d95929603EB9544793d3B30a9Bb9D8",
+          "verifier": "0x7ac9148477FA1E399b29A4d45DD5d036174DF1aE",
+          "accum": "0xb1C88011cdE0eEa7f956114B4A5cD0ffF412d221"
         },
         "SLOW": {
-          "notary": "0xE006DBFCEBb37BB575908d262A0057D19A2C378F",
-          "verifier": "0xE13f57ce005C370E4cBA98632A8603403220A3c6",
-          "accum": "0x2a292Abc2F497b8C20dda13309D8ca0053a39879"
+          "notary": "0x44Eb722Ea1d95929603EB9544793d3B30a9Bb9D8",
+          "verifier": "0x7ac9148477FA1E399b29A4d45DD5d036174DF1aE",
+          "accum": "0x5f4448cf482BE4D2a3E78eb2cb257480b4445CC5"
         }
       }
     },
-    "Verifier": "0xE13f57ce005C370E4cBA98632A8603403220A3c6"
+    "Verifier": "0x7ac9148477FA1E399b29A4d45DD5d036174DF1aE"
   },
-  "31337": {
-    "Counter": "0x8464135c8F25Da09e49BC8782676a84730C318bC",
-    "Hasher": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    "SignatureVerifier": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-    "Socket": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-    "Vault": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-    "SingleDeaccum": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+  "42161": {
+    "Counter": "0x320Cd79c54927Fe130427bD4492b6c6068D075E3",
+    "Hasher": "0xae51c633fb58df92fccbb0694ea22e060d29f5f7",
+    "SignatureVerifier": "0xaddac77b80c990a87906c4273902be5ec7f25b42",
+    "Socket": "0x30dadbc1d9edf62f5e7491439c78bd6502c6c22b",
+    "Vault": "0xa53185e856916228505372f1e3333bbbb4ac2063",
+    "SingleDeaccum": "0x918ece20236b9d8c2aa1742540246d6f9a9eb081",
+    "AdminNotary": "0x90d62Da288bF4AD0EaC4bdE5b773DC5e19FFBC0E",
+    "integrations": {
+      "1": {
+        "FAST": {
+          "notary": "0x90d62Da288bF4AD0EaC4bdE5b773DC5e19FFBC0E",
+          "verifier": "0x25aB980579592AB8DE652E7FC16a369A32f8701e",
+          "accum": "0xFDC28fA368c33DEC7853d63B65FC5Cfe01B212fc"
+        },
+        "SLOW": {
+          "notary": "0x90d62Da288bF4AD0EaC4bdE5b773DC5e19FFBC0E",
+          "verifier": "0x25aB980579592AB8DE652E7FC16a369A32f8701e",
+          "accum": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE"
+        },
+        "NATIVE_BRIDGE": {
+          "notary": "0xB39Cb89dfD708115616fdA1a2735613931B14181",
+          "verifier": "0x0EA425AeB75F5B2027Cbe8c70b821E3D3490da8e",
+          "accum": "0xfCa282147D5E9b14c208D09dbEbC7Eb5C3814dC5"
+        }
+      },
+      "10": {
+        "FAST": {
+          "notary": "0x90d62Da288bF4AD0EaC4bdE5b773DC5e19FFBC0E",
+          "verifier": "0x25aB980579592AB8DE652E7FC16a369A32f8701e",
+          "accum": "0x9C0763930BcA7DDb9275B5e0D67500aE6dFD3A00"
+        },
+        "SLOW": {
+          "notary": "0x90d62Da288bF4AD0EaC4bdE5b773DC5e19FFBC0E",
+          "verifier": "0x25aB980579592AB8DE652E7FC16a369A32f8701e",
+          "accum": "0xc68EF89A141Ca6ee27520fF68faC45a0aF9E23d1"
+        }
+      },
+      "56": {
+        "FAST": {
+          "notary": "0x90d62Da288bF4AD0EaC4bdE5b773DC5e19FFBC0E",
+          "verifier": "0x25aB980579592AB8DE652E7FC16a369A32f8701e",
+          "accum": "0xe63Bc038f4bE3aF3efC6318e3CAc39F60d700526"
+        },
+        "SLOW": {
+          "notary": "0x90d62Da288bF4AD0EaC4bdE5b773DC5e19FFBC0E",
+          "verifier": "0x25aB980579592AB8DE652E7FC16a369A32f8701e",
+          "accum": "0x19791877C020f7Cd5Ca1c97bdd5D268a52dbB0ff"
+        }
+      },
+      "137": {
+        "FAST": {
+          "notary": "0x90d62Da288bF4AD0EaC4bdE5b773DC5e19FFBC0E",
+          "verifier": "0x25aB980579592AB8DE652E7FC16a369A32f8701e",
+          "accum": "0x5D3F469BEA637c5017Df408fF25AA8B9BC6e6400"
+        },
+        "SLOW": {
+          "notary": "0x90d62Da288bF4AD0EaC4bdE5b773DC5e19FFBC0E",
+          "verifier": "0x25aB980579592AB8DE652E7FC16a369A32f8701e",
+          "accum": "0x59511A1b8C5F42936402a13E854F5aa87e64fc71"
+        }
+      }
+    },
+    "Verifier": "0x25aB980579592AB8DE652E7FC16a369A32f8701e"
   },
   "80001": {
-    "Counter": "0xFdBd64cde1D29a3D71871fB450EfbB54B23eB611",
-    "Hasher": "0xf564B59a6f4D6bC0b3367a9dd5EFA037bFf48A69",
-    "SignatureVerifier": "0x409F315ed0c680430fC6515350995f1a334f3bdf",
-    "Socket": "0xaB48847c4A8Abd748FC4A22e5783659255EF7Fd0",
-    "Vault": "0x2a292Abc2F497b8C20dda13309D8ca0053a39879",
-    "SingleDeaccum": "0x2b863CDA83e855078c702233E215884c4d0200dE",
-    "AdminNotary": "0x5a5a25F48742f9d3D0F11b09ED96DBe4E3cCe7b5",
+    "Counter": "0x96c5Af5684AD79d324e0E72968618733908A67D6",
+    "Hasher": "0xdeBE773a9890dB02A03328b0b354984d949b3e77",
+    "SignatureVerifier": "0x13d221a5A418ad0A37621E9cdAA3e29558610C81",
+    "Socket": "0xCa3e85B0c763aDc30eFA2F5fC9BB2bE639d51C6d",
+    "Vault": "0x492728DbAC544Db1E2Aa1203DA3fc13a71DEaD6a",
+    "SingleDeaccum": "0xd91A67768E27Bf2d017D2699c8C65c3e7A4AA01B",
+    "AdminNotary": "0x3983fa7b6312CacFD0C0e2b0ddBe977a9160D55D",
     "integrations": {
       "5": {
         "FAST": {
-          "notary": "0x5a5a25F48742f9d3D0F11b09ED96DBe4E3cCe7b5",
-          "verifier": "0x3eCd7e3Ae0A74d15EcCDc8A047e9190ccA596D04",
-          "accum": "0x729951D37302286D8394e819246c71cc8A790701"
+          "notary": "0x3983fa7b6312CacFD0C0e2b0ddBe977a9160D55D",
+          "verifier": "0xA45b7B7894C9ee7FbBc5C57F4e0DF775aC09D3C0",
+          "accum": "0x7E6FFDCC01EbBB5362b37b0237A9A477c29eD835"
         },
         "SLOW": {
-          "notary": "0x5a5a25F48742f9d3D0F11b09ED96DBe4E3cCe7b5",
-          "verifier": "0x3eCd7e3Ae0A74d15EcCDc8A047e9190ccA596D04",
-          "accum": "0x2B862d70A09bf7e6AcCa5c230b124426781e39A3"
+          "notary": "0x3983fa7b6312CacFD0C0e2b0ddBe977a9160D55D",
+          "verifier": "0xA45b7B7894C9ee7FbBc5C57F4e0DF775aC09D3C0",
+          "accum": "0x696D8a1e7d6B8b63ba01A844e2d616823FcE585f"
         },
         "NATIVE_BRIDGE": {
-          "notary": "0xAE7E5E98607ADbACa4B0dC8Bbe0e04a6b012f9CE",
-          "verifier": "0x6294aBA8c6E0098547e20b5f402A20591a5b4bc0",
-          "accum": "0x421d2AfA1A082ae59d47e844F77365Be08a4c722"
+          "notary": "0xcd0D46d3949bD39C18f8B2e0e88563220C27aBf9",
+          "verifier": "0x3eDD28A2c1B751c69fD352577e0D742016b2bf72",
+          "accum": "0xed015058a44c4a4FDF1378ff3DD24f35686D3Ab5"
+        }
+      },
+      "97": {
+        "FAST": {
+          "notary": "0x3983fa7b6312CacFD0C0e2b0ddBe977a9160D55D",
+          "verifier": "0xA45b7B7894C9ee7FbBc5C57F4e0DF775aC09D3C0",
+          "accum": "0x6DCE19aF1d3340Dfeb44F19767D4626FC76bA0d4"
+        },
+        "SLOW": {
+          "notary": "0x3983fa7b6312CacFD0C0e2b0ddBe977a9160D55D",
+          "verifier": "0xA45b7B7894C9ee7FbBc5C57F4e0DF775aC09D3C0",
+          "accum": "0x9746bb024610d6aeC5Db8a90404573c58325f3F3"
         }
       },
       "420": {
         "FAST": {
-          "notary": "0x5a5a25F48742f9d3D0F11b09ED96DBe4E3cCe7b5",
-          "verifier": "0x3eCd7e3Ae0A74d15EcCDc8A047e9190ccA596D04",
-          "accum": "0x8Fa3310f68b75Ec3Ed03E17013BCFBFacbDC6ac1"
+          "notary": "0x3983fa7b6312CacFD0C0e2b0ddBe977a9160D55D",
+          "verifier": "0xA45b7B7894C9ee7FbBc5C57F4e0DF775aC09D3C0",
+          "accum": "0x4C5e9c36Cfa0DFDb3f9a945a5957FBbAFadaBd22"
         },
         "SLOW": {
-          "notary": "0x5a5a25F48742f9d3D0F11b09ED96DBe4E3cCe7b5",
-          "verifier": "0x3eCd7e3Ae0A74d15EcCDc8A047e9190ccA596D04",
-          "accum": "0xd0015Bd355A58A10642D456eCa4B315fC634A2eE"
+          "notary": "0x3983fa7b6312CacFD0C0e2b0ddBe977a9160D55D",
+          "verifier": "0xA45b7B7894C9ee7FbBc5C57F4e0DF775aC09D3C0",
+          "accum": "0x3806223ff349973e18A4fFD121dF24c4c6C7039d"
         }
       },
       "421613": {
         "FAST": {
-          "notary": "0x5a5a25F48742f9d3D0F11b09ED96DBe4E3cCe7b5",
-          "verifier": "0x3eCd7e3Ae0A74d15EcCDc8A047e9190ccA596D04",
-          "accum": "0xBc10eD760DB98F2107c7F1ed0153AE379Df380D1"
+          "notary": "0x3983fa7b6312CacFD0C0e2b0ddBe977a9160D55D",
+          "verifier": "0xA45b7B7894C9ee7FbBc5C57F4e0DF775aC09D3C0",
+          "accum": "0x47210b800Fbebf01Adb9Ae73bfc00caE15Be8Ab9"
         },
         "SLOW": {
-          "notary": "0x5a5a25F48742f9d3D0F11b09ED96DBe4E3cCe7b5",
-          "verifier": "0x3eCd7e3Ae0A74d15EcCDc8A047e9190ccA596D04",
-          "accum": "0x10cfBbFaF37AD46aDF4F783D02Ac57806eaD620b"
+          "notary": "0x3983fa7b6312CacFD0C0e2b0ddBe977a9160D55D",
+          "verifier": "0xA45b7B7894C9ee7FbBc5C57F4e0DF775aC09D3C0",
+          "accum": "0x0101c64Bfaf2Bb77933b8881343dfCe69D2bDc1D"
         }
       }
     },
-    "Verifier": "0x3eCd7e3Ae0A74d15EcCDc8A047e9190ccA596D04"
+    "Verifier": "0xA45b7B7894C9ee7FbBc5C57F4e0DF775aC09D3C0"
   },
   "421613": {
-    "Counter": "0x87a27a367cA286C4307b08FDFd596065E7690E82",
-    "Hasher": "0x5800895Aa99AD72F3CfBb4A86f13ea89008f6F80",
-    "SignatureVerifier": "0x8428f33bFd58AdD8c02E4E874277939C935cdA8B",
-    "Socket": "0x2fdfDc2CC59E2248457f965B71E2e27BD072d093",
-    "Vault": "0x2A668F68824EDc369972baBEBCB62290CcAAaa9f",
-    "SingleDeaccum": "0xaFb0eF92Dee5b928E0cAe8b950557c4675B7FEa6",
-    "AdminNotary": "0x5d2A7185F0f03ED88067b9Fa02252946fccaA0B8",
+    "Counter": "0xF694B56C91a729d16a726f4b119A6EB421B5E2A7",
+    "Hasher": "0x2B862d70A09bf7e6AcCa5c230b124426781e39A3",
+    "SignatureVerifier": "0x8b2cae72dc1EEB894A132b26958012B40e36B481",
+    "Socket": "0x0C51CE3101F4f43B598691684A4150f7fFA56caF",
+    "Vault": "0x52be561Fa9900c0B99578D30594B84A435739164",
+    "SingleDeaccum": "0xAE7E5E98607ADbACa4B0dC8Bbe0e04a6b012f9CE",
+    "AdminNotary": "0x421d2AfA1A082ae59d47e844F77365Be08a4c722",
     "integrations": {
       "5": {
         "FAST": {
-          "notary": "0x5d2A7185F0f03ED88067b9Fa02252946fccaA0B8",
-          "verifier": "0x0cc9fa871FCBC815c64304238A85ec02930F42ab",
-          "accum": "0x4c8D9ab0F4f6A959092248982bd58D2C964957d6"
+          "notary": "0x421d2AfA1A082ae59d47e844F77365Be08a4c722",
+          "verifier": "0xBc10eD760DB98F2107c7F1ed0153AE379Df380D1",
+          "accum": "0x06845FE0597cD0027df2d62B152B17E5eBaE22DB"
         },
         "SLOW": {
-          "notary": "0x5d2A7185F0f03ED88067b9Fa02252946fccaA0B8",
-          "verifier": "0x0cc9fa871FCBC815c64304238A85ec02930F42ab",
-          "accum": "0x2521b29FD8d3787Ab42141f55F6b462E6115C737"
+          "notary": "0x421d2AfA1A082ae59d47e844F77365Be08a4c722",
+          "verifier": "0xBc10eD760DB98F2107c7F1ed0153AE379Df380D1",
+          "accum": "0x419628056B54d10933Df7065284f106001a1D24a"
         },
         "NATIVE_BRIDGE": {
-          "notary": "0xc9539fdF8003CAfE7b540E1156F675C11c860e31",
-          "verifier": "0x752e803224597Dff351EB58ebdad7178C01BEDb4",
-          "accum": "0xf20dE647B5490166A56bdCf34ed7f86C3F14fE42"
+          "notary": "0xCEB721BF38F373FBf60dB0816d32e7CDd557B4E4",
+          "verifier": "0xd0e3066e9a9C9834c67D8c6570d9F58552e7a0DE",
+          "accum": "0xE7F78bE5F1BC60A1A92F9fD4633B20d8E3E571c3"
+        }
+      },
+      "97": {
+        "FAST": {
+          "notary": "0x421d2AfA1A082ae59d47e844F77365Be08a4c722",
+          "verifier": "0xBc10eD760DB98F2107c7F1ed0153AE379Df380D1",
+          "accum": "0x83583EE80632AC6b33A8411BF8602d2f3FDfeaa5"
+        },
+        "SLOW": {
+          "notary": "0x421d2AfA1A082ae59d47e844F77365Be08a4c722",
+          "verifier": "0xBc10eD760DB98F2107c7F1ed0153AE379Df380D1",
+          "accum": "0xF6145925eEb31AFD941D845E4dEC5707b9E4F167"
         }
       },
       "420": {
         "FAST": {
-          "notary": "0x5d2A7185F0f03ED88067b9Fa02252946fccaA0B8",
-          "verifier": "0x0cc9fa871FCBC815c64304238A85ec02930F42ab",
-          "accum": "0x262020858Cc54Adf0ef8154d517DBA6F4F7dBcF1"
+          "notary": "0x421d2AfA1A082ae59d47e844F77365Be08a4c722",
+          "verifier": "0xBc10eD760DB98F2107c7F1ed0153AE379Df380D1",
+          "accum": "0x70ee25aE4896533E49F8c564E1196EB242f204c6"
         },
         "SLOW": {
-          "notary": "0x5d2A7185F0f03ED88067b9Fa02252946fccaA0B8",
-          "verifier": "0x0cc9fa871FCBC815c64304238A85ec02930F42ab",
-          "accum": "0x1774909Fb90E1Fb5cc6bE46EAE1daD59C68F8c90"
+          "notary": "0x421d2AfA1A082ae59d47e844F77365Be08a4c722",
+          "verifier": "0xBc10eD760DB98F2107c7F1ed0153AE379Df380D1",
+          "accum": "0x5eA828B2a15bc5b01c9ecBCA05F214e75BC07609"
         }
       },
       "80001": {
         "FAST": {
-          "notary": "0x5d2A7185F0f03ED88067b9Fa02252946fccaA0B8",
-          "verifier": "0x0cc9fa871FCBC815c64304238A85ec02930F42ab",
-          "accum": "0x7D84061D74b88b104A5C15536E98D953564484B3"
+          "notary": "0x421d2AfA1A082ae59d47e844F77365Be08a4c722",
+          "verifier": "0xBc10eD760DB98F2107c7F1ed0153AE379Df380D1",
+          "accum": "0x0c0Df3BD6b1C3C2b26b56836be50b10b51B7C64d"
         },
         "SLOW": {
-          "notary": "0x5d2A7185F0f03ED88067b9Fa02252946fccaA0B8",
-          "verifier": "0x0cc9fa871FCBC815c64304238A85ec02930F42ab",
-          "accum": "0xc69eA128BB10fA57A8404D7c8d93b3340d89EEc7"
+          "notary": "0x421d2AfA1A082ae59d47e844F77365Be08a4c722",
+          "verifier": "0xBc10eD760DB98F2107c7F1ed0153AE379Df380D1",
+          "accum": "0xf3344A8ca0b512b4e0744B6FFD4bF4A238A67722"
         }
       }
     },
-    "Verifier": "0x0cc9fa871FCBC815c64304238A85ec02930F42ab"
+    "Verifier": "0xBc10eD760DB98F2107c7F1ed0153AE379Df380D1"
   }
 }
