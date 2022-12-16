@@ -111,16 +111,112 @@ export const config = {
       "configForCounter": IntegrationTypes.fastIntegration
     },
   ],
+  bsc: [
+    {
+      "remoteChain": "polygon-mainnet",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
+    {
+      "remoteChain": "optimism",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
+    {
+      "remoteChain": "arbitrum",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
+    {
+      "remoteChain": "mainnet",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
+  ],
   "polygon-mainnet": [
     {
       "remoteChain": "bsc",
       "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
       "configForCounter": IntegrationTypes.fastIntegration
     },
+    {
+      "remoteChain": "mainnet",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration, IntegrationTypes.nativeIntegration],
+      "configForCounter": IntegrationTypes.nativeIntegration
+    },
+    {
+      "remoteChain": "optimism",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
+    {
+      "remoteChain": "arbitrum",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
   ],
-  bsc: [
+  mainnet: [
     {
       "remoteChain": "polygon-mainnet",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration, IntegrationTypes.nativeIntegration],
+      "configForCounter": IntegrationTypes.nativeIntegration
+    },
+    {
+      "remoteChain": "bsc",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
+    {
+      "remoteChain": "optimism",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration, IntegrationTypes.nativeIntegration],
+      "configForCounter": IntegrationTypes.nativeIntegration
+    },
+    {
+      "remoteChain": "arbitrum",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration, IntegrationTypes.nativeIntegration],
+      "configForCounter": IntegrationTypes.nativeIntegration
+    },
+  ],
+  optimism: [
+    {
+      "remoteChain": "polygon-mainnet",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
+    {
+      "remoteChain": "mainnet",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration, IntegrationTypes.nativeIntegration],
+      "configForCounter": IntegrationTypes.nativeIntegration
+    },
+    {
+      "remoteChain": "bsc",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
+    {
+      "remoteChain": "arbitrum",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
+  ],
+  arbitrum: [
+    {
+      "remoteChain": "polygon-mainnet",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
+    {
+      "remoteChain": "mainnet",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration, IntegrationTypes.nativeIntegration],
+      "configForCounter": IntegrationTypes.nativeIntegration
+    },
+    {
+      "remoteChain": "optimism",
+      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
+      "configForCounter": IntegrationTypes.fastIntegration
+    },
+    {
+      "remoteChain": "bsc",
       "config": [IntegrationTypes.fastIntegration, IntegrationTypes.slowIntegration],
       "configForCounter": IntegrationTypes.fastIntegration
     },
