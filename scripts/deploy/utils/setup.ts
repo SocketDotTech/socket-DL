@@ -1,7 +1,7 @@
 import fs from "fs";
 import hre from "hardhat";
 
-import { constants, Contract } from "ethers";
+import { constants, Contract, ContractTransaction, Transaction, utils } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import {
@@ -47,33 +47,72 @@ const setupContracts = async (
 
   await hre.changeNetwork(remoteChain);
   const signers = await getSigners();
-  let updateRemoteNotaryTx = await remoteNotary
+  let updateRemoteNotaryTx: ContractTransaction = await remoteNotary
     .connect(signers.socketSigner)
     .updateRemoteNotary(localNotary.address);
-  await updateRemoteNotaryTx.wait();
 
-  // set fxchild for l2 to l1 comm
-  if (notary === "PolygonL1Notary") {
-    const setFxChildTunnelTx = await remoteNotary
-      .connect(signers.socketSigner)
-      .setFxChildTunnel(localNotary.address);
-    await setFxChildTunnelTx.wait();
-  }
+  console.log(`Sending updateRemoteNotary tx on ${remoteChain}: ${updateRemoteNotaryTx.hash}`);
+  await updateRemoteNotaryTx.wait();
 
   await hre.changeNetwork(localChain);
   updateRemoteNotaryTx = await localNotary
     .connect(socketSigner)
     .updateRemoteNotary(remoteNotary.address);
+
+  console.log(`Sending updateRemoteNotary tx on ${localChain}: ${updateRemoteNotaryTx.hash}`);
   await updateRemoteNotaryTx.wait();
 
-  // set fxchild for l2 to l1 comm
-  if (localNotaryName === "PolygonL1Notary") {
-    const setFxChildTunnelTx = await localNotary
-      .connect(socketSigner)
-      .setFxChildTunnel(remoteNotary.address);
-    await setFxChildTunnelTx.wait();
-  }
+  if (localChain === "polygon-mumbai" || remoteChain === "polygon-mumbai") await setupPolygonNotaries(localNotaryName, notary, localNotary, remoteNotary);
 };
+
+const setupPolygonNotaries = async (
+  localNotaryName: string,
+  remoteNotaryName: string,
+  localNotary: Contract,
+  remoteNotary: Contract,
+) => {
+  try {
+    await hre.changeNetwork(remoteChain);
+    let signers = await getSigners();
+    if (remoteNotaryName === "PolygonL1Notary") {
+      const setFxChildTunnelTx = await remoteNotary
+        .connect(signers.socketSigner)
+        .setFxChildTunnel(localNotary.address);
+
+      console.log(`Sending setFxChildTunnelTx tx on ${remoteChain}: ${setFxChildTunnelTx.hash}`);
+      await setFxChildTunnelTx.wait();
+
+    } else if (remoteNotaryName === "PolygonL2Notary") {
+      const setFxRootTunnelTx = await remoteNotary
+        .connect(signers.socketSigner)
+        .setFxRootTunnel(localNotary.address);
+
+      console.log(`Sending setFxRootTunnelTx tx on ${remoteChain}: ${setFxRootTunnelTx.hash}`);
+      await setFxRootTunnelTx.wait();
+    }
+
+    await hre.changeNetwork(localChain);
+    signers = await getSigners();
+    if (localNotaryName === "PolygonL1Notary") {
+      const setFxChildTunnelTx = await localNotary.connect(signers.socketSigner)
+        .setFxChildTunnel(remoteNotary.address);
+
+      console.log(`Sending setFxChildTunnelTx tx on ${localChain}: ${setFxChildTunnelTx.hash}`);
+      await setFxChildTunnelTx.wait();
+
+    } else if (localNotaryName === "PolygonL2Notary") {
+      const setFxRootTunnelTx = await localNotary.connect(signers.socketSigner)
+        .setFxRootTunnel(remoteNotary.address);
+
+      console.log(`Sending setFxRootTunnelTx tx on ${localChain}: ${setFxRootTunnelTx.hash}`);
+      await setFxRootTunnelTx.wait();
+    }
+  } catch (error) {
+    throw new Error(
+      `Error while setting up polygon notaries: ${error}`
+    );
+  }
+}
 
 const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
   try {
@@ -95,10 +134,6 @@ const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
         remoteNotary,
         socketSigner
       );
-      const grantAttesterRoleTx = await notary
-        .connect(socketSigner)
-        .grantAttesterRole(chainIds[remoteChain], attesterAddress[localChain]);
-      await grantAttesterRoleTx.wait();
 
       if (notaryName === "AdminNotary") {
         localConfig[notaryName] = notary.address;
@@ -118,6 +153,17 @@ const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
           notary.address
         );
     }
+
+    const hasRole = await notary.hasRole(utils.hexZeroPad(utils.hexlify(chainIds[remoteChain]), 32), attesterAddress[localChain]);
+    if (!hasRole) {
+      const grantAttesterRoleTx = await notary
+        .connect(socketSigner)
+        .grantAttesterRole(chainIds[remoteChain], attesterAddress[localChain]);
+
+      console.log(`Sending grantAttesterRoleTx on ${localChain}: ${grantAttesterRoleTx.hash}`);
+      await grantAttesterRoleTx.wait();
+    }
+
     return notary;
   } catch (error) {
     throw new Error(
@@ -272,8 +318,9 @@ export const setupConfig = async (
   if (
     configurationType !== IntegrationTypes.fastIntegration &&
     configurationType !== IntegrationTypes.slowIntegration
-  )
+  ) {
     await setupContracts(notary, contracts.notary, socketSigner);
+  }
 
   // add config to socket
   console.log("Setting config in Socket");
@@ -290,6 +337,7 @@ export const setupConfig = async (
         verifier.address,
         configurationType
       );
+    console.log(`Sending addConfigTx on ${localChain}: ${addConfigTx.hash}`);
     await addConfigTx.wait();
     await storeAddresses(localConfig, chainIds[localChain]);
   }

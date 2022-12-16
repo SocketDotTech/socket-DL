@@ -6,7 +6,6 @@ import { L1ToL2MessageGasEstimator } from "@arbitrum/sdk/dist/lib/message/L1ToL2
 import { L1TransactionReceipt, L1ToL2MessageStatus } from "@arbitrum/sdk";
 
 import { getInstance, deployedAddressPath } from "../../deploy/utils";
-import { ChainSocketAddresses } from "../../deploy/types";
 import { packPacketId } from "../../deploy/scripts/packetId";
 import { chainIds, getJsonRpcUrl, contractNames } from "../../constants";
 
@@ -14,7 +13,7 @@ import { chainIds, getJsonRpcUrl, contractNames } from "../../constants";
 const localChain = "goerli";
 const remoteChain = "arbitrum-goerli";
 const outboundTx =
-  "0xf42337a0f53a8572d77082b3c19bb33949c8f5de46b9fdac7a8d41436e666733";
+  "0x6a2da0a61caf7f724125e5a2b90431a3c0d8f6977450c1ea98f983847f657690";
 
 const walletPrivateKey = process.env.DEVNET_PRIVKEY;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
@@ -117,8 +116,8 @@ export const main = async () => {
       throw new Error("Deployed Addresses not found");
     }
 
-    const l1Config: ChainSocketAddresses = addresses[chainIds[localChain]];
-    const l2Config: ChainSocketAddresses = addresses[chainIds[remoteChain]];
+    const l1Config = addresses[chainIds[localChain]];
+    const l2Config = addresses[chainIds[remoteChain]];
 
     // get socket contracts for both chains
     // counter l1, counter l2, seal, execute
@@ -133,16 +132,9 @@ export const main = async () => {
     const l1Notary: Contract = (
       await getInstance(
         contracts.notary,
-        l1Config[contracts.notary]?.[chainIds[remoteChain]]
+        l1Config["integrations"]?.[chainIds[remoteChain]]?.[contracts.integrationType]?.["notary"]
       )
     ).connect(l1Wallet);
-
-    const l2Counter: Contract = (
-      await getInstance("Counter", l2Config["Counter"])
-    ).connect(l2Wallet);
-    const l2Socket: Contract = (
-      await getInstance("Socket", l2Config["Socket"])
-    ).connect(l2Wallet);
 
     const outboundTxReceipt = await l1Provider.getTransactionReceipt(
       outboundTx
@@ -167,13 +159,12 @@ export const main = async () => {
     );
 
     const signature = await l1Wallet.signMessage(arrayify(digest));
-
     const { bridgeParams, callValue } = await getBridgeParams(
       packedPacketId,
       newRootHash,
       "0x",
-      l1Accum.address,
-      l2Config["ArbitrumNotary"]?.[chainIds[localChain]]
+      l1Notary.address,
+      l2Config["integrations"]?.[chainIds[localChain]]?.[contracts.integrationType]?.["notary"]
     );
 
     console.log(

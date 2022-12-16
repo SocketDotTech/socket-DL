@@ -13,9 +13,9 @@ export const chainIds = {
   hardhat: 31337,
   mainnet: 1,
   "bsc-testnet": 97,
-  "arbitrum-mainnet": 42161,
+  "arbitrum": 42161,
   "arbitrum-goerli": 421613,
-  "optimism-mainnet": 10,
+  "optimism": 10,
   "optimism-goerli": 420,
   "polygon-mainnet": 137,
   "polygon-mumbai": 80001,
@@ -40,7 +40,14 @@ export function getJsonRpcUrl(chain: keyof typeof chainIds): string {
       jsonRpcUrl = "https://bsc-dataseed1.binance.org";
       break;
     case "bsc-testnet":
-      jsonRpcUrl = " https://data-seed-prebsc-1-s1.binance.org:8545";
+      jsonRpcUrl = "https://data-seed-prebsc-1-s1.binance.org:8545";
+      break;
+    case "optimism":
+      jsonRpcUrl = "https://mainnet.optimism.io";
+      break;
+    case "arbitrum":
+      jsonRpcUrl = "https://arb1.arbitrum.io/rpc ";
+      break;
     default:
       jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
   }

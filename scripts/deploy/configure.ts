@@ -32,9 +32,6 @@ export const main = async () => {
         }
 
         // add a config to plugs on local and remote
-        console.log(
-          `Setting config ${chainSetups[index]["configForCounter"]} for ${chainIds[remoteChain]} chain id!`
-        );
         const counter: Contract = await getInstance(
           "Counter",
           counters.localCounter
@@ -46,6 +43,10 @@ export const main = async () => {
             counters.remoteCounter,
             chainSetups[index]["configForCounter"]
           );
+
+        console.log(
+          `Setting config ${chainSetups[index]["configForCounter"]} for ${chainIds[remoteChain]} chain id! Transaction Hash: ${tx.hash}`
+        );
         await tx.wait();
       }
     }

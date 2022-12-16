@@ -4,7 +4,7 @@ export const bridgeConsts = {
   inbox: {
     mainnet: "0x4Dbd4fc535Ac27206064B68FfCf827b0A60BAB3f",
     goerli: "0x6BEbC4925716945D46F0Ec336D5C2564F419682C",
-    "arbitrum-mainnet": ethers.constants.AddressZero,
+    "arbitrum": ethers.constants.AddressZero,
     "arbitrum-goerli": ethers.constants.AddressZero,
   },
   fxChild: {
