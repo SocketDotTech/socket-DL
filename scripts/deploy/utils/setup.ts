@@ -298,6 +298,7 @@ export const setupConfig = async (
     socketSigner
   );
   console.log(`Notary deployed at: ${notary.address}`)
+  await storeAddresses(localConfig, chainIds[localChain]);
 
   let verifier = await deployLocalVerifier(
     configurationType,
@@ -306,6 +307,7 @@ export const setupConfig = async (
     socketSigner
   );
   console.log(`Verifier deployed at: ${verifier.address}`)
+  await storeAddresses(localConfig, chainIds[localChain]);
 
   let accum = await deployLocalAccum(
     configurationType,
@@ -313,6 +315,7 @@ export const setupConfig = async (
     socketSigner
   );
   console.log(`Accum deployed at: ${accum.address}`)
+  await storeAddresses(localConfig, chainIds[localChain]);
 
   // optional notary and accum settings
   if (
