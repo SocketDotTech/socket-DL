@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./interfaces/IAccumulator.sol";
-import "./interfaces/IDeaccumulator.sol";
-import "./interfaces/IVerifier.sol";
-import "./interfaces/IVault.sol";
-import "./interfaces/IPlug.sol";
-import "./interfaces/IHasher.sol";
-import "./utils/ReentrancyGuard.sol";
+import "../interfaces/IDeaccumulator.sol";
+import "../interfaces/IVerifier.sol";
+import "../interfaces/IPlug.sol";
 
-import "./SocketConfig.sol";
+import "./SocketLocal.sol";
 
-contract Socket is SocketConfig, ReentrancyGuard {
+contract Socket is SocketLocal {
+     enum PacketStatus {
+        NOT_PROPOSED,
+        PROPOSED
+    }
+
     enum MessageStatus {
         NOT_EXECUTED,
         SUCCESS,
@@ -20,97 +21,59 @@ contract Socket is SocketConfig, ReentrancyGuard {
 
     error InvalidProof();
     error InvalidRetry();
-
     error VerificationFailed();
     error MessageAlreadyExecuted();
     error ExecutorNotFound();
+    error AlreadyAttested();
 
-    uint256 public immutable _chainSlug;
-    // incrementing nonce, should be handled in next socket version.
-    uint256 public _messageCount;
+    address public proposer;
+    // keccak256("EXECUTOR")
+    bytes32 private constant EXECUTOR_ROLE =
+        0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
 
-    bytes32 private constant EXECUTOR_ROLE = keccak256("EXECUTOR");
     // msgId => executorAddress
     mapping(uint256 => address) public executor;
     // msgId => message status
-    mapping(uint256 => MessageStatus) private _messagesStatus;
+    mapping(uint256 => MessageStatus) public messageStatus;
+    // accumAddr|chainSlug|packetId
+    mapping(uint256 => bytes32) public remoteRoots;
 
-    IHasher public hasher;
-    IVault public vault;
+    /**
+     * @notice emits the packet details when proposed at remote
+     * @param attester address of attester
+     * @param packetId packet id
+     * @param root packet root
+     */
+    event PacketAttested(
+        address indexed attester,
+        uint256 indexed packetId,
+        bytes32 root
+    );
+
+    /**
+     * @notice emits the root details when root is replaced by owner
+     * @param packetId packet id
+     * @param oldRoot old root
+     * @param newRoot old root
+     */
+    event PacketRootUpdated(uint256 packetId, bytes32 oldRoot, bytes32 newRoot);
 
     /**
      * @param chainSlug_ socket chain slug (should not be more than uint32)
      */
-    constructor(uint32 chainSlug_, address hasher_, address vault_) {
-        _setHasher(hasher_);
-        _setVault(vault_);
+    constructor(
+        uint32 chainSlug_,
+        address hasher_,
+        address signatureVerifier_,
+        address vault_
+    ) SocketLocal(chainSlug_, hasher_, signatureVerifier_, vault_) {}
 
-        _chainSlug = chainSlug_;
-    }
+    function attest(uint256 packetId_, bytes32 root_) external {
+        if (msg.sender != proposer) revert InvalidAttester();
+        if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
+        remoteRoots[packetId_] = root_;
 
-    function setHasher(address hasher_) external onlyOwner {
-        _setHasher(hasher_);
-    }
-
-    function setVault(address vault_) external onlyOwner {
-        _setVault(vault_);
-    }
-
-    /**
-     * @notice registers a message
-     * @dev Packs the message and includes it in a packet with accumulator
-     * @param remoteChainSlug_ the remote chain slug
-     * @param msgGasLimit_ the gas limit needed to execute the payload on remote
-     * @param payload_ the data which is needed by plug at inbound call on remote
-     */
-    function outbound(
-        uint256 remoteChainSlug_,
-        uint256 msgGasLimit_,
-        bytes calldata payload_
-    ) external payable override {
-        PlugConfig memory plugConfig = plugConfigs[msg.sender][
-            remoteChainSlug_
-        ];
-
-        // Packs the local plug, local chain slug, remote chain slug and nonce
-        // _messageCount++ will take care of msg id overflow as well
-        // msgId(256) = localChainSlug(32) | nonce(224)
-        uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
-
-        vault.deductFee{value: msg.value}(
-            remoteChainSlug_,
-            plugConfig.outboundIntegrationType
-        );
-
-        bytes32 packedMessage = hasher.packMessage(
-            _chainSlug,
-            msg.sender,
-            remoteChainSlug_,
-            plugConfig.remotePlug,
-            msgId,
-            msgGasLimit_,
-            payload_
-        );
-
-        IAccumulator(plugConfig.accum).addPackedMessage(packedMessage);
-        emit MessageTransmitted(
-            _chainSlug,
-            msg.sender,
-            remoteChainSlug_,
-            plugConfig.remotePlug,
-            msgId,
-            msgGasLimit_,
-            msg.value,
-            payload_
-        );
-    }
-
-    function retry(
-        uint256 msgId_,
-        uint256 newMsgGasLimit_
-    ) external payable override {
-        vault.deductRetryFee{value: msg.value}();
-        emit MessageRetried(msgId_, newMsgGasLimit_, msg.value);
+        emit PacketAttested(msg.sender, packetId_, root_);
     }
 
     /**
@@ -139,7 +102,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         bytes32 packedMessage = hasher.packMessage(
             verifyParams_.remoteChainSlug,
             plugConfig.remotePlug,
-            _chainSlug,
+            chainSlug,
             localPlug,
             msgId,
             msgGasLimit,
@@ -165,7 +128,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         ISocket.VerificationParams calldata verifyParams_
     ) external override nonReentrant {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
-        if (_messagesStatus[msgId] != MessageStatus.FAILED)
+        if (messageStatus[msgId] != MessageStatus.FAILED)
             revert InvalidRetry();
         executor[msgId] = msg.sender;
 
@@ -176,7 +139,7 @@ contract Socket is SocketConfig, ReentrancyGuard {
         bytes32 packedMessage = hasher.packMessage(
             verifyParams_.remoteChainSlug,
             plugConfig.remotePlug,
-            _chainSlug,
+            chainSlug,
             localPlug,
             msgId,
             msgGasLimit,
@@ -225,17 +188,32 @@ contract Socket is SocketConfig, ReentrancyGuard {
         try
             IPlug(localPlug).inbound{gas: msgGasLimit}(remoteChainSlug, payload)
         {
-            _messagesStatus[msgId] = MessageStatus.SUCCESS;
+            messageStatus[msgId] = MessageStatus.SUCCESS;
             emit ExecutionSuccess(msgId);
         } catch Error(string memory reason) {
             // catch failing revert() and require()
-            _messagesStatus[msgId] = MessageStatus.FAILED;
+            messageStatus[msgId] = MessageStatus.FAILED;
             emit ExecutionFailed(msgId, reason);
         } catch (bytes memory reason) {
             // catch failing assert()
-            _messagesStatus[msgId] = MessageStatus.FAILED;
+            messageStatus[msgId] = MessageStatus.FAILED;
             emit ExecutionFailedBytes(msgId, reason);
         }
+    }
+
+    /**
+     * @notice updates root for given packet id
+     * @param packetId_ id of packet to be updated
+     * @param newRoot_ new root
+     */
+    function updatePacketRoot(
+        uint256 packetId_,
+        bytes32 newRoot_
+    ) external onlyOwner {
+        bytes32 oldRoot = remoteRoots[packetId_];
+        remoteRoots[packetId_] = newRoot_;
+
+        emit PacketRootUpdated(packetId_, oldRoot, newRoot_);
     }
 
     /**
@@ -254,21 +232,12 @@ contract Socket is SocketConfig, ReentrancyGuard {
         _revokeRole(EXECUTOR_ROLE, executor_);
     }
 
-    function _setHasher(address hasher_) private {
-        hasher = IHasher(hasher_);
-    }
-
-    function _setVault(address vault_) private {
-        vault = IVault(vault_);
-    }
-
-    function chainSlug() external view returns (uint256) {
-        return _chainSlug;
-    }
-
-    function getMessageStatus(
-        uint256 msgId_
-    ) external view returns (MessageStatus) {
-        return _messagesStatus[msgId_];
+    function getPacketStatus(
+        uint256 packetId_
+    ) external view returns (PacketStatus status) {
+        return
+            remoteRoots[packetId_] == bytes32(0)
+                ? PacketStatus.NOT_PROPOSED
+                : PacketStatus.PROPOSED;
     }
 }
