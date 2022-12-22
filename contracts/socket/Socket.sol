@@ -8,7 +8,7 @@ import "../interfaces/IPlug.sol";
 import "./SocketLocal.sol";
 
 contract Socket is SocketLocal {
-     enum PacketStatus {
+    enum PacketStatus {
         NOT_PROPOSED,
         PROPOSED
     }
@@ -128,8 +128,7 @@ contract Socket is SocketLocal {
         ISocket.VerificationParams calldata verifyParams_
     ) external override nonReentrant {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
-        if (messageStatus[msgId] != MessageStatus.FAILED)
-            revert InvalidRetry();
+        if (messageStatus[msgId] != MessageStatus.FAILED) revert InvalidRetry();
         executor[msgId] = msg.sender;
 
         PlugConfig memory plugConfig = plugConfigs[localPlug][

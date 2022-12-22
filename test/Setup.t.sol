@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../contracts/Socket.sol";
+import "../contracts/socket/Socket.sol";
 import "../contracts/notaries/AdminNotary.sol";
 import "../contracts/accumulators/SingleAccum.sol";
 import "../contracts/deaccumulators/SingleDeaccum.sol";
@@ -112,6 +112,7 @@ contract Setup is Test {
 
         (cc.hasher__, cc.vault__, cc.socket__) = _deploySocket(
             cc.chainSlug,
+            address(cc.sigVerifier__),
             _socketOwner
         );
 
@@ -166,6 +167,7 @@ contract Setup is Test {
 
     function _deploySocket(
         uint256 chainSlug_,
+        address sigVerifier,
         address deployer_
     ) internal returns (Hasher hasher__, Vault vault__, Socket socket__) {
         vm.startPrank(deployer_);
@@ -174,6 +176,7 @@ contract Setup is Test {
         socket__ = new Socket(
             uint32(chainSlug_),
             address(hasher__),
+            sigVerifier,
             address(vault__)
         );
 
