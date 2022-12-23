@@ -1,11 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
+// import "../interfaces/IVerifier.sol";
 import "../interfaces/IDeaccumulator.sol";
-import "../interfaces/IVerifier.sol";
 import "../interfaces/IPlug.sol";
 
 import "./SocketLocal.sol";
+
+interface IVerifier {
+    /**
+     * @notice verifies if the packet satisfies needed checks before execution
+     * @param root_ root_
+     */
+    function verifyPacket(
+        bytes32 root_,
+        bytes32 integrationType_
+    ) external view returns (bool);
+}
 
 contract Socket is SocketLocal {
     enum PacketStatus {
@@ -25,8 +36,8 @@ contract Socket is SocketLocal {
     error MessageAlreadyExecuted();
     error ExecutorNotFound();
     error AlreadyAttested();
+    error RootNotFound();
 
-    address public proposer;
     // keccak256("EXECUTOR")
     bytes32 private constant EXECUTOR_ROLE =
         0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
@@ -51,21 +62,38 @@ contract Socket is SocketLocal {
      */
     event PacketRootRemoved(bytes32 oldRoot);
 
-    /**
-     * @param chainSlug_ socket chain slug (should not be more than uint32)
-     */
     constructor(
         uint32 chainSlug_,
         address hasher_,
         address signatureVerifier_,
+        address transmitManager_,
         address vault_
-    ) SocketLocal(chainSlug_, hasher_, signatureVerifier_, vault_) {}
+    ) {
+        hasher = IHasher(hasher_);
+        signatureVerifier = ISignatureVerifier(signatureVerifier_);
+        transmitManager = ITransmitManager(transmitManager_);
+        vault = IVault(vault_);
 
-    function attest(bytes32 root_) external {
-        if (msg.sender != proposer) revert InvalidAttester();
+        chainSlug = chainSlug_;
+    }
+
+    // TODO: taking sibling chain input is prone to bug as we saw in previous version
+    function propose(
+        uint256 siblingChainSlug_,
+        bytes32 root_,
+        bytes calldata signature_
+    ) external {
         if (remoteRoots[root_]) revert AlreadyAttested();
-        remoteRoots[root_] = true;
+        if (
+            !transmitManager.checkTransmitter(
+                chainSlug,
+                siblingChainSlug_,
+                root_,
+                signature_
+            )
+        ) revert InvalidAttester();
 
+        remoteRoots[root_] = true;
         emit PacketAttested(msg.sender, root_);
     }
 
@@ -85,7 +113,10 @@ contract Socket is SocketLocal {
         ISocket.VerificationParams calldata verifyParams_
     ) external override nonReentrant {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
+        if (!remoteRoots[verifyParams_.root]) revert RootNotFound();
         if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
+
+        // todo: to decide if this should be just a bool (was added for fees here)
         executor[msgId] = msg.sender;
 
         PlugConfig memory plugConfig = plugConfigs[localPlug][
@@ -107,42 +138,6 @@ contract Socket is SocketLocal {
             localPlug,
             verifyParams_.remoteChainSlug,
             msgGasLimit,
-            msgId,
-            payload
-        );
-    }
-
-    function retryExecute(
-        uint256 newMsgGasLimit,
-        uint256 msgId,
-        uint256 msgGasLimit,
-        address localPlug,
-        bytes calldata payload,
-        ISocket.VerificationParams calldata verifyParams_
-    ) external override nonReentrant {
-        if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
-        if (messageStatus[msgId] != MessageStatus.FAILED) revert InvalidRetry();
-        executor[msgId] = msg.sender;
-
-        PlugConfig memory plugConfig = plugConfigs[localPlug][
-            verifyParams_.remoteChainSlug
-        ];
-
-        bytes32 packedMessage = hasher.packMessage(
-            verifyParams_.remoteChainSlug,
-            plugConfig.remotePlug,
-            chainSlug,
-            localPlug,
-            msgId,
-            msgGasLimit,
-            payload
-        );
-
-        _verify(packedMessage, plugConfig, verifyParams_);
-        _execute(
-            localPlug,
-            verifyParams_.remoteChainSlug,
-            newMsgGasLimit,
             msgId,
             payload
         );
@@ -153,17 +148,16 @@ contract Socket is SocketLocal {
         PlugConfig memory plugConfig,
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
-        (bool isVerified, bytes32 root) = IVerifier(plugConfig.verifier)
-            .verifyPacket(
-                verifyParams_.packetId,
-                plugConfig.inboundIntegrationType
-            );
+        // TODO: do we need inboundIntegrationType at verifier with switchboards?
+        bool isVerified = IVerifier(plugConfig.verifier).verifyPacket(
+            verifyParams_.root,
+            plugConfig.inboundIntegrationType
+        );
 
         if (!isVerified) revert VerificationFailed();
-
         if (
             !IDeaccumulator(plugConfig.deaccum).verifyMessageInclusion(
-                root,
+                verifyParams_.root,
                 packedMessage,
                 verifyParams_.deaccumProof
             )

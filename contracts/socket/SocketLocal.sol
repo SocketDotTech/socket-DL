@@ -7,6 +7,7 @@ import "../interfaces/ISignatureVerifier.sol";
 import "../utils/ReentrancyGuard.sol";
 import "./SocketConfig.sol";
 
+// TODO: replace it with IAccumulator in interfaces/
 interface IAccumulator {
     /**
      * @notice adds the packed message to a packet
@@ -44,46 +45,10 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
 
     IHasher public hasher;
     ISignatureVerifier public signatureVerifier;
+    ITransmitManager public transmitManager;
     IVault public vault;
 
-    // temp replacement for sealer
-    ITransmitManager transmitManager;
-
     error InvalidAttester();
-
-    /**
-     * @notice emits the verification and seal confirmation of a packet
-     * @param attester address of attester
-     * @param accumAddress address of accumulator at local
-     * @param signature signature of attester
-     */
-    event PacketVerifiedAndSealed(
-        address indexed attester,
-        address indexed accumAddress,
-        bytes signature
-    );
-
-    /**
-     * @notice emits when a new signature verifier contract is set
-     * @param signatureVerifier_ address of new verifier contract
-     */
-    event SignatureVerifierSet(address signatureVerifier_);
-
-    /**
-     * @param chainSlug_ socket chain slug (should not be more than uint32)
-     */
-    constructor(
-        uint32 chainSlug_,
-        address hasher_,
-        address signatureVerifier_,
-        address vault_
-    ) {
-        hasher = IHasher(hasher_);
-        vault = IVault(vault_);
-        signatureVerifier = ISignatureVerifier(signatureVerifier_);
-
-        chainSlug = chainSlug_;
-    }
 
     /**
      * @notice registers a message
@@ -106,6 +71,7 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
         // msgId(256) = localChainSlug(32) | nonce(224)
         uint256 msgId = (uint256(uint32(chainSlug)) << 224) | _messageCount++;
 
+        // TODO: replace it with fees from switchboard
         vault.deductFee{value: msg.value}(
             remoteChainSlug_,
             plugConfig.outboundIntegrationType
@@ -134,10 +100,8 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
         );
     }
 
-    function seal(
-        address accumAddress_,
-        bytes calldata signature_
-    ) external nonReentrant {
+    function seal(address accumAddress_, bytes calldata signature_) external {
+        // TODO: take sibling slug from configs (thought of mapping remote slugs and accums in registry)
         (bytes32 root, uint256 remoteChainSlug) = IAccumulator(accumAddress_)
             .sealPacket();
 
@@ -151,14 +115,6 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
         ) revert InvalidAttester();
 
         emit PacketVerifiedAndSealed(msg.sender, accumAddress_, signature_);
-    }
-
-    function retry(
-        uint256 msgId_,
-        uint256 newMsgGasLimit_
-    ) external payable override {
-        vault.deductRetryFee{value: msg.value}();
-        emit MessageRetried(msgId_, newMsgGasLimit_, msg.value);
     }
 
     function setHasher(address hasher_) external onlyOwner {
@@ -178,5 +134,14 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
     ) external onlyOwner {
         signatureVerifier = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
+    }
+
+    /**
+     * @notice updates transmitManager_
+     * @param transmitManager_ address of Transmit Manager
+     */
+    function setTransmitManager(address transmitManager_) external onlyOwner {
+        transmitManager = ITransmitManager(transmitManager_);
+        emit TransmitManager(transmitManager_);
     }
 }

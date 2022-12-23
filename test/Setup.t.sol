@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../contracts/socket/Socket.sol";
+import {Socket, ISocket, SocketConfig} from "../contracts/socket/Socket.sol";
 import "../contracts/notaries/AdminNotary.sol";
 import "../contracts/accumulators/SingleAccum.sol";
 import "../contracts/deaccumulators/SingleDeaccum.sol";
@@ -177,6 +177,7 @@ contract Setup is Test {
             uint32(chainSlug_),
             address(hasher__),
             sigVerifier,
+            address(hasher__),
             address(vault__)
         );
 
@@ -276,7 +277,7 @@ contract Setup is Test {
         ChainContext storage src_,
         ChainContext storage dst_,
         address remotePlug_,
-        uint256 packetId_,
+        uint256,
         uint256 msgId_,
         uint256 msgGasLimit_,
         bytes memory payload_,
@@ -286,7 +287,7 @@ contract Setup is Test {
 
         ISocket.VerificationParams memory vParams = ISocket.VerificationParams(
             src_.chainSlug,
-            packetId_,
+            bytes32(0),
             proof_
         );
 
