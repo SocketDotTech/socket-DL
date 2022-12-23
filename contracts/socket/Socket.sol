@@ -36,27 +36,20 @@ contract Socket is SocketLocal {
     // msgId => message status
     mapping(uint256 => MessageStatus) public messageStatus;
     // accumAddr|chainSlug|packetId
-    mapping(uint256 => bytes32) public remoteRoots;
+    mapping(bytes32 => bool) public remoteRoots;
 
     /**
      * @notice emits the packet details when proposed at remote
      * @param attester address of attester
-     * @param packetId packet id
      * @param root packet root
      */
-    event PacketAttested(
-        address indexed attester,
-        uint256 indexed packetId,
-        bytes32 root
-    );
+    event PacketAttested(address indexed attester, bytes32 root);
 
     /**
-     * @notice emits the root details when root is replaced by owner
-     * @param packetId packet id
+     * @notice emits the root when it is removed by owner
      * @param oldRoot old root
-     * @param newRoot old root
      */
-    event PacketRootUpdated(uint256 packetId, bytes32 oldRoot, bytes32 newRoot);
+    event PacketRootRemoved(bytes32 oldRoot);
 
     /**
      * @param chainSlug_ socket chain slug (should not be more than uint32)
@@ -68,12 +61,12 @@ contract Socket is SocketLocal {
         address vault_
     ) SocketLocal(chainSlug_, hasher_, signatureVerifier_, vault_) {}
 
-    function attest(uint256 packetId_, bytes32 root_) external {
+    function attest(bytes32 root_) external {
         if (msg.sender != proposer) revert InvalidAttester();
-        if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
-        remoteRoots[packetId_] = root_;
+        if (remoteRoots[root_]) revert AlreadyAttested();
+        remoteRoots[root_] = true;
 
-        emit PacketAttested(msg.sender, packetId_, root_);
+        emit PacketAttested(msg.sender, root_);
     }
 
     /**
@@ -201,18 +194,12 @@ contract Socket is SocketLocal {
     }
 
     /**
-     * @notice updates root for given packet id
-     * @param packetId_ id of packet to be updated
-     * @param newRoot_ new root
+     * @notice discards root
+     * @param oldRoot_ existing root
      */
-    function updatePacketRoot(
-        uint256 packetId_,
-        bytes32 newRoot_
-    ) external onlyOwner {
-        bytes32 oldRoot = remoteRoots[packetId_];
-        remoteRoots[packetId_] = newRoot_;
-
-        emit PacketRootUpdated(packetId_, oldRoot, newRoot_);
+    function removePacketRoot(bytes32 oldRoot_) external onlyOwner {
+        remoteRoots[oldRoot_] = false;
+        emit PacketRootRemoved(oldRoot_);
     }
 
     /**
@@ -232,10 +219,10 @@ contract Socket is SocketLocal {
     }
 
     function getPacketStatus(
-        uint256 packetId_
+        bytes32 root_
     ) external view returns (PacketStatus status) {
         return
-            remoteRoots[packetId_] == bytes32(0)
+            !remoteRoots[root_]
                 ? PacketStatus.NOT_PROPOSED
                 : PacketStatus.PROPOSED;
     }

@@ -1,12 +1,41 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/IAccumulator.sol";
 import "../interfaces/IVault.sol";
 import "../interfaces/IHasher.sol";
 import "../interfaces/ISignatureVerifier.sol";
 import "../utils/ReentrancyGuard.sol";
 import "./SocketConfig.sol";
+
+interface IAccumulator {
+    /**
+     * @notice adds the packed message to a packet
+     * @dev this should be only executable by socket
+     * @dev it will be later replaced with a function adding each message to a merkle tree
+     * @param packedMessage the message packed with payload, fees and config
+     */
+    function addPackedMessage(bytes32 packedMessage) external;
+
+    /**
+     * @notice seals the packet
+     * @dev also indicates the packet is ready to be shipped and no more messages can be added now.
+     * @dev this should be executable by notary only
+     * @return root root hash of the packet
+     * @return remoteChainSlug remote chain slug for the packet sealed
+     */
+    function sealPacket()
+        external
+        returns (bytes32 root, uint256 remoteChainSlug);
+}
+
+interface ITransmitManager {
+    function checkTransmitter(
+        uint256 chainSlug,
+        uint256 siblingChainSlug,
+        bytes32 root,
+        bytes calldata signature
+    ) external view returns (bool);
+}
 
 abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
     uint256 public chainSlug;
@@ -18,7 +47,7 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
     IVault public vault;
 
     // temp replacement for sealer
-    address sealer;
+    ITransmitManager transmitManager;
 
     error InvalidAttester();
 
@@ -26,13 +55,11 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
      * @notice emits the verification and seal confirmation of a packet
      * @param attester address of attester
      * @param accumAddress address of accumulator at local
-     * @param packetId packed id
      * @param signature signature of attester
      */
     event PacketVerifiedAndSealed(
         address indexed attester,
         address indexed accumAddress,
-        uint256 indexed packetId,
         bytes signature
     );
 
@@ -110,30 +137,20 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
     function seal(
         address accumAddress_,
         bytes calldata signature_
-    ) external payable nonReentrant {
-        (
-            bytes32 root,
-            uint256 packetCount,
-            uint256 remoteChainSlug
-        ) = IAccumulator(accumAddress_).sealPacket();
+    ) external nonReentrant {
+        (bytes32 root, uint256 remoteChainSlug) = IAccumulator(accumAddress_)
+            .sealPacket();
 
-        uint256 packetId = _getPacketId(accumAddress_, chainSlug, packetCount);
-        address attester = signatureVerifier.recoverSigner(
-            remoteChainSlug,
-            packetId,
-            root,
-            signature_
-        );
+        if (
+            !transmitManager.checkTransmitter(
+                chainSlug,
+                remoteChainSlug,
+                root,
+                signature_
+            )
+        ) revert InvalidAttester();
 
-        // todo: verify sealer role
-        if (sealer != attester) revert InvalidAttester();
-
-        emit PacketVerifiedAndSealed(
-            attester,
-            accumAddress_,
-            packetId,
-            signature_
-        );
+        emit PacketVerifiedAndSealed(msg.sender, accumAddress_, signature_);
     }
 
     function retry(
@@ -161,16 +178,5 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
     ) external onlyOwner {
         signatureVerifier = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
-    }
-
-    function _getPacketId(
-        address accumAddr_,
-        uint256 chainSlug_,
-        uint256 packetCount_
-    ) internal pure returns (uint256 packetId) {
-        packetId =
-            (chainSlug_ << 224) |
-            (uint256(uint160(accumAddr_)) << 64) |
-            packetCount_;
     }
 }
