@@ -199,11 +199,7 @@ contract Setup is Test {
     ) internal returns (SingleAccum accum__, SingleDeaccum deaccum__) {
         vm.startPrank(deployer_);
 
-        accum__ = new SingleAccum(
-            socket_,
-            address(notary__),
-            uint32(remoteChainSlug_)
-        );
+        accum__ = new SingleAccum(socket_);
         deaccum__ = new SingleDeaccum();
 
         vm.stopPrank();
