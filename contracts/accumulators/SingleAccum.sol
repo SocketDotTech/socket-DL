@@ -7,10 +7,7 @@ contract SingleAccum is BaseAccum {
     /**
      * @notice initialises the contract with socket address
      */
-    constructor(
-        address socket_,
-        uint32 remoteChainSlug_
-    ) BaseAccum(socket_, remoteChainSlug_) {}
+    constructor(address socket_) BaseAccum(socket_) {}
 
     /// adds the packed message to a packet
     /// @inheritdoc IAccumulator
@@ -29,7 +26,7 @@ contract SingleAccum is BaseAccum {
         virtual
         override
         onlyRole(SOCKET_ROLE)
-        returns (bytes32, uint256, uint256)
+        returns (bytes32, uint256)
     {
         uint256 packetId = _sealedPackets;
 
@@ -38,6 +35,6 @@ contract SingleAccum is BaseAccum {
         _sealedPackets++;
 
         emit PacketComplete(root, packetId);
-        return (root, packetId, remoteChainSlug);
+        return (root, packetId);
     }
 }

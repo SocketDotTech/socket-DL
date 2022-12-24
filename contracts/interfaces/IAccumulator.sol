@@ -52,9 +52,6 @@ interface IAccumulator {
      * @dev this should be executable by socket only
      * @return root root hash of the packet
      * @return packetId id of the packed sealed
-     * @return remoteChainSlug remote chain slug for the packet sealed
      */
-    function sealPacket()
-        external
-        returns (bytes32 root, uint256 packetId, uint256 remoteChainSlug);
+    function sealPacket() external returns (bytes32 root, uint256 packetId);
 }

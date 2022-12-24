@@ -31,23 +31,24 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
         uint256[] calldata,
         bytes calldata signature_
     ) external payable override nonReentrant {
-        (
-            bytes32 root,
-            uint256 packetCount,
-            uint256 remoteChainSlug
-        ) = IAccumulator(accumAddress_).sealPacket();
+        (bytes32 root, uint256 packetCount) = IAccumulator(accumAddress_)
+            .sealPacket();
 
         uint256 packetId = _getPacketId(accumAddress_, _chainSlug, packetCount);
 
         address attester = signatureVerifier.recoverSigner(
-            remoteChainSlug,
+            0, // TODO: read remoteChainSlug from config
             packetId,
             root,
             signature_
         );
 
-        if (!_hasRole(_attesterRole(remoteChainSlug), attester))
-            revert InvalidAttester();
+        if (
+            !_hasRole(
+                _attesterRole(0 /** TODO: read remoteChainSlug from config */),
+                attester
+            )
+        ) revert InvalidAttester();
         emit PacketVerifiedAndSealed(
             attester,
             accumAddress_,

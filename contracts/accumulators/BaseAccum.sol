@@ -6,7 +6,6 @@ import "../utils/AccessControl.sol";
 
 abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     bytes32 public constant SOCKET_ROLE = keccak256("SOCKET_ROLE");
-    uint256 public immutable remoteChainSlug;
 
     /// an incrementing id for each new packet created
     uint256 internal _packets;
@@ -20,9 +19,8 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     /**
      * @notice initialises the contract with socket address
      */
-    constructor(address socket_, uint32 remoteChainSlug_) {
+    constructor(address socket_) {
         _setSocket(socket_);
-        remoteChainSlug = remoteChainSlug_;
     }
 
     function setSocket(address socket_) external onlyOwner {
