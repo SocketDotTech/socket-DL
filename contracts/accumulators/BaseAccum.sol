@@ -6,7 +6,6 @@ import "../utils/AccessControl.sol";
 
 abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     bytes32 public constant SOCKET_ROLE = keccak256("SOCKET_ROLE");
-    bytes32 public constant NOTARY_ROLE = keccak256("NOTARY_ROLE");
     uint256 public immutable remoteChainSlug;
 
     /// an incrementing id for each new packet created
@@ -19,12 +18,10 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     error NoPendingPacket();
 
     /**
-     * @notice initialises the contract with socket and notary addresses
+     * @notice initialises the contract with socket address
      */
-    constructor(address socket_, address notary_, uint32 remoteChainSlug_) {
+    constructor(address socket_, uint32 remoteChainSlug_) {
         _setSocket(socket_);
-        _setNotary(notary_);
-
         remoteChainSlug = remoteChainSlug_;
     }
 
@@ -32,16 +29,8 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
         _setSocket(socket_);
     }
 
-    function setNotary(address notary_) external onlyOwner {
-        _setNotary(notary_);
-    }
-
     function _setSocket(address socket_) private {
         _grantRole(SOCKET_ROLE, socket_);
-    }
-
-    function _setNotary(address notary_) private {
-        _grantRole(NOTARY_ROLE, notary_);
     }
 
     /// returns the latest packet details to be sealed

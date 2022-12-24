@@ -5,13 +5,12 @@ import "./BaseAccum.sol";
 
 contract SingleAccum is BaseAccum {
     /**
-     * @notice initialises the contract with socket and notary addresses
+     * @notice initialises the contract with socket address
      */
     constructor(
         address socket_,
-        address notary_,
         uint32 remoteChainSlug_
-    ) BaseAccum(socket_, notary_, remoteChainSlug_) {}
+    ) BaseAccum(socket_, remoteChainSlug_) {}
 
     /// adds the packed message to a packet
     /// @inheritdoc IAccumulator
@@ -29,7 +28,7 @@ contract SingleAccum is BaseAccum {
         external
         virtual
         override
-        onlyRole(NOTARY_ROLE)
+        onlyRole(SOCKET_ROLE)
         returns (bytes32, uint256, uint256)
     {
         uint256 packetId = _sealedPackets;

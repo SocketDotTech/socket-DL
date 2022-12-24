@@ -49,7 +49,7 @@ interface IAccumulator {
     /**
      * @notice seals the packet
      * @dev also indicates the packet is ready to be shipped and no more messages can be added now.
-     * @dev this should be executable by notary only
+     * @dev this should be executable by socket only
      * @return root root hash of the packet
      * @return packetId id of the packed sealed
      * @return remoteChainSlug remote chain slug for the packet sealed
