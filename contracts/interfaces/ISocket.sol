@@ -71,12 +71,6 @@ interface ISocket {
     );
 
     /**
-     * @notice emits when a new signature verifier contract is set
-     * @param signatureVerifier_ address of new verifier contract
-     */
-    event SignatureVerifierSet(address signatureVerifier_);
-
-    /**
      * @notice emits when a new transmitManager contract is set
      * @param transmitManager_ address of new transmitManager contract
      */

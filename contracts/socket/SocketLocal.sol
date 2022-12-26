@@ -4,7 +4,6 @@ pragma solidity 0.8.7;
 import "../interfaces/IAccumulator.sol";
 import "../interfaces/IVault.sol";
 import "../interfaces/IHasher.sol";
-import "../interfaces/ISignatureVerifier.sol";
 import "../utils/ReentrancyGuard.sol";
 import "./SocketConfig.sol";
 
@@ -23,7 +22,6 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
     uint256 public _messageCount;
 
     IHasher public hasher;
-    ISignatureVerifier public signatureVerifier;
     ITransmitManager public transmitManager;
     IVault public vault;
 
@@ -124,17 +122,7 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
         vault = IVault(vault_);
     }
 
-    /**
-     * @notice updates signatureVerifier_
-     * @param signatureVerifier_ address of Signature Verifier
-     */
-    function setSignatureVerifier(
-        address signatureVerifier_
-    ) external onlyOwner {
-        signatureVerifier = ISignatureVerifier(signatureVerifier_);
-        emit SignatureVerifierSet(signatureVerifier_);
-    }
-
+    // TODO: in discussion
     /**
      * @notice updates transmitManager_
      * @param transmitManager_ address of Transmit Manager

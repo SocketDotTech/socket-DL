@@ -71,12 +71,10 @@ contract Socket is SocketLocal {
     constructor(
         uint32 chainSlug_,
         address hasher_,
-        address signatureVerifier_,
         address transmitManager_,
         address vault_
     ) {
         hasher = IHasher(hasher_);
-        signatureVerifier = ISignatureVerifier(signatureVerifier_);
         transmitManager = ITransmitManager(transmitManager_);
         vault = IVault(vault_);
 
