@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./BaseAccum.sol";
+import "./BaseCapacitor.sol";
 
-contract SingleAccum is BaseAccum {
+contract SingleCapacitor is BaseCapacitor {
     /**
      * @notice initialises the contract with socket address
      */
-    constructor(address socket_) BaseAccum(socket_) {}
+    constructor(address socket_) BaseCapacitor(socket_) {}
 
     /// adds the packed message to a packet
-    /// @inheritdoc IAccumulator
+    /// @inheritdoc ICapacitor
     function addPackedMessage(
         bytes32 packedMessage
     ) external override onlyRole(SOCKET_ROLE) {

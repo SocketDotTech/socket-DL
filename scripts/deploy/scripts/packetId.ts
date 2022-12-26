@@ -3,7 +3,7 @@ import { hexZeroPad } from "ethers/lib/utils";
 
 interface PackedDetails {
   chainSlug: number;
-  accumAddr: string;
+  capacitorAddr: string;
   packetNonce: string;
 }
 
@@ -14,7 +14,7 @@ export const unpackPacketId = (packetId: BigNumber): PackedDetails => {
   const chainSlug = parseInt(
     BigNumber.from(`0x${packetIdHex.substring(2, 2 + slugLength)}`).toString()
   );
-  const accumAddr = `0x${packetIdHex.substring(
+  const capacitorAddr = `0x${packetIdHex.substring(
     2 + slugLength,
     40 + 2 + slugLength
   )}`;
@@ -24,21 +24,23 @@ export const unpackPacketId = (packetId: BigNumber): PackedDetails => {
 
   return {
     chainSlug,
-    accumAddr,
+    capacitorAddr,
     packetNonce,
   };
 };
 
 export const packPacketId = (
   chainSlug: number,
-  accumAddr: string,
+  capacitorAddr: string,
   packetNonce: string
 ): string => {
   const nonce = BigNumber.from(packetNonce).toHexString();
   const nonceHex =
     nonce.length <= 16 ? hexZeroPad(nonce, 8).substring(2) : nonce.substring(2);
   const id =
-    BigNumber.from(chainSlug).toHexString() + accumAddr.substring(2) + nonceHex;
+    BigNumber.from(chainSlug).toHexString() +
+    capacitorAddr.substring(2) +
+    nonceHex;
 
   return BigNumber.from(id).toString();
 };

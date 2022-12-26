@@ -33,19 +33,19 @@ contract PingPongTest is Setup {
     }
 
     function _verifyAToB(uint256 msgId_) internal {
-        address accum = isFast
-            ? address(_a.fastAccum__)
-            : address(_a.slowAccum__);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
         (
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a, accum, _b.chainSlug);
+        ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
 
-        _sealOnSrc(_a, accum, sig);
+        _sealOnSrc(_a, capacitor, sig);
         _submitRootOnDst(_b, sig, packetId, root);
 
-        vm.warp(block.timestamp + _slowAccumWaitTime);
+        vm.warp(block.timestamp + _slowCapacitorWaitTime);
         _executePayloadOnDst(
             _a,
             _b,
@@ -61,19 +61,19 @@ contract PingPongTest is Setup {
     }
 
     function _verifyBToA(uint256 msgId_) internal {
-        address accum = isFast
-            ? address(_b.fastAccum__)
-            : address(_b.slowAccum__);
+        address capacitor = isFast
+            ? address(_b.fastCapacitor__)
+            : address(_b.slowCapacitor__);
 
         (
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_b, accum, _a.chainSlug);
+        ) = _getLatestSignature(_b, capacitor, _a.chainSlug);
 
-        _sealOnSrc(_b, accum, sig);
+        _sealOnSrc(_b, capacitor, sig);
         _submitRootOnDst(_a, sig, packetId, root);
-        vm.warp(block.timestamp + _slowAccumWaitTime);
+        vm.warp(block.timestamp + _slowCapacitorWaitTime);
 
         _executePayloadOnDst(
             _b,

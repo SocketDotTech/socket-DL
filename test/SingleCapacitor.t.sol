@@ -2,9 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../contracts/accumulators/SingleAccum.sol";
+import "../contracts/capacitors/SingleCapacitor.sol";
 
-contract SingleAccumTest is Test {
+contract SingleCapacitorTest is Test {
     address constant _owner = address(1);
     address constant _socket = address(2);
     address constant _raju = address(3);
@@ -12,11 +12,11 @@ contract SingleAccumTest is Test {
     bytes32 constant _message_1 = bytes32(uint256(5));
     bytes32 constant _message_2 = bytes32(uint256(6));
 
-    SingleAccum _sa;
+    SingleCapacitor _sa;
 
     function setUp() external {
         hoax(_owner);
-        _sa = new SingleAccum(_socket);
+        _sa = new SingleCapacitor(_socket);
     }
 
     function testSetUp() external {
@@ -48,7 +48,7 @@ contract SingleAccumTest is Test {
     }
 
     function testSealPacket() external {
-        vm.expectRevert(BaseAccum.NoPendingPacket.selector);
+        vm.expectRevert(BaseCapacitor.NoPendingPacket.selector);
         _sealPacket();
 
         _addPackedMessage(_message_0);

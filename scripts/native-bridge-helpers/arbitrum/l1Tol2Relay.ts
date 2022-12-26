@@ -123,16 +123,20 @@ export const main = async () => {
     // counter l1, counter l2, seal, execute
     const contracts = contractNames("", localChain, remoteChain);
 
-    const l1Accum: Contract = (
+    const l1Capacitor: Contract = (
       await getInstance(
-        "SingleAccum",
-        l1Config["integrations"]?.[chainIds[remoteChain]]?.[contracts.integrationType]?.["accum"]
+        "SingleCapacitor",
+        l1Config["integrations"]?.[chainIds[remoteChain]]?.[
+          contracts.integrationType
+        ]?.["capacitor"]
       )
     ).connect(l1Wallet);
     const l1Notary: Contract = (
       await getInstance(
         contracts.notary,
-        l1Config["integrations"]?.[chainIds[remoteChain]]?.[contracts.integrationType]?.["notary"]
+        l1Config["integrations"]?.[chainIds[remoteChain]]?.[
+          contracts.integrationType
+        ]?.["notary"]
       )
     ).connect(l1Wallet);
 
@@ -141,13 +145,13 @@ export const main = async () => {
     );
 
     // seal
-    const { packetId, newRootHash } = l1Accum.interface.decodeEventLog(
+    const { packetId, newRootHash } = l1Capacitor.interface.decodeEventLog(
       "MessageAdded",
       outboundTxReceipt.logs[1].data
     );
     const packedPacketId = packPacketId(
       chainIds[localChain],
-      l1Accum.address,
+      l1Capacitor.address,
       packetId
     );
 
@@ -164,16 +168,19 @@ export const main = async () => {
       newRootHash,
       "0x",
       l1Notary.address,
-      l2Config["integrations"]?.[chainIds[localChain]]?.[contracts.integrationType]?.["notary"]
+      l2Config["integrations"]?.[chainIds[localChain]]?.[
+        contracts.integrationType
+      ]?.["notary"]
     );
 
     console.log(
-      `Sealing with params ${(l1Accum.address, bridgeParams, signature, callValue)
+      `Sealing with params ${
+        (l1Capacitor.address, bridgeParams, signature, callValue)
       }`
     );
 
     const sealTx = await l1Notary.seal(
-      l1Accum.address,
+      l1Capacitor.address,
       bridgeParams,
       signature,
       {

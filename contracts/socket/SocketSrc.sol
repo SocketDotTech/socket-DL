@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/IAccumulator.sol";
+import "../interfaces/ICapacitor.sol";
 import "../interfaces/IVault.sol";
 import "./SocketBase.sol";
 
@@ -12,12 +12,12 @@ abstract contract SocketSrc is SocketBase {
 
     /**
      * @notice emits the verification and seal confirmation of a packet
-     * @param accumAddress address of accumulator at local
+     * @param capacitorAddress address of capacitor at local
      * @param packetId packed id
      * @param signature signature of attester
      */
     event PacketVerifiedAndSealed(
-        address indexed accumAddress,
+        address indexed capacitorAddress,
         uint256 indexed packetId,
         bytes signature
     );
@@ -28,7 +28,7 @@ abstract contract SocketSrc is SocketBase {
 
     /**
      * @notice registers a message
-     * @dev Packs the message and includes it in a packet with accumulator
+     * @dev Packs the message and includes it in a packet with capacitor
      * @param remoteChainSlug_ the remote chain slug
      * @param msgGasLimit_ the gas limit needed to execute the payload on remote
      * @param payload_ the data which is needed by plug at inbound call on remote
@@ -63,7 +63,7 @@ abstract contract SocketSrc is SocketBase {
             payload_
         );
 
-        IAccumulator(plugConfig.accum).addPackedMessage(packedMessage);
+        ICapacitor(plugConfig.capacitor).addPackedMessage(packedMessage);
         emit MessageTransmitted(
             _chainSlug,
             msg.sender,
@@ -77,17 +77,21 @@ abstract contract SocketSrc is SocketBase {
     }
 
     function seal(
-        address accumAddress_,
+        address capacitorAddress_,
         bytes calldata signature_
     ) external payable nonReentrant {
-        // TODO: take sibling slug from configs (thought of mapping remote slugs and accums in registry)
+        // TODO: take sibling slug from configs (thought of mapping remote slugs and capacitors in registry)
         (
             bytes32 root,
             uint256 packetCount,
             uint256 remoteChainSlug
-        ) = IAccumulator(accumAddress_).sealPacket();
+        ) = ICapacitor(capacitorAddress_).sealPacket();
 
-        uint256 packetId = _getPacketId(accumAddress_, _chainSlug, packetCount);
+        uint256 packetId = _getPacketId(
+            capacitorAddress_,
+            _chainSlug,
+            packetCount
+        );
 
         if (
             !_transmitManager__.checkTransmitter(
@@ -98,7 +102,7 @@ abstract contract SocketSrc is SocketBase {
             )
         ) revert InvalidAttester();
 
-        emit PacketVerifiedAndSealed(accumAddress_, packetId, signature_);
+        emit PacketVerifiedAndSealed(capacitorAddress_, packetId, signature_);
     }
 
     function setVault(address vault_) external onlyOwner {
@@ -106,13 +110,13 @@ abstract contract SocketSrc is SocketBase {
     }
 
     function _getPacketId(
-        address accumAddr_,
+        address capacitorAddr_,
         uint256 chainSlug_,
         uint256 packetCount_
     ) internal pure returns (uint256 packetId) {
         packetId =
             (chainSlug_ << 224) |
-            (uint256(uint160(accumAddr_)) << 64) |
+            (uint256(uint160(capacitorAddr_)) << 64) |
             packetCount_;
     }
 }
