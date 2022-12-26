@@ -1,22 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-// import "../interfaces/IVerifier.sol";
+import "../interfaces/IVerifier.sol";
 import "../interfaces/IDeaccumulator.sol";
 import "../interfaces/IPlug.sol";
 
 import "./SocketLocal.sol";
-
-interface IVerifier {
-    /**
-     * @notice verifies if the packet satisfies needed checks before execution
-     * @param root_ root_
-     */
-    function verifyPacket(
-        bytes32 root_,
-        bytes32 integrationType_
-    ) external view returns (bool);
-}
 
 contract Socket is SocketLocal {
     enum PacketStatus {
@@ -36,7 +25,6 @@ contract Socket is SocketLocal {
     error MessageAlreadyExecuted();
     error ExecutorNotFound();
     error AlreadyAttested();
-    error RootNotFound();
 
     // keccak256("EXECUTOR")
     bytes32 private constant EXECUTOR_ROLE =
@@ -47,20 +35,27 @@ contract Socket is SocketLocal {
     // msgId => message status
     mapping(uint256 => MessageStatus) public messageStatus;
     // accumAddr|chainSlug|packetId
-    mapping(bytes32 => bool) public remoteRoots;
+    mapping(uint256 => bytes32) public remoteRoots;
 
     /**
      * @notice emits the packet details when proposed at remote
      * @param attester address of attester
+     * @param packetId packet id
      * @param root packet root
      */
-    event PacketAttested(address indexed attester, bytes32 root);
+    event PacketAttested(
+        address indexed attester,
+        uint256 indexed packetId,
+        bytes32 root
+    );
 
     /**
-     * @notice emits the root when it is removed by owner
+     * @notice emits the root details when root is replaced by owner
+     * @param packetId packet id
      * @param oldRoot old root
+     * @param newRoot old root
      */
-    event PacketRootRemoved(bytes32 oldRoot);
+    event PacketRootUpdated(uint256 packetId, bytes32 oldRoot, bytes32 newRoot);
 
     constructor(
         uint32 chainSlug_,
@@ -79,11 +74,12 @@ contract Socket is SocketLocal {
 
     // TODO: taking sibling chain input is prone to bug as we saw in previous version
     function propose(
+        uint256 packetId_,
         uint256 siblingChainSlug_,
         bytes32 root_,
         bytes calldata signature_
     ) external {
-        if (remoteRoots[root_]) revert AlreadyAttested();
+        if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
         if (
             !transmitManager.checkTransmitter(
                 chainSlug,
@@ -93,8 +89,8 @@ contract Socket is SocketLocal {
             )
         ) revert InvalidAttester();
 
-        remoteRoots[root_] = true;
-        emit PacketAttested(msg.sender, root_);
+        remoteRoots[packetId_] = root_;
+        emit PacketAttested(msg.sender, packetId_, root_);
     }
 
     /**
@@ -113,7 +109,6 @@ contract Socket is SocketLocal {
         ISocket.VerificationParams calldata verifyParams_
     ) external override nonReentrant {
         if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
-        if (!remoteRoots[verifyParams_.root]) revert RootNotFound();
         if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
 
         // todo: to decide if this should be just a bool (was added for fees here)
@@ -150,14 +145,15 @@ contract Socket is SocketLocal {
     ) internal view {
         // TODO: do we need inboundIntegrationType at verifier with switchboards?
         bool isVerified = IVerifier(plugConfig.verifier).verifyPacket(
-            verifyParams_.root,
+            verifyParams_.packetId,
             plugConfig.inboundIntegrationType
         );
 
         if (!isVerified) revert VerificationFailed();
+
         if (
             !IDeaccumulator(plugConfig.deaccum).verifyMessageInclusion(
-                verifyParams_.root,
+                remoteRoots[verifyParams_.packetId],
                 packedMessage,
                 verifyParams_.deaccumProof
             )
@@ -188,12 +184,18 @@ contract Socket is SocketLocal {
     }
 
     /**
-     * @notice discards root
-     * @param oldRoot_ existing root
+     * @notice updates root for given packet id
+     * @param packetId_ id of packet to be updated
+     * @param newRoot_ new root
      */
-    function removePacketRoot(bytes32 oldRoot_) external onlyOwner {
-        remoteRoots[oldRoot_] = false;
-        emit PacketRootRemoved(oldRoot_);
+    function updatePacketRoot(
+        uint256 packetId_,
+        bytes32 newRoot_
+    ) external onlyOwner {
+        bytes32 oldRoot = remoteRoots[packetId_];
+        remoteRoots[packetId_] = newRoot_;
+
+        emit PacketRootUpdated(packetId_, oldRoot, newRoot_);
     }
 
     /**
@@ -213,10 +215,10 @@ contract Socket is SocketLocal {
     }
 
     function getPacketStatus(
-        bytes32 root_
+        uint256 packetId_
     ) external view returns (PacketStatus status) {
         return
-            !remoteRoots[root_]
+            remoteRoots[packetId_] == bytes32(0)
                 ? PacketStatus.NOT_PROPOSED
                 : PacketStatus.PROPOSED;
     }

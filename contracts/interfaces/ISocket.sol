@@ -109,7 +109,7 @@ interface ISocket {
 
     struct VerificationParams {
         uint256 remoteChainSlug;
-        bytes32 root;
+        uint256 packetId;
         bytes deaccumProof;
     }
 
