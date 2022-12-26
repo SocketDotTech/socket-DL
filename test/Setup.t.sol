@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import {Socket, ISocket, SocketConfig} from "../contracts/socket/Socket.sol";
+import {Socket, ISocket, SocketConfig, SocketSrc, SocketDst, SocketBase} from "../contracts/socket/Socket.sol";
 import "../contracts/notaries/AdminNotary.sol";
 import "../contracts/accumulators/SingleAccum.sol";
 import "../contracts/deaccumulators/SingleDeaccum.sol";

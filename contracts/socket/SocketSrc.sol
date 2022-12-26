@@ -3,29 +3,12 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IAccumulator.sol";
 import "../interfaces/IVault.sol";
-import "../interfaces/IHasher.sol";
-import "../utils/ReentrancyGuard.sol";
-import "./SocketConfig.sol";
+import "./SocketBase.sol";
 
-interface ITransmitManager {
-    function checkTransmitter(
-        uint256 chainSlug,
-        uint256 siblingChainSlug,
-        bytes32 root,
-        bytes calldata signature
-    ) external view returns (bool);
-}
-
-abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
-    uint256 public chainSlug;
+abstract contract SocketSrc is SocketBase {
     // incrementing nonce, should be handled in next socket version.
     uint256 public _messageCount;
-
-    IHasher public hasher;
-    ITransmitManager public transmitManager;
-    IVault public vault;
-
-    error InvalidAttester();
+    IVault public _vault__;
 
     /**
      * @notice emits the verification and seal confirmation of a packet
@@ -38,6 +21,10 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
         uint256 indexed packetId,
         bytes signature
     );
+
+    constructor(address vault_) {
+        _vault__ = IVault(vault_);
+    }
 
     /**
      * @notice registers a message
@@ -58,16 +45,16 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
         // Packs the local plug, local chain slug, remote chain slug and nonce
         // _messageCount++ will take care of msg id overflow as well
         // msgId(256) = localChainSlug(32) | nonce(224)
-        uint256 msgId = (uint256(uint32(chainSlug)) << 224) | _messageCount++;
+        uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
 
         // TODO: replace it with fees from switchboard
-        vault.deductFee{value: msg.value}(
+        _vault__.deductFee{value: msg.value}(
             remoteChainSlug_,
             plugConfig.outboundIntegrationType
         );
 
-        bytes32 packedMessage = hasher.packMessage(
-            chainSlug,
+        bytes32 packedMessage = _hasher__.packMessage(
+            _chainSlug,
             msg.sender,
             remoteChainSlug_,
             plugConfig.remotePlug,
@@ -78,7 +65,7 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
 
         IAccumulator(plugConfig.accum).addPackedMessage(packedMessage);
         emit MessageTransmitted(
-            chainSlug,
+            _chainSlug,
             msg.sender,
             remoteChainSlug_,
             plugConfig.remotePlug,
@@ -100,11 +87,11 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
             uint256 remoteChainSlug
         ) = IAccumulator(accumAddress_).sealPacket();
 
-        uint256 packetId = _getPacketId(accumAddress_, chainSlug, packetCount);
+        uint256 packetId = _getPacketId(accumAddress_, _chainSlug, packetCount);
 
         if (
-            !transmitManager.checkTransmitter(
-                chainSlug,
+            !_transmitManager__.checkTransmitter(
+                _chainSlug,
                 remoteChainSlug,
                 root,
                 signature_
@@ -114,22 +101,8 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
         emit PacketVerifiedAndSealed(accumAddress_, packetId, signature_);
     }
 
-    function setHasher(address hasher_) external onlyOwner {
-        hasher = IHasher(hasher_);
-    }
-
     function setVault(address vault_) external onlyOwner {
-        vault = IVault(vault_);
-    }
-
-    // TODO: in discussion
-    /**
-     * @notice updates transmitManager_
-     * @param transmitManager_ address of Transmit Manager
-     */
-    function setTransmitManager(address transmitManager_) external onlyOwner {
-        transmitManager = ITransmitManager(transmitManager_);
-        emit TransmitManager(transmitManager_);
+        _vault__ = IVault(vault_);
     }
 
     function _getPacketId(
