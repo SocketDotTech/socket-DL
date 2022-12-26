@@ -8,6 +8,15 @@ import "../interfaces/ISignatureVerifier.sol";
 import "../utils/ReentrancyGuard.sol";
 import "./SocketConfig.sol";
 
+interface ITransmitManager {
+    function checkTransmitter(
+        uint256 chainSlug,
+        uint256 siblingChainSlug,
+        bytes32 root,
+        bytes calldata signature
+    ) external view returns (bool);
+}
+
 abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
     uint256 public chainSlug;
     // incrementing nonce, should be handled in next socket version.
@@ -22,39 +31,15 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
 
     /**
      * @notice emits the verification and seal confirmation of a packet
-     * @param attester address of attester
      * @param accumAddress address of accumulator at local
      * @param packetId packed id
      * @param signature signature of attester
      */
     event PacketVerifiedAndSealed(
-        address indexed attester,
         address indexed accumAddress,
         uint256 indexed packetId,
         bytes signature
     );
-
-    /**
-     * @notice emits when a new signature verifier contract is set
-     * @param signatureVerifier_ address of new verifier contract
-     */
-    event SignatureVerifierSet(address signatureVerifier_);
-
-    /**
-     * @param chainSlug_ socket chain slug (should not be more than uint32)
-     */
-    constructor(
-        uint32 chainSlug_,
-        address hasher_,
-        address signatureVerifier_,
-        address vault_
-    ) {
-        hasher = IHasher(hasher_);
-        vault = IVault(vault_);
-        signatureVerifier = ISignatureVerifier(signatureVerifier_);
-
-        chainSlug = chainSlug_;
-    }
 
     /**
      * @notice registers a message
@@ -128,12 +113,7 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
             )
         ) revert InvalidAttester();
 
-        emit PacketVerifiedAndSealed(
-            attester,
-            accumAddress_,
-            packetId,
-            signature_
-        );
+        emit PacketVerifiedAndSealed(accumAddress_, packetId, signature_);
     }
 
     function setHasher(address hasher_) external onlyOwner {

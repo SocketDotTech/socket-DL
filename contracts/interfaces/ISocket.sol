@@ -71,18 +71,6 @@ interface ISocket {
     );
 
     /**
-     * @notice emits the verification and seal confirmation of a packet
-     * @param attester address of attester
-     * @param accumAddress address of accumulator at local
-     * @param signature signature of attester
-     */
-    event PacketVerifiedAndSealed(
-        address indexed attester,
-        address indexed accumAddress,
-        bytes signature
-    );
-
-    /**
      * @notice emits when a new signature verifier contract is set
      * @param signatureVerifier_ address of new verifier contract
      */

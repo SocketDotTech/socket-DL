@@ -277,7 +277,7 @@ contract Setup is Test {
         ChainContext storage src_,
         ChainContext storage dst_,
         address remotePlug_,
-        uint256,
+        uint256 packetId_,
         uint256 msgId_,
         uint256 msgGasLimit_,
         bytes memory payload_,
@@ -287,7 +287,7 @@ contract Setup is Test {
 
         ISocket.VerificationParams memory vParams = ISocket.VerificationParams(
             src_.chainSlug,
-            bytes32(0),
+            packetId_,
             proof_
         );
 
