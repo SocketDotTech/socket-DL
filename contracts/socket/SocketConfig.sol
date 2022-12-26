@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./interfaces/ISocket.sol";
-import "./utils/AccessControl.sol";
+import "../interfaces/ISocket.sol";
+import "../utils/AccessControl.sol";
 
 abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     struct PlugConfig {

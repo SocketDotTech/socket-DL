@@ -97,7 +97,7 @@ contract SocketTest is Setup {
 
         hoax(_socketOwner);
         _a.socket__.setHasher(newHasher);
-        assertEq(address(_a.socket__.hasher()), newHasher);
+        assertEq(address(_a.socket__._hasher__()), newHasher);
     }
 
     function testSetVault() external {
@@ -109,7 +109,7 @@ contract SocketTest is Setup {
 
         hoax(_socketOwner);
         _a.socket__.setVault(newVault);
-        assertEq(address(_a.socket__.vault()), newVault);
+        assertEq(address(_a.socket__._vault__()), newVault);
     }
 
     function testGrantExecutorRole() external {

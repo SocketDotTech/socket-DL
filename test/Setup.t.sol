@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../contracts/Socket.sol";
+import {Socket, ISocket, SocketConfig, SocketSrc, SocketDst, SocketBase} from "../contracts/socket/Socket.sol";
 import "../contracts/notaries/AdminNotary.sol";
 import "../contracts/accumulators/SingleAccum.sol";
 import "../contracts/deaccumulators/SingleDeaccum.sol";
@@ -173,6 +173,7 @@ contract Setup is Test {
         vault__ = new Vault(deployer_);
         socket__ = new Socket(
             uint32(chainSlug_),
+            address(hasher__),
             address(hasher__),
             address(vault__)
         );
