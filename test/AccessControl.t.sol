@@ -22,9 +22,6 @@ contract AccessControlTest is Test {
     }
 
     function testOwnerSet() external {
-        bytes32 add = keccak256("EXECUTOR");
-        console.logBytes32(add);
-
         address owner = _mac.owner();
         assertEq(owner, _owner);
     }
