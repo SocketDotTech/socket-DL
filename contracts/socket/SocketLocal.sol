@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/IVault.sol";
+import "../interfaces/ISwitchboard.sol";
 import "../interfaces/IHasher.sol";
 import "../interfaces/ISignatureVerifier.sol";
 import "../utils/ReentrancyGuard.sol";
@@ -46,7 +46,6 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
     IHasher public hasher;
     ISignatureVerifier public signatureVerifier;
     ITransmitManager public transmitManager;
-    IVault public vault;
 
     error InvalidAttester();
 
@@ -71,10 +70,10 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
         // msgId(256) = localChainSlug(32) | nonce(224)
         uint256 msgId = (uint256(uint32(chainSlug)) << 224) | _messageCount++;
 
-        // TODO: replace it with fees from switchboard
-        vault.deductFee{value: msg.value}(
-            remoteChainSlug_,
-            plugConfig.outboundIntegrationType
+        // TODO: replace it with switchboard
+        ISwitchboard(plugConfig.verifier).payFees{value: msg.value}(
+            msgGasLimit_,
+            remoteChainSlug_
         );
 
         bytes32 packedMessage = hasher.packMessage(
@@ -119,10 +118,6 @@ abstract contract SocketLocal is SocketConfig, ReentrancyGuard {
 
     function setHasher(address hasher_) external onlyOwner {
         hasher = IHasher(hasher_);
-    }
-
-    function setVault(address vault_) external onlyOwner {
-        vault = IVault(vault_);
     }
 
     /**
