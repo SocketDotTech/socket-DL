@@ -1,22 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-// import "../interfaces/IVerifier.sol";
 import "../interfaces/IDeaccumulator.sol";
 import "../interfaces/IPlug.sol";
 
 import "./SocketLocal.sol";
-
-interface IVerifier {
-    /**
-     * @notice verifies if the packet satisfies needed checks before execution
-     * @param root_ root_
-     */
-    function verifyPacket(
-        bytes32 root_,
-        bytes32 integrationType_
-    ) external view returns (bool);
-}
 
 contract Socket is SocketLocal {
     enum PacketStatus {
@@ -46,8 +34,9 @@ contract Socket is SocketLocal {
     mapping(uint256 => address) public executor;
     // msgId => message status
     mapping(uint256 => MessageStatus) public messageStatus;
-    // accumAddr|chainSlug|packetId
+
     mapping(bytes32 => bool) public remoteRoots;
+    mapping(bytes32 => uint256) public rootProposedAt;
 
     /**
      * @notice emits the packet details when proposed at remote
@@ -66,13 +55,11 @@ contract Socket is SocketLocal {
         uint32 chainSlug_,
         address hasher_,
         address signatureVerifier_,
-        address transmitManager_,
-        address vault_
+        address transmitManager_
     ) {
         hasher = IHasher(hasher_);
         signatureVerifier = ISignatureVerifier(signatureVerifier_);
         transmitManager = ITransmitManager(transmitManager_);
-        vault = IVault(vault_);
 
         chainSlug = chainSlug_;
     }
@@ -94,6 +81,7 @@ contract Socket is SocketLocal {
         ) revert InvalidAttester();
 
         remoteRoots[root_] = true;
+        rootProposedAt[root_] = block.timestamp;
         emit PacketAttested(msg.sender, root_);
     }
 
@@ -148,13 +136,13 @@ contract Socket is SocketLocal {
         PlugConfig memory plugConfig,
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
-        // TODO: do we need inboundIntegrationType at verifier with switchboards?
-        bool isVerified = IVerifier(plugConfig.verifier).verifyPacket(
-            verifyParams_.root,
-            plugConfig.inboundIntegrationType
-        );
+        if (
+            !ISwitchboard(plugConfig.verifier).allowPacket(
+                verifyParams_.root,
+                rootProposedAt[verifyParams_.root]
+            )
+        ) revert VerificationFailed();
 
-        if (!isVerified) revert VerificationFailed();
         if (
             !IDeaccumulator(plugConfig.deaccum).verifyMessageInclusion(
                 verifyParams_.root,
