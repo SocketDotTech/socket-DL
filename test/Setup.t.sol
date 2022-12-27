@@ -177,8 +177,7 @@ contract Setup is Test {
             uint32(chainSlug_),
             address(hasher__),
             sigVerifier,
-            address(hasher__),
-            address(vault__)
+            address(hasher__)
         );
 
         vm.stopPrank();
