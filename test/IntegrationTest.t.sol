@@ -67,7 +67,7 @@ contract HappyTest is Setup {
         // revert execution if packet not proposed
         assertEq(uint256(_b.notary__.getPacketStatus(packetId)), 0);
 
-        vm.expectRevert(Socket.VerificationFailed.selector);
+        vm.expectRevert(SocketDst.VerificationFailed.selector);
         _executePayloadOnDst(
             _a,
             _b,
@@ -89,7 +89,7 @@ contract HappyTest is Setup {
             hoax(_socketOwner);
             _b.socket__.revokeExecutorRole(_raju);
 
-            vm.expectRevert(Socket.ExecutorNotFound.selector);
+            vm.expectRevert(SocketDst.ExecutorNotFound.selector);
             _executePayloadOnDst(
                 _a,
                 _b,
@@ -124,7 +124,7 @@ contract HappyTest is Setup {
         assertEq(srcCounter__.counter(), 0);
         assertEq(uint256(_b.socket__.messageStatus(msgId)), 1);
 
-        vm.expectRevert(Socket.MessageAlreadyExecuted.selector);
+        vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
             _a,
             _b,
@@ -277,7 +277,7 @@ contract HappyTest is Setup {
             proof
         );
 
-        vm.expectRevert(Socket.MessageAlreadyExecuted.selector);
+        vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
             _a,
             _b,
@@ -400,7 +400,7 @@ contract HappyTest is Setup {
             root
         );
 
-        vm.expectRevert(Socket.VerificationFailed.selector);
+        vm.expectRevert(SocketDst.VerificationFailed.selector);
         _executePayloadOnDst(
             _a,
             _b,
@@ -449,7 +449,7 @@ contract HappyTest is Setup {
 
         (uint256 packetId, ) = _attesterChecks(accum);
 
-        vm.expectRevert(Socket.VerificationFailed.selector);
+        vm.expectRevert(SocketDst.VerificationFailed.selector);
         _executePayloadOnDst(
             _a,
             _b,

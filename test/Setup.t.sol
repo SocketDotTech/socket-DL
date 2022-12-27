@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import {Socket, ISocket, SocketConfig} from "../contracts/socket/Socket.sol";
+import {Socket, ISocket, SocketConfig, SocketSrc, SocketDst, SocketBase} from "../contracts/socket/Socket.sol";
 import "../contracts/notaries/AdminNotary.sol";
 import "../contracts/accumulators/SingleAccum.sol";
 import "../contracts/deaccumulators/SingleDeaccum.sol";
@@ -112,7 +112,6 @@ contract Setup is Test {
 
         (cc.hasher__, cc.vault__, cc.socket__) = _deploySocket(
             cc.chainSlug,
-            address(cc.sigVerifier__),
             _socketOwner
         );
 
@@ -167,7 +166,6 @@ contract Setup is Test {
 
     function _deploySocket(
         uint256 chainSlug_,
-        address sigVerifier,
         address deployer_
     ) internal returns (Hasher hasher__, Vault vault__, Socket socket__) {
         vm.startPrank(deployer_);
@@ -276,7 +274,7 @@ contract Setup is Test {
         ChainContext storage src_,
         ChainContext storage dst_,
         address remotePlug_,
-        uint256,
+        uint256 packetId_,
         uint256 msgId_,
         uint256 msgGasLimit_,
         bytes memory payload_,
@@ -286,7 +284,7 @@ contract Setup is Test {
 
         ISocket.VerificationParams memory vParams = ISocket.VerificationParams(
             src_.chainSlug,
-            bytes32(0),
+            packetId_,
             proof_
         );
 
