@@ -7,7 +7,6 @@ import "./SocketBase.sol";
 abstract contract SocketSrc is SocketBase {
     // incrementing nonce, should be handled in next socket version.
     uint256 public _messageCount;
-    IVault public _vault__;
 
     /**
      * @notice emits the verification and seal confirmation of a packet

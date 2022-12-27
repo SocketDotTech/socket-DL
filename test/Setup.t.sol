@@ -174,7 +174,6 @@ contract Setup is Test {
         socket__ = new Socket(
             uint32(chainSlug_),
             address(hasher__),
-            sigVerifier,
             address(hasher__)
         );
 

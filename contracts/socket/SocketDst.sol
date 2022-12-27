@@ -33,7 +33,7 @@ abstract contract SocketDst is SocketBase {
     // msgId => message status
     mapping(uint256 => MessageStatus) public messageStatus;
 
-    mapping(uint256 => bool) public remoteRoots;
+    mapping(uint256 => bytes32) public remoteRoots;
     mapping(uint256 => uint256) public rootProposedAt;
 
     /**
@@ -131,7 +131,7 @@ abstract contract SocketDst is SocketBase {
     ) internal view {
         if (
             !ISwitchboard(plugConfig.verifier).allowPacket(
-                verifyParams_.packetId,
+                remoteRoots[verifyParams_.packetId],
                 rootProposedAt[verifyParams_.packetId]
             )
         ) revert VerificationFailed();

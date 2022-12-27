@@ -2,6 +2,7 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/IHasher.sol";
+import "../interfaces/ISwitchboard.sol";
 import "../utils/ReentrancyGuard.sol";
 import "./SocketConfig.sol";
 
