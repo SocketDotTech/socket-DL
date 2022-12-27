@@ -7,5 +7,8 @@ interface ISwitchboard {
         uint256 proposeTime
     ) external view returns (bool);
 
-    function payFees(uint256 msgGasLimit) external payable;
+    function payFees(
+        uint256 msgGasLimit,
+        uint256 destChainSlug
+    ) external payable;
 }
