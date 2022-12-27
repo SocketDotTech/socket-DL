@@ -39,6 +39,6 @@ abstract contract SocketBase is SocketConfig, ReentrancyGuard {
      */
     function setTransmitManager(address transmitManager_) external onlyOwner {
         _transmitManager__ = ITransmitManager(transmitManager_);
-        emit TransmitManager(transmitManager_);
+        emit TransmitManagerSet(transmitManager_);
     }
 }
