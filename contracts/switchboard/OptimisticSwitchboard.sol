@@ -13,9 +13,8 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
     bool tripFuse;
 
     // TODO: change name
-    // TODO: should we use packetId here?
-    // root => isPaused
-    mapping(bytes32 => bool) public isRootPaused;
+    // packetId => isPaused
+    mapping(uint256 => bool) public isPacketPaused;
 
     event SocketSet(address newSocket_);
     event SwitchboardTripped(bool tripFuse_);
@@ -38,7 +37,7 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
 
     function payFees(
         uint256 msgGasLimit,
-        uint256 remoteChainSlug
+        uint256 dstChainSlug
     ) external payable override {
         // TODO: updated with issue #45
         uint256 expectedFees = 0;
@@ -47,14 +46,16 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
 
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param root root
+     * @param packetId packet id
      * @param proposeTime time at which packet was proposed
      */
     function allowPacket(
-        bytes32 root,
+        bytes32,
+        uint256 packetId,
+        uint256,
         uint256 proposeTime
     ) external view override returns (bool) {
-        if (tripFuse || isRootPaused[root]) return false;
+        if (tripFuse || isPacketPaused[packetId]) return false;
         if (block.timestamp - proposeTime < timeoutInSeconds) return false;
         return true;
     }
