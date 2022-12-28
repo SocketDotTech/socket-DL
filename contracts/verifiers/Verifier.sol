@@ -10,8 +10,8 @@ contract Verifier is IVerifier, Ownable {
     INotary public notary;
     uint256 public immutable timeoutInSeconds;
 
-    // this integration type is set for fast accum
-    // it is compared against the passed accum type to decide packet verification mode
+    // this integration type is set for fast capacitor
+    // it is compared against the passed capacitor type to decide packet verification mode
     bytes32 public immutable fastIntegrationType;
 
     event NotarySet(address notary_);
@@ -59,7 +59,7 @@ contract Verifier is IVerifier, Ownable {
         ) = notary.getPacketDetails(packetId_);
 
         if (status != INotary.PacketStatus.PROPOSED) return (false, root);
-        // if timed out, return true irrespective of fast or slow accum
+        // if timed out, return true irrespective of fast or slow capacitor
         if (block.timestamp - packetArrivedAt > timeoutInSeconds)
             return (true, root);
 

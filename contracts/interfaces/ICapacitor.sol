@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-interface IAccumulator {
+interface ICapacitor {
     /**
      * @notice emits the message details when it arrives
      * @param packedMessage the message packed with payload, fees and config
@@ -49,12 +49,9 @@ interface IAccumulator {
     /**
      * @notice seals the packet
      * @dev also indicates the packet is ready to be shipped and no more messages can be added now.
-     * @dev this should be executable by notary only
+     * @dev this should be executable by socket only
      * @return root root hash of the packet
      * @return packetId id of the packed sealed
-     * @return remoteChainSlug remote chain slug for the packet sealed
      */
-    function sealPacket()
-        external
-        returns (bytes32 root, uint256 packetId, uint256 remoteChainSlug);
+    function sealPacket() external returns (bytes32 root, uint256 packetId);
 }

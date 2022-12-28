@@ -7,8 +7,8 @@ import "../utils/AccessControl.sol";
 abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     struct PlugConfig {
         address remotePlug;
-        address accum;
-        address deaccum;
+        address capacitor;
+        address decapacitor;
         address verifier;
         bytes32 inboundIntegrationType;
         bytes32 outboundIntegrationType;
@@ -16,16 +16,16 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
 
     // integrationType => remoteChainSlug => address
     mapping(bytes32 => mapping(uint256 => address)) public verifiers;
-    mapping(bytes32 => mapping(uint256 => address)) public accums;
-    mapping(bytes32 => mapping(uint256 => address)) public deaccums;
+    mapping(bytes32 => mapping(uint256 => address)) public capacitors;
+    mapping(bytes32 => mapping(uint256 => address)) public decapacitors;
     mapping(bytes32 => mapping(uint256 => bool)) public configExists;
 
-    // plug => remoteChainSlug => config(verifiers, accums, deaccums, remotePlug)
+    // plug => remoteChainSlug => config(verifiers, capacitors, decapacitors, remotePlug)
     mapping(address => mapping(uint256 => PlugConfig)) public plugConfigs;
 
     event ConfigAdded(
-        address accum_,
-        address deaccum_,
+        address capacitor_,
+        address decapacitor_,
         address verifier_,
         uint256 remoteChainSlug_,
         bytes32 integrationType_
@@ -36,8 +36,8 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
 
     function addConfig(
         uint256 remoteChainSlug_,
-        address accum_,
-        address deaccum_,
+        address capacitor_,
+        address decapacitor_,
         address verifier_,
         string calldata integrationType_
     ) external returns (bytes32 integrationType) {
@@ -46,13 +46,13 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
             revert ConfigExists();
 
         verifiers[integrationType][remoteChainSlug_] = verifier_;
-        accums[integrationType][remoteChainSlug_] = accum_;
-        deaccums[integrationType][remoteChainSlug_] = deaccum_;
+        capacitors[integrationType][remoteChainSlug_] = capacitor_;
+        decapacitors[integrationType][remoteChainSlug_] = decapacitor_;
         configExists[integrationType][remoteChainSlug_] = true;
 
         emit ConfigAdded(
-            accum_,
-            deaccum_,
+            capacitor_,
+            decapacitor_,
             verifier_,
             remoteChainSlug_,
             integrationType
@@ -82,8 +82,12 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         ];
 
         plugConfig.remotePlug = remotePlug_;
-        plugConfig.accum = accums[outboundIntegrationType][remoteChainSlug_];
-        plugConfig.deaccum = deaccums[inboundIntegrationType][remoteChainSlug_];
+        plugConfig.capacitor = capacitors[outboundIntegrationType][
+            remoteChainSlug_
+        ];
+        plugConfig.decapacitor = decapacitors[inboundIntegrationType][
+            remoteChainSlug_
+        ];
         plugConfig.verifier = verifiers[inboundIntegrationType][
             remoteChainSlug_
         ];
@@ -104,8 +108,8 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     ) external view returns (address, address, address) {
         bytes32 integrationType = keccak256(abi.encode(integrationType_));
         return (
-            accums[integrationType][remoteChainSlug_],
-            deaccums[integrationType][remoteChainSlug_],
+            capacitors[integrationType][remoteChainSlug_],
+            decapacitors[integrationType][remoteChainSlug_],
             verifiers[integrationType][remoteChainSlug_]
         );
     }
@@ -117,8 +121,8 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         external
         view
         returns (
-            address accum,
-            address deaccum,
+            address capacitor,
+            address decapacitor,
             address verifier,
             address remotePlug,
             bytes32 outboundIntegrationType,
@@ -127,8 +131,8 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     {
         PlugConfig memory plugConfig = plugConfigs[plug_][remoteChainSlug_];
         return (
-            plugConfig.accum,
-            plugConfig.deaccum,
+            plugConfig.capacitor,
+            plugConfig.decapacitor,
             plugConfig.verifier,
             plugConfig.remotePlug,
             plugConfig.outboundIntegrationType,

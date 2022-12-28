@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/IAccumulator.sol";
+import "../interfaces/ICapacitor.sol";
 import "../utils/AccessControl.sol";
 
-abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
+abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
     bytes32 public constant SOCKET_ROLE = keccak256("SOCKET_ROLE");
-    bytes32 public constant NOTARY_ROLE = keccak256("NOTARY_ROLE");
-    uint256 public immutable remoteChainSlug;
 
     /// an incrementing id for each new packet created
     uint256 internal _packets;
@@ -19,33 +17,22 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     error NoPendingPacket();
 
     /**
-     * @notice initialises the contract with socket and notary addresses
+     * @notice initialises the contract with socket address
      */
-    constructor(address socket_, address notary_, uint32 remoteChainSlug_) {
+    constructor(address socket_) {
         _setSocket(socket_);
-        _setNotary(notary_);
-
-        remoteChainSlug = remoteChainSlug_;
     }
 
     function setSocket(address socket_) external onlyOwner {
         _setSocket(socket_);
     }
 
-    function setNotary(address notary_) external onlyOwner {
-        _setNotary(notary_);
-    }
-
     function _setSocket(address socket_) private {
         _grantRole(SOCKET_ROLE, socket_);
     }
 
-    function _setNotary(address notary_) private {
-        _grantRole(NOTARY_ROLE, notary_);
-    }
-
     /// returns the latest packet details to be sealed
-    /// @inheritdoc IAccumulator
+    /// @inheritdoc ICapacitor
     function getNextPacketToBeSealed()
         external
         view
@@ -58,7 +45,7 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     }
 
     /// returns the root of packet for given id
-    /// @inheritdoc IAccumulator
+    /// @inheritdoc ICapacitor
     function getRootById(
         uint256 id
     ) external view virtual override returns (bytes32) {

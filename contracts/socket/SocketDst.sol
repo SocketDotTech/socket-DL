@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/IDeaccumulator.sol";
+// import "../interfaces/IVerifier.sol";
+import "../interfaces/IDecapacitor.sol";
 import "../interfaces/IPlug.sol";
 import "./SocketBase.sol";
 
@@ -32,7 +33,7 @@ abstract contract SocketDst is SocketBase {
     mapping(uint256 => address) public executor;
     // msgId => message status
     mapping(uint256 => MessageStatus) public messageStatus;
-
+    // capacitorAddr|chainSlug|packetId
     mapping(uint256 => bytes32) public remoteRoots;
     mapping(uint256 => uint256) public rootProposedAt;
 
@@ -139,10 +140,10 @@ abstract contract SocketDst is SocketBase {
         ) revert VerificationFailed();
 
         if (
-            !IDeaccumulator(plugConfig.deaccum).verifyMessageInclusion(
+            !IDecapacitor(plugConfig.decapacitor).verifyMessageInclusion(
                 remoteRoots[verifyParams_.packetId],
                 packedMessage,
-                verifyParams_.deaccumProof
+                verifyParams_.decapacitorProof
             )
         ) revert InvalidProof();
     }
