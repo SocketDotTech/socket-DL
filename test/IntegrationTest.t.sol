@@ -30,9 +30,9 @@ contract HappyTest is Setup {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
-        address accum = isFast
-            ? address(_a.fastAccum__)
-            : address(_a.slowAccum__);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
 
         hoax(_raju);
         srcCounter__.remoteAddOperation{value: minFees}(
@@ -48,7 +48,7 @@ contract HappyTest is Setup {
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a, accum, _b.chainSlug);
+        ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
         address attester = vm.addr(_attesterPrivateKey);
 
         // not an attester
@@ -56,13 +56,13 @@ contract HappyTest is Setup {
             hoax(_socketOwner);
             _a.notary__.revokeAttesterRole(_b.chainSlug, attester);
             vm.expectRevert(INotary.InvalidAttester.selector);
-            _sealOnSrc(_a, accum, sig);
+            _sealOnSrc(_a, capacitor, sig);
 
             hoax(_socketOwner);
             _a.notary__.grantAttesterRole(_b.chainSlug, attester);
         }
 
-        _sealOnSrc(_a, accum, sig);
+        _sealOnSrc(_a, capacitor, sig);
 
         // revert execution if packet not proposed
         assertEq(uint256(_b.notary__.getPacketStatus(packetId)), 0);
@@ -141,9 +141,9 @@ contract HappyTest is Setup {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
-        address accum = isFast
-            ? address(_b.fastAccum__)
-            : address(_b.slowAccum__);
+        address capacitor = isFast
+            ? address(_b.fastCapacitor__)
+            : address(_b.slowCapacitor__);
 
         hoax(_raju);
         dstCounter__.remoteAddOperation{value: minFees}(
@@ -156,10 +156,10 @@ contract HappyTest is Setup {
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_b, accum, _a.chainSlug);
+        ) = _getLatestSignature(_b, capacitor, _a.chainSlug);
 
         uint256 msgId = _packMessageId(_b.chainSlug, 0);
-        _sealOnSrc(_b, accum, sig);
+        _sealOnSrc(_b, capacitor, sig);
         _submitRootOnDst(_a, sig, packetId, root);
 
         _executePayloadOnDst(
@@ -183,9 +183,9 @@ contract HappyTest is Setup {
 
         bytes memory subPayload = abi.encode(keccak256("OP_SUB"), subAmount);
         uint256 subMsgId = _packMessageId(_a.chainSlug, 1);
-        address accum = isFast
-            ? address(_a.fastAccum__)
-            : address(_a.slowAccum__);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
 
         bytes32 root;
         uint256 packetId;
@@ -202,8 +202,12 @@ contract HappyTest is Setup {
             _msgGasLimit
         );
 
-        (root, packetId, sig) = _getLatestSignature(_a, accum, _b.chainSlug);
-        _sealOnSrc(_a, accum, sig);
+        (root, packetId, sig) = _getLatestSignature(
+            _a,
+            capacitor,
+            _b.chainSlug
+        );
+        _sealOnSrc(_a, capacitor, sig);
         _submitRootOnDst(_b, sig, packetId, root);
 
         _executePayloadOnDst(
@@ -224,8 +228,12 @@ contract HappyTest is Setup {
             _msgGasLimit
         );
 
-        (root, packetId, sig) = _getLatestSignature(_a, accum, _b.chainSlug);
-        _sealOnSrc(_a, accum, sig);
+        (root, packetId, sig) = _getLatestSignature(
+            _a,
+            capacitor,
+            _b.chainSlug
+        );
+        _sealOnSrc(_a, capacitor, sig);
         _submitRootOnDst(_b, sig, packetId, root);
 
         _executePayloadOnDst(
@@ -248,9 +256,9 @@ contract HappyTest is Setup {
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
         uint256 msgId = _packMessageId(_a.chainSlug, 0);
-        address accum = isFast
-            ? address(_a.fastAccum__)
-            : address(_a.slowAccum__);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
 
         hoax(_raju);
         srcCounter__.remoteAddOperation{value: minFees}(
@@ -262,8 +270,8 @@ contract HappyTest is Setup {
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a, accum, _b.chainSlug);
-        _sealOnSrc(_a, accum, sig);
+        ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+        _sealOnSrc(_a, capacitor, sig);
         _submitRootOnDst(_b, sig, packetId, root);
 
         _executePayloadOnDst(
@@ -298,9 +306,9 @@ contract HappyTest is Setup {
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
         uint256 msgId = _packMessageId(_a.chainSlug, 0);
-        address accum = isFast
-            ? address(_a.fastAccum__)
-            : address(_a.slowAccum__);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
 
         // providing a lower gas limit
         uint256 msgGasLimit = 1000;
@@ -311,7 +319,7 @@ contract HappyTest is Setup {
             msgGasLimit
         );
 
-        (uint256 packetId, ) = _attesterChecks(accum);
+        (uint256 packetId, ) = _attesterChecks(capacitor);
 
         assertEq(uint256(_b.socket__.messageStatus(msgId)), 0);
 
@@ -338,9 +346,9 @@ contract HappyTest is Setup {
         bytes memory payload = abi.encode(keccak256("OP_SUB"), amount);
         bytes memory proof = abi.encode(0);
         uint256 msgId = _packMessageId(_a.chainSlug, 0);
-        address accum = isFast
-            ? address(_a.fastAccum__)
-            : address(_a.slowAccum__);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
 
         hoax(_raju);
         srcCounter__.remoteSubOperation{value: minFees}(
@@ -349,7 +357,7 @@ contract HappyTest is Setup {
             _msgGasLimit
         );
 
-        (uint256 packetId, ) = _attesterChecks(accum);
+        (uint256 packetId, ) = _attesterChecks(capacitor);
         assertEq(uint256(_b.socket__.messageStatus(msgId)), 0);
 
         // ExecutionFailed with error decoded as string
@@ -374,7 +382,7 @@ contract HappyTest is Setup {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
-        address accum = address(_a.fastAccum__);
+        address capacitor = address(_a.fastCapacitor__);
 
         hoax(_raju);
         srcCounter__.remoteAddOperation{value: minFees}(
@@ -390,7 +398,7 @@ contract HappyTest is Setup {
         hoax(_socketOwner);
         _b.notary__.grantAttesterRole(_a.chainSlug, newAttester);
 
-        (uint256 packetId, bytes32 root) = _attesterChecks(accum);
+        (uint256 packetId, bytes32 root) = _attesterChecks(capacitor);
 
         // get signature
         bytes memory sig = _createSignature(
@@ -435,7 +443,7 @@ contract HappyTest is Setup {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
-        address accum = address(_a.slowAccum__);
+        address capacitor = address(_a.slowCapacitor__);
         _configPlugContracts(false);
 
         hoax(_raju);
@@ -447,7 +455,7 @@ contract HappyTest is Setup {
 
         uint256 msgId = _packMessageId(_a.chainSlug, 0);
 
-        (uint256 packetId, ) = _attesterChecks(accum);
+        (uint256 packetId, ) = _attesterChecks(capacitor);
 
         vm.expectRevert(SocketDst.VerificationFailed.selector);
         _executePayloadOnDst(
@@ -461,7 +469,7 @@ contract HappyTest is Setup {
             proof
         );
 
-        vm.warp(block.timestamp + _slowAccumWaitTime);
+        vm.warp(block.timestamp + _slowCapacitorWaitTime);
 
         _executePayloadOnDst(
             _a,
@@ -509,11 +517,15 @@ contract HappyTest is Setup {
     }
 
     function _attesterChecks(
-        address accum
+        address capacitor
     ) internal returns (uint256 packetId, bytes32 root) {
         bytes memory sig;
-        (root, packetId, sig) = _getLatestSignature(_a, accum, _b.chainSlug);
-        _sealOnSrc(_a, accum, sig);
+        (root, packetId, sig) = _getLatestSignature(
+            _a,
+            capacitor,
+            _b.chainSlug
+        );
+        _sealOnSrc(_a, capacitor, sig);
         _submitRootOnDst(_b, sig, packetId, root);
     }
 }

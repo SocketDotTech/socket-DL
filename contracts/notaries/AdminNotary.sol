@@ -4,20 +4,20 @@ pragma solidity 0.8.7;
 import "../utils/AccessControl.sol";
 import "../utils/ReentrancyGuard.sol";
 import "../interfaces/INotary.sol";
-import "../interfaces/IAccumulator.sol";
+import "../interfaces/ICapacitor.sol";
 import "../interfaces/ISignatureVerifier.sol";
 
 contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
     uint256 private immutable _chainSlug;
     ISignatureVerifier public signatureVerifier;
 
-    // attester => accumAddr|chainSlug|packetId => is attested
+    // attester => capacitorAddr|chainSlug|packetId => is attested
     mapping(address => mapping(uint256 => bool)) public isAttested;
 
     // chainSlug => total attesters registered
     mapping(uint256 => uint256) public totalAttestors;
 
-    // accumAddr|chainSlug|packetId
+    // capacitorAddr|chainSlug|packetId
     mapping(uint256 => PacketDetails) private _packetDetails;
 
     constructor(address signatureVerifier_, uint32 chainSlug_) {
@@ -27,14 +27,18 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
 
     /// @inheritdoc INotary
     function seal(
-        address accumAddress_,
+        address capacitorAddress_,
         uint256[] calldata,
         bytes calldata signature_
     ) external payable override nonReentrant {
-        (bytes32 root, uint256 packetCount) = IAccumulator(accumAddress_)
+        (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket();
 
-        uint256 packetId = _getPacketId(accumAddress_, _chainSlug, packetCount);
+        uint256 packetId = _getPacketId(
+            capacitorAddress_,
+            _chainSlug,
+            packetCount
+        );
 
         address attester = signatureVerifier.recoverSigner(
             0, // TODO: read remoteChainSlug from config
@@ -51,7 +55,7 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
         ) revert InvalidAttester();
         emit PacketVerifiedAndSealed(
             attester,
-            accumAddress_,
+            capacitorAddress_,
             packetId,
             signature_
         );
@@ -223,13 +227,13 @@ contract AdminNotary is INotary, AccessControl(msg.sender), ReentrancyGuard {
     }
 
     function _getPacketId(
-        address accumAddr_,
+        address capacitorAddr_,
         uint256 chainSlug_,
         uint256 packetCount_
     ) internal pure returns (uint256 packetId) {
         packetId =
             (chainSlug_ << 224) |
-            (uint256(uint160(accumAddr_)) << 64) |
+            (uint256(uint160(capacitorAddr_)) << 64) |
             packetCount_;
     }
 

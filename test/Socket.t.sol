@@ -22,26 +22,26 @@ contract SocketTest is Setup {
         hoax(_socketOwner);
         _a.socket__.addConfig(
             dstChainSlug,
-            address(_a.fastAccum__),
-            address(_a.deaccum__),
+            address(_a.fastCapacitor__),
+            address(_a.decapacitor__),
             address(_a.verifier__),
             integrationType
         );
 
-        (address accum, address deaccum, address verifier) = _a
+        (address capacitor, address decapacitor, address verifier) = _a
             .socket__
             .getConfigs(dstChainSlug, integrationType);
 
-        assertEq(accum, address(_a.fastAccum__));
-        assertEq(deaccum, address(_a.deaccum__));
+        assertEq(capacitor, address(_a.fastCapacitor__));
+        assertEq(decapacitor, address(_a.decapacitor__));
         assertEq(verifier, address(_a.verifier__));
 
         hoax(_socketOwner);
         vm.expectRevert(SocketConfig.ConfigExists.selector);
         _a.socket__.addConfig(
             dstChainSlug,
-            address(_a.fastAccum__),
-            address(_a.deaccum__),
+            address(_a.fastCapacitor__),
+            address(_a.decapacitor__),
             address(_a.verifier__),
             integrationType
         );
@@ -59,8 +59,8 @@ contract SocketTest is Setup {
 
         _a.socket__.addConfig(
             dstChainSlug,
-            address(_a.fastAccum__),
-            address(_a.deaccum__),
+            address(_a.fastCapacitor__),
+            address(_a.decapacitor__),
             address(_a.verifier__),
             integrationType
         );
@@ -74,16 +74,16 @@ contract SocketTest is Setup {
         );
 
         (
-            address accum,
-            address deaccum,
+            address capacitor,
+            address decapacitor,
             address verifier,
             address remotePlug,
             ,
 
         ) = _a.socket__.getPlugConfig(dstChainSlug, _raju);
 
-        assertEq(accum, address(_a.fastAccum__));
-        assertEq(deaccum, address(_a.deaccum__));
+        assertEq(capacitor, address(_a.fastCapacitor__));
+        assertEq(decapacitor, address(_a.decapacitor__));
         assertEq(verifier, address(_a.verifier__));
         assertEq(remotePlug, _raju);
     }

@@ -7,7 +7,7 @@ import "fx-portal/tunnel/FxBaseChildTunnel.sol";
 contract PolygonL2Notary is NativeBridgeNotary, FxBaseChildTunnel {
     event FxChildUpdate(address oldFxChild, address newFxChild);
     event FxRootTunnel(address fxRootTunnel, address fxRootTunnel_);
-    modifier onlyRemoteAccumulator() override {
+    modifier onlyRemoteCapacitor() override {
         _;
     }
 

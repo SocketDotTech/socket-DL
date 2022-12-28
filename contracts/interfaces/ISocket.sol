@@ -78,7 +78,7 @@ interface ISocket {
 
     /**
      * @notice registers a message
-     * @dev Packs the message and includes it in a packet with accumulator
+     * @dev Packs the message and includes it in a packet with capacitor
      * @param remoteChainSlug_ the remote chain slug
      * @param msgGasLimit_ the gas limit needed to execute the payload on remote
      * @param payload_ the data which is needed by plug at inbound call on remote
@@ -92,7 +92,7 @@ interface ISocket {
     struct VerificationParams {
         uint256 remoteChainSlug;
         uint256 packetId;
-        bytes deaccumProof;
+        bytes decapacitorProof;
     }
 
     /**

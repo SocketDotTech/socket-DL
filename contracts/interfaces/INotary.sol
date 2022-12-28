@@ -22,13 +22,13 @@ interface INotary {
     /**
      * @notice emits the verification and seal confirmation of a packet
      * @param attester address of attester
-     * @param accumAddress address of accumulator at local
+     * @param capacitorAddress address of capacitor at local
      * @param packetId packed id
      * @param signature signature of attester
      */
     event PacketVerifiedAndSealed(
         address indexed attester,
-        address indexed accumAddress,
+        address indexed capacitorAddress,
         uint256 indexed packetId,
         bytes signature
     );
@@ -63,11 +63,11 @@ interface INotary {
 
     /**
      * @notice verifies the attester and seals a packet
-     * @param accumAddress_ address of accumulator at local
+     * @param capacitorAddress_ address of capacitor at local
      * @param signature_ signature of attester
      */
     function seal(
-        address accumAddress_,
+        address capacitorAddress_,
         uint256[] calldata bridgeParams,
         bytes calldata signature_
     ) external payable;

@@ -28,7 +28,7 @@ contract MockSocket {
 
     // integrationType => remoteChainSlug => address
     mapping(bytes32 => mapping(uint256 => bool)) public configExists;
-    // plug => remoteChainSlug => config(verifiers, accums, deaccums, remotePlug)
+    // plug => remoteChainSlug => config(verifiers, capacitors, decapacitors, remotePlug)
     mapping(address => mapping(uint256 => PlugConfig)) public plugConfigs;
 
     error InvalidIntegrationType();
@@ -78,8 +78,8 @@ contract MockSocket {
         external
         view
         returns (
-            address accum,
-            address deaccum,
+            address capacitor,
+            address decapacitor,
             address verifier,
             address remotePlug,
             bytes32 outboundIntegrationType,

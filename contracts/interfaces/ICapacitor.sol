@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-interface IAccumulator {
+interface ICapacitor {
     /**
      * @notice emits the message details when it arrives
      * @param packedMessage the message packed with payload, fees and config

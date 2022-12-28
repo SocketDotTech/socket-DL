@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/IAccumulator.sol";
+import "../interfaces/ICapacitor.sol";
 import "../utils/AccessControl.sol";
 
-abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
+abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
     bytes32 public constant SOCKET_ROLE = keccak256("SOCKET_ROLE");
 
     /// an incrementing id for each new packet created
@@ -32,7 +32,7 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     }
 
     /// returns the latest packet details to be sealed
-    /// @inheritdoc IAccumulator
+    /// @inheritdoc ICapacitor
     function getNextPacketToBeSealed()
         external
         view
@@ -45,7 +45,7 @@ abstract contract BaseAccum is IAccumulator, AccessControl(msg.sender) {
     }
 
     /// returns the root of packet for given id
-    /// @inheritdoc IAccumulator
+    /// @inheritdoc ICapacitor
     function getRootById(
         uint256 id
     ) external view virtual override returns (bytes32) {

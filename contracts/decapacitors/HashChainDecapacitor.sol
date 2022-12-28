@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/IDeaccumulator.sol";
+import "../interfaces/IDecapacitor.sol";
 
-contract HashChainDeaccum is IDeaccumulator {
+contract HashChainDecapacitor is IDecapacitor {
     /// returns if the packed message is the part of a merkle tree or not
-    /// @inheritdoc IDeaccumulator
+    /// @inheritdoc IDecapacitor
     function verifyMessageInclusion(
         bytes32 root_,
         bytes32 packedMessage_,

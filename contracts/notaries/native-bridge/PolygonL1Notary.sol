@@ -7,7 +7,7 @@ import "fx-portal/tunnel/FxBaseRootTunnel.sol";
 contract PolygonL1Notary is NativeBridgeNotary, FxBaseRootTunnel {
     event FxRootTunnel(address fxRootTunnel, address fxRootTunnel_);
 
-    modifier onlyRemoteAccumulator() override {
+    modifier onlyRemoteCapacitor() override {
         _;
     }
 
@@ -24,7 +24,7 @@ contract PolygonL1Notary is NativeBridgeNotary, FxBaseRootTunnel {
 
     function _processMessageFromChild(
         bytes memory message
-    ) internal override onlyRemoteAccumulator {
+    ) internal override onlyRemoteCapacitor {
         (uint256 packetId, bytes32 root, ) = abi.decode(
             message,
             (uint256, bytes32, bytes)
