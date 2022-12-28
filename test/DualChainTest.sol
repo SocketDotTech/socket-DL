@@ -45,9 +45,9 @@ contract DualChainTest is Setup {
     }
 
     function testFork() external {
-        address accum = isFast
-            ? address(_a.fastAccum__)
-            : address(_a.slowAccum__);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
 
         hoax(_raju);
         vm.selectFork(aFork);
@@ -63,8 +63,8 @@ contract DualChainTest is Setup {
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a, accum, _b.chainSlug);
-        _sealOnSrc(_a, accum, sig);
+        ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+        _sealOnSrc(_a, capacitor, sig);
 
         vm.selectFork(bFork);
         _submitRootOnDst(_b, sig, packetId, root);

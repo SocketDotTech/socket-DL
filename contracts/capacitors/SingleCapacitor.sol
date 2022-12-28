@@ -1,20 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./BaseAccum.sol";
+import "./BaseCapacitor.sol";
 
-contract SingleAccum is BaseAccum {
+contract SingleCapacitor is BaseCapacitor {
     /**
-     * @notice initialises the contract with socket and notary addresses
+     * @notice initialises the contract with socket address
      */
-    constructor(
-        address socket_,
-        address notary_,
-        uint32 remoteChainSlug_
-    ) BaseAccum(socket_, notary_, remoteChainSlug_) {}
+    constructor(address socket_) BaseCapacitor(socket_) {}
 
     /// adds the packed message to a packet
-    /// @inheritdoc IAccumulator
+    /// @inheritdoc ICapacitor
     function addPackedMessage(
         bytes32 packedMessage
     ) external override onlyRole(SOCKET_ROLE) {
@@ -29,8 +25,8 @@ contract SingleAccum is BaseAccum {
         external
         virtual
         override
-        onlyRole(NOTARY_ROLE)
-        returns (bytes32, uint256, uint256)
+        onlyRole(SOCKET_ROLE)
+        returns (bytes32, uint256)
     {
         uint256 packetId = _sealedPackets;
 
@@ -39,6 +35,6 @@ contract SingleAccum is BaseAccum {
         _sealedPackets++;
 
         emit PacketComplete(root, packetId);
-        return (root, packetId, remoteChainSlug);
+        return (root, packetId);
     }
 }

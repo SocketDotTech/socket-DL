@@ -2,7 +2,7 @@
 pragma solidity 0.8.7;
 
 // import "../interfaces/IVerifier.sol";
-import "../interfaces/IDeaccumulator.sol";
+import "../interfaces/IDecapacitor.sol";
 import "../interfaces/IPlug.sol";
 import "./SocketBase.sol";
 
@@ -45,7 +45,7 @@ abstract contract SocketDst is SocketBase {
     mapping(uint256 => address) public executor;
     // msgId => message status
     mapping(uint256 => MessageStatus) public messageStatus;
-    // accumAddr|chainSlug|packetId
+    // capacitorAddr|chainSlug|packetId
     mapping(uint256 => bytes32) public remoteRoots;
 
     /**
@@ -148,10 +148,10 @@ abstract contract SocketDst is SocketBase {
         if (!isVerified) revert VerificationFailed();
 
         if (
-            !IDeaccumulator(plugConfig.deaccum).verifyMessageInclusion(
+            !IDecapacitor(plugConfig.decapacitor).verifyMessageInclusion(
                 remoteRoots[verifyParams_.packetId],
                 packedMessage,
-                verifyParams_.deaccumProof
+                verifyParams_.decapacitorProof
             )
         ) revert InvalidProof();
     }
