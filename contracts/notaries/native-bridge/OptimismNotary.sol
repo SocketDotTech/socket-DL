@@ -8,7 +8,7 @@ contract OptimismNotary is NativeBridgeNotary {
     ICrossDomainMessenger public crossDomainMessenger;
     bool public isL2;
 
-    modifier onlyRemoteAccumulator() override {
+    modifier onlyRemoteCapacitor() override {
         if (
             msg.sender != address(crossDomainMessenger) &&
             crossDomainMessenger.xDomainMessageSender() != remoteNotary

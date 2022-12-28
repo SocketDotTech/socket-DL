@@ -71,8 +71,14 @@ interface ISocket {
     );
 
     /**
+     * @notice emits when a new transmitManager contract is set
+     * @param transmitManager_ address of new transmitManager contract
+     */
+    event TransmitManager(address transmitManager_);
+
+    /**
      * @notice registers a message
-     * @dev Packs the message and includes it in a packet with accumulator
+     * @dev Packs the message and includes it in a packet with capacitor
      * @param remoteChainSlug_ the remote chain slug
      * @param msgGasLimit_ the gas limit needed to execute the payload on remote
      * @param payload_ the data which is needed by plug at inbound call on remote
@@ -86,7 +92,7 @@ interface ISocket {
     struct VerificationParams {
         uint256 remoteChainSlug;
         uint256 packetId;
-        bytes deaccumProof;
+        bytes decapacitorProof;
     }
 
     /**
@@ -119,14 +125,15 @@ interface ISocket {
         string memory outboundIntegrationType_
     ) external;
 
-    function retry(uint256 msgId_, uint256 newMsgGasLimit_) external payable;
+    // TODO: retry
+    // function retry(uint256 msgId_, uint256 newMsgGasLimit_) external payable;
 
-    function retryExecute(
-        uint256 newMsgGasLimit,
-        uint256 msgId,
-        uint256 msgGasLimit,
-        address localPlug,
-        bytes calldata payload,
-        ISocket.VerificationParams calldata verifyParams_
-    ) external;
+    // function retryExecute(
+    //     uint256 newMsgGasLimit,
+    //     uint256 msgId,
+    //     uint256 msgGasLimit,
+    //     address localPlug,
+    //     bytes calldata payload,
+    //     ISocket.VerificationParams calldata verifyParams_
+    // ) external;
 }

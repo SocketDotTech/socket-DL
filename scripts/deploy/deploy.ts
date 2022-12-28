@@ -40,14 +40,11 @@ export const main = async () => {
     await storeAddresses(addresses, chainIds[network]);
 
     const vault: Contract = await deployVault(socketSigner);
-    addresses["Vault"] = vault.address;
-    await storeAddresses(addresses, chainIds[network]);
-
-    const deaccum: Contract = await deployContractWithoutArgs(
-      "SingleDeaccum",
+    const decapacitor: Contract = await deployContractWithoutArgs(
+      "SingleDecapacitor",
       socketSigner
     );
-    addresses["SingleDeaccum"] = deaccum.address;
+    addresses["SingleDecapacitor"] = decapacitor.address;
     await storeAddresses(addresses, chainIds[network]);
 
     const socket: Contract = await deploySocket(

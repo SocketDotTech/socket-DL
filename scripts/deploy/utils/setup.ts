@@ -1,7 +1,13 @@
 import fs from "fs";
 import hre from "hardhat";
 
-import { constants, Contract, ContractTransaction, Transaction, utils } from "ethers";
+import {
+  constants,
+  Contract,
+  ContractTransaction,
+  Transaction,
+  utils,
+} from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import {
@@ -17,19 +23,15 @@ import {
   getVerifierAddress,
   storeAddresses,
   deployedAddressPath,
-  getSigners
+  getSigners,
 } from "./";
-import { deployNotary, deployAccumulator, deployVerifier } from "../contracts";
+import { deployNotary, deployCapacitor, deployVerifier } from "../contracts";
 import { IntegrationTypes } from "../../../src";
 
 let localChain, remoteChain, localConfig, remoteConfig;
 
-const setupContracts = async (
-  localNotary,
-  localNotaryName,
-  socketSigner
-) => {
-  // check if remote notary and accum exists
+const setupContracts = async (localNotary, localNotaryName, socketSigner) => {
+  // check if remote notary and capacitor exists
   const { notary, integrationType } = contractNames(
     "",
     remoteChain,
@@ -51,7 +53,9 @@ const setupContracts = async (
     .connect(signers.socketSigner)
     .updateRemoteNotary(localNotary.address);
 
-  console.log(`Sending updateRemoteNotary tx on ${remoteChain}: ${updateRemoteNotaryTx.hash}`);
+  console.log(
+    `Sending updateRemoteNotary tx on ${remoteChain}: ${updateRemoteNotaryTx.hash}`
+  );
   await updateRemoteNotaryTx.wait();
 
   await hre.changeNetwork(localChain);
@@ -59,17 +63,25 @@ const setupContracts = async (
     .connect(socketSigner)
     .updateRemoteNotary(remoteNotary.address);
 
-  console.log(`Sending updateRemoteNotary tx on ${localChain}: ${updateRemoteNotaryTx.hash}`);
+  console.log(
+    `Sending updateRemoteNotary tx on ${localChain}: ${updateRemoteNotaryTx.hash}`
+  );
   await updateRemoteNotaryTx.wait();
 
-  if (localChain === "polygon-mumbai" || remoteChain === "polygon-mumbai") await setupPolygonNotaries(localNotaryName, notary, localNotary, remoteNotary);
+  if (localChain === "polygon-mumbai" || remoteChain === "polygon-mumbai")
+    await setupPolygonNotaries(
+      localNotaryName,
+      notary,
+      localNotary,
+      remoteNotary
+    );
 };
 
 const setupPolygonNotaries = async (
   localNotaryName: string,
   remoteNotaryName: string,
   localNotary: Contract,
-  remoteNotary: Contract,
+  remoteNotary: Contract
 ) => {
   try {
     await hre.changeNetwork(remoteChain);
@@ -79,40 +91,46 @@ const setupPolygonNotaries = async (
         .connect(signers.socketSigner)
         .setFxChildTunnel(localNotary.address);
 
-      console.log(`Sending setFxChildTunnelTx tx on ${remoteChain}: ${setFxChildTunnelTx.hash}`);
+      console.log(
+        `Sending setFxChildTunnelTx tx on ${remoteChain}: ${setFxChildTunnelTx.hash}`
+      );
       await setFxChildTunnelTx.wait();
-
     } else if (remoteNotaryName === "PolygonL2Notary") {
       const setFxRootTunnelTx = await remoteNotary
         .connect(signers.socketSigner)
         .setFxRootTunnel(localNotary.address);
 
-      console.log(`Sending setFxRootTunnelTx tx on ${remoteChain}: ${setFxRootTunnelTx.hash}`);
+      console.log(
+        `Sending setFxRootTunnelTx tx on ${remoteChain}: ${setFxRootTunnelTx.hash}`
+      );
       await setFxRootTunnelTx.wait();
     }
 
     await hre.changeNetwork(localChain);
     signers = await getSigners();
     if (localNotaryName === "PolygonL1Notary") {
-      const setFxChildTunnelTx = await localNotary.connect(signers.socketSigner)
+      const setFxChildTunnelTx = await localNotary
+        .connect(signers.socketSigner)
         .setFxChildTunnel(remoteNotary.address);
 
-      console.log(`Sending setFxChildTunnelTx tx on ${localChain}: ${setFxChildTunnelTx.hash}`);
+      console.log(
+        `Sending setFxChildTunnelTx tx on ${localChain}: ${setFxChildTunnelTx.hash}`
+      );
       await setFxChildTunnelTx.wait();
-
     } else if (localNotaryName === "PolygonL2Notary") {
-      const setFxRootTunnelTx = await localNotary.connect(signers.socketSigner)
+      const setFxRootTunnelTx = await localNotary
+        .connect(signers.socketSigner)
         .setFxRootTunnel(remoteNotary.address);
 
-      console.log(`Sending setFxRootTunnelTx tx on ${localChain}: ${setFxRootTunnelTx.hash}`);
+      console.log(
+        `Sending setFxRootTunnelTx tx on ${localChain}: ${setFxRootTunnelTx.hash}`
+      );
       await setFxRootTunnelTx.wait();
     }
   } catch (error) {
-    throw new Error(
-      `Error while setting up polygon notaries: ${error}`
-    );
+    throw new Error(`Error while setting up polygon notaries: ${error}`);
   }
-}
+};
 
 const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
   try {
@@ -124,7 +142,11 @@ const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
     );
 
     if (!address) {
-      let remoteNotary = getNotaryAddress(notaryName, chainIds[localChain], remoteConfig)
+      let remoteNotary = getNotaryAddress(
+        notaryName,
+        chainIds[localChain],
+        remoteConfig
+      );
       if (!remoteNotary) remoteNotary = constants.AddressZero;
 
       notary = await deployNotary(
@@ -146,7 +168,11 @@ const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
       );
     } else {
       notary = await getInstance(notaryName, address);
-      if (!localConfig["integrations"]?.[chainIds[remoteChain]]?.[integrationType]?.["notary"])
+      if (
+        !localConfig["integrations"]?.[chainIds[remoteChain]]?.[
+          integrationType
+        ]?.["notary"]
+      )
         localConfig = createObj(
           localConfig,
           ["integrations", chainIds[remoteChain], integrationType, "notary"],
@@ -154,13 +180,18 @@ const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
         );
     }
 
-    const hasRole = await notary.hasRole(utils.hexZeroPad(utils.hexlify(chainIds[remoteChain]), 32), attesterAddress[localChain]);
+    const hasRole = await notary.hasRole(
+      utils.hexZeroPad(utils.hexlify(chainIds[remoteChain]), 32),
+      attesterAddress[localChain]
+    );
     if (!hasRole) {
       const grantAttesterRoleTx = await notary
         .connect(socketSigner)
         .grantAttesterRole(chainIds[remoteChain], attesterAddress[localChain]);
 
-      console.log(`Sending grantAttesterRoleTx on ${localChain}: ${grantAttesterRoleTx.hash}`);
+      console.log(
+        `Sending grantAttesterRoleTx on ${localChain}: ${grantAttesterRoleTx.hash}`
+      );
       await grantAttesterRoleTx.wait();
     }
 
@@ -172,15 +203,19 @@ const deployLocalNotary = async (integrationType, notaryName, socketSigner) => {
   }
 };
 
-const deployLocalAccum = async (
+const deployLocalCapacitor = async (
   configurationType,
   notaryAddress,
   socketSigner
 ) => {
   try {
-    let accum;
-    if (!localConfig["integrations"]?.[chainIds[remoteChain]]?.[configurationType]?.["accum"]) {
-      accum = await deployAccumulator(
+    let capacitor;
+    if (
+      !localConfig["integrations"]?.[chainIds[remoteChain]]?.[
+        configurationType
+      ]?.["capacitor"]
+    ) {
+      capacitor = await deployCapacitor(
         localConfig["Socket"],
         notaryAddress,
         remoteChain,
@@ -189,22 +224,21 @@ const deployLocalAccum = async (
 
       localConfig = createObj(
         localConfig,
-        ["integrations", chainIds[remoteChain], configurationType, "accum"],
-        accum.address
+        ["integrations", chainIds[remoteChain], configurationType, "capacitor"],
+        capacitor.address
       );
-
     } else {
-      accum = await getInstance(
-        "SingleAccum",
-        localConfig["integrations"]?.[chainIds[remoteChain]]?.[configurationType]?.["accum"]
+      capacitor = await getInstance(
+        "SingleCapacitor",
+        localConfig["integrations"]?.[chainIds[remoteChain]]?.[
+          configurationType
+        ]?.["capacitor"]
       );
     }
 
-    return accum;
+    return capacitor;
   } catch (error) {
-    throw new Error(
-      `Error while deploying accum contract: ${error}`
-    );
+    throw new Error(`Error while deploying capacitor contract: ${error}`);
   }
 };
 
@@ -241,7 +275,11 @@ const deployLocalVerifier = async (
       );
     } else {
       verifier = await getInstance(verifierName, address);
-      if (!localConfig["integrations"]?.[chainIds[remoteChain]]?.[integrationType]?.["verifier"])
+      if (
+        !localConfig["integrations"]?.[chainIds[remoteChain]]?.[
+          integrationType
+        ]?.["verifier"]
+      )
         localConfig = createObj(
           localConfig,
           ["integrations", chainIds[remoteChain], integrationType, "verifier"],
@@ -252,13 +290,13 @@ const deployLocalVerifier = async (
     return verifier;
   } catch (error) {
     throw new Error(
-      `Error while deploying accum contract: ${verifierName}: ${error}`
+      `Error while deploying capacitor contract: ${verifierName}: ${error}`
     );
   }
 };
 
 /**
- * Used to deploy config related contracts like Accum, deaccum, verifier and notary.
+ * Used to deploy config related contracts like Capacitor, decapacitor, verifier and notary.
  * It checks the deployed addresses, and if a contract exists, it will use the deployed instance
  * @param configurationType type of configurations
  * @param socketSigner
@@ -269,15 +307,15 @@ export const setupConfig = async (
   destChain: string,
   socketSigner: SignerWithAddress
 ) => {
-  localChain = srcChain
-  remoteChain = destChain
+  localChain = srcChain;
+  remoteChain = destChain;
 
   const contracts = contractNames(configurationType, localChain, remoteChain);
   if (configurationType !== contracts.integrationType)
     throw new Error("Given Configuration not supported");
 
   console.log(
-    `Deploying contracts: SingleAccum, ${contracts.notary}, ${contracts.verifier} for ${contracts.integrationType} integration type`
+    `Deploying contracts: SingleCapacitor, ${contracts.notary}, ${contracts.verifier} for ${contracts.integrationType} integration type`
   );
 
   if (!fs.existsSync(deployedAddressPath)) {
@@ -297,8 +335,7 @@ export const setupConfig = async (
     contracts.notary,
     socketSigner
   );
-  console.log(`Notary deployed at: ${notary.address}`)
-  await storeAddresses(localConfig, chainIds[localChain]);
+  console.log(`Notary deployed at: ${notary.address}`);
 
   let verifier = await deployLocalVerifier(
     configurationType,
@@ -306,18 +343,16 @@ export const setupConfig = async (
     notary.address,
     socketSigner
   );
-  console.log(`Verifier deployed at: ${verifier.address}`)
-  await storeAddresses(localConfig, chainIds[localChain]);
+  console.log(`Verifier deployed at: ${verifier.address}`);
 
-  let accum = await deployLocalAccum(
+  let capacitor = await deployLocalCapacitor(
     configurationType,
     notary.address,
     socketSigner
   );
-  console.log(`Accum deployed at: ${accum.address}`)
-  await storeAddresses(localConfig, chainIds[localChain]);
+  console.log(`Capacitor deployed at: ${capacitor.address}`);
 
-  // optional notary and accum settings
+  // optional notary and capacitor settings
   if (
     configurationType !== IntegrationTypes.fastIntegration &&
     configurationType !== IntegrationTypes.slowIntegration
@@ -328,15 +363,18 @@ export const setupConfig = async (
   // add config to socket
   console.log("Setting config in Socket");
   const socket: Contract = await getInstance("Socket", localConfig["Socket"]);
-  const socketConfig = await socket.getConfigs(chainIds[remoteChain], configurationType);
+  const socketConfig = await socket.getConfigs(
+    chainIds[remoteChain],
+    configurationType
+  );
 
   if (socketConfig[0] === constants.AddressZero) {
     const addConfigTx = await socket
       .connect(socketSigner)
       .addConfig(
         chainIds[remoteChain],
-        accum.address,
-        localConfig["SingleDeaccum"],
+        capacitor.address,
+        localConfig["SingleDecapacitor"],
         verifier.address,
         configurationType
       );
@@ -345,5 +383,8 @@ export const setupConfig = async (
     await storeAddresses(localConfig, chainIds[localChain]);
   }
 
-  return { localCounter: localConfig["Counter"], remoteCounter: remoteConfig["Counter"] }
+  return {
+    localCounter: localConfig["Counter"],
+    remoteCounter: remoteConfig["Counter"],
+  };
 };
