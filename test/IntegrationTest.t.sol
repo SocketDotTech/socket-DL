@@ -1,436 +1,531 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "forge-std/Test.sol";
-import "../src/Socket.sol";
-import "../src/Notary/AdminNotary.sol";
-import "../src/accumulators/SingleAccum.sol";
-import "../src/deaccumulators/SingleDeaccum.sol";
-import "../src/verifiers/AcceptWithTimeout.sol";
-import "../src/utils/SignatureVerifier.sol";
-import "../src/utils/Hasher.sol";
-import "../src/examples/counter.sol";
+import "./Setup.t.sol";
+import "../contracts/examples/Counter.sol";
 
-contract HappyTest is Test {
-    address constant _socketOwner = address(1);
-    address constant _counterOwner = address(2);
-    uint256 constant _attesterPrivateKey = uint256(3);
-    address _attester;
-    address constant _raju = address(4);
-    address constant _pauser = address(5);
-    bool constant _isFast = false;
-    uint256 private _timeoutInSeconds = 0;
-    uint256 private _waitTimeInSeconds = 0;
-    struct ChainContext {
-        uint256 chainId;
-        Socket socket__;
-        AdminNotary notary__;
-        IAccumulator accum__;
-        IDeaccumulator deaccum__;
-        AcceptWithTimeout verifier__;
-        Counter counter__;
-        SignatureVerifier sigVerifier__;
-        Hasher hasher__;
-    }
+contract HappyTest is Setup {
+    Counter srcCounter__;
+    Counter dstCounter__;
+    uint256 minFees = 10000;
+    uint256 addAmount = 100;
+    uint256 subAmount = 40;
 
-    struct MessageContext {
-        uint256 amount;
-        bytes payload;
-        bytes proof;
-        uint256 msgId;
-        bytes32 root;
-        uint256 packetId;
-        bytes sig;
-    }
+    bool isFast = true;
 
-    ChainContext _a;
-    ChainContext _b;
+    event ExecutionSuccess(uint256 msgId);
+    event ExecutionFailed(uint256 msgId, string result);
+    event ExecutionFailedBytes(uint256 msgId, bytes result);
 
     function setUp() external {
-        _a.chainId = 0x2013AA263;
-        _b.chainId = 0x2013AA264;
-        _deploySocketContracts();
-        _initAttester();
+        uint256[] memory attesters = new uint256[](1);
+        attesters[0] = _attesterPrivateKey;
+
+        _dualChainSetup(attesters, minFees);
         _deployPlugContracts();
-        _configPlugContracts();
-        _initPausers();
+        _configPlugContracts(isFast);
     }
 
     function testRemoteAddFromAtoB() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
 
         hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, amount);
+        srcCounter__.remoteAddOperation{value: minFees}(
+            _b.chainSlug,
+            amount,
+            _msgGasLimit
+        );
         // TODO: get nonce from event
 
-        uint256 msgId = (uint64(_b.chainId) << 32) | 0;
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+
         (
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, sig);
-        _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, msgId, payload, proof);
+        ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+        address attester = vm.addr(_attesterPrivateKey);
 
-        assertEq(_b.counter__.counter(), amount);
-        assertEq(_a.counter__.counter(), 0);
+        // not an attester
+        {
+            hoax(_socketOwner);
+            _a.notary__.revokeAttesterRole(_b.chainSlug, attester);
+            vm.expectRevert(INotary.InvalidAttester.selector);
+            _sealOnSrc(_a, capacitor, sig);
+
+            hoax(_socketOwner);
+            _a.notary__.grantAttesterRole(_b.chainSlug, attester);
+        }
+
+        _sealOnSrc(_a, capacitor, sig);
+
+        // revert execution if packet not proposed
+        assertEq(uint256(_b.notary__.getPacketStatus(packetId)), 0);
+
+        vm.expectRevert(SocketDst.VerificationFailed.selector);
+        _executePayloadOnDst(
+            _a,
+            _b,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            payload,
+            proof
+        );
+
+        _submitRootOnDst(_b, sig, packetId, root);
+
+        vm.expectRevert(INotary.AlreadyAttested.selector);
+        _submitRootOnDst(_b, sig, packetId, root);
+
+        // without executor role
+        {
+            hoax(_socketOwner);
+            _b.socket__.revokeExecutorRole(_raju);
+
+            vm.expectRevert(SocketDst.ExecutorNotFound.selector);
+            _executePayloadOnDst(
+                _a,
+                _b,
+                address(dstCounter__),
+                packetId,
+                msgId,
+                _msgGasLimit,
+                payload,
+                proof
+            );
+
+            hoax(_socketOwner);
+            _b.socket__.grantExecutorRole(_raju);
+        }
+
+        assertEq(uint256(_b.socket__.messageStatus(msgId)), 0);
+
+        vm.expectEmit(true, false, false, false);
+        emit ExecutionSuccess(msgId);
+        _executePayloadOnDst(
+            _a,
+            _b,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            payload,
+            proof
+        );
+
+        assertEq(dstCounter__.counter(), amount);
+        assertEq(srcCounter__.counter(), 0);
+        assertEq(uint256(_b.socket__.messageStatus(msgId)), 1);
+
+        vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
+        _executePayloadOnDst(
+            _a,
+            _b,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            payload,
+            proof
+        );
     }
 
     function testRemoteAddFromBtoA() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
+        address capacitor = isFast
+            ? address(_b.fastCapacitor__)
+            : address(_b.slowCapacitor__);
 
         hoax(_raju);
-        _b.counter__.remoteAddOperation(_a.chainId, amount);
+        dstCounter__.remoteAddOperation{value: minFees}(
+            _a.chainSlug,
+            amount,
+            _msgGasLimit
+        );
 
         (
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_b);
+        ) = _getLatestSignature(_b, capacitor, _a.chainSlug);
 
-        uint256 msgId = (uint64(_a.chainId) << 32) | 0;
-        _verifyAndSealOnSrc(_b, sig);
-        _submitRootOnDst(_b, _a, sig, packetId, root);
-        _executePayloadOnDst(_b, _a, packetId, msgId, payload, proof);
+        uint256 msgId = _packMessageId(_b.chainSlug, 0);
+        _sealOnSrc(_b, capacitor, sig);
+        _submitRootOnDst(_a, sig, packetId, root);
 
-        assertEq(_a.counter__.counter(), amount);
-        assertEq(_b.counter__.counter(), 0);
+        _executePayloadOnDst(
+            _b,
+            _a,
+            address(srcCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            payload,
+            proof
+        );
+
+        assertEq(srcCounter__.counter(), amount);
+        assertEq(dstCounter__.counter(), 0);
     }
 
     function testRemoteAddAndSubtract() external {
-        uint256 addAmount = 100;
         bytes memory addPayload = abi.encode(keccak256("OP_ADD"), addAmount);
-        bytes memory addProof = abi.encode(0);
-        uint256 addMsgId = (uint64(_b.chainId) << 32) | 0;
+        uint256 addMsgId = _packMessageId(_a.chainSlug, 0);
 
-        uint256 subAmount = 40;
         bytes memory subPayload = abi.encode(keccak256("OP_SUB"), subAmount);
-        bytes memory subProof = abi.encode(0);
-        uint256 subMsgId = (uint64(_b.chainId) << 32) | 1;
+        uint256 subMsgId = _packMessageId(_a.chainSlug, 1);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
 
         bytes32 root;
         uint256 packetId;
         bytes memory sig;
 
         hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, addAmount);
-
-        (root, packetId, sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, sig);
-        _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, addMsgId, addPayload, addProof);
+        vm.expectRevert(Vault.InsufficientFees.selector);
+        srcCounter__.remoteAddOperation(_b.chainSlug, addAmount, _msgGasLimit);
 
         hoax(_raju);
-        _a.counter__.remoteSubOperation(_b.chainId, subAmount);
+        srcCounter__.remoteAddOperation{value: minFees}(
+            _b.chainSlug,
+            addAmount,
+            _msgGasLimit
+        );
 
-        (root, packetId, sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, sig);
-        _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, subMsgId, subPayload, subProof);
-
-        assertEq(_b.counter__.counter(), addAmount - subAmount);
-        assertEq(_a.counter__.counter(), 0);
-    }
-
-    function testMessagesOutOfOrderForSequentialConfig() external {
-        _configPlugContracts();
-
-        MessageContext memory m1;
-        m1.amount = 100;
-        m1.payload = abi.encode(keccak256("OP_ADD"), m1.amount);
-        m1.proof = abi.encode(0);
-        m1.msgId = (uint64(_b.chainId) << 32) | 0;
-
-        hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, m1.amount);
-
-        (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, m1.sig);
-        _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
-
-        MessageContext memory m2;
-        m2.amount = 40;
-        m2.payload = abi.encode(keccak256("OP_ADD"), m2.amount);
-        m2.proof = abi.encode(0);
-        m2.msgId = (uint64(_b.chainId) << 32) | 1;
-
-        hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, m2.amount);
-
-        (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, m2.sig);
-        _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
-    }
-
-    function testMessagesOutOfOrderForNonSequentialConfig() external {
-        _configPlugContracts();
-
-        MessageContext memory m1;
-        m1.amount = 100;
-        m1.payload = abi.encode(keccak256("OP_ADD"), m1.amount);
-        m1.proof = abi.encode(0);
-        m1.msgId = (uint64(_b.chainId) << 32) | 0;
-
-        hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, m1.amount);
-
-        (m1.root, m1.packetId, m1.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, m1.sig);
-        _submitRootOnDst(_a, _b, m1.sig, m1.packetId, m1.root);
-
-        MessageContext memory m2;
-        m2.amount = 40;
-        m2.payload = abi.encode(keccak256("OP_ADD"), m2.amount);
-        m2.proof = abi.encode(0);
-        m2.msgId = (uint64(_b.chainId) << 32) | 1;
-
-        hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, m2.amount);
-
-        (m2.root, m2.packetId, m2.sig) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, m2.sig);
-        _submitRootOnDst(_a, _b, m2.sig, m2.packetId, m2.root);
+        (root, packetId, sig) = _getLatestSignature(
+            _a,
+            capacitor,
+            _b.chainSlug
+        );
+        _sealOnSrc(_a, capacitor, sig);
+        _submitRootOnDst(_b, sig, packetId, root);
 
         _executePayloadOnDst(
             _a,
             _b,
-            m2.packetId,
-            m2.msgId,
-            m2.payload,
-            m2.proof
+            address(dstCounter__),
+            packetId,
+            addMsgId,
+            _msgGasLimit,
+            addPayload,
+            abi.encode(0)
         );
+
+        hoax(_raju);
+        srcCounter__.remoteSubOperation{value: minFees}(
+            _b.chainSlug,
+            subAmount,
+            _msgGasLimit
+        );
+
+        (root, packetId, sig) = _getLatestSignature(
+            _a,
+            capacitor,
+            _b.chainSlug
+        );
+        _sealOnSrc(_a, capacitor, sig);
+        _submitRootOnDst(_b, sig, packetId, root);
+
         _executePayloadOnDst(
             _a,
             _b,
-            m1.packetId,
-            m1.msgId,
-            m1.payload,
-            m1.proof
+            address(dstCounter__),
+            packetId,
+            subMsgId,
+            _msgGasLimit,
+            subPayload,
+            abi.encode(0)
         );
 
-        assertEq(_b.counter__.counter(), m1.amount + m2.amount);
-        assertEq(_a.counter__.counter(), 0);
+        assertEq(dstCounter__.counter(), addAmount - subAmount);
+        assertEq(srcCounter__.counter(), 0);
     }
 
     function testExecSameMessageTwice() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
         bytes memory proof = abi.encode(0);
-        uint256 msgId = (uint64(_b.chainId) << 32) | 0;
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
 
         hoax(_raju);
-        _a.counter__.remoteAddOperation(_b.chainId, amount);
+        srcCounter__.remoteAddOperation{value: minFees}(
+            _b.chainSlug,
+            amount,
+            _msgGasLimit
+        );
         (
             bytes32 root,
             uint256 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_a);
-        _verifyAndSealOnSrc(_a, sig);
-        _submitRootOnDst(_a, _b, sig, packetId, root);
-        _executePayloadOnDst(_a, _b, packetId, msgId, payload, proof);
+        ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+        _sealOnSrc(_a, capacitor, sig);
+        _submitRootOnDst(_b, sig, packetId, root);
 
-        vm.expectRevert(ISocket.MessageAlreadyExecuted.selector);
-        _executePayloadOnDst(_a, _b, packetId, msgId, payload, proof);
+        _executePayloadOnDst(
+            _a,
+            _b,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            payload,
+            proof
+        );
 
-        assertEq(_b.counter__.counter(), amount);
-        assertEq(_a.counter__.counter(), 0);
+        vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
+        _executePayloadOnDst(
+            _a,
+            _b,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            payload,
+            proof
+        );
+
+        assertEq(dstCounter__.counter(), amount);
+        assertEq(srcCounter__.counter(), 0);
     }
 
-    function _deploySocketContracts() private {
-        vm.startPrank(_socketOwner);
+    function testExecuteWithLowGasLimit() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
+        bytes memory proof = abi.encode(0);
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
 
-        _a.hasher__ = new Hasher();
-        _b.hasher__ = new Hasher();
-
-        _a.sigVerifier__ = new SignatureVerifier();
-        _b.sigVerifier__ = new SignatureVerifier();
-
-        _a.notary__ = new AdminNotary(
-            address(_a.sigVerifier__),
-            _a.chainId,
-            _timeoutInSeconds,
-            _waitTimeInSeconds
-        );
-        _b.notary__ = new AdminNotary(
-            address(_b.sigVerifier__),
-            _b.chainId,
-            _timeoutInSeconds,
-            _waitTimeInSeconds
+        // providing a lower gas limit
+        uint256 msgGasLimit = 1000;
+        hoax(_raju);
+        srcCounter__.remoteAddOperation{value: minFees}(
+            _b.chainSlug,
+            amount,
+            msgGasLimit
         );
 
-        // deploy socket
-        _a.socket__ = new Socket(
-            _a.chainId,
-            address(_a.hasher__),
-            address(_a.notary__)
-        );
-        _b.socket__ = new Socket(
-            _b.chainId,
-            address(_b.hasher__),
-            address(_b.notary__)
-        );
+        (uint256 packetId, ) = _attesterChecks(capacitor);
 
-        // deploy accumulators
-        _a.accum__ = new SingleAccum(
-            address(_a.socket__),
-            address(_a.notary__)
-        );
-        _b.accum__ = new SingleAccum(
-            address(_b.socket__),
-            address(_b.notary__)
+        assertEq(uint256(_b.socket__.messageStatus(msgId)), 0);
+
+        // ExecutionFailedBytes with out of gas
+        vm.expectEmit(true, true, false, false);
+        emit ExecutionFailedBytes(msgId, "0x");
+
+        _executePayloadOnDst(
+            _a,
+            _b,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            msgGasLimit,
+            payload,
+            proof
         );
 
-        _a.notary__.addAccumulator(address(_a.accum__), _b.chainId, _isFast);
-        _b.notary__.addAccumulator(address(_b.accum__), _a.chainId, _isFast);
-
-        // deploy deaccumulators
-        _a.deaccum__ = new SingleDeaccum();
-        _b.deaccum__ = new SingleDeaccum();
-
-        vm.stopPrank();
+        assertEq(uint256(_b.socket__.messageStatus(msgId)), 2);
     }
 
-    function _initAttester() private {
-        // deduce attester address from private key
-        _attester = vm.addr(_attesterPrivateKey);
+    function testExecuteWithExecutionFailure() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(keccak256("OP_SUB"), amount);
+        bytes memory proof = abi.encode(0);
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+        address capacitor = isFast
+            ? address(_a.fastCapacitor__)
+            : address(_a.slowCapacitor__);
 
-        vm.startPrank(_socketOwner);
+        hoax(_raju);
+        srcCounter__.remoteSubOperation{value: minFees}(
+            _b.chainSlug,
+            amount,
+            _msgGasLimit
+        );
 
-        // grant attester role
-        _a.notary__.grantAttesterRole(_b.chainId, _attester);
-        _b.notary__.grantAttesterRole(_a.chainId, _attester);
+        (uint256 packetId, ) = _attesterChecks(capacitor);
+        assertEq(uint256(_b.socket__.messageStatus(msgId)), 0);
 
-        vm.stopPrank();
+        // ExecutionFailed with error decoded as string
+        vm.expectEmit(true, true, false, false);
+        emit ExecutionFailed(msgId, "CounterMock: Subtraction Overflow");
+
+        _executePayloadOnDst(
+            _a,
+            _b,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            payload,
+            proof
+        );
+
+        assertEq(uint256(_b.socket__.messageStatus(msgId)), 2);
     }
 
-    function _deployPlugContracts() private {
-        vm.startPrank(_counterOwner);
+    function testRemoteAddFromAtoBFastPath() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
+        bytes memory proof = abi.encode(0);
+        address capacitor = address(_a.fastCapacitor__);
+
+        hoax(_raju);
+        srcCounter__.remoteAddOperation{value: minFees}(
+            _b.chainSlug,
+            amount,
+            _msgGasLimit
+        );
+
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+
+        // add attesters
+        address newAttester = vm.addr(uint256(10));
+        hoax(_socketOwner);
+        _b.notary__.grantAttesterRole(_a.chainSlug, newAttester);
+
+        (uint256 packetId, bytes32 root) = _attesterChecks(capacitor);
+
+        // get signature
+        bytes memory sig = _createSignature(
+            _b.chainSlug,
+            packetId,
+            uint256(10),
+            root
+        );
+
+        vm.expectRevert(SocketDst.VerificationFailed.selector);
+        _executePayloadOnDst(
+            _a,
+            _b,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            payload,
+            proof
+        );
+
+        // attest
+        hoax(newAttester);
+        _b.notary__.attest(packetId, root, sig);
+
+        _executePayloadOnDst(
+            _a,
+            _b,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            payload,
+            proof
+        );
+
+        assertEq(dstCounter__.counter(), amount);
+        assertEq(srcCounter__.counter(), 0);
+    }
+
+    function testRemoteAddFromAtoBSlowPath() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
+        bytes memory proof = abi.encode(0);
+        address capacitor = address(_a.slowCapacitor__);
+        _configPlugContracts(false);
+
+        hoax(_raju);
+        srcCounter__.remoteAddOperation{value: minFees}(
+            _b.chainSlug,
+            amount,
+            _msgGasLimit
+        );
+
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+
+        (uint256 packetId, ) = _attesterChecks(capacitor);
+
+        vm.expectRevert(SocketDst.VerificationFailed.selector);
+        _executePayloadOnDst(
+            _a,
+            _b,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            payload,
+            proof
+        );
+
+        vm.warp(block.timestamp + _slowCapacitorWaitTime);
+
+        _executePayloadOnDst(
+            _a,
+            _b,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            payload,
+            proof
+        );
+
+        assertEq(dstCounter__.counter(), amount);
+        assertEq(srcCounter__.counter(), 0);
+    }
+
+    function _deployPlugContracts() internal {
+        vm.startPrank(_plugOwner);
 
         // deploy counters
-        _a.counter__ = new Counter(address(_a.socket__));
-        _b.counter__ = new Counter(address(_b.socket__));
-
-        // deploy verifiers
-        _a.verifier__ = new AcceptWithTimeout(
-            address(_a.socket__),
-            _counterOwner
-        );
-        _b.verifier__ = new AcceptWithTimeout(
-            address(_b.socket__),
-            _counterOwner
-        );
+        srcCounter__ = new Counter(address(_a.socket__));
+        dstCounter__ = new Counter(address(_b.socket__));
 
         vm.stopPrank();
     }
 
-    function _configPlugContracts() private {
-        hoax(_counterOwner);
-        _a.counter__.setSocketConfig(
-            _b.chainId,
-            address(_b.counter__),
-            address(_a.accum__),
-            address(_a.deaccum__),
-            address(_a.verifier__)
+    function _configPlugContracts(bool isFast_) internal {
+        string memory integrationType = isFast_
+            ? fastIntegrationType
+            : slowIntegrationType;
+
+        hoax(_plugOwner);
+        srcCounter__.setSocketConfig(
+            _b.chainSlug,
+            address(dstCounter__),
+            integrationType
         );
 
-        hoax(_counterOwner);
-        _b.counter__.setSocketConfig(
-            _a.chainId,
-            address(_a.counter__),
-            address(_b.accum__),
-            address(_b.deaccum__),
-            address(_b.verifier__)
-        );
-    }
-
-    function _initPausers() private {
-        // add pausers
-        hoax(_counterOwner);
-        _a.verifier__.AddPauser(_pauser, _b.chainId);
-        hoax(_counterOwner);
-        _b.verifier__.AddPauser(_pauser, _a.chainId);
-
-        // activate remote chains
-        hoax(_pauser);
-        _a.verifier__.Activate(_b.chainId);
-        hoax(_pauser);
-        _b.verifier__.Activate(_a.chainId);
-    }
-
-    function _getLatestSignature(ChainContext storage src_)
-        private
-        returns (
-            bytes32 root,
-            uint256 packetId,
-            bytes memory sig
-        )
-    {
-        (root, packetId) = src_.accum__.getNextPacket();
-        bytes32 digest = keccak256(
-            abi.encode(src_.chainId, address(src_.accum__), packetId, root)
-        );
-
-        (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(
-            _attesterPrivateKey,
-            digest
-        );
-        sig = new bytes(65);
-        bytes1 v32 = bytes1(sigV);
-
-        assembly {
-            mstore(add(sig, 96), v32)
-            mstore(add(sig, 32), sigR)
-            mstore(add(sig, 64), sigS)
-        }
-    }
-
-    function _verifyAndSealOnSrc(ChainContext storage src_, bytes memory sig_)
-        private
-    {
-        hoax(_attester);
-        src_.notary__.verifyAndSeal(address(src_.accum__), sig_);
-    }
-
-    function _submitRootOnDst(
-        ChainContext storage src_,
-        ChainContext storage dst_,
-        bytes memory sig_,
-        uint256 packetId_,
-        bytes32 root_
-    ) private {
-        hoax(_raju);
-        dst_.notary__.propose(
-            src_.chainId,
-            address(src_.accum__),
-            packetId_,
-            root_,
-            sig_
+        hoax(_plugOwner);
+        dstCounter__.setSocketConfig(
+            _a.chainSlug,
+            address(srcCounter__),
+            integrationType
         );
     }
 
-    function _executePayloadOnDst(
-        ChainContext storage src_,
-        ChainContext storage dst_,
-        uint256 packetId_,
-        uint256 msgId_,
-        bytes memory payload_,
-        bytes memory proof_
-    ) private {
-        hoax(_raju);
-        dst_.socket__.execute(
-            src_.chainId,
-            address(dst_.counter__),
-            msgId_,
-            _attester,
-            address(src_.accum__),
-            packetId_,
-            payload_,
-            proof_
+    function _attesterChecks(
+        address capacitor
+    ) internal returns (uint256 packetId, bytes32 root) {
+        bytes memory sig;
+        (root, packetId, sig) = _getLatestSignature(
+            _a,
+            capacitor,
+            _b.chainSlug
         );
+        _sealOnSrc(_a, capacitor, sig);
+        _submitRootOnDst(_b, sig, packetId, root);
     }
 }
