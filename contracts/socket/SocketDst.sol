@@ -132,6 +132,8 @@ abstract contract SocketDst is SocketBase {
         if (
             !ISwitchboard(plugConfig.verifier).allowPacket(
                 remoteRoots[verifyParams_.packetId],
+                verifyParams_.packetId,
+                verifyParams_.remoteChainSlug,
                 rootProposedAt[verifyParams_.packetId]
             )
         ) revert VerificationFailed();
