@@ -3,16 +3,25 @@ pragma solidity 0.8.7;
 
 import "../interfaces/ISwitchboard.sol";
 import "../interfaces/ISocket.sol";
+import "../interfaces/IOracle.sol";
+
 import "../utils/AccessControl.sol";
 
 contract FastSwitchboard is ISwitchboard, AccessControl {
     ISocket public socket;
+    IOracle public oracle;
+
+    uint256 public executionOverhead;
+
     uint256 public immutable chainSlug;
     uint256 public timeoutInSeconds;
     bool public tripFuse;
 
     // dst chain slug => total watchers registered
     mapping(uint256 => uint256) public totalWatchers;
+
+    // dst chain slug => attest gas limit
+    mapping(uint256 => uint256) public attestGasLimit;
 
     // attester => packetId => is attested
     mapping(address => mapping(uint256 => bool)) public isAttested;
@@ -23,22 +32,29 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     event SocketSet(address newSocket_);
     event SwitchboardTripped(bool tripFuse_);
     event PacketAttested(uint256 packetId, address attester);
+    event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
+    event ExecutionOverheadSet(uint256 executionOverhead_);
 
     error TransferFailed();
     error FeesNotEnough();
     error WatcherFound();
     error WatcherNotFound();
     error AlreadyAttested();
+    error InvalidGasPrice();
 
     constructor(
         address owner_,
         address socket_,
+        address oracle_,
         uint32 chainSlug_,
+        uint256 executionOverhead_,
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
         chainSlug = chainSlug_;
-        socket = ISocket(socket_);
+        oracle = IOracle(oracle_);
+        executionOverhead = executionOverhead_;
 
+        socket = ISocket(socket_);
         timeoutInSeconds = timeoutInSeconds_;
     }
 
@@ -51,15 +67,6 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         attestations[packetId]++;
 
         emit PacketAttested(packetId, msg.sender);
-    }
-
-    function payFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
-    ) external payable override {
-        // TODO: updated with issue #45
-        uint256 expectedFees = 0;
-        if (msg.value != expectedFees) revert FeesNotEnough();
     }
 
     // todo: switchboard might need src chain slug and packet id while verifying details here?
@@ -81,6 +88,65 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
 
         if (block.timestamp - proposeTime >= timeoutInSeconds) return true;
         return false;
+    }
+
+    function payFees(
+        uint256 msgGasLimit,
+        uint256 dstChainSlug
+    ) external payable override {
+        uint256 dstGasPrice = oracle.getGasPrice(dstChainSlug);
+        if (dstGasPrice == 0) revert InvalidGasPrice();
+
+        uint256 minExecutionFees = _getExecutionFees(msgGasLimit, dstGasPrice);
+        uint256 minVerificationFees = _getVerificationFees(
+            dstChainSlug,
+            dstGasPrice
+        );
+
+        uint256 expectedFees = minExecutionFees + minVerificationFees;
+        if (msg.value != expectedFees) revert FeesNotEnough();
+    }
+
+    function _getExecutionFees(
+        uint256 msgGasLimit,
+        uint256 dstGasPrice
+    ) internal view returns (uint256) {
+        return (executionOverhead + msgGasLimit) * dstGasPrice;
+    }
+
+    function _getVerificationFees(
+        uint256 dstChainSlug,
+        uint256 dstGasPrice
+    ) internal view returns (uint256) {
+        // todo: are the watchers going to be same on all chains for particular chain slug?
+        return
+            totalWatchers[dstChainSlug] *
+            attestGasLimit[dstChainSlug] *
+            dstGasPrice;
+    }
+
+    /**
+     * @notice updates attest gas limit for given chain slug
+     * @param dstChainSlug_ destination chain
+     * @param attestGasLimit_ average gas limit needed for attest function call
+     */
+    function setAttestGasLimit(
+        uint256 dstChainSlug_,
+        uint256 attestGasLimit_
+    ) external onlyOwner {
+        attestGasLimit[dstChainSlug_] = attestGasLimit_;
+        emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
+    }
+
+    /**
+     * @notice updates execution overhead
+     * @param executionOverhead_ new execution overhead cost
+     */
+    function setExecutionOverhead(
+        uint256 executionOverhead_
+    ) external onlyOwner {
+        executionOverhead = executionOverhead_;
+        emit ExecutionOverheadSet(executionOverhead_);
     }
 
     /**

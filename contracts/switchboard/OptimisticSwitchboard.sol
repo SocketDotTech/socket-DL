@@ -3,10 +3,15 @@ pragma solidity 0.8.7;
 
 import "../interfaces/ISwitchboard.sol";
 import "../interfaces/ISocket.sol";
+import "../interfaces/IOracle.sol";
+
 import "../utils/AccessControl.sol";
 
 contract OptimisticSwitchboard is ISwitchboard, AccessControl {
     ISocket public socket;
+    IOracle public oracle;
+
+    uint256 public executionOverhead;
     uint256 public immutable timeoutInSeconds;
     uint256 public immutable chainSlug;
 
@@ -18,30 +23,27 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
 
     event SocketSet(address newSocket_);
     event SwitchboardTripped(bool tripFuse_);
+    event ExecutionOverheadSet(uint256 executionOverhead_);
 
     error TransferFailed();
     error FeesNotEnough();
+    error InvalidGasPrice();
 
     constructor(
         address owner_,
         address socket_,
+        address oracle_,
         uint32 chainSlug_,
+        uint256 executionOverhead_,
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
         chainSlug = chainSlug_;
+        oracle = IOracle(oracle_);
+        executionOverhead = executionOverhead_;
         socket = ISocket(socket_);
 
         // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
-    }
-
-    function payFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
-    ) external payable override {
-        // TODO: updated with issue #45
-        uint256 expectedFees = 0;
-        if (msg.value != expectedFees) revert FeesNotEnough();
     }
 
     /**
@@ -60,6 +62,25 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
         return true;
     }
 
+    function payFees(
+        uint256 msgGasLimit,
+        uint256 dstChainSlug
+    ) external payable override {
+        uint256 dstGasPrice = oracle.getGasPrice(dstChainSlug);
+        if (dstGasPrice == 0) revert InvalidGasPrice();
+
+        // assuming verification fees as 0
+        uint256 expectedFees = _getExecutionFees(msgGasLimit, dstGasPrice);
+        if (msg.value != expectedFees) revert FeesNotEnough();
+    }
+
+    function _getExecutionFees(
+        uint256 msgGasLimit,
+        uint256 dstGasPrice
+    ) internal view returns (uint256) {
+        return (executionOverhead + msgGasLimit) * dstGasPrice;
+    }
+
     /**
      * @notice updates socket_
      * @param socket_ address of Notary
@@ -67,6 +88,17 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
     function setSocket(address socket_) external onlyOwner {
         socket = ISocket(socket_);
         emit SocketSet(socket_);
+    }
+
+    /**
+     * @notice updates execution overhead
+     * @param executionOverhead_ new execution overhead cost
+     */
+    function setExecutionOverhead(
+        uint256 executionOverhead_
+    ) external onlyOwner {
+        executionOverhead = executionOverhead_;
+        emit ExecutionOverheadSet(executionOverhead_);
     }
 
     /**
