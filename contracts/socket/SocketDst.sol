@@ -110,13 +110,13 @@ abstract contract SocketDst is SocketBase {
         // todo: to decide if this should be just a bool (was added for fees here)
         executor[msgId] = msg.sender;
 
-        PlugConfig memory plugConfig = plugConfigs[localPlug][
+        PlugConfig memory plugConfig = _plugConfigs[localPlug][
             verifyParams_.remoteChainSlug
         ];
 
         bytes32 packedMessage = _hasher__.packMessage(
             verifyParams_.remoteChainSlug,
-            plugConfig.remotePlug,
+            plugConfig.siblingPlug,
             _chainSlug,
             localPlug,
             msgId,
@@ -140,15 +140,16 @@ abstract contract SocketDst is SocketBase {
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
         // TODO: do we need inboundIntegrationType at verifier with switchboards?
-        bool isVerified = IVerifier(plugConfig.verifier).verifyPacket(
-            verifyParams_.packetId,
-            plugConfig.inboundIntegrationType
-        );
+        // TODO: verify on switchboard
+        // bool isVerified = IVerifier(plugConfig.verifier).verifyPacket(
+        //     verifyParams_.packetId,
+        //     plugConfig.inboundIntegrationType
+        // );
 
-        if (!isVerified) revert VerificationFailed();
+        // if (!isVerified) revert VerificationFailed();
 
         if (
-            !IDecapacitor(plugConfig.decapacitor).verifyMessageInclusion(
+            !plugConfig.decapacitor__.verifyMessageInclusion(
                 remoteRoots[verifyParams_.packetId],
                 packedMessage,
                 verifyParams_.decapacitorProof

@@ -2,13 +2,11 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ICapacitor.sol";
-import "../interfaces/IVault.sol";
 import "./SocketBase.sol";
 
 abstract contract SocketSrc is SocketBase {
     // incrementing nonce, should be handled in next socket version.
     uint256 public _messageCount;
-    IVault public _vault__;
 
     /**
      * @notice emits the verification and seal confirmation of a packet
@@ -22,10 +20,6 @@ abstract contract SocketSrc is SocketBase {
         bytes signature
     );
 
-    constructor(address vault_) {
-        _vault__ = IVault(vault_);
-    }
-
     /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with capacitor
@@ -38,7 +32,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable override {
-        PlugConfig memory plugConfig = plugConfigs[msg.sender][
+        PlugConfig memory plugConfig = _plugConfigs[msg.sender][
             remoteChainSlug_
         ];
 
@@ -48,27 +42,27 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
 
         // TODO: replace it with fees from switchboard
-        _vault__.deductFee{value: msg.value}(
-            remoteChainSlug_,
-            plugConfig.outboundIntegrationType
-        );
+        // _vault__.deductFee{value: msg.value}(
+        //     remoteChainSlug_,
+        //     plugConfig.outboundIntegrationType
+        // );
 
         bytes32 packedMessage = _hasher__.packMessage(
             _chainSlug,
             msg.sender,
             remoteChainSlug_,
-            plugConfig.remotePlug,
+            plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
             payload_
         );
 
-        ICapacitor(plugConfig.capacitor).addPackedMessage(packedMessage);
+        plugConfig.capacitor__.addPackedMessage(packedMessage);
         emit MessageTransmitted(
             _chainSlug,
             msg.sender,
             remoteChainSlug_,
-            plugConfig.remotePlug,
+            plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
             msg.value,
@@ -100,10 +94,6 @@ abstract contract SocketSrc is SocketBase {
         ) revert InvalidAttester();
 
         emit PacketVerifiedAndSealed(capacitorAddress_, packetId, signature_);
-    }
-
-    function setVault(address vault_) external onlyOwner {
-        _vault__ = IVault(vault_);
     }
 
     function _getPacketId(

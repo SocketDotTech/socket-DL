@@ -18,14 +18,12 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
 
     ICapacitorFactory public _capacitorFactory__;
 
-    // switchboard => ICapacitor
-    mapping(address => ICapacitor) public _capacitors__;
-    // switchboard => IDecapacitor
-    mapping(address => IDecapacitor) public _decapacitors__;
-    // switchboard => siblingChainSlug
-    mapping(address => uint256) public _siblingChainSlugs;
+    // switchboard => siblingChainSlug => ICapacitor
+    mapping(address => mapping(uint256 => ICapacitor)) public _capacitors__;
+    // switchboard => siblingChainSlug => IDecapacitor
+    mapping(address => mapping(uint256 => IDecapacitor)) public _decapacitors__;
 
-    // plug => remoteChainSlug => config(verifiers, capacitors, decapacitors, remotePlug)
+    // plug => remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
     mapping(address => mapping(uint256 => PlugConfig)) public _plugConfigs;
 
     event SwitchboardAdded(
@@ -34,18 +32,9 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         address capacitor,
         address decapacitor
     );
-    event PlugConnected(
-        address plug,
-        uint256 siblingChainSlug,
-        address siblingPlug,
-        address outboundSwitchboard,
-        address inboundSwitchboar,
-        address capacitor,
-        address decapacitor
-    );
 
     error SwitchboardExists();
-    error InvalidSwitchboard();
+    error InvalidConnection();
 
     constructor(address capacitorFactory_) {
         _capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
@@ -61,15 +50,18 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         uint256 siblingChainSlug_,
         uint256 capacitorType_
     ) external {
-        if (_capacitors__[switchBoardAddress_] != 0) revert SwitchboardExists();
+        // only capacitor checked, decapacitor assumed will exist if capacitor does
+        if (
+            address(_capacitors__[switchBoardAddress_][siblingChainSlug_]) !=
+            address(0)
+        ) revert SwitchboardExists();
 
         (
             ICapacitor capacitor__,
             IDecapacitor decapacitor__
         ) = _capacitorFactory__.deploy(capacitorType_, siblingChainSlug_);
-        _capacitors__[switchBoardAddress_] = capacitor__;
-        _decapacitors__[switchBoardAddress_] = decapacitor__;
-        _siblingChainSlugs[switchBoardAddress_] = siblingChainSlug_;
+        _capacitors__[switchBoardAddress_][siblingChainSlug_] = capacitor__;
+        _decapacitors__[switchBoardAddress_][siblingChainSlug_] = decapacitor__;
 
         emit SwitchboardAdded(
             switchBoardAddress_,
@@ -84,32 +76,36 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         address siblingPlug_,
         address inboundSwitchboard_,
         address outboundSwitchboard_
-    ) external {
+    ) external override {
         if (
-            _capacitors__[inboundSwitchboard_] == 0 ||
-            _capacitors__[outboundSwitchboard_] == 0 ||
-            _siblingChainSlugs[inboundSwitchboard_] != siblingChainSlug_ ||
-            _siblingChainSlugs[outboundSwitchboard_] != siblingChainSlug_
-        ) revert InvalidSwitchboard();
+            address(_capacitors__[inboundSwitchboard_][siblingChainSlug_]) ==
+            address(0) ||
+            address(_capacitors__[outboundSwitchboard_][siblingChainSlug_]) ==
+            address(0)
+        ) revert InvalidConnection();
 
         PlugConfig storage _plugConfig = _plugConfigs[msg.sender][
             siblingChainSlug_
         ];
 
         _plugConfig.siblingPlug = siblingPlug_;
-        _plugConfig.capacitor__ = _capacitors__[outboundSwitchboard_];
-        _plugConfig.decapacitor__ = _decapacitors__[inboundSwitchboard_];
+        _plugConfig.capacitor__ = _capacitors__[outboundSwitchboard_][
+            siblingChainSlug_
+        ];
+        _plugConfig.decapacitor__ = _decapacitors__[inboundSwitchboard_][
+            siblingChainSlug_
+        ];
         _plugConfig.inboundSwitchboard__ = ISwitchboard(inboundSwitchboard_);
         _plugConfig.outboundSwitchboard__ = ISwitchboard(outboundSwitchboard_);
 
         emit PlugConnected(
             msg.sender,
             siblingChainSlug_,
-            siblingPlug_,
-            outboundSwitchboard_,
-            inboundSwitchboard_,
-            address(_capacitors__[outboundSwitchboard_]),
-            address(_decapacitors__[inboundSwitchboard_])
+            _plugConfig.siblingPlug,
+            address(_plugConfig.inboundSwitchboard__),
+            address(_plugConfig.outboundSwitchboard__),
+            address(_plugConfig.capacitor__),
+            address(_plugConfig.decapacitor__)
         );
     }
 }

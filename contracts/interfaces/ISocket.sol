@@ -46,16 +46,22 @@ interface ISocket {
 
     /**
      * @notice emits the config set by a plug for a remoteChainSlug
-     * @param remotePlug address of plug on remote chain
-     * @param remoteChainSlug remote chain slug
-     * @param inboundIntegrationType inbound integration type (set in socket config, plug can choose any)
-     * @param outboundIntegrationType outbound integration type (set in socket config, plug can choose any)
+     * @param plug address of plug on current chain
+     * @param siblingChainSlug sibling chain slug
+     * @param siblingPlug address of plug on sibling chain
+     * @param inboundSwitchboard inbound switchboard (select from registered options)
+     * @param outboundSwitchboard outbound switchboard (select from registered options)
+     * @param capacitor capacitor selected based on outbound switchboard
+     * @param decapacitor decapacitor selected based on inbound switchboard
      */
-    event PlugConfigSet(
-        address remotePlug,
-        uint256 remoteChainSlug,
-        bytes32 inboundIntegrationType,
-        bytes32 outboundIntegrationType
+    event PlugConnected(
+        address plug,
+        uint256 siblingChainSlug,
+        address siblingPlug,
+        address inboundSwitchboard,
+        address outboundSwitchboard,
+        address capacitor,
+        address decapacitor
     );
 
     /**
@@ -113,16 +119,16 @@ interface ISocket {
 
     /**
      * @notice sets the config specific to the plug
-     * @param remoteChainSlug_ the remote chain slug
-     * @param remotePlug_ address of plug present at remote chain to call inbound
-     * @param inboundIntegrationType_ the name of config to use for receiving messages
-     * @param outboundIntegrationType_ the name of config to use for sending messages
+     * @param siblingChainSlug_ the sibling chain slug
+     * @param siblingPlug_ address of plug present at sibling chain to call inbound
+     * @param inboundSwitchboard_ the address of switchboard to use for receiving messages
+     * @param outboundSwitchboard_ the address of switchboard to use for sending messages
      */
-    function setPlugConfig(
-        uint256 remoteChainSlug_,
-        address remotePlug_,
-        string memory inboundIntegrationType_,
-        string memory outboundIntegrationType_
+    function connect(
+        uint256 siblingChainSlug_,
+        address siblingPlug_,
+        address inboundSwitchboard_,
+        address outboundSwitchboard_
     ) external;
 
     // TODO: retry
