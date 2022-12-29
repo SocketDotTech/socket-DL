@@ -505,14 +505,14 @@ contract HappyTest is Setup {
         srcCounter__.setSocketConfig(
             _b.chainSlug,
             address(dstCounter__),
-            integrationType
+            address(0) // integrationType // TODO: change to switchboard
         );
 
         hoax(_plugOwner);
         dstCounter__.setSocketConfig(
             _a.chainSlug,
             address(srcCounter__),
-            integrationType
+            address(0) // integrationType // TODO: change to switchboard
         );
     }
 
