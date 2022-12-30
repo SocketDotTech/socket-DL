@@ -11,7 +11,7 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     ISocket public socket;
     IOracle public oracle;
 
-    uint256 public executionOverhead;
+    mapping(uint256 => uint256) public executionOverhead;
 
     uint256 public immutable chainSlug;
     uint256 public timeoutInSeconds;
@@ -33,7 +33,10 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     event SwitchboardTripped(bool tripFuse_);
     event PacketAttested(uint256 packetId, address attester);
     event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
-    event ExecutionOverheadSet(uint256 executionOverhead_);
+    event ExecutionOverheadSet(
+        uint256 dstChainSlug_,
+        uint256 executionOverhead_
+    );
 
     error TransferFailed();
     error FeesNotEnough();
@@ -47,12 +50,10 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         address socket_,
         address oracle_,
         uint32 chainSlug_,
-        uint256 executionOverhead_,
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
         chainSlug = chainSlug_;
         oracle = IOracle(oracle_);
-        executionOverhead = executionOverhead_;
 
         socket = ISocket(socket_);
         timeoutInSeconds = timeoutInSeconds_;
@@ -97,7 +98,7 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         uint256 dstGasPrice = oracle.getGasPrice(dstChainSlug);
         if (dstGasPrice == 0) revert InvalidGasPrice();
 
-        uint256 minExecutionFees = _getExecutionFees(msgGasLimit, dstGasPrice);
+        uint256 minExecutionFees = _getExecutionFees(msgGasLimit, dstChainSlug, dstGasPrice);
         uint256 minVerificationFees = _getVerificationFees(
             dstChainSlug,
             dstGasPrice
@@ -107,11 +108,12 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         if (msg.value != expectedFees) revert FeesNotEnough();
     }
 
-    function _getExecutionFees(
+     function _getExecutionFees(
         uint256 msgGasLimit,
+        uint256 dstChainSlug,
         uint256 dstGasPrice
     ) internal view returns (uint256) {
-        return (executionOverhead + msgGasLimit) * dstGasPrice;
+        return (executionOverhead[dstChainSlug] + msgGasLimit) * dstGasPrice;
     }
 
     function _getVerificationFees(
@@ -143,10 +145,11 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
      * @param executionOverhead_ new execution overhead cost
      */
     function setExecutionOverhead(
+        uint256 dstChainSlug_,
         uint256 executionOverhead_
     ) external onlyOwner {
-        executionOverhead = executionOverhead_;
-        emit ExecutionOverheadSet(executionOverhead_);
+        executionOverhead[dstChainSlug_] = executionOverhead_;
+        emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
     }
 
     /**
