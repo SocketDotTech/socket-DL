@@ -22,7 +22,7 @@ contract ArbitrumNotary is NativeBridgeNotary {
         address callValueRefundAddress_
     );
 
-    modifier onlyRemoteAccumulator() override {
+    modifier onlyRemoteCapacitor() override {
         if (isL2) {
             if (msg.sender != AddressAliasHelper.applyL1ToL2Alias(remoteNotary))
                 revert InvalidAttester();

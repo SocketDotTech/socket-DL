@@ -13,7 +13,7 @@ export const attesterAddress: {
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   arbitrum: "0x95e655674C6889F80fa024ebA86cdE29D69028A6",
   optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
-  mainnet: "0x6956063c490fa746c9801ccc41baba8a8b678068"
+  mainnet: "0x6956063c490fa746c9801ccc41baba8a8b678068",
 };
 
 export const executorAddress: {
@@ -29,7 +29,7 @@ export const executorAddress: {
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   arbitrum: "0x95e655674C6889F80fa024ebA86cdE29D69028A6",
   optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
-  mainnet: "0x6956063c490fa746c9801ccc41baba8a8b678068"
+  mainnet: "0x6956063c490fa746c9801ccc41baba8a8b678068",
 };
 
 export const timeout: {
@@ -45,7 +45,7 @@ export const timeout: {
   hardhat: 7200,
   arbitrum: 7200,
   optimism: 7200,
-  mainnet: 7200
+  mainnet: 7200,
 };
 
 export const contractPath: {
@@ -55,10 +55,10 @@ export const contractPath: {
   Hasher: "contracts/utils/Hasher.sol",
   Messenger: "contracts/examples/Messenger.sol",
   SignatureVerifier: "contracts/utils/SignatureVerifier.sol",
-  SingleDeaccum: "contracts/deaccumulators/SingleDeaccum.sol",
+  SingleDecapacitor: "contracts/decapacitors/SingleDecapacitor.sol",
   Socket: "contracts/Socket.sol",
   Vault: "contracts/vault/Vault.sol",
-  SingleAccum: "contracts/accumulators/SingleAccum.sol",
+  SingleCapacitor: "contracts/capacitors/SingleCapacitor.sol",
   // notaries
   AdminNotary: "contracts/notaries/AdminNotary.sol",
   ArbitrumNotary: "contracts/notaries/native-bridge/ArbitrumNotary.sol",
@@ -77,12 +77,12 @@ const notaries = {
       notary: "ArbitrumNotary",
     },
   },
-  "arbitrum": {
+  arbitrum: {
     mainnet: {
       notary: "ArbitrumNotary",
     },
   },
-  "optimism": {
+  optimism: {
     mainnet: {
       notary: "OptimismNotary",
     },
@@ -114,16 +114,16 @@ const notaries = {
     },
   },
   mainnet: {
-    "arbitrum": {
+    arbitrum: {
       notary: "ArbitrumNotary",
     },
-    "optimism": {
+    optimism: {
       notary: "OptimismNotary",
     },
     "polygon-mainnet": {
       notary: "PolygonL1Notary",
     },
-  }
+  },
 };
 
 export const contractNames = (
@@ -139,7 +139,7 @@ export const contractNames = (
     return {
       integrationType,
       verifier: "Verifier",
-      notary: "AdminNotary"
+      notary: "AdminNotary",
     };
 
   return {

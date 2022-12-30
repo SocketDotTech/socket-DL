@@ -3,13 +3,13 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 import "../contracts/notaries/BondedNotary.sol";
-import "../contracts/interfaces/IAccumulator.sol";
+import "../contracts/interfaces/ICapacitor.sol";
 import "../contracts/utils/SignatureVerifier.sol";
 
 // contract BondedNotaryTest is Test {
 //     address constant _owner = address(1);
 //     uint256 constant _attesterPrivateKey = uint256(2);
-//     address constant _accum = address(3);
+//     address constant _capacitor = address(3);
 //     bytes32 constant _root = bytes32(uint256(4));
 //     uint256 constant _packetId = uint256(5);
 //     address _attester;
@@ -139,16 +139,16 @@ import "../contracts/utils/SignatureVerifier.sol";
 //         _notary.addBond{value: _minBondAmount}();
 
 //         vm.mockCall(
-//             _accum,
-//             abi.encodeWithSelector(IAccumulator.sealPacket.selector),
+//             _capacitor,
+//             abi.encodeWithSelector(ICapacitor.sealPacket.selector),
 //             abi.encode(_root, _packetId)
 //         );
 
 //         bytes32 digest = keccak256(
-//             abi.encode(_chainSlug, _accum, _packetId, _root)
+//             abi.encode(_chainSlug, _capacitor, _packetId, _root)
 //         );
 
-//         _notary.seal(_accum, _getSignature(digest));
+//         _notary.seal(_capacitor, _getSignature(digest));
 //     }
 
 //     function testSealWithoutEnoughBond() external {
@@ -156,17 +156,17 @@ import "../contracts/utils/SignatureVerifier.sol";
 //         _notary.addBond{value: _minBondAmount / 2}();
 
 //         vm.mockCall(
-//             _accum,
-//             abi.encodeWithSelector(IAccumulator.sealPacket.selector),
+//             _capacitor,
+//             abi.encodeWithSelector(ICapacitor.sealPacket.selector),
 //             abi.encode(_root, _packetId)
 //         );
 
 //         bytes32 digest = keccak256(
-//             abi.encode(_chainSlug, _accum, _packetId, _root)
+//             abi.encode(_chainSlug, _capacitor, _packetId, _root)
 //         );
 
 //         vm.expectRevert(INotary.InvalidBond.selector);
-//         _notary.seal(_accum, _getSignature(digest));
+//         _notary.seal(_capacitor, _getSignature(digest));
 //     }
 
 //     function testChallengeSignature() external {
@@ -174,24 +174,24 @@ import "../contracts/utils/SignatureVerifier.sol";
 //         _notary.addBond{value: 120e18}();
 
 //         vm.mockCall(
-//             _accum,
-//             abi.encodeWithSelector(IAccumulator.sealPacket.selector),
+//             _capacitor,
+//             abi.encodeWithSelector(ICapacitor.sealPacket.selector),
 //             abi.encode(_root, _packetId)
 //         );
 
 //         bytes32 digest = keccak256(
-//             abi.encode(_chainSlug, _accum, _packetId, _root)
+//             abi.encode(_chainSlug, _capacitor, _packetId, _root)
 //         );
 
-//         _notary.seal(_accum, _getSignature(digest));
+//         _notary.seal(_capacitor, _getSignature(digest));
 
 //         bytes32 altDigest = keccak256(
-//             abi.encode(_chainSlug, _accum, _packetId, _altRoot)
+//             abi.encode(_chainSlug, _capacitor, _packetId, _altRoot)
 //         );
 
 //         hoax(_raju, 0);
 //         _notary.challengeSignature(
-//             _accum,
+//             _capacitor,
 //             _altRoot,
 //             _packetId,
 //             _getSignature(altDigest)
@@ -204,7 +204,7 @@ import "../contracts/utils/SignatureVerifier.sol";
 
 //     function testSubmitRemoteRoot() external {
 //         bytes32 digest = keccak256(
-//             abi.encode(_remoteChainSlug, _accum, _packetId, _root)
+//             abi.encode(_remoteChainSlug, _capacitor, _packetId, _root)
 //         );
 
 //         hoax(_owner);
@@ -213,28 +213,28 @@ import "../contracts/utils/SignatureVerifier.sol";
 //         hoax(_raju);
 //         _notary.propose(
 //             _remoteChainSlug,
-//             _accum,
+//             _capacitor,
 //             _packetId,
 //             _root,
 //             _getSignature(digest)
 //         );
 
 //         assertEq(
-//             _notary.getRemoteRoot(_remoteChainSlug, _accum, _packetId),
+//             _notary.getRemoteRoot(_remoteChainSlug, _capacitor, _packetId),
 //             _root
 //         );
 //     }
 
 //     function testSubmitRemoteRootWithoutRole() external {
 //         bytes32 digest = keccak256(
-//             abi.encode(_remoteChainSlug, _accum, _packetId, _root)
+//             abi.encode(_remoteChainSlug, _capacitor, _packetId, _root)
 //         );
 
 //         hoax(_raju);
 //         vm.expectRevert(INotary.InvalidAttester.selector);
 //         _notary.propose(
 //             _remoteChainSlug,
-//             _accum,
+//             _capacitor,
 //             _packetId,
 //             _root,
 //             _getSignature(digest)

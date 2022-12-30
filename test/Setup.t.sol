@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 import {Socket, ISocket, SocketConfig, SocketSrc, SocketDst, SocketBase} from "../contracts/socket/Socket.sol";
 import "../contracts/notaries/AdminNotary.sol";
-import "../contracts/accumulators/SingleAccum.sol";
-import "../contracts/deaccumulators/SingleDeaccum.sol";
+import "../contracts/capacitors/SingleCapacitor.sol";
+import "../contracts/decapacitors/SingleDecapacitor.sol";
 import "../contracts/verifiers/Verifier.sol";
 import "../contracts/utils/SignatureVerifier.sol";
 import "../contracts/utils/Hasher.sol";
@@ -22,20 +22,20 @@ contract Setup is Test {
     uint256 constant _altAttesterPrivateKey = uint256(2);
 
     uint256 internal _timeoutInSeconds = 0;
-    uint256 internal _slowAccumWaitTime = 300;
+    uint256 internal _slowCapacitorWaitTime = 300;
     uint256 internal _msgGasLimit = 25548;
     string internal fastIntegrationType = "FAST";
     string internal slowIntegrationType = "SLOW";
     uint256[] testArr = [1];
     struct ChainContext {
         uint256 chainSlug;
-        bytes32 slowAccumType;
-        bytes32 fastAccumType;
+        bytes32 slowCapacitorType;
+        bytes32 fastCapacitorType;
         AdminNotary notary__;
         Hasher hasher__;
-        IAccumulator fastAccum__;
-        IAccumulator slowAccum__;
-        IDeaccumulator deaccum__;
+        ICapacitor fastCapacitor__;
+        ICapacitor slowCapacitor__;
+        IDecapacitor decapacitor__;
         SignatureVerifier sigVerifier__;
         Socket socket__;
         Vault vault__;
@@ -73,12 +73,12 @@ contract Setup is Test {
         _setConfig(_a, _b.chainSlug);
         _setConfig(_b, _a.chainSlug);
 
-        // setup minfees in vault for diff accum for all remote chains
+        // setup minfees in vault for diff capacitor for all remote chains
         vm.startPrank(_socketOwner);
-        _a.vault__.setFees(minFees_, _b.chainSlug, _a.fastAccumType);
-        _a.vault__.setFees(minFees_, _b.chainSlug, _a.slowAccumType);
-        _b.vault__.setFees(minFees_, _a.chainSlug, _b.fastAccumType);
-        _b.vault__.setFees(minFees_, _a.chainSlug, _b.slowAccumType);
+        _a.vault__.setFees(minFees_, _b.chainSlug, _a.fastCapacitorType);
+        _a.vault__.setFees(minFees_, _b.chainSlug, _a.slowCapacitorType);
+        _b.vault__.setFees(minFees_, _a.chainSlug, _b.fastCapacitorType);
+        _b.vault__.setFees(minFees_, _a.chainSlug, _b.slowCapacitorType);
         vm.stopPrank();
     }
 
@@ -115,14 +115,14 @@ contract Setup is Test {
             _socketOwner
         );
 
-        (cc.fastAccum__, cc.deaccum__) = _deployAccumDeaccum(
+        (cc.fastCapacitor__, cc.decapacitor__) = _deployCapacitorDecapacitor(
             cc.notary__,
             address(cc.socket__),
             _socketOwner,
             remoteChainSlug_
         );
 
-        (cc.slowAccum__, cc.deaccum__) = _deployAccumDeaccum(
+        (cc.slowCapacitor__, cc.decapacitor__) = _deployCapacitorDecapacitor(
             cc.notary__,
             address(cc.socket__),
             _socketOwner,
@@ -146,19 +146,19 @@ contract Setup is Test {
         uint256 remoteChainSlug_
     ) internal {
         hoax(_socketOwner);
-        cc_.fastAccumType = cc_.socket__.addConfig(
+        cc_.fastCapacitorType = cc_.socket__.addConfig(
             remoteChainSlug_,
-            address(cc_.fastAccum__),
-            address(cc_.deaccum__),
+            address(cc_.fastCapacitor__),
+            address(cc_.decapacitor__),
             address(cc_.verifier__),
             fastIntegrationType
         );
 
         hoax(_socketOwner);
-        cc_.slowAccumType = cc_.socket__.addConfig(
+        cc_.slowCapacitorType = cc_.socket__.addConfig(
             remoteChainSlug_,
-            address(cc_.slowAccum__),
-            address(cc_.deaccum__),
+            address(cc_.slowCapacitor__),
+            address(cc_.decapacitor__),
             address(cc_.verifier__),
             slowIntegrationType
         );
@@ -191,32 +191,31 @@ contract Setup is Test {
         vm.stopPrank();
     }
 
-    function _deployAccumDeaccum(
+    function _deployCapacitorDecapacitor(
         AdminNotary notary__,
         address socket_,
         address deployer_,
         uint256 remoteChainSlug_
-    ) internal returns (SingleAccum accum__, SingleDeaccum deaccum__) {
+    )
+        internal
+        returns (SingleCapacitor capacitor__, SingleDecapacitor decapacitor__)
+    {
         vm.startPrank(deployer_);
 
-        accum__ = new SingleAccum(
-            socket_,
-            address(notary__),
-            uint32(remoteChainSlug_)
-        );
-        deaccum__ = new SingleDeaccum();
+        capacitor__ = new SingleCapacitor(socket_);
+        decapacitor__ = new SingleDecapacitor();
 
         vm.stopPrank();
     }
 
     function _getLatestSignature(
         ChainContext storage src_,
-        address accum_,
+        address capacitor_,
         uint256 remoteChainSlug_
     ) internal returns (bytes32 root, uint256 packetId, bytes memory sig) {
         uint256 id;
-        (root, id) = IAccumulator(accum_).getNextPacketToBeSealed();
-        packetId = _getPackedId(accum_, src_.chainSlug, id);
+        (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
+        packetId = _getPackedId(capacitor_, src_.chainSlug, id);
 
         sig = _createSignature(
             remoteChainSlug_,
@@ -252,11 +251,11 @@ contract Setup is Test {
 
     function _sealOnSrc(
         ChainContext storage src_,
-        address accum,
+        address capacitor,
         bytes memory sig_
     ) internal {
         hoax(_attester);
-        src_.notary__.seal(accum, testArr, sig_);
+        src_.notary__.seal(capacitor, testArr, sig_);
     }
 
     function _submitRootOnDst(
@@ -304,11 +303,14 @@ contract Setup is Test {
     }
 
     function _getPackedId(
-        address accumAddr_,
+        address capacitorAddr_,
         uint256 chainSlug_,
         uint256 id_
     ) internal pure returns (uint256) {
-        return (chainSlug_ << 224) | (uint256(uint160(accumAddr_)) << 64) | id_;
+        return
+            (chainSlug_ << 224) |
+            (uint256(uint160(capacitorAddr_)) << 64) |
+            id_;
     }
 
     // to ignore this file from coverage

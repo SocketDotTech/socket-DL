@@ -2,50 +2,31 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../contracts/accumulators/SingleAccum.sol";
+import "../contracts/capacitors/SingleCapacitor.sol";
 
-contract SingleAccumTest is Test {
+contract SingleCapacitorTest is Test {
     address constant _owner = address(1);
     address constant _socket = address(2);
     address constant _raju = address(3);
     bytes32 constant _message_0 = bytes32(uint256(4));
     bytes32 constant _message_1 = bytes32(uint256(5));
     bytes32 constant _message_2 = bytes32(uint256(6));
-    address constant _notary = address(7);
-    uint256 constant _remoteChainSlug = 1;
 
-    SingleAccum _sa;
+    SingleCapacitor _sa;
 
     function setUp() external {
         hoax(_owner);
-        _sa = new SingleAccum(_socket, _notary, uint32(_remoteChainSlug));
+        _sa = new SingleCapacitor(_socket);
     }
 
     function testSetUp() external {
         assertEq(_sa.owner(), _owner, "Owner not set");
-        assertEq(
-            _sa.remoteChainSlug(),
-            _remoteChainSlug,
-            "remoteChainSlug not set"
-        );
 
         assertTrue(
             _sa.hasRole(_sa.SOCKET_ROLE(), _socket),
             "Socket role not set"
         );
-        assertTrue(
-            _sa.hasRole(_sa.NOTARY_ROLE(), _notary),
-            "Notary role not set"
-        );
 
-        assertFalse(
-            _sa.hasRole(_sa.NOTARY_ROLE(), _socket),
-            "Wrong role not set"
-        );
-        assertFalse(
-            _sa.hasRole(_sa.SOCKET_ROLE(), _notary),
-            "Wrong role not set"
-        );
         _assertPacketById(bytes32(0), 0);
         _assertPacketToBeSealed(bytes32(0), 0);
     }
@@ -60,16 +41,6 @@ contract SingleAccumTest is Test {
         assertTrue(_sa.hasRole(_sa.SOCKET_ROLE(), newSocket));
     }
 
-    function testSetNotary() external {
-        address newNotary = address(8);
-        vm.expectRevert(Ownable.OnlyOwner.selector);
-        _sa.setNotary(newNotary);
-
-        hoax(_owner);
-        _sa.setNotary(newNotary);
-        assertTrue(_sa.hasRole(_sa.NOTARY_ROLE(), newNotary));
-    }
-
     function testAddMessage() external {
         _addPackedMessage(_message_0);
         _assertPacketById(_message_0, 0);
@@ -77,7 +48,7 @@ contract SingleAccumTest is Test {
     }
 
     function testSealPacket() external {
-        vm.expectRevert(BaseAccum.NoPendingPacket.selector);
+        vm.expectRevert(BaseCapacitor.NoPendingPacket.selector);
         _sealPacket();
 
         _addPackedMessage(_message_0);
@@ -112,17 +83,12 @@ contract SingleAccumTest is Test {
         assertEq(packetToSeal, 2);
 
         // message_2
-        (
-            bytes32 root,
-            uint256 packetId,
-            uint256 remoteChainSlug
-        ) = _sealPacket();
+        (bytes32 root, uint256 packetId) = _sealPacket();
         (, packetToSeal) = _sa.getNextPacketToBeSealed();
         assertEq(packetToSeal, 3);
 
         assertEq(root, _message_2);
         assertEq(packetId, 2);
-        assertEq(remoteChainSlug, _remoteChainSlug);
 
         _assertPacketById(_message_0, 0);
         _assertPacketById(_message_1, 1);
@@ -148,7 +114,7 @@ contract SingleAccumTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(
                 AccessControl.NoPermit.selector,
-                _sa.NOTARY_ROLE()
+                _sa.SOCKET_ROLE()
             )
         );
         hoax(_raju);
@@ -178,11 +144,8 @@ contract SingleAccumTest is Test {
         _sa.addPackedMessage(packedMessage);
     }
 
-    function _sealPacket()
-        private
-        returns (bytes32 root, uint256 packetId, uint256 remoteChainSlug)
-    {
-        hoax(_notary);
-        (root, packetId, remoteChainSlug) = _sa.sealPacket();
+    function _sealPacket() private returns (bytes32 root, uint256 packetId) {
+        hoax(_socket);
+        (root, packetId) = _sa.sealPacket();
     }
 }

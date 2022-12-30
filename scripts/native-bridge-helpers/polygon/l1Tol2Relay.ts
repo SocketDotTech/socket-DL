@@ -31,10 +31,12 @@ export const main = async () => {
     const l1Config: ChainSocketAddresses = addresses[chainIds[localChain]];
     const contracts = contractNames("", localChain, remoteChain);
 
-    const l1Accum: Contract = (
+    const l1Capacitor: Contract = (
       await getInstance(
-        "SingleAccum",
-        l1Config["integrations"]?.[chainIds[remoteChain]]?.[contracts.integrationType]?.["accum"]
+        "SingleCapacitor",
+        l1Config["integrations"]?.[chainIds[remoteChain]]?.[
+          contracts.integrationType
+        ]?.["capacitor"]
       )
     ).connect(l1Wallet);
 
@@ -51,14 +53,14 @@ export const main = async () => {
     );
 
     // seal
-    const { packetId, newRootHash } = l1Accum.interface.decodeEventLog(
+    const { packetId, newRootHash } = l1Capacitor.interface.decodeEventLog(
       "MessageAdded",
       outboundTxReceipt.logs[1].data
     );
 
     const packedPacketId = packPacketId(
       chainIds[localChain],
-      l1Accum.address,
+      l1Capacitor.address,
       packetId
     );
 
@@ -72,7 +74,7 @@ export const main = async () => {
     const bridgeParams = [];
 
     const sealTx = await l1Notary.seal(
-      l1Accum.address,
+      l1Capacitor.address,
       bridgeParams,
       signature
     );

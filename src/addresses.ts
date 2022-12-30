@@ -9,46 +9,52 @@ function getNotaryAddress(
   dstChainId: ChainId,
   integration: IntegrationTypes
 ) {
-  const notaryAddress = deploymentAddresses[srcChainId]?.["integrations"]?.[dstChainId]?.[integration]?.notary;
+  const notaryAddress =
+    deploymentAddresses[srcChainId]?.["integrations"]?.[dstChainId]?.[
+      integration
+    ]?.notary;
 
   if (!notaryAddress) {
-    throw new Error(`Notary adddess for ${srcChainId}-${dstChainId}-${integration} not found`);
+    throw new Error(
+      `Notary adddess for ${srcChainId}-${dstChainId}-${integration} not found`
+    );
   }
 
   return notaryAddress;
 }
 
-function getAccumAddress(
+function getCapacitorAddress(
   srcChainId: ChainId,
   dstChainId: ChainId,
   integration: IntegrationTypes
 ) {
-  const accumAddress = deploymentAddresses[srcChainId]?.["integrations"]?.[dstChainId]?.[integration]?.accum;
+  const capacitorAddress =
+    deploymentAddresses[srcChainId]?.["integrations"]?.[dstChainId]?.[
+      integration
+    ]?.capacitor;
 
-  if (!accumAddress) {
+  if (!capacitorAddress) {
     throw new Error(
-      `Accumulator address for ${srcChainId}-${dstChainId}-${integration} not found`
+      `Capacitor address for ${srcChainId}-${dstChainId}-${integration} not found`
     );
   }
 
-  return accumAddress;
+  return capacitorAddress;
 }
 
-function getDeAccumAddress(srcChainId: ChainId) {
-  const deAccumAddress = deploymentAddresses[srcChainId]?.SingleDeaccum;
+function getDeCapacitorAddress(srcChainId: ChainId) {
+  const deCapacitorAddress = deploymentAddresses[srcChainId]?.SingleDecapacitor;
 
-  if (!deAccumAddress) {
-    throw new Error(
-      `De Accumulator address for ${srcChainId} not found`
-    );
+  if (!deCapacitorAddress) {
+    throw new Error(`De Capacitor address for ${srcChainId} not found`);
   }
 
-  return deAccumAddress;
+  return deCapacitorAddress;
 }
 
 export {
   deploymentAddresses,
   getNotaryAddress,
-  getAccumAddress,
-  getDeAccumAddress,
+  getCapacitorAddress,
+  getDeCapacitorAddress,
 };

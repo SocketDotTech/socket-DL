@@ -34,8 +34,8 @@ export const main = async () => {
       socketSigner
     );
     const vault: Contract = await deployVault(socketSigner);
-    const deaccum: Contract = await deployContractWithoutArgs(
-      "SingleDeaccum",
+    const decapacitor: Contract = await deployContractWithoutArgs(
+      "SingleDecapacitor",
       socketSigner
     );
     const socket: Contract = await deploySocket(
@@ -54,7 +54,7 @@ export const main = async () => {
       SignatureVerifier: signatureVerifier.address,
       Socket: socket.address,
       Vault: vault.address,
-      SingleDeaccum: deaccum.address,
+      SingleDecapacitor: decapacitor.address,
     };
     console.log("Contracts deployed!");
 
