@@ -93,7 +93,7 @@ abstract contract SocketSrc is SocketBase {
             )
         ) revert InvalidAttester();
 
-        emit PacketVerifiedAndSealed(accumAddress_, packetId, signature_);
+        emit PacketVerifiedAndSealed(capacitorAddress_, packetId, signature_);
     }
 
     function _getPacketId(

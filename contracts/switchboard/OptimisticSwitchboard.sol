@@ -2,34 +2,29 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ISwitchboard.sol";
-import "../interfaces/ISocket.sol";
 import "../utils/AccessControl.sol";
 
 contract OptimisticSwitchboard is ISwitchboard, AccessControl {
-    ISocket public socket;
     uint256 public immutable timeoutInSeconds;
     uint256 public immutable chainSlug;
 
-    bool tripFuse;
-
-    // TODO: change name
+    bool public tripGlobalFuse;
     // packetId => isPaused
-    mapping(uint256 => bool) public isPacketPaused;
+    mapping(uint256 => bool) public tripSingleFuse;
 
-    event SocketSet(address newSocket_);
-    event SwitchboardTripped(bool tripFuse_);
+    event SwitchboardTripped(bool tripGlobalFuse_);
+    event PacketTripped(uint256 packetId_, bool tripSingleFuse_);
 
     error TransferFailed();
     error FeesNotEnough();
+    error WatcherNotFound();
 
     constructor(
         address owner_,
-        address socket_,
         uint32 chainSlug_,
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
         chainSlug = chainSlug_;
-        socket = ISocket(socket_);
 
         // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
@@ -55,27 +50,37 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
         uint256,
         uint256 proposeTime
     ) external view override returns (bool) {
-        if (tripFuse || isPacketPaused[packetId]) return false;
+        if (tripGlobalFuse || tripSingleFuse[packetId]) return false;
         if (block.timestamp - proposeTime < timeoutInSeconds) return false;
         return true;
     }
 
     /**
-     * @notice updates socket_
-     * @param socket_ address of Notary
+     * @notice pause/unpause execution
+     * @param tripGlobalFuse_ bool indicating verification is active or not
      */
-    function setSocket(address socket_) external onlyOwner {
-        socket = ISocket(socket_);
-        emit SocketSet(socket_);
+    function tripGlobal(uint256 srcChainSlug_, bool tripGlobalFuse_) external {
+        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
+            revert WatcherNotFound();
+
+        tripGlobalFuse = tripGlobalFuse_;
+        emit SwitchboardTripped(tripGlobalFuse_);
     }
 
     /**
-     * @notice pause/unpause execution
-     * @param tripFuse_ bool indicating verification is active or not
+     * @notice pause/unpause a packet
+     * @param tripSingleFuse_ bool indicating a packet is verified or not
      */
-    function trip(bool tripFuse_) external onlyOwner {
-        tripFuse = tripFuse_;
-        emit SwitchboardTripped(tripFuse_);
+    function tripSingle(
+        uint256 packetId_,
+        uint256 srcChainSlug_,
+        bool tripSingleFuse_
+    ) external {
+        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
+            revert WatcherNotFound();
+
+        tripSingleFuse[packetId_] = tripSingleFuse_;
+        emit PacketTripped(packetId_, tripSingleFuse_);
     }
 
     // TODO: to support fee distribution
