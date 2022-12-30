@@ -26,7 +26,11 @@ export enum IntegrationTypes {
 
 export type Integrations = { [chainId in ChainId]?: ChainAddresses };
 export type ChainAddresses = { [integration in IntegrationTypes]?: Configs };
-export type Configs = { notary?: string, verifier?: string, accum?: string };
+export type Configs = {
+  notary?: string;
+  verifier?: string;
+  capacitor?: string;
+};
 
 export interface ChainSocketAddresses {
   Counter: string;
@@ -34,7 +38,7 @@ export interface ChainSocketAddresses {
   SignatureVerifier: string;
   Socket: string;
   Vault: string;
-  SingleDeaccum: string;
+  SingleDecapacitor: string;
   AdminNotary?: string;
   Verifier?: string;
   integrations?: Integrations;

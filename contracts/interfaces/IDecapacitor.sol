@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-interface IDeaccumulator {
+interface IDecapacitor {
     /**
      * @notice returns if the packed message is the part of a merkle tree or not
      * @param root_ root hash of the merkle tree

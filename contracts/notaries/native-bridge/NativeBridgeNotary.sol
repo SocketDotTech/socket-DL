@@ -5,7 +5,7 @@ import "../../utils/AccessControl.sol";
 import "../../utils/ReentrancyGuard.sol";
 
 import "../../interfaces/INotary.sol";
-import "../../interfaces/IAccumulator.sol";
+import "../../interfaces/ICapacitor.sol";
 import "../../interfaces/ISignatureVerifier.sol";
 
 abstract contract NativeBridgeNotary is
@@ -17,13 +17,13 @@ abstract contract NativeBridgeNotary is
     uint256 private immutable _chainSlug;
     ISignatureVerifier public signatureVerifier;
 
-    // accumAddr|chainSlug|packetId
+    // capacitorAddr|chainSlug|packetId
     mapping(uint256 => bytes32) private _remoteRoots;
 
     event UpdatedRemoteNotary(address remoteNotary);
     error InvalidSender();
 
-    modifier onlyRemoteAccumulator() virtual {
+    modifier onlyRemoteCapacitor() virtual {
         _;
     }
 
@@ -51,17 +51,21 @@ abstract contract NativeBridgeNotary is
 
     /// @inheritdoc INotary
     function seal(
-        address accumAddress_,
+        address capacitorAddress_,
         uint256[] calldata bridgeParams,
         bytes calldata signature_
     ) external payable override nonReentrant {
-        (
-            bytes32 root,
-            uint256 packetCount,
-            uint256 remoteChainSlug
-        ) = IAccumulator(accumAddress_).sealPacket();
+        // compiler fix
+        uint256 remoteChainSlug = 0;
 
-        uint256 packetId = _getPacketId(accumAddress_, _chainSlug, packetCount);
+        (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
+            .sealPacket();
+
+        uint256 packetId = _getPacketId(
+            capacitorAddress_,
+            _chainSlug,
+            packetCount
+        );
         _sendMessage(bridgeParams, packetId, root);
 
         address attester = signatureVerifier.recoverSigner(
@@ -75,7 +79,7 @@ abstract contract NativeBridgeNotary is
             revert InvalidAttester();
         emit PacketVerifiedAndSealed(
             attester,
-            accumAddress_,
+            capacitorAddress_,
             packetId,
             signature_
         );
@@ -86,7 +90,7 @@ abstract contract NativeBridgeNotary is
         uint256 packetId_,
         bytes32 root_,
         bytes calldata
-    ) external override onlyRemoteAccumulator {
+    ) external override onlyRemoteCapacitor {
         _attest(packetId_, root_);
     }
 
@@ -205,13 +209,13 @@ abstract contract NativeBridgeNotary is
     }
 
     function _getPacketId(
-        address accumAddr_,
+        address capacitorAddr_,
         uint256 chainSlug_,
         uint256 packetCount_
     ) internal pure returns (uint256 packetId) {
         packetId =
             (chainSlug_ << 224) |
-            (uint256(uint160(accumAddr_)) << 64) |
+            (uint256(uint160(capacitorAddr_)) << 64) |
             packetCount_;
     }
 

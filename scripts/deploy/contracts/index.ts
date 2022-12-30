@@ -1,4 +1,4 @@
-export { default as deployAccumulator } from "./deployAccumulator";
+export { default as deployCapacitor } from "./deployCapacitor";
 export { default as deployCounter } from "./deployCounter";
 export { default as deployNotary } from "./deployNotary";
 export { default as deploySocket } from "./deploySocket";

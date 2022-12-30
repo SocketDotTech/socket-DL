@@ -13,14 +13,13 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
     uint256 public immutable timeoutInSeconds;
     uint256 public immutable chainSlug;
 
-    bool tripFuse;
-
-    // TODO: change name
+    bool public tripGlobalFuse;
     // packetId => isPaused
-    mapping(uint256 => bool) public isPacketPaused;
+    mapping(uint256 => bool) public tripSingleFuse;
     mapping(uint256 => uint256) public executionOverhead;
 
-    event SwitchboardTripped(bool tripFuse_);
+    event PacketTripped(uint256 packetId_, bool tripSingleFuse_);
+    event SwitchboardTripped(bool tripGlobalFuse_);
     event ExecutionOverheadSet(
         uint256 dstChainSlug_,
         uint256 executionOverhead_
@@ -28,6 +27,7 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
 
     error TransferFailed();
     error FeesNotEnough();
+    error WatcherNotFound();
 
     constructor(
         address owner_,
@@ -53,7 +53,7 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
         uint256,
         uint256 proposeTime
     ) external view override returns (bool) {
-        if (tripFuse || isPacketPaused[packetId]) return false;
+        if (tripGlobalFuse || tripSingleFuse[packetId]) return false;
         if (block.timestamp - proposeTime < timeoutInSeconds) return false;
         return true;
     }
@@ -97,11 +97,30 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
 
     /**
      * @notice pause/unpause execution
-     * @param tripFuse_ bool indicating verification is active or not
+     * @param tripGlobalFuse_ bool indicating verification is active or not
      */
-    function trip(bool tripFuse_) external onlyOwner {
-        tripFuse = tripFuse_;
-        emit SwitchboardTripped(tripFuse_);
+    function tripGlobal(uint256 srcChainSlug_, bool tripGlobalFuse_) external {
+        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
+            revert WatcherNotFound();
+
+        tripGlobalFuse = tripGlobalFuse_;
+        emit SwitchboardTripped(tripGlobalFuse_);
+    }
+
+    /**
+     * @notice pause/unpause a packet
+     * @param tripSingleFuse_ bool indicating a packet is verified or not
+     */
+    function tripSingle(
+        uint256 packetId_,
+        uint256 srcChainSlug_,
+        bool tripSingleFuse_
+    ) external {
+        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
+            revert WatcherNotFound();
+
+        tripSingleFuse[packetId_] = tripSingleFuse_;
+        emit PacketTripped(packetId_, tripSingleFuse_);
     }
 
     // TODO: to support fee distribution

@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 
 contract AdminNotaryTest is Setup {
-    address constant _accum = address(4);
+    address constant _capacitor = address(4);
     bytes32 constant _root = bytes32(uint256(5));
     uint256 constant _id = uint256(6);
 
@@ -32,7 +32,7 @@ contract AdminNotaryTest is Setup {
             _socketOwner
         );
 
-        _localPacketId = _getPackedId(_accum, _chainSlug, _id);
+        _localPacketId = _getPackedId(_capacitor, _chainSlug, _id);
         localSig = _createSignature(
             _remoteChainSlug,
             _localPacketId,
@@ -40,7 +40,7 @@ contract AdminNotaryTest is Setup {
             _root
         );
 
-        _remotePacketId = _getPackedId(_accum, _remoteChainSlug, _id);
+        _remotePacketId = _getPackedId(_capacitor, _remoteChainSlug, _id);
         remoteSig = _createSignature(
             _chainSlug,
             _remotePacketId,
@@ -100,23 +100,23 @@ contract AdminNotaryTest is Setup {
 
         // wrong packet sealed
         vm.mockCall(
-            _accum,
-            abi.encodeWithSelector(IAccumulator.sealPacket.selector),
+            _capacitor,
+            abi.encodeWithSelector(ICapacitor.sealPacket.selector),
             abi.encode(_altRoot, _id, _remoteChainSlug)
         );
 
         hoax(_attester);
         vm.expectRevert(INotary.InvalidAttester.selector);
-        cc.notary__.seal(_accum, testArr, localSig);
+        cc.notary__.seal(_capacitor, testArr, localSig);
 
         // correct packet sealed
         vm.mockCall(
-            _accum,
-            abi.encodeWithSelector(IAccumulator.sealPacket.selector),
+            _capacitor,
+            abi.encodeWithSelector(ICapacitor.sealPacket.selector),
             abi.encode(_root, _id, _remoteChainSlug)
         );
         hoax(_attester);
-        cc.notary__.seal(_accum, testArr, localSig);
+        cc.notary__.seal(_capacitor, testArr, localSig);
 
         bytes memory altSign = _createSignature(
             _remoteChainSlug,
@@ -128,7 +128,7 @@ contract AdminNotaryTest is Setup {
         // invalid attester
         hoax(_attester);
         vm.expectRevert(INotary.InvalidAttester.selector);
-        cc.notary__.seal(_accum, testArr, altSign);
+        cc.notary__.seal(_capacitor, testArr, altSign);
     }
 
     function testAttest() external {
