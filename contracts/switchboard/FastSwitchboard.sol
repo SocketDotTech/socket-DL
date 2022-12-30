@@ -43,7 +43,6 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     error WatcherFound();
     error WatcherNotFound();
     error AlreadyAttested();
-    error InvalidGasPrice();
 
     constructor(
         address owner_,
@@ -95,36 +94,41 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         uint256 msgGasLimit,
         uint256 dstChainSlug
     ) external payable override {
-        uint256 dstGasPrice = oracle.getGasPrice(dstChainSlug);
-        if (dstGasPrice == 0) revert InvalidGasPrice();
+        uint256 dstRelativeGasPrice = oracle.getRelativeGasPrice(dstChainSlug);
 
-        uint256 minExecutionFees = _getExecutionFees(msgGasLimit, dstChainSlug, dstGasPrice);
+        uint256 minExecutionFees = _getExecutionFees(
+            msgGasLimit,
+            dstChainSlug,
+            dstRelativeGasPrice
+        );
         uint256 minVerificationFees = _getVerificationFees(
             dstChainSlug,
-            dstGasPrice
+            dstRelativeGasPrice
         );
 
         uint256 expectedFees = minExecutionFees + minVerificationFees;
-        if (msg.value != expectedFees) revert FeesNotEnough();
+        if (msg.value <= expectedFees) revert FeesNotEnough();
     }
 
-     function _getExecutionFees(
+    function _getExecutionFees(
         uint256 msgGasLimit,
         uint256 dstChainSlug,
-        uint256 dstGasPrice
+        uint256 dstRelativeGasPrice
     ) internal view returns (uint256) {
-        return (executionOverhead[dstChainSlug] + msgGasLimit) * dstGasPrice;
+        return
+            (executionOverhead[dstChainSlug] + msgGasLimit) *
+            dstRelativeGasPrice;
     }
 
     function _getVerificationFees(
         uint256 dstChainSlug,
-        uint256 dstGasPrice
+        uint256 dstRelativeGasPrice
     ) internal view returns (uint256) {
         // todo: are the watchers going to be same on all chains for particular chain slug?
         return
             totalWatchers[dstChainSlug] *
             attestGasLimit[dstChainSlug] *
-            dstGasPrice;
+            dstRelativeGasPrice;
     }
 
     /**

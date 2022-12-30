@@ -28,7 +28,6 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
 
     error TransferFailed();
     error FeesNotEnough();
-    error InvalidGasPrice();
 
     constructor(
         address owner_,
@@ -63,19 +62,25 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
         uint256 msgGasLimit,
         uint256 dstChainSlug
     ) external payable override {
-        uint256 dstGasPrice = oracle.getGasPrice(dstChainSlug);
+        uint256 dstRelativeGasPrice = oracle.getRelativeGasPrice(dstChainSlug);
 
         // assuming verification fees as 0
-        uint256 expectedFees = _getExecutionFees(msgGasLimit, dstChainSlug, dstGasPrice);
-        if (msg.value != expectedFees) revert FeesNotEnough();
+        uint256 expectedFees = _getExecutionFees(
+            msgGasLimit,
+            dstChainSlug,
+            dstRelativeGasPrice
+        );
+        if (msg.value <= expectedFees) revert FeesNotEnough();
     }
 
     function _getExecutionFees(
         uint256 msgGasLimit,
         uint256 dstChainSlug,
-        uint256 dstGasPrice
+        uint256 dstRelativeGasPrice
     ) internal view returns (uint256) {
-        return (executionOverhead[dstChainSlug] + msgGasLimit) * dstGasPrice;
+        return
+            (executionOverhead[dstChainSlug] + msgGasLimit) *
+            dstRelativeGasPrice;
     }
 
     /**
