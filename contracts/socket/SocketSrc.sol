@@ -41,11 +41,11 @@ abstract contract SocketSrc is SocketBase {
         // msgId(256) = localChainSlug(32) | nonce(224)
         uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
 
-        // TODO: replace it with fees from switchboard
-        // _vault__.deductFee{value: msg.value}(
-        //     remoteChainSlug_,
-        //     plugConfig.outboundIntegrationType
-        // );
+        // TODO: replace it with switchboard
+        ISwitchboard(plugConfig.verifier).payFees{value: msg.value}(
+            msgGasLimit_,
+            remoteChainSlug_
+        );
 
         bytes32 packedMessage = _hasher__.packMessage(
             _chainSlug,
