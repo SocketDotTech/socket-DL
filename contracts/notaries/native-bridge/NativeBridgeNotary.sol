@@ -55,11 +55,11 @@ abstract contract NativeBridgeNotary is
         uint256[] calldata bridgeParams,
         bytes calldata signature_
     ) external payable override nonReentrant {
-        (
-            bytes32 root,
-            uint256 packetCount,
-            uint256 remoteChainSlug
-        ) = ICapacitor(capacitorAddress_).sealPacket();
+        // compiler fix
+        uint256 remoteChainSlug = 0;
+
+        (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
+            .sealPacket();
 
         uint256 packetId = _getPacketId(
             capacitorAddress_,

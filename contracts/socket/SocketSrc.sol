@@ -2,13 +2,11 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ICapacitor.sol";
-import "../interfaces/IVault.sol";
 import "./SocketBase.sol";
 
 abstract contract SocketSrc is SocketBase {
     // incrementing nonce, should be handled in next socket version.
     uint256 public _messageCount;
-    IVault public _vault__;
 
     /**
      * @notice emits the verification and seal confirmation of a packet
@@ -21,10 +19,6 @@ abstract contract SocketSrc is SocketBase {
         uint256 indexed packetId,
         bytes signature
     );
-
-    constructor(address vault_) {
-        _vault__ = IVault(vault_);
-    }
 
     /**
      * @notice registers a message
@@ -47,10 +41,10 @@ abstract contract SocketSrc is SocketBase {
         // msgId(256) = localChainSlug(32) | nonce(224)
         uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
 
-        // TODO: replace it with fees from switchboard
-        _vault__.deductFee{value: msg.value}(
-            remoteChainSlug_,
-            plugConfig.outboundIntegrationType
+        // TODO: replace it with switchboard
+        ISwitchboard(plugConfig.verifier).payFees{value: msg.value}(
+            msgGasLimit_,
+            remoteChainSlug_
         );
 
         bytes32 packedMessage = _hasher__.packMessage(
@@ -100,10 +94,6 @@ abstract contract SocketSrc is SocketBase {
         ) revert InvalidAttester();
 
         emit PacketVerifiedAndSealed(capacitorAddress_, packetId, signature_);
-    }
-
-    function setVault(address vault_) external onlyOwner {
-        _vault__ = IVault(vault_);
     }
 
     function _getPacketId(

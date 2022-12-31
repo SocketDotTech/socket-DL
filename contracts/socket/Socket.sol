@@ -9,7 +9,6 @@ contract Socket is SocketSrc, SocketDst {
     constructor(
         uint32 chainSlug_,
         address hasher_,
-        address transmitManager_,
-        address vault_
-    ) SocketBase(chainSlug_, hasher_, transmitManager_) SocketSrc(vault_) {}
+        address transmitManager_
+    ) SocketBase(chainSlug_, hasher_, transmitManager_) {}
 }

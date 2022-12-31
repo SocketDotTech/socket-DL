@@ -100,18 +100,6 @@ contract SocketTest is Setup {
         assertEq(address(_a.socket__._hasher__()), newHasher);
     }
 
-    function testSetVault() external {
-        address newVault = address(1000);
-
-        hoax(_raju);
-        vm.expectRevert(Ownable.OnlyOwner.selector);
-        _a.socket__.setVault(newVault);
-
-        hoax(_socketOwner);
-        _a.socket__.setVault(newVault);
-        assertEq(address(_a.socket__._vault__()), newVault);
-    }
-
     function testGrantExecutorRole() external {
         hoax(_raju);
         vm.expectRevert(Ownable.OnlyOwner.selector);

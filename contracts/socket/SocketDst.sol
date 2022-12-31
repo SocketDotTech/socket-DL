@@ -6,18 +6,6 @@ import "../interfaces/IDecapacitor.sol";
 import "../interfaces/IPlug.sol";
 import "./SocketBase.sol";
 
-// todo: remove
-interface IVerifier {
-    /**
-     * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId_ packet id
-     */
-    function verifyPacket(
-        uint256 packetId_,
-        bytes32 integrationType_
-    ) external view returns (bool);
-}
-
 abstract contract SocketDst is SocketBase {
     enum PacketStatus {
         NOT_PROPOSED,
@@ -47,6 +35,7 @@ abstract contract SocketDst is SocketBase {
     mapping(uint256 => MessageStatus) public messageStatus;
     // capacitorAddr|chainSlug|packetId
     mapping(uint256 => bytes32) public remoteRoots;
+    mapping(uint256 => uint256) public rootProposedAt;
 
     /**
      * @notice emits the packet details when proposed at remote
@@ -86,6 +75,8 @@ abstract contract SocketDst is SocketBase {
         ) revert InvalidAttester();
 
         remoteRoots[packetId_] = root_;
+        rootProposedAt[packetId_] = block.timestamp;
+
         emit PacketAttested(msg.sender, packetId_, root_);
     }
 
@@ -139,13 +130,14 @@ abstract contract SocketDst is SocketBase {
         PlugConfig memory plugConfig,
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
-        // TODO: do we need inboundIntegrationType at verifier with switchboards?
-        bool isVerified = IVerifier(plugConfig.verifier).verifyPacket(
-            verifyParams_.packetId,
-            plugConfig.inboundIntegrationType
-        );
-
-        if (!isVerified) revert VerificationFailed();
+        if (
+            !ISwitchboard(plugConfig.verifier).allowPacket(
+                remoteRoots[verifyParams_.packetId],
+                verifyParams_.packetId,
+                verifyParams_.remoteChainSlug,
+                rootProposedAt[verifyParams_.packetId]
+            )
+        ) revert VerificationFailed();
 
         if (
             !IDecapacitor(plugConfig.decapacitor).verifyMessageInclusion(
