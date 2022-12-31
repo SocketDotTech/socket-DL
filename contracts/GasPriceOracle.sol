@@ -43,7 +43,8 @@ contract GasPriceOracle is IOracle, AccessControl(msg.sender) {
         priceFeed = priceFeed_;
     }
 
-    // value returned will have PRICE_PRECISION.
+    // value returned will have precision same as dst native token
+    // assumption natives have 18 decimals
     function getRelativeGasPrice(
         uint256 dstChainSlug
     ) external view override returns (uint256) {
@@ -61,10 +62,7 @@ contract GasPriceOracle is IOracle, AccessControl(msg.sender) {
         if (!_hasRole(_transmitterRole(dstChainSlug_), msg.sender))
             revert TransmitterNotFound();
 
-        if (
-            dstGasPrice_ >= PRICE_PRECISION ||
-            dstGasUSDPrice_ >= PRICE_PRECISION
-        ) revert InvalidPrecision();
+        if (dstGasUSDPrice_ >= PRICE_PRECISION) revert InvalidPrecision();
 
         dstGasPrice[dstChainSlug_] = dstGasPrice_;
         dstGasUSDPrice[dstChainSlug_] = dstGasUSDPrice_;
