@@ -131,7 +131,7 @@ abstract contract SocketDst is SocketBase {
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
         if (
-            !ISwitchboard(plugConfig.verifier).allowPacket(
+            !ISwitchboard(plugConfig.inboundSwitchboard__).allowPacket(
                 remoteRoots[verifyParams_.packetId],
                 verifyParams_.packetId,
                 verifyParams_.remoteChainSlug,

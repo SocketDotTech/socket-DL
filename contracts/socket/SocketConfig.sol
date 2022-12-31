@@ -4,8 +4,7 @@ pragma solidity 0.8.7;
 import "../interfaces/ISocket.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/ICapacitorFactory.sol";
-
-interface ISwitchboard {}
+import "../interfaces/ISwitchboard.sol";
 
 abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     struct PlugConfig {

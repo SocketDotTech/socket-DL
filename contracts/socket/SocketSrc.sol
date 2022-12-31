@@ -42,7 +42,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
 
         // TODO: replace it with switchboard
-        ISwitchboard(plugConfig.verifier).payFees{value: msg.value}(
+        plugConfig.outboundSwitchboard__.payFees{value: msg.value}(
             msgGasLimit_,
             remoteChainSlug_
         );
