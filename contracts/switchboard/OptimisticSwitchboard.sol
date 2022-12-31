@@ -70,7 +70,7 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
             dstChainSlug,
             dstRelativeGasPrice
         );
-        if (msg.value <= expectedFees) revert FeesNotEnough();
+        if (msg.value < expectedFees) revert FeesNotEnough();
     }
 
     function _getExecutionFees(

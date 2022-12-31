@@ -107,7 +107,7 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         );
 
         uint256 expectedFees = minExecutionFees + minVerificationFees;
-        if (msg.value <= expectedFees) revert FeesNotEnough();
+        if (msg.value < expectedFees) revert FeesNotEnough();
     }
 
     function _getExecutionFees(
