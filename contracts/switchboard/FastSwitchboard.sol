@@ -2,9 +2,15 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ISwitchboard.sol";
+import "../interfaces/IOracle.sol";
+
 import "../utils/AccessControl.sol";
 
 contract FastSwitchboard is ISwitchboard, AccessControl {
+    IOracle public oracle;
+
+    mapping(uint256 => uint256) public executionOverhead;
+
     uint256 public immutable chainSlug;
     uint256 public timeoutInSeconds;
 
@@ -15,6 +21,9 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     // dst chain slug => total watchers registered
     mapping(uint256 => uint256) public totalWatchers;
 
+    // dst chain slug => attest gas limit
+    mapping(uint256 => uint256) public attestGasLimit;
+
     // attester => packetId => is attested
     mapping(address => mapping(uint256 => bool)) public isAttested;
 
@@ -24,6 +33,11 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     event SwitchboardTripped(bool tripGlobalFuse_);
     event PacketTripped(uint256 packetId_, bool tripSingleFuse_);
     event PacketAttested(uint256 packetId, address attester);
+    event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
+    event ExecutionOverheadSet(
+        uint256 dstChainSlug_,
+        uint256 executionOverhead_
+    );
 
     error TransferFailed();
     error FeesNotEnough();
@@ -33,10 +47,13 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
 
     constructor(
         address owner_,
+        address oracle_,
         uint32 chainSlug_,
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
         chainSlug = chainSlug_;
+        oracle = IOracle(oracle_);
+
         timeoutInSeconds = timeoutInSeconds_;
     }
 
@@ -50,15 +67,6 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         attestations[packetId]++;
 
         emit PacketAttested(packetId, msg.sender);
-    }
-
-    function payFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
-    ) external payable override {
-        // TODO: updated with issue #45
-        uint256 expectedFees = 0;
-        if (msg.value != expectedFees) revert FeesNotEnough();
     }
 
     // todo: switchboard might need src chain slug and packet id while verifying details here?
@@ -75,11 +83,86 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     ) external view override returns (bool) {
         if (tripGlobalFuse || tripSingleFuse[packetId]) return false;
 
-        if (block.timestamp - proposeTime >= timeoutInSeconds) return true;
         // to handle the situation if a watcher is removed after it attested the packet
         if (attestations[packetId] >= totalWatchers[srcChainSlug]) return true;
+        if (block.timestamp - proposeTime >= timeoutInSeconds) return true;
 
         return false;
+    }
+
+    function payFees(
+        uint256 msgGasLimit,
+        uint256 dstChainSlug
+    ) external payable override {
+        uint256 dstRelativeGasPrice = oracle.getRelativeGasPrice(dstChainSlug);
+
+        uint256 minExecutionFees = _getExecutionFees(
+            msgGasLimit,
+            dstChainSlug,
+            dstRelativeGasPrice
+        );
+        uint256 minVerificationFees = _getVerificationFees(
+            dstChainSlug,
+            dstRelativeGasPrice
+        );
+
+        uint256 expectedFees = minExecutionFees + minVerificationFees;
+        if (msg.value < expectedFees) revert FeesNotEnough();
+    }
+
+    function _getExecutionFees(
+        uint256 msgGasLimit,
+        uint256 dstChainSlug,
+        uint256 dstRelativeGasPrice
+    ) internal view returns (uint256) {
+        return
+            (executionOverhead[dstChainSlug] + msgGasLimit) *
+            dstRelativeGasPrice;
+    }
+
+    function _getVerificationFees(
+        uint256 dstChainSlug,
+        uint256 dstRelativeGasPrice
+    ) internal view returns (uint256) {
+        // todo: are the watchers going to be same on all chains for particular chain slug?
+        return
+            totalWatchers[dstChainSlug] *
+            attestGasLimit[dstChainSlug] *
+            dstRelativeGasPrice;
+    }
+
+    /**
+     * @notice updates attest gas limit for given chain slug
+     * @param dstChainSlug_ destination chain
+     * @param attestGasLimit_ average gas limit needed for attest function call
+     */
+    function setAttestGasLimit(
+        uint256 dstChainSlug_,
+        uint256 attestGasLimit_
+    ) external onlyOwner {
+        attestGasLimit[dstChainSlug_] = attestGasLimit_;
+        emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
+    }
+
+    function setExecutionOverhead(
+        uint256 dstChainSlug_,
+        uint256 executionOverhead_
+    ) external onlyOwner {
+        executionOverhead[dstChainSlug_] = executionOverhead_;
+        emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
+    }
+
+    /**
+     * @notice pause/unpause execution
+     * @param tripSingleFuse_ bool indicating verification is active or not
+     */
+    function tripSingle(
+        uint256 packetId_,
+        uint256 srcChainSlug_,
+        bool tripSingleFuse_
+    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+        tripSingleFuse[packetId_] = tripSingleFuse_;
+        emit PacketTripped(packetId_, tripSingleFuse_);
     }
 
     /**
@@ -92,19 +175,6 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     ) external onlyRole(_watcherRole(srcChainSlug_)) {
         tripGlobalFuse = tripGlobalFuse_;
         emit SwitchboardTripped(tripGlobalFuse_);
-    }
-
-    /**
-     * @notice pause/unpause a packet
-     * @param tripSingleFuse_ bool indicating a packet is verified or not
-     */
-    function tripSingle(
-        uint256 packetId_,
-        uint256 srcChainSlug_,
-        bool tripSingleFuse_
-    ) external onlyRole(_watcherRole(srcChainSlug_)) {
-        tripSingleFuse[packetId_] = tripSingleFuse_;
-        emit PacketTripped(packetId_, tripSingleFuse_);
     }
 
     // TODO: to support fee distribution

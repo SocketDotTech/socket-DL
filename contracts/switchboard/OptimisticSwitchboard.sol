@@ -2,18 +2,28 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ISwitchboard.sol";
+
+import "../interfaces/IOracle.sol";
+
 import "../utils/AccessControl.sol";
 
 contract OptimisticSwitchboard is ISwitchboard, AccessControl {
+    IOracle public oracle;
+
     uint256 public immutable timeoutInSeconds;
     uint256 public immutable chainSlug;
 
     bool public tripGlobalFuse;
     // packetId => isPaused
     mapping(uint256 => bool) public tripSingleFuse;
+    mapping(uint256 => uint256) public executionOverhead;
 
-    event SwitchboardTripped(bool tripGlobalFuse_);
     event PacketTripped(uint256 packetId_, bool tripSingleFuse_);
+    event SwitchboardTripped(bool tripGlobalFuse_);
+    event ExecutionOverheadSet(
+        uint256 dstChainSlug_,
+        uint256 executionOverhead_
+    );
 
     error TransferFailed();
     error FeesNotEnough();
@@ -21,22 +31,15 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
 
     constructor(
         address owner_,
+        address oracle_,
         uint32 chainSlug_,
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
         chainSlug = chainSlug_;
+        oracle = IOracle(oracle_);
 
         // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
-    }
-
-    function payFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
-    ) external payable override {
-        // TODO: updated with issue #45
-        uint256 expectedFees = 0;
-        if (msg.value != expectedFees) revert FeesNotEnough();
     }
 
     /**
@@ -53,6 +56,43 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
         if (tripGlobalFuse || tripSingleFuse[packetId]) return false;
         if (block.timestamp - proposeTime < timeoutInSeconds) return false;
         return true;
+    }
+
+    function payFees(
+        uint256 msgGasLimit,
+        uint256 dstChainSlug
+    ) external payable override {
+        uint256 dstRelativeGasPrice = oracle.getRelativeGasPrice(dstChainSlug);
+
+        // assuming verification fees as 0
+        uint256 expectedFees = _getExecutionFees(
+            msgGasLimit,
+            dstChainSlug,
+            dstRelativeGasPrice
+        );
+        if (msg.value < expectedFees) revert FeesNotEnough();
+    }
+
+    function _getExecutionFees(
+        uint256 msgGasLimit,
+        uint256 dstChainSlug,
+        uint256 dstRelativeGasPrice
+    ) internal view returns (uint256) {
+        return
+            (executionOverhead[dstChainSlug] + msgGasLimit) *
+            dstRelativeGasPrice;
+    }
+
+    /**
+     * @notice updates execution overhead
+     * @param executionOverhead_ new execution overhead cost
+     */
+    function setExecutionOverhead(
+        uint256 dstChainSlug_,
+        uint256 executionOverhead_
+    ) external onlyOwner {
+        executionOverhead[dstChainSlug_] = executionOverhead_;
+        emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
     }
 
     /**
