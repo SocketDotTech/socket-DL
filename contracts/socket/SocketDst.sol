@@ -34,7 +34,7 @@ abstract contract SocketDst is SocketBase {
     // msgId => message status
     mapping(uint256 => MessageStatus) public messageStatus;
     // capacitorAddr|chainSlug|packetId
-    mapping(uint256 => bytes32) public remoteRoots;
+    mapping(uint256 => bytes32) public override remoteRoots;
     mapping(uint256 => uint256) public rootProposedAt;
 
     /**

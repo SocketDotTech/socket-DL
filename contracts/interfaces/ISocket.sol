@@ -125,6 +125,8 @@ interface ISocket {
         string memory outboundIntegrationType_
     ) external;
 
+    function remoteRoots(uint256 packetId_) external view returns (bytes32);
+
     // TODO: retry
     // function retry(uint256 msgId_, uint256 newMsgGasLimit_) external payable;
 
