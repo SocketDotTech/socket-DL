@@ -4,20 +4,32 @@ pragma solidity 0.8.7;
 import "../interfaces/ISwitchboard.sol";
 import "../utils/AccessControl.sol";
 
-contract OptimisticSwitchboard is ISwitchboard, AccessControl {
-    uint256 public immutable timeoutInSeconds;
+contract FastSwitchboard is ISwitchboard, AccessControl {
     uint256 public immutable chainSlug;
+    uint256 public timeoutInSeconds;
 
     bool public tripGlobalFuse;
     // packetId => isPaused
     mapping(uint256 => bool) public tripSingleFuse;
 
+    // dst chain slug => total watchers registered
+    mapping(uint256 => uint256) public totalWatchers;
+
+    // attester => packetId => is attested
+    mapping(address => mapping(uint256 => bool)) public isAttested;
+
+    // packetId => total attestations
+    mapping(uint256 => uint256) public attestations;
+
     event SwitchboardTripped(bool tripGlobalFuse_);
     event PacketTripped(uint256 packetId_, bool tripSingleFuse_);
+    event PacketAttested(uint256 packetId, address attester);
 
     error TransferFailed();
     error FeesNotEnough();
+    error WatcherFound();
     error WatcherNotFound();
+    error AlreadyAttested();
 
     constructor(
         address owner_,
@@ -25,9 +37,19 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
         chainSlug = chainSlug_;
-
-        // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
+    }
+
+    function attest(
+        uint256 packetId,
+        uint256 srcChainSlug
+    ) external onlyRole(_watcherRole(srcChainSlug)) {
+        if (isAttested[msg.sender][packetId]) revert AlreadyAttested();
+
+        isAttested[msg.sender][packetId] = true;
+        attestations[packetId]++;
+
+        emit PacketAttested(packetId, msg.sender);
     }
 
     function payFees(
@@ -39,20 +61,25 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
         if (msg.value != expectedFees) revert FeesNotEnough();
     }
 
+    // todo: switchboard might need src chain slug and packet id while verifying details here?
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId packet id
+     * @param packetId packetId
      * @param proposeTime time at which packet was proposed
      */
     function allowPacket(
         bytes32,
         uint256 packetId,
-        uint256,
+        uint256 srcChainSlug,
         uint256 proposeTime
     ) external view override returns (bool) {
         if (tripGlobalFuse || tripSingleFuse[packetId]) return false;
-        if (block.timestamp - proposeTime < timeoutInSeconds) return false;
-        return true;
+
+        if (block.timestamp - proposeTime >= timeoutInSeconds) return true;
+        // to handle the situation if a watcher is removed after it attested the packet
+        if (attestations[packetId] >= totalWatchers[srcChainSlug]) return true;
+
+        return false;
     }
 
     /**
@@ -92,27 +119,33 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
     }
 
     /**
-     * @notice adds an watcher for `remoteChainSlug_` chain
-     * @param remoteChainSlug_ remote chain slug
+     * @notice adds a watcher for `srcChainSlug_` chain
      * @param watcher_ watcher address
      */
     function grantWatcherRole(
-        uint256 remoteChainSlug_,
+        uint256 srcChainSlug_,
         address watcher_
     ) external onlyOwner {
-        _grantRole(_watcherRole(remoteChainSlug_), watcher_);
+        if (_hasRole(_watcherRole(srcChainSlug_), watcher_))
+            revert WatcherFound();
+
+        _grantRole(_watcherRole(srcChainSlug_), watcher_);
+        totalWatchers[srcChainSlug_]++;
     }
 
     /**
-     * @notice removes an watcher from `remoteChainSlug_` chain list
-     * @param remoteChainSlug_ remote chain slug
+     * @notice removes a watcher from `srcChainSlug_` chain list
      * @param watcher_ watcher address
      */
     function revokeWatcherRole(
-        uint256 remoteChainSlug_,
+        uint256 srcChainSlug_,
         address watcher_
     ) external onlyOwner {
-        _revokeRole(_watcherRole(remoteChainSlug_), watcher_);
+        if (!_hasRole(_watcherRole(srcChainSlug_), watcher_))
+            revert WatcherNotFound();
+
+        _revokeRole(_watcherRole(srcChainSlug_), watcher_);
+        totalWatchers[srcChainSlug_]--;
     }
 
     function _watcherRole(uint256 chainSlug_) internal pure returns (bytes32) {
