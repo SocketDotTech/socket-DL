@@ -19,9 +19,14 @@ interface IAggregatorV3Interface {
         );
 }
 
-contract GasPriceOracle is IOracle, AccessControl(msg.sender) {
+interface ITransmitManager {
+    function isTransmitter(address user) external view returns (bool);
+}
+
+contract GasPriceOracle is IOracle {
     // Native token <> USD price feed oracle address
     IAggregatorV3Interface public priceFeed;
+    ITransmitManager public transmitManager;
 
     mapping(uint256 => uint256) public dstGasPrice;
     mapping(uint256 => uint256) public dstGasUSDPrice;
@@ -39,12 +44,15 @@ contract GasPriceOracle is IOracle, AccessControl(msg.sender) {
     error TransmitterNotFound();
     error InvalidPrecision();
 
-    constructor(IAggregatorV3Interface priceFeed_) {
+    constructor(
+        IAggregatorV3Interface priceFeed_,
+        ITransmitManager transmitManager_
+    ) {
         priceFeed = priceFeed_;
+        transmitManager = transmitManager_;
     }
 
     // value returned will have precision same as dst native token
-    // assumption natives have 18 decimals
     function getRelativeGasPrice(
         uint256 dstChainSlug
     ) external view override returns (uint256) {
@@ -59,9 +67,8 @@ contract GasPriceOracle is IOracle, AccessControl(msg.sender) {
         uint256 dstGasPrice_,
         uint256 dstGasUSDPrice_
     ) external {
-        if (!_hasRole(_transmitterRole(dstChainSlug_), msg.sender))
+        if (!transmitManager.isTransmitter(msg.sender))
             revert TransmitterNotFound();
-
         if (dstGasUSDPrice_ >= PRICE_PRECISION) revert InvalidPrecision();
 
         dstGasPrice[dstChainSlug_] = dstGasPrice_;
@@ -74,35 +81,5 @@ contract GasPriceOracle is IOracle, AccessControl(msg.sender) {
     function srcUsdPrice() internal view returns (uint256) {
         (, int256 answer, , , ) = priceFeed.latestRoundData();
         return uint256(answer);
-    }
-
-    /**
-     * @notice adds a transmitter for `remoteChainSlug_` chain
-     * @param remoteChainSlug_ remote chain slug
-     * @param transmitter_ transmitter address
-     */
-    function grantTransmitterRole(
-        uint256 remoteChainSlug_,
-        address transmitter_
-    ) external onlyOwner {
-        _grantRole(_transmitterRole(remoteChainSlug_), transmitter_);
-    }
-
-    /**
-     * @notice removes an transmitter from `remoteChainSlug_` chain list
-     * @param remoteChainSlug_ remote chain slug
-     * @param transmitter_ transmitter address
-     */
-    function revokeTransmitterRole(
-        uint256 remoteChainSlug_,
-        address transmitter_
-    ) external onlyOwner {
-        _revokeRole(_transmitterRole(remoteChainSlug_), transmitter_);
-    }
-
-    function _transmitterRole(
-        uint256 chainSlug_
-    ) internal pure returns (bytes32) {
-        return bytes32(chainSlug_);
     }
 }
