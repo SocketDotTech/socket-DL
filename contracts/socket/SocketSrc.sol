@@ -83,7 +83,7 @@ abstract contract SocketSrc is SocketBase {
             remoteChainSlug_
         );
 
-        if(value < transmitFee) revert InsufficientFees();
+        if (value < transmitFee) revert InsufficientFees();
 
         ITransmitManager(_transmitManager__).payFees{value: transmitFee}(
             remoteChainSlug_
