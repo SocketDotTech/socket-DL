@@ -8,8 +8,13 @@ function getNotaryAddress(notary: string, chainId: ChainId, config: any) {
   return notary === "AdminNotary" ? config[notary] : config["integrations"]?.[chainId]?.[IntegrationTypes.nativeIntegration]?.["notary"];
 }
 
+function getAccumAddress(chainId: ChainId, integrationType: string, config: any) {
+  return config["integrations"]?.[chainId]?.[integrationType]?.["accum"];
+}
+
 export {
   getNotaryAddress,
+  getAccumAddress,
   getVerifierAddress
 };
 

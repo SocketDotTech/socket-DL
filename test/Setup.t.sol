@@ -145,23 +145,23 @@ contract Setup is Test {
         ChainContext storage cc_,
         uint256 remoteChainSlug_
     ) internal {
-        hoax(_socketOwner);
-        cc_.fastCapacitorType = cc_.socket__.addConfig(
-            remoteChainSlug_,
-            address(cc_.fastCapacitor__),
-            address(cc_.decapacitor__),
-            address(cc_.verifier__),
-            fastIntegrationType
-        );
-
-        hoax(_socketOwner);
-        cc_.slowCapacitorType = cc_.socket__.addConfig(
-            remoteChainSlug_,
-            address(cc_.slowCapacitor__),
-            address(cc_.decapacitor__),
-            address(cc_.verifier__),
-            slowIntegrationType
-        );
+        // TODO: change to switchboards
+        // hoax(_socketOwner);
+        // cc_.fastCapacitorType = cc_.socket__.addConfig(
+        //     remoteChainSlug_,
+        //     address(cc_.fastCapacitor__),
+        //     address(cc_.decapacitor__),
+        //     address(cc_.verifier__),
+        //     fastIntegrationType
+        // );
+        // hoax(_socketOwner);
+        // cc_.slowCapacitorType = cc_.socket__.addConfig(
+        //     remoteChainSlug_,
+        //     address(cc_.slowCapacitor__),
+        //     address(cc_.decapacitor__),
+        //     address(cc_.verifier__),
+        //     slowIntegrationType
+        // );
     }
 
     function _deploySocket(
@@ -173,6 +173,7 @@ contract Setup is Test {
         vault__ = new Vault(deployer_);
         socket__ = new Socket(
             uint32(chainSlug_),
+            address(hasher__),
             address(hasher__),
             address(hasher__)
         );
