@@ -51,7 +51,10 @@ contract TransmitManager is ITransmitManager, AccessControl {
 
     function payFees(uint256 dstSlug) external payable override {}
 
-    function getMinFees(uint256 dstSlug) external view override {}
+    function getMinFees(
+        uint256 dstSlug
+    ) external view override returns (uint256) {}
+
 
     /**
      * @notice updates signatureVerifier_

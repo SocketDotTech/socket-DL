@@ -90,6 +90,7 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         return false;
     }
 
+    // assumption: natives have 18 decimals
     function payFees(
         uint256 msgGasLimit,
         uint256 dstChainSlug

@@ -16,5 +16,5 @@ interface ITransmitManager {
 
     function payFees(uint256 dstSlug) external payable;
 
-    function getMinFees(uint256 dstSlug) external view;
+    function getMinFees(uint256 dstSlug) external view returns (uint256);
 }
