@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import "./interfaces/IOracle.sol";
 import "./interfaces/ITransmitManager.sol";
+import "./interfaces/IAggregatorV3Interface.sol";
 import "./utils/AccessControl.sol";
 
 contract GasPriceOracle is IOracle {
