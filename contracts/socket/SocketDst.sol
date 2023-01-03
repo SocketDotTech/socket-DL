@@ -67,8 +67,8 @@ abstract contract SocketDst is SocketBase {
         if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
         if (
             !_transmitManager__.checkTransmitter(
-                _chainSlug,
                 siblingChainSlug_,
+                packetId_,
                 root_,
                 signature_
             )

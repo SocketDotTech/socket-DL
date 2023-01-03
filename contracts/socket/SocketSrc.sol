@@ -86,8 +86,8 @@ abstract contract SocketSrc is SocketBase {
 
         if (
             !_transmitManager__.checkTransmitter(
-                _chainSlug,
                 0, // todo: get remoteChainSlug from config,
+                packetId,
                 root,
                 signature_
             )
