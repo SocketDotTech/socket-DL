@@ -8,7 +8,6 @@ import { chainIds } from "../constants/networks";
 
 import { deployCounter, deploySocket, deployVault } from "./contracts";
 import { executorAddress } from "../constants/config";
-import { ChainSocketAddresses } from "../../src";
 
 /**
  * Deploys network-independent socket contracts
@@ -18,6 +17,7 @@ export const main = async () => {
     // assign deployers
     const { getNamedAccounts } = hre;
     const { socketOwner, counterOwner } = await getNamedAccounts();
+    let addresses = {};
 
     const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
     const counterSigner: SignerWithAddress = await ethers.getSigner(
@@ -29,33 +29,38 @@ export const main = async () => {
       "SignatureVerifier",
       socketSigner
     );
+    addresses["SignatureVerifier"] = signatureVerifier.address;
+    await storeAddresses(addresses, chainIds[network]);
+
     const hasher: Contract = await deployContractWithoutArgs(
       "Hasher",
       socketSigner
     );
+    addresses["Hasher"] = hasher.address;
+    await storeAddresses(addresses, chainIds[network]);
+
     const vault: Contract = await deployVault(socketSigner);
     const decapacitor: Contract = await deployContractWithoutArgs(
       "SingleDecapacitor",
       socketSigner
     );
+    addresses["SingleDecapacitor"] = decapacitor.address;
+    await storeAddresses(addresses, chainIds[network]);
+
     const socket: Contract = await deploySocket(
       chainIds[network],
       hasher,
       vault,
       socketSigner
     );
+    addresses["Socket"] = socket.address;
+    await storeAddresses(addresses, chainIds[network]);
 
     // plug deployments
     const counter: Contract = await deployCounter(socket, counterSigner);
+    addresses["Counter"] = counter.address;
+    await storeAddresses(addresses, chainIds[network]);
 
-    let addresses: ChainSocketAddresses = {
-      Counter: counter.address,
-      Hasher: hasher.address,
-      SignatureVerifier: signatureVerifier.address,
-      Socket: socket.address,
-      Vault: vault.address,
-      SingleDecapacitor: decapacitor.address,
-    };
     console.log("Contracts deployed!");
 
     // configure
@@ -63,8 +68,6 @@ export const main = async () => {
       .connect(socketSigner)
       .grantExecutorRole(executorAddress[network]);
     console.log(`Assigned executor role to ${executorAddress[network]} !`);
-
-    await storeAddresses(addresses, chainIds[network]);
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
     throw error;

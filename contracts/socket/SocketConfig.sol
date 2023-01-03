@@ -3,140 +3,108 @@ pragma solidity 0.8.7;
 
 import "../interfaces/ISocket.sol";
 import "../utils/AccessControl.sol";
+import "../interfaces/ICapacitorFactory.sol";
+import "../interfaces/ISwitchboard.sol";
 
 abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     struct PlugConfig {
-        address remotePlug;
-        address capacitor;
-        address decapacitor;
-        address verifier;
-        bytes32 inboundIntegrationType;
-        bytes32 outboundIntegrationType;
+        address siblingPlug;
+        ICapacitor capacitor__;
+        IDecapacitor decapacitor__;
+        ISwitchboard inboundSwitchboard__;
+        ISwitchboard outboundSwitchboard__;
     }
 
-    // integrationType => remoteChainSlug => address
-    mapping(bytes32 => mapping(uint256 => address)) public verifiers;
-    mapping(bytes32 => mapping(uint256 => address)) public capacitors;
-    mapping(bytes32 => mapping(uint256 => address)) public decapacitors;
-    mapping(bytes32 => mapping(uint256 => bool)) public configExists;
+    ICapacitorFactory public _capacitorFactory__;
 
-    // plug => remoteChainSlug => config(verifiers, capacitors, decapacitors, remotePlug)
-    mapping(address => mapping(uint256 => PlugConfig)) public plugConfigs;
+    // switchboard => siblingChainSlug => ICapacitor
+    mapping(address => mapping(uint256 => ICapacitor)) public _capacitors__;
+    // switchboard => siblingChainSlug => IDecapacitor
+    mapping(address => mapping(uint256 => IDecapacitor)) public _decapacitors__;
 
-    event ConfigAdded(
-        address capacitor_,
-        address decapacitor_,
-        address verifier_,
-        uint256 remoteChainSlug_,
-        bytes32 integrationType_
+    // plug => remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
+    mapping(address => mapping(uint256 => PlugConfig)) public _plugConfigs;
+
+    event SwitchboardAdded(
+        address switchboard,
+        uint256 siblingChainSlug,
+        address capacitor,
+        address decapacitor
     );
 
-    error ConfigExists();
-    error InvalidIntegrationType();
+    error SwitchboardExists();
+    error InvalidConnection();
 
-    function addConfig(
-        uint256 remoteChainSlug_,
-        address capacitor_,
-        address decapacitor_,
-        address verifier_,
-        string calldata integrationType_
-    ) external returns (bytes32 integrationType) {
-        integrationType = keccak256(abi.encode(integrationType_));
-        if (configExists[integrationType][remoteChainSlug_])
-            revert ConfigExists();
-
-        verifiers[integrationType][remoteChainSlug_] = verifier_;
-        capacitors[integrationType][remoteChainSlug_] = capacitor_;
-        decapacitors[integrationType][remoteChainSlug_] = decapacitor_;
-        configExists[integrationType][remoteChainSlug_] = true;
-
-        emit ConfigAdded(
-            capacitor_,
-            decapacitor_,
-            verifier_,
-            remoteChainSlug_,
-            integrationType
-        );
+    constructor(address capacitorFactory_) {
+        _capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
     }
 
-    /// @inheritdoc ISocket
-    function setPlugConfig(
-        uint256 remoteChainSlug_,
-        address remotePlug_,
-        string memory inboundIntegrationType_,
-        string memory outboundIntegrationType_
-    ) external override {
-        bytes32 inboundIntegrationType = keccak256(
-            abi.encode(inboundIntegrationType_)
-        );
-        bytes32 outboundIntegrationType = keccak256(
-            abi.encode(outboundIntegrationType_)
-        );
+    // todo: need event, check for other such functions.
+    function setCapacitorFactory(address capacitorFactory_) external onlyOwner {
+        _capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
+    }
+
+    function registerSwitchBoard(
+        address switchBoardAddress_,
+        uint256 siblingChainSlug_,
+        uint256 capacitorType_
+    ) external {
+        // only capacitor checked, decapacitor assumed will exist if capacitor does
         if (
-            !configExists[inboundIntegrationType][remoteChainSlug_] ||
-            !configExists[outboundIntegrationType][remoteChainSlug_]
-        ) revert InvalidIntegrationType();
+            address(_capacitors__[switchBoardAddress_][siblingChainSlug_]) !=
+            address(0)
+        ) revert SwitchboardExists();
 
-        PlugConfig storage plugConfig = plugConfigs[msg.sender][
-            remoteChainSlug_
-        ];
+        (
+            ICapacitor capacitor__,
+            IDecapacitor decapacitor__
+        ) = _capacitorFactory__.deploy(capacitorType_, siblingChainSlug_);
+        _capacitors__[switchBoardAddress_][siblingChainSlug_] = capacitor__;
+        _decapacitors__[switchBoardAddress_][siblingChainSlug_] = decapacitor__;
 
-        plugConfig.remotePlug = remotePlug_;
-        plugConfig.capacitor = capacitors[outboundIntegrationType][
-            remoteChainSlug_
-        ];
-        plugConfig.decapacitor = decapacitors[inboundIntegrationType][
-            remoteChainSlug_
-        ];
-        plugConfig.verifier = verifiers[inboundIntegrationType][
-            remoteChainSlug_
-        ];
-        plugConfig.inboundIntegrationType = inboundIntegrationType;
-        plugConfig.outboundIntegrationType = outboundIntegrationType;
-
-        emit PlugConfigSet(
-            remotePlug_,
-            remoteChainSlug_,
-            inboundIntegrationType,
-            outboundIntegrationType
+        emit SwitchboardAdded(
+            switchBoardAddress_,
+            siblingChainSlug_,
+            address(capacitor__),
+            address(decapacitor__)
         );
     }
 
-    function getConfigs(
-        uint256 remoteChainSlug_,
-        string memory integrationType_
-    ) external view returns (address, address, address) {
-        bytes32 integrationType = keccak256(abi.encode(integrationType_));
-        return (
-            capacitors[integrationType][remoteChainSlug_],
-            decapacitors[integrationType][remoteChainSlug_],
-            verifiers[integrationType][remoteChainSlug_]
-        );
-    }
+    function connect(
+        uint256 siblingChainSlug_,
+        address siblingPlug_,
+        address inboundSwitchboard_,
+        address outboundSwitchboard_
+    ) external override {
+        if (
+            address(_capacitors__[inboundSwitchboard_][siblingChainSlug_]) ==
+            address(0) ||
+            address(_capacitors__[outboundSwitchboard_][siblingChainSlug_]) ==
+            address(0)
+        ) revert InvalidConnection();
 
-    function getPlugConfig(
-        uint256 remoteChainSlug_,
-        address plug_
-    )
-        external
-        view
-        returns (
-            address capacitor,
-            address decapacitor,
-            address verifier,
-            address remotePlug,
-            bytes32 outboundIntegrationType,
-            bytes32 inboundIntegrationType
-        )
-    {
-        PlugConfig memory plugConfig = plugConfigs[plug_][remoteChainSlug_];
-        return (
-            plugConfig.capacitor,
-            plugConfig.decapacitor,
-            plugConfig.verifier,
-            plugConfig.remotePlug,
-            plugConfig.outboundIntegrationType,
-            plugConfig.inboundIntegrationType
+        PlugConfig storage _plugConfig = _plugConfigs[msg.sender][
+            siblingChainSlug_
+        ];
+
+        _plugConfig.siblingPlug = siblingPlug_;
+        _plugConfig.capacitor__ = _capacitors__[outboundSwitchboard_][
+            siblingChainSlug_
+        ];
+        _plugConfig.decapacitor__ = _decapacitors__[inboundSwitchboard_][
+            siblingChainSlug_
+        ];
+        _plugConfig.inboundSwitchboard__ = ISwitchboard(inboundSwitchboard_);
+        _plugConfig.outboundSwitchboard__ = ISwitchboard(outboundSwitchboard_);
+
+        emit PlugConnected(
+            msg.sender,
+            siblingChainSlug_,
+            _plugConfig.siblingPlug,
+            address(_plugConfig.inboundSwitchboard__),
+            address(_plugConfig.outboundSwitchboard__),
+            address(_plugConfig.capacitor__),
+            address(_plugConfig.decapacitor__)
         );
     }
 }

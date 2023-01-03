@@ -2,7 +2,6 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/IHasher.sol";
-import "../interfaces/ISwitchboard.sol";
 import "../utils/ReentrancyGuard.sol";
 import "./SocketConfig.sol";
 
@@ -23,7 +22,12 @@ abstract contract SocketBase is SocketConfig, ReentrancyGuard {
 
     error InvalidAttester();
 
-    constructor(uint32 chainSlug_, address hasher_, address transmitManager_) {
+    constructor(
+        uint32 chainSlug_,
+        address hasher_,
+        address transmitManager_,
+        address capacitorFactory_
+    ) SocketConfig(capacitorFactory_) {
         _chainSlug = chainSlug_;
         _hasher__ = IHasher(hasher_);
         _transmitManager__ = ITransmitManager(transmitManager_);
@@ -40,6 +44,6 @@ abstract contract SocketBase is SocketConfig, ReentrancyGuard {
      */
     function setTransmitManager(address transmitManager_) external onlyOwner {
         _transmitManager__ = ITransmitManager(transmitManager_);
-        emit TransmitManager(transmitManager_);
+        emit TransmitManagerSet(transmitManager_);
     }
 }
