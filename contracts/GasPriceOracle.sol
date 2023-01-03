@@ -4,7 +4,6 @@ pragma solidity 0.8.7;
 import "./interfaces/IOracle.sol";
 import "./interfaces/ITransmitManager.sol";
 import "./interfaces/IAggregatorV3Interface.sol";
-import "./utils/AccessControl.sol";
 
 contract GasPriceOracle is IOracle {
     // Native token <> USD price feed oracle address
@@ -50,7 +49,7 @@ contract GasPriceOracle is IOracle {
         uint256 dstGasPrice_,
         uint256 dstGasUSDPrice_
     ) external {
-        if (!transmitManager.isTransmitter(msg.sender))
+        if (!transmitManager.isTransmitter(msg.sender, dstChainSlug_))
             revert TransmitterNotFound();
         if (dstGasUSDPrice_ >= PRICE_PRECISION) revert InvalidPrecision();
 
