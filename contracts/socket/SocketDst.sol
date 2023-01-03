@@ -22,7 +22,6 @@ abstract contract SocketDst is SocketBase {
     error InvalidRetry();
     error VerificationFailed();
     error MessageAlreadyExecuted();
-    error ExecutorNotFound();
     error AlreadyAttested();
 
     // keccak256("EXECUTOR")
@@ -94,8 +93,7 @@ abstract contract SocketDst is SocketBase {
         address localPlug,
         bytes calldata payload,
         ISocket.VerificationParams calldata verifyParams_
-    ) external override nonReentrant {
-        if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
+    ) external override nonReentrant onlyRole(EXECUTOR_ROLE) {
         if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
 
         // todo: to decide if this should be just a bool (was added for fees here)

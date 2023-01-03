@@ -42,10 +42,11 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         timeoutInSeconds = timeoutInSeconds_;
     }
 
-    function attest(uint256 packetId, uint256 srcChainSlug) external {
+    function attest(
+        uint256 packetId,
+        uint256 srcChainSlug
+    ) external onlyRole(_watcherRole(srcChainSlug)) {
         if (isAttested[msg.sender][packetId]) revert AlreadyAttested();
-        if (!_hasRole(_watcherRole(srcChainSlug), msg.sender))
-            revert WatcherNotFound();
 
         isAttested[msg.sender][packetId] = true;
         attestations[packetId]++;
