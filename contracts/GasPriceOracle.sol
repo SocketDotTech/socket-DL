@@ -11,7 +11,7 @@ interface ITransmitManager {
     ) external view returns (bool);
 }
 
-contract GasPriceOracle is IOracle {
+contract GasPriceOracle is IOracle, Ownable {
     ITransmitManager public transmitManager;
 
     // plugs/switchboards/transmitter can use it to ensure prices are updated
@@ -20,11 +20,14 @@ contract GasPriceOracle is IOracle {
     mapping(uint256 => uint256) public override relativeGasPrice;
 
     event GasPriceUpdated(uint256 dstChainSlug_, uint256 relativeGasPrice_);
+    event TransmitManagerUpdated(address transmitManager);
 
     error TransmitterNotFound();
-    error InvalidPrecision();
 
-    constructor(ITransmitManager transmitManager_) {
+    constructor(
+        ITransmitManager transmitManager_,
+        address owner_
+    ) Ownable(owner_) {
         transmitManager = transmitManager_;
     }
 
@@ -45,5 +48,12 @@ contract GasPriceOracle is IOracle {
         updatedAt[dstChainSlug_] = block.timestamp;
 
         emit GasPriceUpdated(dstChainSlug_, relativeGasPrice_);
+    }
+
+    function setTransmitManager(
+        ITransmitManager transmitManager_
+    ) external onlyOwner {
+        transmitManager = transmitManager_;
+        emit TransmitManagerUpdated(address(transmitManager_));
     }
 }
