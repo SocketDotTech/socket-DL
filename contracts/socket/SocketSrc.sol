@@ -8,6 +8,8 @@ abstract contract SocketSrc is SocketBase {
     // incrementing nonce, should be handled in next socket version.
     uint256 public _messageCount;
 
+    error InsufficientFees();
+
     /**
      * @notice emits the verification and seal confirmation of a packet
      * @param capacitorAddress address of capacitor at local
@@ -41,10 +43,11 @@ abstract contract SocketSrc is SocketBase {
         // msgId(256) = localChainSlug(32) | nonce(224)
         uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
 
-        // TODO: replace it with switchboard
-        plugConfig.outboundSwitchboard__.payFees{value: msg.value}(
+        _deductFees(
             msgGasLimit_,
-            remoteChainSlug_
+            remoteChainSlug_,
+            msg.value,
+            plugConfig.outboundSwitchboard__
         );
 
         bytes32 packedMessage = _hasher__.packMessage(
@@ -70,6 +73,24 @@ abstract contract SocketSrc is SocketBase {
         );
     }
 
+    function _deductFees(
+        uint256 msgGasLimit_,
+        uint256 remoteChainSlug_,
+        uint256 value,
+        ISwitchboard switchboard__
+    ) internal {
+        uint256 transmitFee = _transmitManager__.getMinFees(remoteChainSlug_);
+
+        if (value < transmitFee) revert InsufficientFees();
+
+        _transmitManager__.payFees{value: transmitFee}(remoteChainSlug_);
+
+        switchboard__.payFees{value: value - transmitFee}(
+            msgGasLimit_,
+            remoteChainSlug_
+        );
+    }
+
     function seal(
         address capacitorAddress_,
         bytes calldata signature_
@@ -86,8 +107,8 @@ abstract contract SocketSrc is SocketBase {
 
         if (
             !_transmitManager__.checkTransmitter(
-                _chainSlug,
                 0, // todo: get remoteChainSlug from config,
+                packetId,
                 root,
                 signature_
             )

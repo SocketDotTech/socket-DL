@@ -2,11 +2,8 @@
 pragma solidity 0.8.7;
 
 import "./interfaces/IOracle.sol";
+import "./interfaces/ITransmitManager.sol";
 import "./utils/AccessControl.sol";
-
-interface ITransmitManager {
-    function isTransmitter(address user) external view returns (bool);
-}
 
 contract GasPriceOracle is IOracle, Ownable {
     ITransmitManager public transmitManager;
@@ -38,7 +35,7 @@ contract GasPriceOracle is IOracle, Ownable {
         uint256 dstChainSlug_,
         uint256 relativeGasPrice_
     ) external {
-        if (!transmitManager.isTransmitter(msg.sender))
+        if (!transmitManager.isTransmitter(msg.sender, dstChainSlug_))
             revert TransmitterNotFound();
 
         relativeGasPrice[dstChainSlug_] = relativeGasPrice_;

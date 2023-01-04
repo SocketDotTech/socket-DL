@@ -58,13 +58,14 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
         return true;
     }
 
+    // assumption: natives have 18 decimals
     function payFees(
         uint256 msgGasLimit,
         uint256 dstChainSlug
     ) external payable override {
         uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
 
-        // assuming verification fees as 0
+        // assuming 0 verification fees
         uint256 expectedFees = _getExecutionFees(
             msgGasLimit,
             dstChainSlug,

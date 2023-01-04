@@ -2,18 +2,9 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/IHasher.sol";
+import "../interfaces/ITransmitManager.sol";
 import "../utils/ReentrancyGuard.sol";
 import "./SocketConfig.sol";
-
-// todo: remove
-interface ITransmitManager {
-    function checkTransmitter(
-        uint256 chainSlug,
-        uint256 siblingChainSlug,
-        bytes32 root,
-        bytes calldata signature
-    ) external view returns (bool);
-}
 
 abstract contract SocketBase is SocketConfig, ReentrancyGuard {
     IHasher public _hasher__;
