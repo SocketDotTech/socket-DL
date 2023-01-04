@@ -1,21 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/ISwitchboard.sol";
 import "../interfaces/ISocket.sol";
-import "../interfaces/IOracle.sol";
+import "./SwitchboardBase.sol";
 
-import "../utils/AccessControl.sol";
-
-contract FastSwitchboard is ISwitchboard, AccessControl {
+contract FastSwitchboard is SwitchboardBase {
     ISocket public socket;
-    IOracle public oracle;
-
-    mapping(uint256 => uint256) public executionOverhead;
-
-    uint256 public immutable chainSlug;
     uint256 public timeoutInSeconds;
-    bool public tripFuse;
 
     // dst chain slug => total watchers registered
     mapping(uint256 => uint256) public totalWatchers;
@@ -30,16 +21,9 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     mapping(uint256 => uint256) public attestations;
 
     event SocketSet(address newSocket_);
-    event SwitchboardTripped(bool tripFuse_);
     event PacketAttested(uint256 packetId, address attester);
     event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
-    event ExecutionOverheadSet(
-        uint256 dstChainSlug_,
-        uint256 executionOverhead_
-    );
 
-    error TransferFailed();
-    error FeesNotEnough();
     error WatcherFound();
     error WatcherNotFound();
     error AlreadyAttested();
@@ -50,8 +34,7 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         address oracle_,
         uint32 chainSlug_,
         uint256 timeoutInSeconds_
-    ) AccessControl(owner_) {
-        chainSlug = chainSlug_;
+    ) AccessControl(owner_) SwitchboardBase(chainSlug_) {
         oracle = IOracle(oracle_);
 
         socket = ISocket(socket_);
@@ -81,7 +64,7 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         uint256 srcChainSlug,
         uint256 proposeTime
     ) external view override returns (bool) {
-        if (tripFuse) return false;
+        if (tripGlobalFuse) return false;
 
         // to handle the situation if a watcher is removed after it attested the packet
         if (attestations[packetId] >= totalWatchers[srcChainSlug]) return true;
@@ -90,32 +73,11 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         return false;
     }
 
-    // assumption: natives have 18 decimals
-    function payFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
-    ) external payable override {
-        uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
-
-        uint256 minExecutionFees = _getExecutionFees(
-            msgGasLimit,
-            dstChainSlug,
-            dstRelativeGasPrice
-        );
-        uint256 minVerificationFees = _getVerificationFees(
-            dstChainSlug,
-            dstRelativeGasPrice
-        );
-
-        uint256 expectedFees = minExecutionFees + minVerificationFees;
-        if (msg.value <= expectedFees) revert FeesNotEnough();
-    }
-
     function _getExecutionFees(
         uint256 msgGasLimit,
         uint256 dstChainSlug,
         uint256 dstRelativeGasPrice
-    ) internal view returns (uint256) {
+    ) internal view override returns (uint256) {
         return
             (executionOverhead[dstChainSlug] + msgGasLimit) *
             dstRelativeGasPrice;
@@ -124,7 +86,7 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     function _getVerificationFees(
         uint256 dstChainSlug,
         uint256 dstRelativeGasPrice
-    ) internal view returns (uint256) {
+    ) internal view override returns (uint256) {
         // todo: are the watchers going to be same on all chains for particular chain slug?
         return
             totalWatchers[dstChainSlug] *
@@ -146,18 +108,6 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     }
 
     /**
-     * @notice updates execution overhead
-     * @param executionOverhead_ new execution overhead cost
-     */
-    function setExecutionOverhead(
-        uint256 dstChainSlug_,
-        uint256 executionOverhead_
-    ) external onlyOwner {
-        executionOverhead[dstChainSlug_] = executionOverhead_;
-        emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
-    }
-
-    /**
      * @notice updates socket_
      * @param socket_ address of Notary
      */
@@ -168,22 +118,11 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
 
     /**
      * @notice pause/unpause execution
-     * @param tripFuse_ bool indicating verification is active or not
+     * @param tripGlobalFuse_ bool indicating verification is active or not
      */
-    function trip(bool tripFuse_) external onlyOwner {
-        tripFuse = tripFuse_;
-        emit SwitchboardTripped(tripFuse_);
-    }
-
-    // TODO: to support fee distribution
-    /**
-     * @notice transfers the fees collected to `account_`
-     * @param account_ address to transfer ETH
-     */
-    function withdrawFees(address account_) external onlyOwner {
-        require(account_ != address(0));
-        (bool success, ) = account_.call{value: address(this).balance}("");
-        if (!success) revert TransferFailed();
+    function trip(bool tripGlobalFuse_) external onlyOwner {
+        tripGlobalFuse = tripGlobalFuse_;
+        emit SwitchboardTripped(tripGlobalFuse_);
     }
 
     /**
