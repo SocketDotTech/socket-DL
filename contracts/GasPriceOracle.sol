@@ -5,7 +5,10 @@ import "./interfaces/IOracle.sol";
 import "./utils/AccessControl.sol";
 
 interface ITransmitManager {
-    function isTransmitter(address user) external view returns (bool);
+    function isTransmitter(
+        address transmitter_,
+        uint256 dstChainSlug_
+    ) external view returns (bool);
 }
 
 contract GasPriceOracle is IOracle {
