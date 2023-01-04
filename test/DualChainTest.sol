@@ -110,14 +110,14 @@ contract DualChainTest is Setup {
         srcCounter__.setSocketConfig(
             _b.chainSlug,
             address(dstCounter__),
-            integrationType
+            address(0) // integrationType // TODO: change to switchboard
         );
 
         vm.selectFork(bFork);
         dstCounter__.setSocketConfig(
             _a.chainSlug,
             address(srcCounter__),
-            integrationType
+            address(0) // integrationType // TODO: change to switchboard
         );
 
         vm.stopPrank();

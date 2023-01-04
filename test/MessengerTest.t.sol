@@ -162,14 +162,14 @@ contract PingPongTest is Setup {
         srcMessenger__.setSocketConfig(
             _b.chainSlug,
             address(dstMessenger__),
-            integrationType
+            address(0) // integrationType // TODO: change to switchboard
         );
         payable(srcMessenger__).transfer(socketFee * ITERATIONS * 2);
 
         dstMessenger__.setSocketConfig(
             _a.chainSlug,
             address(srcMessenger__),
-            integrationType
+            address(0) // integrationType // TODO: change to switchboard
         );
         payable(dstMessenger__).transfer(socketFee * ITERATIONS * 2);
 

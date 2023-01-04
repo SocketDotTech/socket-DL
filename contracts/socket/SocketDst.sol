@@ -22,7 +22,6 @@ abstract contract SocketDst is SocketBase {
     error InvalidRetry();
     error VerificationFailed();
     error MessageAlreadyExecuted();
-    error ExecutorNotFound();
     error AlreadyAttested();
 
     // keccak256("EXECUTOR")
@@ -94,20 +93,19 @@ abstract contract SocketDst is SocketBase {
         address localPlug,
         bytes calldata payload,
         ISocket.VerificationParams calldata verifyParams_
-    ) external override nonReentrant {
-        if (!_hasRole(EXECUTOR_ROLE, msg.sender)) revert ExecutorNotFound();
+    ) external override nonReentrant onlyRole(EXECUTOR_ROLE) {
         if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
 
         // todo: to decide if this should be just a bool (was added for fees here)
         executor[msgId] = msg.sender;
 
-        PlugConfig memory plugConfig = plugConfigs[localPlug][
+        PlugConfig memory plugConfig = _plugConfigs[localPlug][
             verifyParams_.remoteChainSlug
         ];
 
         bytes32 packedMessage = _hasher__.packMessage(
             verifyParams_.remoteChainSlug,
-            plugConfig.remotePlug,
+            plugConfig.siblingPlug,
             _chainSlug,
             localPlug,
             msgId,
@@ -131,7 +129,7 @@ abstract contract SocketDst is SocketBase {
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
         if (
-            !ISwitchboard(plugConfig.verifier).allowPacket(
+            !ISwitchboard(plugConfig.inboundSwitchboard__).allowPacket(
                 remoteRoots[verifyParams_.packetId],
                 verifyParams_.packetId,
                 verifyParams_.remoteChainSlug,
@@ -140,7 +138,7 @@ abstract contract SocketDst is SocketBase {
         ) revert VerificationFailed();
 
         if (
-            !IDecapacitor(plugConfig.decapacitor).verifyMessageInclusion(
+            !plugConfig.decapacitor__.verifyMessageInclusion(
                 remoteRoots[verifyParams_.packetId],
                 packedMessage,
                 verifyParams_.decapacitorProof

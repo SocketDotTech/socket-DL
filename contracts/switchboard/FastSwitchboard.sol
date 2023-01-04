@@ -2,20 +2,21 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ISwitchboard.sol";
-import "../interfaces/ISocket.sol";
 import "../interfaces/IOracle.sol";
 
 import "../utils/AccessControl.sol";
 
 contract FastSwitchboard is ISwitchboard, AccessControl {
-    ISocket public socket;
     IOracle public oracle;
 
     mapping(uint256 => uint256) public executionOverhead;
 
     uint256 public immutable chainSlug;
     uint256 public timeoutInSeconds;
-    bool public tripFuse;
+
+    bool public tripGlobalFuse;
+    // packetId => isPaused
+    mapping(uint256 => bool) public tripSingleFuse;
 
     // dst chain slug => total watchers registered
     mapping(uint256 => uint256) public totalWatchers;
@@ -29,8 +30,8 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     // packetId => total attestations
     mapping(uint256 => uint256) public attestations;
 
-    event SocketSet(address newSocket_);
-    event SwitchboardTripped(bool tripFuse_);
+    event SwitchboardTripped(bool tripGlobalFuse_);
+    event PacketTripped(uint256 packetId_, bool tripSingleFuse_);
     event PacketAttested(uint256 packetId, address attester);
     event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
     event ExecutionOverheadSet(
@@ -46,7 +47,6 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
 
     constructor(
         address owner_,
-        address socket_,
         address oracle_,
         uint32 chainSlug_,
         uint256 timeoutInSeconds_
@@ -54,14 +54,14 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         chainSlug = chainSlug_;
         oracle = IOracle(oracle_);
 
-        socket = ISocket(socket_);
         timeoutInSeconds = timeoutInSeconds_;
     }
 
-    function attest(uint256 packetId, uint256 srcChainSlug) external {
+    function attest(
+        uint256 packetId,
+        uint256 srcChainSlug
+    ) external onlyRole(_watcherRole(srcChainSlug)) {
         if (isAttested[msg.sender][packetId]) revert AlreadyAttested();
-        if (!_hasRole(_watcherRole(srcChainSlug), msg.sender))
-            revert WatcherNotFound();
 
         isAttested[msg.sender][packetId] = true;
         attestations[packetId]++;
@@ -81,12 +81,12 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         uint256 srcChainSlug,
         uint256 proposeTime
     ) external view override returns (bool) {
-        if (tripFuse) return false;
+        if (tripGlobalFuse || tripSingleFuse[packetId]) return false;
 
         // to handle the situation if a watcher is removed after it attested the packet
         if (attestations[packetId] >= totalWatchers[srcChainSlug]) return true;
-
         if (block.timestamp - proposeTime >= timeoutInSeconds) return true;
+
         return false;
     }
 
@@ -108,7 +108,7 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         );
 
         uint256 expectedFees = minExecutionFees + minVerificationFees;
-        if (msg.value <= expectedFees) revert FeesNotEnough();
+        if (msg.value < expectedFees) revert FeesNotEnough();
     }
 
     function _getExecutionFees(
@@ -145,10 +145,6 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
     }
 
-    /**
-     * @notice updates execution overhead
-     * @param executionOverhead_ new execution overhead cost
-     */
     function setExecutionOverhead(
         uint256 dstChainSlug_,
         uint256 executionOverhead_
@@ -158,21 +154,28 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     }
 
     /**
-     * @notice updates socket_
-     * @param socket_ address of Notary
+     * @notice pause/unpause execution
+     * @param tripSingleFuse_ bool indicating verification is active or not
      */
-    function setSocket(address socket_) external onlyOwner {
-        socket = ISocket(socket_);
-        emit SocketSet(socket_);
+    function tripSingle(
+        uint256 packetId_,
+        uint256 srcChainSlug_,
+        bool tripSingleFuse_
+    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+        tripSingleFuse[packetId_] = tripSingleFuse_;
+        emit PacketTripped(packetId_, tripSingleFuse_);
     }
 
     /**
      * @notice pause/unpause execution
-     * @param tripFuse_ bool indicating verification is active or not
+     * @param tripGlobalFuse_ bool indicating verification is active or not
      */
-    function trip(bool tripFuse_) external onlyOwner {
-        tripFuse = tripFuse_;
-        emit SwitchboardTripped(tripFuse_);
+    function tripGlobal(
+        uint256 srcChainSlug_,
+        bool tripGlobalFuse_
+    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+        tripGlobalFuse = tripGlobalFuse_;
+        emit SwitchboardTripped(tripGlobalFuse_);
     }
 
     // TODO: to support fee distribution

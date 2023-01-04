@@ -34,7 +34,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable override {
-        PlugConfig memory plugConfig = plugConfigs[msg.sender][
+        PlugConfig memory plugConfig = _plugConfigs[msg.sender][
             remoteChainSlug_
         ];
 
@@ -54,18 +54,18 @@ abstract contract SocketSrc is SocketBase {
             _chainSlug,
             msg.sender,
             remoteChainSlug_,
-            plugConfig.remotePlug,
+            plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
             payload_
         );
 
-        ICapacitor(plugConfig.capacitor).addPackedMessage(packedMessage);
+        plugConfig.capacitor__.addPackedMessage(packedMessage);
         emit MessageTransmitted(
             _chainSlug,
             msg.sender,
             remoteChainSlug_,
-            plugConfig.remotePlug,
+            plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
             msg.value,

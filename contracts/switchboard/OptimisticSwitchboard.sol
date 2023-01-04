@@ -71,7 +71,7 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
             dstChainSlug,
             dstRelativeGasPrice
         );
-        if (msg.value <= expectedFees) revert FeesNotEnough();
+        if (msg.value < expectedFees) revert FeesNotEnough();
     }
 
     function _getExecutionFees(
@@ -100,10 +100,10 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
      * @notice pause/unpause execution
      * @param tripGlobalFuse_ bool indicating verification is active or not
      */
-    function tripGlobal(uint256 srcChainSlug_, bool tripGlobalFuse_) external {
-        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
-            revert WatcherNotFound();
-
+    function tripGlobal(
+        uint256 srcChainSlug_,
+        bool tripGlobalFuse_
+    ) external onlyRole(_watcherRole(srcChainSlug_)) {
         tripGlobalFuse = tripGlobalFuse_;
         emit SwitchboardTripped(tripGlobalFuse_);
     }
@@ -116,10 +116,7 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
         uint256 packetId_,
         uint256 srcChainSlug_,
         bool tripSingleFuse_
-    ) external {
-        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
-            revert WatcherNotFound();
-
+    ) external onlyRole(_watcherRole(srcChainSlug_)) {
         tripSingleFuse[packetId_] = tripSingleFuse_;
         emit PacketTripped(packetId_, tripSingleFuse_);
     }

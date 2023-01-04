@@ -4,7 +4,6 @@ import { chainIds } from "../constants";
 import { config } from "./config";
 import {
   getInstance,
-  getChainId,
   getSigners,
   setupConfig
 } from "./utils";
@@ -36,6 +35,7 @@ export const main = async () => {
           "Counter",
           counters.localCounter
         );
+
         const tx = await counter
           .connect(counterSigner)
           .setSocketConfig(
