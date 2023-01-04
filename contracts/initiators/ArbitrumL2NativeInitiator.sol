@@ -2,13 +2,12 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/native-bridge/IArbSys.sol";
-import "../interfaces/native-bridge/INativeInitiator.sol";
 import "../interfaces/native-bridge/INativeSwitchboard.sol";
 import "../interfaces/ISocket.sol";
 
 import "../utils/Ownable.sol";
 
-contract ArbitrumL2NativeInitiator is INativeInitiator, Ownable(msg.sender) {
+contract ArbitrumL2NativeInitiator is Ownable(msg.sender) {
     address public remoteNativeSwitchboard;
 
     IArbSys constant arbsys = IArbSys(address(100));
@@ -24,9 +23,7 @@ contract ArbitrumL2NativeInitiator is INativeInitiator, Ownable(msg.sender) {
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
     }
 
-    function initateNativeConfirmation(
-        uint256 packetId
-    ) external payable override {
+    function initateNativeConfirmation(uint256 packetId) external {
         bytes32 root = socket.remoteRoots(packetId);
         if (root == bytes32(0)) revert NoRootFound();
 

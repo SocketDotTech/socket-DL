@@ -2,17 +2,12 @@
 pragma solidity 0.8.7;
 
 import "fx-portal/tunnel/FxBaseRootTunnel.sol";
-import "../interfaces/native-bridge/INativeInitiator.sol";
 import "../interfaces/native-bridge/INativeSwitchboard.sol";
 import "../interfaces/ISocket.sol";
 
 import "../utils/Ownable.sol";
 
-contract PolygonL1NativeInitiator is
-    INativeInitiator,
-    Ownable(msg.sender),
-    FxBaseRootTunnel
-{
+contract PolygonL1NativeInitiator is Ownable(msg.sender), FxBaseRootTunnel {
     address public remoteNativeSwitchboard;
     ISocket public socket;
 
@@ -35,9 +30,7 @@ contract PolygonL1NativeInitiator is
     /**
      * @param packetId - packet id
      */
-    function initateNativeConfirmation(
-        uint256 packetId
-    ) external payable override {
+    function initateNativeConfirmation(uint256 packetId) external {
         bytes32 root = socket.remoteRoots(packetId);
         if (root == bytes32(0)) revert NoRootFound();
 

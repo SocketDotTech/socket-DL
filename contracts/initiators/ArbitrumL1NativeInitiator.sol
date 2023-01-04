@@ -2,12 +2,11 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/native-bridge/IInbox.sol";
-import "../interfaces/native-bridge/INativeInitiator.sol";
 import "../interfaces/native-bridge/INativeSwitchboard.sol";
 import "../interfaces/ISocket.sol";
 import "../utils/Ownable.sol";
 
-contract ArbitrumL1NativeInitiator is INativeInitiator, Ownable(msg.sender) {
+contract ArbitrumL1NativeInitiator is Ownable(msg.sender) {
     address public remoteNativeSwitchboard;
     address public remoteRefundAddress;
     address public callValueRefundAddress;
@@ -39,11 +38,11 @@ contract ArbitrumL1NativeInitiator is INativeInitiator, Ownable(msg.sender) {
     }
 
     function initateNativeConfirmation(
-        uint256 packetId
-    ) external payable override {
-        // todo: need to handle these fee settings dynamically
-        uint256[3] memory bridgeParams = [uint256(1), uint256(2), uint256(3)];
-
+        uint256 packetId,
+        uint256 maxSubmissionCost,
+        uint256 maxGas,
+        uint256 gasPriceBid
+    ) external payable {
         bytes32 root = socket.remoteRoots(packetId);
         if (root == bytes32(0)) revert NoRootFound();
 
@@ -60,11 +59,11 @@ contract ArbitrumL1NativeInitiator is INativeInitiator, Ownable(msg.sender) {
         inbox.createRetryableTicket{value: msg.value}(
             remoteNativeSwitchboard,
             0, // no value needed for receivePacket
-            bridgeParams[0], // maxSubmissionCost
+            maxSubmissionCost,
             remoteRefund,
             callValueRefund,
-            bridgeParams[1], // maxGas
-            bridgeParams[2], // gasPriceBid
+            maxGas,
+            gasPriceBid,
             data
         );
     }

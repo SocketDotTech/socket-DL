@@ -2,13 +2,12 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/native-bridge/ICrossDomainMessenger.sol";
-import "../interfaces/native-bridge/INativeInitiator.sol";
 import "../interfaces/native-bridge/INativeSwitchboard.sol";
 import "../interfaces/ISocket.sol";
 
 import "../utils/Ownable.sol";
 
-contract OptimismNativeInitiator is INativeInitiator, Ownable(msg.sender) {
+contract OptimismNativeInitiator is Ownable(msg.sender) {
     uint256 public receivePacketGasLimit;
     address public remoteNativeSwitchboard;
 
@@ -45,9 +44,7 @@ contract OptimismNativeInitiator is INativeInitiator, Ownable(msg.sender) {
         }
     }
 
-    function initateNativeConfirmation(
-        uint256 packetId
-    ) external payable override {
+    function initateNativeConfirmation(uint256 packetId) external {
         bytes32 root = socket.remoteRoots(packetId);
         if (root == bytes32(0)) revert NoRootFound();
 
