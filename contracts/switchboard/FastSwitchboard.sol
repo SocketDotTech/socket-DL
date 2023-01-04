@@ -95,7 +95,7 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         uint256 msgGasLimit,
         uint256 dstChainSlug
     ) external payable override {
-        uint256 dstRelativeGasPrice = oracle.getRelativeGasPrice(dstChainSlug);
+        uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
 
         uint256 minExecutionFees = _getExecutionFees(
             msgGasLimit,
