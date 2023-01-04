@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/ISocket.sol";
+import "../../interfaces/ISocket.sol";
 import "./SwitchboardBase.sol";
 
 contract FastSwitchboard is SwitchboardBase {
@@ -34,7 +34,7 @@ contract FastSwitchboard is SwitchboardBase {
         address oracle_,
         uint32 chainSlug_,
         uint256 timeoutInSeconds_
-    ) AccessControl(owner_) SwitchboardBase(chainSlug_) {
+    ) SwitchboardBase(chainSlug_, owner_) {
         oracle = IOracle(oracle_);
 
         socket = ISocket(socket_);

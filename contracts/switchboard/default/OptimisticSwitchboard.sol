@@ -17,7 +17,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
         address oracle_,
         uint32 chainSlug_,
         uint256 timeoutInSeconds_
-    ) AccessControl(owner_) SwitchboardBase(chainSlug_) {
+    ) SwitchboardBase(chainSlug_, owner_) {
         oracle = IOracle(oracle_);
 
         // TODO: restrict the timeout durations to a few select options

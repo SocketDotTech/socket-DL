@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/ISwitchboard.sol";
-
-import "../interfaces/IOracle.sol";
-
-import "../utils/AccessControl.sol";
+import "../../interfaces/ISwitchboard.sol";
+import "../../interfaces/IOracle.sol";
+import "../../utils/AccessControl.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     IOracle public oracle;
-    uint256 public immutable chainSlug;
-
     bool public tripGlobalFuse;
+    uint256 public immutable chainSlug;
     mapping(uint256 => uint256) public executionOverhead;
 
     event SwitchboardTripped(bool tripGlobalFuse_);
@@ -23,7 +20,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     error TransferFailed();
     error FeesNotEnough();
 
-    constructor(uint32 chainSlug_) {
+    constructor(uint32 chainSlug_, address owner_) AccessControl(owner_) {
         chainSlug = chainSlug_;
     }
 
