@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/native-bridge/ICrossDomainMessenger.sol";
-import "../interfaces/native-bridge/INativeSwitchboard.sol";
-import "../interfaces/ISocket.sol";
+import "../../interfaces/native-bridge/ICrossDomainMessenger.sol";
+import "../../interfaces/ISocket.sol";
+import "./NativeSwitchboardBase.sol";
 
-import "../utils/Ownable.sol";
-
-contract OptimismNativeInitiator is Ownable(msg.sender) {
+contract OptimismSwitchboard is NativeSwitchboardBase {
     uint256 public receivePacketGasLimit;
     address public remoteNativeSwitchboard;
+    // stores the roots received from native bridge
+    mapping(uint256 => bytes32) public roots;
 
     ICrossDomainMessenger public crossDomainMessenger;
     ISocket public socket;
@@ -17,14 +17,27 @@ contract OptimismNativeInitiator is Ownable(msg.sender) {
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
     event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit_);
     event UpdatedSocket(address socket);
+    event RootReceived(uint256 packetId_, bytes32 root_);
 
+    error InvalidSender();
     error NoRootFound();
 
+    modifier onlyRemoteSwitchboard() {
+        if (
+            msg.sender != address(crossDomainMessenger) &&
+            crossDomainMessenger.xDomainMessageSender() !=
+            remoteNativeSwitchboard
+        ) revert InvalidSender();
+        _;
+    }
+
     constructor(
+        uint32 chainSlug_,
         uint256 receivePacketGasLimit_,
         address remoteNativeSwitchboard_,
+        address owner_,
         ISocket socket_
-    ) {
+    ) NativeSwitchboardBase(chainSlug_, owner_) {
         receivePacketGasLimit = receivePacketGasLimit_;
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         socket = socket_;
@@ -59,6 +72,37 @@ contract OptimismNativeInitiator is Ownable(msg.sender) {
             data,
             uint32(receivePacketGasLimit)
         );
+    }
+
+    function receivePacket(
+        uint256 packetId_,
+        bytes32 root_
+    ) external override onlyRemoteSwitchboard {
+        roots[packetId_] = root_;
+        emit RootReceived(packetId_, root_);
+    }
+
+    /**
+     * @notice verifies if the packet satisfies needed checks before execution
+     * @param packetId packet id
+     */
+    function allowPacket(
+        bytes32 root,
+        uint256 packetId,
+        uint256,
+        uint256
+    ) external view override returns (bool) {
+        if (tripGlobalFuse) return false;
+        if (roots[packetId] != root) return false;
+
+        return true;
+    }
+
+    function _getExecutionFees(
+        uint256 msgGasLimit,
+        uint256 dstRelativeGasPrice
+    ) internal view override returns (uint256) {
+        return (executionOverhead + msgGasLimit) * dstRelativeGasPrice;
     }
 
     function updateRemoteNativeSwitchboard(
