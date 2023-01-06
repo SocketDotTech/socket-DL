@@ -14,18 +14,14 @@ abstract contract NativeSwitchboardBase is
     IOracle public oracle;
 
     bool public tripGlobalFuse;
-    uint256 public immutable chainSlug;
     uint256 public executionOverhead;
 
     event SwitchboardTripped(bool tripGlobalFuse_);
     event ExecutionOverheadSet(uint256 executionOverhead_);
+    event OracleSet(address oracle_);
 
     error TransferFailed();
     error FeesNotEnough();
-
-    constructor(uint32 chainSlug_, address owner_) AccessControl(owner_) {
-        chainSlug = chainSlug_;
-    }
 
     // assumption: natives have 18 decimals
     function payFees(
@@ -67,6 +63,15 @@ abstract contract NativeSwitchboardBase is
     ) external onlyOwner {
         executionOverhead = executionOverhead_;
         emit ExecutionOverheadSet(executionOverhead_);
+    }
+
+    /**
+     * @notice updates oracle address
+     * @param oracle_ new oracle
+     */
+    function setOracle(address oracle_) external onlyOwner {
+        oracle = IOracle(oracle_);
+        emit OracleSet(oracle_);
     }
 
     // TODO: to support fee distribution

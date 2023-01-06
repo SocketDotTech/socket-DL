@@ -32,12 +32,11 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
     }
 
     constructor(
-        uint32 chainSlug_,
         uint256 receivePacketGasLimit_,
         address remoteNativeSwitchboard_,
         address owner_,
         ISocket socket_
-    ) NativeSwitchboardBase(chainSlug_, owner_) {
+    ) AccessControl(owner_) {
         receivePacketGasLimit = receivePacketGasLimit_;
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         socket = socket_;
