@@ -34,7 +34,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable override {
-        PlugConfig memory plugConfig = plugConfigs[msg.sender][
+        PlugConfig memory plugConfig = _plugConfigs[msg.sender][
             remoteChainSlug_
         ];
 
@@ -47,25 +47,25 @@ abstract contract SocketSrc is SocketBase {
             msgGasLimit_,
             remoteChainSlug_,
             msg.value,
-            plugConfig.verifier
+            plugConfig.outboundSwitchboard__
         );
 
         bytes32 packedMessage = _hasher__.packMessage(
             _chainSlug,
             msg.sender,
             remoteChainSlug_,
-            plugConfig.remotePlug,
+            plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
             payload_
         );
 
-        ICapacitor(plugConfig.capacitor).addPackedMessage(packedMessage);
+        plugConfig.capacitor__.addPackedMessage(packedMessage);
         emit MessageTransmitted(
             _chainSlug,
             msg.sender,
             remoteChainSlug_,
-            plugConfig.remotePlug,
+            plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
             msg.value,
@@ -77,19 +77,15 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgGasLimit_,
         uint256 remoteChainSlug_,
         uint256 value,
-        address switchboard_
+        ISwitchboard switchboard__
     ) internal {
-        uint256 transmitFee = ITransmitManager(_transmitManager__).getMinFees(
-            remoteChainSlug_
-        );
+        uint256 transmitFee = _transmitManager__.getMinFees(remoteChainSlug_);
 
         if (value < transmitFee) revert InsufficientFees();
 
-        ITransmitManager(_transmitManager__).payFees{value: transmitFee}(
-            remoteChainSlug_
-        );
+        _transmitManager__.payFees{value: transmitFee}(remoteChainSlug_);
 
-        ISwitchboard(switchboard_).payFees{value: value - transmitFee}(
+        switchboard__.payFees{value: value - transmitFee}(
             msgGasLimit_,
             remoteChainSlug_
         );

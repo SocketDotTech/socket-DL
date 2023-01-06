@@ -100,13 +100,13 @@ contract Counter is IPlug {
     function setSocketConfig(
         uint256 remoteChainSlug,
         address remotePlug,
-        string calldata integrationType
+        address switchboard
     ) external onlyOwner {
-        ISocket(socket).setPlugConfig(
+        ISocket(socket).connect(
             remoteChainSlug,
             remotePlug,
-            integrationType,
-            integrationType
+            switchboard,
+            switchboard
         );
     }
 
