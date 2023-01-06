@@ -4,7 +4,6 @@ pragma solidity 0.8.7;
 import "../../interfaces/native-bridge/IInbox.sol";
 import "../../interfaces/native-bridge/IOutbox.sol";
 import "../../interfaces/native-bridge/IBridge.sol";
-import "../../interfaces/ISocket.sol";
 import "./NativeSwitchboardBase.sol";
 
 contract ArbitrumL1Switchboard is NativeSwitchboardBase {
@@ -13,7 +12,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     address public remoteNativeSwitchboard;
 
     IInbox public inbox;
-    ISocket public socket;
 
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
@@ -24,7 +22,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         address callValueRefundAddress_
     );
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
-    event UpdatedSocket(address socket);
     event RootReceived(uint256 packetId_, bytes32 root_);
 
     error InvalidSender();
@@ -140,10 +137,5 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     ) external onlyOwner {
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
-    }
-
-    function updateSocket(address socket_) external onlyOwner {
-        socket = ISocket(socket_);
-        emit UpdatedSocket(socket_);
     }
 }

@@ -5,6 +5,7 @@ import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IOracle.sol";
 import "../../interfaces/native-bridge/INativeSwitchboard.sol";
 import "../../utils/AccessControl.sol";
+import "../../interfaces/ISocket.sol";
 
 abstract contract NativeSwitchboardBase is
     ISwitchboard,
@@ -12,6 +13,7 @@ abstract contract NativeSwitchboardBase is
     AccessControl
 {
     IOracle public oracle;
+    ISocket public socket;
 
     bool public tripGlobalFuse;
     uint256 public executionOverhead;
@@ -19,6 +21,7 @@ abstract contract NativeSwitchboardBase is
     event SwitchboardTripped(bool tripGlobalFuse_);
     event ExecutionOverheadSet(uint256 executionOverhead_);
     event OracleSet(address oracle_);
+    event SocketSet(address socket);
 
     error TransferFailed();
     error FeesNotEnough();
@@ -72,6 +75,11 @@ abstract contract NativeSwitchboardBase is
     function setOracle(address oracle_) external onlyOwner {
         oracle = IOracle(oracle_);
         emit OracleSet(oracle_);
+    }
+
+    function setSocket(address socket_) external onlyOwner {
+        socket = ISocket(socket_);
+        emit SocketSet(socket_);
     }
 
     // TODO: to support fee distribution

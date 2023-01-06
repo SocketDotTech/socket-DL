@@ -2,7 +2,6 @@
 pragma solidity 0.8.7;
 
 import "../../interfaces/native-bridge/ICrossDomainMessenger.sol";
-import "../../interfaces/ISocket.sol";
 import "./NativeSwitchboardBase.sol";
 
 contract OptimismSwitchboard is NativeSwitchboardBase {
@@ -12,11 +11,9 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
     mapping(uint256 => bytes32) public roots;
 
     ICrossDomainMessenger public crossDomainMessenger;
-    ISocket public socket;
 
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
     event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit_);
-    event UpdatedSocket(address socket);
     event RootReceived(uint256 packetId_, bytes32 root_);
 
     error InvalidSender();
@@ -116,10 +113,5 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
     ) external onlyOwner {
         receivePacketGasLimit = receivePacketGasLimit_;
         emit UpdatedReceivePacketGasLimit(receivePacketGasLimit_);
-    }
-
-    function updateSocket(address socket_) external onlyOwner {
-        socket = ISocket(socket_);
-        emit UpdatedSocket(socket_);
     }
 }

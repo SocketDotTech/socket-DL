@@ -2,18 +2,13 @@
 pragma solidity 0.8.7;
 
 import "fx-portal/tunnel/FxBaseRootTunnel.sol";
-
-import "../../interfaces/ISocket.sol";
 import "./NativeSwitchboardBase.sol";
 
 contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
-    ISocket public socket;
-
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
 
     event FxRootTunnel(address fxRootTunnel, address fxRootTunnel_);
-    event UpdatedSocket(address socket);
     event RootReceived(uint256 packetId_, bytes32 root_);
 
     error NoRootFound();
@@ -21,8 +16,11 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     constructor(
         address checkpointManager_,
         address fxRoot_,
-        address owner_
-    ) AccessControl(owner_) FxBaseRootTunnel(checkpointManager_, fxRoot_) {}
+        address owner_,
+        ISocket socket_
+    ) AccessControl(owner_) FxBaseRootTunnel(checkpointManager_, fxRoot_) {
+        socket = socket_;
+    }
 
     /**
      * @param packetId - packet id
@@ -73,10 +71,5 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     function updateFxChildTunnel(address fxChildTunnel_) external onlyOwner {
         emit FxRootTunnel(fxChildTunnel, fxChildTunnel_);
         fxChildTunnel = fxChildTunnel_;
-    }
-
-    function updateSocket(address socket_) external onlyOwner {
-        socket = ISocket(socket_);
-        emit UpdatedSocket(socket_);
     }
 }

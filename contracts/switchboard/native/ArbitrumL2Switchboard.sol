@@ -3,21 +3,18 @@ pragma solidity 0.8.7;
 
 import "../../interfaces/native-bridge/IArbSys.sol";
 import "../../interfaces/native-bridge/INativeSwitchboard.sol";
-import "../../interfaces/ISocket.sol";
 
 import "../../libraries/AddressAliasHelper.sol";
 import "./NativeSwitchboardBase.sol";
 
 contract ArbitrumL2Switchboard is NativeSwitchboardBase {
     address public remoteNativeSwitchboard;
-    ISocket public socket;
     IArbSys constant arbsys = IArbSys(address(100));
 
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
 
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
-    event UpdatedSocket(address socket);
     event RootReceived(uint256 packetId_, bytes32 root_);
 
     error InvalidSender();
@@ -96,10 +93,5 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
     ) external onlyOwner {
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
-    }
-
-    function updateSocket(address socket_) external onlyOwner {
-        socket = ISocket(socket_);
-        emit UpdatedSocket(socket_);
     }
 }
