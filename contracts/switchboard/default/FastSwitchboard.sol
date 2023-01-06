@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../../interfaces/ISocket.sol";
 import "./SwitchboardBase.sol";
 
 contract FastSwitchboard is SwitchboardBase {
-    ISocket public socket;
-    uint256 public timeoutInSeconds;
+    uint256 public immutable timeoutInSeconds;
 
     // dst chain slug => total watchers registered
     mapping(uint256 => uint256) public totalWatchers;
@@ -30,14 +28,10 @@ contract FastSwitchboard is SwitchboardBase {
 
     constructor(
         address owner_,
-        address socket_,
         address oracle_,
-        uint32 chainSlug_,
         uint256 timeoutInSeconds_
-    ) SwitchboardBase(chainSlug_, owner_) {
+    ) AccessControl(owner_) {
         oracle = IOracle(oracle_);
-
-        socket = ISocket(socket_);
         timeoutInSeconds = timeoutInSeconds_;
     }
 
@@ -66,7 +60,7 @@ contract FastSwitchboard is SwitchboardBase {
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
 
-        // to handle the situation if a watcher is removed after it attested the packet
+        // to handle the situation: if a watcher is removed after it attested the packet
         if (attestations[packetId] >= totalWatchers[srcChainSlug]) return true;
 
         if (block.timestamp - proposeTime >= timeoutInSeconds) return true;
@@ -87,7 +81,7 @@ contract FastSwitchboard is SwitchboardBase {
         uint256 dstChainSlug,
         uint256 dstRelativeGasPrice
     ) internal view override returns (uint256) {
-        // todo: are the watchers going to be same on all chains for particular chain slug?
+        // todo: number of watchers are going to be same on all chains for particular chain slug?
         return
             totalWatchers[dstChainSlug] *
             attestGasLimit[dstChainSlug] *
@@ -105,15 +99,6 @@ contract FastSwitchboard is SwitchboardBase {
     ) external onlyOwner {
         attestGasLimit[dstChainSlug_] = attestGasLimit_;
         emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
-    }
-
-    /**
-     * @notice updates socket_
-     * @param socket_ address of Notary
-     */
-    function setSocket(address socket_) external onlyOwner {
-        socket = ISocket(socket_);
-        emit SocketSet(socket_);
     }
 
     /**

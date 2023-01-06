@@ -8,7 +8,6 @@ import "../../utils/AccessControl.sol";
 abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     IOracle public oracle;
     bool public tripGlobalFuse;
-    uint256 public immutable chainSlug;
     mapping(uint256 => uint256) public executionOverhead;
 
     event SwitchboardTripped(bool tripGlobalFuse_);
@@ -16,15 +15,11 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
         uint256 dstChainSlug_,
         uint256 executionOverhead_
     );
+    event OracleSet(address oracle_);
 
     error TransferFailed();
     error FeesNotEnough();
 
-    constructor(uint32 chainSlug_, address owner_) AccessControl(owner_) {
-        chainSlug = chainSlug_;
-    }
-
-    // assumption: natives have 18 decimals
     function payFees(
         uint256 msgGasLimit,
         uint256 dstChainSlug
@@ -67,6 +62,15 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     ) external onlyOwner {
         executionOverhead[dstChainSlug_] = executionOverhead_;
         emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
+    }
+
+    /**
+     * @notice updates oracle address
+     * @param oracle_ new oracle
+     */
+    function setOracle(address oracle_) external onlyOwner {
+        oracle = IOracle(oracle_);
+        emit OracleSet(oracle_);
     }
 
     // TODO: to support fee distribution

@@ -15,9 +15,8 @@ contract OptimisticSwitchboard is SwitchboardBase {
     constructor(
         address owner_,
         address oracle_,
-        uint32 chainSlug_,
         uint256 timeoutInSeconds_
-    ) SwitchboardBase(chainSlug_, owner_) {
+    ) AccessControl(owner_) {
         oracle = IOracle(oracle_);
 
         // TODO: restrict the timeout durations to a few select options
@@ -38,6 +37,34 @@ contract OptimisticSwitchboard is SwitchboardBase {
         if (tripGlobalFuse || tripSingleFuse[packetId]) return false;
         if (block.timestamp - proposeTime < timeoutInSeconds) return false;
         return true;
+    }
+
+    /**
+     * @notice pause/unpause execution
+     * @param tripGlobalFuse_ bool indicating verification is active or not
+     */
+    function tripGlobal(uint256 srcChainSlug_, bool tripGlobalFuse_) external {
+        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
+            revert WatcherNotFound();
+
+        tripGlobalFuse = tripGlobalFuse_;
+        emit SwitchboardTripped(tripGlobalFuse_);
+    }
+
+    /**
+     * @notice pause/unpause a packet
+     * @param tripSingleFuse_ bool indicating a packet is verified or not
+     */
+    function tripSingle(
+        uint256 packetId_,
+        uint256 srcChainSlug_,
+        bool tripSingleFuse_
+    ) external {
+        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
+            revert WatcherNotFound();
+
+        tripSingleFuse[packetId_] = tripSingleFuse_;
+        emit PacketTripped(packetId_, tripSingleFuse_);
     }
 
     function _getExecutionFees(
