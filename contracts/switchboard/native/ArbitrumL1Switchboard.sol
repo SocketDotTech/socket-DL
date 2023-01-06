@@ -10,6 +10,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     address public remoteRefundAddress;
     address public callValueRefundAddress;
     address public remoteNativeSwitchboard;
+    uint256 public dynamicFees;
 
     IInbox public inbox;
 
@@ -23,6 +24,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     );
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
     event RootReceived(uint256 packetId_, bytes32 root_);
+    event UpdatedDynamicFees(uint256 dynamicFees_);
 
     error InvalidSender();
     error NoRootFound();
@@ -114,6 +116,14 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         return (executionOverhead + msgGasLimit) * dstRelativeGasPrice;
     }
 
+    function _getVerificationFees(
+        uint256 dstChainSlug,
+        uint256 dstRelativeGasPrice
+    ) internal view override returns (uint256) {
+        // todo: check if dynamic fees can be divided into more constants
+        return initateNativeConfirmationGasLimit * tx.gasprice + dynamicFees;
+    }
+
     function updateRefundAddresses(
         address remoteRefundAddress_,
         address callValueRefundAddress_
@@ -125,6 +135,11 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
             remoteRefundAddress_,
             callValueRefundAddress_
         );
+    }
+
+    function updateDynamicFees(uint256 dynamicFees_) external onlyOwner {
+        dynamicFees = dynamicFees_;
+        emit UpdatedDynamicFees(dynamicFees_);
     }
 
     function updateInboxAddresses(address inbox_) external onlyOwner {

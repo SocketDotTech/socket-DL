@@ -9,6 +9,8 @@ import "./NativeSwitchboardBase.sol";
 
 contract ArbitrumL2Switchboard is NativeSwitchboardBase {
     address public remoteNativeSwitchboard;
+    uint256 public l2ReceiveGasLimit;
+
     IArbSys constant arbsys = IArbSys(address(100));
 
     // stores the roots received from native bridge
@@ -16,6 +18,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
 
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
     event RootReceived(uint256 packetId_, bytes32 root_);
+    event UpdatedL2ReceiveGasLimit(uint256 l2ReceiveGasLimit_);
 
     error InvalidSender();
     error NoRootFound();
@@ -83,9 +86,20 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
 
     function _getVerificationFees(
         uint256,
-        uint256
+        uint256 dstRelativeGasPrice
     ) internal view override returns (uint256) {
-        // return dstRelativeGasPrice;
+        return
+            initateNativeConfirmationGasLimit *
+            tx.gasprice +
+            l2ReceiveGasLimit *
+            dstRelativeGasPrice;
+    }
+
+    function updateL2ReceiveGasLimit(
+        uint256 l2ReceiveGasLimit_
+    ) external onlyOwner {
+        l2ReceiveGasLimit = l2ReceiveGasLimit_;
+        emit UpdatedL2ReceiveGasLimit(l2ReceiveGasLimit_);
     }
 
     function updateRemoteNativeSwitchboard(

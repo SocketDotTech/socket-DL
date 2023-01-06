@@ -7,10 +7,12 @@ import "./NativeSwitchboardBase.sol";
 contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
+    uint256 public l2ReceiveGasLimit;
 
     event FxChildUpdate(address oldFxChild, address newFxChild);
     event FxRootTunnel(address fxRootTunnel, address fxRootTunnel_);
     event RootReceived(uint256 packetId_, bytes32 root_);
+    event UpdatedL2ReceiveGasLimit(uint256 l2ReceiveGasLimit_);
 
     error NoRootFound();
 
@@ -67,6 +69,24 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         uint256 dstRelativeGasPrice
     ) internal view override returns (uint256) {
         return (executionOverhead + msgGasLimit) * dstRelativeGasPrice;
+    }
+
+    function _getVerificationFees(
+        uint256,
+        uint256 dstRelativeGasPrice
+    ) internal view override returns (uint256) {
+        return
+            initateNativeConfirmationGasLimit *
+            tx.gasprice +
+            l2ReceiveGasLimit *
+            dstRelativeGasPrice;
+    }
+
+    function updateL2ReceiveGasLimit(
+        uint256 l2ReceiveGasLimit_
+    ) external onlyOwner {
+        l2ReceiveGasLimit = l2ReceiveGasLimit_;
+        emit UpdatedL2ReceiveGasLimit(l2ReceiveGasLimit_);
     }
 
     function receivePacket(uint256, bytes32) external override {}

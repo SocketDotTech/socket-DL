@@ -17,9 +17,11 @@ abstract contract NativeSwitchboardBase is
 
     bool public tripGlobalFuse;
     uint256 public executionOverhead;
+    uint256 public initateNativeConfirmationGasLimit;
 
     event SwitchboardTripped(bool tripGlobalFuse_);
     event ExecutionOverheadSet(uint256 executionOverhead_);
+    event InitialConfirmationGasLimitSet(uint256 gasLimit_);
     event OracleSet(address oracle_);
     event SocketSet(address socket);
 
@@ -66,6 +68,17 @@ abstract contract NativeSwitchboardBase is
     ) external onlyOwner {
         executionOverhead = executionOverhead_;
         emit ExecutionOverheadSet(executionOverhead_);
+    }
+
+    /**
+     * @notice updates initateNativeConfirmationGasLimit
+     * @param gasLimit_ new gas limit for initiateNativeConfirmation
+     */
+    function setInitialConfirmationGasLimit(
+        uint256 gasLimit_
+    ) external onlyOwner {
+        initateNativeConfirmationGasLimit = gasLimit_;
+        emit InitialConfirmationGasLimitSet(gasLimit_);
     }
 
     /**

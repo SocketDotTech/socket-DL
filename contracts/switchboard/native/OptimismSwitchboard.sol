@@ -6,6 +6,8 @@ import "./NativeSwitchboardBase.sol";
 
 contract OptimismSwitchboard is NativeSwitchboardBase {
     uint256 public receivePacketGasLimit;
+    uint256 public l2ReceiveGasLimit;
+
     address public remoteNativeSwitchboard;
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
@@ -15,6 +17,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
     event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit_);
     event RootReceived(uint256 packetId_, bytes32 root_);
+    event UpdatedL2ReceiveGasLimit(uint256 l2ReceiveGasLimit_);
 
     error InvalidSender();
     error NoRootFound();
@@ -99,6 +102,25 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         uint256 dstRelativeGasPrice
     ) internal view override returns (uint256) {
         return (executionOverhead + msgGasLimit) * dstRelativeGasPrice;
+    }
+
+    function _getVerificationFees(
+        uint256,
+        uint256 dstRelativeGasPrice
+    ) internal view override returns (uint256) {
+        // l2ReceiveGasLimit will be 0 when switchboard is deployed on L1
+        return
+            initateNativeConfirmationGasLimit *
+            tx.gasprice +
+            l2ReceiveGasLimit *
+            dstRelativeGasPrice;
+    }
+
+    function updateL2ReceiveGasLimit(
+        uint256 l2ReceiveGasLimit_
+    ) external onlyOwner {
+        l2ReceiveGasLimit = l2ReceiveGasLimit_;
+        emit UpdatedL2ReceiveGasLimit(l2ReceiveGasLimit_);
     }
 
     function updateRemoteNativeSwitchboard(
