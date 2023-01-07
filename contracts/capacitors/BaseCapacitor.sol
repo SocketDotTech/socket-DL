@@ -3,8 +3,11 @@ pragma solidity 0.8.7;
 
 import "../interfaces/ICapacitor.sol";
 import "../utils/AccessControl.sol";
+import "../libraries/SafeTransferLib.sol";
 
 abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
+    using SafeTransferLib for IERC20;
+
     bytes32 public constant SOCKET_ROLE = keccak256("SOCKET_ROLE");
 
     /// an incrementing id for each new packet created
@@ -54,5 +57,18 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
 
     function getLatestPacketId() external view returns (uint256) {
         return _packets == 0 ? 0 : _packets - 1;
+    }
+
+    function rescueFunds(
+        address token,
+        address userAddress,
+        uint256 amount
+    ) external onlyOwner {
+        if (token == address(0)) {
+            payable(userAddress).transfer(amount);
+        } else {
+            // do we need safe transfer?
+            IERC20(token).transfer(userAddress, amount);
+        }
     }
 }

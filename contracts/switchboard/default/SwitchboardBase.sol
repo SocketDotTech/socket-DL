@@ -5,7 +5,11 @@ import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IOracle.sol";
 import "../../utils/AccessControl.sol";
 
+import "../../libraries/SafeTransferLib.sol";
+
 abstract contract SwitchboardBase is ISwitchboard, AccessControl {
+    using SafeTransferLib for IERC20;
+
     IOracle public oracle;
     bool public tripGlobalFuse;
     mapping(uint256 => uint256) public executionOverhead;
@@ -82,5 +86,18 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
         require(account_ != address(0));
         (bool success, ) = account_.call{value: address(this).balance}("");
         if (!success) revert TransferFailed();
+    }
+
+    function rescueFunds(
+        address token,
+        address userAddress,
+        uint256 amount
+    ) external onlyOwner {
+        if (token == address(0)) {
+            payable(userAddress).transfer(amount);
+        } else {
+            // do we need safe transfer?
+            IERC20(token).transfer(userAddress, amount);
+        }
     }
 }
