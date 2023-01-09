@@ -21,12 +21,7 @@ contract GasPriceOracle is IOracle, Ownable {
 
     error TransmitterNotFound();
 
-    constructor(
-        ITransmitManager transmitManager_,
-        address owner_
-    ) Ownable(owner_) {
-        transmitManager = transmitManager_;
-    }
+    constructor(address owner_) Ownable(owner_) {}
 
     /**
      * @dev the relative prices are calculated as:
