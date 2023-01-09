@@ -95,7 +95,6 @@ abstract contract SocketSrc is SocketBase {
         address capacitorAddress_,
         bytes calldata signature_
     ) external payable nonReentrant {
-        // TODO: take sibling slug from configs (thought of mapping remote slugs and capacitors in registry)
         (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket();
 
@@ -107,7 +106,7 @@ abstract contract SocketSrc is SocketBase {
 
         if (
             !_transmitManager__.checkTransmitter(
-                0, // todo: get remoteChainSlug from config,
+                _capacitorToSlug[capacitorAddress_],
                 packetId,
                 root,
                 signature_
