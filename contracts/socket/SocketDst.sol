@@ -56,17 +56,15 @@ abstract contract SocketDst is SocketBase {
      */
     event PacketRootUpdated(uint256 packetId, bytes32 oldRoot, bytes32 newRoot);
 
-    // TODO: taking sibling chain input is prone to bug as we saw in previous version
     function propose(
         uint256 packetId_,
-        uint256 siblingChainSlug_,
         bytes32 root_,
         bytes calldata signature_
     ) external {
         if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
         if (
             !_transmitManager__.checkTransmitter(
-                siblingChainSlug_,
+                _chainSlug,
                 packetId_,
                 root_,
                 signature_
