@@ -117,10 +117,11 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     }
 
     function _getVerificationFees(
-        uint256 dstChainSlug,
-        uint256 dstRelativeGasPrice
+        uint256,
+        uint256
     ) internal view override returns (uint256) {
         // todo: check if dynamic fees can be divided into more constants
+        // arbitrum: check src contract
         return initateNativeConfirmationGasLimit * tx.gasprice + dynamicFees;
     }
 
