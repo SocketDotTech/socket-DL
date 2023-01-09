@@ -17,6 +17,9 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
 
     ICapacitorFactory public _capacitorFactory__;
 
+    // siblingChainSlug => capacitor address
+    mapping(address => uint256) public _capacitorToSlug;
+
     // switchboard => siblingChainSlug => ICapacitor
     mapping(address => mapping(uint256 => ICapacitor)) public _capacitors__;
     // switchboard => siblingChainSlug => IDecapacitor
@@ -59,6 +62,8 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
             ICapacitor capacitor__,
             IDecapacitor decapacitor__
         ) = _capacitorFactory__.deploy(capacitorType_, siblingChainSlug_);
+
+        _capacitorToSlug[address(capacitor__)] = siblingChainSlug_;
         _capacitors__[switchBoardAddress_][siblingChainSlug_] = capacitor__;
         _decapacitors__[switchBoardAddress_][siblingChainSlug_] = decapacitor__;
 
