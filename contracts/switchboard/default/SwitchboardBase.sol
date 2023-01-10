@@ -28,6 +28,21 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
         uint256 msgGasLimit,
         uint256 dstChainSlug
     ) external payable override {
+        uint256 expectedFees = _calculateFees(msgGasLimit, dstChainSlug);
+        if (msg.value < expectedFees) revert FeesNotEnough();
+    }
+
+    function getMinFees(
+        uint256 msgGasLimit,
+        uint256 dstChainSlug
+    ) external returns (uint256) {
+        return _calculateFees(msgGasLimit, dstChainSlug);
+    }
+
+    function _calculateFees(
+        uint256 msgGasLimit,
+        uint256 dstChainSlug
+    ) internal returns (uint256 expectedFees) {
         uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
 
         uint256 minExecutionFees = _getExecutionFees(
@@ -40,8 +55,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
             dstRelativeGasPrice
         );
 
-        uint256 expectedFees = minExecutionFees + minVerificationFees;
-        if (msg.value <= expectedFees) revert FeesNotEnough();
+        expectedFees = minExecutionFees + minVerificationFees;
     }
 
     // overridden in child contracts
