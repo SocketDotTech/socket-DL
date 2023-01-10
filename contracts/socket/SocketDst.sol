@@ -64,6 +64,7 @@ abstract contract SocketDst is SocketBase {
         if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
         if (
             !_transmitManager__.checkTransmitter(
+                _getChainSlug(packetId_),
                 _chainSlug,
                 packetId_,
                 root_,
@@ -205,5 +206,11 @@ abstract contract SocketDst is SocketBase {
             remoteRoots[packetId_] == bytes32(0)
                 ? PacketStatus.NOT_PROPOSED
                 : PacketStatus.PROPOSED;
+    }
+
+    function _getChainSlug(
+        uint256 packetId_
+    ) internal pure returns (uint256 chainSlug_) {
+        chainSlug_ = uint32(packetId_ >> 224);
     }
 }

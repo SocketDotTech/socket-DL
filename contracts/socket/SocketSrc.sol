@@ -107,6 +107,7 @@ abstract contract SocketSrc is SocketBase {
         if (
             !_transmitManager__.checkTransmitter(
                 _capacitorToSlug[capacitorAddress_],
+                _capacitorToSlug[capacitorAddress_],
                 packetId,
                 root,
                 signature_

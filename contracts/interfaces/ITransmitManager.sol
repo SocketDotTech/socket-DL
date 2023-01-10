@@ -9,6 +9,7 @@ interface ITransmitManager {
 
     function checkTransmitter(
         uint256 siblingChainSlug,
+        uint256 sigChainSlug_,
         uint256 packetId,
         bytes32 root,
         bytes calldata signature

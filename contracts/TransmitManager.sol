@@ -11,10 +11,10 @@ import "./libraries/SafeTransferLib.sol";
 contract TransmitManager is ITransmitManager, AccessControl {
     using SafeTransferLib for IERC20;
 
-    uint256 public chainSlug;
     ISignatureVerifier public signatureVerifier;
     IOracle public oracle;
 
+    uint256 public chainSlug;
     uint256 public sealGasLimit;
     mapping(uint256 => uint256) public proposeGasLimit;
 
@@ -45,12 +45,13 @@ contract TransmitManager is ITransmitManager, AccessControl {
 
     function checkTransmitter(
         uint256 siblingChainSlug_,
+        uint256 sigChainSlug_,
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_
     ) external view override returns (bool) {
         address transmitter = signatureVerifier.recoverSigner(
-            chainSlug,
+            sigChainSlug_,
             packetId_,
             root_,
             signature_
