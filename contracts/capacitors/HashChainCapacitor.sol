@@ -17,10 +17,10 @@ contract HashChainCapacitor is BaseCapacitor {
     function addPackedMessage(
         bytes32 packedMessage
     ) external override onlyRole(SOCKET_ROLE) {
-        uint256 packetId = _packets;
+        uint256 packetCount = _packets;
 
-        _roots[packetId] = keccak256(
-            abi.encode(_roots[packetId], packedMessage)
+        _roots[packetCount] = keccak256(
+            abi.encode(_roots[packetCount], packedMessage)
         );
         _chainLength++;
 
@@ -29,7 +29,7 @@ contract HashChainCapacitor is BaseCapacitor {
             _chainLength = 0;
         }
 
-        emit MessageAdded(packedMessage, packetId, _roots[packetId]);
+        emit MessageAdded(packedMessage, packetCount, _roots[packetCount]);
     }
 
     function sealPacket()
@@ -39,13 +39,13 @@ contract HashChainCapacitor is BaseCapacitor {
         onlyRole(SOCKET_ROLE)
         returns (bytes32, uint256)
     {
-        uint256 packetId = _sealedPackets;
+        uint256 packetCount = _sealedPackets;
 
-        if (_roots[packetId] == bytes32(0)) revert NoPendingPacket();
-        bytes32 root = _roots[packetId];
+        if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
+        bytes32 root = _roots[packetCount];
         _sealedPackets++;
 
-        emit PacketComplete(root, packetId);
-        return (root, packetId);
+        emit PacketComplete(root, packetCount);
+        return (root, packetCount);
     }
 }

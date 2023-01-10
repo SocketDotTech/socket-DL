@@ -55,7 +55,7 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
         return _roots[id];
     }
 
-    function getLatestPacketId() external view returns (uint256) {
+    function getLatestPacketCount() external view returns (uint256) {
         return _packets == 0 ? 0 : _packets - 1;
     }
 
