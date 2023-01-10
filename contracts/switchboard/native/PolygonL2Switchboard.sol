@@ -10,7 +10,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     uint256 public l2ReceiveGasLimit;
 
     event FxChildUpdate(address oldFxChild, address newFxChild);
-    event FxRootTunnel(address fxRootTunnel, address fxRootTunnel_);
+    event FxRootTunnelSet(address fxRootTunnel, address fxRootTunnel_);
     event RootReceived(uint256 packetId_, bytes32 root_);
     event UpdatedL2ReceiveGasLimit(uint256 l2ReceiveGasLimit_);
 
@@ -89,8 +89,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         emit UpdatedL2ReceiveGasLimit(l2ReceiveGasLimit_);
     }
 
-    function receivePacket(uint256, bytes32) external override {}
-
     /**
      * @notice Update the address of the FxChild
      * @param fxChild_ The address of the new FxChild
@@ -101,7 +99,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     }
 
     function updateFxRootTunnel(address fxRootTunnel_) external onlyOwner {
-        emit FxRootTunnel(fxRootTunnel, fxRootTunnel_);
+        emit FxRootTunnelSet(fxRootTunnel, fxRootTunnel_);
         fxRootTunnel = fxRootTunnel_;
     }
 }

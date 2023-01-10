@@ -2,9 +2,11 @@
 pragma solidity 0.8.7;
 
 import "../../interfaces/native-bridge/ICrossDomainMessenger.sol";
+import "../../interfaces/native-bridge/INativeReceiver.sol";
+
 import "./NativeSwitchboardBase.sol";
 
-contract OptimismSwitchboard is NativeSwitchboardBase {
+contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
     uint256 public receivePacketGasLimit;
     uint256 public l2ReceiveGasLimit;
 
@@ -61,7 +63,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encodeWithSelector(
-            INativeSwitchboard.receivePacket.selector,
+            INativeReceiver.receivePacket.selector,
             packetId,
             root
         );

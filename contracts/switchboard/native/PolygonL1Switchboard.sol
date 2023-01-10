@@ -42,8 +42,6 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         emit RootReceived(packetId, root);
     }
 
-    function receivePacket(uint256, bytes32) external override {}
-
     /**
      * @notice verifies if the packet satisfies needed checks before execution
      * @param packetId packet id

@@ -4,9 +4,11 @@ pragma solidity 0.8.7;
 import "../../interfaces/native-bridge/IInbox.sol";
 import "../../interfaces/native-bridge/IOutbox.sol";
 import "../../interfaces/native-bridge/IBridge.sol";
+import "../../interfaces/native-bridge/INativeReceiver.sol";
+
 import "./NativeSwitchboardBase.sol";
 
-contract ArbitrumL1Switchboard is NativeSwitchboardBase {
+contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     address public remoteRefundAddress;
     address public callValueRefundAddress;
     address public remoteNativeSwitchboard;
@@ -64,7 +66,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encodeWithSelector(
-            INativeSwitchboard.receivePacket.selector,
+            INativeReceiver.receivePacket.selector,
             packetId,
             root
         );
