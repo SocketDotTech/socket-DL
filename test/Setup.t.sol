@@ -17,19 +17,30 @@ import "../contracts/CapacitorFactory.sol";
 contract Setup is Test {
     address constant _socketOwner = address(1);
     address constant _plugOwner = address(2);
+    address constant _raju = address(3);
     address constant _executor = address(4);
 
     address _transmitter;
     address _altTransmitter;
 
+    address _watcher;
+    address _altWatcher;
+
     uint256 constant _transmitterPrivateKey = uint256(1);
+    uint256 constant _watcherPrivateKey = uint256(2);
+
     uint256 constant _altTransmitterPrivateKey = uint256(2);
+    uint256 constant _altWatcherPrivateKey = uint256(2);
 
     uint256 internal _timeoutInSeconds = 0;
     uint256 internal _slowCapacitorWaitTime = 300;
     uint256 internal _msgGasLimit = 25548;
-    uint256 internal sealGasLimit_ = 150000;
-    uint256 internal capacitorType_ = 1;
+    uint256 internal _sealGasLimit = 150000;
+    uint256 internal _proposeGasLimit = 150000;
+    uint256 internal _attestGasLimit = 150000;
+    uint256 internal _executionOverhead = 50000;
+    uint256 internal _capacitorType = 1;
+
     struct SocketConfigContext {
         uint256 siblingChainSlug;
         ICapacitor capacitor__;
@@ -61,12 +72,11 @@ contract Setup is Test {
     ChainContext _a;
     ChainContext _b;
 
-    function _dualChainSetup(
-        uint256[] memory transmitters_,
-        uint256 minFees_
-    ) internal {
+    function _dualChainSetup(uint256[] memory transmitters_) internal {
         _a.chainSlug = uint32(uint256(0x2013AA263));
         _b.chainSlug = uint32(uint256(0x2013AA264));
+
+        _watcher = vm.addr(_watcherPrivateKey);
 
         _a = _deployContractsOnSingleChain(
             _a,
@@ -89,29 +99,57 @@ contract Setup is Test {
         uint256[] memory transmitters_
     ) internal returns (ChainContext storage) {
         cc_.chainSlug = localChainSlug_;
+
+        // deploy socket setup
         cc_ = _deploySocket(cc_, _socketOwner);
+
+        hoax(_socketOwner);
+        cc_.transmitManager__.setProposeGasLimit(
+            remoteChainSlug_,
+            _proposeGasLimit
+        );
 
         // deploy default configs: fast, slow
         SocketConfigContext memory scc_;
 
-        ISwitchboard fastSwitchboard = new FastSwitchboard(
+        FastSwitchboard fastSwitchboard = new FastSwitchboard(
             _socketOwner,
             address(cc_.gasPriceOracle__),
             _timeoutInSeconds
         );
+
+        vm.startPrank(_socketOwner);
+        fastSwitchboard.setExecutionOverhead(
+            remoteChainSlug_,
+            _executionOverhead
+        );
+        fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
+        fastSwitchboard.setAttestGasLimit(remoteChainSlug_, _attestGasLimit);
+        vm.stopPrank();
+
         scc_ = _registerSwitchbaord(
             cc_,
             _socketOwner,
             address(fastSwitchboard),
             remoteChainSlug_
         );
+
         cc_.configs__.push(scc_);
 
-        ISwitchboard optimisticSwitchboard = new OptimisticSwitchboard(
+        OptimisticSwitchboard optimisticSwitchboard = new OptimisticSwitchboard(
             _socketOwner,
             address(cc_.gasPriceOracle__),
             _timeoutInSeconds
         );
+        vm.startPrank(_socketOwner);
+
+        optimisticSwitchboard.setExecutionOverhead(
+            remoteChainSlug_,
+            _executionOverhead
+        );
+        optimisticSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
+        vm.stopPrank();
+
         scc_ = _registerSwitchbaord(
             cc_,
             _socketOwner,
@@ -120,9 +158,9 @@ contract Setup is Test {
         );
         cc_.configs__.push(scc_);
 
+        // add roles
         hoax(_socketOwner);
         cc_.socket__.grantExecutorRole(_executor);
-
         _addTransmitters(transmitters_, cc_, remoteChainSlug_);
 
         return cc_;
@@ -144,7 +182,7 @@ contract Setup is Test {
             cc_.gasPriceOracle__,
             deployer_,
             cc_.chainSlug,
-            sealGasLimit_
+            _sealGasLimit
         );
 
         cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
@@ -171,7 +209,7 @@ contract Setup is Test {
         cc_.socket__.registerSwitchBoard(
             switchBoardAddress_,
             remoteChainSlug_,
-            capacitorType_
+            _capacitorType
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
