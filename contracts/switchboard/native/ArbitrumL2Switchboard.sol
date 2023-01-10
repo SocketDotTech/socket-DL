@@ -2,14 +2,14 @@
 pragma solidity 0.8.7;
 
 import "../../interfaces/native-bridge/IArbSys.sol";
-import "../../interfaces/native-bridge/INativeSwitchboard.sol";
+import "../../interfaces/native-bridge/INativeReceiver.sol";
 
 import "../../libraries/AddressAliasHelper.sol";
 import "./NativeSwitchboardBase.sol";
 
-contract ArbitrumL2Switchboard is NativeSwitchboardBase {
+contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
     address public remoteNativeSwitchboard;
-    uint256 public l2ReceiveGasLimit;
+    uint256 public l1ReceiveGasLimit;
 
     IArbSys constant arbsys = IArbSys(address(100));
 
@@ -18,7 +18,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
 
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
     event RootReceived(uint256 packetId_, bytes32 root_);
-    event UpdatedL2ReceiveGasLimit(uint256 l2ReceiveGasLimit_);
+    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit_);
 
     error InvalidSender();
     error NoRootFound();
@@ -45,7 +45,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encodeWithSelector(
-            INativeSwitchboard.receivePacket.selector,
+            INativeReceiver.receivePacket.selector,
             packetId,
             root
         );
@@ -91,15 +91,15 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
         return
             initateNativeConfirmationGasLimit *
             tx.gasprice +
-            l2ReceiveGasLimit *
+            l1ReceiveGasLimit *
             dstRelativeGasPrice;
     }
 
     function updateL2ReceiveGasLimit(
-        uint256 l2ReceiveGasLimit_
+        uint256 l1ReceiveGasLimit_
     ) external onlyOwner {
-        l2ReceiveGasLimit = l2ReceiveGasLimit_;
-        emit UpdatedL2ReceiveGasLimit(l2ReceiveGasLimit_);
+        l1ReceiveGasLimit = l1ReceiveGasLimit_;
+        emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
     }
 
     function updateRemoteNativeSwitchboard(

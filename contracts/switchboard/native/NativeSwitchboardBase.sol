@@ -3,15 +3,10 @@ pragma solidity 0.8.7;
 
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IOracle.sol";
-import "../../interfaces/native-bridge/INativeSwitchboard.sol";
 import "../../utils/AccessControl.sol";
 import "../../interfaces/ISocket.sol";
 
-abstract contract NativeSwitchboardBase is
-    ISwitchboard,
-    INativeSwitchboard,
-    AccessControl
-{
+abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     IOracle public oracle;
     ISocket public socket;
 

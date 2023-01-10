@@ -89,8 +89,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         emit UpdatedL2ReceiveGasLimit(l2ReceiveGasLimit_);
     }
 
-    function receivePacket(uint256, bytes32) external override {}
-
     /**
      * @notice Update the address of the FxChild
      * @param fxChild_ The address of the new FxChild
