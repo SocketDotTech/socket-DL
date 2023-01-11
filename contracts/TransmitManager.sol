@@ -6,8 +6,11 @@ import "./interfaces/ISignatureVerifier.sol";
 import "./interfaces/IOracle.sol";
 
 import "./utils/AccessControl.sol";
+import "./libraries/SafeTransferLib.sol";
 
 contract TransmitManager is ITransmitManager, AccessControl {
+    using SafeTransferLib for IERC20;
+
     uint256 public chainSlug;
     ISignatureVerifier public signatureVerifier;
     IOracle public oracle;
@@ -162,5 +165,18 @@ contract TransmitManager is ITransmitManager, AccessControl {
         uint256 chainSlug_
     ) internal pure returns (bytes32) {
         return bytes32(chainSlug_);
+    }
+
+    function rescueFunds(
+        address token,
+        address userAddress,
+        uint256 amount
+    ) external onlyOwner {
+        if (token == address(0)) {
+            payable(userAddress).transfer(amount);
+        } else {
+            // do we need safe transfer?
+            IERC20(token).transfer(userAddress, amount);
+        }
     }
 }

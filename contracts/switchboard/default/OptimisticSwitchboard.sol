@@ -40,31 +40,41 @@ contract OptimisticSwitchboard is SwitchboardBase {
     }
 
     /**
-     * @notice pause/unpause execution
-     * @param tripGlobalFuse_ bool indicating verification is active or not
+     * @notice pause execution
      */
-    function tripGlobal(uint256 srcChainSlug_, bool tripGlobalFuse_) external {
-        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
-            revert WatcherNotFound();
+    function tripGlobal(
+        uint256 srcChainSlug_
+    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+        // todo: should we allow watchers to pause global execution?
+        tripGlobalFuse = false;
+        emit SwitchboardTripped(false);
+    }
 
-        tripGlobalFuse = tripGlobalFuse_;
-        emit SwitchboardTripped(tripGlobalFuse_);
+    /**
+     * @notice pause a packet
+     */
+    function tripSingle(
+        uint256 packetId_,
+        uint256 srcChainSlug_
+    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+        tripSingleFuse[packetId_] = false;
+        emit PacketTripped(packetId_, false);
+    }
+
+    /**
+     * @notice pause/unpause execution
+     */
+    function tripGlobal(bool trip_) external onlyOwner {
+        tripGlobalFuse = trip_;
+        emit SwitchboardTripped(trip_);
     }
 
     /**
      * @notice pause/unpause a packet
-     * @param tripSingleFuse_ bool indicating a packet is verified or not
      */
-    function tripSingle(
-        uint256 packetId_,
-        uint256 srcChainSlug_,
-        bool tripSingleFuse_
-    ) external {
-        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
-            revert WatcherNotFound();
-
-        tripSingleFuse[packetId_] = tripSingleFuse_;
-        emit PacketTripped(packetId_, tripSingleFuse_);
+    function tripSingle(uint256 packetId_, bool trip_) external onlyOwner {
+        tripSingleFuse[packetId_] = trip_;
+        emit PacketTripped(packetId_, trip_);
     }
 
     function _getExecutionFees(
