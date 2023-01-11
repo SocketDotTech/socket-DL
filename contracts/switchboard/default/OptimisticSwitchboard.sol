@@ -1,41 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/ISwitchboard.sol";
+import "./SwitchboardBase.sol";
 
-import "../interfaces/IOracle.sol";
-
-import "../utils/AccessControl.sol";
-
-contract OptimisticSwitchboard is ISwitchboard, AccessControl {
-    IOracle public oracle;
-
+contract OptimisticSwitchboard is SwitchboardBase {
     uint256 public immutable timeoutInSeconds;
-    uint256 public immutable chainSlug;
 
-    bool public tripGlobalFuse;
     // packetId => isPaused
     mapping(uint256 => bool) public tripSingleFuse;
-    mapping(uint256 => uint256) public executionOverhead;
 
     event PacketTripped(uint256 packetId_, bool tripSingleFuse_);
-    event SwitchboardTripped(bool tripGlobalFuse_);
-    event ExecutionOverheadSet(
-        uint256 dstChainSlug_,
-        uint256 executionOverhead_
-    );
-
-    error TransferFailed();
-    error FeesNotEnough();
     error WatcherNotFound();
 
     constructor(
         address owner_,
         address oracle_,
-        uint32 chainSlug_,
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
-        chainSlug = chainSlug_;
         oracle = IOracle(oracle_);
 
         // TODO: restrict the timeout durations to a few select options
@@ -58,52 +39,14 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
         return true;
     }
 
-    // assumption: natives have 18 decimals
-    function payFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
-    ) external payable override {
-        uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
-
-        // assuming 0 verification fees
-        uint256 expectedFees = _getExecutionFees(
-            msgGasLimit,
-            dstChainSlug,
-            dstRelativeGasPrice
-        );
-        if (msg.value < expectedFees) revert FeesNotEnough();
-    }
-
-    function _getExecutionFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug,
-        uint256 dstRelativeGasPrice
-    ) internal view returns (uint256) {
-        return
-            (executionOverhead[dstChainSlug] + msgGasLimit) *
-            dstRelativeGasPrice;
-    }
-
-    /**
-     * @notice updates execution overhead
-     * @param executionOverhead_ new execution overhead cost
-     */
-    function setExecutionOverhead(
-        uint256 dstChainSlug_,
-        uint256 executionOverhead_
-    ) external onlyOwner {
-        executionOverhead[dstChainSlug_] = executionOverhead_;
-        emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
-    }
-
     /**
      * @notice pause/unpause execution
      * @param tripGlobalFuse_ bool indicating verification is active or not
      */
-    function tripGlobal(
-        uint256 srcChainSlug_,
-        bool tripGlobalFuse_
-    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+    function tripGlobal(uint256 srcChainSlug_, bool tripGlobalFuse_) external {
+        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
+            revert WatcherNotFound();
+
         tripGlobalFuse = tripGlobalFuse_;
         emit SwitchboardTripped(tripGlobalFuse_);
     }
@@ -116,20 +59,22 @@ contract OptimisticSwitchboard is ISwitchboard, AccessControl {
         uint256 packetId_,
         uint256 srcChainSlug_,
         bool tripSingleFuse_
-    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+    ) external {
+        if (!_hasRole(_watcherRole(srcChainSlug_), msg.sender))
+            revert WatcherNotFound();
+
         tripSingleFuse[packetId_] = tripSingleFuse_;
         emit PacketTripped(packetId_, tripSingleFuse_);
     }
 
-    // TODO: to support fee distribution
-    /**
-     * @notice transfers the fees collected to `account_`
-     * @param account_ address to transfer ETH
-     */
-    function withdrawFees(address account_) external onlyOwner {
-        require(account_ != address(0));
-        (bool success, ) = account_.call{value: address(this).balance}("");
-        if (!success) revert TransferFailed();
+    function _getExecutionFees(
+        uint256 msgGasLimit,
+        uint256 dstChainSlug,
+        uint256 dstRelativeGasPrice
+    ) internal view override returns (uint256) {
+        return
+            (executionOverhead[dstChainSlug] + msgGasLimit) *
+            dstRelativeGasPrice;
     }
 
     /**

@@ -1,22 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/ISwitchboard.sol";
-import "../interfaces/IOracle.sol";
+import "./SwitchboardBase.sol";
 
-import "../utils/AccessControl.sol";
-
-contract FastSwitchboard is ISwitchboard, AccessControl {
-    IOracle public oracle;
-
-    mapping(uint256 => uint256) public executionOverhead;
-
-    uint256 public immutable chainSlug;
-    uint256 public timeoutInSeconds;
-
-    bool public tripGlobalFuse;
-    // packetId => isPaused
-    mapping(uint256 => bool) public tripSingleFuse;
+contract FastSwitchboard is SwitchboardBase {
+    uint256 public immutable timeoutInSeconds;
 
     // dst chain slug => total watchers registered
     mapping(uint256 => uint256) public totalWatchers;
@@ -30,17 +18,10 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     // packetId => total attestations
     mapping(uint256 => uint256) public attestations;
 
-    event SwitchboardTripped(bool tripGlobalFuse_);
-    event PacketTripped(uint256 packetId_, bool tripSingleFuse_);
+    event SocketSet(address newSocket_);
     event PacketAttested(uint256 packetId, address attester);
     event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
-    event ExecutionOverheadSet(
-        uint256 dstChainSlug_,
-        uint256 executionOverhead_
-    );
 
-    error TransferFailed();
-    error FeesNotEnough();
     error WatcherFound();
     error WatcherNotFound();
     error AlreadyAttested();
@@ -48,20 +29,16 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     constructor(
         address owner_,
         address oracle_,
-        uint32 chainSlug_,
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
-        chainSlug = chainSlug_;
         oracle = IOracle(oracle_);
-
         timeoutInSeconds = timeoutInSeconds_;
     }
 
-    function attest(
-        uint256 packetId,
-        uint256 srcChainSlug
-    ) external onlyRole(_watcherRole(srcChainSlug)) {
+    function attest(uint256 packetId, uint256 srcChainSlug) external {
         if (isAttested[msg.sender][packetId]) revert AlreadyAttested();
+        if (!_hasRole(_watcherRole(srcChainSlug), msg.sender))
+            revert WatcherNotFound();
 
         isAttested[msg.sender][packetId] = true;
         attestations[packetId]++;
@@ -81,41 +58,20 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         uint256 srcChainSlug,
         uint256 proposeTime
     ) external view override returns (bool) {
-        if (tripGlobalFuse || tripSingleFuse[packetId]) return false;
+        if (tripGlobalFuse) return false;
 
-        // to handle the situation if a watcher is removed after it attested the packet
+        // to handle the situation: if a watcher is removed after it attested the packet
         if (attestations[packetId] >= totalWatchers[srcChainSlug]) return true;
+
         if (block.timestamp - proposeTime >= timeoutInSeconds) return true;
-
         return false;
-    }
-
-    // assumption: natives have 18 decimals
-    function payFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
-    ) external payable override {
-        uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
-
-        uint256 minExecutionFees = _getExecutionFees(
-            msgGasLimit,
-            dstChainSlug,
-            dstRelativeGasPrice
-        );
-        uint256 minVerificationFees = _getVerificationFees(
-            dstChainSlug,
-            dstRelativeGasPrice
-        );
-
-        uint256 expectedFees = minExecutionFees + minVerificationFees;
-        if (msg.value < expectedFees) revert FeesNotEnough();
     }
 
     function _getExecutionFees(
         uint256 msgGasLimit,
         uint256 dstChainSlug,
         uint256 dstRelativeGasPrice
-    ) internal view returns (uint256) {
+    ) internal view override returns (uint256) {
         return
             (executionOverhead[dstChainSlug] + msgGasLimit) *
             dstRelativeGasPrice;
@@ -124,8 +80,8 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
     function _getVerificationFees(
         uint256 dstChainSlug,
         uint256 dstRelativeGasPrice
-    ) internal view returns (uint256) {
-        // todo: are the watchers going to be same on all chains for particular chain slug?
+    ) internal view override returns (uint256) {
+        // todo: number of watchers are going to be same on all chains for particular chain slug?
         return
             totalWatchers[dstChainSlug] *
             attestGasLimit[dstChainSlug] *
@@ -145,48 +101,13 @@ contract FastSwitchboard is ISwitchboard, AccessControl {
         emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
     }
 
-    function setExecutionOverhead(
-        uint256 dstChainSlug_,
-        uint256 executionOverhead_
-    ) external onlyOwner {
-        executionOverhead[dstChainSlug_] = executionOverhead_;
-        emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
-    }
-
-    /**
-     * @notice pause/unpause execution
-     * @param tripSingleFuse_ bool indicating verification is active or not
-     */
-    function tripSingle(
-        uint256 packetId_,
-        uint256 srcChainSlug_,
-        bool tripSingleFuse_
-    ) external onlyRole(_watcherRole(srcChainSlug_)) {
-        tripSingleFuse[packetId_] = tripSingleFuse_;
-        emit PacketTripped(packetId_, tripSingleFuse_);
-    }
-
     /**
      * @notice pause/unpause execution
      * @param tripGlobalFuse_ bool indicating verification is active or not
      */
-    function tripGlobal(
-        uint256 srcChainSlug_,
-        bool tripGlobalFuse_
-    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+    function trip(bool tripGlobalFuse_) external onlyOwner {
         tripGlobalFuse = tripGlobalFuse_;
         emit SwitchboardTripped(tripGlobalFuse_);
-    }
-
-    // TODO: to support fee distribution
-    /**
-     * @notice transfers the fees collected to `account_`
-     * @param account_ address to transfer ETH
-     */
-    function withdrawFees(address account_) external onlyOwner {
-        require(account_ != address(0));
-        (bool success, ) = account_.call{value: address(this).balance}("");
-        if (!success) revert TransferFailed();
     }
 
     /**
