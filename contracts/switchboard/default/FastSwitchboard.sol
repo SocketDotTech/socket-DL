@@ -101,6 +101,7 @@ contract FastSwitchboard is SwitchboardBase {
         emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
     }
 
+    // TODO: watchers are chain specific hence letting them act globally seems weird, need to rethink
     /**
      * @notice pause execution
      * @dev this function can only be called by watchers for pausing the global execution
