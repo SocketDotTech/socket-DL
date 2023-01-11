@@ -5,12 +5,13 @@ import "forge-std/Test.sol";
 import "../contracts/capacitors/SingleCapacitor.sol";
 
 contract SingleCapacitorTest is Test {
-    address constant _owner = address(1);
-    address constant _socket = address(2);
-    address constant _raju = address(3);
-    bytes32 constant _message_0 = bytes32(uint256(4));
-    bytes32 constant _message_1 = bytes32(uint256(5));
-    bytes32 constant _message_2 = bytes32(uint256(6));
+    uint256 internal c = 1;
+    address immutable _owner = address(uint160(c++));
+    address immutable _socket = address(uint160(c++));
+    address immutable _raju = address(uint160(c++));
+    bytes32 immutable _message_0 = bytes32(c++);
+    bytes32 immutable _message_1 = bytes32(c++);
+    bytes32 immutable _message_2 = bytes32(c++);
 
     SingleCapacitor _sa;
 

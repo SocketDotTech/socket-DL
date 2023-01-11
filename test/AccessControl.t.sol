@@ -5,12 +5,13 @@ import "forge-std/Test.sol";
 import "../contracts/mocks/MockAccessControl.sol";
 
 contract AccessControlTest is Test {
-    address constant _owner = address(1);
-    address constant _giraffe_0 = address(2);
-    address constant _giraffe_1 = address(3);
-    address constant _hippo_0 = address(4);
-    address constant _hippo_1 = address(5);
-    address constant _ape = address(6);
+    uint256 internal c = 1;
+    address immutable _owner = address(uint160(c++));
+    address immutable _giraffe_0 = address(uint160(c++));
+    address immutable _giraffe_1 = address(uint160(c++));
+    address immutable _hippo_0 = address(uint160(c++));
+    address immutable _hippo_1 = address(uint160(c++));
+    address immutable _ape = address(uint160(c++));
     MockAccessControl _mac;
     bytes32 ROLE_GIRAFFE;
     bytes32 ROLE_HIPPO;

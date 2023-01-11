@@ -21,8 +21,8 @@ contract DualChainTest is Setup {
     uint256 bFork;
 
     function setUp() public {
-        _a.chainSlug = 1;
-        _b.chainSlug = 2;
+        _a.chainSlug = c++;
+        _b.chainSlug = c++;
 
         aFork = vm.createFork(vm.envString("CHAIN1_RPC_URL"));
         bFork = vm.createFork(vm.envString("CHAIN2_RPC_URL"));

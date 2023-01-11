@@ -14,11 +14,11 @@ contract SingleCapacitor is BaseCapacitor {
     function addPackedMessage(
         bytes32 packedMessage
     ) external override onlyRole(SOCKET_ROLE) {
-        uint256 packetId = _packets;
-        _roots[packetId] = packedMessage;
+        uint256 packetCount = _packets;
+        _roots[packetCount] = packedMessage;
         _packets++;
 
-        emit MessageAdded(packedMessage, packetId, packedMessage);
+        emit MessageAdded(packedMessage, packetCount, packedMessage);
     }
 
     function sealPacket()
@@ -28,13 +28,13 @@ contract SingleCapacitor is BaseCapacitor {
         onlyRole(SOCKET_ROLE)
         returns (bytes32, uint256)
     {
-        uint256 packetId = _sealedPackets;
+        uint256 packetCount = _sealedPackets;
 
-        if (_roots[packetId] == bytes32(0)) revert NoPendingPacket();
-        bytes32 root = _roots[packetId];
+        if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
+        bytes32 root = _roots[packetCount];
         _sealedPackets++;
 
-        emit PacketComplete(root, packetId);
-        return (root, packetId);
+        emit PacketComplete(root, packetCount);
+        return (root, packetCount);
     }
 }
