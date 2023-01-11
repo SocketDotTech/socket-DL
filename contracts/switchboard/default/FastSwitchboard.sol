@@ -46,7 +46,6 @@ contract FastSwitchboard is SwitchboardBase {
         emit PacketAttested(packetId, msg.sender);
     }
 
-    // todo: switchboard might need src chain slug and packet id while verifying details here?
     /**
      * @notice verifies if the packet satisfies needed checks before execution
      * @param packetId packetId
@@ -81,7 +80,7 @@ contract FastSwitchboard is SwitchboardBase {
         uint256 dstChainSlug,
         uint256 dstRelativeGasPrice
     ) internal view override returns (uint256) {
-        // todo: number of watchers are going to be same on all chains for particular chain slug?
+        // assumption: number of watchers are going to be same on all chains for particular chain slug?
         return
             totalWatchers[dstChainSlug] *
             attestGasLimit[dstChainSlug] *

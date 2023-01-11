@@ -19,7 +19,6 @@ contract OptimisticSwitchboard is SwitchboardBase {
     ) AccessControl(owner_) {
         oracle = IOracle(oracle_);
 
-        // TODO: restrict the timeout durations to a few select options
         timeoutInSeconds = timeoutInSeconds_;
     }
 
@@ -45,7 +44,6 @@ contract OptimisticSwitchboard is SwitchboardBase {
     function tripGlobal(
         uint256 srcChainSlug_
     ) external onlyRole(_watcherRole(srcChainSlug_)) {
-        // todo: should we allow watchers to pause global execution?
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
     }
