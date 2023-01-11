@@ -5,9 +5,10 @@ import "forge-std/Test.sol";
 import "../contracts/mocks/MockOwnable.sol";
 
 contract OwnableTest is Test {
-    address constant _bob = address(1);
-    address constant _owner = address(2);
-    address constant _newOwner = address(3);
+    uint256 internal c = 1;
+    address immutable _bob = address(uint160(c++));
+    address immutable _owner = address(uint160(c++));
+    address immutable _newOwner = address(uint160(c++));
     MockOwnable _mo;
 
     function setUp() external {

@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 
 contract SocketTest is Setup {
-    uint256 constant srcChainSlug_ = 1;
-    uint256 constant dstChainSlug = 2;
+    uint256 immutable srcChainSlug_ = c++;
+    uint256 immutable dstChainSlug = c++;
     string constant integrationType = "FAST";
     bytes32 private constant EXECUTOR_ROLE = keccak256("EXECUTOR");
 

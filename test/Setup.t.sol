@@ -15,10 +15,11 @@ import "../contracts/GasPriceOracle.sol";
 import "../contracts/CapacitorFactory.sol";
 
 contract Setup is Test {
-    address constant _socketOwner = address(1);
-    address constant _plugOwner = address(2);
-    address constant _raju = address(3);
-    address constant _executor = address(4);
+    uint256 internal c = 1;
+    address immutable _socketOwner = address(uint160(c++));
+    address immutable _plugOwner = address(uint160(c++));
+    address immutable _raju = address(uint160(c++));
+    address immutable _executor = address(uint160(c++));
 
     address _transmitter;
     address _altTransmitter;
@@ -26,11 +27,11 @@ contract Setup is Test {
     address _watcher;
     address _altWatcher;
 
-    uint256 constant _transmitterPrivateKey = uint256(1);
-    uint256 constant _watcherPrivateKey = uint256(2);
+    uint256 immutable _transmitterPrivateKey = c++;
+    uint256 immutable _watcherPrivateKey = c++;
 
-    uint256 constant _altTransmitterPrivateKey = uint256(2);
-    uint256 constant _altWatcherPrivateKey = uint256(2);
+    uint256 immutable _altTransmitterPrivateKey = c++;
+    uint256 immutable _altWatcherPrivateKey = c++;
 
     uint256 internal _timeoutInSeconds = 0;
     uint256 internal _slowCapacitorWaitTime = 300;
