@@ -17,10 +17,10 @@ contract HappyTest is Setup {
     event ExecutionFailedBytes(uint256 msgId, bytes result);
 
     function setUp() external {
-        uint256[] memory attesters = new uint256[](1);
-        attesters[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPivateKeys = new uint256[](1);
+        transmitterPivateKeys[0] = _transmitterPrivateKey;
 
-        _dualChainSetup(attesters);
+        _dualChainSetup(transmitterPivateKeys);
         _deployPlugContracts();
         _configPlugContracts(isFast);
     }
@@ -51,7 +51,6 @@ contract HappyTest is Setup {
             uint256 packetId,
             bytes memory sig
         ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
-        address attester = vm.addr(_transmitterPrivateKey);
 
         _sealOnSrc(_a, capacitor, sig);
         _proposeOnDst(_b, sig, packetId, root);

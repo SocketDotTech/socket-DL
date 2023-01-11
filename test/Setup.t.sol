@@ -73,36 +73,34 @@ contract Setup is Test {
     ChainContext _a;
     ChainContext _b;
 
-    function _dualChainSetup(uint256[] memory transmitters_) internal {
+    function _dualChainSetup(
+        uint256[] memory transmitterPrivateKeys_
+    ) internal {
         _a.chainSlug = uint32(uint256(0x2013AA263));
         _b.chainSlug = uint32(uint256(0x2013AA264));
 
         _watcher = vm.addr(_watcherPrivateKey);
+        _transmitter = vm.addr(_transmitterPrivateKey);
 
-        _a = _deployContractsOnSingleChain(
+        _deployContractsOnSingleChain(
             _a,
-            _a.chainSlug,
             _b.chainSlug,
-            transmitters_
+            transmitterPrivateKeys_
         );
-        _b = _deployContractsOnSingleChain(
+        _deployContractsOnSingleChain(
             _b,
-            _b.chainSlug,
             _a.chainSlug,
-            transmitters_
+            transmitterPrivateKeys_
         );
     }
 
     function _deployContractsOnSingleChain(
         ChainContext storage cc_,
-        uint256 localChainSlug_,
         uint256 remoteChainSlug_,
-        uint256[] memory transmitters_
-    ) internal returns (ChainContext storage) {
-        cc_.chainSlug = localChainSlug_;
-
+        uint256[] memory transmitterPrivateKeys_
+    ) internal {
         // deploy socket setup
-        cc_ = _deploySocket(cc_, _socketOwner);
+        _deploySocket(cc_, _socketOwner);
 
         hoax(_socketOwner);
         cc_.transmitManager__.setProposeGasLimit(
@@ -162,15 +160,13 @@ contract Setup is Test {
         // add roles
         hoax(_socketOwner);
         cc_.socket__.grantExecutorRole(_executor);
-        _addTransmitters(transmitters_, cc_, remoteChainSlug_);
-
-        return cc_;
+        _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
     }
 
     function _deploySocket(
         ChainContext storage cc_,
         address deployer_
-    ) internal returns (ChainContext storage) {
+    ) internal {
         vm.startPrank(deployer_);
 
         cc_.hasher__ = new Hasher();
@@ -196,8 +192,6 @@ contract Setup is Test {
         );
 
         vm.stopPrank();
-
-        return cc_;
     }
 
     function _registerSwitchbaord(
@@ -228,7 +222,7 @@ contract Setup is Test {
     }
 
     function _addTransmitters(
-        uint256[] memory transmitterPrivateKey_,
+        uint256[] memory transmitterPrivateKeys_,
         ChainContext memory cc_,
         uint256 remoteChainSlug_
     ) internal {
@@ -237,11 +231,11 @@ contract Setup is Test {
         address transmitter;
         for (
             uint256 index = 0;
-            index < transmitterPrivateKey_.length;
+            index < transmitterPrivateKeys_.length;
             index++
         ) {
             // deduce transmitter address from private key
-            transmitter = vm.addr(transmitterPrivateKey_[index]);
+            transmitter = vm.addr(transmitterPrivateKeys_[index]);
             // grant transmitter role
             cc_.transmitManager__.grantTransmitterRole(
                 remoteChainSlug_,
@@ -298,7 +292,7 @@ contract Setup is Test {
         address capacitor,
         bytes memory sig_
     ) internal {
-        hoax(_transmitter);
+        hoax(_raju);
         src_.socket__.seal(capacitor, sig_);
     }
 
@@ -308,7 +302,7 @@ contract Setup is Test {
         uint256 packetId_,
         bytes32 root_
     ) internal {
-        hoax(_executor);
+        hoax(_raju);
         dst_.socket__.propose(packetId_, root_, sig_);
     }
 
