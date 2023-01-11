@@ -8,7 +8,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
 
-    event FxRootTunnel(address fxRootTunnel, address fxRootTunnel_);
+    event FxChildTunnelSet(address fxRootTunnel, address fxRootTunnel_);
     event RootReceived(uint256 packetId_, bytes32 root_);
 
     error NoRootFound();
@@ -74,7 +74,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
 
     // set fxChildTunnel if not set already
     function updateFxChildTunnel(address fxChildTunnel_) external onlyOwner {
-        emit FxRootTunnel(fxChildTunnel, fxChildTunnel_);
+        emit FxChildTunnelSet(fxChildTunnel, fxChildTunnel_);
         fxChildTunnel = fxChildTunnel_;
     }
 }
