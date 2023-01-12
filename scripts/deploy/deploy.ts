@@ -6,8 +6,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithoutArgs, storeAddresses } from "./utils";
 import { chainIds } from "../constants/networks";
 
-import { deployCounter, deploySocket, deployVault } from "./contracts";
-import { executorAddress } from "../constants/config";
+import { executorAddress, sealGasLimit } from "../constants/config";
+import deployContractWithArgs from "./utils/utils";
 
 /**
  * Deploys network-independent socket contracts
@@ -25,6 +25,7 @@ export const main = async () => {
     );
 
     const network = hre.network.name;
+
     const signatureVerifier: Contract = await deployContractWithoutArgs(
       "SignatureVerifier",
       socketSigner
@@ -39,35 +40,55 @@ export const main = async () => {
     addresses["Hasher"] = hasher.address;
     await storeAddresses(addresses, chainIds[network]);
 
-    const vault: Contract = await deployVault(socketSigner);
-    const decapacitor: Contract = await deployContractWithoutArgs(
-      "SingleDecapacitor",
+    const capacitorFactory: Contract = await deployContractWithoutArgs(
+      "CapacitorFactory",
       socketSigner
     );
-    addresses["SingleDecapacitor"] = decapacitor.address;
+    addresses["CapacitorFactory"] = capacitorFactory.address;
     await storeAddresses(addresses, chainIds[network]);
 
-    const socket: Contract = await deploySocket(
-      chainIds[network],
-      hasher,
-      vault,
+    const gasPriceOracle: Contract = await deployContractWithArgs("GasPriceOracle", [socketSigner.address], socketSigner);
+    addresses["GasPriceOracle"] = gasPriceOracle.address;
+    await storeAddresses(addresses, chainIds[network]);
+
+    const transmitManager: Contract = await deployContractWithArgs("TransmitManager", [signatureVerifier.address, gasPriceOracle.address, socketSigner.address, chainIds[network], sealGasLimit[network]], socketSigner);
+    addresses["TransmitManager"] = transmitManager.address;
+    await storeAddresses(addresses, chainIds[network]);
+
+    const tmAddress: string = await gasPriceOracle.transmitManager();
+    if (tmAddress.toLowerCase() !== transmitManager.address) {
+      const tx = await gasPriceOracle
+        .connect(socketSigner)
+        .setTransmitManager(transmitManager.address);
+      console.log(`Setting transmit manager in oracle: ${tx.hash}`);
+      await tx.wait();
+    }
+
+    const socket: Contract = await deployContractWithArgs(
+      "Socket",
+      [
+        chainIds[network],
+        hasher.address,
+        transmitManager.address,
+        capacitorFactory.address,
+      ],
       socketSigner
     );
     addresses["Socket"] = socket.address;
     await storeAddresses(addresses, chainIds[network]);
 
     // plug deployments
-    const counter: Contract = await deployCounter(socket, counterSigner);
+    const counter: Contract = await deployContractWithArgs("Counter", [socket.address], counterSigner);
     addresses["Counter"] = counter.address;
     await storeAddresses(addresses, chainIds[network]);
-
     console.log("Contracts deployed!");
 
     // configure
-    await socket
+    const tx = await socket
       .connect(socketSigner)
       .grantExecutorRole(executorAddress[network]);
-    console.log(`Assigned executor role to ${executorAddress[network]} !`);
+    console.log(`Assigned executor role to ${executorAddress[network]}: ${tx.hash}`);
+    await tx.wait();
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
     throw error;

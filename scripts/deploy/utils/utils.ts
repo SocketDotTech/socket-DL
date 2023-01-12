@@ -30,6 +30,22 @@ export const deployContractWithoutArgs = async (
   }
 };
 
+export default async function deployContractWithArgs(contractName: string, args: Array<any>, signer: SignerWithAddress) {
+  try {
+    const Contract: ContractFactory = await ethers.getContractFactory(
+      contractName
+    );
+    const contract: Contract = await Contract.connect(signer).deploy(...args);
+    await contract.deployed();
+
+    await verify(contract.address, contractName, args);
+
+    return contract;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export const verify = async (
   address: string,
   contractName: string,
