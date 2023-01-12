@@ -13,4 +13,9 @@ interface ISwitchboard {
         uint256 msgGasLimit,
         uint256 dstChainSlug
     ) external payable;
+
+    function getMinFees(
+        uint256 msgGasLimit,
+        uint256 dstChainSlug
+    ) external view returns (uint256);
 }

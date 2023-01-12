@@ -35,14 +35,14 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     function getMinFees(
         uint256 msgGasLimit,
         uint256 dstChainSlug
-    ) external returns (uint256) {
+    ) external view override returns (uint256) {
         return _calculateFees(msgGasLimit, dstChainSlug);
     }
 
     function _calculateFees(
         uint256 msgGasLimit,
         uint256 dstChainSlug
-    ) internal returns (uint256 expectedFees) {
+    ) internal view returns (uint256 expectedFees) {
         uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
 
         uint256 minExecutionFees = _getExecutionFees(
