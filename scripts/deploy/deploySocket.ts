@@ -3,11 +3,10 @@ import { ethers } from "hardhat";
 
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployContractWithoutArgs, storeAddresses } from "./utils";
+import { deployContractWithoutArgs, deployContractWithArgs, storeAddresses } from "./utils";
 import { chainIds } from "../constants/networks";
 
 import { executorAddress, sealGasLimit } from "../constants/config";
-import deployContractWithArgs from "./utils/utils";
 
 /**
  * Deploys network-independent socket contracts
