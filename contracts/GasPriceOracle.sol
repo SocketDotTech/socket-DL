@@ -14,7 +14,7 @@ contract GasPriceOracle is IOracle, Ownable {
     // chain slug => relative gas price
     mapping(uint256 => uint256) public override relativeGasPrice;
 
-    event GasPriceUpdated(uint256 dstChainSlug_, uint256 relativeGasPrice_);
+    event GasPriceUpdated(uint256 dstChainSlug_, uint256 oldRelativeGasPrice_,uint256 relativeGasPrice_);
 
     constructor(address owner_) Ownable(owner_) {}
 
@@ -28,10 +28,9 @@ contract GasPriceOracle is IOracle, Ownable {
         uint256 dstChainSlug_,
         uint256 relativeGasPrice_
     ) public onlyOwner() {
+        emit GasPriceUpdated(dstChainSlug_, relativeGasPrice[dstChainSlug_], relativeGasPrice_);
         relativeGasPrice[dstChainSlug_] = relativeGasPrice_;
         updatedAt[dstChainSlug_] = block.timestamp;
-
-        emit GasPriceUpdated(dstChainSlug_, relativeGasPrice_);
     }
 
     /**
