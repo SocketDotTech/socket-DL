@@ -106,6 +106,10 @@ contract TransmitManager is ITransmitManager, AccessControl {
         if (!success) revert TransferFailed();
     }
 
+    //
+    // ADMIN FUNCTIONS
+    //
+
     /**
      * @notice updates seal gas limit
      * @param gasLimit_ new seal gas limit
@@ -138,6 +142,10 @@ contract TransmitManager is ITransmitManager, AccessControl {
         emit SignatureVerifierSet(signatureVerifier_);
     }
 
+    //
+    // ROLE MANAGEMENT
+    //
+
     /**
      * @notice adds a transmitter for `remoteChainSlug_` chain
      * @param remoteChainSlug_ remote chain slug
@@ -165,8 +173,12 @@ contract TransmitManager is ITransmitManager, AccessControl {
     function _transmitterRole(
         uint256 chainSlug_
     ) internal pure returns (bytes32) {
-        return bytes32(chainSlug_);
+        return keccak256(abi.encodePacked("transmitter", chainSlug_));
     }
+
+    // 
+    // RESCUE FUNCTIONS
+    //
 
     function rescueFunds(
         address token,
