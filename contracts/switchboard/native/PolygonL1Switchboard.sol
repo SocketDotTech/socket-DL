@@ -14,12 +14,19 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     error NoRootFound();
 
     constructor(
+        uint256 initialConfirmationGasLimit_,
+        uint256 executionOverhead_,
         address checkpointManager_,
         address fxRoot_,
         address owner_,
-        ISocket socket_
+        ISocket socket_,
+        IOracle oracle_
     ) AccessControl(owner_) FxBaseRootTunnel(checkpointManager_, fxRoot_) {
         socket = socket_;
+        oracle = oracle_;
+
+        initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
+        executionOverhead = executionOverhead_;
     }
 
     /**

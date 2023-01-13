@@ -35,13 +35,23 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
 
     constructor(
         uint256 receivePacketGasLimit_,
+        uint256 l2ReceiveGasLimit_,
+        uint256 initialConfirmationGasLimit_,
+        uint256 executionOverhead_,
         address remoteNativeSwitchboard_,
         address owner_,
-        ISocket socket_
+        ISocket socket_,
+        IOracle oracle_
     ) AccessControl(owner_) {
         receivePacketGasLimit = receivePacketGasLimit_;
+
+        l2ReceiveGasLimit = l2ReceiveGasLimit_;
+        initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
+        executionOverhead = executionOverhead_;
+
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         socket = socket_;
+        oracle = oracle_;
 
         if ((block.chainid == 10 || block.chainid == 420)) {
             crossDomainMessenger = ICrossDomainMessenger(
