@@ -20,7 +20,7 @@ export enum ChainId {
 
 export enum IntegrationTypes {
   fastIntegration = "FAST",
-  slowIntegration = "SLOW",
+  optimisticIntegration = "OPTIMISTIC",
   nativeIntegration = "NATIVE_BRIDGE",
 }
 
@@ -47,3 +47,12 @@ export interface ChainSocketAddresses {
 export type DeploymentAddresses = {
   [chainId in ChainId]?: ChainSocketAddresses;
 };
+
+export enum NativeSwitchboard {
+  NON_NATIVE = 0,
+  ARBITRUM_L1 = 1,
+  ARBITRUM_L2 = 2,
+  OPTIMISM = 3,
+  POLYGON_L1 = 4,
+  POLYGON_L2 = 5,
+}

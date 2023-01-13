@@ -1,20 +1,20 @@
 import { ChainId, IntegrationTypes } from "../../../src";
 
-function getVerifierAddress(verifier: string, chainId: ChainId, config: any) {
-  return verifier === "Verifier" ? config[verifier] : config["integrations"]?.[chainId]?.[IntegrationTypes.nativeIntegration]?.["verifier"];
+function getSwitchboardAddress(chainId: ChainId, integrationType: IntegrationTypes, config: any) {
+  return config["integrations"]?.[chainId]?.[integrationType]?.["switchboard"];
 }
 
-function getNotaryAddress(notary: string, chainId: ChainId, config: any) {
-  return notary === "AdminNotary" ? config[notary] : config["integrations"]?.[chainId]?.[IntegrationTypes.nativeIntegration]?.["notary"];
+function getCapacitorAddress(chainId: ChainId, integrationType: IntegrationTypes, config: any) {
+  return config["integrations"]?.[chainId]?.[integrationType]?.["capacitor"];
 }
 
-function getAccumAddress(chainId: ChainId, integrationType: string, config: any) {
-  return config["integrations"]?.[chainId]?.[integrationType]?.["accum"];
+function getDecapacitorAddress(chainId: ChainId, integrationType: IntegrationTypes, config: any) {
+  return config["integrations"]?.[chainId]?.[integrationType]?.["decapacitor"];
 }
 
 export {
-  getNotaryAddress,
-  getAccumAddress,
-  getVerifierAddress
+  getSwitchboardAddress,
+  getCapacitorAddress,
+  getDecapacitorAddress
 };
 
