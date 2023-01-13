@@ -73,6 +73,6 @@ export const setupOptimistic = async (
       await grantWatcherRoleTx.wait();
     }
   } catch (error) {
-    console.log("Error in setting up fast switchboard", error);
+    console.log("Error in setting up optimistic switchboard", error);
   }
 }

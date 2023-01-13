@@ -21,6 +21,21 @@ export const chainIds = {
   "polygon-mumbai": 80001,
 };
 
+export const networkToChainId = {
+  43114: "avalanche",
+  56: "bsc",
+  5: "goerli",
+  31337: "hardhat",
+  1: "mainnet",
+  97: "bsc-testnet",
+  42161: "arbitrum",
+  421613: "arbitrum-goerli",
+  10: "optimism",
+  420: "optimism-goerli",
+  137: "polygon-mainnet",
+  80001: "polygon-mumbai",
+};
+
 export function getJsonRpcUrl(chain: keyof typeof chainIds): string {
   let jsonRpcUrl: string;
   switch (chain) {
