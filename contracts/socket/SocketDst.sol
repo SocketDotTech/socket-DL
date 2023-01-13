@@ -62,20 +62,20 @@ abstract contract SocketDst is SocketBase {
         bytes calldata signature_
     ) external {
         if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
-        if (
-            !_transmitManager__.checkTransmitter(
+        (address transmitter, bool isTransmitter) = _transmitManager__
+            .checkTransmitter(
                 _getChainSlug(packetId_),
                 _chainSlug,
                 packetId_,
                 root_,
                 signature_
-            )
-        ) revert InvalidAttester();
+            );
+        if (!isTransmitter) revert InvalidAttester();
 
         remoteRoots[packetId_] = root_;
         rootProposedAt[packetId_] = block.timestamp;
 
-        emit PacketAttested(msg.sender, packetId_, root_);
+        emit PacketAttested(transmitter, packetId_, root_);
     }
 
     /**

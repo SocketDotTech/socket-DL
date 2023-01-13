@@ -17,6 +17,7 @@ abstract contract SocketSrc is SocketBase {
      * @param signature signature of attester
      */
     event PacketVerifiedAndSealed(
+        address indexed transmitter,
         address indexed capacitorAddress,
         uint256 indexed packetId,
         bytes signature
@@ -104,17 +105,23 @@ abstract contract SocketSrc is SocketBase {
             packetCount
         );
 
-        if (
-            !_transmitManager__.checkTransmitter(
+        (address transmitter, bool isTransmitter) = _transmitManager__
+            .checkTransmitter(
                 _capacitorToSlug[capacitorAddress_],
                 _capacitorToSlug[capacitorAddress_],
                 packetId,
                 root,
                 signature_
-            )
-        ) revert InvalidAttester();
+            );
 
-        emit PacketVerifiedAndSealed(capacitorAddress_, packetId, signature_);
+        if (!isTransmitter) revert InvalidAttester();
+
+        emit PacketVerifiedAndSealed(
+            transmitter,
+            capacitorAddress_,
+            packetId,
+            signature_
+        );
     }
 
     function _getPacketId(

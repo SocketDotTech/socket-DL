@@ -49,7 +49,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_
-    ) external view override returns (bool) {
+    ) external view override returns (address, bool) {
         address transmitter = signatureVerifier.recoverSigner(
             sigChainSlug_,
             packetId_,
@@ -57,7 +57,10 @@ contract TransmitManager is ITransmitManager, AccessControl {
             signature_
         );
 
-        return _hasRole(_transmitterRole(siblingChainSlug_), transmitter);
+        return (
+            transmitter,
+            _hasRole(_transmitterRole(siblingChainSlug_), transmitter)
+        );
     }
 
     // can be used for different checks related to oracle
