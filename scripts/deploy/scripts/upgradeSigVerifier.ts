@@ -27,7 +27,8 @@ export const main = async () => {
 
     const signatureVerifier: Contract = await deployContractWithoutArgs(
       "SignatureVerifier",
-      socketSigner
+      socketSigner,
+      "contracts/utils/SignatureVerifier.sol"
     );
     console.log(
       signatureVerifier.address,

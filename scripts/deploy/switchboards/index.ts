@@ -20,8 +20,7 @@ export const getSwitchboardDeployData = (
   } else if (integrationType === IntegrationTypes.optimisticIntegration) {
     return optimisticSwitchboard(localChain, oracleAddress, signerAddress);
   } else if (integrationType === IntegrationTypes.nativeIntegration) {
-    const switchboardType = switchboards[localChain]?.[remoteChain]
-
+    const switchboardType = switchboards[localChain]?.[remoteChain]?.["switchboard"]
     if (switchboardType === NativeSwitchboard.ARBITRUM_L1) {
       return arbitrumL1Switchboard(localChain, socketAddress, oracleAddress, signerAddress);
     } else if (switchboardType === NativeSwitchboard.ARBITRUM_L2) {
@@ -33,10 +32,10 @@ export const getSwitchboardDeployData = (
     } else if (switchboardType === NativeSwitchboard.POLYGON_L2) {
       return polygonL2Switchboard(localChain, socketAddress, oracleAddress, signerAddress);
     } else {
-      return { contractName: "", args: [] };
+      return { contractName: "", args: [], path: "" };
     }
   } else {
     // TODO: handle invalid data
-    return { contractName: "", args: [] };
+    return { contractName: "", args: [], path: "" };
   }
 }

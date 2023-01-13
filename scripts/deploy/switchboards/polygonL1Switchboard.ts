@@ -9,5 +9,5 @@ export const polygonL1Switchboard = (
   oracleAddress: string,
   signerAddress: string
 ) => {
-  return { contractName: "PolygonL1Switchboard", args: [initialConfirmationGasLimit, executionOverhead, bridgeConsts.checkpointManager[network], bridgeConsts.fxRoot[network], signerAddress, socketAddress, oracleAddress] };
+  return { contractName: "PolygonL1Switchboard", args: [initialConfirmationGasLimit, executionOverhead, bridgeConsts.checkpointManager[network], bridgeConsts.fxRoot[network], signerAddress, socketAddress, oracleAddress], path: "contracts/switchboard/native/PolygonL1Switchboard.sol" };
 };

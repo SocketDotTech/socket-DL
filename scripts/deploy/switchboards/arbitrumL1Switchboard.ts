@@ -13,6 +13,7 @@ export const arbitrumL1Switchboard = (
 ) => {
   return {
     contractName: "ArbitrumL1Switchboard",
-    args: [dynamicFees, initialConfirmationGasLimit, executionOverhead, constants.AddressZero, bridgeConsts.inbox[network], signerAddress, socketAddress, oracleAddress]
+    args: [dynamicFees, initialConfirmationGasLimit, executionOverhead, constants.AddressZero, bridgeConsts.inbox[network], signerAddress, socketAddress, oracleAddress],
+    path: "contracts/switchboard/native/ArbitrumL1Switchboard.sol"
   };
 };

@@ -7,6 +7,7 @@ import { deployContractWithoutArgs, deployContractWithArgs, storeAddresses } fro
 import { chainIds } from "../constants/networks";
 
 import { executorAddress, sealGasLimit } from "../constants/config";
+import { ChainSocketAddresses } from "../../src";
 
 /**
  * Deploys network-independent socket contracts
@@ -16,7 +17,15 @@ export const main = async () => {
     // assign deployers
     const { getNamedAccounts } = hre;
     const { socketOwner, counterOwner } = await getNamedAccounts();
-    let addresses = {};
+    let addresses: ChainSocketAddresses = {
+      Counter: "",
+      Hasher: "",
+      SignatureVerifier: "",
+      Socket: "",
+      CapacitorFactory: "",
+      GasPriceOracle: "",
+      TransmitManager: ""
+    };
 
     const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
     const counterSigner: SignerWithAddress = await ethers.getSigner(
@@ -27,30 +36,44 @@ export const main = async () => {
 
     const signatureVerifier: Contract = await deployContractWithoutArgs(
       "SignatureVerifier",
-      socketSigner
+      socketSigner,
+      "contracts/utils/SignatureVerifier.sol"
     );
     addresses["SignatureVerifier"] = signatureVerifier.address;
     await storeAddresses(addresses, chainIds[network]);
 
     const hasher: Contract = await deployContractWithoutArgs(
       "Hasher",
-      socketSigner
+      socketSigner,
+      "contracts/utils/Hasher.sol"
     );
     addresses["Hasher"] = hasher.address;
     await storeAddresses(addresses, chainIds[network]);
 
     const capacitorFactory: Contract = await deployContractWithoutArgs(
       "CapacitorFactory",
-      socketSigner
+      socketSigner,
+      "contracts/CapacitorFactory.sol"
     );
     addresses["CapacitorFactory"] = capacitorFactory.address;
     await storeAddresses(addresses, chainIds[network]);
 
-    const gasPriceOracle: Contract = await deployContractWithArgs("GasPriceOracle", [socketSigner.address], socketSigner);
+    const gasPriceOracle: Contract = await deployContractWithArgs(
+      "GasPriceOracle",
+      [socketSigner.address],
+      socketSigner,
+      "contracts/GasPriceOracle.sol"
+    );
+
     addresses["GasPriceOracle"] = gasPriceOracle.address;
     await storeAddresses(addresses, chainIds[network]);
 
-    const transmitManager: Contract = await deployContractWithArgs("TransmitManager", [signatureVerifier.address, gasPriceOracle.address, socketSigner.address, chainIds[network], sealGasLimit[network]], socketSigner);
+    const transmitManager: Contract = await deployContractWithArgs(
+      "TransmitManager",
+      [signatureVerifier.address, gasPriceOracle.address, socketSigner.address, chainIds[network], sealGasLimit[network]],
+      socketSigner,
+      "contracts/TransmitManager.sol"
+    );
     addresses["TransmitManager"] = transmitManager.address;
     await storeAddresses(addresses, chainIds[network]);
 
@@ -71,13 +94,14 @@ export const main = async () => {
         transmitManager.address,
         capacitorFactory.address,
       ],
-      socketSigner
+      socketSigner,
+      "contracts/socket/Socket.sol"
     );
     addresses["Socket"] = socket.address;
     await storeAddresses(addresses, chainIds[network]);
 
     // plug deployments
-    const counter: Contract = await deployContractWithArgs("Counter", [socket.address], counterSigner);
+    const counter: Contract = await deployContractWithArgs("Counter", [socket.address], counterSigner, "contracts/examples/Counter.sol");
     addresses["Counter"] = counter.address;
     await storeAddresses(addresses, chainIds[network]);
     console.log("Contracts deployed!");

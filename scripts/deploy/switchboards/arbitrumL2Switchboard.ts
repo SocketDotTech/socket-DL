@@ -9,5 +9,5 @@ export const arbitrumL2Switchboard = (
   oracleAddress: string,
   signerAddress: string
 ) => {
-  return { contractName: "ArbitrumL2Switchboard", args: [l1ReceiveGasLimit, initialConfirmationGasLimit, executionOverhead, constants.AddressZero, signerAddress, socketAddress, oracleAddress] };
+  return { contractName: "ArbitrumL2Switchboard", args: [l1ReceiveGasLimit, initialConfirmationGasLimit, executionOverhead, constants.AddressZero, signerAddress, socketAddress, oracleAddress], path: "contracts/switchboard/native/ArbitrumL2Switchboard.sol" };
 };

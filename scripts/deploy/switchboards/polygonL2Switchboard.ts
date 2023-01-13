@@ -10,5 +10,5 @@ export const polygonL2Switchboard = (
   oracleAddress: string,
   signerAddress: string
 ) => {
-  return { contractName: "PolygonL2Switchboard", args: [l1ReceiveGasLimit, initialConfirmationGasLimit, executionOverhead, bridgeConsts.fxChild[network], signerAddress, socketAddress, oracleAddress] }
+  return { contractName: "PolygonL2Switchboard", args: [l1ReceiveGasLimit, initialConfirmationGasLimit, executionOverhead, bridgeConsts.fxChild[network], signerAddress, socketAddress, oracleAddress], path: "contracts/switchboard/native/PolygonL2Switchboard.sol" }
 };

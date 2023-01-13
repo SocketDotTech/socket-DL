@@ -39,7 +39,7 @@ export const optimisticSwitchboard = (
   oracleAddress: string,
   signerAddress: string
 ) => {
-  return { contractName: "OptimisticSwitchboard", args: [signerAddress, oracleAddress, timeout[network]] }
+  return { contractName: "OptimisticSwitchboard", args: [signerAddress, oracleAddress, timeout[network]], path: "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol" }
 };
 
 export const setupOptimistic = async (

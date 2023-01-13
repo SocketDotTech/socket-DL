@@ -39,7 +39,7 @@ export const fastSwitchboard = (
   oracleAddress: string,
   signerAddress: string
 ) => {
-  return { contractName: "FastSwitchboard", args: [signerAddress, oracleAddress, timeout[network]] }
+  return { contractName: "FastSwitchboard", args: [signerAddress, oracleAddress, timeout[network]], path: "contracts/switchboard/default-switchboards/FastSwitchboard.sol" }
 };
 
 export const setupFast = async (

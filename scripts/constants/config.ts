@@ -99,54 +99,54 @@ export const proposeGasLimit: {
 export const switchboards = {
   "arbitrum-goerli": {
     goerli: {
-      notary: NativeSwitchboard.ARBITRUM_L2,
+      switchboard: NativeSwitchboard.ARBITRUM_L2,
     },
   },
   arbitrum: {
     mainnet: {
-      notary: NativeSwitchboard.ARBITRUM_L2,
+      switchboard: NativeSwitchboard.ARBITRUM_L2,
     },
   },
   optimism: {
     mainnet: {
-      notary: NativeSwitchboard.OPTIMISM,
+      switchboard: NativeSwitchboard.OPTIMISM,
     },
   },
   "optimism-goerli": {
     goerli: {
-      notary: NativeSwitchboard.OPTIMISM,
+      switchboard: NativeSwitchboard.OPTIMISM,
     },
   },
   "polygon-mainnet": {
     mainnet: {
-      notary: NativeSwitchboard.POLYGON_L2,
+      switchboard: NativeSwitchboard.POLYGON_L2,
     },
   },
   "polygon-mumbai": {
     goerli: {
-      notary: NativeSwitchboard.POLYGON_L2,
+      switchboard: NativeSwitchboard.POLYGON_L2,
     },
   },
   goerli: {
     "arbitrum-goerli": {
-      notary: NativeSwitchboard.ARBITRUM_L1,
+      switchboard: NativeSwitchboard.ARBITRUM_L1,
     },
     "optimism-goerli": {
-      notary: NativeSwitchboard.OPTIMISM,
+      switchboard: NativeSwitchboard.OPTIMISM,
     },
     "polygon-mumbai": {
-      notary: NativeSwitchboard.POLYGON_L1,
+      switchboard: NativeSwitchboard.POLYGON_L1,
     },
   },
   mainnet: {
     arbitrum: {
-      notary: NativeSwitchboard.ARBITRUM_L1,
+      switchboard: NativeSwitchboard.ARBITRUM_L1,
     },
     optimism: {
-      notary: NativeSwitchboard.OPTIMISM,
+      switchboard: NativeSwitchboard.OPTIMISM,
     },
     "polygon-mainnet": {
-      notary: NativeSwitchboard.POLYGON_L1,
+      switchboard: NativeSwitchboard.POLYGON_L1,
     },
   },
 };
