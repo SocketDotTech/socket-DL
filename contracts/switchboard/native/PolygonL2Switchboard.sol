@@ -7,21 +7,30 @@ import "./NativeSwitchboardBase.sol";
 contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
-    uint256 public l2ReceiveGasLimit;
+    uint256 public l1ReceiveGasLimit;
 
     event FxChildUpdate(address oldFxChild, address newFxChild);
     event FxRootTunnelSet(address fxRootTunnel, address fxRootTunnel_);
     event RootReceived(uint256 packetId_, bytes32 root_);
-    event UpdatedL2ReceiveGasLimit(uint256 l2ReceiveGasLimit_);
+    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit_);
 
     error NoRootFound();
 
     constructor(
+        uint256 l1ReceiveGasLimit_,
+        uint256 initialConfirmationGasLimit_,
+        uint256 executionOverhead_,
         address fxChild_,
         address owner_,
-        ISocket socket_
+        ISocket socket_,
+        IOracle oracle_
     ) AccessControl(owner_) FxBaseChildTunnel(fxChild_) {
         socket = socket_;
+        oracle = oracle_;
+
+        l1ReceiveGasLimit = l1ReceiveGasLimit_;
+        initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
+        executionOverhead = executionOverhead_;
     }
 
     /**
@@ -78,15 +87,15 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         return
             initateNativeConfirmationGasLimit *
             tx.gasprice +
-            l2ReceiveGasLimit *
+            l1ReceiveGasLimit *
             dstRelativeGasPrice;
     }
 
-    function updateL2ReceiveGasLimit(
-        uint256 l2ReceiveGasLimit_
+    function updateL1ReceiveGasLimit(
+        uint256 l1ReceiveGasLimit_
     ) external onlyOwner {
-        l2ReceiveGasLimit = l2ReceiveGasLimit_;
-        emit UpdatedL2ReceiveGasLimit(l2ReceiveGasLimit_);
+        l1ReceiveGasLimit = l1ReceiveGasLimit_;
+        emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
     }
 
     /**

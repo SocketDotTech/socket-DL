@@ -13,7 +13,7 @@ interface ITransmitManager {
         uint256 packetId,
         bytes32 root,
         bytes calldata signature
-    ) external view returns (bool);
+    ) external view returns (address, bool);
 
     function payFees(uint256 dstSlug) external payable;
 

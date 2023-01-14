@@ -43,14 +43,23 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     }
 
     constructor(
+        uint256 dynamicFees_,
+        uint256 initialConfirmationGasLimit_,
+        uint256 executionOverhead_,
         address remoteNativeSwitchboard_,
         address inbox_,
         address owner_,
-        ISocket socket_
+        ISocket socket_,
+        IOracle oracle_
     ) AccessControl(owner_) {
+        dynamicFees = dynamicFees_;
+        initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
+        executionOverhead = executionOverhead_;
+
         inbox = IInbox(inbox_);
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         socket = socket_;
+        oracle = oracle_;
 
         remoteRefundAddress = msg.sender;
         callValueRefundAddress = msg.sender;

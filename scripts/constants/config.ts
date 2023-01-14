@@ -48,6 +48,23 @@ export const timeout: {
   mainnet: 7200,
 };
 
+export const sealGasLimit: {
+  [key: string]: number;
+} = {
+  "bsc-testnet": 90000,
+  "polygon-mainnet": 90000,
+  bsc: 90000,
+  "polygon-mumbai": 90000,
+  "arbitrum-goerli": 90000,
+  "optimism-goerli": 90000,
+  goerli: 90000,
+  hardhat: 90000,
+  arbitrum: 90000,
+  optimism: 90000,
+  mainnet: 90000,
+};
+
+
 export const contractPath: {
   [key: string]: string;
 } = {

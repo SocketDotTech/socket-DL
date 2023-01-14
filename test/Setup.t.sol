@@ -6,8 +6,8 @@ import {Socket, ISocket, SocketConfig, SocketSrc, SocketDst, SocketBase} from ".
 import "../contracts/utils/SignatureVerifier.sol";
 import "../contracts/utils/Hasher.sol";
 
-import "../contracts/switchboard/default/FastSwitchboard.sol";
-import "../contracts/switchboard/default/OptimisticSwitchboard.sol";
+import "../contracts/switchboard/default-switchboards/FastSwitchboard.sol";
+import "../contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol";
 
 import "../contracts/TransmitManager.sol";
 import "../contracts/GasPriceOracle.sol";
