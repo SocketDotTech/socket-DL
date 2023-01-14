@@ -4,23 +4,23 @@ import { ChainId, DeploymentAddresses, IntegrationTypes } from "./types";
 
 const deploymentAddresses = addresses as DeploymentAddresses;
 
-function getNotaryAddress(
+function getSwitchboardAddress(
   srcChainId: ChainId,
   dstChainId: ChainId,
   integration: IntegrationTypes
 ) {
-  const notaryAddress =
+  const switchboardAddress =
     deploymentAddresses[srcChainId]?.["integrations"]?.[dstChainId]?.[
       integration
-    ]?.notary;
+    ]?.switchboard;
 
-  if (!notaryAddress) {
+  if (!switchboardAddress) {
     throw new Error(
-      `Notary adddess for ${srcChainId}-${dstChainId}-${integration} not found`
+      `Switchboard adddess for ${srcChainId}-${dstChainId}-${integration} not found`
     );
   }
 
-  return notaryAddress;
+  return switchboardAddress;
 }
 
 function getCapacitorAddress(
@@ -42,11 +42,20 @@ function getCapacitorAddress(
   return capacitorAddress;
 }
 
-function getDeCapacitorAddress(srcChainId: ChainId) {
-  const deCapacitorAddress = deploymentAddresses[srcChainId]?.SingleDecapacitor;
+function getDeCapacitorAddress(
+  srcChainId: ChainId,
+  dstChainId: ChainId,
+  integration: IntegrationTypes
+) {
+  const deCapacitorAddress =
+    deploymentAddresses[srcChainId]?.["integrations"]?.[dstChainId]?.[
+      integration
+    ]?.capacitor;
 
   if (!deCapacitorAddress) {
-    throw new Error(`De Capacitor address for ${srcChainId} not found`);
+    throw new Error(
+      `De Capacitor address for ${srcChainId}-${dstChainId}-${integration} not found`
+    );
   }
 
   return deCapacitorAddress;
@@ -54,7 +63,7 @@ function getDeCapacitorAddress(srcChainId: ChainId) {
 
 export {
   deploymentAddresses,
-  getNotaryAddress,
+  getSwitchboardAddress,
   getCapacitorAddress,
   getDeCapacitorAddress,
 };

@@ -1,11 +1,11 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { ContractFactory, Contract } from "ethers";
 import { network, ethers, run } from "hardhat";
+
+import { ContractFactory, Contract } from "ethers";
 import { Address } from "hardhat-deploy/dist/types";
-import { contractPath } from "../../constants/config";
 import path from "path";
 import fs from "fs";
-import { ChainSocketAddresses, DeploymentAddresses } from "../types";
+import { ChainSocketAddresses, DeploymentAddresses } from "../../../src";
 
 export const deployedAddressPath = path.join(
   __dirname,
@@ -14,7 +14,8 @@ export const deployedAddressPath = path.join(
 
 export const deployContractWithoutArgs = async (
   contractName: string,
-  signer: SignerWithAddress
+  signer: SignerWithAddress,
+  path: string
 ): Promise<Contract> => {
   try {
     const Contract: ContractFactory = await ethers.getContractFactory(
@@ -22,7 +23,7 @@ export const deployContractWithoutArgs = async (
     );
     const contractInstance: Contract = await Contract.connect(signer).deploy();
     await contractInstance.deployed();
-    await verify(contractInstance.address, contractName, []);
+    await verify(contractInstance.address, contractName, path, []);
 
     return contractInstance;
   } catch (error) {
@@ -30,7 +31,7 @@ export const deployContractWithoutArgs = async (
   }
 };
 
-export default async function deployContractWithArgs(contractName: string, args: Array<any>, signer: SignerWithAddress) {
+export async function deployContractWithArgs(contractName: string, args: Array<any>, signer: SignerWithAddress, path: string) {
   try {
     const Contract: ContractFactory = await ethers.getContractFactory(
       contractName
@@ -38,8 +39,7 @@ export default async function deployContractWithArgs(contractName: string, args:
     const contract: Contract = await Contract.connect(signer).deploy(...args);
     await contract.deployed();
 
-    await verify(contract.address, contractName, args);
-
+    await verify(contract.address, contractName, args, path);
     return contract;
   } catch (error) {
     throw error;
@@ -49,6 +49,7 @@ export default async function deployContractWithArgs(contractName: string, args:
 export const verify = async (
   address: string,
   contractName: string,
+  path: string,
   args: any[]
 ) => {
   try {
@@ -58,7 +59,7 @@ export const verify = async (
     await sleep(20);
     await run("verify:verify", {
       address,
-      contract: `${contractPath[contractName]}:${contractName}`,
+      contract: `${path}:${contractName}`,
       constructorArguments: args,
     });
   } catch (error) {
@@ -69,7 +70,7 @@ export const verify = async (
 export const sleep = (delay) =>
   new Promise((resolve) => setTimeout(resolve, delay * 1000));
 
-export const getInstance = async (contractName: string, address: Address) =>
+export const getInstance = async (contractName: string, address: Address): Promise<Contract> =>
   (await ethers.getContractFactory(contractName)).attach(address);
 
 export const getChainId = async (): Promise<number> => {

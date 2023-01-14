@@ -20,16 +20,16 @@ export enum ChainId {
 
 export enum IntegrationTypes {
   fastIntegration = "FAST",
-  slowIntegration = "SLOW",
+  optimisticIntegration = "OPTIMISTIC",
   nativeIntegration = "NATIVE_BRIDGE",
 }
 
 export type Integrations = { [chainId in ChainId]?: ChainAddresses };
 export type ChainAddresses = { [integration in IntegrationTypes]?: Configs };
 export type Configs = {
-  notary?: string;
-  verifier?: string;
+  switchboard?: string;
   capacitor?: string;
+  decapacitor?: string;
 };
 
 export interface ChainSocketAddresses {
@@ -37,13 +37,21 @@ export interface ChainSocketAddresses {
   Hasher: string;
   SignatureVerifier: string;
   Socket: string;
-  Vault: string;
-  SingleDecapacitor: string;
-  AdminNotary?: string;
-  Verifier?: string;
+  CapacitorFactory: string;
+  GasPriceOracle: string;
+  TransmitManager: string;
   integrations?: Integrations;
 }
 
 export type DeploymentAddresses = {
   [chainId in ChainId]?: ChainSocketAddresses;
 };
+
+export enum NativeSwitchboard {
+  NON_NATIVE = 0,
+  ARBITRUM_L1 = 1,
+  ARBITRUM_L2 = 2,
+  OPTIMISM = 3,
+  POLYGON_L1 = 4,
+  POLYGON_L2 = 5,
+}
