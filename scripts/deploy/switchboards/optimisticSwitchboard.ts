@@ -18,22 +18,6 @@ const executionOverhead: {
   mainnet: 300000,
 };
 
-const attestGasLimit: {
-  [key: string]: number;
-} = {
-  "bsc-testnet": 300000,
-  "polygon-mainnet": 300000,
-  bsc: 300000,
-  "polygon-mumbai": 300000,
-  "arbitrum-goerli": 300000,
-  "optimism-goerli": 300000,
-  goerli: 300000,
-  hardhat: 300000,
-  arbitrum: 300000,
-  optimism: 300000,
-  mainnet: 300000,
-};
-
 export const optimisticSwitchboard = (
   network: string,
   oracleAddress: string,

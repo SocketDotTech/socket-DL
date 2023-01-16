@@ -1,7 +1,7 @@
 import fs from "fs";
 import hre from "hardhat";
 import { constants, Contract } from "ethers";
-import { chainIds, networkToChainId, switchboards } from "../constants";
+import { chainIds, networkToChainId, switchboards, transmitterAddress } from "../constants";
 import { config } from "./config";
 import {
   deployedAddressPath,
@@ -40,7 +40,10 @@ export const main = async () => {
           console.log("Done! 🚀")
         }
 
-        await setSocketConfig(chainIds[remoteChain], chainSetups[index]["configForCounter"], localConfigUpdated, remoteConfig, counterSigner)
+        await addTransmitter(transmitterAddress[chain], chainIds[remoteChain], localConfigUpdated, socketSigner)
+
+        const socket = await getInstance("Socket", localConfigUpdated["Socket"]);
+        await setSocketConfig(socket, chainIds[remoteChain], remoteConfig["Counter"], chainSetups[index]["configForCounter"], localConfigUpdated, counterSigner)
       }
     }
 
@@ -121,23 +124,49 @@ const validateChainSetup = (chain, chainSetups) => {
   return { remoteChain, remoteConfig, localConfig };
 }
 
-const setSocketConfig = async (remoteChainSlug, integrationType, localConfig, remoteConfig, counterSigner) => {
+const setSocketConfig = async (socket, remoteChainSlug, remoteCounter, integrationType, localConfig, counterSigner) => {
   // add a config to plugs on local and remote
   const counter: Contract = await getInstance(
     "Counter",
     localConfig["Counter"]
   );
 
+  const switchboard = getSwitchboardAddress(remoteChainSlug, integrationType, localConfig)
+  const configs = await socket._plugConfigs(counter.address, remoteChainSlug);
+  if (configs["siblingPlug"].toLowerCase() === remoteCounter.toLowerCase() && configs["inboundSwitchboard__"].toLowerCase() === switchboard.toLowerCase())
+    return;
+
   const tx = await counter
     .connect(counterSigner)
     .setSocketConfig(
       remoteChainSlug,
-      remoteConfig["Counter"],
-      getSwitchboardAddress(remoteChainSlug, integrationType, localConfig)
+      remoteCounter,
     );
 
   console.log(
     `Setting config ${integrationType} for ${remoteChainSlug} chain id! Transaction Hash: ${tx.hash}`
+  );
+  await tx.wait();
+}
+
+const addTransmitter = async (transmitter, remoteChainSlug, localConfig, signer) => {
+  const transmitManager: Contract = await getInstance(
+    "TransmitManager",
+    localConfig["TransmitManager"]
+  );
+
+  const isSet = await transmitManager.isTransmitter(transmitter, remoteChainSlug);
+  if (isSet) return;
+
+  const tx = await transmitManager
+    .connect(signer)
+    .grantTransmitterRole(
+      remoteChainSlug,
+      transmitter
+    );
+
+  console.log(
+    `Setting transmitter ${transmitter} for ${remoteChainSlug} chain id! Transaction Hash: ${tx.hash}`
   );
   await tx.wait();
 }
