@@ -1,74 +1,100 @@
 import fs from "fs";
 import hre from "hardhat";
-import { utils } from "ethers";
-import { attesterAddress, chainIds, contractNames, executorAddress } from "../constants";
+import { constants, utils } from "ethers";
+import { transmitterAddress, chainIds, executorAddress, switchboards, proposeGasLimit, watcherAddress, relativeGasPrice } from "../constants";
 import { config } from "./config";
 import {
   deployedAddressPath,
-  getAccumAddress,
+  getCapacitorAddress,
+  getDecapacitorAddress,
   getInstance,
-  getNotaryAddress,
-  getVerifierAddress
+  getSwitchboardAddress
 } from "./utils";
 import { assert } from "console";
-import { IntegrationTypes } from "../../src";
+import { IntegrationTypes, NativeSwitchboard } from "../../src";
 
 const executorRole = "0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767";
 
 const roleExist = async (contract, role, address) => await contract.hasRole(role, address);
 
-const checkSocket = async (chain, remoteChain, config, configurationType, accum, verifier) => {
-  await hre.changeNetwork(chain);
+const checkSocket = async (chain, remoteChain, config, switchboard, capacitor, decapacitor) => {
   const socket = await getInstance("Socket", config["Socket"]);
   let hasExecutorRole = await roleExist(socket, executorRole, executorAddress[chain]);
   assert(hasExecutorRole, `❌ Executor Role do not exist for ${chain}`);
 
-  const socketConfig = await socket.getConfigs(chainIds[remoteChain], configurationType);
-  assert(socketConfig[0] === accum, "Wrong Accum set in config");
-  assert(socketConfig[1] === config["SingleDeaccum"], "Wrong Deaccum set in config");
-  assert(socketConfig[2] === verifier, "Wrong Verifier set in config");
+  const capacitor__ = await socket._capacitors__(switchboard, chainIds[remoteChain]);
+  const decapacitor__ = await socket._decapacitors__(switchboard, chainIds[remoteChain]);
+
+  assert(capacitor__ !== constants.AddressZero, "❌ Switchboard not registered");
+  assert(capacitor__ === capacitor, "❌ Wrong Capacitor");
+  assert(decapacitor__ === decapacitor, "❌ Wrong DeCapacitor");
 }
 
-const checkAttesterRole = async (chain, remoteChain, notaryName, notaryAddress) => {
-  await hre.changeNetwork(chain);
-  const notary = await getInstance(notaryName, notaryAddress);
+const checkTransmitter = async (chain, remoteChain, transmitManagerAddr) => {
+  const transmitManager = await getInstance("TransmitManager", transmitManagerAddr)
 
-  let hasAttesterRole = await roleExist(notary, utils.hexZeroPad(utils.hexlify(chainIds[remoteChain]), 32), attesterAddress[chain]);
-  assert(hasAttesterRole, `❌ Attester Role do not exist for ${remoteChain} on ${chain}`);
+  // check role
+  const hasTransmitterRole = await roleExist(transmitManager, utils.hexZeroPad(utils.hexlify(chainIds[remoteChain]), 32), transmitterAddress[chain]);
+  assert(hasTransmitterRole, `❌ Transmitter Role do not exist for ${remoteChain} on ${chain}`);
+
+  // check propose gas limit
+  const proposeGasLimit__ = await transmitManager.proposeGasLimit(chainIds[remoteChain])
+  assert(parseInt(proposeGasLimit__) === proposeGasLimit[remoteChain], `❌ Wrong propose gas limit set for ${remoteChain} on ${chain}`);
 }
 
-const checkNotary = async (chain, notaryName, notaryAddress, remoteNotaryAddress) => {
-  await hre.changeNetwork(chain);
-  const notary = await getInstance(notaryName, notaryAddress);
+const checkOracle = async (chain, remoteChain, oracleAddr, transmitManagerAddr) => {
+  const oracle = await getInstance("GasPriceOracle", oracleAddr)
 
-  let remoteNotary = await notary.remoteNotary();
-  assert(remoteNotary === remoteNotaryAddress, `❌ Wrong notary set for ${chain}: ${notaryName}`);
+  // check transmit manager
+  const transmitManager = await oracle.transmitManager();
+  assert(transmitManager.toLowerCase() === transmitManagerAddr.toLowerCase(), `❌ TransmitManager not set in oracle on ${chain}`);
 
-  if (notaryName === "PolygonL1Notary") {
-    let childTunnel = await notary.fxChildTunnel();
-    assert(childTunnel === remoteNotaryAddress, `❌ Wrong childTunnel set for ${chain}`);
-  }
+  // check gas price
+  const gasPrice = await oracle.relativeGasPrice(chainIds[remoteChain]);
+  assert(parseInt(gasPrice) === relativeGasPrice[remoteChain], `❌ Relative GasPrice set to 0 for ${remoteChain} on ${chain}`);
+}
 
-  if (notaryName === "PolygonL2Notary") {
-    let rootTunnel = await notary.fxRootTunnel();
-    assert(rootTunnel === remoteNotaryAddress, `❌ Wrong rootTunnel set for ${chain}`);
+const checkSwitchboard = async (chain, remoteChain, localSwitchboard, remoteSwitchboard, configurationType) => {
+  if (configurationType === IntegrationTypes.nativeIntegration) {
+    const switchboardType = switchboards[chain][remoteChain]["switchboard"];
+
+    if (switchboardType === NativeSwitchboard.POLYGON_L1) {
+      const switchboard = await getInstance("PolygonL1Switchboard", localSwitchboard);
+      let childTunnel = await switchboard.fxChildTunnel();
+      assert(childTunnel === remoteSwitchboard, `❌ Wrong childTunnel set for ${chain}`);
+    } else if (switchboardType === NativeSwitchboard.POLYGON_L2) {
+      const switchboard = await getInstance("PolygonL2Switchboard", localSwitchboard);
+      let rootTunnel = await switchboard.fxRootTunnel();
+      assert(rootTunnel === remoteSwitchboard, `❌ Wrong rootTunnel set for ${chain}`);
+    } else {
+      const switchboard = await getInstance("ArbitrumL1Switchboard", localSwitchboard);
+      const remoteSwitchboard__ = await switchboard.remoteNativeSwitchboard();
+      assert(remoteSwitchboard__ === remoteSwitchboard, `❌ Wrong remote switchboard set for ${chain}`)
+    }
+  } else {
+    const switchboard = await getInstance("FastSwitchboard", localSwitchboard);
+
+    const executionOverheadOnChain = await switchboard.executionOverhead(chainIds[remoteChain])
+    const watcherRoleSet = await switchboard.hasRole(
+      utils.hexZeroPad(utils.hexlify(chainIds[remoteChain]), 32),
+      watcherAddress[chain]
+    );
+
+    assert(parseInt(executionOverheadOnChain) !== 0, "❌ Execution overhead not set on switchboard")
+    assert(watcherRoleSet, `❌ Watcher Role not set for ${remoteChain} on switchboard`)
+
+    if (configurationType === IntegrationTypes.fastIntegration) {
+      const attestGasLimitOnChain = await switchboard.attestGasLimit(chainIds[remoteChain]);
+      assert(parseInt(attestGasLimitOnChain) !== 0, `❌ Attest gas limit is 0 for ${remoteChain} on switchboard`)
+    }
   }
 }
 
 export const verifyConfig = async (
-  configurationType: string,
-  srcChain: string,
-  destChain: string
+  configurationType: IntegrationTypes,
+  localChain: string,
+  remoteChain: string
 ) => {
-  let localChain = srcChain
-  let remoteChain = destChain
-
-  const localContracts = contractNames(configurationType, localChain, remoteChain);
-  const remoteContracts = contractNames(configurationType, remoteChain, localChain);
-
-  if (configurationType !== localContracts.integrationType)
-    throw new Error(`Wrong Configuration in configs:  deployments: ${configurationType} and configurations: ${localContracts.integrationType}`);
-
   if (!fs.existsSync(deployedAddressPath)) {
     throw new Error("addresses.json not found");
   }
@@ -83,29 +109,26 @@ export const verifyConfig = async (
 
   // contracts exist:
   // core contracts
-  if (!localConfig["Hasher"] || !localConfig["SignatureVerifier"] || !localConfig["Socket"] || !localConfig["Vault"] || !localConfig["SingleDeaccum"]) {
+  if (!localConfig["Hasher"] || !localConfig["SignatureVerifier"] || !localConfig["Socket"] || !localConfig["CapacitorFactory"] || !localConfig["GasPriceOracle"] || !localConfig["TransmitManager"]) {
     console.log(`❌ Core contracts do not exist for ${localChain}`);
     return;
   }
 
-  if (!remoteConfig["Hasher"] || !remoteConfig["SignatureVerifier"] || !remoteConfig["Socket"] || !remoteConfig["Vault"] || !remoteConfig["SingleDeaccum"]) {
+  if (!remoteConfig["Hasher"] || !remoteConfig["SignatureVerifier"] || !remoteConfig["Socket"] || !remoteConfig["CapacitorFactory"] || !remoteConfig["GasPriceOracle"] || !remoteConfig["TransmitManager"]) {
     console.log(`❌ Core contracts do not exist for ${remoteChain}`);
     return;
   }
 
-  // config related contracts
-  let localNotary, localAccum, localVerifier;
-  let remoteNotary, remoteAccum, remoteVerifier;
+  // config related contracts  
+  let localSwitchboard = getSwitchboardAddress(chainIds[remoteChain], configurationType, localConfig);
+  let localCapacitor = getCapacitorAddress(chainIds[remoteChain], configurationType, localConfig);
+  let localDecapacitor = getDecapacitorAddress(chainIds[remoteChain], configurationType, localConfig);
 
-  localNotary = getNotaryAddress(localContracts.notary, chainIds[remoteChain], localConfig);
-  localAccum = getAccumAddress(chainIds[remoteChain], configurationType, localConfig);
-  localVerifier = getVerifierAddress(localContracts.verifier, chainIds[remoteChain], localConfig);
+  let remoteSwitchboard = getSwitchboardAddress(chainIds[localChain], configurationType, remoteConfig);
+  let remoteCapacitor = getCapacitorAddress(chainIds[localChain], configurationType, remoteConfig);
+  let remoteDecapacitor = getDecapacitorAddress(chainIds[localChain], configurationType, remoteConfig);
 
-  remoteNotary = getNotaryAddress(remoteContracts.notary, chainIds[localChain], remoteConfig);
-  remoteAccum = getAccumAddress(chainIds[localChain], configurationType, remoteConfig);
-  remoteVerifier = getVerifierAddress(remoteContracts.verifier, chainIds[localChain], remoteConfig);
-
-  if (!localNotary || !localAccum || !localVerifier || !remoteNotary || !remoteAccum || !remoteVerifier) {
+  if (!localSwitchboard || !localCapacitor || !localDecapacitor || !remoteSwitchboard || !remoteCapacitor || !remoteDecapacitor) {
     console.log(`❌ Config contracts do not exist for ${configurationType}`);
     return;
   }
@@ -113,22 +136,17 @@ export const verifyConfig = async (
   console.log("✅ All contracts exist");
 
   // Socket: executor roles & config exists
-  await checkSocket(localChain, remoteChain, localConfig, configurationType, localAccum, localVerifier)
-  await checkSocket(remoteChain, localChain, remoteConfig, configurationType, remoteAccum, remoteVerifier)
-
-  await checkAttesterRole(localChain, remoteChain, localContracts.notary, localNotary)
-  await checkAttesterRole(remoteChain, localChain, remoteContracts.notary, remoteNotary)
+  await hre.changeNetwork(localChain);
+  await checkSocket(localChain, remoteChain, localConfig, localSwitchboard, localCapacitor, localDecapacitor)
+  await checkOracle(localChain, remoteChain, localConfig["GasPriceOracle"], localConfig["TransmitManager"])
+  await checkTransmitter(localChain, remoteChain, localConfig["TransmitManager"])
 
   console.log("✅ All roles checked");
   console.log(`✅ Socket Config checked for integration type ${configurationType}`);
 
-  // optional notary and accum settings
-  if (configurationType === IntegrationTypes.nativeIntegration) {
-    await checkNotary(localChain, localContracts.notary, localNotary, remoteNotary)
-    await checkNotary(remoteChain, remoteContracts.notary, remoteNotary, localNotary)
-  }
-
-  console.log("✅ Checked special notaries");
+  // optional switchboard settings
+  await checkSwitchboard(localChain, remoteChain, localSwitchboard, remoteSwitchboard, configurationType);
+  console.log("✅ Checked switchboard settings");
 };
 
 export const main = async () => {
