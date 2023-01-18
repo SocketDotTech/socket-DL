@@ -1,7 +1,7 @@
 import fs from "fs";
 import hre from "hardhat";
 import { constants, Contract } from "ethers";
-import { chainIds, networkToChainId, switchboards, transmitterAddress } from "../constants";
+import { chainIds, networkToChainId, proposeGasLimit, relativeGasPrice, switchboards, transmitterAddress } from "../constants";
 import { config } from "./config";
 import {
   deployedAddressPath,
@@ -40,7 +40,8 @@ export const main = async () => {
           console.log("Done! 🚀")
         }
 
-        await addTransmitter(transmitterAddress[chain], chainIds[remoteChain], localConfigUpdated, socketSigner)
+        await configTransmitter(transmitterAddress[chain], remoteChain, localConfigUpdated, socketSigner)
+        await setRelativeGasPrice(remoteChain, localConfigUpdated, socketSigner)
 
         const socket = await getInstance("Socket", localConfigUpdated["Socket"]);
         await setSocketConfig(socket, chainIds[remoteChain], remoteConfig["Counter"], chainSetups[index]["configForCounter"], localConfigUpdated, counterSigner)
@@ -149,26 +150,65 @@ const setSocketConfig = async (socket, remoteChainSlug, remoteCounter, integrati
   await tx.wait();
 }
 
-const addTransmitter = async (transmitter, remoteChainSlug, localConfig, signer) => {
+const configTransmitter = async (transmitter, remoteChain, localConfig, signer) => {
   const transmitManager: Contract = await getInstance(
     "TransmitManager",
     localConfig["TransmitManager"]
   );
+  const remoteChainSlug = chainIds[remoteChain]
 
   const isSet = await transmitManager.isTransmitter(transmitter, remoteChainSlug);
-  if (isSet) return;
+  if (!isSet) {
+    const tx = await transmitManager
+      .connect(signer)
+      .grantTransmitterRole(
+        remoteChainSlug,
+        transmitter
+      );
 
-  const tx = await transmitManager
-    .connect(signer)
-    .grantTransmitterRole(
-      remoteChainSlug,
-      transmitter
+    console.log(
+      `Setting transmitter ${transmitter} for ${remoteChainSlug} chain id! Transaction Hash: ${tx.hash}`
     );
+    await tx.wait();
+  }
 
-  console.log(
-    `Setting transmitter ${transmitter} for ${remoteChainSlug} chain id! Transaction Hash: ${tx.hash}`
+  const gasLimit = await transmitManager.proposeGasLimit(remoteChainSlug);
+  if (parseInt(gasLimit) !== proposeGasLimit[remoteChain]) {
+    const tx = await transmitManager
+      .connect(signer)
+      .setProposeGasLimit(
+        remoteChainSlug,
+        proposeGasLimit[remoteChain]
+      );
+
+    console.log(
+      `Setting propose gas limit ${proposeGasLimit[remoteChain]} for ${remoteChainSlug} chain id! Transaction Hash: ${tx.hash}`
+    );
+    await tx.wait();
+  }
+}
+
+const setRelativeGasPrice = async (remoteChain, localConfig, signer) => {
+  const oracle: Contract = await getInstance(
+    "GasPriceOracle",
+    localConfig["GasPriceOracle"]
   );
-  await tx.wait();
+  const remoteChainSlug = chainIds[remoteChain]
+
+  const gasPrice = await oracle.relativeGasPrice(chainIds[remoteChain]);
+  if (parseInt(gasPrice) !== relativeGasPrice[remoteChain]) {
+    const tx = await oracle
+      .connect(signer)
+      .setRelativeGasPrice(
+        remoteChainSlug,
+        relativeGasPrice[remoteChain]
+      );
+
+    console.log(
+      `Setting relative gas price ${relativeGasPrice[remoteChain]} for ${remoteChainSlug} chain id! Transaction Hash: ${tx.hash}`
+    );
+    await tx.wait();
+  }
 }
 
 main()
