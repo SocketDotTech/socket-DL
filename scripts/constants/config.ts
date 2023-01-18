@@ -96,23 +96,6 @@ export const proposeGasLimit: {
   mainnet: 300000,
 };
 
-// TODO
-export const relativeGasPrice: {
-  [key: string]: number;
-} = {
-  "bsc-testnet": 0,
-  "polygon-mainnet": 0,
-  bsc: 0,
-  "polygon-mumbai": 0,
-  "arbitrum-goerli": 0,
-  "optimism-goerli": 0,
-  goerli: 0,
-  hardhat: 0,
-  arbitrum: 0,
-  optimism: 0,
-  mainnet: 0,
-};
-
 export const switchboards = {
   "arbitrum-goerli": {
     goerli: {

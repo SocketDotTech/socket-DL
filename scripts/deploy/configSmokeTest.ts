@@ -1,7 +1,7 @@
 import fs from "fs";
 import hre from "hardhat";
 import { constants, utils } from "ethers";
-import { transmitterAddress, chainIds, executorAddress, switchboards, proposeGasLimit, watcherAddress, relativeGasPrice } from "../constants";
+import { transmitterAddress, chainIds, executorAddress, switchboards, proposeGasLimit, watcherAddress } from "../constants";
 import { config } from "./config";
 import {
   deployedAddressPath,
@@ -48,10 +48,6 @@ const checkOracle = async (chain, remoteChain, oracleAddr, transmitManagerAddr) 
   // check transmit manager
   const transmitManager = await oracle.transmitManager();
   assert(transmitManager.toLowerCase() === transmitManagerAddr.toLowerCase(), `❌ TransmitManager not set in oracle on ${chain}`);
-
-  // check gas price
-  const gasPrice = await oracle.relativeGasPrice(chainIds[remoteChain]);
-  assert(parseInt(gasPrice) === relativeGasPrice[remoteChain], `❌ Relative GasPrice set to 0 for ${remoteChain} on ${chain}`);
 }
 
 const checkSwitchboard = async (chain, remoteChain, localSwitchboard, remoteSwitchboard, configurationType) => {

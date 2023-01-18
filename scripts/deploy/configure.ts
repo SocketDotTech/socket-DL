@@ -1,7 +1,7 @@
 import fs from "fs";
 import hre from "hardhat";
 import { constants, Contract } from "ethers";
-import { chainIds, networkToChainId, proposeGasLimit, relativeGasPrice, switchboards, transmitterAddress } from "../constants";
+import { chainIds, networkToChainId, proposeGasLimit, switchboards, transmitterAddress } from "../constants";
 import { config } from "./config";
 import {
   deployedAddressPath,
@@ -41,7 +41,6 @@ export const main = async () => {
         }
 
         await configTransmitter(transmitterAddress[chain], remoteChain, localConfigUpdated, socketSigner)
-        await setRelativeGasPrice(remoteChain, localConfigUpdated, socketSigner)
 
         const socket = await getInstance("Socket", localConfigUpdated["Socket"]);
         await setSocketConfig(socket, chainIds[remoteChain], remoteConfig["Counter"], chainSetups[index]["configForCounter"], localConfigUpdated, counterSigner)
@@ -183,29 +182,6 @@ const configTransmitter = async (transmitter, remoteChain, localConfig, signer) 
 
     console.log(
       `Setting propose gas limit ${proposeGasLimit[remoteChain]} for ${remoteChainSlug} chain id! Transaction Hash: ${tx.hash}`
-    );
-    await tx.wait();
-  }
-}
-
-const setRelativeGasPrice = async (remoteChain, localConfig, signer) => {
-  const oracle: Contract = await getInstance(
-    "GasPriceOracle",
-    localConfig["GasPriceOracle"]
-  );
-  const remoteChainSlug = chainIds[remoteChain]
-
-  const gasPrice = await oracle.relativeGasPrice(chainIds[remoteChain]);
-  if (parseInt(gasPrice) !== relativeGasPrice[remoteChain]) {
-    const tx = await oracle
-      .connect(signer)
-      .setRelativeGasPrice(
-        remoteChainSlug,
-        relativeGasPrice[remoteChain]
-      );
-
-    console.log(
-      `Setting relative gas price ${relativeGasPrice[remoteChain]} for ${remoteChainSlug} chain id! Transaction Hash: ${tx.hash}`
     );
     await tx.wait();
   }
