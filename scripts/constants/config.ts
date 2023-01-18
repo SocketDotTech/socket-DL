@@ -67,33 +67,50 @@ export const timeout: {
 export const sealGasLimit: {
   [key: string]: number;
 } = {
-  "bsc-testnet": 90000,
-  "polygon-mainnet": 90000,
-  bsc: 90000,
-  "polygon-mumbai": 90000,
-  "arbitrum-goerli": 90000,
-  "optimism-goerli": 90000,
-  goerli: 90000,
-  hardhat: 90000,
-  arbitrum: 90000,
-  optimism: 90000,
-  mainnet: 90000,
+  "bsc-testnet": 300000,
+  "polygon-mainnet": 300000,
+  bsc: 300000,
+  "polygon-mumbai": 300000,
+  "arbitrum-goerli": 300000,
+  "optimism-goerli": 300000,
+  goerli: 300000,
+  hardhat: 300000,
+  arbitrum: 300000,
+  optimism: 300000,
+  mainnet: 300000,
 };
 
 export const proposeGasLimit: {
   [key: string]: number;
 } = {
-  "bsc-testnet": 90000,
-  "polygon-mainnet": 90000,
-  bsc: 90000,
-  "polygon-mumbai": 90000,
-  "arbitrum-goerli": 90000,
-  "optimism-goerli": 90000,
-  goerli: 90000,
-  hardhat: 90000,
-  arbitrum: 90000,
-  optimism: 90000,
-  mainnet: 90000,
+  "bsc-testnet": 300000,
+  "polygon-mainnet": 300000,
+  bsc: 300000,
+  "polygon-mumbai": 300000,
+  "arbitrum-goerli": 300000,
+  "optimism-goerli": 300000,
+  goerli: 300000,
+  hardhat: 300000,
+  arbitrum: 300000,
+  optimism: 300000,
+  mainnet: 300000,
+};
+
+// TODO
+export const relativeGasPrice: {
+  [key: string]: number;
+} = {
+  "bsc-testnet": 0,
+  "polygon-mainnet": 0,
+  bsc: 0,
+  "polygon-mumbai": 0,
+  "arbitrum-goerli": 0,
+  "optimism-goerli": 0,
+  goerli: 0,
+  hardhat: 0,
+  arbitrum: 0,
+  optimism: 0,
+  mainnet: 0,
 };
 
 export const switchboards = {

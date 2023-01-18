@@ -45,6 +45,7 @@ export const fastSwitchboard = (
 export const setupFast = async (
   switchboard: Contract,
   remoteChainSlug: number,
+  localChain: string,
   remoteChain: string,
   signer: SignerWithAddress
 ) => {
@@ -53,7 +54,7 @@ export const setupFast = async (
     const attestGasLimitOnChain = await switchboard.attestGasLimit(remoteChainSlug);
     const watcherRoleSet = await switchboard.hasRole(
       utils.hexZeroPad(utils.hexlify(remoteChainSlug), 32),
-      watcherAddress[remoteChain]
+      watcherAddress[localChain]
     );
 
     if (parseInt(executionOverheadOnChain) !== executionOverhead[remoteChain]) {
@@ -68,7 +69,7 @@ export const setupFast = async (
     if (!watcherRoleSet) {
       const grantWatcherRoleTx = await switchboard.connect(signer).grantWatcherRole(
         remoteChainSlug,
-        watcherAddress[remoteChain]
+        watcherAddress[localChain]
       );
       console.log(`grantWatcherRoleTx: ${grantWatcherRoleTx.hash}`);
       await grantWatcherRoleTx.wait();

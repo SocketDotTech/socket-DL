@@ -29,6 +29,7 @@ export const optimisticSwitchboard = (
 export const setupOptimistic = async (
   switchboard: Contract,
   remoteChainSlug: number,
+  localChain: string,
   remoteChain: string,
   signer: SignerWithAddress
 ) => {
@@ -36,8 +37,10 @@ export const setupOptimistic = async (
     const executionOverheadOnChain = await switchboard.executionOverhead(remoteChainSlug)
     const watcherRoleSet = await switchboard.hasRole(
       utils.hexZeroPad(utils.hexlify(remoteChainSlug), 32),
-      watcherAddress[remoteChain]
+      watcherAddress[localChain]
     );
+
+    console.log(executionOverheadOnChain.toString())
 
     if (parseInt(executionOverheadOnChain) !== executionOverhead[remoteChain]) {
       const setExecutionOverheadTx = await switchboard.connect(signer).setExecutionOverhead(
@@ -51,7 +54,7 @@ export const setupOptimistic = async (
     if (!watcherRoleSet) {
       const grantWatcherRoleTx = await switchboard.connect(signer).grantWatcherRole(
         remoteChainSlug,
-        watcherAddress[remoteChain]
+        watcherAddress[localChain]
       );
       console.log(`grantWatcherRoleTx: ${grantWatcherRoleTx.hash}`);
       await grantWatcherRoleTx.wait();
