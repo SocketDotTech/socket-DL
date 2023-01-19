@@ -12,13 +12,12 @@ abstract contract SocketSrc is SocketBase {
 
     /**
      * @notice emits the verification and seal confirmation of a packet
-     * @param capacitorAddress address of capacitor at local
+     * @param transmitter address of transmitter recovered from sig
      * @param packetId packed id
      * @param signature signature of attester
      */
     event PacketVerifiedAndSealed(
         address indexed transmitter,
-        address indexed capacitorAddress,
         uint256 indexed packetId,
         bytes signature
     );
@@ -86,10 +85,12 @@ abstract contract SocketSrc is SocketBase {
 
         _transmitManager__.payFees{value: transmitFee}(remoteChainSlug_);
 
-        switchboard__.payFees{value: value - transmitFee}(
-            msgGasLimit_,
-            remoteChainSlug_
-        );
+        unchecked {
+            switchboard__.payFees{value: value - transmitFee}(
+                msgGasLimit_,
+                remoteChainSlug_
+            );
+        }
     }
 
     function seal(
@@ -117,12 +118,7 @@ abstract contract SocketSrc is SocketBase {
 
         if (!isTransmitter) revert InvalidAttester();
 
-        emit PacketVerifiedAndSealed(
-            transmitter,
-            capacitorAddress_,
-            packetId,
-            signature_
-        );
+        emit PacketVerifiedAndSealed(transmitter, packetId, signature_);
     }
 
     function _getPacketId(

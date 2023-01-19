@@ -9,20 +9,10 @@ import "./SocketConfig.sol";
 abstract contract SocketBase is SocketConfig, ReentrancyGuard {
     IHasher public _hasher__;
     ITransmitManager public _transmitManager__;
+
     uint256 public _chainSlug;
 
     error InvalidAttester();
-
-    constructor(
-        uint32 chainSlug_,
-        address hasher_,
-        address transmitManager_,
-        address capacitorFactory_
-    ) SocketConfig(capacitorFactory_) {
-        _chainSlug = chainSlug_;
-        _hasher__ = IHasher(hasher_);
-        _transmitManager__ = ITransmitManager(transmitManager_);
-    }
 
     function setHasher(address hasher_) external onlyOwner {
         _hasher__ = IHasher(hasher_);

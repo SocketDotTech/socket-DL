@@ -14,7 +14,13 @@ contract Socket is SocketSrc, SocketDst {
         address hasher_,
         address transmitManager_,
         address capacitorFactory_
-    ) SocketBase(chainSlug_, hasher_, transmitManager_, capacitorFactory_) {}
+    ) {
+        _chainSlug = chainSlug_;
+
+        _hasher__ = IHasher(hasher_);
+        _capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
+        _transmitManager__ = ITransmitManager(transmitManager_);
+    }
 
     function rescueFunds(
         address token,

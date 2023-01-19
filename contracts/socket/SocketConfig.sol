@@ -38,10 +38,6 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     error SwitchboardExists();
     error InvalidConnection();
 
-    constructor(address capacitorFactory_) {
-        _capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
-    }
-
     // todo: need event, check for other such functions.
     function setCapacitorFactory(address capacitorFactory_) external onlyOwner {
         _capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
@@ -49,8 +45,8 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
 
     function registerSwitchBoard(
         address switchBoardAddress_,
-        uint256 siblingChainSlug_,
-        uint256 capacitorType_
+        uint32 siblingChainSlug_,
+        uint32 capacitorType_
     ) external {
         // only capacitor checked, decapacitor assumed will exist if capacitor does
         if (
