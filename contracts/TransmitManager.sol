@@ -44,14 +44,13 @@ contract TransmitManager is ITransmitManager, AccessControl {
     }
 
     function checkTransmitter(
-        uint256 siblingChainSlug_,
-        uint256 sigChainSlug_,
+        uint256 slugs_,
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_
     ) external view override returns (address, bool) {
         address transmitter = signatureVerifier.recoverSigner(
-            sigChainSlug_,
+            type(uint128).max & slugs_,
             packetId_,
             root_,
             signature_
@@ -59,7 +58,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
 
         return (
             transmitter,
-            _hasRole(_transmitterRole(siblingChainSlug_), transmitter)
+            _hasRole(_transmitterRole(slugs_ >> 128), transmitter)
         );
     }
 
@@ -89,13 +88,11 @@ contract TransmitManager is ITransmitManager, AccessControl {
             siblingChainSlug_
         );
 
-        unchecked {
-            minTransmissionFees =
-                sealGasLimit *
-                tx.gasprice +
-                proposeGasLimit[siblingChainSlug_] *
-                siblingRelativeGasPrice;
-        }
+        minTransmissionFees =
+            sealGasLimit *
+            tx.gasprice +
+            proposeGasLimit[siblingChainSlug_] *
+            siblingRelativeGasPrice;
     }
 
     // TODO: to support fee distribution

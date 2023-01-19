@@ -105,10 +105,11 @@ abstract contract SocketSrc is SocketBase {
             packetCount
         );
 
+        uint256 siblingChainSlug = _capacitorToSlug[capacitorAddress_];
+
         (address transmitter, bool isTransmitter) = _transmitManager__
             .checkTransmitter(
-                _capacitorToSlug[capacitorAddress_],
-                _capacitorToSlug[capacitorAddress_],
+                (siblingChainSlug << 128) | siblingChainSlug,
                 packetId,
                 root,
                 signature_
