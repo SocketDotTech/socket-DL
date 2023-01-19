@@ -107,8 +107,13 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
         address userAddress,
         uint256 amount
     ) external onlyOwner {
+        require(userAddress != address(0));
+
         if (token == address(0)) {
-            payable(userAddress).transfer(amount);
+            (bool success, ) = userAddress.call{value: address(this).balance}(
+                ""
+            );
+            require(success);
         } else {
             // do we need safe transfer?
             IERC20(token).transfer(userAddress, amount);
