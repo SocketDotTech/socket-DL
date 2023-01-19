@@ -25,8 +25,8 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     // switchboard => siblingChainSlug => IDecapacitor
     mapping(address => mapping(uint256 => IDecapacitor)) public _decapacitors__;
 
-    // plug => remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
-    mapping(address => mapping(uint256 => PlugConfig)) public _plugConfigs;
+    // plug | remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
+    mapping(uint256 => PlugConfig) internal _plugConfigs;
 
     event SwitchboardAdded(
         address switchboard,
@@ -84,8 +84,8 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
             address(0)
         ) revert InvalidConnection();
 
-        PlugConfig storage _plugConfig = _plugConfigs[msg.sender][
-            siblingChainSlug_
+        PlugConfig storage _plugConfig = _plugConfigs[
+            (uint256(uint160(msg.sender)) << 96) | siblingChainSlug_
         ];
 
         _plugConfig.siblingPlug = siblingPlug_;
@@ -101,6 +101,33 @@ abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
         emit PlugConnected(
             msg.sender,
             siblingChainSlug_,
+            _plugConfig.siblingPlug,
+            address(_plugConfig.inboundSwitchboard__),
+            address(_plugConfig.outboundSwitchboard__),
+            address(_plugConfig.capacitor__),
+            address(_plugConfig.decapacitor__)
+        );
+    }
+
+    function getPlugConfig(
+        address plugAddress_,
+        uint256 siblingChainSlug_
+    )
+        external
+        view
+        returns (
+            address siblingPlug,
+            address inboundSwitchboard__,
+            address outboundSwitchboard__,
+            address capacitor__,
+            address decapacitor__
+        )
+    {
+        PlugConfig memory _plugConfig = _plugConfigs[
+            (uint256(uint160(plugAddress_)) << 96) | siblingChainSlug_
+        ];
+
+        return (
             _plugConfig.siblingPlug,
             address(_plugConfig.inboundSwitchboard__),
             address(_plugConfig.outboundSwitchboard__),

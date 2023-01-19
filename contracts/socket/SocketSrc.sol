@@ -34,8 +34,8 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable override {
-        PlugConfig memory plugConfig = _plugConfigs[msg.sender][
-            remoteChainSlug_
+        PlugConfig memory plugConfig = _plugConfigs[
+            (uint256(uint160(msg.sender)) << 96) | remoteChainSlug_
         ];
 
         // Packs the local plug, local chain slug, remote chain slug and nonce

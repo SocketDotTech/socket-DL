@@ -97,8 +97,8 @@ abstract contract SocketDst is SocketBase {
         // todo: to decide if this should be just a bool (was added for fees here)
         executor[msgId] = msg.sender;
 
-        PlugConfig memory plugConfig = _plugConfigs[localPlug][
-            verifyParams_.remoteChainSlug
+        PlugConfig memory plugConfig = _plugConfigs[
+            (uint256(uint160(localPlug)) << 96) | verifyParams_.remoteChainSlug
         ];
 
         bytes32 packedMessage = _hasher__.packMessage(
