@@ -59,11 +59,11 @@ contract FastSwitchboard is SwitchboardBase {
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
 
-        // to handle the situation: if a watcher is removed after it attested the packet
-        if (attestations[packetId] >= totalWatchers[srcChainSlug]) return true;
+        if (attestations[packetId] < totalWatchers[srcChainSlug]) {
+            if (block.timestamp - proposeTime < timeoutInSeconds) return false;
+        }
 
-        if (block.timestamp - proposeTime >= timeoutInSeconds) return true;
-        return false;
+        return true;
     }
 
     function _getExecutionFees(

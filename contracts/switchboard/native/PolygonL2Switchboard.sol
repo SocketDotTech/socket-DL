@@ -68,9 +68,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         uint256
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
-        if (roots[packetId] != root) return false;
-
-        return true;
+        return roots[packetId] == root;
     }
 
     function _getExecutionFees(

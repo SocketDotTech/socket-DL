@@ -29,9 +29,9 @@ contract SingleCapacitor is BaseCapacitor {
         returns (bytes32, uint256)
     {
         uint256 packetCount = _sealedPackets;
+        bytes32 root = _roots[packetCount];
 
         if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
-        bytes32 root = _roots[packetCount];
         _sealedPackets++;
 
         emit PacketComplete(root, packetCount);

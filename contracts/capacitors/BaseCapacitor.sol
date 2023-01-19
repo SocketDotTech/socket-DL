@@ -8,7 +8,9 @@ import "../libraries/SafeTransferLib.sol";
 abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
     using SafeTransferLib for IERC20;
 
-    bytes32 public constant SOCKET_ROLE = keccak256("SOCKET_ROLE");
+    // keccak256("SOCKET_ROLE")
+    bytes32 public constant SOCKET_ROLE =
+        0x9626cdfde87fcc60a5069beda7850c84f848fb1b20dab826995baf7113491456;
 
     /// an incrementing id for each new packet created
     uint256 internal _packets;

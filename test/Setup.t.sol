@@ -203,8 +203,8 @@ contract Setup is Test {
         vm.startPrank(deployer_);
         cc_.socket__.registerSwitchBoard(
             switchBoardAddress_,
-            remoteChainSlug_,
-            _capacitorType
+            uint32(remoteChainSlug_),
+            uint32(_capacitorType)
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
