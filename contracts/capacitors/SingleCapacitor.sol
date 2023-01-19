@@ -28,11 +28,10 @@ contract SingleCapacitor is BaseCapacitor {
         onlyRole(SOCKET_ROLE)
         returns (bytes32, uint256)
     {
-        uint256 packetCount = _sealedPackets;
+        uint256 packetCount = _sealedPackets++;
         bytes32 root = _roots[packetCount];
 
         if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
-        _sealedPackets++;
 
         emit PacketComplete(root, packetCount);
         return (root, packetCount);
