@@ -21,6 +21,8 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
 
     error NoPendingPacket();
 
+    event SocketSet(address socket_);
+
     /**
      * @notice initialises the contract with socket address
      */
@@ -30,6 +32,7 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
 
     function setSocket(address socket_) external onlyOwner {
         _setSocket(socket_);
+        emit SocketSet(socket_);
     }
 
     function _setSocket(address socket_) private {

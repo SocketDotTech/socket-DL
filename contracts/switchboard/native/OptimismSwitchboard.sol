@@ -83,6 +83,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
             data,
             uint32(receivePacketGasLimit)
         );
+        emit InitiatedNativeConfirmation(packetId);
     }
 
     function receivePacket(

@@ -60,6 +60,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
         );
 
         arbsys.sendTxToL1(remoteNativeSwitchboard, data);
+        emit InitiatedNativeConfirmation(packetId);
     }
 
     function receivePacket(

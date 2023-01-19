@@ -38,6 +38,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
 
         bytes memory data = abi.encode(packetId, root);
         _sendMessageToChild(data);
+        emit InitiatedNativeConfirmation(packetId);
     }
 
     function _processMessageFromChild(bytes memory message) internal override {

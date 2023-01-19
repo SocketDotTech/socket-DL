@@ -23,6 +23,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
 
     event SealGasLimitSet(uint256 gasLimit_);
     event ProposeGasLimitSet(uint256 dstChainSlug_, uint256 gasLimit_);
+    event FeesWithdrawn(address account_, uint256 value_);
 
     /**
      * @notice emits when a new signature verifier contract is set
@@ -102,8 +103,12 @@ contract TransmitManager is ITransmitManager, AccessControl {
      */
     function withdrawFees(address account_) external onlyOwner {
         require(account_ != address(0));
-        (bool success, ) = account_.call{value: address(this).balance}("");
+
+        uint256 value = address(this).balance;
+        (bool success, ) = account_.call{value: value}("");
         if (!success) revert TransferFailed();
+
+        emit FeesWithdrawn(account_, value);
     }
 
     /**

@@ -14,8 +14,11 @@ abstract contract SocketBase is SocketConfig, ReentrancyGuard {
 
     error InvalidAttester();
 
+    event HasherSet(address hasher_);
+
     function setHasher(address hasher_) external onlyOwner {
         _hasher__ = IHasher(hasher_);
+        emit HasherSet(hasher_);
     }
 
     // TODO: in discussion
