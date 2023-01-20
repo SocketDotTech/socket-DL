@@ -37,21 +37,21 @@ abstract contract SocketSrc is SocketBase {
         PlugConfig memory plugConfig = _plugConfigs[
             (uint256(uint160(msg.sender)) << 96) | remoteChainSlug_
         ];
+        uint256 localChainSlug = _chainSlug;
 
         // Packs the local plug, local chain slug, remote chain slug and nonce
         // _messageCount++ will take care of msg id overflow as well
         // msgId(256) = localChainSlug(32) | nonce(224)
-        uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
-
+        uint256 msgId = (uint256(uint32(localChainSlug)) << 224) |
+            _messageCount++;
         _deductFees(
             msgGasLimit_,
             remoteChainSlug_,
-            msg.value,
             plugConfig.outboundSwitchboard__
         );
 
         bytes32 packedMessage = _hasher__.packMessage(
-            _chainSlug,
+            localChainSlug,
             msg.sender,
             remoteChainSlug_,
             plugConfig.siblingPlug,
@@ -62,7 +62,7 @@ abstract contract SocketSrc is SocketBase {
 
         plugConfig.capacitor__.addPackedMessage(packedMessage);
         emit MessageTransmitted(
-            _chainSlug,
+            localChainSlug,
             msg.sender,
             remoteChainSlug_,
             plugConfig.siblingPlug,
@@ -76,17 +76,16 @@ abstract contract SocketSrc is SocketBase {
     function _deductFees(
         uint256 msgGasLimit_,
         uint256 remoteChainSlug_,
-        uint256 value,
         ISwitchboard switchboard__
     ) internal {
         uint256 transmitFee = _transmitManager__.getMinFees(remoteChainSlug_);
 
-        if (value < transmitFee) revert InsufficientFees();
+        if (msg.value < transmitFee) revert InsufficientFees();
 
         _transmitManager__.payFees{value: transmitFee}(remoteChainSlug_);
 
         unchecked {
-            switchboard__.payFees{value: value - transmitFee}(
+            switchboard__.payFees{value: msg.value - transmitFee}(
                 msgGasLimit_,
                 remoteChainSlug_
             );
@@ -100,11 +99,9 @@ abstract contract SocketSrc is SocketBase {
         (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket();
 
-        uint256 packetId = _getPacketId(
-            capacitorAddress_,
-            _chainSlug,
-            packetCount
-        );
+        uint256 packetId = (_chainSlug << 224) |
+            (uint256(uint160(capacitorAddress_)) << 64) |
+            packetCount;
 
         uint256 siblingChainSlug = _capacitorToSlug[capacitorAddress_];
 
@@ -119,16 +116,5 @@ abstract contract SocketSrc is SocketBase {
         if (!isTransmitter) revert InvalidAttester();
 
         emit PacketVerifiedAndSealed(transmitter, packetId, signature_);
-    }
-
-    function _getPacketId(
-        address capacitorAddr_,
-        uint256 chainSlug_,
-        uint256 packetCount_
-    ) internal pure returns (uint256 packetId) {
-        packetId =
-            (chainSlug_ << 224) |
-            (uint256(uint160(capacitorAddr_)) << 64) |
-            packetCount_;
     }
 }

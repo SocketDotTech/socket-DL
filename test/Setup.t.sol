@@ -2,7 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import {Socket, ISocket, SocketConfig, SocketSrc, SocketDst, SocketBase} from "../contracts/socket/Socket.sol";
+import {ISocket, SocketConfig, SocketBase} from "../contracts/socket/SocketBase.sol";
+import {Socket, SocketSrc, SocketDst} from "../contracts/socket/Socket.sol";
 import "../contracts/utils/SignatureVerifier.sol";
 import "../contracts/utils/Hasher.sol";
 

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./SocketBase.sol";
-import "./SocketSrc.sol";
+import {SocketSrc} from "./SocketSrc.sol";
 import "./SocketDst.sol";
 import "../libraries/SafeTransferLib.sol";
 

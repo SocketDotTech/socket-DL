@@ -2,9 +2,9 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ISocket.sol";
-import "../utils/AccessControl.sol";
 import "../interfaces/ICapacitorFactory.sol";
 import "../interfaces/ISwitchboard.sol";
+import {AccessControl} from "../utils/AccessControl.sol";
 
 abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
     struct PlugConfig {

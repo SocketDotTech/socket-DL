@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-// import "../interfaces/IVerifier.sol";
 import "../interfaces/IDecapacitor.sol";
 import "../interfaces/IPlug.sol";
 import "./SocketBase.sol";
