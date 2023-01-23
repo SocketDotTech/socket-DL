@@ -27,21 +27,28 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     // assumption: natives have 18 decimals
     function payFees(
         uint256 msgGasLimit,
+        uint256 msgValue,
         uint256 dstChainSlug
     ) external payable override {
-        uint256 expectedFees = _calculateFees(msgGasLimit, dstChainSlug);
+        uint256 expectedFees = _calculateFees(
+            msgGasLimit,
+            msgValue,
+            dstChainSlug
+        );
         if (msg.value < expectedFees) revert FeesNotEnough();
     }
 
     function getMinFees(
         uint256 msgGasLimit,
+        uint256 msgValue,
         uint256 dstChainSlug
     ) external view override returns (uint256) {
-        return _calculateFees(msgGasLimit, dstChainSlug);
+        return _calculateFees(msgGasLimit, msgValue, dstChainSlug);
     }
 
     function _calculateFees(
         uint256 msgGasLimit,
+        uint256 msgValue,
         uint256 dstChainSlug
     ) internal view returns (uint256 expectedFees) {
         uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
@@ -55,7 +62,11 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
             dstRelativeGasPrice
         );
 
-        expectedFees = minExecutionFees + minVerificationFees;
+        expectedFees =
+            minExecutionFees +
+            minVerificationFees +
+            msgValue *
+            dstRelativeGasPrice;
     }
 
     // overridden in child contracts
