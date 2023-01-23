@@ -12,6 +12,7 @@ contract Hasher is IHasher {
         address dstPlug,
         uint256 msgId,
         uint256 msgGasLimit,
+        uint256 msgValue,
         bytes calldata payload
     ) external pure override returns (bytes32) {
         return
@@ -23,6 +24,7 @@ contract Hasher is IHasher {
                     dstPlug,
                     msgId,
                     msgGasLimit,
+                    msgValue,
                     payload
                 )
             );
