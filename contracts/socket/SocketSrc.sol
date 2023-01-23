@@ -33,6 +33,7 @@ abstract contract SocketSrc is SocketBase {
     function outbound(
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
+        uint256 msgValue_,
         bytes calldata payload_
     ) external payable override {
         PlugConfig memory plugConfig = _plugConfigs[msg.sender][
@@ -47,7 +48,7 @@ abstract contract SocketSrc is SocketBase {
         _deductFees(
             msgGasLimit_,
             remoteChainSlug_,
-            msg.value,
+            msgValue_,
             plugConfig.outboundSwitchboard__
         );
 
@@ -58,6 +59,7 @@ abstract contract SocketSrc is SocketBase {
             plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
+            msgValue_,
             payload_
         );
 
@@ -77,19 +79,21 @@ abstract contract SocketSrc is SocketBase {
     function _deductFees(
         uint256 msgGasLimit_,
         uint256 remoteChainSlug_,
-        uint256 value,
+        uint256 msgValue_,
         ISwitchboard switchboard__
     ) internal {
         uint256 transmitFee = _transmitManager__.getMinFees(remoteChainSlug_);
 
-        if (value < transmitFee) revert InsufficientFees();
+        if (msg.value < transmitFee) revert InsufficientFees();
 
-        _transmitManager__.payFees{value: transmitFee}(remoteChainSlug_);
-
-        switchboard__.payFees{value: value - transmitFee}(
-            msgGasLimit_,
-            remoteChainSlug_
-        );
+        unchecked {
+            _transmitManager__.payFees{value: transmitFee}(remoteChainSlug_);
+            switchboard__.payFees{value: msg.value - transmitFee}(
+                msgGasLimit_,
+                msgValue_,
+                remoteChainSlug_
+            );
+        }
     }
 
     function seal(

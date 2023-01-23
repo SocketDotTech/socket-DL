@@ -92,6 +92,7 @@ interface ISocket {
     function outbound(
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
+        uint256 msgValue_,
         bytes calldata payload_
     ) external payable;
 
@@ -101,21 +102,24 @@ interface ISocket {
         bytes decapacitorProof;
     }
 
+    struct ExecutionParams {
+        uint256 msgValue;
+        uint256 msgGasLimit;
+        bytes payload;
+    }
+
     /**
      * @notice executes a message
-     * @param msgGasLimit gas limit needed to execute the inbound at remote
      * @param msgId message id packed with remoteChainSlug and nonce
      * @param localPlug local plug address
-     * @param payload the data which is needed by plug at inbound call on remote
      * @param verifyParams_ the details needed for message verification
      */
     function execute(
-        uint256 msgGasLimit,
         uint256 msgId,
         address localPlug,
-        bytes calldata payload,
-        ISocket.VerificationParams calldata verifyParams_
-    ) external;
+        ISocket.VerificationParams calldata verifyParams_,
+        ISocket.ExecutionParams calldata executeParams_
+    ) external payable;
 
     /**
      * @notice sets the config specific to the plug
@@ -132,16 +136,4 @@ interface ISocket {
     ) external;
 
     function remoteRoots(uint256 packetId_) external view returns (bytes32);
-
-    // TODO: retry
-    // function retry(uint256 msgId_, uint256 newMsgGasLimit_) external payable;
-
-    // function retryExecute(
-    //     uint256 newMsgGasLimit,
-    //     uint256 msgId,
-    //     uint256 msgGasLimit,
-    //     address localPlug,
-    //     bytes calldata payload,
-    //     ISocket.VerificationParams calldata verifyParams_
-    // ) external;
 }

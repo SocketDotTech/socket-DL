@@ -324,13 +324,13 @@ contract Setup is Test {
             proof_
         );
 
-        dst_.socket__.execute(
+        ISocket.ExecutionParams memory eParams = ISocket.ExecutionParams(
+            0,
             msgGasLimit_,
-            msgId_,
-            remotePlug_,
-            payload_,
-            vParams
+            payload_
         );
+
+        dst_.socket__.execute(msgId_, remotePlug_, vParams, eParams);
     }
 
     function _packMessageId(

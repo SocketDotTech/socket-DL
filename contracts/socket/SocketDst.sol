@@ -80,19 +80,16 @@ abstract contract SocketDst is SocketBase {
 
     /**
      * @notice executes a message
-     * @param msgGasLimit gas limit needed to execute the inbound at remote
      * @param msgId message id packed with local plug, local chainSlug, remote ChainSlug and nonce
      * @param localPlug remote plug address
-     * @param payload the data which is needed by plug at inbound call on remote
      * @param verifyParams_ the details needed for message verification
      */
     function execute(
-        uint256 msgGasLimit,
         uint256 msgId,
         address localPlug,
-        bytes calldata payload,
-        ISocket.VerificationParams calldata verifyParams_
-    ) external override nonReentrant onlyRole(EXECUTOR_ROLE) {
+        ISocket.VerificationParams calldata verifyParams_,
+        ISocket.ExecutionParams calldata executeParams_
+    ) external payable override nonReentrant onlyRole(EXECUTOR_ROLE) {
         if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
 
         // todo: to decide if this should be just a bool (was added for fees here)
@@ -108,17 +105,19 @@ abstract contract SocketDst is SocketBase {
             _chainSlug,
             localPlug,
             msgId,
-            msgGasLimit,
-            payload
+            executeParams_.msgGasLimit,
+            executeParams_.msgValue,
+            executeParams_.payload
         );
 
         _verify(packedMessage, plugConfig, verifyParams_);
         _execute(
             localPlug,
             verifyParams_.remoteChainSlug,
-            msgGasLimit,
+            executeParams_.msgGasLimit,
+            executeParams_.msgValue,
             msgId,
-            payload
+            executeParams_.payload
         );
     }
 
@@ -149,11 +148,15 @@ abstract contract SocketDst is SocketBase {
         address localPlug,
         uint256 remoteChainSlug,
         uint256 msgGasLimit,
+        uint256 msgValue,
         uint256 msgId,
         bytes calldata payload
     ) internal {
         try
-            IPlug(localPlug).inbound{gas: msgGasLimit}(remoteChainSlug, payload)
+            IPlug(localPlug).inbound{gas: msgGasLimit, value: msgValue}(
+                remoteChainSlug,
+                payload
+            )
         {
             messageStatus[msgId] = MessageStatus.SUCCESS;
             emit ExecutionSuccess(msgId);
