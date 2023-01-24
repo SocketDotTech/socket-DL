@@ -32,14 +32,14 @@ export default async function deployAndRegisterSwitchboard(
         switchboard.address
       );
       await storeAddresses(sourceConfig, chainIds[network]);
-
-      if (contractName === "FastSwitchboard") {
-        await setupFast(switchboard, chainIds[remoteChain], remoteChain, signer);
-      } else if (contractName === "OptimisticSwitchboard") {
-        await setupOptimistic(switchboard, chainIds[remoteChain], remoteChain, signer)
-      }
     } else {
       switchboard = await getInstance(contractName, switchboardAddress)
+    }
+
+    if (contractName === "FastSwitchboard") {
+      await setupFast(switchboard, chainIds[remoteChain], network, remoteChain, signer);
+    } else if (contractName === "OptimisticSwitchboard") {
+      await setupOptimistic(switchboard, chainIds[remoteChain], network, remoteChain, signer)
     }
 
     sourceConfig = await registerSwitchBoard(switchboard.address, remoteChainSlug, capacitorType, signer, integrationType, sourceConfig);

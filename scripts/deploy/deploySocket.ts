@@ -78,7 +78,7 @@ export const main = async () => {
     await storeAddresses(addresses, chainIds[network]);
 
     const tmAddress: string = await gasPriceOracle.transmitManager();
-    if (tmAddress.toLowerCase() !== transmitManager.address) {
+    if (tmAddress.toLowerCase() !== (transmitManager.address).toLowerCase()) {
       const tx = await gasPriceOracle
         .connect(socketSigner)
         .setTransmitManager(transmitManager.address);
