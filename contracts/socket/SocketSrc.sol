@@ -84,13 +84,15 @@ abstract contract SocketSrc is SocketBase {
         ISwitchboard switchboard__
     ) internal returns (uint256 executionFee) {
         uint256 transmitFee = _transmitManager__.getMinFees(remoteChainSlug_);
-        executionFee = switchboard__.getExecutionFees(
-            msgGasLimit_,
-            msgValue_,
+        uint256 verificationFee = switchboard__.getVerificationFees(
             remoteChainSlug_
         );
 
-        if (msg.value < transmitFee + executionFee) revert InsufficientFees();
+        if (msg.value < transmitFee + verificationFee)
+            revert InsufficientFees();
+
+        // any extra fee is considered as executionFee
+        executionFee = msg.value - transmitFee - verificationFee;
 
         unchecked {
             _transmitManager__.payFees{value: transmitFee}(remoteChainSlug_);

@@ -26,4 +26,8 @@ interface ISwitchboard {
         uint256 msgValue,
         uint256 dstChainSlug
     ) external view returns (uint256);
+
+    function getVerificationFees(
+        uint256 dstChainSlug
+    ) external view returns (uint256);
 }
