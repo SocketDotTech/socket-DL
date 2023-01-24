@@ -66,16 +66,6 @@ contract FastSwitchboard is SwitchboardBase {
         return false;
     }
 
-    function _getExecutionFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug,
-        uint256 dstRelativeGasPrice
-    ) internal view override returns (uint256) {
-        return
-            (executionOverhead[dstChainSlug] + msgGasLimit) *
-            dstRelativeGasPrice;
-    }
-
     function _getVerificationFees(
         uint256 dstChainSlug,
         uint256 dstRelativeGasPrice
