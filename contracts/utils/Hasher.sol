@@ -13,6 +13,7 @@ contract Hasher is IHasher {
         uint256 msgId,
         uint256 msgGasLimit,
         uint256 msgValue,
+        uint256 executionFee,
         bytes calldata payload
     ) external pure override returns (bytes32) {
         return
@@ -25,6 +26,7 @@ contract Hasher is IHasher {
                     msgId,
                     msgGasLimit,
                     msgValue,
+                    executionFee,
                     payload
                 )
             );

@@ -21,6 +21,7 @@ interface IHasher {
         uint256 msgId,
         uint256 msgGasLimit,
         uint256 msgValue,
+        uint256 executionFee,
         bytes calldata payload
     ) external returns (bytes32);
 }
