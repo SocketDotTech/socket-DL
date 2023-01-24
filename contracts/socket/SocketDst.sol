@@ -81,7 +81,7 @@ abstract contract SocketDst is SocketBase {
         if (_executionManager__.isExecutor(msg.sender)) revert NotExecutor();
         if (messageExecuted[msgId]) revert MessageAlreadyExecuted();
 
-        PlugConfig memory plugConfig = _plugConfigs[localPlug][
+        PlugConfig storage plugConfig = _plugConfigs[localPlug][
             verifyParams_.remoteChainSlug
         ];
 
@@ -112,7 +112,7 @@ abstract contract SocketDst is SocketBase {
 
     function _verify(
         bytes32 packedMessage,
-        PlugConfig memory plugConfig,
+        PlugConfig storage plugConfig,
         ISocket.VerificationParams calldata verifyParams_
     ) internal view {
         if (
