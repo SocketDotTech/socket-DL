@@ -2,11 +2,11 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ISocket.sol";
-import "../utils/AccessControl.sol";
+import "../utils/Ownable.sol";
 import "../interfaces/ICapacitorFactory.sol";
 import "../interfaces/ISwitchboard.sol";
 
-abstract contract SocketConfig is ISocket, AccessControl(msg.sender) {
+abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
     struct PlugConfig {
         address siblingPlug;
         ICapacitor capacitor__;

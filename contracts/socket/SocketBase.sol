@@ -3,12 +3,16 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IHasher.sol";
 import "../interfaces/ITransmitManager.sol";
+import "../interfaces/IExecutionManager.sol";
+
 import "../utils/ReentrancyGuard.sol";
 import "./SocketConfig.sol";
 
 abstract contract SocketBase is SocketConfig, ReentrancyGuard {
     IHasher public _hasher__;
     ITransmitManager public _transmitManager__;
+    IExecutionManager public _executionManager__;
+
     uint256 public _chainSlug;
 
     error InvalidAttester();
@@ -17,11 +21,13 @@ abstract contract SocketBase is SocketConfig, ReentrancyGuard {
         uint32 chainSlug_,
         address hasher_,
         address transmitManager_,
+        address executionManager_,
         address capacitorFactory_
     ) SocketConfig(capacitorFactory_) {
         _chainSlug = chainSlug_;
         _hasher__ = IHasher(hasher_);
         _transmitManager__ = ITransmitManager(transmitManager_);
+        _executionManager__ = IExecutionManager(executionManager_);
     }
 
     function setHasher(address hasher_) external onlyOwner {
