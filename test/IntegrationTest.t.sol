@@ -84,7 +84,7 @@ contract HappyTest is Setup {
 
         assertEq(dstCounter__.counter(), amount);
         assertEq(srcCounter__.counter(), 0);
-        assertEq(uint256(_b.socket__.messageStatus(msgId)), 1);
+        assertTrue(_b.socket__.messageExecuted(msgId));
 
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(

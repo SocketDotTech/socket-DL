@@ -118,7 +118,7 @@ interface ISocket {
         address localPlug,
         ISocket.VerificationParams calldata verifyParams_,
         ISocket.ExecutionParams calldata executeParams_
-    ) external payable;
+    ) external;
 
     /**
      * @notice sets the config specific to the plug

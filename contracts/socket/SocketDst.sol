@@ -12,12 +12,6 @@ abstract contract SocketDst is SocketBase {
         PROPOSED
     }
 
-    enum MessageStatus {
-        NOT_EXECUTED,
-        SUCCESS,
-        FAILED
-    }
-
     error InvalidProof();
     error InvalidRetry();
     error VerificationFailed();
@@ -32,7 +26,7 @@ abstract contract SocketDst is SocketBase {
     mapping(uint256 => mapping(address => mapping(address => uint256)))
         public feesEarned;
     // msgId => message status
-    mapping(uint256 => MessageStatus) public messageStatus;
+    mapping(uint256 => bool) public messageExecuted;
     // capacitorAddr|chainSlug|packetId
     mapping(uint256 => bytes32) public override remoteRoots;
     mapping(uint256 => uint256) public rootProposedAt;
@@ -90,9 +84,8 @@ abstract contract SocketDst is SocketBase {
         address localPlug,
         ISocket.VerificationParams calldata verifyParams_,
         ISocket.ExecutionParams calldata executeParams_
-    ) external payable override nonReentrant onlyRole(EXECUTOR_ROLE) {
-        if (messageStatus[msgId] == MessageStatus.SUCCESS)
-            revert MessageAlreadyExecuted();
+    ) external override nonReentrant onlyRole(EXECUTOR_ROLE) {
+        if (messageExecuted[msgId]) revert MessageAlreadyExecuted();
 
         PlugConfig memory plugConfig = _plugConfigs[localPlug][
             verifyParams_.remoteChainSlug
@@ -156,15 +149,13 @@ abstract contract SocketDst is SocketBase {
         try
             IPlug(localPlug).inbound{gas: msgGasLimit}(remoteChainSlug, payload)
         {
-            messageStatus[msgId] = MessageStatus.SUCCESS;
+            messageExecuted[msgId] = true;
             emit ExecutionSuccess(msgId);
         } catch Error(string memory reason) {
             // catch failing revert() and require()
-            messageStatus[msgId] = MessageStatus.FAILED;
             emit ExecutionFailed(msgId, reason);
         } catch (bytes memory reason) {
             // catch failing assert()
-            messageStatus[msgId] = MessageStatus.FAILED;
             emit ExecutionFailedBytes(msgId, reason);
         }
     }
