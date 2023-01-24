@@ -45,7 +45,7 @@ abstract contract SocketSrc is SocketBase {
         // msgId(256) = localChainSlug(32) | nonce(224)
         uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
 
-        _deductFees(
+        uint256 executionFee = _deductFees(
             msgGasLimit_,
             remoteChainSlug_,
             msgValue_,
@@ -60,6 +60,7 @@ abstract contract SocketSrc is SocketBase {
             msgId,
             msgGasLimit_,
             msgValue_,
+            executionFee,
             payload_
         );
 
@@ -81,10 +82,15 @@ abstract contract SocketSrc is SocketBase {
         uint256 remoteChainSlug_,
         uint256 msgValue_,
         ISwitchboard switchboard__
-    ) internal {
+    ) internal returns (uint256 executionFee) {
         uint256 transmitFee = _transmitManager__.getMinFees(remoteChainSlug_);
+        executionFee = switchboard__.getExecutionFees(
+            msgGasLimit_,
+            msgValue_,
+            remoteChainSlug_
+        );
 
-        if (msg.value < transmitFee) revert InsufficientFees();
+        if (msg.value < transmitFee + executionFee) revert InsufficientFees();
 
         unchecked {
             _transmitManager__.payFees{value: transmitFee}(remoteChainSlug_);

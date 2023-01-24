@@ -28,8 +28,9 @@ abstract contract SocketDst is SocketBase {
     bytes32 private constant EXECUTOR_ROLE =
         0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
 
-    // msgId => executorAddress
-    mapping(uint256 => address) public executor;
+    // srcChainSlug => switchboardAddress => executorAddress => fees
+    mapping(uint256 => mapping(address => mapping(address => uint256)))
+        public feesEarned;
     // msgId => message status
     mapping(uint256 => MessageStatus) public messageStatus;
     // capacitorAddr|chainSlug|packetId
@@ -90,14 +91,16 @@ abstract contract SocketDst is SocketBase {
         ISocket.VerificationParams calldata verifyParams_,
         ISocket.ExecutionParams calldata executeParams_
     ) external payable override nonReentrant onlyRole(EXECUTOR_ROLE) {
-        if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
-
-        // todo: to decide if this should be just a bool (was added for fees here)
-        executor[msgId] = msg.sender;
+        if (messageStatus[msgId] == MessageStatus.SUCCESS)
+            revert MessageAlreadyExecuted();
 
         PlugConfig memory plugConfig = _plugConfigs[localPlug][
             verifyParams_.remoteChainSlug
         ];
+
+        feesEarned[verifyParams_.remoteChainSlug][
+            address(plugConfig.inboundSwitchboard__)
+        ][msg.sender] += executeParams_.executionFee;
 
         bytes32 packedMessage = _hasher__.packMessage(
             verifyParams_.remoteChainSlug,
@@ -107,6 +110,7 @@ abstract contract SocketDst is SocketBase {
             msgId,
             executeParams_.msgGasLimit,
             executeParams_.msgValue,
+            executeParams_.executionFee,
             executeParams_.payload
         );
 

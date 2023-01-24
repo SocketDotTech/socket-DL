@@ -76,6 +76,7 @@ contract DualChainTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            0,
             payload,
             proof
         );

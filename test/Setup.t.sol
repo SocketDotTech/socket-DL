@@ -313,6 +313,7 @@ contract Setup is Test {
         uint256 packetId_,
         uint256 msgId_,
         uint256 msgGasLimit_,
+        uint256 executionFee_,
         bytes memory payload_,
         bytes memory proof_
     ) internal {
@@ -325,6 +326,7 @@ contract Setup is Test {
         );
 
         ISocket.ExecutionParams memory eParams = ISocket.ExecutionParams(
+            executionFee_,
             0,
             msgGasLimit_,
             payload_

@@ -103,6 +103,7 @@ interface ISocket {
     }
 
     struct ExecutionParams {
+        uint256 executionFee;
         uint256 msgValue;
         uint256 msgGasLimit;
         bytes payload;
