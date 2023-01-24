@@ -11,7 +11,7 @@ import "../contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol"
 
 import "../contracts/TransmitManager.sol";
 import "../contracts/GasPriceOracle.sol";
-import "../contracts/GasPriceOracle.sol";
+import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
 
 contract Setup is Test {
@@ -57,6 +57,7 @@ contract Setup is Test {
         CapacitorFactory capacitorFactory__;
         TransmitManager transmitManager__;
         GasPriceOracle gasPriceOracle__;
+        ExecutionManager executionManager__;
         SocketConfigContext[] configs__;
     }
 
@@ -158,8 +159,8 @@ contract Setup is Test {
         cc_.configs__.push(scc_);
 
         // add roles
-        hoax(_socketOwner);
-        cc_.socket__.grantExecutorRole(_executor);
+        // hoax(_socketOwner);
+        // cc_.socket__.grantExecutorRole(_executor);
         _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
     }
 
@@ -173,6 +174,10 @@ contract Setup is Test {
         cc_.sigVerifier__ = new SignatureVerifier();
         cc_.capacitorFactory__ = new CapacitorFactory();
         cc_.gasPriceOracle__ = new GasPriceOracle(deployer_);
+        cc_.executionManager__ = new ExecutionManager(
+            cc_.gasPriceOracle__,
+            deployer_
+        );
 
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
@@ -188,6 +193,7 @@ contract Setup is Test {
             uint32(cc_.chainSlug),
             address(cc_.hasher__),
             address(cc_.transmitManager__),
+            address(cc_.executionManager__),
             address(cc_.capacitorFactory__)
         );
 
