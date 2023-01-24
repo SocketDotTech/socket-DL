@@ -92,7 +92,6 @@ interface ISocket {
     function outbound(
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
-        uint256 msgValue_,
         bytes calldata payload_
     ) external payable;
 
@@ -104,7 +103,6 @@ interface ISocket {
 
     struct ExecutionParams {
         uint256 executionFee;
-        uint256 msgValue;
         uint256 msgGasLimit;
         bytes payload;
     }

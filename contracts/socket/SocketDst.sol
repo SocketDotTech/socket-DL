@@ -109,7 +109,6 @@ abstract contract SocketDst is SocketBase {
             localPlug,
             msgId,
             executeParams_.msgGasLimit,
-            executeParams_.msgValue,
             executeParams_.executionFee,
             executeParams_.payload
         );
@@ -119,7 +118,6 @@ abstract contract SocketDst is SocketBase {
             localPlug,
             verifyParams_.remoteChainSlug,
             executeParams_.msgGasLimit,
-            executeParams_.msgValue,
             msgId,
             executeParams_.payload
         );
@@ -152,15 +150,11 @@ abstract contract SocketDst is SocketBase {
         address localPlug,
         uint256 remoteChainSlug,
         uint256 msgGasLimit,
-        uint256 msgValue,
         uint256 msgId,
         bytes calldata payload
     ) internal {
         try
-            IPlug(localPlug).inbound{gas: msgGasLimit, value: msgValue}(
-                remoteChainSlug,
-                payload
-            )
+            IPlug(localPlug).inbound{gas: msgGasLimit}(remoteChainSlug, payload)
         {
             messageStatus[msgId] = MessageStatus.SUCCESS;
             emit ExecutionSuccess(msgId);

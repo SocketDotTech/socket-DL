@@ -91,7 +91,6 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         ISocket(_socket).outbound{value: SOCKET_FEE}(
             targetChain_,
             msgGasLimit,
-            0,
             payload_
         );
     }
