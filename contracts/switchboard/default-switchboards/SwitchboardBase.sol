@@ -45,6 +45,18 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
         return _calculateFees(msgGasLimit, msgValue, dstChainSlug);
     }
 
+    function getExecutionFees(
+        uint256 msgGasLimit,
+        uint256 msgValue,
+        uint256 dstChainSlug
+    ) external view override returns (uint256) {
+        uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
+        return
+            msgValue *
+            dstRelativeGasPrice +
+            _getExecutionFees(msgGasLimit, dstChainSlug, dstRelativeGasPrice);
+    }
+
     function _calculateFees(
         uint256 msgGasLimit,
         uint256 msgValue,

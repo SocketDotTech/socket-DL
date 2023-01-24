@@ -20,4 +20,10 @@ interface ISwitchboard {
         uint256 msgValue,
         uint256 dstChainSlug
     ) external view returns (uint256);
+
+    function getExecutionFees(
+        uint256 msgGasLimit,
+        uint256 msgValue,
+        uint256 dstChainSlug
+    ) external view returns (uint256);
 }
