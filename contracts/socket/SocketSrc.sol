@@ -82,8 +82,11 @@ abstract contract SocketSrc is SocketBase {
         uint256 transmitFees = _transmitManager__.getMinFees(remoteChainSlug_);
         (uint256 switchboardFees, uint256 executionOverhead) = switchboard__
             .getMinFees(remoteChainSlug_);
+        uint256 msgExecutionFee = _executionManager__
+            .getMinFees(msgGasLimit_, remoteChainSlug_);
 
-        if (msg.value < transmitFees + switchboardFees + executionOverhead)
+
+        if (msg.value < transmitFees + switchboardFees + executionOverhead + msgExecutionFee)
             revert InsufficientFees();
 
         // any extra fee is considered as executionFee
