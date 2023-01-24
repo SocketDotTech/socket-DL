@@ -65,7 +65,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         return true;
     }
 
-    function _getVerificationFees(
+    function _getSwitchboardFees(
         uint256,
         uint256
     ) internal view override returns (uint256) {

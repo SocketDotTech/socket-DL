@@ -11,5 +11,7 @@ interface ISwitchboard {
 
     function payFees(uint256 dstChainSlug) external payable;
 
-    function getMinFees(uint256 dstChainSlug) external view returns (uint256);
+    function getMinFees(
+        uint256 dstChainSlug
+    ) external view returns (uint256 switchboardFee, uint256 executionFee);
 }

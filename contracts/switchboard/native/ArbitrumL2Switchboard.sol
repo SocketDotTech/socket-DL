@@ -86,7 +86,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
         return true;
     }
 
-    function _getVerificationFees(
+    function _getSwitchboardFees(
         uint256,
         uint256 dstRelativeGasPrice
     ) internal view override returns (uint256) {

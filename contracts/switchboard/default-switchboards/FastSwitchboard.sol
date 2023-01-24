@@ -66,7 +66,7 @@ contract FastSwitchboard is SwitchboardBase {
         return false;
     }
 
-    function _getVerificationFees(
+    function _getSwitchboardFees(
         uint256 dstChainSlug,
         uint256 dstRelativeGasPrice
     ) internal view override returns (uint256) {
