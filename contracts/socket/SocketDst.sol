@@ -86,6 +86,7 @@ abstract contract SocketDst is SocketBase {
         ISocket.ExecutionParams calldata executeParams_
     ) external override nonReentrant onlyRole(EXECUTOR_ROLE) {
         if (messageExecuted[msgId]) revert MessageAlreadyExecuted();
+        messageExecuted[msgId] = true;
 
         PlugConfig memory plugConfig = _plugConfigs[localPlug][
             verifyParams_.remoteChainSlug
@@ -149,13 +150,14 @@ abstract contract SocketDst is SocketBase {
         try
             IPlug(localPlug).inbound{gas: msgGasLimit}(remoteChainSlug, payload)
         {
-            messageExecuted[msgId] = true;
             emit ExecutionSuccess(msgId);
         } catch Error(string memory reason) {
             // catch failing revert() and require()
+            messageExecuted[msgId] = false;
             emit ExecutionFailed(msgId, reason);
         } catch (bytes memory reason) {
             // catch failing assert()
+            messageExecuted[msgId] = false;
             emit ExecutionFailedBytes(msgId, reason);
         }
     }
