@@ -35,13 +35,15 @@ contract HappyTest is Setup {
 
         uint256 executionFee;
         {
-            uint256 switchboardFees = SwitchboardBase(
-                address(_a.configs__[index].switchboard__)
-            ).getMinFees(_msgGasLimit, _b.chainSlug);
+            uint256 switchboardFees = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_msgGasLimit, _b.chainSlug);
 
-            executionFee = SwitchboardBase(
-                address(_a.configs__[index].switchboard__)
-            ).getExecutionFees(_msgGasLimit, _b.chainSlug);
+            executionFee = _a.configs__[index].switchboard__.getExecutionFees(
+                _msgGasLimit,
+                _b.chainSlug
+            );
 
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
 

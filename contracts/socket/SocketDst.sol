@@ -75,67 +75,75 @@ abstract contract SocketDst is SocketBase {
 
     /**
      * @notice executes a message
-     * @param msgId message id packed with local plug, local chainSlug, remote ChainSlug and nonce
+     * @param packetId packet id
      * @param localPlug remote plug address
-     * @param verifyParams_ the details needed for message verification
+     * @param messageDetails_ the details needed for message verification
      */
     function execute(
-        uint256 msgId,
+        uint256 packetId,
         address localPlug,
-        ISocket.VerificationParams calldata verifyParams_,
-        ISocket.ExecutionParams calldata executeParams_
+        ISocket.MessageDetails calldata messageDetails_
     ) external override nonReentrant onlyRole(EXECUTOR_ROLE) {
-        if (messageExecuted[msgId]) revert MessageAlreadyExecuted();
-        messageExecuted[msgId] = true;
+        if (messageExecuted[messageDetails_.msgId])
+            revert MessageAlreadyExecuted();
+        messageExecuted[messageDetails_.msgId] = true;
 
-        PlugConfig memory plugConfig = _plugConfigs[localPlug][
-            verifyParams_.remoteChainSlug
-        ];
+        uint256 remoteSlug = uint256(messageDetails_.msgId >> 224);
 
-        feesEarned[verifyParams_.remoteChainSlug][
-            address(plugConfig.inboundSwitchboard__)
-        ][msg.sender] += executeParams_.executionFee;
+        PlugConfig memory plugConfig = _plugConfigs[localPlug][remoteSlug];
+
+        feesEarned[remoteSlug][address(plugConfig.inboundSwitchboard__)][
+            msg.sender
+        ] += messageDetails_.executionFee;
 
         bytes32 packedMessage = _hasher__.packMessage(
-            verifyParams_.remoteChainSlug,
+            remoteSlug,
             plugConfig.siblingPlug,
             _chainSlug,
             localPlug,
-            msgId,
-            executeParams_.msgGasLimit,
-            executeParams_.executionFee,
-            executeParams_.payload
+            messageDetails_.msgId,
+            messageDetails_.msgGasLimit,
+            messageDetails_.executionFee,
+            messageDetails_.payload
         );
 
-        _verify(packedMessage, plugConfig, verifyParams_);
+        _verify(
+            packetId,
+            remoteSlug,
+            packedMessage,
+            plugConfig,
+            messageDetails_.decapacitorProof
+        );
         _execute(
             localPlug,
-            verifyParams_.remoteChainSlug,
-            executeParams_.msgGasLimit,
-            msgId,
-            executeParams_.payload
+            remoteSlug,
+            messageDetails_.msgGasLimit,
+            messageDetails_.msgId,
+            messageDetails_.payload
         );
     }
 
     function _verify(
+        uint256 packetId,
+        uint256 remoteChainSlug,
         bytes32 packedMessage,
         PlugConfig memory plugConfig,
-        ISocket.VerificationParams calldata verifyParams_
+        bytes memory decapacitorProof
     ) internal view {
         if (
             !ISwitchboard(plugConfig.inboundSwitchboard__).allowPacket(
-                remoteRoots[verifyParams_.packetId],
-                verifyParams_.packetId,
-                verifyParams_.remoteChainSlug,
-                rootProposedAt[verifyParams_.packetId]
+                remoteRoots[packetId],
+                packetId,
+                remoteChainSlug,
+                rootProposedAt[packetId]
             )
         ) revert VerificationFailed();
 
         if (
             !plugConfig.decapacitor__.verifyMessageInclusion(
-                remoteRoots[verifyParams_.packetId],
+                remoteRoots[packetId],
                 packedMessage,
-                verifyParams_.decapacitorProof
+                decapacitorProof
             )
         ) revert InvalidProof();
     }
