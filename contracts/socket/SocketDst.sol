@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-// import "../interfaces/IVerifier.sol";
 import "../interfaces/IDecapacitor.sol";
 import "../interfaces/IPlug.sol";
 
@@ -78,7 +77,7 @@ abstract contract SocketDst is SocketBase {
         ISocket.VerificationParams calldata verifyParams_,
         ISocket.ExecutionParams calldata executeParams_
     ) external override nonReentrant {
-        if (_executionManager__.isExecutor(msg.sender)) revert NotExecutor();
+        if (!_executionManager__.isExecutor(msg.sender)) revert NotExecutor();
         if (messageExecuted[msgId]) revert MessageAlreadyExecuted();
 
         PlugConfig storage plugConfig = _plugConfigs[localPlug][

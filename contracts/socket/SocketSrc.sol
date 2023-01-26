@@ -93,9 +93,8 @@ abstract contract SocketSrc is SocketBase {
         ) revert InsufficientFees();
 
         // any extra fee is considered as executionFee
-        executionFee = msg.value - transmitFees - switchboardFees;
-
         unchecked {
+            executionFee = msg.value - transmitFees - switchboardFees;
             _transmitManager__.payFees{value: transmitFees}(remoteChainSlug_);
             switchboard__.payFees{value: switchboardFees}(remoteChainSlug_);
             _executionManager__.payFees{value: executionFee}(
