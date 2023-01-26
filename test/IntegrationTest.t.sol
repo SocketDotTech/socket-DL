@@ -32,10 +32,19 @@ contract HappyTest is Setup {
 
         uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
+
+        uint256 executionFee;
         {
-            uint256 switchboardFees = SwitchboardBase(
-                address(_a.configs__[index].switchboard__)
-            ).getMinFees(_msgGasLimit, _b.chainSlug);
+            uint256 switchboardFees = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_msgGasLimit, _b.chainSlug);
+
+            executionFee = _a.configs__[index].switchboard__.getExecutionFees(
+                _msgGasLimit,
+                _b.chainSlug
+            );
+
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
 
             hoax(_raju);
@@ -46,17 +55,23 @@ contract HappyTest is Setup {
 
         uint256 msgId = _packMessageId(_a.chainSlug, 0);
 
-        (
-            bytes32 root,
-            uint256 packetId,
-            bytes memory sig
-        ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+        uint256 packetId;
+        {
+            (
+                bytes32 root_,
+                uint256 packetId_,
+                bytes memory sig_
+            ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
 
-        _sealOnSrc(_a, capacitor, sig);
-        _proposeOnDst(_b, sig, packetId, root);
+            _sealOnSrc(_a, capacitor, sig_);
+            _proposeOnDst(_b, sig_, packetId_, root_);
 
-        vm.expectEmit(true, false, false, false);
-        emit ExecutionSuccess(msgId);
+            vm.expectEmit(true, false, false, false);
+            emit ExecutionSuccess(msgId);
+
+            packetId = packetId_;
+        }
+
         _executePayloadOnDst(
             _a,
             _b,
@@ -64,13 +79,14 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            executionFee,
             payload,
             proof
         );
 
         assertEq(dstCounter__.counter(), amount);
         assertEq(srcCounter__.counter(), 0);
-        assertEq(uint256(_b.socket__.messageStatus(msgId)), 1);
+        assertTrue(_b.socket__.messageExecuted(msgId));
 
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
@@ -80,6 +96,7 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            executionFee,
             payload,
             proof
         );
@@ -119,6 +136,7 @@ contract HappyTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            0,
             payload,
             proof
         );

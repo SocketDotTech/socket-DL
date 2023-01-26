@@ -44,10 +44,9 @@ abstract contract SocketSrc is SocketBase {
         // msgId(256) = localChainSlug(32) | nonce(224)
         uint256 msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
 
-        _deductFees(
+        uint256 executionFee = _deductFees(
             msgGasLimit_,
             remoteChainSlug_,
-            msg.value,
             plugConfig.outboundSwitchboard__
         );
 
@@ -58,6 +57,7 @@ abstract contract SocketSrc is SocketBase {
             plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
+            executionFee,
             payload_
         );
 
@@ -77,19 +77,25 @@ abstract contract SocketSrc is SocketBase {
     function _deductFees(
         uint256 msgGasLimit_,
         uint256 remoteChainSlug_,
-        uint256 value,
         ISwitchboard switchboard__
-    ) internal {
+    ) internal returns (uint256 executionFee) {
         uint256 transmitFee = _transmitManager__.getMinFees(remoteChainSlug_);
-
-        if (value < transmitFee) revert InsufficientFees();
-
-        _transmitManager__.payFees{value: transmitFee}(remoteChainSlug_);
-
-        switchboard__.payFees{value: value - transmitFee}(
-            msgGasLimit_,
+        uint256 verificationFee = switchboard__.getVerificationFees(
             remoteChainSlug_
         );
+
+        if (msg.value < transmitFee + verificationFee)
+            revert InsufficientFees();
+
+        // any extra fee is considered as executionFee
+        unchecked {
+            executionFee = msg.value - transmitFee - verificationFee;
+            _transmitManager__.payFees{value: transmitFee}(remoteChainSlug_);
+            switchboard__.payFees{value: msg.value - transmitFee}(
+                msgGasLimit_,
+                remoteChainSlug_
+            );
+        }
     }
 
     function seal(

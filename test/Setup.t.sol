@@ -313,24 +313,21 @@ contract Setup is Test {
         uint256 packetId_,
         uint256 msgId_,
         uint256 msgGasLimit_,
+        uint256 executionFee_,
         bytes memory payload_,
         bytes memory proof_
     ) internal {
         hoax(_executor);
 
-        ISocket.VerificationParams memory vParams = ISocket.VerificationParams(
-            src_.chainSlug,
-            packetId_,
+        ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
+            msgId_,
+            executionFee_,
+            msgGasLimit_,
+            payload_,
             proof_
         );
 
-        dst_.socket__.execute(
-            msgGasLimit_,
-            msgId_,
-            remotePlug_,
-            payload_,
-            vParams
-        );
+        dst_.socket__.execute(packetId_, remotePlug_, msgDetails);
     }
 
     function _packMessageId(

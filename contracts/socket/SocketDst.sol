@@ -12,12 +12,6 @@ abstract contract SocketDst is SocketBase {
         PROPOSED
     }
 
-    enum MessageStatus {
-        NOT_EXECUTED,
-        SUCCESS,
-        FAILED
-    }
-
     error InvalidProof();
     error InvalidRetry();
     error VerificationFailed();
@@ -28,10 +22,11 @@ abstract contract SocketDst is SocketBase {
     bytes32 private constant EXECUTOR_ROLE =
         0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
 
-    // msgId => executorAddress
-    mapping(uint256 => address) public executor;
+    // srcChainSlug => switchboardAddress => executorAddress => fees
+    mapping(uint256 => mapping(address => mapping(address => uint256)))
+        public feesEarned;
     // msgId => message status
-    mapping(uint256 => MessageStatus) public messageStatus;
+    mapping(uint256 => bool) public messageExecuted;
     // capacitorAddr|chainSlug|packetId
     mapping(uint256 => bytes32) public override remoteRoots;
     mapping(uint256 => uint256) public rootProposedAt;
@@ -80,67 +75,75 @@ abstract contract SocketDst is SocketBase {
 
     /**
      * @notice executes a message
-     * @param msgGasLimit gas limit needed to execute the inbound at remote
-     * @param msgId message id packed with local plug, local chainSlug, remote ChainSlug and nonce
+     * @param packetId packet id
      * @param localPlug remote plug address
-     * @param payload the data which is needed by plug at inbound call on remote
-     * @param verifyParams_ the details needed for message verification
+     * @param messageDetails_ the details needed for message verification
      */
     function execute(
-        uint256 msgGasLimit,
-        uint256 msgId,
+        uint256 packetId,
         address localPlug,
-        bytes calldata payload,
-        ISocket.VerificationParams calldata verifyParams_
+        ISocket.MessageDetails calldata messageDetails_
     ) external override nonReentrant onlyRole(EXECUTOR_ROLE) {
-        if (executor[msgId] != address(0)) revert MessageAlreadyExecuted();
+        if (messageExecuted[messageDetails_.msgId])
+            revert MessageAlreadyExecuted();
+        messageExecuted[messageDetails_.msgId] = true;
 
-        // todo: to decide if this should be just a bool (was added for fees here)
-        executor[msgId] = msg.sender;
+        uint256 remoteSlug = uint256(messageDetails_.msgId >> 224);
 
-        PlugConfig memory plugConfig = _plugConfigs[localPlug][
-            verifyParams_.remoteChainSlug
-        ];
+        PlugConfig memory plugConfig = _plugConfigs[localPlug][remoteSlug];
+
+        feesEarned[remoteSlug][address(plugConfig.inboundSwitchboard__)][
+            msg.sender
+        ] += messageDetails_.executionFee;
 
         bytes32 packedMessage = _hasher__.packMessage(
-            verifyParams_.remoteChainSlug,
+            remoteSlug,
             plugConfig.siblingPlug,
             _chainSlug,
             localPlug,
-            msgId,
-            msgGasLimit,
-            payload
+            messageDetails_.msgId,
+            messageDetails_.msgGasLimit,
+            messageDetails_.executionFee,
+            messageDetails_.payload
         );
 
-        _verify(packedMessage, plugConfig, verifyParams_);
+        _verify(
+            packetId,
+            remoteSlug,
+            packedMessage,
+            plugConfig,
+            messageDetails_.decapacitorProof
+        );
         _execute(
             localPlug,
-            verifyParams_.remoteChainSlug,
-            msgGasLimit,
-            msgId,
-            payload
+            remoteSlug,
+            messageDetails_.msgGasLimit,
+            messageDetails_.msgId,
+            messageDetails_.payload
         );
     }
 
     function _verify(
+        uint256 packetId,
+        uint256 remoteChainSlug,
         bytes32 packedMessage,
         PlugConfig memory plugConfig,
-        ISocket.VerificationParams calldata verifyParams_
+        bytes memory decapacitorProof
     ) internal view {
         if (
             !ISwitchboard(plugConfig.inboundSwitchboard__).allowPacket(
-                remoteRoots[verifyParams_.packetId],
-                verifyParams_.packetId,
-                verifyParams_.remoteChainSlug,
-                rootProposedAt[verifyParams_.packetId]
+                remoteRoots[packetId],
+                packetId,
+                remoteChainSlug,
+                rootProposedAt[packetId]
             )
         ) revert VerificationFailed();
 
         if (
             !plugConfig.decapacitor__.verifyMessageInclusion(
-                remoteRoots[verifyParams_.packetId],
+                remoteRoots[packetId],
                 packedMessage,
-                verifyParams_.decapacitorProof
+                decapacitorProof
             )
         ) revert InvalidProof();
     }
@@ -155,15 +158,14 @@ abstract contract SocketDst is SocketBase {
         try
             IPlug(localPlug).inbound{gas: msgGasLimit}(remoteChainSlug, payload)
         {
-            messageStatus[msgId] = MessageStatus.SUCCESS;
             emit ExecutionSuccess(msgId);
         } catch Error(string memory reason) {
             // catch failing revert() and require()
-            messageStatus[msgId] = MessageStatus.FAILED;
+            messageExecuted[msgId] = false;
             emit ExecutionFailed(msgId, reason);
         } catch (bytes memory reason) {
             // catch failing assert()
-            messageStatus[msgId] = MessageStatus.FAILED;
+            messageExecuted[msgId] = false;
             emit ExecutionFailedBytes(msgId, reason);
         }
     }

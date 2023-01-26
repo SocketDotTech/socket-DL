@@ -53,6 +53,7 @@ contract PingPongTest is Setup {
             packetId,
             msgId_,
             msgGasLimit,
+            0,
             _payloadPing,
             _PROOF
         );
@@ -82,6 +83,7 @@ contract PingPongTest is Setup {
             packetId,
             msgId_,
             msgGasLimit,
+            0,
             _payloadPong,
             _PROOF
         );
