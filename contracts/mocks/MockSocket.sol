@@ -101,7 +101,7 @@ contract MockSocket {
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes calldata payload_
-    ) external payable {
+    ) external payable returns (uint256) {
         PlugConfig memory srcPlugConfig = plugConfigs[msg.sender][
             remoteChainSlug_
         ];
