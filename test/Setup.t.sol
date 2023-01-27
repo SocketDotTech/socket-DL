@@ -325,19 +325,15 @@ contract Setup is Test {
     ) internal {
         hoax(_executor);
 
-        ISocket.VerificationParams memory vParams = ISocket.VerificationParams(
-            src_.chainSlug,
-            packetId_,
+        ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
+            msgId_,
+            executionFee_,
+            msgGasLimit_,
+            payload_,
             proof_
         );
 
-        ISocket.ExecutionParams memory eParams = ISocket.ExecutionParams(
-            executionFee_,
-            msgGasLimit_,
-            payload_
-        );
-
-        dst_.socket__.execute(msgId_, remotePlug_, vParams, eParams);
+        dst_.socket__.execute(packetId_, remotePlug_, msgDetails);
     }
 
     function _packMessageId(

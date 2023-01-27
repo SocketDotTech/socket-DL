@@ -95,29 +95,24 @@ interface ISocket {
         bytes calldata payload_
     ) external payable;
 
-    struct VerificationParams {
-        uint256 remoteChainSlug;
-        uint256 packetId;
-        bytes decapacitorProof;
-    }
-
-    struct ExecutionParams {
+    struct MessageDetails {
+        uint256 msgId;
         uint256 executionFee;
         uint256 msgGasLimit;
         bytes payload;
+        bytes decapacitorProof;
     }
 
     /**
      * @notice executes a message
-     * @param msgId message id packed with remoteChainSlug and nonce
+     * @param packetId packet id
      * @param localPlug local plug address
-     * @param verifyParams_ the details needed for message verification
+     * @param messageDetails_ the details needed for message verification
      */
     function execute(
-        uint256 msgId,
+        uint256 packetId,
         address localPlug,
-        ISocket.VerificationParams calldata verifyParams_,
-        ISocket.ExecutionParams calldata executeParams_
+        ISocket.MessageDetails calldata messageDetails_
     ) external;
 
     /**
