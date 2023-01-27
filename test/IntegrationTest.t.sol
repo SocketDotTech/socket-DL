@@ -30,7 +30,11 @@ contract HappyTest is Setup {
 
     function testRemoteAddFromAtoB() external {
         uint256 amount = 100;
-        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
         bytes memory proof = abi.encode(0);
 
         uint256 index = isFast ? 0 : 1;
@@ -50,7 +54,7 @@ contract HappyTest is Setup {
                 _b.chainSlug
             );
 
-            hoax(_raju);
+            hoax(_plugOwner);
             srcCounter__.remoteAddOperation{
                 value: switchboardFees +
                     socketFees +
@@ -109,7 +113,11 @@ contract HappyTest is Setup {
 
     function testRemoteAddFromBtoA() external {
         uint256 amount = 100;
-        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
         bytes memory proof = abi.encode(0);
         address capacitor = isFast
             ? address(_b.configs__[0].capacitor__)
@@ -117,7 +125,7 @@ contract HappyTest is Setup {
 
         uint256 minFees = _b.transmitManager__.getMinFees(_a.chainSlug);
 
-        hoax(_raju);
+        hoax(_plugOwner);
         dstCounter__.remoteAddOperation{value: minFees}(
             _a.chainSlug,
             amount,
@@ -160,7 +168,7 @@ contract HappyTest is Setup {
         uint256 msgGasLimit = _msgGasLimit;
         uint256 dstSlug = _b.chainSlug;
 
-        hoax(_raju);
+        hoax(_plugOwner);
         srcCounter__.remoteAddOperation{value: fees}(
             dstSlug,
             amount,
@@ -211,7 +219,11 @@ contract HappyTest is Setup {
         _configPlugContracts(_a.configs__.length - 1);
 
         uint256 amount = 100;
-        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
 
         uint256 executionFee;
         uint256 msgId1;
