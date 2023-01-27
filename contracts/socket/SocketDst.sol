@@ -169,7 +169,7 @@ abstract contract SocketDst is SocketBase {
         emit PacketRootUpdated(packetId_, oldRoot, newRoot_);
     }
 
-    function getPacketStatus(uint256 packetId_) external view returns (bool) {
+    function isPacketProposed(uint256 packetId_) external view returns (bool) {
         return remoteRoots[packetId_] == bytes32(0) ? false : true;
     }
 

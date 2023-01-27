@@ -37,7 +37,7 @@ contract HappyTest is Setup {
         {
             (
                 uint256 switchboardFees,
-                uint256 executionOverhead
+                uint256 verificationFee
             ) = SwitchboardBase(address(_a.configs__[index].switchboard__))
                     .getMinFees(_b.chainSlug);
 
@@ -51,7 +51,7 @@ contract HappyTest is Setup {
             srcCounter__.remoteAddOperation{
                 value: switchboardFees +
                     socketFees +
-                    executionOverhead +
+                    verificationFee +
                     executionFee
             }(_b.chainSlug, amount, _msgGasLimit);
         }
