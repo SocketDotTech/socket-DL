@@ -282,26 +282,19 @@ contract Setup is Test {
         uint256 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
-
-        sig = _createSignature(
-            remoteChainSlug_,
-            packetId,
-            _transmitterPrivateKey,
-            root
+        bytes32 digest = keccak256(
+            abi.encode(remoteChainSlug_, packetId, root)
         );
+
+        sig = _createSignature(digest, _transmitterPrivateKey);
     }
 
     function _createSignature(
-        uint256 remoteChainSlug_,
-        uint256 packetId_,
-        uint256 privateKey_,
-        bytes32 root_
+        bytes32 digest_,
+        uint256 privateKey_
     ) internal returns (bytes memory sig) {
         bytes32 digest = keccak256(
-            abi.encode(remoteChainSlug_, packetId_, root_)
-        );
-        digest = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest_)
         );
 
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(privateKey_, digest);

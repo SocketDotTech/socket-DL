@@ -25,6 +25,7 @@ contract FastSwitchboard is SwitchboardBase {
     error WatcherFound();
     error WatcherNotFound();
     error AlreadyAttested();
+    error InvalidSigLength();
 
     constructor(
         address owner_,
@@ -35,15 +36,21 @@ contract FastSwitchboard is SwitchboardBase {
         timeoutInSeconds = timeoutInSeconds_;
     }
 
-    function attest(uint256 packetId, uint256 srcChainSlug) external {
-        if (isAttested[msg.sender][packetId]) revert AlreadyAttested();
-        if (!_hasRole(_watcherRole(srcChainSlug), msg.sender))
+    function attest(
+        uint256 packetId,
+        uint256 srcChainSlug,
+        bytes calldata signature
+    ) external {
+        address watcher = _recoverSigner(srcChainSlug, packetId, signature);
+
+        if (isAttested[watcher][packetId]) revert AlreadyAttested();
+        if (!_hasRole(_watcherRole(srcChainSlug), watcher))
             revert WatcherNotFound();
 
-        isAttested[msg.sender][packetId] = true;
+        isAttested[watcher][packetId] = true;
         attestations[packetId]++;
 
-        emit PacketAttested(packetId, msg.sender);
+        emit PacketAttested(packetId, watcher);
     }
 
     /**
@@ -143,5 +150,37 @@ contract FastSwitchboard is SwitchboardBase {
 
     function _watcherRole(uint256 chainSlug_) internal pure returns (bytes32) {
         return bytes32(chainSlug_);
+    }
+
+    /**
+     * @notice returns the address of signer recovered from input signature
+     */
+    function _recoverSigner(
+        uint256 srcChainSlug_,
+        uint256 packetId_,
+        bytes memory signature_
+    ) private pure returns (address signer) {
+        bytes32 digest = keccak256(abi.encode(srcChainSlug_, packetId_));
+        digest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
+        );
+        (bytes32 sigR, bytes32 sigS, uint8 sigV) = _splitSignature(signature_);
+
+        // recovered signer is checked for the valid roles later
+        signer = ecrecover(digest, sigV, sigR, sigS);
+    }
+
+    /**
+     * @notice splits the signature into v, r and s.
+     */
+    function _splitSignature(
+        bytes memory signature_
+    ) private pure returns (bytes32 r, bytes32 s, uint8 v) {
+        if (signature_.length != 65) revert InvalidSigLength();
+        assembly {
+            r := mload(add(signature_, 0x20))
+            s := mload(add(signature_, 0x40))
+            v := byte(0, mload(add(signature_, 0x60)))
+        }
     }
 }
