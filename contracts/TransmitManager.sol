@@ -23,6 +23,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
 
     event SealGasLimitSet(uint256 gasLimit_);
     event ProposeGasLimitSet(uint256 dstChainSlug_, uint256 gasLimit_);
+    event FeesWithdrawn(address account_, uint256 value_);
 
     /**
      * @notice emits when a new signature verifier contract is set
@@ -44,14 +45,13 @@ contract TransmitManager is ITransmitManager, AccessControl {
     }
 
     function checkTransmitter(
-        uint256 siblingChainSlug_,
-        uint256 sigChainSlug_,
+        uint256 slugs_,
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_
     ) external view override returns (address, bool) {
         address transmitter = signatureVerifier.recoverSigner(
-            sigChainSlug_,
+            type(uint128).max & slugs_,
             packetId_,
             root_,
             signature_
@@ -59,7 +59,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
 
         return (
             transmitter,
-            _hasRole(_transmitterRole(siblingChainSlug_), transmitter)
+            _hasRole(_transmitterRole(slugs_ >> 128), transmitter)
         );
     }
 
@@ -89,13 +89,11 @@ contract TransmitManager is ITransmitManager, AccessControl {
             siblingChainSlug_
         );
 
-        unchecked {
-            minTransmissionFees =
-                sealGasLimit *
-                tx.gasprice +
-                proposeGasLimit[siblingChainSlug_] *
-                siblingRelativeGasPrice;
-        }
+        minTransmissionFees =
+            sealGasLimit *
+            tx.gasprice +
+            proposeGasLimit[siblingChainSlug_] *
+            siblingRelativeGasPrice;
     }
 
     // TODO: to support fee distribution
@@ -105,8 +103,12 @@ contract TransmitManager is ITransmitManager, AccessControl {
      */
     function withdrawFees(address account_) external onlyOwner {
         require(account_ != address(0));
-        (bool success, ) = account_.call{value: address(this).balance}("");
+
+        uint256 value = address(this).balance;
+        (bool success, ) = account_.call{value: value}("");
         if (!success) revert TransferFailed();
+
+        emit FeesWithdrawn(account_, value);
     }
 
     /**
@@ -176,8 +178,13 @@ contract TransmitManager is ITransmitManager, AccessControl {
         address userAddress,
         uint256 amount
     ) external onlyOwner {
+        require(userAddress != address(0));
+
         if (token == address(0)) {
-            payable(userAddress).transfer(amount);
+            (bool success, ) = userAddress.call{value: address(this).balance}(
+                ""
+            );
+            require(success);
         } else {
             // do we need safe transfer?
             IERC20(token).transfer(userAddress, amount);

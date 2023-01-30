@@ -12,13 +12,12 @@ abstract contract SocketSrc is SocketBase {
 
     /**
      * @notice emits the verification and seal confirmation of a packet
-     * @param capacitorAddress address of capacitor at local
+     * @param transmitter address of transmitter recovered from sig
      * @param packetId packed id
      * @param signature signature of attester
      */
     event PacketVerifiedAndSealed(
         address indexed transmitter,
-        address indexed capacitorAddress,
         uint256 indexed packetId,
         bytes signature
     );
@@ -35,9 +34,10 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable override returns (uint256 msgId) {
-        PlugConfig storage plugConfig = _plugConfigs[msg.sender][
-            remoteChainSlug_
+        PlugConfig storage plugConfig = _plugConfigs[
+            (uint256(uint160(msg.sender)) << 96) | remoteChainSlug_
         ];
+        uint256 localChainSlug = _chainSlug;
 
         // Packs the local plug, local chain slug, remote chain slug and nonce
         // _messageCount++ will take care of msg id overflow as well
@@ -51,7 +51,7 @@ abstract contract SocketSrc is SocketBase {
         );
 
         bytes32 packedMessage = _hasher__.packMessage(
-            _chainSlug,
+            localChainSlug,
             msg.sender,
             remoteChainSlug_,
             plugConfig.siblingPlug,
@@ -63,7 +63,7 @@ abstract contract SocketSrc is SocketBase {
 
         plugConfig.capacitor__.addPackedMessage(packedMessage);
         emit MessageTransmitted(
-            _chainSlug,
+            localChainSlug,
             msg.sender,
             remoteChainSlug_,
             plugConfig.siblingPlug,
@@ -111,16 +111,15 @@ abstract contract SocketSrc is SocketBase {
         (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket();
 
-        uint256 packetId = _getPacketId(
-            capacitorAddress_,
-            _chainSlug,
-            packetCount
-        );
+        uint256 packetId = (_chainSlug << 224) |
+            (uint256(uint160(capacitorAddress_)) << 64) |
+            packetCount;
+
+        uint256 siblingChainSlug = _capacitorToSlug[capacitorAddress_];
 
         (address transmitter, bool isTransmitter) = _transmitManager__
             .checkTransmitter(
-                _capacitorToSlug[capacitorAddress_],
-                _capacitorToSlug[capacitorAddress_],
+                (siblingChainSlug << 128) | siblingChainSlug,
                 packetId,
                 root,
                 signature_
@@ -128,22 +127,6 @@ abstract contract SocketSrc is SocketBase {
 
         if (!isTransmitter) revert InvalidAttester();
 
-        emit PacketVerifiedAndSealed(
-            transmitter,
-            capacitorAddress_,
-            packetId,
-            signature_
-        );
-    }
-
-    function _getPacketId(
-        address capacitorAddr_,
-        uint256 chainSlug_,
-        uint256 packetCount_
-    ) internal pure returns (uint256 packetId) {
-        packetId =
-            (chainSlug_ << 224) |
-            (uint256(uint160(capacitorAddr_)) << 64) |
-            packetCount_;
+        emit PacketVerifiedAndSealed(transmitter, packetId, signature_);
     }
 }

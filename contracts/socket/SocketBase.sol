@@ -17,21 +17,11 @@ abstract contract SocketBase is SocketConfig, ReentrancyGuard {
 
     error InvalidAttester();
 
-    constructor(
-        uint32 chainSlug_,
-        address hasher_,
-        address transmitManager_,
-        address executionManager_,
-        address capacitorFactory_
-    ) SocketConfig(capacitorFactory_) {
-        _chainSlug = chainSlug_;
-        _hasher__ = IHasher(hasher_);
-        _transmitManager__ = ITransmitManager(transmitManager_);
-        _executionManager__ = IExecutionManager(executionManager_);
-    }
+    event HasherSet(address hasher_);
 
     function setHasher(address hasher_) external onlyOwner {
         _hasher__ = IHasher(hasher_);
+        emit HasherSet(hasher_);
     }
 
     // TODO: in discussion

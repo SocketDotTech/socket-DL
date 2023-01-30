@@ -8,8 +8,7 @@ interface ITransmitManager {
     ) external view returns (bool);
 
     function checkTransmitter(
-        uint256 siblingChainSlug,
-        uint256 sigChainSlug_,
+        uint256 chainSlugs_,
         uint256 packetId,
         bytes32 root,
         bytes calldata signature

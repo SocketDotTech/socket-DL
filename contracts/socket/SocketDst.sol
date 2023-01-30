@@ -51,8 +51,7 @@ abstract contract SocketDst is SocketBase {
         if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
         (address transmitter, bool isTransmitter) = _transmitManager__
             .checkTransmitter(
-                _getChainSlug(packetId_),
-                _chainSlug,
+                (_getChainSlug(packetId_) << 128) | _chainSlug,
                 packetId_,
                 root_,
                 signature_
@@ -80,8 +79,8 @@ abstract contract SocketDst is SocketBase {
         if (!_executionManager__.isExecutor(msg.sender)) revert NotExecutor();
         if (messageExecuted[msgId]) revert MessageAlreadyExecuted();
 
-        PlugConfig storage plugConfig = _plugConfigs[localPlug][
-            verifyParams_.remoteChainSlug
+        PlugConfig storage plugConfig = _plugConfigs[
+            (uint256(uint160(localPlug)) << 96) | verifyParams_.remoteChainSlug
         ];
 
         feesEarned[verifyParams_.remoteChainSlug][

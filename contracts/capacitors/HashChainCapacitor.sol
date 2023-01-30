@@ -39,11 +39,10 @@ contract HashChainCapacitor is BaseCapacitor {
         onlyRole(SOCKET_ROLE)
         returns (bytes32, uint256)
     {
-        uint256 packetCount = _sealedPackets;
+        uint256 packetCount = _sealedPackets++;
 
         if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
         bytes32 root = _roots[packetCount];
-        _sealedPackets++;
 
         emit PacketComplete(root, packetCount);
         return (root, packetCount);

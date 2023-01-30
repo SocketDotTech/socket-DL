@@ -94,6 +94,8 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
             gasPriceBid,
             data
         );
+
+        emit InitiatedNativeConfirmation(packetId);
     }
 
     function receivePacket(
