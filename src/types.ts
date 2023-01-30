@@ -34,11 +34,12 @@ export type Configs = {
 
 export interface ChainSocketAddresses {
   Counter: string;
+  CapacitorFactory: string;
+  ExecutionManager: string;
+  GasPriceOracle: string;
   Hasher: string;
   SignatureVerifier: string;
   Socket: string;
-  CapacitorFactory: string;
-  GasPriceOracle: string;
   TransmitManager: string;
   integrations?: Integrations;
 }
