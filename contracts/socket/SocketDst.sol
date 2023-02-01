@@ -83,7 +83,7 @@ abstract contract SocketDst is SocketBase {
         uint256 remoteSlug = uint256(messageDetails_.msgId >> 224);
 
         PlugConfig storage plugConfig = _plugConfigs[
-            (uint256(uint160(localPlug)) << 96) | verifyParams_.remoteChainSlug
+            (uint256(uint160(localPlug)) << 96) | remoteSlug
         ];
 
         feesEarned[remoteSlug][address(plugConfig.inboundSwitchboard__)][
