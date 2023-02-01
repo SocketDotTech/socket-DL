@@ -12,22 +12,20 @@ export const main = async () => {
     const chainId = await getChainId();
     const amount = 100;
     const msgGasLimit = "19000000";
-
-    if (!fs.existsSync(deployedAddressPath + chainId + ".json")) {
-      throw new Error("Deployed Addresses not found");
-    }
+    const gasLimit = 200485;
+    const fees = 20000000000000000;
 
     const config: any = JSON.parse(
-      fs.readFileSync(deployedAddressPath + chainId + ".json", "utf-8")
+      fs.readFileSync(deployedAddressPath, "utf-8")
     );
 
-    const { user } = await getNamedAccounts();
-    const signer: SignerWithAddress = await ethers.getSigner(user);
+    const { counterOwner } = await getNamedAccounts();
+    const signer: SignerWithAddress = await ethers.getSigner(counterOwner);
 
-    const counter: Contract = await getInstance("Counter", config["counter"]);
+    const counter: Contract = await getInstance("Counter", config[chainId]["Counter"]);
     await counter
       .connect(signer)
-      .remoteAddOperation(remoteChainId, amount, msgGasLimit);
+      .remoteAddOperation(remoteChainId, amount, msgGasLimit, { gasLimit, value: fees });
 
     console.log(
       `Sent remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`
