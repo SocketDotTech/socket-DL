@@ -38,11 +38,11 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
 
     function _calculateFees(
         uint256 dstChainSlug
-    ) internal view returns (uint256 switchboardFee, uint256 executionFee) {
+    ) internal view returns (uint256 switchboardFee, uint256 verificationFee) {
         uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
 
         switchboardFee = _getSwitchboardFees(dstChainSlug, dstRelativeGasPrice);
-        executionFee = executionOverhead[dstChainSlug] * dstRelativeGasPrice;
+        verificationFee = executionOverhead[dstChainSlug] * dstRelativeGasPrice;
     }
 
     function _getSwitchboardFees(
