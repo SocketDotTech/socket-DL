@@ -42,7 +42,7 @@ abstract contract SocketSrc is SocketBase {
         // Packs the local plug, local chain slug, remote chain slug and nonce
         // _messageCount++ will take care of msg id overflow as well
         // msgId(256) = localChainSlug(32) | nonce(224)
-        msgId = (uint256(uint32(_chainSlug)) << 224) | _messageCount++;
+        msgId = (uint256(uint32(localChainSlug)) << 224) | _messageCount++;
 
         uint256 executionFee = _deductFees(
             msgGasLimit_,
