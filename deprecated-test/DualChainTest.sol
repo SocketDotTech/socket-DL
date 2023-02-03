@@ -70,8 +70,8 @@ contract DualChainTest is Setup {
         _submitRootOnDst(_b, sig, packetId, root);
 
         _executePayloadOnDst(
-            _a,
             _b,
+            _a.chainSlug,
             address(dstCounter__),
             packetId,
             msgId,

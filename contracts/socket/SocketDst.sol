@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-// import "../interfaces/IVerifier.sol";
 import "../interfaces/IDecapacitor.sol";
 import "../interfaces/IPlug.sol";
 
@@ -77,13 +76,14 @@ abstract contract SocketDst is SocketBase {
         address localPlug,
         ISocket.MessageDetails calldata messageDetails_
     ) external override {
+        if (!_executionManager__.isExecutor(msg.sender)) revert NotExecutor();
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
 
         uint256 remoteSlug = uint256(messageDetails_.msgId >> 224);
 
-        PlugConfig memory plugConfig = _plugConfigs[localPlug][remoteSlug];
+        PlugConfig storage plugConfig = _plugConfigs[localPlug][remoteSlug];
 
         feesEarned[remoteSlug][address(plugConfig.inboundSwitchboard__)][
             msg.sender
@@ -120,7 +120,7 @@ abstract contract SocketDst is SocketBase {
         uint256 packetId,
         uint256 remoteChainSlug,
         bytes32 packedMessage,
-        PlugConfig memory plugConfig,
+        PlugConfig storage plugConfig,
         bytes memory decapacitorProof
     ) internal view {
         if (

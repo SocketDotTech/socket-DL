@@ -41,6 +41,8 @@ contract Setup is Test {
     uint256 internal _attestGasLimit = 150000;
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
+    bytes32 internal EXECUTOR_ROLE =
+        0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
 
     struct SocketConfigContext {
         uint256 siblingChainSlug;
@@ -110,8 +112,55 @@ contract Setup is Test {
         );
 
         // deploy default configs: fast, slow
-        SocketConfigContext memory scc_;
+        SocketConfigContext memory scc_ = _addFastSwitchboard(
+            cc_,
+            remoteChainSlug_,
+            _capacitorType
+        );
+        cc_.configs__.push(scc_);
 
+        scc_ = _addOptimisticSwitchboard(cc_, remoteChainSlug_, _capacitorType);
+        cc_.configs__.push(scc_);
+
+        // add roles
+        hoax(_socketOwner);
+        cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
+        _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
+    }
+
+    function _addOptimisticSwitchboard(
+        ChainContext storage cc_,
+        uint256 remoteChainSlug_,
+        uint256 capacitorType_
+    ) internal returns (SocketConfigContext memory scc_) {
+        OptimisticSwitchboard optimisticSwitchboard = new OptimisticSwitchboard(
+            _socketOwner,
+            address(cc_.gasPriceOracle__),
+            _timeoutInSeconds
+        );
+        vm.startPrank(_socketOwner);
+
+        optimisticSwitchboard.setExecutionOverhead(
+            remoteChainSlug_,
+            _executionOverhead
+        );
+        optimisticSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
+        vm.stopPrank();
+
+        scc_ = _registerSwitchbaord(
+            cc_,
+            _socketOwner,
+            address(optimisticSwitchboard),
+            remoteChainSlug_,
+            capacitorType_
+        );
+    }
+
+    function _addFastSwitchboard(
+        ChainContext storage cc_,
+        uint256 remoteChainSlug_,
+        uint256 capacitorType_
+    ) internal returns (SocketConfigContext memory scc_) {
         FastSwitchboard fastSwitchboard = new FastSwitchboard(
             _socketOwner,
             address(cc_.gasPriceOracle__),
@@ -131,37 +180,9 @@ contract Setup is Test {
             cc_,
             _socketOwner,
             address(fastSwitchboard),
-            remoteChainSlug_
-        );
-
-        cc_.configs__.push(scc_);
-
-        OptimisticSwitchboard optimisticSwitchboard = new OptimisticSwitchboard(
-            _socketOwner,
-            address(cc_.gasPriceOracle__),
-            _timeoutInSeconds
-        );
-        vm.startPrank(_socketOwner);
-
-        optimisticSwitchboard.setExecutionOverhead(
             remoteChainSlug_,
-            _executionOverhead
+            capacitorType_
         );
-        optimisticSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
-        vm.stopPrank();
-
-        scc_ = _registerSwitchbaord(
-            cc_,
-            _socketOwner,
-            address(optimisticSwitchboard),
-            remoteChainSlug_
-        );
-        cc_.configs__.push(scc_);
-
-        // add roles
-        // hoax(_socketOwner);
-        // cc_.socket__.grantExecutorRole(_executor);
-        _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
     }
 
     function _deploySocket(
@@ -204,13 +225,14 @@ contract Setup is Test {
         ChainContext storage cc_,
         address deployer_,
         address switchBoardAddress_,
-        uint256 remoteChainSlug_
+        uint256 remoteChainSlug_,
+        uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         vm.startPrank(deployer_);
         cc_.socket__.registerSwitchBoard(
             switchBoardAddress_,
             remoteChainSlug_,
-            _capacitorType
+            capacitorType_
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
@@ -313,8 +335,8 @@ contract Setup is Test {
     }
 
     function _executePayloadOnDst(
-        ChainContext storage src_,
         ChainContext storage dst_,
+        uint256 srcChainSlug,
         address remotePlug_,
         uint256 packetId_,
         uint256 msgId_,

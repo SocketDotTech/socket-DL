@@ -47,8 +47,8 @@ contract PingPongTest is Setup {
 
         vm.warp(block.timestamp + _slowCapacitorWaitTime);
         _executePayloadOnDst(
-            _a,
             _b,
+            _a.chainSlug,
             address(dstMessenger__),
             packetId,
             msgId_,
@@ -77,8 +77,8 @@ contract PingPongTest is Setup {
         vm.warp(block.timestamp + _slowCapacitorWaitTime);
 
         _executePayloadOnDst(
-            _b,
             _a,
+            _b.chainSlug,
             address(srcMessenger__),
             packetId,
             msgId_,

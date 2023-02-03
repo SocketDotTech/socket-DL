@@ -11,6 +11,7 @@ contract HappyTest is Setup {
     uint256 addAmount = 100;
     uint256 subAmount = 40;
     bool isFast = true;
+    bytes32[] roots;
 
     event ExecutionSuccess(uint256 msgId);
     event ExecutionFailed(uint256 msgId, string result);
@@ -22,7 +23,9 @@ contract HappyTest is Setup {
 
         _dualChainSetup(transmitterPivateKeys);
         _deployPlugContracts();
-        _configPlugContracts(isFast);
+
+        uint256 index = isFast ? 0 : 1;
+        _configPlugContracts(index);
     }
 
     function testRemoteAddFromAtoB() external {
@@ -74,8 +77,8 @@ contract HappyTest is Setup {
         }
 
         _executePayloadOnDst(
-            _a,
             _b,
+            _a.chainSlug,
             address(dstCounter__),
             packetId,
             msgId,
@@ -91,8 +94,8 @@ contract HappyTest is Setup {
 
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
-            _a,
             _b,
+            _a.chainSlug,
             address(dstCounter__),
             packetId,
             msgId,
@@ -131,8 +134,8 @@ contract HappyTest is Setup {
         _proposeOnDst(_a, sig, packetId, root);
 
         _executePayloadOnDst(
-            _b,
             _a,
+            _b.chainSlug,
             address(srcCounter__),
             packetId,
             msgId,
@@ -146,6 +149,139 @@ contract HappyTest is Setup {
         assertEq(dstCounter__.counter(), 0);
     }
 
+    function outbound(
+        uint256 count,
+        uint256 amount,
+        uint256 executionFees,
+        uint256 fees,
+        bytes memory payload
+    ) internal returns (uint256 msgId, bytes32 root) {
+        uint256 msgGasLimit = _msgGasLimit;
+        uint256 dstSlug = _b.chainSlug;
+
+        hoax(_raju);
+        srcCounter__.remoteAddOperation{value: fees}(
+            dstSlug,
+            amount,
+            msgGasLimit
+        );
+
+        msgId = _packMessageId(_a.chainSlug, count);
+        root = _a.hasher__.packMessage(
+            _a.chainSlug,
+            address(srcCounter__),
+            dstSlug,
+            address(dstCounter__),
+            msgId,
+            msgGasLimit,
+            executionFees,
+            payload
+        );
+    }
+
+    function sealAndPropose(address capacitor) internal returns (uint256) {
+        (
+            bytes32 root_,
+            uint256 packetId_,
+            bytes memory sig_
+        ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+
+        _sealOnSrc(_a, capacitor, sig_);
+        _proposeOnDst(_b, sig_, packetId_, root_);
+
+        return packetId_;
+    }
+
+    function testRemoteAddFromAtoBHashCapacitor() external {
+        SocketConfigContext memory srcConfig = _addFastSwitchboard(
+            _a,
+            _b.chainSlug,
+            2
+        );
+        SocketConfigContext memory dstConfig = _addFastSwitchboard(
+            _b,
+            _a.chainSlug,
+            2
+        );
+
+        _a.configs__.push(srcConfig);
+        _b.configs__.push(dstConfig);
+
+        _configPlugContracts(_a.configs__.length - 1);
+
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(keccak256("OP_ADD"), amount);
+
+        uint256 executionFee;
+        uint256 msgId1;
+        bytes32 root1;
+        uint256 msgId2;
+        bytes32 root2;
+        {
+            (uint256 switchboardFees, uint256 executionOverhead) = srcConfig
+                .switchboard__
+                .getMinFees(_b.chainSlug);
+
+            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
+            executionFee = _a.executionManager__.getMinFees(
+                _msgGasLimit,
+                _b.chainSlug
+            );
+
+            uint256 fees = switchboardFees +
+                executionOverhead +
+                socketFees +
+                executionFee;
+
+            // send 2 messages
+            (msgId1, root1) = outbound(0, amount, executionFee, fees, payload);
+            (msgId2, root2) = outbound(1, amount, executionFee, fees, payload);
+        }
+
+        // seal 2 messages together
+        uint256 packetId = sealAndPropose(address(srcConfig.capacitor__));
+        roots.push(root1);
+        roots.push(root2);
+
+        // execute msg 1
+        vm.expectEmit(true, false, false, false);
+        emit ExecutionSuccess(msgId1);
+
+        _executePayloadOnDst(
+            _b,
+            _a.chainSlug,
+            address(dstCounter__),
+            packetId,
+            msgId1,
+            _msgGasLimit,
+            executionFee,
+            payload,
+            abi.encode(roots)
+        );
+
+        assertEq(dstCounter__.counter(), amount);
+        assertEq(srcCounter__.counter(), 0);
+
+        // execute msg 2
+        vm.expectEmit(true, false, false, false);
+        emit ExecutionSuccess(msgId2);
+
+        _executePayloadOnDst(
+            _b,
+            _a.chainSlug,
+            address(dstCounter__),
+            packetId,
+            msgId2,
+            _msgGasLimit,
+            executionFee,
+            payload,
+            abi.encode(roots)
+        );
+
+        assertEq(dstCounter__.counter(), 2 * amount);
+        assertEq(srcCounter__.counter(), 0);
+    }
+
     function _deployPlugContracts() internal {
         vm.startPrank(_plugOwner);
 
@@ -156,21 +292,19 @@ contract HappyTest is Setup {
         vm.stopPrank();
     }
 
-    function _configPlugContracts(bool isFast_) internal {
-        uint256 index = isFast_ ? 0 : 1;
-
+    function _configPlugContracts(uint256 socketConfigIndex) internal {
         hoax(_plugOwner);
         srcCounter__.setSocketConfig(
             _b.chainSlug,
             address(dstCounter__),
-            address(_a.configs__[index].switchboard__)
+            address(_a.configs__[socketConfigIndex].switchboard__)
         );
 
         hoax(_plugOwner);
         dstCounter__.setSocketConfig(
             _a.chainSlug,
             address(srcCounter__),
-            address(_b.configs__[index].switchboard__)
+            address(_b.configs__[socketConfigIndex].switchboard__)
         );
     }
 

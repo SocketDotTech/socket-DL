@@ -18,11 +18,13 @@ contract HashChainDecapacitor is IDecapacitor, Ownable(msg.sender) {
         bytes32[] memory chain = abi.decode(proof, (bytes32[]));
         uint256 len = chain.length;
         bytes32 generatedRoot;
+        bool isIncluded;
         for (uint256 i = 0; i < len; i++) {
             generatedRoot = keccak256(abi.encode(generatedRoot, chain[i]));
+            if (chain[i] == packedMessage_) isIncluded = true;
         }
-        generatedRoot = keccak256(abi.encode(generatedRoot, packedMessage_));
-        return root_ == generatedRoot;
+
+        return root_ == generatedRoot && isIncluded;
     }
 
     function rescueFunds(
