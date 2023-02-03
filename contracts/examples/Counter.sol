@@ -17,6 +17,8 @@ contract Counter is IPlug {
     bytes32 constant OP_ADD = keccak256("OP_ADD");
     bytes32 constant OP_SUB = keccak256("OP_SUB");
 
+    error OnlyOwner();
+
     constructor(address _socket) {
         socket = _socket;
         owner = msg.sender;
@@ -40,7 +42,7 @@ contract Counter is IPlug {
         uint256 amount,
         uint256 msgGasLimit
     ) external payable {
-        bytes memory payload = abi.encode(OP_ADD, amount);
+        bytes memory payload = abi.encode(OP_ADD, amount, msg.sender);
         _outbound(chainSlug, msgGasLimit, payload);
     }
 
@@ -49,7 +51,7 @@ contract Counter is IPlug {
         uint256 amount,
         uint256 msgGasLimit
     ) external payable {
-        bytes memory payload = abi.encode(OP_SUB, amount);
+        bytes memory payload = abi.encode(OP_SUB, amount, msg.sender);
         _outbound(chainSlug, msgGasLimit, payload);
     }
 
@@ -58,10 +60,12 @@ contract Counter is IPlug {
         bytes calldata payload
     ) external payable override {
         require(msg.sender == socket, "Counter: Invalid Socket");
-        (bytes32 operationType, uint256 amount) = abi.decode(
+        (bytes32 operationType, uint256 amount, address sender) = abi.decode(
             payload,
-            (bytes32, uint256)
+            (bytes32, uint256, address)
         );
+
+        if (sender != owner) revert OnlyOwner();
 
         if (operationType == OP_ADD) {
             _addOperation(amount);

@@ -35,7 +35,7 @@ contract Setup is Test {
 
     uint256 internal _timeoutInSeconds = 0;
     uint256 internal _slowCapacitorWaitTime = 300;
-    uint256 internal _msgGasLimit = 25548;
+    uint256 internal _msgGasLimit = 30548;
     uint256 internal _sealGasLimit = 150000;
     uint256 internal _proposeGasLimit = 150000;
     uint256 internal _attestGasLimit = 150000;

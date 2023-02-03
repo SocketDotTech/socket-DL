@@ -93,7 +93,7 @@ interface ISocket {
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes calldata payload_
-    ) external payable;
+    ) external payable returns (uint256 msgId);
 
     struct MessageDetails {
         uint256 msgId;
