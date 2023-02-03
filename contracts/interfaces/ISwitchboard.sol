@@ -9,22 +9,9 @@ interface ISwitchboard {
         uint256 proposeTime
     ) external view returns (bool);
 
-    function payFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
-    ) external payable;
+    function payFees(uint256 dstChainSlug) external payable;
 
     function getMinFees(
-        uint256 msgGasLimit,
         uint256 dstChainSlug
-    ) external view returns (uint256);
-
-    function getExecutionFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
-    ) external view returns (uint256);
-
-    function getVerificationFees(
-        uint256 dstChainSlug
-    ) external view returns (uint256);
+    ) external view returns (uint256 switchboardFee, uint256 verificationFee);
 }

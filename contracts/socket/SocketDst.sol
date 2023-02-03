@@ -4,23 +4,16 @@ pragma solidity 0.8.7;
 // import "../interfaces/IVerifier.sol";
 import "../interfaces/IDecapacitor.sol";
 import "../interfaces/IPlug.sol";
+
 import "./SocketBase.sol";
 
 abstract contract SocketDst is SocketBase {
-    enum PacketStatus {
-        NOT_PROPOSED,
-        PROPOSED
-    }
-
+    error AlreadyAttested();
     error InvalidProof();
     error InvalidRetry();
-    error VerificationFailed();
     error MessageAlreadyExecuted();
-    error AlreadyAttested();
-
-    // keccak256("EXECUTOR")
-    bytes32 private constant EXECUTOR_ROLE =
-        0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
+    error NotExecutor();
+    error VerificationFailed();
 
     // srcChainSlug => switchboardAddress => executorAddress => fees
     mapping(uint256 => mapping(address => mapping(address => uint256)))
@@ -83,7 +76,7 @@ abstract contract SocketDst is SocketBase {
         uint256 packetId,
         address localPlug,
         ISocket.MessageDetails calldata messageDetails_
-    ) external override nonReentrant onlyRole(EXECUTOR_ROLE) {
+    ) external override {
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
@@ -185,29 +178,8 @@ abstract contract SocketDst is SocketBase {
         emit PacketRootUpdated(packetId_, oldRoot, newRoot_);
     }
 
-    /**
-     * @notice adds an executor
-     * @param executor_ executor address
-     */
-    function grantExecutorRole(address executor_) external onlyOwner {
-        _grantRole(EXECUTOR_ROLE, executor_);
-    }
-
-    /**
-     * @notice removes an executor from `remoteChainSlug_` chain list
-     * @param executor_ executor address
-     */
-    function revokeExecutorRole(address executor_) external onlyOwner {
-        _revokeRole(EXECUTOR_ROLE, executor_);
-    }
-
-    function getPacketStatus(
-        uint256 packetId_
-    ) external view returns (PacketStatus status) {
-        return
-            remoteRoots[packetId_] == bytes32(0)
-                ? PacketStatus.NOT_PROPOSED
-                : PacketStatus.PROPOSED;
+    function isPacketProposed(uint256 packetId_) external view returns (bool) {
+        return remoteRoots[packetId_] == bytes32(0) ? false : true;
     }
 
     function _getChainSlug(

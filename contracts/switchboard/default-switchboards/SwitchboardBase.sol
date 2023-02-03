@@ -24,64 +24,27 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     error TransferFailed();
     error FeesNotEnough();
 
-    function payFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
-    ) external payable override {
-        uint256 expectedFees = _calculateFees(msgGasLimit, dstChainSlug);
+    function payFees(uint256 dstChainSlug) external payable override {
+        (uint256 expectedFees, ) = _calculateFees(dstChainSlug);
         if (msg.value < expectedFees) revert FeesNotEnough();
     }
 
     function getMinFees(
-        uint256 msgGasLimit,
         uint256 dstChainSlug
-    ) external view override returns (uint256) {
-        return _calculateFees(msgGasLimit, dstChainSlug);
-    }
-
-    function getExecutionFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
-    ) external view override returns (uint256) {
-        uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
-        return
-            _getExecutionFees(msgGasLimit, dstChainSlug, dstRelativeGasPrice);
-    }
-
-    function getVerificationFees(
-        uint256 dstChainSlug
-    ) external view override returns (uint256) {
-        uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
-        return _getVerificationFees(dstChainSlug, dstRelativeGasPrice);
+    ) external view override returns (uint256, uint256) {
+        return _calculateFees(dstChainSlug);
     }
 
     function _calculateFees(
-        uint256 msgGasLimit,
         uint256 dstChainSlug
-    ) internal view returns (uint256 expectedFees) {
+    ) internal view returns (uint256 switchboardFee, uint256 verificationFee) {
         uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
 
-        uint256 minExecutionFees = _getExecutionFees(
-            msgGasLimit,
-            dstChainSlug,
-            dstRelativeGasPrice
-        );
-        uint256 minVerificationFees = _getVerificationFees(
-            dstChainSlug,
-            dstRelativeGasPrice
-        );
-
-        expectedFees = minExecutionFees + minVerificationFees;
+        switchboardFee = _getSwitchboardFees(dstChainSlug, dstRelativeGasPrice);
+        verificationFee = executionOverhead[dstChainSlug] * dstRelativeGasPrice;
     }
 
-    // overridden in child contracts
-    function _getExecutionFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug,
-        uint256 dstRelativeGasPrice
-    ) internal view virtual returns (uint256) {}
-
-    function _getVerificationFees(
+    function _getSwitchboardFees(
         uint256 dstChainSlug,
         uint256 dstRelativeGasPrice
     ) internal view virtual returns (uint256) {}

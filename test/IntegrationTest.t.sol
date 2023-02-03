@@ -35,26 +35,27 @@ contract HappyTest is Setup {
 
         uint256 executionFee;
         {
-            uint256 switchboardFees = _a
+            (uint256 switchboardFees, uint256 verificationFee) = _a
                 .configs__[index]
                 .switchboard__
-                .getMinFees(_msgGasLimit, _b.chainSlug);
+                .getMinFees(_b.chainSlug);
 
-            executionFee = _a.configs__[index].switchboard__.getExecutionFees(
+            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
+            executionFee = _a.executionManager__.getMinFees(
                 _msgGasLimit,
                 _b.chainSlug
             );
 
-            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-
             hoax(_raju);
             srcCounter__.remoteAddOperation{
-                value: switchboardFees + socketFees
+                value: switchboardFees +
+                    socketFees +
+                    verificationFee +
+                    executionFee
             }(_b.chainSlug, amount, _msgGasLimit);
         }
 
         uint256 msgId = _packMessageId(_a.chainSlug, 0);
-
         uint256 packetId;
         {
             (

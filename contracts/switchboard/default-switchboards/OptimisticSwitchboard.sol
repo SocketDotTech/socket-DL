@@ -18,7 +18,6 @@ contract OptimisticSwitchboard is SwitchboardBase {
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
         oracle = IOracle(oracle_);
-
         timeoutInSeconds = timeoutInSeconds_;
     }
 
@@ -73,16 +72,6 @@ contract OptimisticSwitchboard is SwitchboardBase {
     function tripSingle(uint256 packetId_, bool trip_) external onlyOwner {
         tripSingleFuse[packetId_] = trip_;
         emit PacketTripped(packetId_, trip_);
-    }
-
-    function _getExecutionFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug,
-        uint256 dstRelativeGasPrice
-    ) internal view override returns (uint256) {
-        return
-            (executionOverhead[dstChainSlug] + msgGasLimit) *
-            dstRelativeGasPrice;
     }
 
     /**

@@ -13,8 +13,17 @@ contract Socket is SocketSrc, SocketDst {
         uint32 chainSlug_,
         address hasher_,
         address transmitManager_,
+        address executionManager_,
         address capacitorFactory_
-    ) SocketBase(chainSlug_, hasher_, transmitManager_, capacitorFactory_) {}
+    )
+        SocketBase(
+            chainSlug_,
+            hasher_,
+            transmitManager_,
+            executionManager_,
+            capacitorFactory_
+        )
+    {}
 
     function rescueFunds(
         address token,
