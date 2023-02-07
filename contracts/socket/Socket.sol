@@ -3,11 +3,9 @@ pragma solidity 0.8.7;
 
 import {SocketSrc} from "./SocketSrc.sol";
 import "./SocketDst.sol";
-import "../libraries/SafeTransferLib.sol";
+import "../libraries/RescueFundsLib.sol";
 
 contract Socket is SocketSrc, SocketDst {
-    using SafeTransferLib for IERC20;
-
     constructor(
         uint32 chainSlug_,
         address hasher_,
@@ -27,16 +25,6 @@ contract Socket is SocketSrc, SocketDst {
         address userAddress,
         uint256 amount
     ) external onlyOwner {
-        require(userAddress != address(0));
-
-        if (token == address(0)) {
-            (bool success, ) = userAddress.call{value: address(this).balance}(
-                ""
-            );
-            require(success);
-        } else {
-            // do we need safe transfer?
-            IERC20(token).transfer(userAddress, amount);
-        }
+        RescueFundsLib.rescueFunds(token, userAddress, amount);
     }
 }

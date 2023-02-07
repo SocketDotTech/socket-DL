@@ -2,12 +2,10 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/IDecapacitor.sol";
-import "../libraries/SafeTransferLib.sol";
+import "../libraries/RescueFundsLib.sol";
 import "../utils/Ownable.sol";
 
 contract SingleDecapacitor is IDecapacitor, Ownable(msg.sender) {
-    using SafeTransferLib for IERC20;
-
     /// returns if the packed message is the part of a merkle tree or not
     /// @inheritdoc IDecapacitor
     function verifyMessageInclusion(
@@ -23,16 +21,6 @@ contract SingleDecapacitor is IDecapacitor, Ownable(msg.sender) {
         address userAddress,
         uint256 amount
     ) external onlyOwner {
-        require(userAddress != address(0));
-
-        if (token == address(0)) {
-            (bool success, ) = userAddress.call{value: address(this).balance}(
-                ""
-            );
-            require(success);
-        } else {
-            // do we need safe transfer?
-            IERC20(token).transfer(userAddress, amount);
-        }
+        RescueFundsLib.rescueFunds(token, userAddress, amount);
     }
 }

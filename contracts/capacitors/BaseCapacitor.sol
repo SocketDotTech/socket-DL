@@ -3,11 +3,9 @@ pragma solidity 0.8.7;
 
 import "../interfaces/ICapacitor.sol";
 import "../utils/AccessControl.sol";
-import "../libraries/SafeTransferLib.sol";
+import "../libraries/RescueFundsLib.sol";
 
 abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
-    using SafeTransferLib for IERC20;
-
     // keccak256("SOCKET_ROLE")
     bytes32 public constant SOCKET_ROLE =
         0x9626cdfde87fcc60a5069beda7850c84f848fb1b20dab826995baf7113491456;
@@ -69,16 +67,6 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
         address userAddress,
         uint256 amount
     ) external onlyOwner {
-        require(userAddress != address(0));
-
-        if (token == address(0)) {
-            (bool success, ) = userAddress.call{value: address(this).balance}(
-                ""
-            );
-            require(success);
-        } else {
-            // do we need safe transfer?
-            IERC20(token).transfer(userAddress, amount);
-        }
+        RescueFundsLib.rescueFunds(token, userAddress, amount);
     }
 }

@@ -6,11 +6,9 @@ import "./interfaces/ISignatureVerifier.sol";
 import "./interfaces/IOracle.sol";
 
 import "./utils/AccessControl.sol";
-import "./libraries/SafeTransferLib.sol";
+import "./libraries/RescueFundsLib.sol";
 
 contract TransmitManager is ITransmitManager, AccessControl {
-    using SafeTransferLib for IERC20;
-
     ISignatureVerifier public signatureVerifier;
     IOracle public oracle;
 
@@ -178,16 +176,6 @@ contract TransmitManager is ITransmitManager, AccessControl {
         address userAddress,
         uint256 amount
     ) external onlyOwner {
-        require(userAddress != address(0));
-
-        if (token == address(0)) {
-            (bool success, ) = userAddress.call{value: address(this).balance}(
-                ""
-            );
-            require(success);
-        } else {
-            // do we need safe transfer?
-            IERC20(token).transfer(userAddress, amount);
-        }
+        RescueFundsLib.rescueFunds(token, userAddress, amount);
     }
 }

@@ -5,7 +5,7 @@ import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IOracle.sol";
 import "../../utils/AccessControl.sol";
 import "../../interfaces/ISocket.sol";
-import "../../libraries/SafeTransferLib.sol";
+import "../../libraries/RescueFundsLib.sol";
 
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     IOracle public oracle;
@@ -114,16 +114,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
         address userAddress,
         uint256 amount
     ) external onlyOwner {
-        require(userAddress != address(0));
-
-        if (token == address(0)) {
-            (bool success, ) = userAddress.call{value: address(this).balance}(
-                ""
-            );
-            require(success);
-        } else {
-            // do we need safe transfer?
-            IERC20(token).transfer(userAddress, amount);
-        }
+        RescueFundsLib.rescueFunds(token, userAddress, amount);
     }
 }

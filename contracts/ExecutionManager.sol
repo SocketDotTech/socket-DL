@@ -4,11 +4,9 @@ pragma solidity 0.8.7;
 import "./interfaces/IExecutionManager.sol";
 import "./interfaces/IOracle.sol";
 import "./utils/AccessControl.sol";
-import "./libraries/SafeTransferLib.sol";
+import "./libraries/RescueFundsLib.sol";
 
 contract ExecutionManager is IExecutionManager, AccessControl {
-    using SafeTransferLib for IERC20;
-
     IOracle public oracle;
 
     // keccak256("EXECUTOR")
@@ -67,11 +65,6 @@ contract ExecutionManager is IExecutionManager, AccessControl {
         address userAddress,
         uint256 amount
     ) external onlyOwner {
-        if (token == address(0)) {
-            payable(userAddress).transfer(amount);
-        } else {
-            // do we need safe transfer?
-            IERC20(token).transfer(userAddress, amount);
-        }
+        RescueFundsLib.rescueFunds(token, userAddress, amount);
     }
 }
