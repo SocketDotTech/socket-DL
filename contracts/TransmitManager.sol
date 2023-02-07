@@ -42,6 +42,11 @@ contract TransmitManager is ITransmitManager, AccessControl {
         oracle = IOracle(oracle_);
     }
 
+    // @param slugs_ packs the siblingChainSlug & sigChainSlug
+    // slugs_(256) = siblingChainSlug(128) | sigChainSlug(128)
+    // @dev sibling chain slug is required to check the transmitter role
+    // @dev sig chain slug is required by signature. On src, this is sibling slug while on
+    // destination, it is current chain slug
     function checkTransmitter(
         uint256 slugs_,
         uint256 packetId_,

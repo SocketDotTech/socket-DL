@@ -330,7 +330,7 @@ contract Setup is Test {
 
     function _executePayloadOnDst(
         ChainContext storage dst_,
-        uint256 srcChainSlug,
+        uint256,
         address remotePlug_,
         uint256 packetId_,
         uint256 msgId_,
