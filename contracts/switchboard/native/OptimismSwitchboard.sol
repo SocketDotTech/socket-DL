@@ -117,7 +117,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         // l2ReceiveGasLimit will be 0 when switchboard is deployed on L1
         return
             initateNativeConfirmationGasLimit *
-            tx.gasprice +
+            oracle.sourceGasPrice() +
             l2ReceiveGasLimit *
             dstRelativeGasPrice;
     }

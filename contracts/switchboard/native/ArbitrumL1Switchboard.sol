@@ -128,7 +128,10 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     ) internal view override returns (uint256) {
         // todo: check if dynamic fees can be divided into more constants
         // arbitrum: check src contract
-        return initateNativeConfirmationGasLimit * tx.gasprice + dynamicFees;
+        return
+            initateNativeConfirmationGasLimit *
+            oracle.sourceGasPrice() +
+            dynamicFees;
     }
 
     function updateRefundAddresses(

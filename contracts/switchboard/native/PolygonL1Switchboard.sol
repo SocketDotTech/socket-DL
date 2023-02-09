@@ -70,7 +70,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         uint256,
         uint256
     ) internal view override returns (uint256) {
-        return initateNativeConfirmationGasLimit * tx.gasprice;
+        return initateNativeConfirmationGasLimit * oracle.sourceGasPrice();
     }
 
     // set fxChildTunnel if not set already
