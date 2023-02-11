@@ -1,6 +1,6 @@
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { createObj, deployContractWithArgs, getInstance, getSwitchboardAddress, storeAddresses } from "./utils";
+import { createObj, deployContractWithArgs, getCapacitorAddress, getInstance, getSwitchboardAddress, storeAddresses } from "./utils";
 import { chainIds } from "../constants";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { ChainSocketAddresses, IntegrationTypes } from "../../src";
@@ -21,7 +21,7 @@ export default async function deployAndRegisterSwitchboard(
     const remoteChainSlug = chainIds[remoteChain];
 
     const switchboardAddress = getSwitchboardAddress(chainIds[remoteChain], integrationType, sourceConfig)
-    const { contractName, args, path } = getSwitchboardDeployData(integrationType, network, remoteChain, sourceConfig["Socket"], sourceConfig["GasPriceOracle"], signer.address);
+    const { contractName, args, path } = getSwitchboardDeployData(integrationType, network, remoteChain, sourceConfig["GasPriceOracle"], signer.address);
 
     let switchboard: Contract;
     if (!switchboardAddress) {
@@ -36,14 +36,22 @@ export default async function deployAndRegisterSwitchboard(
       switchboard = await getInstance(contractName, switchboardAddress)
     }
 
+    sourceConfig = await registerSwitchBoard(switchboard.address, remoteChainSlug, capacitorType, signer, integrationType, sourceConfig);
+    await storeAddresses(sourceConfig, chainIds[network]);
+
     if (contractName === "FastSwitchboard") {
       await setupFast(switchboard, chainIds[remoteChain], network, remoteChain, signer);
     } else if (contractName === "OptimisticSwitchboard") {
       await setupOptimistic(switchboard, chainIds[remoteChain], network, remoteChain, signer)
+    } else {
+      const capacitor = getCapacitorAddress(remoteChainSlug, IntegrationTypes.nativeIntegration, sourceConfig);
+      const setCapacitorTx = await switchboard.connect(signer).setCapacitor(
+        capacitor
+      );
+      console.log(`Adding Capacitor ${capacitor}: ${setCapacitorTx.hash}`);
+      await setCapacitorTx.wait();
     }
 
-    sourceConfig = await registerSwitchBoard(switchboard.address, remoteChainSlug, capacitorType, signer, integrationType, sourceConfig);
-    await storeAddresses(sourceConfig, chainIds[network]);
 
     return sourceConfig;
   } catch (error) {
