@@ -22,10 +22,8 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         uint256 executionOverhead_,
         address fxChild_,
         address owner_,
-        ISocket socket_,
         IOracle oracle_
     ) AccessControl(owner_) FxBaseChildTunnel(fxChild_) {
-        socket = socket_;
         oracle = oracle_;
 
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
@@ -37,7 +35,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
      * @param packetId - packet id
      */
     function initateNativeConfirmation(uint256 packetId) external payable {
-        bytes32 root = socket.remoteRoots(packetId);
+        bytes32 root = capacitor.getRootById(packetId);
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encode(packetId, root);

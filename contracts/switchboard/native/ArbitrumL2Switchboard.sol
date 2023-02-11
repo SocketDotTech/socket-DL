@@ -37,7 +37,6 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
         uint256 executionOverhead_,
         address remoteNativeSwitchboard_,
         address owner_,
-        ISocket socket_,
         IOracle oracle_
     ) AccessControl(owner_) {
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
@@ -45,12 +44,11 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
         executionOverhead = executionOverhead_;
 
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        socket = socket_;
         oracle = oracle_;
     }
 
     function initateNativeConfirmation(uint256 packetId) external {
-        bytes32 root = socket.remoteRoots(packetId);
+        bytes32 root = capacitor.getRootById(packetId);
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encodeWithSelector(

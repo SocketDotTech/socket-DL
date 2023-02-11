@@ -49,7 +49,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         address remoteNativeSwitchboard_,
         address inbox_,
         address owner_,
-        ISocket socket_,
         IOracle oracle_
     ) AccessControl(owner_) {
         dynamicFees = dynamicFees_;
@@ -58,7 +57,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
 
         inbox = IInbox(inbox_);
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        socket = socket_;
         oracle = oracle_;
 
         remoteRefundAddress = msg.sender;
@@ -71,7 +69,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         uint256 maxGas,
         uint256 gasPriceBid
     ) external payable {
-        bytes32 root = socket.remoteRoots(packetId);
+        bytes32 root = capacitor.getRootById(packetId);
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encodeWithSelector(

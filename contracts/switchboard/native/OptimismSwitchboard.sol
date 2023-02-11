@@ -40,7 +40,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         uint256 executionOverhead_,
         address remoteNativeSwitchboard_,
         address owner_,
-        ISocket socket_,
         IOracle oracle_
     ) AccessControl(owner_) {
         receivePacketGasLimit = receivePacketGasLimit_;
@@ -50,7 +49,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         executionOverhead = executionOverhead_;
 
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        socket = socket_;
         oracle = oracle_;
 
         if ((block.chainid == 10 || block.chainid == 420)) {
@@ -69,9 +67,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
     }
 
     function initateNativeConfirmation(uint256 packetId) external {
-        bytes32 root = socket.remoteRoots(packetId);
-        if (root == bytes32(0)) revert NoRootFound();
-
+        bytes32 root = capacitor.getRootById(packetId);
         bytes memory data = abi.encodeWithSelector(
             INativeReceiver.receivePacket.selector,
             packetId,
