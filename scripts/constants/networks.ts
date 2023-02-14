@@ -63,6 +63,9 @@ export function getJsonRpcUrl(chain: keyof typeof chainIds): string {
     case "arbitrum":
       jsonRpcUrl = "https://arb1.arbitrum.io/rpc ";
       break;
+    case "goerli":
+      jsonRpcUrl = process.env.GOERLI_RPC_URL;
+      break;
     default:
       jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
   }

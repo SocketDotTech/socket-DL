@@ -16,6 +16,7 @@ contract GasPriceOracle is IOracle, Ownable {
 
     // gas price of source chain
     uint256 public override sourceGasPrice;
+    uint256 public immutable chainSlug;
 
     event GasPriceUpdated(uint256 dstChainSlug_, uint256 relativeGasPrice_);
     event TransmitManagerUpdated(address transmitManager);
@@ -23,13 +24,18 @@ contract GasPriceOracle is IOracle, Ownable {
 
     error TransmitterNotFound();
 
-    constructor(address owner_) Ownable(owner_) {}
+    constructor(address owner_, uint256 _chainSlug) Ownable(owner_) {
+        chainSlug = _chainSlug;
+    }
 
     /**
      * @notice update the sourceGasPrice which is to be used in various computations
      * @param sourceGasPrice_ gas price of source chain
      */
     function setSourceGasPrice(uint256 sourceGasPrice_) external {
+        if (!transmitManager.isTransmitter(msg.sender, chainSlug))
+            revert TransmitterNotFound();
+
         sourceGasPrice = sourceGasPrice_;
         emit SourceGasPriceUpdated(sourceGasPrice);
     }

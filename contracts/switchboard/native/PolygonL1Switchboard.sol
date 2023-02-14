@@ -68,9 +68,10 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
 
     function _getSwitchboardFees(
         uint256,
-        uint256
+        uint256,
+        uint256 sourceGasPrice
     ) internal view override returns (uint256) {
-        return initateNativeConfirmationGasLimit * oracle.sourceGasPrice();
+        return initateNativeConfirmationGasLimit * sourceGasPrice;
     }
 
     // set fxChildTunnel if not set already
