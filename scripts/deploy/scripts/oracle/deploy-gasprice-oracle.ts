@@ -6,37 +6,35 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 /**
  * Deploys network-independent gas-price-oracle contracts
  */
+// npx hardhat run scripts/deploy/scripts/oracle/deploy-gasprice-oracle.ts --network goerli
 export const main = async () => {
   try {
     // assign deployers
     const { getNamedAccounts } = hre;
-    const { socketOwner, counterOwner } = await getNamedAccounts();
+    const { socketOwner } = await getNamedAccounts();
     
-    //0xF883Bb6FbDcea8664e37F2f572f6659CE1AcE75A
     const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
-    const counterSigner: SignerWithAddress = await ethers.getSigner(
-      counterOwner
-    );
 
     const factory = await ethers.getContractFactory('GasPriceOracle');
-    const gasPriceOracleContract = await factory.deploy(socketSigner.address);
+    const gasPriceOracleContract = await factory.deploy(socketSigner.address, 5);
     await gasPriceOracleContract.deployed();
 
     await sleep(30);
 
+        // 0x3ECc6604bB808f4eEE4A78400A5DCd3Eb3A2148A
     await run("verify:verify", {
       address: gasPriceOracleContract.address,
       contract: `contracts/GasPriceOracle.sol:GasPriceOracle`,
-      constructorArguments: [socketSigner.address],
+      constructorArguments: [socketSigner.address, 5],
     });
 
-    const tx = await gasPriceOracleContract
-        .connect(socketSigner)
-        .setTransmitManager(socketOwner);
+    // const tx = await gasPriceOracleContract
+    //     .connect(socketSigner)
+    //     .setTransmitManager(socketOwner);
 
-      console.log(`Setting transmit manager in oracle: ${tx.hash}`);
+    //   console.log(`Setting transmit manager in oracle: ${tx.hash}`);
 
-      await tx.wait();
+    // await tx.wait();
   } catch (error) {
     console.log("Error in deploying gasprice-oracle contracts", error);
     throw error;
