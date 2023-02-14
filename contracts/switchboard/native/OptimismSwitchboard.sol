@@ -112,12 +112,13 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
 
     function _getSwitchboardFees(
         uint256,
-        uint256 dstRelativeGasPrice
+        uint256 dstRelativeGasPrice,
+        uint256 sourceGasPrice
     ) internal view override returns (uint256) {
         // l2ReceiveGasLimit will be 0 when switchboard is deployed on L1
         return
             initateNativeConfirmationGasLimit *
-            oracle.sourceGasPrice() +
+            sourceGasPrice +
             l2ReceiveGasLimit *
             dstRelativeGasPrice;
     }

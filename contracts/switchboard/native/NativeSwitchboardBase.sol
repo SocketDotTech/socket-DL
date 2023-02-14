@@ -46,16 +46,17 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     function _calculateFees(
         uint256 dstChainSlug
     ) internal view returns (uint256 switchboardFee, uint256 verificationFee) {
-        uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
-
-        switchboardFee = _getSwitchboardFees(dstChainSlug, dstRelativeGasPrice);
+        (uint256 sourceGasPrice, uint256 dstRelativeGasPrice) = oracle.getGasPrices(dstChainSlug);
+        
+        switchboardFee = _getSwitchboardFees(dstChainSlug, dstRelativeGasPrice, sourceGasPrice);
 
         verificationFee = executionOverhead * dstRelativeGasPrice;
     }
 
     function _getSwitchboardFees(
         uint256 dstChainSlug,
-        uint256 dstRelativeGasPrice
+        uint256 dstRelativeGasPrice,
+        uint256 sourceGasPrice
     ) internal view virtual returns (uint256) {}
 
     /**
