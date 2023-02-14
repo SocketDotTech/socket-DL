@@ -8,8 +8,8 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
 
-    event FxChildTunnelSet(address fxRootTunnel, address fxRootTunnel_);
-    event RootReceived(uint256 packetId_, bytes32 root_);
+    event FxChildTunnelSet(address fxRootTunnel, address newFxRootTunnel);
+    event RootReceived(uint256 packetId, bytes32 root);
 
     error NoRootFound();
 
@@ -31,7 +31,8 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
      * @param packetId - packet id
      */
     function initateNativeConfirmation(uint256 packetId) external payable {
-        bytes32 root = capacitor.getRootById(packetId);
+        uint256 capacitorPacketCount = uint256(uint64(packetId));
+        bytes32 root = capacitor.getRootById(capacitorPacketCount);
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encode(packetId, root);

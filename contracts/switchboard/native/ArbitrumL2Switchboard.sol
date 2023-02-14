@@ -16,9 +16,9 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
 
-    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
-    event RootReceived(uint256 packetId_, bytes32 root_);
-    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit_);
+    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
+    event RootReceived(uint256 packetId, bytes32 root);
+    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit);
 
     error InvalidSender();
     error NoRootFound();
@@ -48,7 +48,8 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
     }
 
     function initateNativeConfirmation(uint256 packetId) external {
-        bytes32 root = capacitor.getRootById(packetId);
+        uint256 capacitorPacketCount = uint256(uint64(packetId));
+        bytes32 root = capacitor.getRootById(capacitorPacketCount);
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encodeWithSelector(

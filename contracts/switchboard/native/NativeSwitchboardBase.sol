@@ -16,13 +16,13 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     uint256 public executionOverhead;
     uint256 public initateNativeConfirmationGasLimit;
 
-    event SwitchboardTripped(bool tripGlobalFuse_);
-    event ExecutionOverheadSet(uint256 executionOverhead_);
-    event InitialConfirmationGasLimitSet(uint256 gasLimit_);
-    event CapacitorSet(address capacitor_);
-    event OracleSet(address oracle_);
+    event SwitchboardTripped(bool tripGlobalFuse);
+    event ExecutionOverheadSet(uint256 executionOverhead);
+    event InitialConfirmationGasLimitSet(uint256 gasLimit);
+    event CapacitorSet(address capacitor);
+    event OracleSet(address oracle);
     event InitiatedNativeConfirmation(uint256 packetId);
-    event FeesWithdrawn(address account_, uint256 value_);
+    event FeesWithdrawn(address account, uint256 value);
 
     error TransferFailed();
     error FeesNotEnough();

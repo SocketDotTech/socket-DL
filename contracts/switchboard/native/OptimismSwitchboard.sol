@@ -16,10 +16,10 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
 
     ICrossDomainMessenger public crossDomainMessenger;
 
-    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
-    event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit_);
-    event RootReceived(uint256 packetId_, bytes32 root_);
-    event UpdatedL2ReceiveGasLimit(uint256 l2ReceiveGasLimit_);
+    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
+    event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit);
+    event RootReceived(uint256 packetId, bytes32 root);
+    event UpdatedL2ReceiveGasLimit(uint256 l2ReceiveGasLimit);
 
     error InvalidSender();
     error NoRootFound();
@@ -67,7 +67,8 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
     }
 
     function initateNativeConfirmation(uint256 packetId) external {
-        bytes32 root = capacitor.getRootById(packetId);
+        uint256 capacitorPacketCount = uint256(uint64(packetId));
+        bytes32 root = capacitor.getRootById(capacitorPacketCount);
         bytes memory data = abi.encodeWithSelector(
             INativeReceiver.receivePacket.selector,
             packetId,
