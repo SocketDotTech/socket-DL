@@ -4,11 +4,9 @@ pragma solidity 0.8.7;
 import "./interfaces/IOracle.sol";
 import "./interfaces/ITransmitManager.sol";
 import "./utils/AccessControl.sol";
-import "./libraries/SafeTransferLib.sol";
+import "./libraries/RescueFundsLib.sol";
 
 contract GasPriceOracle is IOracle, Ownable {
-    using SafeTransferLib for IERC20;
-
     ITransmitManager public transmitManager;
 
     // plugs/switchboards/transmitter can use it to ensure prices are updated
@@ -54,11 +52,6 @@ contract GasPriceOracle is IOracle, Ownable {
         address userAddress,
         uint256 amount
     ) external onlyOwner {
-        if (token == address(0)) {
-            payable(userAddress).transfer(amount);
-        } else {
-            // do we need safe transfer?
-            IERC20(token).transfer(userAddress, amount);
-        }
+        RescueFundsLib.rescueFunds(token, userAddress, amount);
     }
 }

@@ -6,7 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithoutArgs, deployContractWithArgs, storeAddresses } from "./utils";
 import { chainIds } from "../constants/networks";
 
-import { executorAddress, sealGasLimit } from "../constants/config";
+import { executorAddress, EXECUTOR_ROLE, sealGasLimit } from "../constants/config";
 import { ChainSocketAddresses } from "../../src";
 
 /**
@@ -19,11 +19,12 @@ export const main = async () => {
     const { socketOwner, counterOwner } = await getNamedAccounts();
     let addresses: ChainSocketAddresses = {
       Counter: "",
+      CapacitorFactory: "",
+      ExecutionManager: "",
+      GasPriceOracle: "",
       Hasher: "",
       SignatureVerifier: "",
       Socket: "",
-      CapacitorFactory: "",
-      GasPriceOracle: "",
       TransmitManager: ""
     };
 
@@ -68,6 +69,15 @@ export const main = async () => {
     addresses["GasPriceOracle"] = gasPriceOracle.address;
     await storeAddresses(addresses, chainIds[network]);
 
+    const executionManager: Contract = await deployContractWithArgs(
+      "ExecutionManager",
+      [gasPriceOracle.address, socketSigner.address],
+      socketSigner,
+      "contracts/ExecutionManager.sol"
+    );
+    addresses["ExecutionManager"] = executionManager.address;
+    await storeAddresses(addresses, chainIds[network]);
+
     const transmitManager: Contract = await deployContractWithArgs(
       "TransmitManager",
       [signatureVerifier.address, gasPriceOracle.address, socketSigner.address, chainIds[network], sealGasLimit[network]],
@@ -92,6 +102,7 @@ export const main = async () => {
         chainIds[network],
         hasher.address,
         transmitManager.address,
+        executionManager.address,
         capacitorFactory.address,
       ],
       socketSigner,
@@ -107,10 +118,11 @@ export const main = async () => {
     console.log("Contracts deployed!");
 
     // configure
-    const tx = await socket
+    const tx = await executionManager
       .connect(socketSigner)
-      .grantExecutorRole(executorAddress[network]);
+      .grantRole(EXECUTOR_ROLE, executorAddress[network]);
     console.log(`Assigned executor role to ${executorAddress[network]}: ${tx.hash}`);
+
     await tx.wait();
   } catch (error) {
     console.log("Error in deploying setup contracts", error);

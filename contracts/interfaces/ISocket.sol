@@ -20,6 +20,7 @@ interface ISocket {
         address dstPlug,
         uint256 msgId,
         uint256 msgGasLimit,
+        uint256 executionFee,
         uint256 fees,
         bytes payload
     );
@@ -62,18 +63,6 @@ interface ISocket {
         address outboundSwitchboard,
         address capacitor,
         address decapacitor
-    );
-
-    /**
-     * @notice emits when a msg is retried with updated fees
-     * @param msgId_ msg id to be retried
-     * @param newMsgGasLimit_ new gas limit to execute a message
-     * @param fees_ additional fees sent
-     */
-    event MessageRetried(
-        uint256 msgId_,
-        uint256 newMsgGasLimit_,
-        uint256 fees_
     );
 
     /**

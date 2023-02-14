@@ -1,40 +1,30 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./SocketBase.sol";
-import "./SocketSrc.sol";
+import {SocketSrc} from "./SocketSrc.sol";
 import "./SocketDst.sol";
-import "../libraries/SafeTransferLib.sol";
+import "../libraries/RescueFundsLib.sol";
 
 contract Socket is SocketSrc, SocketDst {
-    using SafeTransferLib for IERC20;
-
     constructor(
         uint32 chainSlug_,
         address hasher_,
         address transmitManager_,
         address executionManager_,
         address capacitorFactory_
-    )
-        SocketBase(
-            chainSlug_,
-            hasher_,
-            transmitManager_,
-            executionManager_,
-            capacitorFactory_
-        )
-    {}
+    ) {
+        _chainSlug = chainSlug_;
+        _hasher__ = IHasher(hasher_);
+        _transmitManager__ = ITransmitManager(transmitManager_);
+        _executionManager__ = IExecutionManager(executionManager_);
+        _capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
+    }
 
     function rescueFunds(
         address token,
         address userAddress,
         uint256 amount
     ) external onlyOwner {
-        if (token == address(0)) {
-            payable(userAddress).transfer(amount);
-        } else {
-            // do we need safe transfer?
-            IERC20(token).transfer(userAddress, amount);
-        }
+        RescueFundsLib.rescueFunds(token, userAddress, amount);
     }
 }

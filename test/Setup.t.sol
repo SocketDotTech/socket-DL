@@ -2,7 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import {Socket, ISocket, SocketConfig, SocketSrc, SocketDst, SocketBase} from "../contracts/socket/Socket.sol";
+import {ISocket, SocketConfig, SocketBase} from "../contracts/socket/SocketBase.sol";
+import {Socket, SocketSrc, SocketDst} from "../contracts/socket/Socket.sol";
 import "../contracts/utils/SignatureVerifier.sol";
 import "../contracts/utils/Hasher.sol";
 
@@ -231,8 +232,8 @@ contract Setup is Test {
         vm.startPrank(deployer_);
         cc_.socket__.registerSwitchBoard(
             switchBoardAddress_,
-            remoteChainSlug_,
-            capacitorType_
+            uint32(remoteChainSlug_),
+            uint32(capacitorType_)
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
@@ -329,7 +330,7 @@ contract Setup is Test {
 
     function _executePayloadOnDst(
         ChainContext storage dst_,
-        uint256 srcChainSlug,
+        uint256,
         address remotePlug_,
         uint256 packetId_,
         uint256 msgId_,

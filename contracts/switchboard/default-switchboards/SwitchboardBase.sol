@@ -5,11 +5,9 @@ import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IOracle.sol";
 import "../../utils/AccessControl.sol";
 
-import "../../libraries/SafeTransferLib.sol";
+import "../../libraries/RescueFundsLib.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControl {
-    using SafeTransferLib for IERC20;
-
     IOracle public oracle;
     bool public tripGlobalFuse;
     mapping(uint256 => uint256) public executionOverhead;
@@ -20,6 +18,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
         uint256 executionOverhead_
     );
     event OracleSet(address oracle_);
+    event FeesWithdrawn(address account_, uint256 value_);
 
     error TransferFailed();
     error FeesNotEnough();
@@ -77,8 +76,12 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
      */
     function withdrawFees(address account_) external onlyOwner {
         require(account_ != address(0));
-        (bool success, ) = account_.call{value: address(this).balance}("");
+
+        uint256 value = address(this).balance;
+        (bool success, ) = account_.call{value: value}("");
         if (!success) revert TransferFailed();
+
+        emit FeesWithdrawn(account_, value);
     }
 
     function rescueFunds(
@@ -86,11 +89,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
         address userAddress,
         uint256 amount
     ) external onlyOwner {
-        if (token == address(0)) {
-            payable(userAddress).transfer(amount);
-        } else {
-            // do we need safe transfer?
-            IERC20(token).transfer(userAddress, amount);
-        }
+        RescueFundsLib.rescueFunds(token, userAddress, amount);
     }
 }

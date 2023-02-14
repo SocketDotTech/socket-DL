@@ -19,7 +19,9 @@ const roleExist = async (contract, role, address) => await contract.hasRole(role
 
 const checkSocket = async (chain, remoteChain, config, switchboard, capacitor, decapacitor) => {
   const socket = await getInstance("Socket", config["Socket"]);
-  let hasExecutorRole = await roleExist(socket, executorRole, executorAddress[chain]);
+
+  const executionManager = await getInstance("ExecutionManager", config["ExecutionManager"]);
+  let hasExecutorRole = await roleExist(executionManager, executorRole, executorAddress[chain]);
   assert(hasExecutorRole, `❌ Executor Role do not exist for ${chain}`);
 
   const capacitor__ = await socket._capacitors__(switchboard, chainIds[remoteChain]);
@@ -105,12 +107,12 @@ export const verifyConfig = async (
 
   // contracts exist:
   // core contracts
-  if (!localConfig["Hasher"] || !localConfig["SignatureVerifier"] || !localConfig["Socket"] || !localConfig["CapacitorFactory"] || !localConfig["GasPriceOracle"] || !localConfig["TransmitManager"]) {
+  if (!localConfig["Hasher"] || !localConfig["SignatureVerifier"] || !localConfig["Socket"] || !localConfig["CapacitorFactory"] || !localConfig["GasPriceOracle"] || !localConfig["ExecutionManager"] || !localConfig["TransmitManager"]) {
     console.log(`❌ Core contracts do not exist for ${localChain}`);
     return;
   }
 
-  if (!remoteConfig["Hasher"] || !remoteConfig["SignatureVerifier"] || !remoteConfig["Socket"] || !remoteConfig["CapacitorFactory"] || !remoteConfig["GasPriceOracle"] || !remoteConfig["TransmitManager"]) {
+  if (!remoteConfig["Hasher"] || !remoteConfig["SignatureVerifier"] || !remoteConfig["Socket"] || !remoteConfig["CapacitorFactory"] || !remoteConfig["GasPriceOracle"] || !localConfig["ExecutionManager"] || !remoteConfig["TransmitManager"]) {
     console.log(`❌ Core contracts do not exist for ${remoteChain}`);
     return;
   }

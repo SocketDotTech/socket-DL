@@ -132,7 +132,7 @@ const setSocketConfig = async (socket, remoteChainSlug, remoteCounter, integrati
   );
 
   const switchboard = getSwitchboardAddress(remoteChainSlug, integrationType, localConfig)
-  const configs = await socket._plugConfigs(counter.address, remoteChainSlug);
+  const configs = await socket.getPlugConfig(counter.address, remoteChainSlug);
   if (configs["siblingPlug"].toLowerCase() === remoteCounter.toLowerCase() && configs["inboundSwitchboard__"].toLowerCase() === switchboard.toLowerCase())
     return;
 
@@ -141,6 +141,7 @@ const setSocketConfig = async (socket, remoteChainSlug, remoteCounter, integrati
     .setSocketConfig(
       remoteChainSlug,
       remoteCounter,
+      switchboard
     );
 
   console.log(

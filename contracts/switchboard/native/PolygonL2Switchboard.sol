@@ -42,6 +42,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
 
         bytes memory data = abi.encode(packetId, root);
         _sendMessageToRoot(data);
+        emit InitiatedNativeConfirmation(packetId);
     }
 
     /**
@@ -68,9 +69,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         uint256
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
-        if (roots[packetId] != root) return false;
-
-        return true;
+        return roots[packetId] == root;
     }
 
     function _getSwitchboardFees(

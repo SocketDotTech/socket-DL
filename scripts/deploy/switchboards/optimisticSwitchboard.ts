@@ -40,8 +40,6 @@ export const setupOptimistic = async (
       watcherAddress[localChain]
     );
 
-    console.log(executionOverheadOnChain.toString())
-
     if (parseInt(executionOverheadOnChain) !== executionOverhead[remoteChain]) {
       const setExecutionOverheadTx = await switchboard.connect(signer).setExecutionOverhead(
         remoteChainSlug,
