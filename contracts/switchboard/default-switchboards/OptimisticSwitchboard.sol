@@ -56,7 +56,6 @@ contract OptimisticSwitchboard is SwitchboardBase {
     ) external onlyRole(_watcherRole(srcChainSlug_)) {
         //source chain based tripping
 
-
         tripSingleFuse[packetId_] = false;
         emit PacketTripped(packetId_, false);
     }
