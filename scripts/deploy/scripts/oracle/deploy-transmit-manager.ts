@@ -4,19 +4,19 @@ import { ethers, run } from "hardhat";
 /**
  * Deploys transmitManager contracts
  */
-// npx hardhat run scripts/deploy/scripts/oracle/deploy-transmit-manager.ts --network goerli
+// npx hardhat run scripts/deploy/scripts/oracle/deploy-transmit-manager.ts --network polygon-mumbai
 export const main = async () => {
   try {
     const { getNamedAccounts } = hre;
     const { socketOwner } = await getNamedAccounts();
 
-    const sigVerifier ='0x98d36cf40f46A5fD51C26AC53390C26b87ff9E1F';
-    const gasPriceOracle = '0x3ECc6604bB808f4eEE4A78400A5DCd3Eb3A2148A';
+    const sigVerifier ='0x6cCA0f6485Ab43e9c91E83Be6BFe3A3C0681CC7e';
+    const gasPriceOracle = '0xe1C2aE858E8F64be00343aE052F9D3a08856BbB9';
     const owner = socketOwner;
-    const chainSlug = 5;
+    const chainSlug = 80001;
     const sealGasLimit = 100000;
 
-    // 0xD670A70781CB24F4525536cEa0cb7639635c9a87
+    // 0xe4813b2Cad4801a0dA640ecDB8b5b059bF5D262b
     const factory = await ethers.getContractFactory('TransmitManager');
     const transmitManagerContract = await factory.deploy(sigVerifier, gasPriceOracle, owner, chainSlug, sealGasLimit);
     await transmitManagerContract.deployed();

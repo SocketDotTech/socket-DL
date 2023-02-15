@@ -3,7 +3,7 @@ import { ethers, run } from "hardhat";
 /**
  * Deploys sig-verifier contracts
  */
-// npx hardhat run scripts/deploy/scripts/oracle/deploy-sig-verifier.ts --network goerli
+// npx hardhat run scripts/deploy/scripts/oracle/deploy-sig-verifier.ts --network polygon-mumbai
 export const main = async () => {
   try {
     const factory = await ethers.getContractFactory('SignatureVerifier');
@@ -12,7 +12,7 @@ export const main = async () => {
 
     await sleep(30);
 
-        //0x98d36cf40f46A5fD51C26AC53390C26b87ff9E1F
+        //0x6cCA0f6485Ab43e9c91E83Be6BFe3A3C0681CC7e
     await run("verify:verify", {
       address: signatureVerifierContract.address,
       contract: `contracts/utils/SignatureVerifier.sol:SignatureVerifier`,

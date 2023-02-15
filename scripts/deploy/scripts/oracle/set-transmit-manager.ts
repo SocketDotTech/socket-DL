@@ -2,7 +2,7 @@ import { BigNumber } from 'ethers';
 import { ethers, run } from 'hardhat';
 const hre = require("hardhat");
 
-// usage: npx hardhat run scripts/deploy/scripts/oracle/set-transmit-manager.ts --network goerli
+// usage: npx hardhat run scripts/deploy/scripts/oracle/set-transmit-manager.ts --network polygon-mumbai
 export const setTransmitManagerInGasPriceOracle = async () => {
   try {
 
@@ -10,11 +10,11 @@ export const setTransmitManagerInGasPriceOracle = async () => {
     const socketOwnerSigner = await ethers.getSigner(socketOwner);
     console.log(`socketOwner is: ${socketOwner}`);
 
-    const gasPriceOracleAddress = '0x3ECc6604bB808f4eEE4A78400A5DCd3Eb3A2148A';
+    const gasPriceOracleAddress = '0xe1C2aE858E8F64be00343aE052F9D3a08856BbB9';
     const GasPriceOracle = await ethers.getContractFactory('GasPriceOracle');
     const gasPriceOracleInstance = GasPriceOracle.attach(gasPriceOracleAddress);
 
-    const transmitManagerAddress = '0xD670A70781CB24F4525536cEa0cb7639635c9a87';
+    const transmitManagerAddress = '0xe4813b2Cad4801a0dA640ecDB8b5b059bF5D262b';
     const tx = await gasPriceOracleInstance.connect(socketOwnerSigner).setTransmitManager(
       transmitManagerAddress,
       {

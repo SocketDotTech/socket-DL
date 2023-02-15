@@ -2,10 +2,10 @@ import { BigNumber } from 'ethers';
 import { ethers, run } from 'hardhat';
 const hre = require("hardhat");
 
-// usage: npx hardhat run scripts/deploy/scripts/oracle/set-source-gasprice-oracle.ts --network goerli
+// usage: npx hardhat run scripts/deploy/scripts/oracle/set-source-gasprice-oracle.ts --network polygon-mumbai
 export const setSourceGasPriceInOracle = async () => {
   try {
-    const gasPriceOracleAddress = '0xF883Bb6FbDcea8664e37F2f572f6659CE1AcE75A';
+    const gasPriceOracleAddress = '0xe1C2aE858E8F64be00343aE052F9D3a08856BbB9';
 
     const { socketOwner } = await getNamedAccounts();
     const socketOwnerSigner = await ethers.getSigner(socketOwner);
@@ -15,9 +15,9 @@ export const setSourceGasPriceInOracle = async () => {
     const gasPriceOracleInstance = GasPriceOracle.attach(gasPriceOracleAddress);
 
     const tx = await gasPriceOracleInstance.connect(socketOwnerSigner).setSourceGasPrice(
-      ethers.utils.parseEther('0.75'),
+      ethers.utils.parseUnits('350', 'gwei'),
       {
-        gasLimit: 200000,
+        gasLimit: 70000,
         gasPrice: ethers.utils.parseUnits("50", "gwei").toNumber()
       });
     await tx.wait();

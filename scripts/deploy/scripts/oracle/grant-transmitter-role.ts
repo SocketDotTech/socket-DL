@@ -2,7 +2,7 @@ import { BigNumber } from 'ethers';
 import { ethers, run } from 'hardhat';
 const hre = require("hardhat");
 
-// usage: npx hardhat run scripts/deploy/scripts/oracle/grant-transmitter-role.ts --network goerli
+// usage: npx hardhat run scripts/deploy/scripts/oracle/grant-transmitter-role.ts --network polygon-mumbai
 export const grantTransmitterRole = async () => {
   try {
 
@@ -10,15 +10,15 @@ export const grantTransmitterRole = async () => {
     const socketOwnerSigner = await ethers.getSigner(socketOwner);
     console.log(`socketOwner is: ${socketOwner}`);
 
-    const transmitManagerAddress = '0xD670A70781CB24F4525536cEa0cb7639635c9a87';
+    const transmitManagerAddress = '0xe4813b2Cad4801a0dA640ecDB8b5b059bF5D262b';
     const TransmitManager = await ethers.getContractFactory('TransmitManager');
     const transmitManagerInstance = TransmitManager.attach(transmitManagerAddress);
 
     const tx = await transmitManagerInstance.connect(socketOwnerSigner).grantTransmitterRole(
-      137,
+      5,
       socketOwner,
       {
-        gasLimit: 50000,
+        gasLimit: 90000,
         gasPrice: ethers.utils.parseUnits("50", "gwei").toNumber()
       });
     await tx.wait();
