@@ -6,7 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 /**
  * Deploys network-independent gas-price-oracle contracts
  */
-// npx hardhat run scripts/deploy/scripts/oracle/deploy-gasprice-oracle.ts --network goerli
+// npx hardhat run scripts/deploy/scripts/oracle/deploy-gasprice-oracle.ts --network polygon-mumbai
 export const main = async () => {
   try {
     // assign deployers
@@ -16,16 +16,16 @@ export const main = async () => {
     const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
 
     const factory = await ethers.getContractFactory('GasPriceOracle');
-    const gasPriceOracleContract = await factory.deploy(socketSigner.address, 5);
+    const gasPriceOracleContract = await factory.deploy(socketSigner.address, 80001);
     await gasPriceOracleContract.deployed();
 
     await sleep(30);
 
-        // 0x3ECc6604bB808f4eEE4A78400A5DCd3Eb3A2148A
+        // 0xe1C2aE858E8F64be00343aE052F9D3a08856BbB9
     await run("verify:verify", {
       address: gasPriceOracleContract.address,
       contract: `contracts/GasPriceOracle.sol:GasPriceOracle`,
-      constructorArguments: [socketSigner.address, 5],
+      constructorArguments: [socketSigner.address, 80001],
     });
 
     // const tx = await gasPriceOracleContract

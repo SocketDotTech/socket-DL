@@ -64,9 +64,8 @@ export function getJsonRpcUrl(chain: keyof typeof chainIds): string {
       jsonRpcUrl = "https://arb1.arbitrum.io/rpc ";
       break;
     case "goerli":
-      jsonRpcUrl = "https://rpc.ankr.com/eth_goerli	";
+      jsonRpcUrl = "https://sparkling-distinguished-gadget.ethereum-goerli.discover.quiknode.pro/007d59cbcc70496817a611e740e0f84e14978636/"
       break;
-
     default:
       jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
   }
