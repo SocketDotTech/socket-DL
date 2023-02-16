@@ -9,7 +9,6 @@ import {TransmitManager} from "../../contracts/TransmitManager.sol";
 import {SignatureVerifier} from "../../contracts/utils/SignatureVerifier.sol";
 
 contract GasPriceOracleTest is Test {
-
     GasPriceOracle internal gasPriceOracle;
     uint256 chainSlug = uint32(uint256(0x2013AA263));
     uint256 destChainSlug = uint32(uint256(0x2013AA264));
@@ -27,8 +26,13 @@ contract GasPriceOracleTest is Test {
     function setUp() public {
         gasPriceOracle = new GasPriceOracle(owner, chainSlug);
         signatureVerifier = new SignatureVerifier();
-        transmitManager = new TransmitManager(signatureVerifier, 
-        gasPriceOracle, owner, chainSlug, gasLimit);
+        transmitManager = new TransmitManager(
+            signatureVerifier,
+            gasPriceOracle,
+            owner,
+            chainSlug,
+            gasLimit
+        );
         vm.startPrank(owner);
         transmitManager.grantTransmitterRole(chainSlug, transmitter);
         transmitManager.grantTransmitterRole(destChainSlug, transmitter);
@@ -37,44 +41,54 @@ contract GasPriceOracleTest is Test {
     }
 
     function testSetSourceGasPrice() public {
-
         vm.startPrank(transmitter);
 
-        gasPriceOracle.setSourceGasPrice(1200000);
+        uint256 sourceGasPrice = 1200000;
+
+        vm.expectEmit(false, false, false, true);
+        emit SourceGasPriceUpdated(sourceGasPrice);
+
+        gasPriceOracle.setSourceGasPrice(sourceGasPrice);
 
         vm.stopPrank();
 
-        assert(gasPriceOracle.sourceGasPrice() == 1200000);
+        assert(gasPriceOracle.sourceGasPrice() == sourceGasPrice);
     }
 
     function testSetRelativeGasPrice() public {
-
         vm.startPrank(transmitter);
 
-        gasPriceOracle.setRelativeGasPrice(destChainSlug, 1200000);
+        uint256 relativeGasPrice = 1200000;
+
+        vm.expectEmit(false, false, false, true);
+        emit GasPriceUpdated(destChainSlug, relativeGasPrice);
+
+        gasPriceOracle.setRelativeGasPrice(destChainSlug, relativeGasPrice);
 
         vm.stopPrank();
 
-        vm.expectEmit(false, false, false, true);
-        emit GasPriceUpdated(destChainSlug, 1200000);
-
-        assert(gasPriceOracle.relativeGasPrice(destChainSlug) == 1200000);
+        assert(
+            gasPriceOracle.relativeGasPrice(destChainSlug) == relativeGasPrice
+        );
     }
 
     function testGetGasPrices() public {
         vm.startPrank(transmitter);
 
-        gasPriceOracle.setSourceGasPrice(1200000);
-        gasPriceOracle.setRelativeGasPrice(destChainSlug, 1100000);
+        uint256 sourceGasPrice = 1200000;
+        uint256 relativeGasPrice = 1100000;
+
+        gasPriceOracle.setSourceGasPrice(sourceGasPrice);
+        gasPriceOracle.setRelativeGasPrice(destChainSlug, relativeGasPrice);
 
         vm.stopPrank();
 
-        (uint256 sourceGasPrice, uint256 relativeGasPrice) = gasPriceOracle.getGasPrices(destChainSlug);
+        (
+            uint256 sourceGasPriceActual,
+            uint256 relativeGasPriceActual
+        ) = gasPriceOracle.getGasPrices(destChainSlug);
 
-        assertEq(sourceGasPrice , uint256(1200000));
-        assertEq(relativeGasPrice , uint256(1100000));
+        assertEq(sourceGasPriceActual, sourceGasPrice);
+        assertEq(relativeGasPriceActual, relativeGasPrice);
     }
-
-
-
 }
