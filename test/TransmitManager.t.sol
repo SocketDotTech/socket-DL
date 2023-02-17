@@ -44,5 +44,4 @@ contract TransmitManagerTest is Test {
 
         assertTrue(transmitManager.isTransmitter(transmitter, chainSlug));
     }
-
 }
