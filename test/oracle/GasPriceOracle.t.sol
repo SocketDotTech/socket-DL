@@ -15,6 +15,7 @@ contract GasPriceOracleTest is Test {
     uint256 internal c = 1;
     address immutable owner = address(uint160(c++));
     address immutable transmitter = address(uint160(c++));
+    address immutable nonTransmitter = address(uint160(c++));
     uint256 gasLimit = 200000;
     SignatureVerifier internal signatureVerifier;
     TransmitManager internal transmitManager;
@@ -22,6 +23,7 @@ contract GasPriceOracleTest is Test {
     event GasPriceUpdated(uint256 dstChainSlug_, uint256 relativeGasPrice_);
     event TransmitManagerUpdated(address transmitManager);
     event SourceGasPriceUpdated(uint256 sourceGasPrice);
+    error TransmitterNotFound();
 
     function setUp() public {
         gasPriceOracle = new GasPriceOracle(owner, chainSlug);
@@ -36,7 +38,11 @@ contract GasPriceOracleTest is Test {
         vm.startPrank(owner);
         transmitManager.grantTransmitterRole(chainSlug, transmitter);
         transmitManager.grantTransmitterRole(destChainSlug, transmitter);
+
+        vm.expectEmit(false, false, false, true);
+        emit TransmitManagerUpdated(address(transmitManager));
         gasPriceOracle.setTransmitManager(transmitManager);
+
         vm.stopPrank();
     }
 
@@ -90,5 +96,36 @@ contract GasPriceOracleTest is Test {
 
         assertEq(sourceGasPriceActual, sourceGasPrice);
         assertEq(relativeGasPriceActual, relativeGasPrice);
+    }
+
+    function testNonTransmitterUpdateRelativeGasPrice() public {
+        vm.startPrank(nonTransmitter);
+
+        uint256 relativeGasPrice = 1200000;
+
+        vm.expectRevert(TransmitterNotFound.selector);
+        gasPriceOracle.setRelativeGasPrice(destChainSlug, relativeGasPrice);
+
+        vm.stopPrank();
+    }
+
+    function testNonTransmitterUpdateSrcGasPrice() public {
+        vm.startPrank(nonTransmitter);
+
+        uint256 sourceGasPrice = 1200000;
+
+        vm.expectRevert(TransmitterNotFound.selector);
+        gasPriceOracle.setSourceGasPrice(sourceGasPrice);
+
+        vm.stopPrank();
+    }
+
+    function testNonOwnerUpdateTransmitManager() public {
+        vm.startPrank(transmitter);
+
+        vm.expectRevert();
+        gasPriceOracle.setTransmitManager(transmitManager);
+
+        vm.stopPrank();
     }
 }
