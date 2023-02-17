@@ -1,3 +1,9 @@
+/***********************************************
+ *                                             *
+ * Update below values when new chain is added *
+ *                                             *
+ ***********************************************/
+
 export enum ChainId {
   GOERLI = 5,
   MUMBAI = 80001,
@@ -21,10 +27,6 @@ export const TestnetIds: ChainId[] = [
 
 export const L1Ids: ChainId[] = [ChainId.MAINNET, ChainId.GOERLI];
 
-export const MainnetIds: ChainId[] = (
-  Object.values(ChainId) as ChainId[]
-).filter((c) => !TestnetIds.includes(c));
-
 export const L2Ids: ChainId[] = [
   ChainId.MUMBAI,
   ChainId.ARBITRUM_TESTNET,
@@ -33,6 +35,45 @@ export const L2Ids: ChainId[] = [
   ChainId.ARBITRUM,
   ChainId.OPTIMISM,
 ];
+
+export enum NativeSwitchboard {
+  NON_NATIVE = 0,
+  ARBITRUM_L1 = 1,
+  ARBITRUM_L2 = 2,
+  OPTIMISM = 3,
+  POLYGON_L1 = 4,
+  POLYGON_L2 = 5,
+}
+
+/***********************************************
+ *                                             *
+ * Update above values when new chain is added *
+ *                                             *
+ ***********************************************/
+
+export const MainnetIds: ChainId[] = (
+  Object.values(ChainId) as ChainId[]
+).filter((c) => !TestnetIds.includes(c));
+
+export const isTestnet = (chainId: ChainId) => {
+  return TestnetIds.includes(chainId);
+};
+
+export const isMainnet = (chainId: ChainId) => {
+  return MainnetIds.includes(chainId);
+};
+
+export const isL1 = (chainId: ChainId) => {
+  return L1Ids.includes(chainId);
+};
+
+export const isL2 = (chainId: ChainId) => {
+  return L2Ids.includes(chainId);
+};
+
+export const isNonNativeChain = (chainId: ChainId) => {
+  return !L1Ids.includes(chainId) && !L2Ids.includes(chainId);
+};
 
 export enum IntegrationTypes {
   fast = "FAST",
@@ -63,12 +104,3 @@ export interface ChainSocketAddresses {
 export type DeploymentAddresses = {
   [chainId in ChainId]?: ChainSocketAddresses;
 };
-
-export enum NativeSwitchboard {
-  NON_NATIVE = 0,
-  ARBITRUM_L1 = 1,
-  ARBITRUM_L2 = 2,
-  OPTIMISM = 3,
-  POLYGON_L1 = 4,
-  POLYGON_L2 = 5,
-}
