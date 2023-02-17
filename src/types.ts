@@ -98,6 +98,8 @@ export interface ChainSocketAddresses {
   SignatureVerifier: string;
   Socket: string;
   TransmitManager: string;
+  FastSwitchboard?: string;
+  OptimisticSwitchboard?: string;
   integrations?: Integrations;
 }
 
