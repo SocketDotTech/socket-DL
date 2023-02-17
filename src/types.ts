@@ -1,27 +1,84 @@
+/***********************************************
+ *                                             *
+ * Update below values when new chain is added *
+ *                                             *
+ ***********************************************/
+
 export enum ChainId {
-  GOERLI_CHAIN_ID = 5,
-  KOVAN_CHAIN_ID = 42,
-  POLYGON_CHAIN_ID = 137,
-  MUMBAI_CHAIN_ID = 80001,
-  MAINNET_CHAIN_ID = 1,
-  RINKEBY_CHAIN_ID = 4,
-  ROPSTEN_CHAIN_ID = 3,
-  ARBITRUM_TESTNET_CHAIN_ID = 421613,
-  XDAI_CHAIN_ID = 100,
-  SOKOL_CHAIN_ID = 77,
-  ARBITRUM_CHAIN_ID = 42161,
-  FANTOM_CHAIN_ID = 250,
-  OPTIMISM_CHAIN_ID = 10,
-  OPTIMISM_TESTNET_CHAIN_ID = 420,
-  AVAX_CHAIN_ID = 43114,
-  BSC_CHAIN_ID = 56,
-  AURORA_CHAIN_ID = 1313161554,
+  GOERLI = 5,
+  MUMBAI = 80001,
+  ARBITRUM_TESTNET = 421613,
+  OPTIMISM_TESTNET = 420,
+  BSC_TESTNET = 97,
+  MAINNET = 1,
+  POLYGON = 137,
+  ARBITRUM = 42161,
+  OPTIMISM = 10,
+  BSC = 56,
 }
 
+export const TestnetIds: ChainId[] = [
+  ChainId.GOERLI,
+  ChainId.MUMBAI,
+  ChainId.ARBITRUM_TESTNET,
+  ChainId.OPTIMISM_TESTNET,
+  ChainId.BSC_TESTNET,
+];
+
+export const L1Ids: ChainId[] = [ChainId.MAINNET, ChainId.GOERLI];
+
+export const L2Ids: ChainId[] = [
+  ChainId.MUMBAI,
+  ChainId.ARBITRUM_TESTNET,
+  ChainId.OPTIMISM_TESTNET,
+  ChainId.POLYGON,
+  ChainId.ARBITRUM,
+  ChainId.OPTIMISM,
+];
+
+export enum NativeSwitchboard {
+  NON_NATIVE = 0,
+  ARBITRUM_L1 = 1,
+  ARBITRUM_L2 = 2,
+  OPTIMISM = 3,
+  POLYGON_L1 = 4,
+  POLYGON_L2 = 5,
+}
+
+/***********************************************
+ *                                             *
+ * Update above values when new chain is added *
+ *                                             *
+ ***********************************************/
+
+export const MainnetIds: ChainId[] = (
+  Object.values(ChainId) as ChainId[]
+).filter((c) => !TestnetIds.includes(c));
+
+export const isTestnet = (chainId: ChainId) => {
+  return TestnetIds.includes(chainId);
+};
+
+export const isMainnet = (chainId: ChainId) => {
+  return MainnetIds.includes(chainId);
+};
+
+export const isL1 = (chainId: ChainId) => {
+  return L1Ids.includes(chainId);
+};
+
+export const isL2 = (chainId: ChainId) => {
+  return L2Ids.includes(chainId);
+};
+
+export const isNonNativeChain = (chainId: ChainId) => {
+  return !L1Ids.includes(chainId) && !L2Ids.includes(chainId);
+};
+
 export enum IntegrationTypes {
-  fastIntegration = "FAST",
-  optimisticIntegration = "OPTIMISTIC",
-  nativeIntegration = "NATIVE_BRIDGE",
+  fast = "FAST",
+  optimistic = "OPTIMISTIC",
+  native = "NATIVE_BRIDGE",
 }
 
 export type Integrations = { [chainId in ChainId]?: ChainAddresses };
@@ -41,18 +98,11 @@ export interface ChainSocketAddresses {
   SignatureVerifier: string;
   Socket: string;
   TransmitManager: string;
+  FastSwitchboard?: string;
+  OptimisticSwitchboard?: string;
   integrations?: Integrations;
 }
 
 export type DeploymentAddresses = {
   [chainId in ChainId]?: ChainSocketAddresses;
 };
-
-export enum NativeSwitchboard {
-  NON_NATIVE = 0,
-  ARBITRUM_L1 = 1,
-  ARBITRUM_L2 = 2,
-  OPTIMISM = 3,
-  POLYGON_L1 = 4,
-  POLYGON_L2 = 5,
-}
