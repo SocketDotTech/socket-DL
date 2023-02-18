@@ -11,6 +11,9 @@ import {SignatureVerifier} from "../contracts/utils/SignatureVerifier.sol";
 contract TransmitManagerTest is Test {
     GasPriceOracle internal gasPriceOracle;
 
+    address public constant NATIVE_TOKEN_ADDRESS =
+        address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+
     uint256 chainSlug = uint32(uint256(0x2013AA263));
     uint256 destChainSlug = uint32(uint256(0x2013AA264));
     uint256 chainSlug2 = uint32(uint256(0x2113AA263));
@@ -46,6 +49,7 @@ contract TransmitManagerTest is Test {
     error TransmitterNotFound();
     error InsufficientTransmitFees();
     event FeesWithdrawn(address account_, uint256 value_);
+    event SignatureVerifierSet(address signatureVerifier_);
 
     function setUp() public {
         owner = vm.addr(ownerPrivateKey);
@@ -199,6 +203,39 @@ contract TransmitManagerTest is Test {
         vm.stopPrank();
 
         assertFalse(transmitManager.isTransmitter(nonTransmitter, chainSlug2));
+    }
+
+    function testSetSignatureVerifier() public {
+        SignatureVerifier signatureVerifierNew = new SignatureVerifier();
+
+        hoax(owner);
+        vm.expectEmit(false, false, false, true);
+        emit SignatureVerifierSet(address(signatureVerifierNew));
+        transmitManager.setSignatureVerifier(address(signatureVerifierNew));
+
+        assertEq(
+            address(transmitManager.signatureVerifier()),
+            address(signatureVerifierNew)
+        );
+    }
+
+    function testRescueNativeFunds() public {
+        uint256 amount = 1e18;
+
+        assertEq(address(transmitManager).balance, 0);
+        deal(address(transmitManager), amount);
+        assertEq(address(transmitManager).balance, amount);
+
+        hoax(owner);
+
+        transmitManager.rescueFunds(
+            NATIVE_TOKEN_ADDRESS,
+            feesWithdrawer,
+            amount
+        );
+
+        assertEq(feesWithdrawer.balance, amount);
+        assertEq(address(transmitManager).balance, 0);
     }
 
     function _createSignature(
