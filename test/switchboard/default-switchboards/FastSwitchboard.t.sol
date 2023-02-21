@@ -7,6 +7,16 @@ contract FastSwitchboardTest is Setup {
     bool isFast = true;
     uint256 immutable remoteChainSlug = uint32(uint256(2));
     uint256 immutable packetId = 1;
+    address watcher;
+
+    event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
+    event PacketAttested(uint256 packetId, address attester);
+    event SwitchboardTripped(bool tripGlobalFuse_);
+
+    error WatcherFound();
+    error WatcherNotFound();
+    error AlreadyAttested();
+    error InvalidSigLength();
 
     FastSwitchboard fastSwitchboard;
 
@@ -25,6 +35,9 @@ contract FastSwitchboardTest is Setup {
             remoteChainSlug,
             _executionOverhead
         );
+
+        watcher = vm.addr(_watcherPrivateKey);
+
         fastSwitchboard.grantWatcherRole(
             remoteChainSlug,
             vm.addr(_watcherPrivateKey)
@@ -34,7 +47,10 @@ contract FastSwitchboardTest is Setup {
             vm.addr(_altWatcherPrivateKey)
         );
 
+        vm.expectEmit(false, false, false, true);
+        emit AttestGasLimitSet(remoteChainSlug, _attestGasLimit);
         fastSwitchboard.setAttestGasLimit(remoteChainSlug, _attestGasLimit);
+
         vm.stopPrank();
     }
 
@@ -42,10 +58,115 @@ contract FastSwitchboardTest is Setup {
         bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
 
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
+
+        vm.expectEmit(false, false, false, true);
+        emit PacketAttested(packetId, vm.addr(_watcherPrivateKey));
+
         fastSwitchboard.attest(packetId, remoteChainSlug, sig);
 
         assertTrue(
             fastSwitchboard.isAttested(vm.addr(_watcherPrivateKey), packetId)
         );
+    }
+
+    function testDuplicateAttestation() external {
+        bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
+
+        bytes memory sig = _createSignature(digest, _watcherPrivateKey);
+
+        vm.expectEmit(false, false, false, true);
+        emit PacketAttested(packetId, vm.addr(_watcherPrivateKey));
+
+        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+
+        assertTrue(
+            fastSwitchboard.isAttested(vm.addr(_watcherPrivateKey), packetId)
+        );
+
+        vm.expectRevert(AlreadyAttested.selector);
+        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+    }
+
+    function testIsAllowed() external {
+        bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
+
+        bytes memory sig = _createSignature(digest, _watcherPrivateKey);
+        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+
+        uint256 proposeTime = block.timestamp -
+            fastSwitchboard.timeoutInSeconds();
+
+        bool isAllowed = fastSwitchboard.allowPacket(
+            0,
+            packetId,
+            _a.chainSlug,
+            proposeTime
+        );
+
+        assertTrue(isAllowed);
+    }
+
+    function testTripGlobal() external {
+        hoax(_socketOwner);
+        vm.expectEmit(false, false, false, true);
+        emit SwitchboardTripped(true);
+        fastSwitchboard.trip(true);
+        assertTrue(fastSwitchboard.tripGlobalFuse());
+    }
+
+    function testTripPath() external {
+        hoax(watcher);
+        vm.expectEmit(false, false, false, true);
+        emit SwitchboardTripped(true);
+        fastSwitchboard.trip(remoteChainSlug);
+        assertTrue(fastSwitchboard.tripGlobalFuse());
+    }
+
+    function testGrantWatcherRole() external {
+        uint256 watcher2PrivateKey = c++;
+        address watcher2 = vm.addr(watcher2PrivateKey);
+
+        vm.startPrank(_socketOwner);
+
+        fastSwitchboard.grantWatcherRole(remoteChainSlug, watcher2);
+        vm.stopPrank();
+
+        assertEq(fastSwitchboard.totalWatchers(remoteChainSlug), 3);
+    }
+
+    function testRedundantGrantWatcherRole() public {
+        vm.startPrank(_socketOwner);
+
+        vm.expectRevert(WatcherFound.selector);
+        fastSwitchboard.grantWatcherRole(remoteChainSlug, watcher);
+
+        vm.stopPrank();
+    }
+
+    function testRevokeWatcherRole() external {
+        vm.startPrank(_socketOwner);
+
+        fastSwitchboard.revokeWatcherRole(
+            remoteChainSlug,
+            vm.addr(_altWatcherPrivateKey)
+        );
+        vm.stopPrank();
+
+        assertEq(fastSwitchboard.totalWatchers(remoteChainSlug), 1);
+    }
+
+    function testRevokeWatcherRoleFail() public {
+        vm.startPrank(_socketOwner);
+
+        vm.expectRevert(WatcherNotFound.selector);
+        fastSwitchboard.revokeWatcherRole(remoteChainSlug, vm.addr(c++));
+        vm.stopPrank();
+    }
+
+    function testInvalidSignature() public {
+        bytes memory sig = "0x121234323123232323";
+
+        vm.expectRevert(InvalidSigLength.selector);
+        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
     }
 }
