@@ -106,8 +106,8 @@ contract FastSwitchboard is SwitchboardBase {
     function trip(
         uint256 srcChainSlug_
     ) external onlyRole(_watcherRole(srcChainSlug_)) {
-        tripGlobalFuse = false;
-        emit SwitchboardTripped(false);
+        tripGlobalFuse = true;
+        emit SwitchboardTripped(true);
     }
 
     /**
