@@ -36,10 +36,11 @@ export async function deployContractWithArgs(contractName: string, args: Array<a
     const Contract: ContractFactory = await ethers.getContractFactory(
       contractName
     );
+
     const contract: Contract = await Contract.connect(signer).deploy(...args);
     await contract.deployed();
 
-    await verify(contract.address, contractName, args, path);
+    await verify(contract.address, contractName, path, args);
     return contract;
   } catch (error) {
     throw error;
@@ -57,6 +58,7 @@ export const verify = async (
     if (chainId === 31337) return;
 
     await sleep(20);
+    console.log(`inside verify contract for contract: ${address} and name: ${path}:${contractName} - with args: ${args}`);
     await run("verify:verify", {
       address,
       contract: `${path}:${contractName}`,
@@ -107,6 +109,26 @@ export const storeAddresses = async (
     deployedAddressPath,
     JSON.stringify(deploymentAddresses, null, 2)
   );
+};
+
+export const getAddresses = async (
+  chainId: number
+) => {
+  if (!fs.existsSync(deployedAddressPath)) {
+    await fs.promises.mkdir(deployedAddressPath);
+  }
+
+  const outputExists = fs.existsSync(deployedAddressPath);
+  let deploymentAddresses: DeploymentAddresses = {};
+  if (outputExists) {
+    const deploymentAddressesString = fs.readFileSync(
+      deployedAddressPath,
+      "utf-8"
+    );
+    deploymentAddresses = JSON.parse(deploymentAddressesString);
+  }
+
+  return deploymentAddresses[chainId];
 };
 
 export const createObj = function (obj, keys, value) {
