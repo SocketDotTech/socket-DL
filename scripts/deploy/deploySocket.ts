@@ -61,7 +61,7 @@ export const main = async () => {
 
     const gasPriceOracle: Contract = await deployContractWithArgs(
       "GasPriceOracle",
-      [socketSigner.address],
+      [socketSigner.address, chainIds[network]],
       socketSigner,
       "contracts/GasPriceOracle.sol"
     );
@@ -98,7 +98,7 @@ export const main = async () => {
       //grant transmitter role to transmitter-address
       const transmitter = transmitterAddress[network];
 
-      const grantTransmitterRoleTxn = await gasPriceOracle
+      const grantTransmitterRoleTxn = await transmitManager
       .connect(socketSigner)
       .grantTransmitterRole(chainIds[network], transmitter);
 
