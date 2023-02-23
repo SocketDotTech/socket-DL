@@ -8,8 +8,8 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
 
-    event FxChildTunnelSet(address fxRootTunnel, address fxRootTunnel_);
-    event RootReceived(uint256 packetId_, bytes32 root_);
+    event FxChildTunnelSet(address fxRootTunnel, address newFxRootTunnel);
+    event RootReceived(uint256 packetId, bytes32 root);
 
     error NoRootFound();
 
@@ -22,28 +22,28 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         ISocket socket_,
         IOracle oracle_
     ) AccessControl(owner_) FxBaseRootTunnel(checkpointManager_, fxRoot_) {
-        socket = socket_;
-        oracle = oracle_;
+        socket__ = socket_;
+        oracle__ = oracle_;
 
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
         executionOverhead = executionOverhead_;
     }
 
     /**
-     * @param packetId - packet id
+     * @param packetId_ - packet id
      */
-    function initateNativeConfirmation(uint256 packetId) external payable {
-        bytes32 root = socket.remoteRoots(packetId);
+    function initateNativeConfirmation(uint256 packetId_) external payable {
+        bytes32 root = socket__.remoteRoots(packetId_);
         if (root == bytes32(0)) revert NoRootFound();
 
-        bytes memory data = abi.encode(packetId, root);
+        bytes memory data = abi.encode(packetId_, root);
         _sendMessageToChild(data);
-        emit InitiatedNativeConfirmation(packetId);
+        emit InitiatedNativeConfirmation(packetId_);
     }
 
-    function _processMessageFromChild(bytes memory message) internal override {
+    function _processMessageFromChild(bytes memory message_) internal override {
         (uint256 packetId, bytes32 root) = abi.decode(
-            message,
+            message_,
             (uint256, bytes32)
         );
         roots[packetId] = root;
@@ -52,16 +52,16 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
 
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId packet id
+     * @param packetId_ packet id
      */
     function allowPacket(
-        bytes32 root,
-        uint256 packetId,
+        bytes32 root_,
+        uint256 packetId_,
         uint256,
         uint256
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
-        if (roots[packetId] != root) return false;
+        if (roots[packetId_] != root_) return false;
 
         return true;
     }
@@ -69,9 +69,9 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     function _getSwitchboardFees(
         uint256,
         uint256,
-        uint256 sourceGasPrice
+        uint256 sourceGasPrice_
     ) internal view override returns (uint256) {
-        return initateNativeConfirmationGasLimit * sourceGasPrice;
+        return initateNativeConfirmationGasLimit * sourceGasPrice_;
     }
 
     // set fxChildTunnel if not set already

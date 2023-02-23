@@ -66,15 +66,15 @@ contract Messenger is IPlug, Ownable(msg.sender) {
 
     // settings
     function setSocketConfig(
-        uint256 remoteChainSlug,
-        address remotePlug,
-        address switchboard
+        uint256 remoteChainSlug_,
+        address remotePlug_,
+        address switchboard_
     ) external onlyOwner {
         ISocket(_socket).connect(
-            remoteChainSlug,
-            remotePlug,
-            switchboard,
-            switchboard
+            remoteChainSlug_,
+            remotePlug_,
+            switchboard_,
+            switchboard_
         );
     }
 

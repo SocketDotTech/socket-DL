@@ -9,7 +9,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
     // sourceChain => isPaused
     mapping(uint256 => bool) public tripSingleFuse;
 
-    event PacketTripped(uint256 packetId_, bool tripSingleFuse_);
+    event PacketTripped(uint256 packetId, bool tripSingleFuse);
     error WatcherNotFound();
 
     constructor(
@@ -17,23 +17,23 @@ contract OptimisticSwitchboard is SwitchboardBase {
         address oracle_,
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
-        oracle = IOracle(oracle_);
+        oracle__ = IOracle(oracle_);
         timeoutInSeconds = timeoutInSeconds_;
     }
 
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId packet id
-     * @param proposeTime time at which packet was proposed
+     * @param packetId_ packet id
+     * @param proposeTime_ time at which packet was proposed
      */
     function allowPacket(
         bytes32,
-        uint256 packetId,
+        uint256 packetId_,
         uint256,
-        uint256 proposeTime
+        uint256 proposeTime_
     ) external view override returns (bool) {
-        if (tripGlobalFuse || tripSingleFuse[packetId]) return false;
-        if (block.timestamp - proposeTime < timeoutInSeconds) return false;
+        if (tripGlobalFuse || tripSingleFuse[packetId_]) return false;
+        if (block.timestamp - proposeTime_ < timeoutInSeconds) return false;
         return true;
     }
 

@@ -8,60 +8,64 @@ import "../../interfaces/ISocket.sol";
 import "../../libraries/RescueFundsLib.sol";
 
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
-    IOracle public oracle;
-    ISocket public socket;
+    IOracle public oracle__;
+    ISocket public socket__;
 
     bool public tripGlobalFuse;
     uint256 public executionOverhead;
     uint256 public initateNativeConfirmationGasLimit;
 
-    event SwitchboardTripped(bool tripGlobalFuse_);
-    event ExecutionOverheadSet(uint256 executionOverhead_);
-    event InitialConfirmationGasLimitSet(uint256 gasLimit_);
-    event OracleSet(address oracle_);
+    event SwitchboardTripped(bool tripGlobalFuse);
+    event ExecutionOverheadSet(uint256 executionOverhead);
+    event InitialConfirmationGasLimitSet(uint256 gasLimit);
+    event OracleSet(address oracle);
     event SocketSet(address socket);
     event InitiatedNativeConfirmation(uint256 packetId);
-    event FeesWithdrawn(address account_, uint256 value_);
+    event FeesWithdrawn(address account, uint256 value);
 
     error TransferFailed();
     error FeesNotEnough();
 
     // assumption: natives have 18 decimals
-    function payFees(uint256 dstChainSlug) external payable override {
-        (uint256 expectedFees, ) = _calculateFees(dstChainSlug);
+    function payFees(uint256 dstChainSlug_) external payable override {
+        (uint256 expectedFees, ) = _calculateFees(dstChainSlug_);
         if (msg.value < expectedFees) revert FeesNotEnough();
     }
 
     function getMinFees(
-        uint256 dstChainSlug
+        uint256 dstChainSlug_
     )
         external
         view
         override
-        returns (uint256 switchboardFee, uint256 verificationFee)
+        returns (uint256 switchboardFee_, uint256 verificationFee_)
     {
-        return _calculateFees(dstChainSlug);
+        return _calculateFees(dstChainSlug_);
     }
 
     function _calculateFees(
-        uint256 dstChainSlug
-    ) internal view returns (uint256 switchboardFee, uint256 verificationFee) {
-        (uint256 sourceGasPrice, uint256 dstRelativeGasPrice) = oracle
-            .getGasPrices(dstChainSlug);
+        uint256 dstChainSlug_
+    )
+        internal
+        view
+        returns (uint256 switchboardFee_, uint256 verificationFee_)
+    {
+        (uint256 sourceGasPrice, uint256 dstRelativeGasPrice) = oracle__
+            .getGasPrices(dstChainSlug_);
 
-        switchboardFee = _getSwitchboardFees(
-            dstChainSlug,
+        switchboardFee_ = _getSwitchboardFees(
+            dstChainSlug_,
             dstRelativeGasPrice,
             sourceGasPrice
         );
 
-        verificationFee = executionOverhead * dstRelativeGasPrice;
+        verificationFee_ = executionOverhead * dstRelativeGasPrice;
     }
 
     function _getSwitchboardFees(
-        uint256 dstChainSlug,
-        uint256 dstRelativeGasPrice,
-        uint256 sourceGasPrice
+        uint256 dstChainSlug_,
+        uint256 dstRelativeGasPrice_,
+        uint256 sourceGasPrice_
     ) internal view virtual returns (uint256) {}
 
     /**
@@ -91,12 +95,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
      * @param oracle_ new oracle
      */
     function setOracle(address oracle_) external onlyOwner {
-        oracle = IOracle(oracle_);
+        oracle__ = IOracle(oracle_);
         emit OracleSet(oracle_);
     }
 
     function setSocket(address socket_) external onlyOwner {
-        socket = ISocket(socket_);
+        socket__ = ISocket(socket_);
         emit SocketSet(socket_);
     }
 
@@ -116,10 +120,10 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
+        address token_,
+        address userAddress_,
+        uint256 amount_
     ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

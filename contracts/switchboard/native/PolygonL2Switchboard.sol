@@ -10,9 +10,9 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     uint256 public l1ReceiveGasLimit;
 
     event FxChildUpdate(address oldFxChild, address newFxChild);
-    event FxRootTunnelSet(address fxRootTunnel, address fxRootTunnel_);
-    event RootReceived(uint256 packetId_, bytes32 root_);
-    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit_);
+    event FxRootTunnelSet(address fxRootTunnel, address newFxRootTunnel);
+    event RootReceived(uint256 packetId, bytes32 root);
+    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit);
 
     error NoRootFound();
 
@@ -25,8 +25,8 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         ISocket socket_,
         IOracle oracle_
     ) AccessControl(owner_) FxBaseChildTunnel(fxChild_) {
-        socket = socket_;
-        oracle = oracle_;
+        socket__ = socket_;
+        oracle__ = oracle_;
 
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
@@ -34,15 +34,15 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     }
 
     /**
-     * @param packetId - packet id
+     * @param packetId_ - packet id
      */
-    function initateNativeConfirmation(uint256 packetId) external payable {
-        bytes32 root = socket.remoteRoots(packetId);
+    function initateNativeConfirmation(uint256 packetId_) external payable {
+        bytes32 root = socket__.remoteRoots(packetId_);
         if (root == bytes32(0)) revert NoRootFound();
 
-        bytes memory data = abi.encode(packetId, root);
+        bytes memory data = abi.encode(packetId_, root);
         _sendMessageToRoot(data);
-        emit InitiatedNativeConfirmation(packetId);
+        emit InitiatedNativeConfirmation(packetId_);
     }
 
     /**
@@ -50,38 +50,41 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
      */
     function _processMessageFromRoot(
         uint256,
-        address rootMessageSender,
-        bytes memory data
-    ) internal override validateSender(rootMessageSender) {
-        (uint256 packetId, bytes32 root) = abi.decode(data, (uint256, bytes32));
+        address rootMessageSender_,
+        bytes memory data_
+    ) internal override validateSender(rootMessageSender_) {
+        (uint256 packetId, bytes32 root) = abi.decode(
+            data_,
+            (uint256, bytes32)
+        );
         roots[packetId] = root;
         emit RootReceived(packetId, root);
     }
 
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId packet id
+     * @param packetId_ packet id
      */
     function allowPacket(
-        bytes32 root,
-        uint256 packetId,
+        bytes32 root_,
+        uint256 packetId_,
         uint256,
         uint256
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
-        return roots[packetId] == root;
+        return roots[packetId_] == root_;
     }
 
     function _getSwitchboardFees(
         uint256,
-        uint256 dstRelativeGasPrice,
-        uint256 sourceGasPrice
+        uint256 dstRelativeGasPrice_,
+        uint256 sourceGasPrice_
     ) internal view override returns (uint256) {
         return
             initateNativeConfirmationGasLimit *
-            dstRelativeGasPrice +
+            sourceGasPrice_ +
             l1ReceiveGasLimit *
-            dstRelativeGasPrice;
+            dstRelativeGasPrice_;
     }
 
     function updateL1ReceiveGasLimit(

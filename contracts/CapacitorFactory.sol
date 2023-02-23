@@ -11,13 +11,13 @@ import "./utils/Ownable.sol";
 
 contract CapacitorFactory is ICapacitorFactory, Ownable(msg.sender) {
     function deploy(
-        uint256 capacitorType,
+        uint256 capacitorType_,
         uint256 /** siblingChainSlug */
     ) external override returns (ICapacitor, IDecapacitor) {
-        if (capacitorType == 1) {
+        if (capacitorType_ == 1) {
             return (new SingleCapacitor(msg.sender), new SingleDecapacitor());
         }
-        if (capacitorType == 2) {
+        if (capacitorType_ == 2) {
             return (
                 new HashChainCapacitor(msg.sender),
                 new HashChainDecapacitor()
@@ -27,10 +27,10 @@ contract CapacitorFactory is ICapacitorFactory, Ownable(msg.sender) {
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
+        address token_,
+        address userAddress_,
+        uint256 amount_
     ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

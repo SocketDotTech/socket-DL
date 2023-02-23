@@ -7,7 +7,7 @@ import "./utils/AccessControl.sol";
 import "./libraries/RescueFundsLib.sol";
 
 contract GasPriceOracle is IOracle, Ownable {
-    ITransmitManager public transmitManager;
+    ITransmitManager public transmitManager__;
 
     // plugs/switchboards/transmitter can use it to ensure prices are updated
     mapping(uint256 => uint256) public updatedAt;
@@ -18,14 +18,14 @@ contract GasPriceOracle is IOracle, Ownable {
     uint256 public override sourceGasPrice;
     uint256 public immutable chainSlug;
 
-    event GasPriceUpdated(uint256 dstChainSlug_, uint256 relativeGasPrice_);
+    event GasPriceUpdated(uint256 dstChainSlug, uint256 relativeGasPrice);
     event TransmitManagerUpdated(address transmitManager);
     event SourceGasPriceUpdated(uint256 sourceGasPrice);
 
     error TransmitterNotFound();
 
-    constructor(address owner_, uint256 _chainSlug) Ownable(owner_) {
-        chainSlug = _chainSlug;
+    constructor(address owner_, uint256 chainSlug_) Ownable(owner_) {
+        chainSlug = chainSlug_;
     }
 
     /**
@@ -33,7 +33,7 @@ contract GasPriceOracle is IOracle, Ownable {
      * @param sourceGasPrice_ gas price of source chain
      */
     function setSourceGasPrice(uint256 sourceGasPrice_) external {
-        if (!transmitManager.isTransmitter(msg.sender, chainSlug))
+        if (!transmitManager__.isTransmitter(msg.sender, chainSlug))
             revert TransmitterNotFound();
 
         sourceGasPrice = sourceGasPrice_;
@@ -50,7 +50,7 @@ contract GasPriceOracle is IOracle, Ownable {
         uint256 dstChainSlug_,
         uint256 relativeGasPrice_
     ) external {
-        if (!transmitManager.isTransmitter(msg.sender, dstChainSlug_))
+        if (!transmitManager__.isTransmitter(msg.sender, dstChainSlug_))
             revert TransmitterNotFound();
 
         relativeGasPrice[dstChainSlug_] = relativeGasPrice_;
@@ -68,15 +68,15 @@ contract GasPriceOracle is IOracle, Ownable {
     function setTransmitManager(
         ITransmitManager transmitManager_
     ) external onlyOwner {
-        transmitManager = transmitManager_;
+        transmitManager__ = transmitManager_;
         emit TransmitManagerUpdated(address(transmitManager_));
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
+        address token_,
+        address userAddress_,
+        uint256 amount_
     ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

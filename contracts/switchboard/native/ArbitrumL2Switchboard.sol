@@ -11,14 +11,14 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
     address public remoteNativeSwitchboard;
     uint256 public l1ReceiveGasLimit;
 
-    IArbSys constant arbsys = IArbSys(address(100));
+    IArbSys public immutable arbsys__ = IArbSys(address(100));
 
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
 
-    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
-    event RootReceived(uint256 packetId_, bytes32 root_);
-    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit_);
+    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
+    event RootReceived(uint256 packetId, bytes32 root);
+    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit);
 
     error InvalidSender();
     error NoRootFound();
@@ -45,22 +45,22 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
         executionOverhead = executionOverhead_;
 
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        socket = socket_;
-        oracle = oracle_;
+        socket__ = socket_;
+        oracle__ = oracle_;
     }
 
-    function initateNativeConfirmation(uint256 packetId) external {
-        bytes32 root = socket.remoteRoots(packetId);
+    function initateNativeConfirmation(uint256 packetId_) external {
+        bytes32 root = socket__.remoteRoots(packetId_);
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encodeWithSelector(
             INativeReceiver.receivePacket.selector,
-            packetId,
+            packetId_,
             root
         );
 
-        arbsys.sendTxToL1(remoteNativeSwitchboard, data);
-        emit InitiatedNativeConfirmation(packetId);
+        arbsys__.sendTxToL1(remoteNativeSwitchboard, data);
+        emit InitiatedNativeConfirmation(packetId_);
     }
 
     function receivePacket(
@@ -73,30 +73,30 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
 
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId packet id
+     * @param packetId_ packet id
      */
     function allowPacket(
-        bytes32 root,
-        uint256 packetId,
+        bytes32 root_,
+        uint256 packetId_,
         uint256,
         uint256
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
-        if (roots[packetId] != root) return false;
+        if (roots[packetId_] != root_) return false;
 
         return true;
     }
 
     function _getSwitchboardFees(
         uint256,
-        uint256 dstRelativeGasPrice,
-        uint256 sourceGasPrice
+        uint256 dstRelativeGasPrice_,
+        uint256 sourceGasPrice_
     ) internal view override returns (uint256) {
         return
             initateNativeConfirmationGasLimit *
-            sourceGasPrice +
+            sourceGasPrice_ +
             l1ReceiveGasLimit *
-            dstRelativeGasPrice;
+            dstRelativeGasPrice_;
     }
 
     function updateL2ReceiveGasLimit(

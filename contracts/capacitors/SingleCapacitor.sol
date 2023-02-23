@@ -12,13 +12,13 @@ contract SingleCapacitor is BaseCapacitor {
     /// adds the packed message to a packet
     /// @inheritdoc ICapacitor
     function addPackedMessage(
-        bytes32 packedMessage
+        bytes32 packedMessage_
     ) external override onlyRole(SOCKET_ROLE) {
         uint256 packetCount = _packets;
-        _roots[packetCount] = packedMessage;
+        _roots[packetCount] = packedMessage_;
         _packets++;
 
-        emit MessageAdded(packedMessage, packetCount, packedMessage);
+        emit MessageAdded(packedMessage_, packetCount, packedMessage_);
     }
 
     function sealPacket()

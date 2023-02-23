@@ -19,7 +19,7 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
 
     error NoPendingPacket();
 
-    event SocketSet(address socket_);
+    event SocketSet(address socket);
 
     /**
      * @notice initialises the contract with socket address
@@ -53,9 +53,9 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
     /// returns the root of packet for given id
     /// @inheritdoc ICapacitor
     function getRootById(
-        uint256 id
+        uint256 id_
     ) external view virtual override returns (bytes32) {
-        return _roots[id];
+        return _roots[id_];
     }
 
     function getLatestPacketCount() external view returns (uint256) {
@@ -63,10 +63,10 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
+        address token_,
+        address userAddress_,
+        uint256 amount_
     ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

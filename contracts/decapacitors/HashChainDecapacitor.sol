@@ -11,9 +11,9 @@ contract HashChainDecapacitor is IDecapacitor, Ownable(msg.sender) {
     function verifyMessageInclusion(
         bytes32 root_,
         bytes32 packedMessage_,
-        bytes calldata proof
+        bytes calldata proof_
     ) external pure override returns (bool) {
-        bytes32[] memory chain = abi.decode(proof, (bytes32[]));
+        bytes32[] memory chain = abi.decode(proof_, (bytes32[]));
         uint256 len = chain.length;
         bytes32 generatedRoot;
         bool isIncluded;
@@ -26,10 +26,10 @@ contract HashChainDecapacitor is IDecapacitor, Ownable(msg.sender) {
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
+        address token_,
+        address userAddress_,
+        uint256 amount_
     ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

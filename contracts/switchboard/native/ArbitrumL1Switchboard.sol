@@ -14,29 +14,29 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     address public remoteNativeSwitchboard;
     uint256 public dynamicFees;
 
-    IInbox public inbox;
+    IInbox public inbox__;
 
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
 
-    event UpdatedInboxAddress(address inbox_);
+    event UpdatedInboxAddress(address inbox);
     event UpdatedRefundAddresses(
-        address remoteRefundAddress_,
-        address callValueRefundAddress_
+        address remoteRefundAddress,
+        address callValueRefundAddress
     );
-    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
-    event RootReceived(uint256 packetId_, bytes32 root_);
-    event UpdatedDynamicFees(uint256 dynamicFees_);
+    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
+    event RootReceived(uint256 packetId, bytes32 root);
+    event UpdatedDynamicFees(uint256 dynamicFees);
 
     error InvalidSender();
     error NoRootFound();
 
     modifier onlyRemoteSwitchboard() {
-        IBridge bridge = inbox.bridge();
-        if (msg.sender != address(bridge)) revert InvalidSender();
+        IBridge bridge__ = inbox__.bridge();
+        if (msg.sender != address(bridge__)) revert InvalidSender();
 
-        IOutbox outbox = IOutbox(bridge.activeOutbox());
-        address l2Sender = outbox.l2ToL1Sender();
+        IOutbox outbox__ = IOutbox(bridge__.activeOutbox());
+        address l2Sender = outbox__.l2ToL1Sender();
         if (l2Sender != remoteNativeSwitchboard) revert InvalidSender();
 
         _;
@@ -56,27 +56,27 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
         executionOverhead = executionOverhead_;
 
-        inbox = IInbox(inbox_);
+        inbox__ = IInbox(inbox_);
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        socket = socket_;
-        oracle = oracle_;
+        socket__ = socket_;
+        oracle__ = oracle_;
 
         remoteRefundAddress = msg.sender;
         callValueRefundAddress = msg.sender;
     }
 
     function initateNativeConfirmation(
-        uint256 packetId,
-        uint256 maxSubmissionCost,
-        uint256 maxGas,
-        uint256 gasPriceBid
+        uint256 packetId_,
+        uint256 maxSubmissionCost_,
+        uint256 maxGas_,
+        uint256 gasPriceBid_
     ) external payable {
-        bytes32 root = socket.remoteRoots(packetId);
+        bytes32 root = socket__.remoteRoots(packetId_);
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encodeWithSelector(
             INativeReceiver.receivePacket.selector,
-            packetId,
+            packetId_,
             root
         );
 
@@ -84,18 +84,18 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         address callValueRefund = callValueRefundAddress;
         address remoteRefund = remoteRefundAddress;
 
-        inbox.createRetryableTicket{value: msg.value}(
+        inbox__.createRetryableTicket{value: msg.value}(
             remoteNativeSwitchboard,
             0, // no value needed for receivePacket
-            maxSubmissionCost,
+            maxSubmissionCost_,
             remoteRefund,
             callValueRefund,
-            maxGas,
-            gasPriceBid,
+            maxGas_,
+            gasPriceBid_,
             data
         );
 
-        emit InitiatedNativeConfirmation(packetId);
+        emit InitiatedNativeConfirmation(packetId_);
     }
 
     function receivePacket(
@@ -108,16 +108,16 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
 
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId packet id
+     * @param packetId_ packet id
      */
     function allowPacket(
-        bytes32 root,
-        uint256 packetId,
+        bytes32 root_,
+        uint256 packetId_,
         uint256,
         uint256
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
-        if (roots[packetId] != root) return false;
+        if (roots[packetId_] != root_) return false;
 
         return true;
     }
@@ -125,11 +125,12 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     function _getSwitchboardFees(
         uint256,
         uint256,
-        uint256 sourceGasPrice
+        uint256 sourceGasPrice_
     ) internal view override returns (uint256) {
         // todo: check if dynamic fees can be divided into more constants
         // arbitrum: check src contract
-        return initateNativeConfirmationGasLimit * sourceGasPrice + dynamicFees;
+        return
+            initateNativeConfirmationGasLimit * sourceGasPrice_ + dynamicFees;
     }
 
     function updateRefundAddresses(
@@ -151,7 +152,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     }
 
     function updateInboxAddresses(address inbox_) external onlyOwner {
-        inbox = IInbox(inbox_);
+        inbox__ = IInbox(inbox_);
         emit UpdatedInboxAddress(inbox_);
     }
 
