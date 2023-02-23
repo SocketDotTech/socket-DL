@@ -25,12 +25,12 @@ abstract contract SocketDst is SocketBase {
 
     /**
      * @notice emits the packet details when proposed at remote
-     * @param attester address of attester
+     * @param transmitter address of transmitter
      * @param packetId packet id
      * @param root packet root
      */
-    event PacketAttested(
-        address indexed attester,
+    event PacketProposed(
+        address indexed transmitter,
         uint256 indexed packetId,
         bytes32 root
     );
@@ -61,7 +61,7 @@ abstract contract SocketDst is SocketBase {
         remoteRoots[packetId_] = root_;
         rootProposedAt[packetId_] = block.timestamp;
 
-        emit PacketAttested(transmitter, packetId_, root_);
+        emit PacketProposed(transmitter, packetId_, root_);
     }
 
     /**

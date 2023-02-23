@@ -14,7 +14,7 @@ contract ExecutionManager is IExecutionManager, AccessControl {
         0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
 
     event FeesWithdrawn(address account, uint256 amount);
-    
+
     error TransferFailed();
     error InsufficientExecutionFees();
 
