@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.7;
 
+import "./ITransmitManager.sol";
+import "./IExecutionManager.sol";
+
 interface ISocket {
     /**
      * @notice emits the message details when a new message arrives at outbound
@@ -119,4 +122,8 @@ interface ISocket {
     ) external;
 
     function remoteRoots(uint256 packetId_) external view returns (bytes32);
+
+    function _transmitManager__() external view returns (ITransmitManager);
+
+    function _executionManager__() external view returns (IExecutionManager);
 }

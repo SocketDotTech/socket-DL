@@ -10,8 +10,8 @@ import "./SocketConfig.sol";
 
 abstract contract SocketBase is SocketConfig, ReentrancyGuard {
     IHasher public _hasher__;
-    ITransmitManager public _transmitManager__;
-    IExecutionManager public _executionManager__;
+    ITransmitManager public override _transmitManager__;
+    IExecutionManager public override _executionManager__;
 
     uint256 public _chainSlug;
 
