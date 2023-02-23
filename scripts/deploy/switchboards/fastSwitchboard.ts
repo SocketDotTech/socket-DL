@@ -39,7 +39,11 @@ export const fastSwitchboard = (
   oracleAddress: string,
   signerAddress: string
 ) => {
-  return { contractName: "FastSwitchboard", args: [signerAddress, oracleAddress, timeout[network]], path: "contracts/switchboard/default-switchboards/FastSwitchboard.sol" }
+  return {
+    contractName: "FastSwitchboard",
+    args: [signerAddress, oracleAddress, timeout[network]],
+    path: "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+  };
 };
 
 export const setupFast = async (
@@ -50,41 +54,41 @@ export const setupFast = async (
   signer: SignerWithAddress
 ) => {
   try {
-    const executionOverheadOnChain = await switchboard.executionOverhead(remoteChainSlug)
-    const attestGasLimitOnChain = await switchboard.attestGasLimit(remoteChainSlug);
+    const executionOverheadOnChain = await switchboard.executionOverhead(
+      remoteChainSlug
+    );
+    const attestGasLimitOnChain = await switchboard.attestGasLimit(
+      remoteChainSlug
+    );
     const watcherRoleSet = await switchboard.hasRole(
       utils.hexZeroPad(utils.hexlify(remoteChainSlug), 32),
       watcherAddress[localChain]
     );
 
     if (parseInt(executionOverheadOnChain) !== executionOverhead[remoteChain]) {
-      const setExecutionOverheadTx = await switchboard.connect(signer).setExecutionOverhead(
-        remoteChainSlug,
-        executionOverhead[remoteChain]
-      );
+      const setExecutionOverheadTx = await switchboard
+        .connect(signer)
+        .setExecutionOverhead(remoteChainSlug, executionOverhead[remoteChain]);
       console.log(`setExecutionOverheadTx: ${setExecutionOverheadTx.hash}`);
       await setExecutionOverheadTx.wait();
     }
 
     if (!watcherRoleSet) {
-      const grantWatcherRoleTx = await switchboard.connect(signer).grantWatcherRole(
-        remoteChainSlug,
-        watcherAddress[localChain]
-      );
+      const grantWatcherRoleTx = await switchboard
+        .connect(signer)
+        .grantWatcherRole(remoteChainSlug, watcherAddress[localChain]);
       console.log(`grantWatcherRoleTx: ${grantWatcherRoleTx.hash}`);
       await grantWatcherRoleTx.wait();
     }
 
     if (parseInt(attestGasLimitOnChain) !== attestGasLimit[remoteChain]) {
-      const setAttestGasLimitTx = await switchboard.connect(signer).setAttestGasLimit(
-        remoteChainSlug,
-        attestGasLimit[remoteChain]
-      );
+      const setAttestGasLimitTx = await switchboard
+        .connect(signer)
+        .setAttestGasLimit(remoteChainSlug, attestGasLimit[remoteChain]);
       console.log(`setAttestGasLimitTx: ${setAttestGasLimitTx.hash}`);
       await setAttestGasLimitTx.wait();
     }
-
   } catch (error) {
     console.log("Error in setting up fast switchboard", error);
   }
-}
+};

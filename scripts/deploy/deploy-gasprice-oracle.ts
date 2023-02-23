@@ -36,22 +36,27 @@ export const main = async () => {
     const tx = await gasPriceOracle
       .connect(socketSigner)
       .setTransmitManager(transmitManagerAddress);
-    console.log(`Setting transmit manager in oracle and resulting transactionHash is: ${tx.hash}`);
+    console.log(
+      `Setting transmit manager in oracle and resulting transactionHash is: ${tx.hash}`
+    );
     await tx.wait();
 
     //grant transmitter role to transmitter-address
     const transmitter = transmitterAddress[network];
 
-    const TransmitManager = await ethers.getContractFactory('TransmitManager');
-    const transmitManagerInstance = TransmitManager.attach(transmitManagerAddress);
+    const TransmitManager = await ethers.getContractFactory("TransmitManager");
+    const transmitManagerInstance = TransmitManager.attach(
+      transmitManagerAddress
+    );
     const grantTransmitterRoleTxn = await transmitManagerInstance
       .connect(socketSigner)
       .grantTransmitterRole(chainIds[network], transmitter);
 
-    console.log(`granted transmitter role to ${transmitter} and resulting transactionHash is: ${grantTransmitterRoleTxn.hash}`);
+    console.log(
+      `granted transmitter role to ${transmitter} and resulting transactionHash is: ${grantTransmitterRoleTxn.hash}`
+    );
     await grantTransmitterRoleTxn.wait();
-  }
-  catch (error) {
+  } catch (error) {
     console.log("Error in setting up gas-price-oracle contract", error);
     throw error;
   }

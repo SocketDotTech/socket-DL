@@ -23,7 +23,11 @@ export const optimisticSwitchboard = (
   oracleAddress: string,
   signerAddress: string
 ) => {
-  return { contractName: "OptimisticSwitchboard", args: [signerAddress, oracleAddress, timeout[network]], path: "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol" }
+  return {
+    contractName: "OptimisticSwitchboard",
+    args: [signerAddress, oracleAddress, timeout[network]],
+    path: "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
+  };
 };
 
 export const setupOptimistic = async (
@@ -34,30 +38,30 @@ export const setupOptimistic = async (
   signer: SignerWithAddress
 ) => {
   try {
-    const executionOverheadOnChain = await switchboard.executionOverhead(remoteChainSlug)
+    const executionOverheadOnChain = await switchboard.executionOverhead(
+      remoteChainSlug
+    );
     const watcherRoleSet = await switchboard.hasRole(
       utils.hexZeroPad(utils.hexlify(remoteChainSlug), 32),
       watcherAddress[localChain]
     );
 
     if (parseInt(executionOverheadOnChain) !== executionOverhead[remoteChain]) {
-      const setExecutionOverheadTx = await switchboard.connect(signer).setExecutionOverhead(
-        remoteChainSlug,
-        executionOverhead[remoteChain]
-      );
+      const setExecutionOverheadTx = await switchboard
+        .connect(signer)
+        .setExecutionOverhead(remoteChainSlug, executionOverhead[remoteChain]);
       console.log(`setExecutionOverheadTx: ${setExecutionOverheadTx.hash}`);
       await setExecutionOverheadTx.wait();
     }
 
     if (!watcherRoleSet) {
-      const grantWatcherRoleTx = await switchboard.connect(signer).grantWatcherRole(
-        remoteChainSlug,
-        watcherAddress[localChain]
-      );
+      const grantWatcherRoleTx = await switchboard
+        .connect(signer)
+        .grantWatcherRole(remoteChainSlug, watcherAddress[localChain]);
       console.log(`grantWatcherRoleTx: ${grantWatcherRoleTx.hash}`);
       await grantWatcherRoleTx.wait();
     }
   } catch (error) {
     console.log("Error in setting up optimistic switchboard", error);
   }
-}
+};

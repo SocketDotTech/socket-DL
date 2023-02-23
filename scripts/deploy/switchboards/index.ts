@@ -11,16 +11,20 @@ import { polygonL1Switchboard } from "./polygonL1Switchboard";
 import { polygonL2Switchboard } from "./polygonL2Switchboard";
 import { switchboards } from "../../constants";
 
-
 export const getSwitchboardDeployData = (
-  integrationType, localChain, remoteChain, oracleAddress, signerAddress
+  integrationType,
+  localChain,
+  remoteChain,
+  oracleAddress,
+  signerAddress
 ) => {
   if (integrationType === IntegrationTypes.fast) {
     return fastSwitchboard(localChain, oracleAddress, signerAddress);
   } else if (integrationType === IntegrationTypes.optimistic) {
     return optimisticSwitchboard(localChain, oracleAddress, signerAddress);
   } else if (integrationType === IntegrationTypes.native) {
-    const switchboardType = switchboards[localChain]?.[remoteChain]?.["switchboard"]
+    const switchboardType =
+      switchboards[localChain]?.[remoteChain]?.["switchboard"];
     if (switchboardType === NativeSwitchboard.ARBITRUM_L1) {
       return arbitrumL1Switchboard(localChain, oracleAddress, signerAddress);
     } else if (switchboardType === NativeSwitchboard.ARBITRUM_L2) {
@@ -38,4 +42,4 @@ export const getSwitchboardDeployData = (
     // TODO: handle invalid data
     return { contractName: "", args: [], path: "" };
   }
-}
+};
