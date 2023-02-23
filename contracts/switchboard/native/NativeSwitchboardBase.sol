@@ -3,13 +3,14 @@ pragma solidity 0.8.7;
 
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IOracle.sol";
+import "../../interfaces/ICapacitor.sol";
+
 import "../../utils/AccessControl.sol";
-import "../../interfaces/ISocket.sol";
 import "../../libraries/RescueFundsLib.sol";
 
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     IOracle public oracle__;
-    ISocket public socket__;
+    ICapacitor public capacitor__;
 
     bool public tripGlobalFuse;
     uint256 public executionOverhead;
@@ -18,8 +19,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     event SwitchboardTripped(bool tripGlobalFuse);
     event ExecutionOverheadSet(uint256 executionOverhead);
     event InitialConfirmationGasLimitSet(uint256 gasLimit);
+    event CapacitorSet(address capacitor);
     event OracleSet(address oracle);
-    event SocketSet(address socket);
     event InitiatedNativeConfirmation(uint256 packetId);
     event FeesWithdrawn(address account, uint256 value);
 
@@ -91,17 +92,21 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     }
 
     /**
+     * @notice updates capacitor address
+     * @param capacitor_ new capacitor
+     */
+    function setCapacitor(address capacitor_) external onlyOwner {
+        capacitor__ = ICapacitor(capacitor_);
+        emit CapacitorSet(capacitor_);
+    }
+
+    /**
      * @notice updates oracle address
      * @param oracle_ new oracle
      */
     function setOracle(address oracle_) external onlyOwner {
         oracle__ = IOracle(oracle_);
         emit OracleSet(oracle_);
-    }
-
-    function setSocket(address socket_) external onlyOwner {
-        socket__ = ISocket(socket_);
-        emit SocketSet(socket_);
     }
 
     // TODO: to support fee distribution

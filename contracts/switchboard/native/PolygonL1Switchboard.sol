@@ -19,10 +19,8 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         address checkpointManager_,
         address fxRoot_,
         address owner_,
-        ISocket socket_,
         IOracle oracle_
     ) AccessControl(owner_) FxBaseRootTunnel(checkpointManager_, fxRoot_) {
-        socket__ = socket_;
         oracle__ = oracle_;
 
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
@@ -33,7 +31,8 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
      * @param packetId_ - packet id
      */
     function initateNativeConfirmation(uint256 packetId_) external payable {
-        bytes32 root = socket__.remoteRoots(packetId_);
+        uint256 capacitorPacketCount = uint256(uint64(packetId_));
+        bytes32 root = capacitor__.getRootById(capacitorPacketCount);
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encode(packetId_, root);
