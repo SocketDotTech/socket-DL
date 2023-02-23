@@ -24,8 +24,8 @@ const checkSocket = async (chain, remoteChain, config, switchboard, capacitor, d
   let hasExecutorRole = await roleExist(executionManager, executorRole, executorAddress[chain]);
   assert(hasExecutorRole, `❌ Executor Role do not exist for ${chain}`);
 
-  const capacitor__ = await socket._capacitors__(switchboard, chainIds[remoteChain]);
-  const decapacitor__ = await socket._decapacitors__(switchboard, chainIds[remoteChain]);
+  const capacitor__ = await socket.capacitors__(switchboard, chainIds[remoteChain]);
+  const decapacitor__ = await socket.decapacitors__(switchboard, chainIds[remoteChain]);
 
   assert(capacitor__ !== constants.AddressZero, "❌ Switchboard not registered");
   assert(capacitor__ === capacitor, "❌ Wrong Capacitor");
@@ -48,12 +48,12 @@ const checkOracle = async (chain, remoteChain, oracleAddr, transmitManagerAddr) 
   const oracle = await getInstance("GasPriceOracle", oracleAddr)
 
   // check transmit manager
-  const transmitManager = await oracle.transmitManager();
+  const transmitManager = await oracle.transmitManager__();
   assert(transmitManager.toLowerCase() === transmitManagerAddr.toLowerCase(), `❌ TransmitManager not set in oracle on ${chain}`);
 }
 
 const checkSwitchboard = async (chain, remoteChain, localSwitchboard, remoteSwitchboard, configurationType) => {
-  if (configurationType === IntegrationTypes.nativeIntegration) {
+  if (configurationType === IntegrationTypes.native) {
     const switchboardType = switchboards[chain][remoteChain]["switchboard"];
 
     if (switchboardType === NativeSwitchboard.POLYGON_L1) {
@@ -81,7 +81,7 @@ const checkSwitchboard = async (chain, remoteChain, localSwitchboard, remoteSwit
     assert(parseInt(executionOverheadOnChain) !== 0, "❌ Execution overhead not set on switchboard")
     assert(watcherRoleSet, `❌ Watcher Role not set for ${remoteChain} on switchboard`)
 
-    if (configurationType === IntegrationTypes.fastIntegration) {
+    if (configurationType === IntegrationTypes.fast) {
       const attestGasLimitOnChain = await switchboard.attestGasLimit(chainIds[remoteChain]);
       assert(parseInt(attestGasLimitOnChain) !== 0, `❌ Attest gas limit is 0 for ${remoteChain} on switchboard`)
     }

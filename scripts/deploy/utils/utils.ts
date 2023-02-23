@@ -57,8 +57,7 @@ export const verify = async (
     const chainId = await getChainId();
     if (chainId === 31337) return;
 
-    await sleep(20);
-    console.log(`inside verify contract for contract: ${address} and name: ${path}:${contractName} - with args: ${args}`);
+    await sleep(30);
     await run("verify:verify", {
       address,
       contract: `${path}:${contractName}`,

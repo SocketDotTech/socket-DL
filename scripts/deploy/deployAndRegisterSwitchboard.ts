@@ -44,7 +44,7 @@ export default async function deployAndRegisterSwitchboard(
     } else if (contractName === "OptimisticSwitchboard") {
       await setupOptimistic(switchboard, chainIds[remoteChain], network, remoteChain, signer)
     } else {
-      const capacitor = getCapacitorAddress(remoteChainSlug, IntegrationTypes.nativeIntegration, sourceConfig);
+      const capacitor = getCapacitorAddress(remoteChainSlug, IntegrationTypes.native, sourceConfig);
       const setCapacitorTx = await switchboard.connect(signer).setCapacitor(
         capacitor
       );

@@ -13,7 +13,7 @@ export default async function registerSwitchBoard(
 ): Promise<ChainSocketAddresses> {
   try {
     const socket = await getInstance("Socket", config["Socket"]);
-    let capacitor = await socket._capacitors__(switchBoardAddress, remoteChainSlug);
+    let capacitor = await socket.capacitors__(switchBoardAddress, remoteChainSlug);
 
     if (capacitor === constants.AddressZero) {
       const registerTx = await socket.connect(signer).registerSwitchBoard(
@@ -26,8 +26,8 @@ export default async function registerSwitchBoard(
     }
 
     // get capacitor and decapacitor for config
-    capacitor = await socket._capacitors__(switchBoardAddress, remoteChainSlug);
-    const decapacitor = await socket._decapacitors__(switchBoardAddress, remoteChainSlug);
+    capacitor = await socket.capacitors__(switchBoardAddress, remoteChainSlug);
+    const decapacitor = await socket.decapacitors__(switchBoardAddress, remoteChainSlug);
 
     config = setCapacitorPair(
       config,

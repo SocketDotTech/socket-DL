@@ -63,12 +63,12 @@ const setRemoteSwitchboards = async () => {
       for (let dstChain in deploymentAddresses[srcChain]?.["integrations"]) {
         const dstConfig = deploymentAddresses[srcChain]["integrations"][dstChain]
 
-        if (dstConfig?.[IntegrationTypes.nativeIntegration]) {
+        if (dstConfig?.[IntegrationTypes.native]) {
           const srcSwitchboardType = switchboards[networkToChainId[srcChain]]?.[networkToChainId[dstChain]]?.["switchboard"]
-          const dstSwitchboardAddress = getSwitchboardAddress(srcChain, IntegrationTypes.nativeIntegration, deploymentAddresses?.[dstChain])
+          const dstSwitchboardAddress = getSwitchboardAddress(srcChain, IntegrationTypes.native, deploymentAddresses?.[dstChain])
           if (!dstSwitchboardAddress) continue;
 
-          const srcSwitchboardAddress = dstConfig?.[IntegrationTypes.nativeIntegration]["switchboard"];
+          const srcSwitchboardAddress = dstConfig?.[IntegrationTypes.native]["switchboard"];
 
           let functionName, sbContract;
           if (srcSwitchboardType === NativeSwitchboard.POLYGON_L1) {
