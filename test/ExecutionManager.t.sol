@@ -167,7 +167,7 @@ contract ExecutionManagerTest is Test {
 
         hoax(owner);
 
-        transmitManager.rescueFunds(
+        executionManager.rescueFunds(
             NATIVE_TOKEN_ADDRESS,
             feesWithdrawer,
             amount
