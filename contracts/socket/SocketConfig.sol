@@ -40,7 +40,6 @@ abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
     error SwitchboardExists();
     error InvalidConnection();
 
-    // todo: need event, check for other such functions.
     function setCapacitorFactory(address capacitorFactory_) external onlyOwner {
         capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
         emit CapacitorFactorySet(capacitorFactory_);

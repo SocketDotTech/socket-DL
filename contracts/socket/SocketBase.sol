@@ -24,7 +24,7 @@ abstract contract SocketBase is SocketConfig, ReentrancyGuard {
         emit HasherSet(hasher_);
     }
 
-    // TODO: in discussion
+    // open issue #50
     /**
      * @notice updates transmitManager_
      * @param transmitManager_ address of Transmit Manager
