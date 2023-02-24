@@ -99,16 +99,6 @@ contract FastSwitchboard is SwitchboardBase {
     }
 
     // TODO: watchers are chain specific hence letting them act globally seems weird, need to rethink
-    /**
-     * @notice pause execution
-     * @dev this function can only be called by watchers for pausing the global execution
-     */
-    function trip(
-        uint256 srcChainSlug_
-    ) external onlyRole(_watcherRole(srcChainSlug_)) {
-        tripGlobalFuse = true;
-        emit SwitchboardTripped(true);
-    }
 
     /**
      * @notice pause/unpause execution
@@ -147,10 +137,6 @@ contract FastSwitchboard is SwitchboardBase {
 
         _revokeRole(_watcherRole(srcChainSlug_), watcher_);
         totalWatchers[srcChainSlug_]--;
-    }
-
-    function _watcherRole(uint256 chainSlug_) internal pure returns (bytes32) {
-        return bytes32(chainSlug_);
     }
 
     /**

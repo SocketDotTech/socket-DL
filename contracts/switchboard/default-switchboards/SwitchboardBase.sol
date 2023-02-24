@@ -12,6 +12,10 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     bool public tripGlobalFuse;
     mapping(uint256 => uint256) public executionOverhead;
 
+    // sourceChain => isPaused
+    mapping(uint256 => bool) public tripSinglePath;
+
+    event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
     event SwitchboardTripped(bool tripGlobalFuse);
     event ExecutionOverheadSet(uint256 dstChainSlug, uint256 executionOverhead);
     event OracleSet(address oracle);
@@ -49,6 +53,29 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
         uint256 dstChainSlug_,
         uint256 dstRelativeGasPrice_
     ) internal view virtual returns (uint256) {}
+
+    function _watcherRole(uint256 chainSlug_) internal pure returns (bytes32) {
+        return bytes32(chainSlug_);
+    }
+
+    /**
+     * @notice pause a path
+     */
+    function tripPath(
+        uint256 srcChainSlug_
+    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+        //source chain based tripping
+        tripSinglePath[srcChainSlug_] = true;
+        emit PathTripped(srcChainSlug_, true);
+    }
+
+    /**
+     * @notice pause/unpause a path
+     */
+    function tripSingle(uint256 srcChainSlug_, bool trip_) external onlyOwner {
+        tripSinglePath[srcChainSlug_] = trip_;
+        emit PathTripped(srcChainSlug_, trip_);
+    }
 
     /**
      * @notice updates execution overhead
