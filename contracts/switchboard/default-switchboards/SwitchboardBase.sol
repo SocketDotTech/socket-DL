@@ -70,11 +70,30 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     }
 
     /**
+     * @notice pause execution
+     */
+    function tripGlobal(
+        uint256 srcChainSlug_
+    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+        tripGlobalFuse = true;
+        emit SwitchboardTripped(true);
+    }
+
+    /**
      * @notice pause/unpause a path
      */
-    function tripSingle(uint256 srcChainSlug_, bool trip_) external onlyOwner {
+    function tripPath(uint256 srcChainSlug_, bool trip_) external onlyOwner {
         tripSinglePath[srcChainSlug_] = trip_;
         emit PathTripped(srcChainSlug_, trip_);
+    }
+
+    /**
+     * @notice pause/unpause execution
+     * @param tripGlobalFuse_ bool indicating verification is active or not
+     */
+    function tripGlobal(bool tripGlobalFuse_) external onlyOwner {
+        tripGlobalFuse = tripGlobalFuse_;
+        emit SwitchboardTripped(tripGlobalFuse_);
     }
 
     /**

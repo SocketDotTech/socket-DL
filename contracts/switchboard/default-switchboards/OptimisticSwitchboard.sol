@@ -20,36 +20,18 @@ contract OptimisticSwitchboard is SwitchboardBase {
 
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId_ packet id
+     * @param srcChainSlug_ source chain slug
      * @param proposeTime_ time at which packet was proposed
      */
     function allowPacket(
         bytes32,
-        uint256 packetId_,
+        uint256,
         uint256 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {
         if (tripGlobalFuse || tripSinglePath[srcChainSlug_]) return false;
         if (block.timestamp - proposeTime_ < timeoutInSeconds) return false;
         return true;
-    }
-
-    /**
-     * @notice pause execution
-     */
-    function tripGlobal(
-        uint256 srcChainSlug_
-    ) external onlyRole(_watcherRole(srcChainSlug_)) {
-        tripGlobalFuse = true;
-        emit SwitchboardTripped(true);
-    }
-
-    /**
-     * @notice pause/unpause execution
-     */
-    function tripGlobal(bool trip_) external onlyOwner {
-        tripGlobalFuse = trip_;
-        emit SwitchboardTripped(trip_);
     }
 
     /**

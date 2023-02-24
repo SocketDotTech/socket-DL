@@ -115,7 +115,7 @@ contract FastSwitchboardTest is Setup {
         hoax(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit SwitchboardTripped(true);
-        fastSwitchboard.trip(true);
+        fastSwitchboard.tripGlobal(true);
         assertTrue(fastSwitchboard.tripGlobalFuse());
     }
 
@@ -139,14 +139,14 @@ contract FastSwitchboardTest is Setup {
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
-        fastSwitchboard.tripSingle(srcChainSlug, true);
+        fastSwitchboard.tripPath(srcChainSlug, true);
         assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
     }
 
     function testNonOwnerToTripSingle() external {
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectRevert();
-        fastSwitchboard.tripSingle(srcChainSlug, true);
+        fastSwitchboard.tripPath(srcChainSlug, true);
     }
 
     function testUnTripAfterTripSingle() external {
@@ -154,13 +154,13 @@ contract FastSwitchboardTest is Setup {
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
-        fastSwitchboard.tripSingle(srcChainSlug, true);
+        fastSwitchboard.tripPath(srcChainSlug, true);
         assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
 
         hoax(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, false);
-        fastSwitchboard.tripSingle(srcChainSlug, false);
+        fastSwitchboard.tripPath(srcChainSlug, false);
         assertFalse(fastSwitchboard.tripSinglePath(srcChainSlug));
     }
 

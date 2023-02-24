@@ -79,14 +79,14 @@ contract OptimisticSwitchboardTest is Setup {
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
-        optimisticSwitchboard.tripSingle(srcChainSlug, true);
+        optimisticSwitchboard.tripPath(srcChainSlug, true);
         assertTrue(optimisticSwitchboard.tripSinglePath(srcChainSlug));
     }
 
     function testNonOwnerToTripSingle() external {
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectRevert();
-        optimisticSwitchboard.tripSingle(srcChainSlug, true);
+        optimisticSwitchboard.tripPath(srcChainSlug, true);
     }
 
     function testUnTripAfterTripSingle() external {
@@ -94,13 +94,13 @@ contract OptimisticSwitchboardTest is Setup {
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
-        optimisticSwitchboard.tripSingle(srcChainSlug, true);
+        optimisticSwitchboard.tripPath(srcChainSlug, true);
         assertTrue(optimisticSwitchboard.tripSinglePath(srcChainSlug));
 
         hoax(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, false);
-        optimisticSwitchboard.tripSingle(srcChainSlug, false);
+        optimisticSwitchboard.tripPath(srcChainSlug, false);
         assertFalse(optimisticSwitchboard.tripSinglePath(srcChainSlug));
     }
 
