@@ -1,4 +1,4 @@
-import { Contract } from "ethers";
+import { constants, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   createObj,
@@ -26,7 +26,7 @@ export default async function deployAndRegisterSwitchboard(
   try {
     const remoteChainSlug = chainIds[remoteChain];
 
-    const switchboardAddress = getSwitchboardAddress(
+    const result = getOrStoreSwitchboardAddress(
       chainIds[remoteChain],
       integrationType,
       sourceConfig
@@ -40,7 +40,8 @@ export default async function deployAndRegisterSwitchboard(
     );
 
     let switchboard: Contract;
-    if (!switchboardAddress) {
+    sourceConfig = result.sourceConfig;
+    if (!result.switchboardAddr) {
       switchboard = await deployContractWithArgs(
         contractName,
         args,
@@ -52,9 +53,17 @@ export default async function deployAndRegisterSwitchboard(
         ["integrations", chainIds[remoteChain], integrationType, "switchboard"],
         switchboard.address
       );
+
+      if (integrationType === IntegrationTypes.optimistic) {
+        sourceConfig["OptimisticSwitchboard"] = switchboard.address;
+      }
+      if (integrationType === IntegrationTypes.fast) {
+        sourceConfig["FastSwitchboard"] = switchboard.address;
+      }
+
       await storeAddresses(sourceConfig, chainIds[network]);
     } else {
-      switchboard = await getInstance(contractName, switchboardAddress);
+      switchboard = await getInstance(contractName, result.switchboardAddr);
     }
 
     sourceConfig = await registerSwitchBoard(
@@ -89,11 +98,17 @@ export default async function deployAndRegisterSwitchboard(
         IntegrationTypes.native,
         sourceConfig
       );
-      const setCapacitorTx = await switchboard
-        .connect(signer)
-        .setCapacitor(capacitor);
-      console.log(`Adding Capacitor ${capacitor}: ${setCapacitorTx.hash}`);
-      await setCapacitorTx.wait();
+      const capacitorAddr = await switchboard.capacitor__();
+      if (
+        capacitorAddr.toString().toLowerCase() !==
+        capacitor.toString().toLowerCase()
+      ) {
+        const setCapacitorTx = await switchboard
+          .connect(signer)
+          .setCapacitor(capacitor);
+        console.log(`Adding Capacitor ${capacitor}: ${setCapacitorTx.hash}`);
+        await setCapacitorTx.wait();
+      }
     }
 
     return sourceConfig;
@@ -102,3 +117,35 @@ export default async function deployAndRegisterSwitchboard(
     throw error;
   }
 }
+
+const getOrStoreSwitchboardAddress = (
+  remoteChain,
+  integrationType,
+  sourceConfig
+) => {
+  let switchboardAddr = getSwitchboardAddress(
+    remoteChain,
+    integrationType,
+    sourceConfig
+  );
+
+  if (switchboardAddr) {
+    if (integrationType === IntegrationTypes.optimistic) {
+      sourceConfig = createObj(
+        sourceConfig,
+        ["integrations", remoteChain, integrationType, "switchboard"],
+        switchboardAddr
+      );
+      switchboardAddr = sourceConfig["OptimisticSwitchboard"];
+    } else if (integrationType === IntegrationTypes.fast) {
+      sourceConfig = createObj(
+        sourceConfig,
+        ["integrations", remoteChain, integrationType, "switchboard"],
+        switchboardAddr
+      );
+      switchboardAddr = sourceConfig["FastSwitchboard"];
+    }
+  }
+
+  return { switchboardAddr, sourceConfig };
+};

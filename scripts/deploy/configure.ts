@@ -29,6 +29,7 @@ export const main = async () => {
     if (!fs.existsSync(deployedAddressPath)) {
       throw new Error("addresses.json not found");
     }
+    let addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
 
     for (let chain in config) {
       console.log(`Deploying configs for ${chain}`);
@@ -39,6 +40,7 @@ export const main = async () => {
 
       for (let index = 0; index < chainSetups.length; index++) {
         const { remoteChain, remoteConfig, localConfig } = validateChainSetup(
+          addresses,
           chain,
           chainSetups[index]
         );
@@ -57,6 +59,7 @@ export const main = async () => {
             socketSigner,
             localConfigUpdated
           );
+          addresses[chainIds[chain]] = localConfigUpdated;
           console.log("Done! 🚀");
         }
 
@@ -82,22 +85,21 @@ export const main = async () => {
       }
     }
 
-    await setRemoteSwitchboards();
+    await setRemoteSwitchboards(addresses);
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;
   }
 };
 
-const setRemoteSwitchboards = async () => {
+const setRemoteSwitchboards = async (addresses) => {
   try {
-    for (let srcChain in deploymentAddresses) {
+    for (let srcChain in addresses) {
       await hre.changeNetwork(networkToChainId[srcChain]);
       const { socketSigner } = await getSigners();
 
-      for (let dstChain in deploymentAddresses[srcChain]?.["integrations"]) {
-        const dstConfig =
-          deploymentAddresses[srcChain]["integrations"][dstChain];
+      for (let dstChain in addresses[srcChain]?.["integrations"]) {
+        const dstConfig = addresses[srcChain]["integrations"][dstChain];
 
         if (dstConfig?.[IntegrationTypes.native]) {
           const srcSwitchboardType =
@@ -174,11 +176,10 @@ const setRemoteSwitchboards = async () => {
   }
 };
 
-const validateChainSetup = (chain, chainSetups) => {
+const validateChainSetup = (addresses, chain, chainSetups) => {
   let remoteChain = chainSetups["remoteChain"];
   if (chain === remoteChain) throw new Error("Wrong chains");
 
-  const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
   if (!addresses[chainIds[chain]] || !addresses[chainIds[remoteChain]]) {
     throw new Error("Deployed Addresses not found");
   }

@@ -5,9 +5,14 @@ function getSwitchboardAddress(
   integrationType: IntegrationTypes,
   config: any
 ) {
-  return config?.["integrations"]?.[chainId]?.[integrationType]?.[
-    "switchboard"
-  ];
+  if (integrationType === IntegrationTypes.fast) {
+    return config?.["FastSwitchboard"];
+  } else if (integrationType === IntegrationTypes.optimistic) {
+    return config?.["OptimisticSwitchboard"];
+  } else
+    return config?.["integrations"]?.[chainId]?.[integrationType]?.[
+      "switchboard"
+    ];
 }
 
 function getCapacitorAddress(

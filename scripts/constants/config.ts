@@ -1,4 +1,4 @@
-import { IntegrationTypes, NativeSwitchboard } from "../../src/types";
+import { NativeSwitchboard } from "../../src/types";
 
 export const transmitterAddress: {
   [key: string]: string;
