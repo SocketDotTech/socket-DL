@@ -135,114 +135,138 @@ export const config = {
       configForCounter: IntegrationTypes.fast,
     },
   ],
-  // bsc: [
-  //   {
-  //     "remoteChain": "polygon-mainnet",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  //   {
-  //     "remoteChain": "optimism",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  //   {
-  //     "remoteChain": "arbitrum",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  //   {
-  //     "remoteChain": "mainnet",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  // ],
-  // "polygon-mainnet": [
-  //   {
-  //     "remoteChain": "bsc",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  //   {
-  //     "remoteChain": "mainnet",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic, IntegrationTypes.native],
-  //     "configForCounter": IntegrationTypes.native
-  //   },
-  //   {
-  //     "remoteChain": "optimism",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  //   {
-  //     "remoteChain": "arbitrum",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  // ],
-  // mainnet: [
-  //   {
-  //     "remoteChain": "polygon-mainnet",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic, IntegrationTypes.native],
-  //     "configForCounter": IntegrationTypes.native
-  //   },
-  //   {
-  //     "remoteChain": "bsc",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  //   {
-  //     "remoteChain": "optimism",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic, IntegrationTypes.native],
-  //     "configForCounter": IntegrationTypes.native
-  //   },
-  //   {
-  //     "remoteChain": "arbitrum",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic, IntegrationTypes.native],
-  //     "configForCounter": IntegrationTypes.native
-  //   },
-  // ],
-  // optimism: [
-  //   {
-  //     "remoteChain": "polygon-mainnet",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  //   {
-  //     "remoteChain": "mainnet",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic, IntegrationTypes.native],
-  //     "configForCounter": IntegrationTypes.native
-  //   },
-  //   {
-  //     "remoteChain": "bsc",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  //   {
-  //     "remoteChain": "arbitrum",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  // ],
-  // arbitrum: [
-  //   {
-  //     "remoteChain": "polygon-mainnet",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  //   {
-  //     "remoteChain": "mainnet",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic, IntegrationTypes.native],
-  //     "configForCounter": IntegrationTypes.native
-  //   },
-  //   {
-  //     "remoteChain": "optimism",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  //   {
-  //     "remoteChain": "bsc",
-  //     "config": [IntegrationTypes.fast, IntegrationTypes.optimistic],
-  //     "configForCounter": IntegrationTypes.fast
-  //   },
-  // ]
+  bsc: [
+    {
+      remoteChain: "polygon-mainnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+    {
+      remoteChain: "optimism",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+    {
+      remoteChain: "arbitrum",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+    {
+      remoteChain: "mainnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+  ],
+  "polygon-mainnet": [
+    {
+      remoteChain: "bsc",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+    {
+      remoteChain: "mainnet",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
+    },
+    {
+      remoteChain: "optimism",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+    {
+      remoteChain: "arbitrum",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+  ],
+  mainnet: [
+    {
+      remoteChain: "polygon-mainnet",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
+    },
+    {
+      remoteChain: "bsc",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+    {
+      remoteChain: "optimism",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
+    },
+    {
+      remoteChain: "arbitrum",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
+    },
+  ],
+  optimism: [
+    {
+      remoteChain: "polygon-mainnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+    {
+      remoteChain: "mainnet",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
+    },
+    {
+      remoteChain: "bsc",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+    {
+      remoteChain: "arbitrum",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+  ],
+  arbitrum: [
+    {
+      remoteChain: "polygon-mainnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+    {
+      remoteChain: "mainnet",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
+    },
+    {
+      remoteChain: "optimism",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+    {
+      remoteChain: "bsc",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
+    },
+  ],
 };

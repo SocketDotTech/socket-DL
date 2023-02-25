@@ -74,14 +74,16 @@ export const main = async () => {
           "Socket",
           localConfigUpdated["Socket"]
         );
-        await setSocketConfig(
-          socket,
-          chainIds[remoteChain],
-          remoteConfig["Counter"],
-          chainSetups[index]["configForCounter"],
-          localConfigUpdated,
-          counterSigner
-        );
+
+        if (remoteConfig["Counter"])
+          await setSocketConfig(
+            socket,
+            chainIds[remoteChain],
+            remoteConfig["Counter"],
+            chainSetups[index]["configForCounter"],
+            localConfigUpdated,
+            counterSigner
+          );
       }
     }
 
