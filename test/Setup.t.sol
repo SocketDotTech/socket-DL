@@ -195,7 +195,7 @@ contract Setup is Test {
         cc_.hasher__ = new Hasher();
         cc_.sigVerifier__ = new SignatureVerifier();
         cc_.capacitorFactory__ = new CapacitorFactory();
-        cc_.gasPriceOracle__ = new GasPriceOracle(deployer_);
+        cc_.gasPriceOracle__ = new GasPriceOracle(deployer_, cc_.chainSlug);
         cc_.executionManager__ = new ExecutionManager(
             cc_.gasPriceOracle__,
             deployer_

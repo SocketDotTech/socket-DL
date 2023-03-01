@@ -6,7 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithoutArgs, deployContractWithArgs, storeAddresses } from "./utils";
 import { chainIds } from "../constants/networks";
 
-import { executorAddress, EXECUTOR_ROLE, sealGasLimit } from "../constants/config";
+import { executorAddress, transmitterAddress, EXECUTOR_ROLE, sealGasLimit } from "../constants/config";
 import { ChainSocketAddresses } from "../../src";
 
 /**
@@ -61,7 +61,7 @@ export const main = async () => {
 
     const gasPriceOracle: Contract = await deployContractWithArgs(
       "GasPriceOracle",
-      [socketSigner.address],
+      [socketSigner.address, chainIds[network]],
       socketSigner,
       "contracts/GasPriceOracle.sol"
     );
@@ -94,6 +94,16 @@ export const main = async () => {
         .setTransmitManager(transmitManager.address);
       console.log(`Setting transmit manager in oracle: ${tx.hash}`);
       await tx.wait();
+
+      //grant transmitter role to transmitter-address
+      const transmitter = transmitterAddress[network];
+
+      const grantTransmitterRoleTxn = await transmitManager
+      .connect(socketSigner)
+      .grantTransmitterRole(chainIds[network], transmitter);
+
+      console.log(`Setting transmitter manager in oracle has transactionHash: ${grantTransmitterRoleTxn.hash}`);
+      await grantTransmitterRoleTxn.wait();
     }
 
     const socket: Contract = await deployContractWithArgs(

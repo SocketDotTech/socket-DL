@@ -88,13 +88,12 @@ contract TransmitManager is ITransmitManager, AccessControl {
     function _calculateFees(
         uint256 siblingChainSlug_
     ) internal view returns (uint256 minTransmissionFees) {
-        uint256 siblingRelativeGasPrice = oracle.relativeGasPrice(
-            siblingChainSlug_
-        );
+        (uint256 sourceGasPrice, uint256 siblingRelativeGasPrice) = oracle
+            .getGasPrices(siblingChainSlug_);
 
         minTransmissionFees =
             sealGasLimit *
-            tx.gasprice +
+            sourceGasPrice +
             proposeGasLimit[siblingChainSlug_] *
             siblingRelativeGasPrice;
     }

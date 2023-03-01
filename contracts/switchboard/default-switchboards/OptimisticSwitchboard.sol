@@ -6,7 +6,7 @@ import "./SwitchboardBase.sol";
 contract OptimisticSwitchboard is SwitchboardBase {
     uint256 public immutable timeoutInSeconds;
 
-    // packetId => isPaused
+    // sourceChain => isPaused
     mapping(uint256 => bool) public tripSingleFuse;
 
     event PacketTripped(uint256 packetId_, bool tripSingleFuse_);
@@ -50,10 +50,12 @@ contract OptimisticSwitchboard is SwitchboardBase {
     /**
      * @notice pause a packet
      */
-    function tripSingle(
+    function tripPath(
         uint256 packetId_,
         uint256 srcChainSlug_
     ) external onlyRole(_watcherRole(srcChainSlug_)) {
+        //source chain based tripping
+
         tripSingleFuse[packetId_] = false;
         emit PacketTripped(packetId_, false);
     }
