@@ -64,7 +64,7 @@ contract FastSwitchboard is SwitchboardBase {
         uint256 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {
-        if (tripGlobalFuse) return false;
+        if (tripGlobalFuse || tripSinglePath[srcChainSlug_]) return false;
 
         if (
             attestations[packetId_] < totalWatchers[srcChainSlug_] &&
@@ -98,27 +98,6 @@ contract FastSwitchboard is SwitchboardBase {
         emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
     }
 
-    // TODO: watchers are chain specific hence letting them act globally seems weird, need to rethink
-    /**
-     * @notice pause execution
-     * @dev this function can only be called by watchers for pausing the global execution
-     */
-    function trip(
-        uint256 srcChainSlug_
-    ) external onlyRole(_watcherRole(srcChainSlug_)) {
-        tripGlobalFuse = true;
-        emit SwitchboardTripped(true);
-    }
-
-    /**
-     * @notice pause/unpause execution
-     * @param tripGlobalFuse_ bool indicating verification is active or not
-     */
-    function trip(bool tripGlobalFuse_) external onlyOwner {
-        tripGlobalFuse = tripGlobalFuse_;
-        emit SwitchboardTripped(tripGlobalFuse_);
-    }
-
     /**
      * @notice adds a watcher for `srcChainSlug_` chain
      * @param watcher_ watcher address
@@ -147,10 +126,6 @@ contract FastSwitchboard is SwitchboardBase {
 
         _revokeRole(_watcherRole(srcChainSlug_), watcher_);
         totalWatchers[srcChainSlug_]--;
-    }
-
-    function _watcherRole(uint256 chainSlug_) internal pure returns (bytes32) {
-        return bytes32(chainSlug_);
     }
 
     /**

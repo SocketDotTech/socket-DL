@@ -12,6 +12,7 @@ contract FastSwitchboardTest is Setup {
     event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
     event PacketAttested(uint256 packetId, address attester);
     event SwitchboardTripped(bool tripGlobalFuse_);
+    event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
 
     error WatcherFound();
     error WatcherNotFound();
@@ -40,6 +41,10 @@ contract FastSwitchboardTest is Setup {
 
         fastSwitchboard.grantWatcherRole(
             remoteChainSlug,
+            vm.addr(_watcherPrivateKey)
+        );
+        fastSwitchboard.grantWatcherRole(
+            _a.chainSlug,
             vm.addr(_watcherPrivateKey)
         );
         fastSwitchboard.grantWatcherRole(
@@ -110,16 +115,53 @@ contract FastSwitchboardTest is Setup {
         hoax(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit SwitchboardTripped(true);
-        fastSwitchboard.trip(true);
+        fastSwitchboard.tripGlobal(true);
         assertTrue(fastSwitchboard.tripGlobalFuse());
     }
 
     function testTripPath() external {
         hoax(watcher);
+        uint256 srcChainSlug = _a.chainSlug;
         vm.expectEmit(false, false, false, true);
-        emit SwitchboardTripped(true);
-        fastSwitchboard.trip(remoteChainSlug);
-        assertTrue(fastSwitchboard.tripGlobalFuse());
+        emit PathTripped(srcChainSlug, true);
+        fastSwitchboard.tripPath(srcChainSlug);
+        assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
+    }
+
+    function testNonWatcherToTripPath() external {
+        uint256 srcChainSlug = _a.chainSlug;
+        vm.expectRevert();
+        fastSwitchboard.tripPath(srcChainSlug);
+    }
+
+    function testTripSingle() external {
+        hoax(_socketOwner);
+        uint256 srcChainSlug = _a.chainSlug;
+        vm.expectEmit(false, false, false, true);
+        emit PathTripped(srcChainSlug, true);
+        fastSwitchboard.tripPath(srcChainSlug, true);
+        assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
+    }
+
+    function testNonOwnerToTripSingle() external {
+        uint256 srcChainSlug = _a.chainSlug;
+        vm.expectRevert();
+        fastSwitchboard.tripPath(srcChainSlug, true);
+    }
+
+    function testUnTripAfterTripSingle() external {
+        hoax(_socketOwner);
+        uint256 srcChainSlug = _a.chainSlug;
+        vm.expectEmit(false, false, false, true);
+        emit PathTripped(srcChainSlug, true);
+        fastSwitchboard.tripPath(srcChainSlug, true);
+        assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
+
+        hoax(_socketOwner);
+        vm.expectEmit(false, false, false, true);
+        emit PathTripped(srcChainSlug, false);
+        fastSwitchboard.tripPath(srcChainSlug, false);
+        assertFalse(fastSwitchboard.tripSinglePath(srcChainSlug));
     }
 
     function testGrantWatcherRole() external {
