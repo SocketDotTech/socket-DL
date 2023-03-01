@@ -9,8 +9,8 @@ import "./utils/AccessControl.sol";
 import "./libraries/RescueFundsLib.sol";
 
 contract TransmitManager is ITransmitManager, AccessControl {
-    ISignatureVerifier public signatureVerifier;
-    IOracle public oracle;
+    ISignatureVerifier public signatureVerifier__;
+    IOracle public oracle__;
 
     uint256 public chainSlug;
     uint256 public sealGasLimit;
@@ -19,15 +19,15 @@ contract TransmitManager is ITransmitManager, AccessControl {
     error TransferFailed();
     error InsufficientTransmitFees();
 
-    event SealGasLimitSet(uint256 gasLimit_);
-    event ProposeGasLimitSet(uint256 dstChainSlug_, uint256 gasLimit_);
-    event FeesWithdrawn(address account_, uint256 value_);
+    event SealGasLimitSet(uint256 gasLimit);
+    event ProposeGasLimitSet(uint256 dstChainSlug, uint256 gasLimit);
+    event FeesWithdrawn(address account, uint256 value);
 
     /**
      * @notice emits when a new signature verifier contract is set
-     * @param signatureVerifier_ address of new verifier contract
+     * @param signatureVerifier address of new verifier contract
      */
-    event SignatureVerifierSet(address signatureVerifier_);
+    event SignatureVerifierSet(address signatureVerifier);
 
     constructor(
         ISignatureVerifier signatureVerifier_,
@@ -38,8 +38,8 @@ contract TransmitManager is ITransmitManager, AccessControl {
     ) AccessControl(owner_) {
         chainSlug = chainSlug_;
         sealGasLimit = sealGasLimit_;
-        signatureVerifier = signatureVerifier_;
-        oracle = IOracle(oracle_);
+        signatureVerifier__ = signatureVerifier_;
+        oracle__ = IOracle(oracle_);
     }
 
     // @param slugs_ packs the siblingChainSlug & sigChainSlug
@@ -53,7 +53,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
         bytes32 root_,
         bytes calldata signature_
     ) external view override returns (address, bool) {
-        address transmitter = signatureVerifier.recoverSigner(
+        address transmitter = signatureVerifier__.recoverSigner(
             type(uint128).max & slugs_,
             packetId_,
             root_,
@@ -88,7 +88,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
     function _calculateFees(
         uint256 siblingChainSlug_
     ) internal view returns (uint256 minTransmissionFees) {
-        (uint256 sourceGasPrice, uint256 siblingRelativeGasPrice) = oracle
+        (uint256 sourceGasPrice, uint256 siblingRelativeGasPrice) = oracle__
             .getGasPrices(siblingChainSlug_);
 
         minTransmissionFees =
@@ -141,7 +141,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
     function setSignatureVerifier(
         address signatureVerifier_
     ) external onlyOwner {
-        signatureVerifier = ISignatureVerifier(signatureVerifier_);
+        signatureVerifier__ = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
     }
 
@@ -176,10 +176,10 @@ contract TransmitManager is ITransmitManager, AccessControl {
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
+        address token_,
+        address userAddress_,
+        uint256 amount_
     ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

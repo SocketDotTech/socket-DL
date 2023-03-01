@@ -13,18 +13,18 @@ contract Socket is SocketSrc, SocketDst {
         address executionManager_,
         address capacitorFactory_
     ) {
-        _chainSlug = chainSlug_;
-        _hasher__ = IHasher(hasher_);
-        _transmitManager__ = ITransmitManager(transmitManager_);
-        _executionManager__ = IExecutionManager(executionManager_);
-        _capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
+        chainSlug = chainSlug_;
+        hasher__ = IHasher(hasher_);
+        transmitManager__ = ITransmitManager(transmitManager_);
+        executionManager__ = IExecutionManager(executionManager_);
+        capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
+        address token_,
+        address userAddress_,
+        uint256 amount_
     ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

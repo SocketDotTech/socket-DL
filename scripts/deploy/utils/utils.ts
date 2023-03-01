@@ -31,7 +31,12 @@ export const deployContractWithoutArgs = async (
   }
 };
 
-export async function deployContractWithArgs(contractName: string, args: Array<any>, signer: SignerWithAddress, path: string) {
+export async function deployContractWithArgs(
+  contractName: string,
+  args: Array<any>,
+  signer: SignerWithAddress,
+  path: string
+) {
   try {
     const Contract: ContractFactory = await ethers.getContractFactory(
       contractName
@@ -57,8 +62,7 @@ export const verify = async (
     const chainId = await getChainId();
     if (chainId === 31337) return;
 
-    await sleep(20);
-    console.log(`inside verify contract for contract: ${address} and name: ${path}:${contractName} - with args: ${args}`);
+    await sleep(30);
     await run("verify:verify", {
       address,
       contract: `${path}:${contractName}`,
@@ -72,7 +76,10 @@ export const verify = async (
 export const sleep = (delay) =>
   new Promise((resolve) => setTimeout(resolve, delay * 1000));
 
-export const getInstance = async (contractName: string, address: Address): Promise<Contract> =>
+export const getInstance = async (
+  contractName: string,
+  address: Address
+): Promise<Contract> =>
   (await ethers.getContractFactory(contractName)).attach(address);
 
 export const getChainId = async (): Promise<number> => {
@@ -111,9 +118,7 @@ export const storeAddresses = async (
   );
 };
 
-export const getAddresses = async (
-  chainId: number
-) => {
+export const getAddresses = async (chainId: number) => {
   if (!fs.existsSync(deployedAddressPath)) {
     await fs.promises.mkdir(deployedAddressPath);
   }

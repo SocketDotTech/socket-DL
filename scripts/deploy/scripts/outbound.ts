@@ -22,10 +22,16 @@ export const main = async () => {
     const { counterOwner } = await getNamedAccounts();
     const signer: SignerWithAddress = await ethers.getSigner(counterOwner);
 
-    const counter: Contract = await getInstance("Counter", config[chainId]["Counter"]);
+    const counter: Contract = await getInstance(
+      "Counter",
+      config[chainId]["Counter"]
+    );
     await counter
       .connect(signer)
-      .remoteAddOperation(remoteChainId, amount, msgGasLimit, { gasLimit, value: fees });
+      .remoteAddOperation(remoteChainId, amount, msgGasLimit, {
+        gasLimit,
+        value: fees,
+      });
 
     console.log(
       `Sent remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`

@@ -18,9 +18,9 @@ contract FastSwitchboard is SwitchboardBase {
     // packetId => total attestations
     mapping(uint256 => uint256) public attestations;
 
-    event SocketSet(address newSocket_);
+    event SocketSet(address newSocket);
     event PacketAttested(uint256 packetId, address attester);
-    event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
+    event AttestGasLimitSet(uint256 dstChainSlug, uint256 attestGasLimit);
 
     error WatcherFound();
     error WatcherNotFound();
@@ -32,57 +32,57 @@ contract FastSwitchboard is SwitchboardBase {
         address oracle_,
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
-        oracle = IOracle(oracle_);
+        oracle__ = IOracle(oracle_);
         timeoutInSeconds = timeoutInSeconds_;
     }
 
     function attest(
-        uint256 packetId,
-        uint256 srcChainSlug,
-        bytes calldata signature
+        uint256 packetId_,
+        uint256 srcChainSlug_,
+        bytes calldata signature_
     ) external {
-        address watcher = _recoverSigner(srcChainSlug, packetId, signature);
+        address watcher = _recoverSigner(srcChainSlug_, packetId_, signature_);
 
-        if (isAttested[watcher][packetId]) revert AlreadyAttested();
-        if (!_hasRole(_watcherRole(srcChainSlug), watcher))
+        if (isAttested[watcher][packetId_]) revert AlreadyAttested();
+        if (!_hasRole(_watcherRole(srcChainSlug_), watcher))
             revert WatcherNotFound();
 
-        isAttested[watcher][packetId] = true;
-        attestations[packetId]++;
+        isAttested[watcher][packetId_] = true;
+        attestations[packetId_]++;
 
-        emit PacketAttested(packetId, watcher);
+        emit PacketAttested(packetId_, watcher);
     }
 
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId packetId
-     * @param proposeTime time at which packet was proposed
+     * @param packetId_ packetId
+     * @param proposeTime_ time at which packet was proposed
      */
     function allowPacket(
         bytes32,
-        uint256 packetId,
-        uint256 srcChainSlug,
-        uint256 proposeTime
+        uint256 packetId_,
+        uint256 srcChainSlug_,
+        uint256 proposeTime_
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
 
         if (
-            attestations[packetId] < totalWatchers[srcChainSlug] &&
-            block.timestamp - proposeTime < timeoutInSeconds
+            attestations[packetId_] < totalWatchers[srcChainSlug_] &&
+            block.timestamp - proposeTime_ < timeoutInSeconds
         ) return false;
 
         return true;
     }
 
     function _getSwitchboardFees(
-        uint256 dstChainSlug,
-        uint256 dstRelativeGasPrice
+        uint256 dstChainSlug_,
+        uint256 dstRelativeGasPrice_
     ) internal view override returns (uint256) {
         // assumption: number of watchers are going to be same on all chains for particular chain slug?
         return
-            totalWatchers[dstChainSlug] *
-            attestGasLimit[dstChainSlug] *
-            dstRelativeGasPrice;
+            totalWatchers[dstChainSlug_] *
+            attestGasLimit[dstChainSlug_] *
+            dstRelativeGasPrice_;
     }
 
     /**

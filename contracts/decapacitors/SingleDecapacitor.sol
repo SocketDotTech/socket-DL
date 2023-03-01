@@ -17,10 +17,10 @@ contract SingleDecapacitor is IDecapacitor, Ownable(msg.sender) {
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
+        address token_,
+        address userAddress_,
+        uint256 amount_
     ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

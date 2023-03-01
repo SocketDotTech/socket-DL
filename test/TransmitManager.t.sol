@@ -214,7 +214,7 @@ contract TransmitManagerTest is Test {
         transmitManager.setSignatureVerifier(address(signatureVerifierNew));
 
         assertEq(
-            address(transmitManager.signatureVerifier()),
+            address(transmitManager.signatureVerifier__()),
             address(signatureVerifierNew)
         );
     }

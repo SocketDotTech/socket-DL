@@ -4,7 +4,7 @@ pragma solidity 0.8.7;
 import "../utils/Ownable.sol";
 
 contract MockOwnable is Ownable {
-    constructor(address owner) Ownable(owner) {}
+    constructor(address owner_) Ownable(owner_) {}
 
     function ownerFunction() external onlyOwner {}
 

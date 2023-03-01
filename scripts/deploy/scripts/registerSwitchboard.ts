@@ -13,43 +13,45 @@ export default async function registerSwitchBoard(
 ): Promise<ChainSocketAddresses> {
   try {
     const socket = await getInstance("Socket", config["Socket"]);
-    let capacitor = await socket._capacitors__(switchBoardAddress, remoteChainSlug);
+    let capacitor = await socket.capacitors__(
+      switchBoardAddress,
+      remoteChainSlug
+    );
 
     if (capacitor === constants.AddressZero) {
-      const registerTx = await socket.connect(signer).registerSwitchBoard(
-        switchBoardAddress,
-        remoteChainSlug,
-        capacitorType
+      const registerTx = await socket
+        .connect(signer)
+        .registerSwitchBoard(
+          switchBoardAddress,
+          remoteChainSlug,
+          capacitorType
+        );
+      console.log(
+        `Registering Switchboard ${switchBoardAddress}: ${registerTx.hash}`
       );
-      console.log(`Registering Switchboard ${switchBoardAddress}: ${registerTx.hash}`);
       await registerTx.wait();
     }
 
     // get capacitor and decapacitor for config
-    capacitor = await socket._capacitors__(switchBoardAddress, remoteChainSlug);
-    const decapacitor = await socket._decapacitors__(switchBoardAddress, remoteChainSlug);
+    capacitor = await socket.capacitors__(switchBoardAddress, remoteChainSlug);
+    const decapacitor = await socket.decapacitors__(
+      switchBoardAddress,
+      remoteChainSlug
+    );
 
-    config = setCapacitorPair(
-      config,
-      remoteChainSlug,
-      integrationType,
-      { capacitor, decapacitor }
-    )
+    config = setCapacitorPair(config, remoteChainSlug, integrationType, {
+      capacitor,
+      decapacitor,
+    });
 
-    return config
+    return config;
   } catch (error) {
     console.log("Error in registering switchboards", error);
     throw error;
   }
-};
+}
 
-
-function setCapacitorPair(
-  config,
-  chainSlug,
-  integrationType,
-  contracts
-) {
+function setCapacitorPair(config, chainSlug, integrationType, contracts) {
   config = createObj(
     config,
     ["integrations", chainSlug, integrationType, "capacitor"],

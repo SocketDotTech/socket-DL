@@ -25,12 +25,12 @@ abstract contract SocketDst is SocketBase {
 
     /**
      * @notice emits the packet details when proposed at remote
-     * @param attester address of attester
+     * @param transmitter address of transmitter
      * @param packetId packet id
      * @param root packet root
      */
-    event PacketAttested(
-        address indexed attester,
+    event PacketProposed(
+        address indexed transmitter,
         uint256 indexed packetId,
         bytes32 root
     );
@@ -49,9 +49,9 @@ abstract contract SocketDst is SocketBase {
         bytes calldata signature_
     ) external {
         if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
-        (address transmitter, bool isTransmitter) = _transmitManager__
+        (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
-                (_getChainSlug(packetId_) << 128) | _chainSlug,
+                (_getChainSlug(packetId_) << 128) | chainSlug,
                 packetId_,
                 root_,
                 signature_
@@ -61,21 +61,21 @@ abstract contract SocketDst is SocketBase {
         remoteRoots[packetId_] = root_;
         rootProposedAt[packetId_] = block.timestamp;
 
-        emit PacketAttested(transmitter, packetId_, root_);
+        emit PacketProposed(transmitter, packetId_, root_);
     }
 
     /**
      * @notice executes a message
-     * @param packetId packet id
-     * @param localPlug remote plug address
+     * @param packetId_ packet id
+     * @param localPlug_ remote plug address
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
-        uint256 packetId,
-        address localPlug,
+        uint256 packetId_,
+        address localPlug_,
         ISocket.MessageDetails calldata messageDetails_
     ) external override {
-        if (!_executionManager__.isExecutor(msg.sender)) revert NotExecutor();
+        if (!executionManager__.isExecutor(msg.sender)) revert NotExecutor();
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
@@ -83,18 +83,18 @@ abstract contract SocketDst is SocketBase {
         uint256 remoteSlug = uint256(messageDetails_.msgId >> 224);
 
         PlugConfig storage plugConfig = _plugConfigs[
-            (uint256(uint160(localPlug)) << 96) | remoteSlug
+            (uint256(uint160(localPlug_)) << 96) | remoteSlug
         ];
 
         feesEarned[remoteSlug][address(plugConfig.inboundSwitchboard__)][
             msg.sender
         ] += messageDetails_.executionFee;
 
-        bytes32 packedMessage = _hasher__.packMessage(
+        bytes32 packedMessage = hasher__.packMessage(
             remoteSlug,
             plugConfig.siblingPlug,
-            _chainSlug,
-            localPlug,
+            chainSlug,
+            localPlug_,
             messageDetails_.msgId,
             messageDetails_.msgGasLimit,
             messageDetails_.executionFee,
@@ -102,14 +102,14 @@ abstract contract SocketDst is SocketBase {
         );
 
         _verify(
-            packetId,
+            packetId_,
             remoteSlug,
             packedMessage,
             plugConfig,
             messageDetails_.decapacitorProof
         );
         _execute(
-            localPlug,
+            localPlug_,
             remoteSlug,
             messageDetails_.msgGasLimit,
             messageDetails_.msgId,
@@ -118,49 +118,52 @@ abstract contract SocketDst is SocketBase {
     }
 
     function _verify(
-        uint256 packetId,
-        uint256 remoteChainSlug,
-        bytes32 packedMessage,
-        PlugConfig storage plugConfig,
-        bytes memory decapacitorProof
+        uint256 packetId_,
+        uint256 remoteChainSlug_,
+        bytes32 packedMessage_,
+        PlugConfig storage plugConfig_,
+        bytes memory decapacitorProof_
     ) internal view {
         if (
-            !ISwitchboard(plugConfig.inboundSwitchboard__).allowPacket(
-                remoteRoots[packetId],
-                packetId,
-                remoteChainSlug,
-                rootProposedAt[packetId]
+            !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
+                remoteRoots[packetId_],
+                packetId_,
+                remoteChainSlug_,
+                rootProposedAt[packetId_]
             )
         ) revert VerificationFailed();
 
         if (
-            !plugConfig.decapacitor__.verifyMessageInclusion(
-                remoteRoots[packetId],
-                packedMessage,
-                decapacitorProof
+            !plugConfig_.decapacitor__.verifyMessageInclusion(
+                remoteRoots[packetId_],
+                packedMessage_,
+                decapacitorProof_
             )
         ) revert InvalidProof();
     }
 
     function _execute(
-        address localPlug,
-        uint256 remoteChainSlug,
-        uint256 msgGasLimit,
-        uint256 msgId,
-        bytes calldata payload
+        address localPlug_,
+        uint256 remoteChainSlug_,
+        uint256 msgGasLimit_,
+        uint256 msgId_,
+        bytes calldata payload_
     ) internal {
         try
-            IPlug(localPlug).inbound{gas: msgGasLimit}(remoteChainSlug, payload)
+            IPlug(localPlug_).inbound{gas: msgGasLimit_}(
+                remoteChainSlug_,
+                payload_
+            )
         {
-            emit ExecutionSuccess(msgId);
+            emit ExecutionSuccess(msgId_);
         } catch Error(string memory reason) {
             // catch failing revert() and require()
-            messageExecuted[msgId] = false;
-            emit ExecutionFailed(msgId, reason);
+            messageExecuted[msgId_] = false;
+            emit ExecutionFailed(msgId_, reason);
         } catch (bytes memory reason) {
             // catch failing assert()
-            messageExecuted[msgId] = false;
-            emit ExecutionFailedBytes(msgId, reason);
+            messageExecuted[msgId_] = false;
+            emit ExecutionFailedBytes(msgId_, reason);
         }
     }
 

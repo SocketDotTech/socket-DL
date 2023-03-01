@@ -6,7 +6,7 @@ import "./SocketBase.sol";
 
 abstract contract SocketSrc is SocketBase {
     // incrementing nonce, should be handled in next socket version.
-    uint256 public _messageCount;
+    uint256 public messageCount;
 
     error InsufficientFees();
 
@@ -37,12 +37,12 @@ abstract contract SocketSrc is SocketBase {
         PlugConfig storage plugConfig = _plugConfigs[
             (uint256(uint160(msg.sender)) << 96) | remoteChainSlug_
         ];
-        uint256 localChainSlug = _chainSlug;
+        uint256 localChainSlug = chainSlug;
 
         // Packs the local plug, local chain slug, remote chain slug and nonce
-        // _messageCount++ will take care of msg id overflow as well
+        // messageCount++ will take care of msg id overflow as well
         // msgId(256) = localChainSlug(32) | nonce(224)
-        msgId = (uint256(uint32(localChainSlug)) << 224) | _messageCount++;
+        msgId = (uint256(uint32(localChainSlug)) << 224) | messageCount++;
 
         uint256 executionFee = _deductFees(
             msgGasLimit_,
@@ -50,7 +50,7 @@ abstract contract SocketSrc is SocketBase {
             plugConfig.outboundSwitchboard__
         );
 
-        bytes32 packedMessage = _hasher__.packMessage(
+        bytes32 packedMessage = hasher__.packMessage(
             localChainSlug,
             msg.sender,
             remoteChainSlug_,
@@ -80,10 +80,10 @@ abstract contract SocketSrc is SocketBase {
         uint256 remoteChainSlug_,
         ISwitchboard switchboard__
     ) internal returns (uint256 executionFee) {
-        uint256 transmitFees = _transmitManager__.getMinFees(remoteChainSlug_);
+        uint256 transmitFees = transmitManager__.getMinFees(remoteChainSlug_);
         (uint256 switchboardFees, uint256 verificationFee) = switchboard__
             .getMinFees(remoteChainSlug_);
-        uint256 msgExecutionFee = _executionManager__.getMinFees(
+        uint256 msgExecutionFee = executionManager__.getMinFees(
             msgGasLimit_,
             remoteChainSlug_
         );
@@ -97,9 +97,9 @@ abstract contract SocketSrc is SocketBase {
             // any extra fee is considered as executionFee
             executionFee = msg.value - transmitFees - switchboardFees;
 
-            _transmitManager__.payFees{value: transmitFees}(remoteChainSlug_);
+            transmitManager__.payFees{value: transmitFees}(remoteChainSlug_);
             switchboard__.payFees{value: switchboardFees}(remoteChainSlug_);
-            _executionManager__.payFees{value: executionFee}(
+            executionManager__.payFees{value: executionFee}(
                 msgGasLimit_,
                 remoteChainSlug_
             );
@@ -113,13 +113,13 @@ abstract contract SocketSrc is SocketBase {
         (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket();
 
-        uint256 packetId = (_chainSlug << 224) |
+        uint256 packetId = (chainSlug << 224) |
             (uint256(uint160(capacitorAddress_)) << 64) |
             packetCount;
 
-        uint256 siblingChainSlug = _capacitorToSlug[capacitorAddress_];
+        uint256 siblingChainSlug = capacitorToSlug[capacitorAddress_];
 
-        (address transmitter, bool isTransmitter) = _transmitManager__
+        (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
                 (siblingChainSlug << 128) | siblingChainSlug,
                 packetId,

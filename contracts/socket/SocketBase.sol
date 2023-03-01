@@ -9,28 +9,28 @@ import "../utils/ReentrancyGuard.sol";
 import "./SocketConfig.sol";
 
 abstract contract SocketBase is SocketConfig, ReentrancyGuard {
-    IHasher public _hasher__;
-    ITransmitManager public _transmitManager__;
-    IExecutionManager public _executionManager__;
+    IHasher public hasher__;
+    ITransmitManager public transmitManager__;
+    IExecutionManager public executionManager__;
 
-    uint256 public _chainSlug;
+    uint256 public chainSlug;
 
     error InvalidAttester();
 
-    event HasherSet(address hasher_);
+    event HasherSet(address hasher);
 
     function setHasher(address hasher_) external onlyOwner {
-        _hasher__ = IHasher(hasher_);
+        hasher__ = IHasher(hasher_);
         emit HasherSet(hasher_);
     }
 
-    // TODO: in discussion
+    // open issue #50
     /**
      * @notice updates transmitManager_
      * @param transmitManager_ address of Transmit Manager
      */
     function setTransmitManager(address transmitManager_) external onlyOwner {
-        _transmitManager__ = ITransmitManager(transmitManager_);
+        transmitManager__ = ITransmitManager(transmitManager_);
         emit TransmitManagerSet(transmitManager_);
     }
 }

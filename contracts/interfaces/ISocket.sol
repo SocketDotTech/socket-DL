@@ -67,9 +67,9 @@ interface ISocket {
 
     /**
      * @notice emits when a new transmitManager contract is set
-     * @param transmitManager_ address of new transmitManager contract
+     * @param transmitManager address of new transmitManager contract
      */
-    event TransmitManagerSet(address transmitManager_);
+    event TransmitManagerSet(address transmitManager);
 
     /**
      * @notice registers a message

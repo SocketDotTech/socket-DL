@@ -14,20 +14,20 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
     // stores the roots received from native bridge
     mapping(uint256 => bytes32) public roots;
 
-    ICrossDomainMessenger public crossDomainMessenger;
+    ICrossDomainMessenger public crossDomainMessenger__;
 
-    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard_);
-    event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit_);
-    event RootReceived(uint256 packetId_, bytes32 root_);
-    event UpdatedL2ReceiveGasLimit(uint256 l2ReceiveGasLimit_);
+    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
+    event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit);
+    event RootReceived(uint256 packetId, bytes32 root);
+    event UpdatedL2ReceiveGasLimit(uint256 l2ReceiveGasLimit);
 
     error InvalidSender();
     error NoRootFound();
 
     modifier onlyRemoteSwitchboard() {
         if (
-            msg.sender != address(crossDomainMessenger) &&
-            crossDomainMessenger.xDomainMessageSender() !=
+            msg.sender != address(crossDomainMessenger__) &&
+            crossDomainMessenger__.xDomainMessageSender() !=
             remoteNativeSwitchboard
         ) revert InvalidSender();
         _;
@@ -40,7 +40,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         uint256 executionOverhead_,
         address remoteNativeSwitchboard_,
         address owner_,
-        ISocket socket_,
         IOracle oracle_
     ) AccessControl(owner_) {
         receivePacketGasLimit = receivePacketGasLimit_;
@@ -50,15 +49,14 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         executionOverhead = executionOverhead_;
 
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        socket = socket_;
-        oracle = oracle_;
+        oracle__ = oracle_;
 
         if ((block.chainid == 10 || block.chainid == 420)) {
-            crossDomainMessenger = ICrossDomainMessenger(
+            crossDomainMessenger__ = ICrossDomainMessenger(
                 0x4200000000000000000000000000000000000007
             );
         } else {
-            crossDomainMessenger = block.chainid == 1
+            crossDomainMessenger__ = block.chainid == 1
                 ? ICrossDomainMessenger(
                     0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1
                 )
@@ -68,22 +66,21 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         }
     }
 
-    function initateNativeConfirmation(uint256 packetId) external {
-        bytes32 root = socket.remoteRoots(packetId);
-        if (root == bytes32(0)) revert NoRootFound();
-
+    function initateNativeConfirmation(uint256 packetId_) external {
+        uint256 capacitorPacketCount = uint256(uint64(packetId_));
+        bytes32 root = capacitor__.getRootById(capacitorPacketCount);
         bytes memory data = abi.encodeWithSelector(
             INativeReceiver.receivePacket.selector,
-            packetId,
+            packetId_,
             root
         );
 
-        crossDomainMessenger.sendMessage(
+        crossDomainMessenger__.sendMessage(
             remoteNativeSwitchboard,
             data,
             uint32(receivePacketGasLimit)
         );
-        emit InitiatedNativeConfirmation(packetId);
+        emit InitiatedNativeConfirmation(packetId_);
     }
 
     function receivePacket(
@@ -96,31 +93,31 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
 
     /**
      * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId packet id
+     * @param packetId_ packet id
      */
     function allowPacket(
-        bytes32 root,
-        uint256 packetId,
+        bytes32 root_,
+        uint256 packetId_,
         uint256,
         uint256
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
-        if (roots[packetId] != root) return false;
+        if (roots[packetId_] != root_) return false;
 
         return true;
     }
 
     function _getSwitchboardFees(
         uint256,
-        uint256 dstRelativeGasPrice,
-        uint256 sourceGasPrice
+        uint256 dstRelativeGasPrice_,
+        uint256 sourceGasPrice_
     ) internal view override returns (uint256) {
         // l2ReceiveGasLimit will be 0 when switchboard is deployed on L1
         return
             initateNativeConfirmationGasLimit *
-            sourceGasPrice +
+            sourceGasPrice_ +
             l2ReceiveGasLimit *
-            dstRelativeGasPrice;
+            dstRelativeGasPrice_;
     }
 
     function updateL2ReceiveGasLimit(

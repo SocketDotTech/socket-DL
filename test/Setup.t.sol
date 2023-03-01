@@ -237,11 +237,11 @@ contract Setup is Test {
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
-        scc_.capacitor__ = cc_.socket__._capacitors__(
+        scc_.capacitor__ = cc_.socket__.capacitors__(
             switchBoardAddress_,
             remoteChainSlug_
         );
-        scc_.decapacitor__ = cc_.socket__._decapacitors__(
+        scc_.decapacitor__ = cc_.socket__.decapacitors__(
             switchBoardAddress_,
             remoteChainSlug_
         );

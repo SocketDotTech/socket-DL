@@ -7,23 +7,25 @@ import "./utils/AccessControl.sol";
 import "./libraries/RescueFundsLib.sol";
 
 contract ExecutionManager is IExecutionManager, AccessControl {
-    IOracle public oracle;
+    IOracle public oracle__;
 
     // keccak256("EXECUTOR")
-    bytes32 private constant EXECUTOR_ROLE =
+    bytes32 private constant _EXECUTOR_ROLE =
         0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
+
+    event FeesWithdrawn(address account, uint256 amount);
 
     error TransferFailed();
     error InsufficientExecutionFees();
 
     constructor(IOracle oracle_, address owner_) AccessControl(owner_) {
-        oracle = IOracle(oracle_);
+        oracle__ = IOracle(oracle_);
     }
 
     function isExecutor(
         address executor_
     ) external view override returns (bool) {
-        return _hasRole(EXECUTOR_ROLE, executor_);
+        return _hasRole(_EXECUTOR_ROLE, executor_);
     }
 
     function payFees(
@@ -42,11 +44,11 @@ contract ExecutionManager is IExecutionManager, AccessControl {
     }
 
     function _getExecutionFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
+        uint256 msgGasLimit_,
+        uint256 dstChainSlug_
     ) internal view returns (uint256) {
-        uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
-        return msgGasLimit * dstRelativeGasPrice;
+        uint256 dstRelativeGasPrice = oracle__.relativeGasPrice(dstChainSlug_);
+        return msgGasLimit_ * dstRelativeGasPrice;
     }
 
     // TODO: to support fee distribution
@@ -56,15 +58,19 @@ contract ExecutionManager is IExecutionManager, AccessControl {
      */
     function withdrawFees(address account_) external onlyOwner {
         require(account_ != address(0));
-        (bool success, ) = account_.call{value: address(this).balance}("");
+
+        uint256 amount = address(this).balance;
+        (bool success, ) = account_.call{value: amount}("");
         if (!success) revert TransferFailed();
+
+        emit FeesWithdrawn(account_, amount);
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
+        address token_,
+        address userAddress_,
+        uint256 amount_
     ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }
