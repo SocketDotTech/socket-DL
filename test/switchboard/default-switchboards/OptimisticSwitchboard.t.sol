@@ -25,7 +25,7 @@ contract OptimisticSwitchboardTest is Setup {
         optimisticSwitchboard = new OptimisticSwitchboard(
             _socketOwner,
             address(uint160(c++)),
-            _timeoutInSeconds
+            1
         );
 
         optimisticSwitchboard.setExecutionOverhead(
@@ -102,6 +102,51 @@ contract OptimisticSwitchboardTest is Setup {
         emit PathTripped(srcChainSlug, false);
         optimisticSwitchboard.tripPath(srcChainSlug, false);
         assertFalse(optimisticSwitchboard.tripSinglePath(srcChainSlug));
+    }
+
+    function testIsAllowed() external {
+        uint256 proposeTime = block.timestamp -
+            optimisticSwitchboard.timeoutInSeconds();
+
+        bool isAllowed = optimisticSwitchboard.allowPacket(
+            0,
+            0,
+            _a.chainSlug,
+            proposeTime
+        );
+
+        assertTrue(isAllowed);
+    }
+
+    function testIsAllowedWhenProposedAfterTimeout() external {
+        uint256 proposeTime = block.timestamp;
+        bool isAllowed = optimisticSwitchboard.allowPacket(
+            0,
+            0,
+            _a.chainSlug,
+            proposeTime
+        );
+        assertFalse(isAllowed);
+    }
+
+    function testIsAllowedWhenAPathIsTripped() external {
+        uint256 proposeTime = block.timestamp -
+            optimisticSwitchboard.timeoutInSeconds();
+
+        hoax(_socketOwner);
+
+        vm.expectEmit(false, false, false, true);
+        emit PathTripped(_a.chainSlug, true);
+        optimisticSwitchboard.tripPath(_a.chainSlug, true);
+
+        bool isAllowed = optimisticSwitchboard.allowPacket(
+            0,
+            0,
+            _a.chainSlug,
+            proposeTime
+        );
+
+        assertFalse(isAllowed);
     }
 
     function testGrantWatcherRole() external {
