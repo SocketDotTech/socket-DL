@@ -29,7 +29,7 @@ contract FastSwitchboardTest is Setup {
         fastSwitchboard = new FastSwitchboard(
             _socketOwner,
             address(uint160(c++)),
-            _timeoutInSeconds
+            1
         );
 
         fastSwitchboard.setExecutionOverhead(
@@ -109,6 +109,17 @@ contract FastSwitchboardTest is Setup {
         );
 
         assertTrue(isAllowed);
+    }
+
+    function testIsAllowedWhenProposedAfterTimeout() external {
+        uint256 proposeTime = block.timestamp;
+        bool isAllowed = fastSwitchboard.allowPacket(
+            0,
+            0,
+            _a.chainSlug,
+            proposeTime
+        );
+        assertFalse(isAllowed);
     }
 
     function testTripGlobal() external {
