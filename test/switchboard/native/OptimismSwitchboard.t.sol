@@ -3,30 +3,36 @@ pragma solidity ^0.8.0;
 
 import "../../Setup.t.sol";
 import "forge-std/Test.sol";
-import "../../../contracts/switchboard/native/ArbitrumL2Switchboard.sol";
+import "../../../contracts/switchboard/native/OptimismSwitchboard.sol";
 import "../../../contracts/TransmitManager.sol";
 import "../../../contracts/GasPriceOracle.sol";
 import "../../../contracts/ExecutionManager.sol";
 import "../../../contracts/CapacitorFactory.sol";
 import "../../../contracts/interfaces/ICapacitor.sol";
 
-// Arbitrum Goerli -> Goerli
-contract ArbitrumL2SwitchboardTest is Setup {
+// Goerli -> Optimism-Goerli
+// Switchboard on Goerli (5) for Optimism (420) as remote is: 0x793753781B45565C68392c4BB556C1bEcFC42F24
+// RemoteNativeSwitchBoard i.e SwitchBoard on Optimism-Goerli (420) is:0x2D468C4d7e355a4ADe099802A61Ba536220fb3Cb
+contract OptimismSwitchboardTest is Setup {
     bytes32[] roots;
 
-    uint256 l1ReceiveGasLimit_ = 100;
-    uint256 initialConfirmationGasLimit_ = 100;
-    uint256 executionOverhead_ = 100;
+    uint256 receivePacketGasLimit_ = 100000;
+    uint256 l2ReceiveGasLimit_ = 100000;
+    uint256 initialConfirmationGasLimit_ = 100000;
+    uint256 executionOverhead_ = 100000;
     address remoteNativeSwitchboard_ =
-        0x3f0121d91B5c04B716Ea960790a89b173da7929c;
+        0x793753781B45565C68392c4BB556C1bEcFC42F24;
     IOracle oracle_;
 
-    ArbitrumL2Switchboard arbitrumL2Switchboard;
+    OptimismSwitchboard optimismSwitchboard;
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        _a.chainSlug = uint32(uint256(421613));
-        _b.chainSlug = uint32(uint256(5));
+        _a.chainSlug = uint32(uint256(5));
+        _b.chainSlug = uint32(uint256(420));
+
+        uint256 fork = vm.createFork(vm.envString("GOERLI_RPC"), 8546564);
+        vm.selectFork(fork);
 
         uint256[] memory transmitterPivateKeys = new uint256[](1);
         transmitterPivateKeys[0] = _transmitterPrivateKey;
@@ -39,13 +45,11 @@ contract ArbitrumL2SwitchboardTest is Setup {
 
         vm.startPrank(socketAddress);
 
-        deal(socketAddress, 2e18);
-
         bytes32 packedMessage = _a.hasher__.packMessage(
             _a.chainSlug,
             msg.sender,
             _b.chainSlug,
-            address(arbitrumL2Switchboard.arbsys__()),
+            0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1,
             0,
             1000000,
             100,
@@ -60,15 +64,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(_a, address(singleCapacitor), _b.chainSlug);
         uint256 capacitorPacketCount = uint256(uint64(packetId));
-        vm.mockCall(
-            address(arbitrumL2Switchboard.arbsys__()),
-            abi.encodeWithSelector(
-                arbitrumL2Switchboard.arbsys__().sendTxToL1.selector
-            ),
-            abi.encode("0x")
-        );
-
-        arbitrumL2Switchboard.initateNativeConfirmation(packetId);
+        optimismSwitchboard.initateNativeConfirmation(packetId);
         vm.stopPrank();
     }
 
@@ -93,7 +89,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
             _proposeGasLimit
         );
 
-        SocketConfigContext memory scc_ = addArbitrumL2Switchboard(
+        SocketConfigContext memory scc_ = addOptimismSwitchboard(
             cc_,
             remoteChainSlug_,
             _capacitorType
@@ -142,13 +138,14 @@ contract ArbitrumL2SwitchboardTest is Setup {
         vm.stopPrank();
     }
 
-    function addArbitrumL2Switchboard(
+    function addOptimismSwitchboard(
         ChainContext storage cc_,
         uint256 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
-        arbitrumL2Switchboard = new ArbitrumL2Switchboard(
-            l1ReceiveGasLimit_,
+        optimismSwitchboard = new OptimismSwitchboard(
+            receivePacketGasLimit_,
+            l2ReceiveGasLimit_,
             initialConfirmationGasLimit_,
             executionOverhead_,
             remoteNativeSwitchboard_,
@@ -156,14 +153,10 @@ contract ArbitrumL2SwitchboardTest is Setup {
             cc_.gasPriceOracle__
         );
 
-        vm.startPrank(_socketOwner);
-        arbitrumL2Switchboard.setExecutionOverhead(_executionOverhead);
-        vm.stopPrank();
-
         scc_ = registerSwitchbaord(
             cc_,
             _socketOwner,
-            address(arbitrumL2Switchboard),
+            address(optimismSwitchboard),
             remoteChainSlug_,
             capacitorType_
         );
@@ -196,7 +189,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
         );
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
 
-        arbitrumL2Switchboard.setCapacitor(address(singleCapacitor));
+        optimismSwitchboard.setCapacitor(address(singleCapacitor));
 
         vm.stopPrank();
     }
