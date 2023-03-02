@@ -11,9 +11,8 @@ import "../../../contracts/CapacitorFactory.sol";
 import "../../../contracts/interfaces/ICapacitor.sol";
 
 // Goerli -> Optimism-Goerli
-// Switchboard on Goerli (5) for Optimism (420) as remote is: 0x793753781B45565C68392c4BB556C1bEcFC42F24
-// RemoteNativeSwitchBoard i.e SwitchBoard on Optimism-Goerli (420) is:0x2D468C4d7e355a4ADe099802A61Ba536220fb3Cb
-contract OptimismSwitchboardTest is Setup {
+// RemoteNativeSwitchBoard i.e SwitchBoard on Goerli (5) is:0x793753781B45565C68392c4BB556C1bEcFC42F24
+contract OptimismSwitchboardL2L1Test is Setup {
     bytes32[] roots;
 
     uint256 receivePacketGasLimit_ = 100000;
@@ -28,10 +27,13 @@ contract OptimismSwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        _a.chainSlug = uint32(uint256(5));
-        _b.chainSlug = uint32(uint256(420));
+        _a.chainSlug = uint32(uint256(420));
+        _b.chainSlug = uint32(uint256(5));
 
-        uint256 fork = vm.createFork(vm.envString("GOERLI_RPC"), 8546564);
+        uint256 fork = vm.createFork(
+            vm.envString("OPTIMISM_GOERLI_RPC"),
+            5911043
+        );
         vm.selectFork(fork);
 
         uint256[] memory transmitterPivateKeys = new uint256[](1);
