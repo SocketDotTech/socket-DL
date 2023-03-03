@@ -16,6 +16,12 @@ contract HappyTest is Setup {
     event ExecutionSuccess(uint256 msgId);
     event ExecutionFailed(uint256 msgId, string result);
     event ExecutionFailedBytes(uint256 msgId, bytes result);
+    event PacketVerifiedAndSealed(
+        address indexed transmitter,
+        uint256 indexed packetId,
+        bytes32 root,
+        bytes signature
+    );
 
     function setUp() external {
         uint256[] memory transmitterPivateKeys = new uint256[](1);
@@ -194,6 +200,8 @@ contract HappyTest is Setup {
             bytes memory sig_
         ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
 
+        vm.expectEmit(false, false, false, true);
+        emit PacketVerifiedAndSealed(_transmitter, packetId_, root_, sig_);
         _sealOnSrc(_a, capacitor, sig_);
         _proposeOnDst(_b, sig_, packetId_, root_);
 

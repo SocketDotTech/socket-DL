@@ -14,11 +14,13 @@ abstract contract SocketSrc is SocketBase {
      * @notice emits the verification and seal confirmation of a packet
      * @param transmitter address of transmitter recovered from sig
      * @param packetId packed id
+     * @param root root
      * @param signature signature of attester
      */
     event PacketVerifiedAndSealed(
         address indexed transmitter,
         uint256 indexed packetId,
+        bytes32 root,
         bytes signature
     );
 
@@ -129,6 +131,6 @@ abstract contract SocketSrc is SocketBase {
 
         if (!isTransmitter) revert InvalidAttester();
 
-        emit PacketVerifiedAndSealed(transmitter, packetId, signature_);
+        emit PacketVerifiedAndSealed(transmitter, packetId, root, signature_);
     }
 }
