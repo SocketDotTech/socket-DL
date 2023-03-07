@@ -17,9 +17,6 @@ contract CapacitorFactoryTest is Test {
     ERC20PresetFixedSupply _token;
 
     function setUp() external {
-        uint256 fork = vm.createFork(vm.envString("ETHEREUM_RPC"), 16333752);
-        vm.selectFork(fork);
-
         hoax(_owner);
         _cf = new CapacitorFactory();
         _token = new ERC20PresetFixedSupply("TEST", "T", tokenSupply, _owner);
