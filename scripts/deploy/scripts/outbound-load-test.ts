@@ -1,14 +1,19 @@
 import fs from "fs";
 import { ethers } from "ethers";
 import { Contract } from "ethers";
-import { deployedAddressPath, sleep } from "../utils";
 require("dotenv").config();
 import yargs from "yargs";
 import { chainIds, getProviderFromChainName } from "../../constants";
 import * as CounterABI from "../../../artifacts/contracts/examples/Counter.sol/Counter.json";
+import path from "path";
+
+const deployedAddressPath = path.join(
+  __dirname,
+  "/../../../deployments/addresses.json"
+);
 
 // usage:
-// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain 80001 --remoteChain 5 --load 10 --waithTime 50
+// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain polygon-mumbai --remoteChain goerli --load 10 --waitTime 50
 export const main = async () => {
   try {
     const amount = 100;
@@ -27,7 +32,7 @@ export const main = async () => {
       .option({
         remoteChain: {
           description: "remoteChain",
-          type: "number",
+          type: "string",
           demandOption: true,
         },
       })
@@ -42,39 +47,38 @@ export const main = async () => {
         waitTime: {
           description: "waitTime",
           type: "number",
-          demandOption: true,
+          demandOption: false,
         },
       }).argv;
 
     const chain = argv.chain as keyof typeof chainIds;
-
-    const providerInstance = getProviderFromChainName(chain);
-
     const chainId = chainIds[chain];
 
-    const config: any = JSON.parse(
-      fs.readFileSync(deployedAddressPath, "utf-8")
-    );
+    const providerInstance = getProviderFromChainName(chain);
 
     const signer = new ethers.Wallet(
       process.env.LOAD_TEST_PRIVATE_KEY as string,
       providerInstance
     );
 
-    const counterAddress = config[chainId]["Counter"];
-
-    console.log(`counterAddress is: ${counterAddress}`);
-
-    const counter: Contract = new ethers.Contract(
-      counterAddress,
-      CounterABI.abi,
-      signer
-    );
+    const remoteChain = argv.remoteChain as keyof typeof chainIds;
+    const remoteChainId = chainIds[remoteChain];
 
     const load = argv.load as number;
-    const remoteChainId = argv.remoteChain as number;
 
     for (let i = 0; i < load; i++) {
+      const config: any = JSON.parse(
+        fs.readFileSync(deployedAddressPath, "utf-8")
+      );
+
+      const counterAddress = config[chainId]["Counter"];
+
+      const counter: Contract = new ethers.Contract(
+        counterAddress,
+        CounterABI.abi,
+        signer
+      );
+
       await counter
         .connect(signer)
         .remoteAddOperation(remoteChainId, amount, msgGasLimit, {
@@ -84,7 +88,9 @@ export const main = async () => {
 
       const waitTime = argv.waitTime as number;
 
-      await sleep(waitTime);
+      if(waitTime && waitTime > 0) {
+        await sleep(waitTime);
+      }
     }
 
     console.log(
@@ -95,6 +101,8 @@ export const main = async () => {
     throw error;
   }
 };
+
+const sleep = (delay: any) => new Promise((resolve) => setTimeout(resolve, delay * 1000));
 
 main()
   .then(() => process.exit(0))
