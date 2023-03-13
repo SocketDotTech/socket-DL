@@ -22,7 +22,6 @@ export const main = async () => {
   let remoteChainId;
 
   try {
-
     const argv = await yargs
       .option({
         chain: {
@@ -90,16 +89,17 @@ export const main = async () => {
         });
 
       await tx.wait();
-      
+
       console.log(
-        `remoteAddOperation-tx with hash: ${JSON.stringify(tx.hash)} was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`
+        `remoteAddOperation-tx with hash: ${JSON.stringify(
+          tx.hash
+        )} was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`
       );
 
       if (waitTime && waitTime > 0) {
         await sleep(waitTime);
       }
     }
-
   } catch (error) {
     console.log(
       `Error while sending remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`
