@@ -88,7 +88,7 @@ export const main = async () => {
 
       const waitTime = argv.waitTime as number;
 
-      if(waitTime && waitTime > 0) {
+      if (waitTime && waitTime > 0) {
         await sleep(waitTime);
       }
     }
@@ -102,7 +102,8 @@ export const main = async () => {
   }
 };
 
-const sleep = (delay: any) => new Promise((resolve) => setTimeout(resolve, delay * 1000));
+const sleep = (delay: any) =>
+  new Promise((resolve) => setTimeout(resolve, delay * 1000));
 
 main()
   .then(() => process.exit(0))
