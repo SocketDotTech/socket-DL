@@ -7,6 +7,8 @@ import yargs from "yargs";
 import { chainIds, getProviderFromChainName } from "../../constants";
 import * as CounterABI from "../../../artifacts/contracts/examples/Counter.sol/Counter.json";
 
+// usage:
+// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain 80001 --remoteChain 5 --load 10 --waithTime 50
 export const main = async () => {
   try {
     const amount = 100;
@@ -35,6 +37,13 @@ export const main = async () => {
           type: "number",
           demandOption: true,
         },
+      })
+      .option({
+        waitTime: {
+          description: "waitTime",
+          type: "number",
+          demandOption: true,
+        },
       }).argv;
 
     const chain = argv.chain as keyof typeof chainIds;
@@ -52,8 +61,12 @@ export const main = async () => {
       providerInstance
     );
 
+    const counterAddress = config[chainId]["Counter"];
+
+    console.log(`counterAddress is: ${counterAddress}`);
+
     const counter: Contract = new ethers.Contract(
-      config[chainId]["Counter"],
+      counterAddress,
       CounterABI.abi,
       signer
     );
@@ -69,7 +82,9 @@ export const main = async () => {
           value: fees,
         });
 
-      await sleep(40);
+      const waitTime = argv.waitTime as number;
+
+      await sleep(waitTime);
     }
 
     console.log(
