@@ -13,7 +13,7 @@ const deployedAddressPath = path.join(
 );
 
 // usage:
-// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain polygon-mumbai --remoteChain goerli --load 5 --waitTime 10
+// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain polygon-mumbai --remoteChain goerli --numOfRequests 5 --waitTime 10
 export const main = async () => {
   const amount = 100;
   const msgGasLimit = "19000000";
@@ -38,8 +38,8 @@ export const main = async () => {
         },
       })
       .option({
-        load: {
-          description: "load",
+        numOfRequests: {
+          description: "numOfRequests",
           type: "number",
           demandOption: true,
         },
@@ -65,7 +65,7 @@ export const main = async () => {
     const remoteChain = argv.remoteChain as keyof typeof chainIds;
     remoteChainId = chainIds[remoteChain];
 
-    const load = argv.load as number;
+    const numOfRequests = argv.numOfRequests as number;
     const waitTime = argv.waitTime as number;
 
     const config: any = JSON.parse(
@@ -80,7 +80,7 @@ export const main = async () => {
       signer
     );
 
-    for (let i = 0; i < load; i++) {
+    for (let i = 0; i < numOfRequests; i++) {
       const tx = await counter
         .connect(signer)
         .remoteAddOperation(remoteChainId, amount, msgGasLimit, {
