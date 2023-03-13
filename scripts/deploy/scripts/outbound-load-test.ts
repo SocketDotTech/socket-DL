@@ -1,5 +1,5 @@
 import fs from "fs";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { Contract } from "ethers";
 require("dotenv").config();
 import yargs from "yargs";
@@ -13,13 +13,15 @@ const deployedAddressPath = path.join(
 );
 
 // usage:
-// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain polygon-mumbai --remoteChain goerli --load 10 --waitTime 50
+// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain polygon-mumbai --remoteChain goerli --load 5 --waitTime 10
 export const main = async () => {
+  const amount = 100;
+  const msgGasLimit = "19000000";
+  const gasLimit = 200485;
+  const fees = "20000000000000000";
+  let remoteChainId;
+
   try {
-    const amount = 100;
-    const msgGasLimit = "19000000";
-    const gasLimit = 200485;
-    const fees = 20000000000000000;
 
     const argv = await yargs
       .option({
@@ -62,42 +64,47 @@ export const main = async () => {
     );
 
     const remoteChain = argv.remoteChain as keyof typeof chainIds;
-    const remoteChainId = chainIds[remoteChain];
+    remoteChainId = chainIds[remoteChain];
 
     const load = argv.load as number;
+    const waitTime = argv.waitTime as number;
+
+    const config: any = JSON.parse(
+      fs.readFileSync(deployedAddressPath, "utf-8")
+    );
+
+    const counterAddress = config[chainId]["Counter"];
+
+    const counter: Contract = new ethers.Contract(
+      counterAddress,
+      CounterABI.abi,
+      signer
+    );
 
     for (let i = 0; i < load; i++) {
-      const config: any = JSON.parse(
-        fs.readFileSync(deployedAddressPath, "utf-8")
-      );
-
-      const counterAddress = config[chainId]["Counter"];
-
-      const counter: Contract = new ethers.Contract(
-        counterAddress,
-        CounterABI.abi,
-        signer
-      );
-
-      await counter
+      const tx = await counter
         .connect(signer)
         .remoteAddOperation(remoteChainId, amount, msgGasLimit, {
           gasLimit,
-          value: fees,
+          value: BigNumber.from(fees),
         });
 
-      const waitTime = argv.waitTime as number;
+      await tx.wait();
+      
+      console.log(
+        `remoteAddOperation-tx with hash: ${JSON.stringify(tx.hash)} was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`
+      );
 
       if (waitTime && waitTime > 0) {
         await sleep(waitTime);
       }
     }
 
-    console.log(
-      `Sent remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`
-    );
   } catch (error) {
-    console.log("Error while sending transaction", error);
+    console.log(
+      `Error while sending remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`
+    );
+    console.error("Error while sending transaction", error);
     throw error;
   }
 };
