@@ -40,7 +40,6 @@ export const networkToChainId = {
 export function getJsonRpcUrl(chain: keyof typeof chainIds): string {
   let jsonRpcUrl: string;
   switch (chain) {
-
     case "arbitrum":
       jsonRpcUrl = process.env.ARBITRUM_RPC as string;
       break;
@@ -95,4 +94,4 @@ export function getJsonRpcUrl(chain: keyof typeof chainIds): string {
 export const getProviderFromChainName = (chainId: keyof typeof chainIds) => {
   const jsonRpcUrl = getJsonRpcUrl(chainId);
   return new ethers.providers.JsonRpcProvider(jsonRpcUrl);
-}
+};
