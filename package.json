@@ -31,6 +31,7 @@
     "@types/chai": "^4.3.0",
     "@types/mocha": "^9.1.0",
     "@types/node": "^18.11.9",
+    "@types/yargs": "^17.0.22",
     "arb-shared-dependencies": "^1.0.0",
     "chai": "^4.3.6",
     "dotenv": "^16.0.3",
@@ -56,5 +57,7 @@
   "pre-commit": [
     "lint"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "yargs": "^17.7.1"
+  }
 }
