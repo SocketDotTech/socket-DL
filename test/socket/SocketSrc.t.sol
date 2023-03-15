@@ -74,7 +74,12 @@ contract SocketSrcTest is Setup {
                 bytes32 root_,
                 uint256 packetId_,
                 bytes memory sig_
-            ) = getLatestSignature(_a, capacitor, _b.chainSlug, _transmitterPrivateKey);
+            ) = getLatestSignature(
+                    _a,
+                    capacitor,
+                    _b.chainSlug,
+                    _transmitterPrivateKey
+                );
 
             vm.expectEmit(true, true, true, true);
             emit PacketVerifiedAndSealed(_transmitter, packetId_, sig_);
@@ -124,7 +129,12 @@ contract SocketSrcTest is Setup {
                 bytes32 root_,
                 uint256 packetId_,
                 bytes memory sig_
-            ) = getLatestSignature(_a, capacitor, _b.chainSlug, fakeTransmitterKey);
+            ) = getLatestSignature(
+                    _a,
+                    capacitor,
+                    _b.chainSlug,
+                    fakeTransmitterKey
+                );
 
             vm.expectRevert(InvalidAttester.selector);
             _sealOnSrc(_a, capacitor, sig_);
@@ -146,7 +156,6 @@ contract SocketSrcTest is Setup {
 
         sig = _createSignature(digest, transmitterPrivateKey_);
     }
-
 
     function _deployPlugContracts() internal {
         vm.startPrank(_plugOwner);
