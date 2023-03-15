@@ -13,6 +13,7 @@ contract SocketSrcTest is Setup {
     bool isFast = true;
     bytes32[] roots;
 
+    error InvalidAttester();
     event ExecutionSuccess(uint256 msgId);
     event ExecutionFailed(uint256 msgId, string result);
     event ExecutionFailedBytes(uint256 msgId, bytes result);
@@ -33,7 +34,7 @@ contract SocketSrcTest is Setup {
         _configPlugContracts(index);
     }
 
-    function testRemoteAddFromAtoB() external {
+    function testSendMessageAndSealSuccessfully() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
             keccak256("OP_ADD"),
@@ -73,15 +74,79 @@ contract SocketSrcTest is Setup {
                 bytes32 root_,
                 uint256 packetId_,
                 bytes memory sig_
-            ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+            ) = getLatestSignature(_a, capacitor, _b.chainSlug, _transmitterPrivateKey);
 
-            vm.expectEmit(true,true,true,true);
+            vm.expectEmit(true, true, true, true);
             emit PacketVerifiedAndSealed(_transmitter, packetId_, sig_);
 
             _sealOnSrc(_a, capacitor, sig_);
         }
-
     }
+
+    function testSealWithNonTransmitter() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+        bytes memory proof = abi.encode(0);
+
+        uint256 index = isFast ? 0 : 1;
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        uint256 executionFee;
+        {
+            (uint256 switchboardFees, uint256 verificationFee) = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_b.chainSlug);
+
+            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
+            executionFee = _a.executionManager__.getMinFees(
+                _msgGasLimit,
+                _b.chainSlug
+            );
+
+            hoax(_plugOwner);
+            srcCounter__.remoteAddOperation{
+                value: switchboardFees +
+                    socketFees +
+                    verificationFee +
+                    executionFee
+            }(_b.chainSlug, amount, _msgGasLimit);
+        }
+
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+        uint256 fakeTransmitterKey = c++;
+        {
+            (
+                bytes32 root_,
+                uint256 packetId_,
+                bytes memory sig_
+            ) = getLatestSignature(_a, capacitor, _b.chainSlug, fakeTransmitterKey);
+
+            vm.expectRevert(InvalidAttester.selector);
+            _sealOnSrc(_a, capacitor, sig_);
+        }
+    }
+
+    function getLatestSignature(
+        ChainContext memory src_,
+        address capacitor_,
+        uint256 remoteChainSlug_,
+        uint256 transmitterPrivateKey_
+    ) public returns (bytes32 root, uint256 packetId, bytes memory sig) {
+        uint256 id;
+        (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
+        packetId = _getPackedId(capacitor_, src_.chainSlug, id);
+        bytes32 digest = keccak256(
+            abi.encode(remoteChainSlug_, packetId, root)
+        );
+
+        sig = _createSignature(digest, transmitterPrivateKey_);
+    }
+
 
     function _deployPlugContracts() internal {
         vm.startPrank(_plugOwner);
