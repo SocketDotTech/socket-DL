@@ -176,9 +176,11 @@ contract SocketSrcTest is Setup {
             hoax(_plugOwner);
 
             vm.expectRevert(InsufficientFees.selector);
-            srcCounter__.remoteAddOperation{
-                value: 0
-            }(_b.chainSlug, amount, _msgGasLimit);
+            srcCounter__.remoteAddOperation{value: 0}(
+                _b.chainSlug,
+                amount,
+                _msgGasLimit
+            );
         }
     }
 
