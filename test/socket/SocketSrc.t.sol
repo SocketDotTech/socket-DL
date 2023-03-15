@@ -10,13 +10,17 @@ contract SocketSrcTest is Setup {
 
     uint256 addAmount = 100;
     uint256 subAmount = 40;
+
+    uint256 sealGasLimit = 200000;
+    uint256 proposeGasLimit = 100000;
+    uint256 sourceGasPrice = 1200000;
+    uint256 relativeGasPrice = 1100000;
+
     bool isFast = true;
     bytes32[] roots;
 
     error InvalidAttester();
-    event ExecutionSuccess(uint256 msgId);
-    event ExecutionFailed(uint256 msgId, string result);
-    event ExecutionFailedBytes(uint256 msgId, bytes result);
+    error InsufficientFees();
     event PacketVerifiedAndSealed(
         address indexed transmitter,
         uint256 indexed packetId,
@@ -32,6 +36,11 @@ contract SocketSrcTest is Setup {
 
         uint256 index = isFast ? 0 : 1;
         _configPlugContracts(index);
+
+        vm.startPrank(_transmitter);
+        _a.gasPriceOracle__.setSourceGasPrice(sourceGasPrice);
+        _a.gasPriceOracle__.setRelativeGasPrice(_b.chainSlug, relativeGasPrice);
+        vm.stopPrank();
     }
 
     function testSendMessageAndSealSuccessfully() external {
@@ -68,7 +77,6 @@ contract SocketSrcTest is Setup {
             }(_b.chainSlug, amount, _msgGasLimit);
         }
 
-        uint256 msgId = _packMessageId(_a.chainSlug, 0);
         {
             (
                 bytes32 root_,
@@ -88,7 +96,7 @@ contract SocketSrcTest is Setup {
         }
     }
 
-    function testSealWithNonTransmitter() external {
+    function testSealWithNonTransmitter() public {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
             keccak256("OP_ADD"),
@@ -122,7 +130,6 @@ contract SocketSrcTest is Setup {
             }(_b.chainSlug, amount, _msgGasLimit);
         }
 
-        uint256 msgId = _packMessageId(_a.chainSlug, 0);
         uint256 fakeTransmitterKey = c++;
         {
             (
@@ -138,6 +145,40 @@ contract SocketSrcTest is Setup {
 
             vm.expectRevert(InvalidAttester.selector);
             _sealOnSrc(_a, capacitor, sig_);
+        }
+    }
+
+    function testOutboundWithInSufficientFees() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+        bytes memory proof = abi.encode(0);
+
+        uint256 index = isFast ? 0 : 1;
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        uint256 executionFee;
+        {
+            (uint256 switchboardFees, uint256 verificationFee) = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_b.chainSlug);
+
+            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
+            executionFee = _a.executionManager__.getMinFees(
+                _msgGasLimit,
+                _b.chainSlug
+            );
+
+            hoax(_plugOwner);
+
+            vm.expectRevert(InsufficientFees.selector);
+            srcCounter__.remoteAddOperation{
+                value: 0
+            }(_b.chainSlug, amount, _msgGasLimit);
         }
     }
 
