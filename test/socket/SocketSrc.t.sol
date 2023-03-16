@@ -44,6 +44,40 @@ contract SocketSrcTest is Setup {
         vm.stopPrank();
     }
 
+    function testOutboundFromSocketSrc() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+
+        uint256 index = isFast ? 0 : 1;
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        uint256 executionFee;
+        {
+            (uint256 switchboardFees, uint256 verificationFee) = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_b.chainSlug);
+
+            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
+            executionFee = _a.executionManager__.getMinFees(
+                _msgGasLimit,
+                _b.chainSlug
+            );
+
+            hoax(_plugOwner);
+            _a.socket__.outbound{
+                value: switchboardFees +
+                    socketFees +
+                    verificationFee +
+                    executionFee
+            }(_b.chainSlug, _msgGasLimit, payload);
+        }
+    }
+
     function testSendMessageAndSealSuccessfully() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
