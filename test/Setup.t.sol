@@ -127,6 +127,7 @@ contract Setup is Test {
         hoax(_socketOwner);
         cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
         _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
+        _addTransmitters(transmitterPrivateKeys_, cc_, cc_.chainSlug);
     }
 
     function _addOptimisticSwitchboard(
