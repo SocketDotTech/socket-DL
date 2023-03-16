@@ -24,6 +24,7 @@ contract SocketSrcTest is Setup {
     event PacketVerifiedAndSealed(
         address indexed transmitter,
         uint256 indexed packetId,
+        bytes32 root,
         bytes signature
     );
 
@@ -89,8 +90,8 @@ contract SocketSrcTest is Setup {
                     _transmitterPrivateKey
                 );
 
-            vm.expectEmit(true, true, true, true);
-            emit PacketVerifiedAndSealed(_transmitter, packetId_, sig_);
+            vm.expectEmit(false, false, false, true);
+            emit PacketVerifiedAndSealed(_transmitter, packetId_, root_, sig_);
 
             _sealOnSrc(_a, capacitor, sig_);
         }
