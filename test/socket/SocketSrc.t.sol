@@ -27,6 +27,17 @@ contract SocketSrcTest is Setup {
         bytes32 root,
         bytes signature
     );
+    event MessageTransmitted(
+        uint256 localChainSlug,
+        address localPlug,
+        uint256 dstChainSlug,
+        address dstPlug,
+        uint256 msgId,
+        uint256 msgGasLimit,
+        uint256 executionFee,
+        uint256 fees,
+        bytes payload
+    );
 
     function setUp() external {
         uint256[] memory transmitterPivateKeys = new uint256[](1);
@@ -69,6 +80,26 @@ contract SocketSrcTest is Setup {
             );
 
             hoax(address(srcCounter__));
+
+            vm.expectEmit(false,false,false,true);
+
+            uint256 msgId = (uint256(uint32(_a.chainSlug)) << 224) | 1;
+
+            emit MessageTransmitted(
+            _a.chainSlug,
+            address(srcCounter__),
+            _b.chainSlug,
+            address(dstCounter__),
+            msgId,
+            _msgGasLimit,
+            executionFee,
+            switchboardFees +
+                    socketFees +
+                    verificationFee +
+                    executionFee,
+            payload
+        );
+
             _a.socket__.outbound{
                 value: switchboardFees +
                     socketFees +
