@@ -68,7 +68,7 @@ contract SocketSrcTest is Setup {
                 _b.chainSlug
             );
 
-            hoax(_plugOwner);
+            hoax(address(srcCounter__));
             _a.socket__.outbound{
                 value: switchboardFees +
                     socketFees +
@@ -86,6 +86,8 @@ contract SocketSrcTest is Setup {
             _plugOwner
         );
         bytes memory proof = abi.encode(0);
+
+        console.log("socket address is: ", address(_a.socket__));
 
         uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
@@ -253,11 +255,15 @@ contract SocketSrcTest is Setup {
             address(_a.configs__[socketConfigIndex].switchboard__)
         );
 
+        console.log("SocketSrc.t _configPlugContracts srcSwitchBoard is: ", address(_a.configs__[socketConfigIndex].switchboard__));
+
         hoax(_plugOwner);
         dstCounter__.setSocketConfig(
             _a.chainSlug,
             address(srcCounter__),
             address(_b.configs__[socketConfigIndex].switchboard__)
         );
+        console.log("SocketSrc.t _configPlugContracts dstSwitchBoard is: ", address(_b.configs__[socketConfigIndex].switchboard__));
+
     }
 }
