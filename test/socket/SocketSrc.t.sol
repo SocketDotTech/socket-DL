@@ -27,6 +27,7 @@ contract SocketSrcTest is Setup {
         bytes32 root,
         bytes signature
     );
+
     event MessageTransmitted(
         uint256 localChainSlug,
         address localPlug,
@@ -55,6 +56,39 @@ contract SocketSrcTest is Setup {
         vm.stopPrank();
     }
 
+    function testGetMinFeesOnSocketSrc() external {
+        uint256 index = isFast ? 0 : 1;
+
+        uint256 executionFee;
+        {
+            (uint256 switchboardFees, uint256 verificationFee) = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_b.chainSlug);
+
+            uint256 transmitFees = _a.transmitManager__.getMinFees(
+                _b.chainSlug
+            );
+            executionFee = _a.executionManager__.getMinFees(
+                _msgGasLimit,
+                _b.chainSlug
+            );
+
+            uint256 minFeesExpected = transmitFees +
+                switchboardFees +
+                verificationFee +
+                executionFee;
+
+            uint256 minFeesActual = _a.socket__.getMinFees(
+                _msgGasLimit,
+                _b.chainSlug,
+                address(srcCounter__)
+            );
+
+            assertEq(minFeesActual, minFeesExpected);
+        }
+    }
+
     function testOutboundFromSocketSrc() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
@@ -64,7 +98,6 @@ contract SocketSrcTest is Setup {
         );
 
         uint256 index = isFast ? 0 : 1;
-        address capacitor = address(_a.configs__[index].capacitor__);
 
         uint256 executionFee;
         {
