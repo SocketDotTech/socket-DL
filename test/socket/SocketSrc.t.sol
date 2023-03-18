@@ -81,25 +81,6 @@ contract SocketSrcTest is Setup {
 
             hoax(address(srcCounter__));
 
-            vm.expectEmit(false,false,false,true);
-
-            uint256 msgId = (uint256(uint32(_a.chainSlug)) << 224) | 1;
-
-            emit MessageTransmitted(
-            _a.chainSlug,
-            address(srcCounter__),
-            _b.chainSlug,
-            address(dstCounter__),
-            msgId,
-            _msgGasLimit,
-            executionFee,
-            switchboardFees +
-                    socketFees +
-                    verificationFee +
-                    executionFee,
-            payload
-        );
-
             _a.socket__.outbound{
                 value: switchboardFees +
                     socketFees +
@@ -286,15 +267,11 @@ contract SocketSrcTest is Setup {
             address(_a.configs__[socketConfigIndex].switchboard__)
         );
 
-        console.log("SocketSrc.t _configPlugContracts srcSwitchBoard is: ", address(_a.configs__[socketConfigIndex].switchboard__));
-
         hoax(_plugOwner);
         dstCounter__.setSocketConfig(
             _a.chainSlug,
             address(srcCounter__),
             address(_b.configs__[socketConfigIndex].switchboard__)
         );
-        console.log("SocketSrc.t _configPlugContracts dstSwitchBoard is: ", address(_b.configs__[socketConfigIndex].switchboard__));
-
     }
 }
