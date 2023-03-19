@@ -132,8 +132,6 @@ contract SocketSrcTest is Setup {
         );
         bytes memory proof = abi.encode(0);
 
-        console.log("socket address is: ", address(_a.socket__));
-
         uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
 
