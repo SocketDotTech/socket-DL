@@ -11,10 +11,10 @@ contract OptimisticSwitchboard is SwitchboardBase {
 
     constructor(
         address owner_,
-        address oracle_,
+        address gasPriceOracle_,
         uint256 timeoutInSeconds_
     ) AccessControl(owner_) {
-        oracle__ = IOracle(oracle_);
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         timeoutInSeconds = timeoutInSeconds_;
     }
 

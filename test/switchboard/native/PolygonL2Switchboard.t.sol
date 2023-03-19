@@ -19,7 +19,7 @@ contract PolygonL2SwitchboardTest is Setup {
     uint256 executionOverhead_ = 300000;
     address fxChild_ = 0xCf73231F28B7331BBe3124B907840A94851f9f11;
 
-    IOracle oracle_;
+    IGasPriceOracle gasPriceOracle_;
 
     PolygonL2Switchboard polygonL2Switchboard;
     ICapacitor singleCapacitor;

@@ -22,7 +22,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
     uint256 executionOverhead_ = 100000;
     address remoteNativeSwitchboard_ =
         0x2D468C4d7e355a4ADe099802A61Ba536220fb3Cb;
-    IOracle oracle_;
+    IGasPriceOracle gasPriceOracle_;
 
     OptimismSwitchboard optimismSwitchboard;
     ICapacitor singleCapacitor;

@@ -20,7 +20,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
     address remoteNativeSwitchboard_ =
         0x3f0121d91B5c04B716Ea960790a89b173da7929c;
     address inbox_ = 0x6BEbC4925716945D46F0Ec336D5C2564F419682C;
-    IOracle oracle_;
+    IGasPriceOracle gasPriceOracle_;
 
     ArbitrumL1Switchboard arbitrumL1Switchboard;
     ICapacitor singleCapacitor;

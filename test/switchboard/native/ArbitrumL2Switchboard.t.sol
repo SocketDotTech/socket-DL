@@ -19,7 +19,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
     uint256 executionOverhead_ = 100;
     address remoteNativeSwitchboard_ =
         0x3f0121d91B5c04B716Ea960790a89b173da7929c;
-    IOracle oracle_;
+    IGasPriceOracle gasPriceOracle_;
 
     ArbitrumL2Switchboard arbitrumL2Switchboard;
     ICapacitor singleCapacitor;

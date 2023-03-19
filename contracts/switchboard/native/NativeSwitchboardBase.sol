@@ -2,14 +2,14 @@
 pragma solidity 0.8.7;
 
 import "../../interfaces/ISwitchboard.sol";
-import "../../interfaces/IOracle.sol";
+import "../../interfaces/IGasPriceOracle.sol";
 import "../../interfaces/ICapacitor.sol";
 
 import "../../utils/AccessControl.sol";
 import "../../libraries/RescueFundsLib.sol";
 
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
-    IOracle public oracle__;
+    IGasPriceOracle public gasPriceOracle__;
     ICapacitor public capacitor__;
 
     bool public tripGlobalFuse;
@@ -20,7 +20,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     event ExecutionOverheadSet(uint256 executionOverhead);
     event InitialConfirmationGasLimitSet(uint256 gasLimit);
     event CapacitorSet(address capacitor);
-    event OracleSet(address oracle);
+    event GasPriceOracleSet(address gasPriceOracle);
     event InitiatedNativeConfirmation(uint256 packetId);
     event FeesWithdrawn(address account, uint256 value);
 
@@ -29,7 +29,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
 
     // assumption: natives have 18 decimals
     function payFees(uint256 dstChainSlug_) external payable override {
-        (uint256 expectedFees, ) = _calculateFees(dstChainSlug_);
+        (uint256 expectedFees, ) = _calculateMinFees(dstChainSlug_);
         if (msg.value < expectedFees) revert FeesNotEnough();
     }
 
@@ -41,17 +41,17 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
         override
         returns (uint256 switchboardFee_, uint256 verificationFee_)
     {
-        return _calculateFees(dstChainSlug_);
+        return _calculateMinFees(dstChainSlug_);
     }
 
-    function _calculateFees(
+    function _calculateMinFees(
         uint256 dstChainSlug_
     )
         internal
         view
         returns (uint256 switchboardFee_, uint256 verificationFee_)
     {
-        (uint256 sourceGasPrice, uint256 dstRelativeGasPrice) = oracle__
+        (uint256 sourceGasPrice, uint256 dstRelativeGasPrice) = gasPriceOracle__
             .getGasPrices(dstChainSlug_);
 
         switchboardFee_ = _getSwitchboardFees(
@@ -101,12 +101,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     }
 
     /**
-     * @notice updates oracle address
-     * @param oracle_ new oracle
+     * @notice updates gasPriceOracle_ address
+     * @param gasPriceOracle_ new gasPriceOracle_
      */
-    function setOracle(address oracle_) external onlyOwner {
-        oracle__ = IOracle(oracle_);
-        emit OracleSet(oracle_);
+    function setGasPriceOracle(address gasPriceOracle_) external onlyOwner {
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
+        emit GasPriceOracleSet(gasPriceOracle_);
     }
 
     // TODO: to support fee distribution

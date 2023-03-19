@@ -3,14 +3,14 @@ pragma solidity 0.8.7;
 
 import "./interfaces/ITransmitManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
-import "./interfaces/IOracle.sol";
+import "./interfaces/IGasPriceOracle.sol";
 
 import "./utils/AccessControl.sol";
 import "./libraries/RescueFundsLib.sol";
 
 contract TransmitManager is ITransmitManager, AccessControl {
     ISignatureVerifier public signatureVerifier__;
-    IOracle public oracle__;
+    IGasPriceOracle public gasPriceOracle__;
 
     uint256 public chainSlug;
     uint256 public sealGasLimit;
@@ -31,7 +31,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
 
     constructor(
         ISignatureVerifier signatureVerifier_,
-        IOracle oracle_,
+        IGasPriceOracle gasPriceOracle_,
         address owner_,
         uint256 chainSlug_,
         uint256 sealGasLimit_
@@ -39,7 +39,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
         chainSlug = chainSlug_;
         sealGasLimit = sealGasLimit_;
         signatureVerifier__ = signatureVerifier_;
-        oracle__ = IOracle(oracle_);
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
     }
 
     // @param slugs_ packs the siblingChainSlug & sigChainSlug
@@ -66,7 +66,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
         );
     }
 
-    // can be used for different checks related to oracle
+    // can be used for different checks related to gasPriceOracle
     function isTransmitter(
         address transmitter_,
         uint256 siblingChainSlug_
@@ -75,21 +75,23 @@ contract TransmitManager is ITransmitManager, AccessControl {
     }
 
     function payFees(uint256 siblingChainSlug_) external payable override {
-        if (msg.value < _calculateFees(siblingChainSlug_))
+        if (msg.value < _calculateMinFees(siblingChainSlug_))
             revert InsufficientTransmitFees();
     }
 
     function getMinFees(
         uint256 siblingChainSlug_
     ) external view override returns (uint256) {
-        return _calculateFees(siblingChainSlug_);
+        return _calculateMinFees(siblingChainSlug_);
     }
 
-    function _calculateFees(
+    function _calculateMinFees(
         uint256 siblingChainSlug_
     ) internal view returns (uint256 minTransmissionFees) {
-        (uint256 sourceGasPrice, uint256 siblingRelativeGasPrice) = oracle__
-            .getGasPrices(siblingChainSlug_);
+        (
+            uint256 sourceGasPrice,
+            uint256 siblingRelativeGasPrice
+        ) = gasPriceOracle__.getGasPrices(siblingChainSlug_);
 
         minTransmissionFees =
             sealGasLimit *

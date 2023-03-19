@@ -2,13 +2,13 @@
 pragma solidity 0.8.7;
 
 import "../../interfaces/ISwitchboard.sol";
-import "../../interfaces/IOracle.sol";
+import "../../interfaces/IGasPriceOracle.sol";
 import "../../utils/AccessControl.sol";
 
 import "../../libraries/RescueFundsLib.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControl {
-    IOracle public oracle__;
+    IGasPriceOracle public gasPriceOracle__;
     bool public tripGlobalFuse;
     mapping(uint256 => uint256) public executionOverhead;
 
@@ -18,27 +18,29 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
     event SwitchboardTripped(bool tripGlobalFuse);
     event ExecutionOverheadSet(uint256 dstChainSlug, uint256 executionOverhead);
-    event OracleSet(address oracle);
+    event GasPriceOracleSet(address gasPriceOracle);
     event FeesWithdrawn(address account, uint256 value);
 
     error TransferFailed();
     error FeesNotEnough();
 
     function payFees(uint256 dstChainSlug_) external payable override {
-        (uint256 expectedFees, ) = _calculateFees(dstChainSlug_);
-        if (msg.value < expectedFees) revert FeesNotEnough();
+        (uint256 minExpectedFees, ) = _calculateMinFees(dstChainSlug_);
+        if (msg.value < minExpectedFees) revert FeesNotEnough();
     }
 
     function getMinFees(
         uint256 dstChainSlug_
     ) external view override returns (uint256, uint256) {
-        return _calculateFees(dstChainSlug_);
+        return _calculateMinFees(dstChainSlug_);
     }
 
-    function _calculateFees(
+    function _calculateMinFees(
         uint256 dstChainSlug_
     ) internal view returns (uint256 switchboardFee, uint256 verificationFee) {
-        uint256 dstRelativeGasPrice = oracle__.relativeGasPrice(dstChainSlug_);
+        uint256 dstRelativeGasPrice = gasPriceOracle__.relativeGasPrice(
+            dstChainSlug_
+        );
 
         switchboardFee = _getSwitchboardFees(
             dstChainSlug_,
@@ -80,9 +82,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     }
 
     /**
-     * @notice pause/unpause a path
+     * @notice unpause a path
      */
-    function tripPath(uint256 srcChainSlug_, bool trip_) external onlyOwner {
+    function untrip(uint256 srcChainSlug_, bool trip_) external onlyOwner {
         tripSinglePath[srcChainSlug_] = trip_;
         emit PathTripped(srcChainSlug_, trip_);
     }
@@ -109,12 +111,12 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     }
 
     /**
-     * @notice updates oracle address
-     * @param oracle_ new oracle
+     * @notice updates gasPriceOracle_ address
+     * @param gasPriceOracle_ new gasPriceOracle_
      */
-    function setOracle(address oracle_) external onlyOwner {
-        oracle__ = IOracle(oracle_);
-        emit OracleSet(oracle_);
+    function setGasPriceOracle(address gasPriceOracle_) external onlyOwner {
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
+        emit GasPriceOracleSet(gasPriceOracle_);
     }
 
     // TODO: to support fee distribution

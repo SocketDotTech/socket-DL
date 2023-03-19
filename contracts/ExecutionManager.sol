@@ -2,12 +2,12 @@
 pragma solidity 0.8.7;
 
 import "./interfaces/IExecutionManager.sol";
-import "./interfaces/IOracle.sol";
+import "./interfaces/IGasPriceOracle.sol";
 import "./utils/AccessControl.sol";
 import "./libraries/RescueFundsLib.sol";
 
 contract ExecutionManager is IExecutionManager, AccessControl {
-    IOracle public oracle__;
+    IGasPriceOracle public gasPriceOracle__;
 
     // keccak256("EXECUTOR")
     bytes32 private constant _EXECUTOR_ROLE =
@@ -18,8 +18,11 @@ contract ExecutionManager is IExecutionManager, AccessControl {
     error TransferFailed();
     error InsufficientExecutionFees();
 
-    constructor(IOracle oracle_, address owner_) AccessControl(owner_) {
-        oracle__ = IOracle(oracle_);
+    constructor(
+        IGasPriceOracle gasPriceOracle_,
+        address owner_
+    ) AccessControl(owner_) {
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
     }
 
     function isExecutor(
@@ -47,7 +50,9 @@ contract ExecutionManager is IExecutionManager, AccessControl {
         uint256 msgGasLimit_,
         uint256 dstChainSlug_
     ) internal view returns (uint256) {
-        uint256 dstRelativeGasPrice = oracle__.relativeGasPrice(dstChainSlug_);
+        uint256 dstRelativeGasPrice = gasPriceOracle__.relativeGasPrice(
+            dstChainSlug_
+        );
         return msgGasLimit_ * dstRelativeGasPrice;
     }
 

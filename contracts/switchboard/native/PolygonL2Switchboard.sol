@@ -22,9 +22,9 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         uint256 executionOverhead_,
         address fxChild_,
         address owner_,
-        IOracle oracle_
+        IGasPriceOracle gasPriceOracle_
     ) AccessControl(owner_) FxBaseChildTunnel(fxChild_) {
-        oracle__ = oracle_;
+        gasPriceOracle__ = gasPriceOracle_;
 
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;

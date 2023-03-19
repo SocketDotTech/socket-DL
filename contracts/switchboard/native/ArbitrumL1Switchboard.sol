@@ -49,7 +49,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         address remoteNativeSwitchboard_,
         address inbox_,
         address owner_,
-        IOracle oracle_
+        IGasPriceOracle gasPriceOracle_
     ) AccessControl(owner_) {
         dynamicFees = dynamicFees_;
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
@@ -57,7 +57,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
 
         inbox__ = IInbox(inbox_);
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        oracle__ = oracle_;
+        gasPriceOracle__ = gasPriceOracle_;
 
         remoteRefundAddress = msg.sender;
         callValueRefundAddress = msg.sender;

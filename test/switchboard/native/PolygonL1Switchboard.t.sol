@@ -23,7 +23,7 @@ contract PolygonL1SwitchboardTest is Setup {
     address remoteNativeSwitchboard_ =
         0x029ce68B3A6B3B3713CaC23a39c9096f279c8Ad2;
 
-    IOracle oracle_;
+    IGasPriceOracle gasPriceOracle_;
 
     PolygonL1Switchboard polygonL1Switchboard;
     ICapacitor singleCapacitor;

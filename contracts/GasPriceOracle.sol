@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./interfaces/IOracle.sol";
+import "./interfaces/IGasPriceOracle.sol";
 import "./interfaces/ITransmitManager.sol";
 import "./utils/AccessControl.sol";
 import "./libraries/RescueFundsLib.sol";
 
-contract GasPriceOracle is IOracle, Ownable {
+contract GasPriceOracle is IGasPriceOracle, Ownable {
     ITransmitManager public transmitManager__;
 
     // plugs/switchboards/transmitter can use it to ensure prices are updated

@@ -40,7 +40,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         uint256 executionOverhead_,
         address remoteNativeSwitchboard_,
         address owner_,
-        IOracle oracle_
+        IGasPriceOracle gasPriceOracle_
     ) AccessControl(owner_) {
         receivePacketGasLimit = receivePacketGasLimit_;
 
@@ -49,7 +49,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         executionOverhead = executionOverhead_;
 
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        oracle__ = oracle_;
+        gasPriceOracle__ = gasPriceOracle_;
 
         if ((block.chainid == 10 || block.chainid == 420)) {
             crossDomainMessenger__ = ICrossDomainMessenger(
