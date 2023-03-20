@@ -18,20 +18,20 @@ contract SignatureVerifier is ISignatureVerifier {
         digest = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
         );
-        signer = _recoverSigner(digest, signature_);
+        signer = recoverSignerFromDigest(digest, signature_);
     }
 
     /**
-     * @notice returns the address of signer recovered from input signature
+     * @notice returns the address of signer recovered from input signature and digest
      */
-    function _recoverSigner(
-        bytes32 hash_,
+    function recoverSignerFromDigest(
+        bytes32 digest_,
         bytes memory signature_
-    ) private pure returns (address signer) {
+    ) public pure override returns (address signer) {
         (bytes32 sigR, bytes32 sigS, uint8 sigV) = _splitSignature(signature_);
 
         // recovered signer is checked for the valid roles later
-        signer = ecrecover(hash_, sigV, sigR, sigS);
+        signer = ecrecover(digest_, sigV, sigR, sigS);
     }
 
     /**
