@@ -48,19 +48,16 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
     // @dev sig chain slug is required by signature. On src, this is sibling slug while on
     // destination, it is current chain slug
     function checkTransmitter(
-        uint256 slugs_,
-        uint256 packetId_,
-        bytes32 root_,
+        uint256 siblingSlug,
+        bytes32 digest_,
         bytes calldata signature_
     ) external view override returns (address, bool) {
-        address transmitter = signatureVerifier__.recoverSigner(
-            type(uint128).max & slugs_,
-            packetId_,
-            root_,
+        address transmitter = signatureVerifier__.recoverSignerFromDigest(
+            digest_,
             signature_
         );
 
-        return (transmitter, _hasRoleWithUint(slugs_ >> 128, transmitter));
+        return (transmitter, _hasRoleWithUint(siblingSlug, transmitter));
     }
 
     function payFees(uint256 siblingChainSlug_) external payable override {

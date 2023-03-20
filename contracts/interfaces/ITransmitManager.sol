@@ -3,9 +3,8 @@ pragma solidity 0.8.7;
 
 interface ITransmitManager {
     function checkTransmitter(
-        uint256 chainSlugs_,
-        uint256 packetId,
-        bytes32 root,
+        uint256 siblingSlug,
+        bytes32 digest,
         bytes calldata signature
     ) external view returns (address, bool);
 
