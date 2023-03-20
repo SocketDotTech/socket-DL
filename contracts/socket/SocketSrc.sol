@@ -173,14 +173,12 @@ abstract contract SocketSrc is SocketBase {
 
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
-                (siblingChainSlug << 128) | siblingChainSlug,
-                packetId,
-                root,
+                siblingChainSlug,
+                keccak256(abi.encode(siblingChainSlug, packetId, root)),
                 signature_
             );
 
         if (!isTransmitter) revert InvalidAttester();
-
         emit PacketVerifiedAndSealed(transmitter, packetId, root, signature_);
     }
 }

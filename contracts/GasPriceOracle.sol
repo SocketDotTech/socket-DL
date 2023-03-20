@@ -14,6 +14,8 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
     // chain slug => relative gas price
     mapping(uint256 => uint256) public override relativeGasPrice;
 
+    mapping(address => mapping(uint256 => bool)) public nonces;
+
     // gas price of source chain
     uint256 public override sourceGasPrice;
     uint256 public immutable chainSlug;
@@ -23,6 +25,7 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
     event SourceGasPriceUpdated(uint256 sourceGasPrice);
 
     error TransmitterNotFound();
+    error SignatureAlreadyUsed();
 
     constructor(address owner_, uint256 chainSlug_) Ownable(owner_) {
         chainSlug = chainSlug_;
@@ -32,37 +35,61 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
      * @notice update the sourceGasPrice which is to be used in various computations
      * @param sourceGasPrice_ gas price of source chain
      */
-    function setSourceGasPrice(uint256 sourceGasPrice_) external {
-        if (!transmitManager__.isTransmitter(msg.sender, chainSlug))
-            revert TransmitterNotFound();
+    function setSourceGasPrice(
+        uint256 nonce_,
+        uint256 sourceGasPrice_,
+        bytes calldata signature_
+    ) external {
+        (address transmitter, bool isTransmitter) = transmitManager__
+            .checkTransmitter(
+                chainSlug,
+                keccak256(abi.encode(chainSlug, nonce_, sourceGasPrice_)),
+                signature_
+            );
 
+        if (!isTransmitter) revert TransmitterNotFound();
+        if (nonces[transmitter][nonce_]) revert SignatureAlreadyUsed();
+
+        nonces[transmitter][nonce_] = true;
         sourceGasPrice = sourceGasPrice_;
         emit SourceGasPriceUpdated(sourceGasPrice);
     }
 
     /**
      * @dev the relative prices are calculated as:
-     * relativeGasPrice = (dstGasPrice * dstGasUSDPrice)/srcGasUSDPrice
+     * relativeGasPrice = (siblingGasPrice * siblingGasUSDPrice)/srcGasUSDPrice
      * It is assumed that precision of relative gas price will be same as src native tokens
      * So that when it is multiplied with gas limits at other contracts, we get correct values.
      */
     function setRelativeGasPrice(
-        uint256 dstChainSlug_,
-        uint256 relativeGasPrice_
+        uint256 siblingChainSlug_,
+        uint256 nonce_,
+        uint256 relativeGasPrice_,
+        bytes calldata signature_
     ) external {
-        if (!transmitManager__.isTransmitter(msg.sender, dstChainSlug_))
-            revert TransmitterNotFound();
+        (address transmitter, bool isTransmitter) = transmitManager__
+            .checkTransmitter(
+                siblingChainSlug_,
+                keccak256(
+                    abi.encode(siblingChainSlug_, nonce_, relativeGasPrice_)
+                ),
+                signature_
+            );
 
-        relativeGasPrice[dstChainSlug_] = relativeGasPrice_;
-        updatedAt[dstChainSlug_] = block.timestamp;
+        if (!isTransmitter) revert TransmitterNotFound();
+        if (nonces[transmitter][nonce_]) revert SignatureAlreadyUsed();
 
-        emit GasPriceUpdated(dstChainSlug_, relativeGasPrice_);
+        nonces[transmitter][nonce_] = true;
+        relativeGasPrice[siblingChainSlug_] = relativeGasPrice_;
+        updatedAt[siblingChainSlug_] = block.timestamp;
+
+        emit GasPriceUpdated(siblingChainSlug_, relativeGasPrice_);
     }
 
     function getGasPrices(
-        uint256 dstChainSlug_
+        uint256 siblingChainSlug_
     ) external view override returns (uint256, uint256) {
-        return (sourceGasPrice, relativeGasPrice[dstChainSlug_]);
+        return (sourceGasPrice, relativeGasPrice[siblingChainSlug_]);
     }
 
     function setTransmitManager(
