@@ -228,7 +228,7 @@ contract SocketDstTest is Setup {
                 _b.chainSlug
             );
 
-        console.log("executionFee is: ", executionFee);
+            console.log("executionFee is: ", executionFee);
 
             hoax(_plugOwner);
             srcCounter__.remoteAddOperation{
