@@ -5,10 +5,10 @@ import "./interfaces/ITransmitManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./interfaces/IGasPriceOracle.sol";
 
-import "./utils/AccessControl.sol";
+import "./utils/AccessControlWithUint.sol";
 import "./libraries/RescueFundsLib.sol";
 
-contract TransmitManager is ITransmitManager, AccessControl {
+contract TransmitManager is ITransmitManager, AccessControlWithUint {
     ISignatureVerifier public signatureVerifier__;
     IGasPriceOracle public gasPriceOracle__;
 
@@ -60,18 +60,7 @@ contract TransmitManager is ITransmitManager, AccessControl {
             signature_
         );
 
-        return (
-            transmitter,
-            _hasRole(_transmitterRole(slugs_ >> 128), transmitter)
-        );
-    }
-
-    // can be used for different checks related to gasPriceOracle
-    function isTransmitter(
-        address transmitter_,
-        uint256 siblingChainSlug_
-    ) external view override returns (bool) {
-        return _hasRole(_transmitterRole(siblingChainSlug_), transmitter_);
+        return (transmitter, _hasRoleWithUint(slugs_ >> 128, transmitter));
     }
 
     function payFees(uint256 siblingChainSlug_) external payable override {
@@ -145,36 +134,6 @@ contract TransmitManager is ITransmitManager, AccessControl {
     ) external onlyOwner {
         signatureVerifier__ = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
-    }
-
-    /**
-     * @notice adds a transmitter for `remoteChainSlug_` chain
-     * @param remoteChainSlug_ remote chain slug
-     * @param transmitter_ transmitter address
-     */
-    function grantTransmitterRole(
-        uint256 remoteChainSlug_,
-        address transmitter_
-    ) external onlyOwner {
-        _grantRole(_transmitterRole(remoteChainSlug_), transmitter_);
-    }
-
-    /**
-     * @notice removes an transmitter from `remoteChainSlug_` chain list
-     * @param remoteChainSlug_ remote chain slug
-     * @param transmitter_ transmitter address
-     */
-    function revokeTransmitterRole(
-        uint256 remoteChainSlug_,
-        address transmitter_
-    ) external onlyOwner {
-        _revokeRole(_transmitterRole(remoteChainSlug_), transmitter_);
-    }
-
-    function _transmitterRole(
-        uint256 chainSlug_
-    ) internal pure returns (bytes32) {
-        return bytes32(chainSlug_);
     }
 
     function rescueFunds(

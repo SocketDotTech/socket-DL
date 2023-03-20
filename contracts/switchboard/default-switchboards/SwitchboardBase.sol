@@ -3,11 +3,11 @@ pragma solidity 0.8.7;
 
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IGasPriceOracle.sol";
-import "../../utils/AccessControl.sol";
+import "../../utils/AccessControlWithUint.sol";
 
 import "../../libraries/RescueFundsLib.sol";
 
-abstract contract SwitchboardBase is ISwitchboard, AccessControl {
+abstract contract SwitchboardBase is ISwitchboard, AccessControlWithUint {
     IGasPriceOracle public gasPriceOracle__;
     bool public tripGlobalFuse;
     mapping(uint256 => uint256) public executionOverhead;
@@ -61,7 +61,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
      */
     function tripPath(
         uint256 srcChainSlug_
-    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+    ) external onlyRoleWithUint(srcChainSlug_) {
         //source chain based tripping
         tripSinglePath[srcChainSlug_] = true;
         emit PathTripped(srcChainSlug_, true);
@@ -72,7 +72,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
      */
     function tripGlobal(
         uint256 srcChainSlug_
-    ) external onlyRole(_watcherRole(srcChainSlug_)) {
+    ) external onlyRoleWithUint(srcChainSlug_) {
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
     }
@@ -80,18 +80,17 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     /**
      * @notice unpause a path
      */
-    function untrip(uint256 srcChainSlug_, bool trip_) external onlyOwner {
-        tripSinglePath[srcChainSlug_] = trip_;
-        emit PathTripped(srcChainSlug_, trip_);
+    function untripPath(uint256 srcChainSlug_) external onlyOwner {
+        tripSinglePath[srcChainSlug_] = false;
+        emit PathTripped(srcChainSlug_, false);
     }
 
     /**
-     * @notice pause/unpause execution
-     * @param tripGlobalFuse_ bool indicating verification is active or not
+     * @notice unpause execution
      */
-    function tripGlobal(bool tripGlobalFuse_) external onlyOwner {
-        tripGlobalFuse = tripGlobalFuse_;
-        emit SwitchboardTripped(tripGlobalFuse_);
+    function untrip() external onlyOwner {
+        tripGlobalFuse = false;
+        emit SwitchboardTripped(false);
     }
 
     /**

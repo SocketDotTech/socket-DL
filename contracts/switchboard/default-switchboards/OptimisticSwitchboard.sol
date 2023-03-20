@@ -34,36 +34,6 @@ contract OptimisticSwitchboard is SwitchboardBase {
         return true;
     }
 
-    /**
-     * @notice adds an watcher for `remoteChainSlug_` chain
-     * @param remoteChainSlug_ remote chain slug
-     * @param watcher_ watcher address
-     */
-    function grantWatcherRole(
-        uint256 remoteChainSlug_,
-        address watcher_
-    ) external onlyOwner {
-        if (_hasRole(_watcherRole(remoteChainSlug_), watcher_))
-            revert WatcherFound();
-
-        _grantRole(_watcherRole(remoteChainSlug_), watcher_);
-    }
-
-    /**
-     * @notice removes an watcher from `remoteChainSlug_` chain list
-     * @param remoteChainSlug_ remote chain slug
-     * @param watcher_ watcher address
-     */
-    function revokeWatcherRole(
-        uint256 remoteChainSlug_,
-        address watcher_
-    ) external onlyOwner {
-        if (!_hasRole(_watcherRole(remoteChainSlug_), watcher_))
-            revert WatcherNotFound();
-
-        _revokeRole(_watcherRole(remoteChainSlug_), watcher_);
-    }
-
     function _getSwitchboardFees(
         uint256,
         uint256

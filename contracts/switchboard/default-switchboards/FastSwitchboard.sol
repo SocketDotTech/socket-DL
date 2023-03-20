@@ -44,8 +44,7 @@ contract FastSwitchboard is SwitchboardBase {
         address watcher = _recoverSigner(srcChainSlug_, packetId_, signature_);
 
         if (isAttested[watcher][packetId_]) revert AlreadyAttested();
-        if (!_hasRole(_watcherRole(srcChainSlug_), watcher))
-            revert WatcherNotFound();
+        if (!_hasRoleWithUint(srcChainSlug_, watcher)) revert WatcherNotFound();
 
         isAttested[watcher][packetId_] = true;
         attestations[packetId_]++;
@@ -106,10 +105,9 @@ contract FastSwitchboard is SwitchboardBase {
         uint256 srcChainSlug_,
         address watcher_
     ) external onlyOwner {
-        if (_hasRole(_watcherRole(srcChainSlug_), watcher_))
-            revert WatcherFound();
+        if (_hasRoleWithUint(srcChainSlug_, watcher_)) revert WatcherFound();
+        _grantRoleWithUint(srcChainSlug_, watcher_);
 
-        _grantRole(_watcherRole(srcChainSlug_), watcher_);
         totalWatchers[srcChainSlug_]++;
     }
 
@@ -121,10 +119,10 @@ contract FastSwitchboard is SwitchboardBase {
         uint256 srcChainSlug_,
         address watcher_
     ) external onlyOwner {
-        if (!_hasRole(_watcherRole(srcChainSlug_), watcher_))
+        if (!_hasRoleWithUint(srcChainSlug_, watcher_))
             revert WatcherNotFound();
+        _revokeRoleWithUint(srcChainSlug_, watcher_);
 
-        _revokeRole(_watcherRole(srcChainSlug_), watcher_);
         totalWatchers[srcChainSlug_]--;
     }
 
