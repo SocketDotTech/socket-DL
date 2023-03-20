@@ -64,9 +64,11 @@ contract SocketDstTest is Setup {
     }
 
     function testProposeAPacket() external {
-        uint256 packetId;
         uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
+
+        sendOutboundMessage(index, capacitor);
+
         (
             bytes32 root_,
             uint256 packetId_,
@@ -78,16 +80,51 @@ contract SocketDstTest is Setup {
                 _transmitterPrivateKey
             );
 
+        _sealOnSrc(_a, capacitor, sig_);
+
         vm.expectEmit(false, false, false, true);
         emit PacketProposed(_transmitter, packetId_, root_);
 
         _proposeOnDst(_b, sig_, packetId_, root_);
+
+        assertEq(_b.socket__.remoteRoots(packetId_), root_);
+        assertEq(_b.socket__.rootProposedAt(packetId_), block.timestamp);
+    }
+
+    function testIsPacketProposed() external {
+        uint256 index = isFast ? 0 : 1;
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        sendOutboundMessage(index, capacitor);
+
+        (
+            bytes32 root_,
+            uint256 packetId_,
+            bytes memory sig_
+        ) = getLatestSignature(
+                _a,
+                capacitor,
+                _b.chainSlug,
+                _transmitterPrivateKey
+            );
+
+        _sealOnSrc(_a, capacitor, sig_);
+
+        assertFalse(_b.socket__.isPacketProposed(packetId_));
+
+        _proposeOnDst(_b, sig_, packetId_, root_);
+
+        assertEq(_b.socket__.remoteRoots(packetId_), root_);
+
+        assertTrue(_b.socket__.isPacketProposed(packetId_));
     }
 
     function testProposeAPacketByInvalidAttester() external {
-        uint256 packetId;
         uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
+
+        sendOutboundMessage(index, capacitor);
+
         (
             bytes32 root_,
             uint256 packetId_,
@@ -105,6 +142,32 @@ contract SocketDstTest is Setup {
     }
 
     function testDuplicateProposePacket() external {
+        uint256 index = isFast ? 0 : 1;
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        sendOutboundMessage(index, capacitor);
+        {
+            (
+                bytes32 root_,
+                uint256 packetId_,
+                bytes memory sig_
+            ) = getLatestSignature(
+                    _a,
+                    capacitor,
+                    _b.chainSlug,
+                    _transmitterPrivateKey
+                );
+
+            _sealOnSrc(_a, capacitor, sig_);
+            _proposeOnDst(_b, sig_, packetId_, root_);
+
+            vm.expectRevert(AlreadyAttested.selector);
+
+            _proposeOnDst(_b, sig_, packetId_, root_);
+        }
+    }
+
+    function sendOutboundMessage(uint256 index, address capacitor) internal {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
             keccak256("OP_ADD"),
@@ -112,9 +175,6 @@ contract SocketDstTest is Setup {
             _plugOwner
         );
         bytes memory proof = abi.encode(0);
-
-        uint256 index = isFast ? 0 : 1;
-        address capacitor = address(_a.configs__[index].capacitor__);
 
         uint256 executionFee;
         {
@@ -136,27 +196,6 @@ contract SocketDstTest is Setup {
                     verificationFee +
                     executionFee
             }(_b.chainSlug, amount, _msgGasLimit);
-
-            (
-                bytes32 root_,
-                uint256 packetId_,
-                bytes memory sig_
-            ) = getLatestSignature(
-                    _a,
-                    capacitor,
-                    _b.chainSlug,
-                    _transmitterPrivateKey
-                );
-
-            vm.expectEmit(false, false, false, true);
-            emit PacketVerifiedAndSealed(_transmitter, packetId_, root_, sig_);
-
-            _sealOnSrc(_a, capacitor, sig_);
-            _proposeOnDst(_b, sig_, packetId_, root_);
-
-            vm.expectRevert(AlreadyAttested.selector);
-
-            _proposeOnDst(_b, sig_, packetId_, root_);
         }
     }
 
