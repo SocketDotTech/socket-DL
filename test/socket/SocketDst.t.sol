@@ -22,6 +22,10 @@ contract SocketDstTest is Setup {
     error AlreadyAttested();
     error InvalidAttester();
     error InsufficientFees();
+    event ExecutionSuccess(uint256 msgId);
+    event ExecutionFailed(uint256 msgId, string result);
+    event ExecutionFailedBytes(uint256 msgId, bytes result);
+
     event PacketVerifiedAndSealed(
         address indexed transmitter,
         uint256 indexed packetId,
@@ -165,6 +169,67 @@ contract SocketDstTest is Setup {
 
             _proposeOnDst(_b, sig_, packetId_, root_);
         }
+    }
+
+    function testExecuteMessage() external {
+        uint256 index = isFast ? 0 : 1;
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        sendOutboundMessage(index, capacitor);
+
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+        uint256 packetId;
+
+        {
+            (
+                bytes32 root_,
+                uint256 packetId_,
+                bytes memory sig_
+            ) = getLatestSignature(
+                    _a,
+                    capacitor,
+                    _b.chainSlug,
+                    _transmitterPrivateKey
+                );
+
+            _sealOnSrc(_a, capacitor, sig_);
+            _proposeOnDst(_b, sig_, packetId_, root_);
+
+            packetId = packetId_;
+        }
+
+        vm.expectEmit(true, false, false, false);
+        emit ExecutionSuccess(msgId);
+
+        uint256 executionFee = _a.executionManager__.getMinFees(
+            _msgGasLimit,
+            _b.chainSlug
+        );
+
+        uint256 amount = 100;
+        bytes memory proof = abi.encode(0);
+
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+
+        _executePayloadOnDst(
+            _b,
+            _a.chainSlug,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            executionFee,
+            payload,
+            proof
+        );
+
+        assertEq(dstCounter__.counter(), amount);
+        assertEq(srcCounter__.counter(), 0);
+        assertTrue(_b.socket__.messageExecuted(msgId));
     }
 
     function sendOutboundMessage(uint256 index, address capacitor) internal {
