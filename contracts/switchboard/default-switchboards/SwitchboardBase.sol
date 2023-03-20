@@ -54,11 +54,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControl {
     function _getSwitchboardFees(
         uint256 dstChainSlug_,
         uint256 dstRelativeGasPrice_
-    ) internal view virtual returns (uint256) {}
-
-    function _watcherRole(uint256 chainSlug_) internal pure returns (bytes32) {
-        return bytes32(chainSlug_);
-    }
+    ) internal view virtual returns (uint256);
 
     /**
      * @notice pause a path

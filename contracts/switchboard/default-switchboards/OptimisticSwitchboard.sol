@@ -63,4 +63,11 @@ contract OptimisticSwitchboard is SwitchboardBase {
 
         _revokeRole(_watcherRole(remoteChainSlug_), watcher_);
     }
+
+    function _getSwitchboardFees(
+        uint256,
+        uint256
+    ) internal pure override returns (uint256) {
+        return 0;
+    }
 }
