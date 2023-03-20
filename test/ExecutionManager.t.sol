@@ -80,13 +80,13 @@ contract ExecutionManagerTest is Test {
 
         vm.startPrank(owner);
         executionManager.grantRole(EXECUTOR_ROLE, executor);
-        transmitManager.grantTransmitterRole(chainSlug, transmitter);
-        transmitManager.grantTransmitterRole(destChainSlug, transmitter);
+        transmitManager.grantRoleWithUint(chainSlug, transmitter);
+        transmitManager.grantRoleWithUint(destChainSlug, transmitter);
         gasPriceOracle.setTransmitManager(transmitManager);
         vm.stopPrank();
 
-        assertTrue(transmitManager.isTransmitter(transmitter, chainSlug));
-        assertTrue(transmitManager.isTransmitter(transmitter, destChainSlug));
+        assertTrue(transmitManager.hasRoleWithUint(chainSlug, transmitter));
+        assertTrue(transmitManager.hasRoleWithUint(destChainSlug, transmitter));
 
         vm.startPrank(transmitter);
         gasPriceOracle.setSourceGasPrice(sourceGasPrice);

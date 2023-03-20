@@ -145,7 +145,7 @@ contract Setup is Test {
             remoteChainSlug_,
             _executionOverhead
         );
-        optimisticSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
+        optimisticSwitchboard.grantRoleWithUint(remoteChainSlug_, _watcher);
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
@@ -266,7 +266,7 @@ contract Setup is Test {
             // deduce transmitter address from private key
             transmitter = vm.addr(transmitterPrivateKeys_[index]);
             // grant transmitter role
-            cc_.transmitManager__.grantTransmitterRole(
+            cc_.transmitManager__.grantRoleWithUint(
                 remoteChainSlug_,
                 transmitter
             );

@@ -36,8 +36,8 @@ contract GasPriceOracleTest is Test {
             gasLimit
         );
         vm.startPrank(owner);
-        transmitManager.grantTransmitterRole(chainSlug, transmitter);
-        transmitManager.grantTransmitterRole(destChainSlug, transmitter);
+        transmitManager.grantRoleWithUint(chainSlug, transmitter);
+        transmitManager.grantRoleWithUint(destChainSlug, transmitter);
 
         vm.expectEmit(false, false, false, true);
         emit TransmitManagerUpdated(address(transmitManager));
