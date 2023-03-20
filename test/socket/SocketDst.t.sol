@@ -171,67 +171,6 @@ contract SocketDstTest is Setup {
         }
     }
 
-    function testExecuteMessage() external {
-        uint256 index = isFast ? 0 : 1;
-        address capacitor = address(_a.configs__[index].capacitor__);
-
-        sendOutboundMessage(index, capacitor);
-
-        uint256 msgId = _packMessageId(_a.chainSlug, 0);
-        uint256 packetId;
-
-        {
-            (
-                bytes32 root_,
-                uint256 packetId_,
-                bytes memory sig_
-            ) = getLatestSignature(
-                    _a,
-                    capacitor,
-                    _b.chainSlug,
-                    _transmitterPrivateKey
-                );
-
-            _sealOnSrc(_a, capacitor, sig_);
-            _proposeOnDst(_b, sig_, packetId_, root_);
-
-            packetId = packetId_;
-        }
-
-        vm.expectEmit(true, false, false, false);
-        emit ExecutionSuccess(msgId);
-
-        uint256 executionFee = _a.executionManager__.getMinFees(
-            _msgGasLimit,
-            _b.chainSlug
-        );
-
-        uint256 amount = 100;
-        bytes memory proof = abi.encode(0);
-
-        bytes memory payload = abi.encode(
-            keccak256("OP_ADD"),
-            amount,
-            _plugOwner
-        );
-
-        _executePayloadOnDst(
-            _b,
-            _a.chainSlug,
-            address(dstCounter__),
-            packetId,
-            msgId,
-            _msgGasLimit,
-            executionFee,
-            payload,
-            proof
-        );
-
-        assertEq(dstCounter__.counter(), amount);
-        assertEq(srcCounter__.counter(), 0);
-        assertTrue(_b.socket__.messageExecuted(msgId));
-    }
-
     function sendOutboundMessage(uint256 index, address capacitor) internal {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
@@ -262,6 +201,90 @@ contract SocketDstTest is Setup {
                     executionFee
             }(_b.chainSlug, amount, _msgGasLimit);
         }
+    }
+
+    function testExecuteMessageOnSocketDst() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+        bytes memory proof = abi.encode(0);
+
+        uint256 index = isFast ? 0 : 1;
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        uint256 executionFee;
+        {
+            (uint256 switchboardFees, uint256 verificationFee) = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_b.chainSlug);
+
+            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
+            executionFee = _a.executionManager__.getMinFees(
+                _msgGasLimit,
+                _b.chainSlug
+            );
+
+        console.log("executionFee is: ", executionFee);
+
+            hoax(_plugOwner);
+            srcCounter__.remoteAddOperation{
+                value: switchboardFees +
+                    socketFees +
+                    verificationFee +
+                    executionFee
+            }(_b.chainSlug, amount, _msgGasLimit);
+        }
+
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+        uint256 packetId;
+        {
+            (
+                bytes32 root_,
+                uint256 packetId_,
+                bytes memory sig_
+            ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+
+            _sealOnSrc(_a, capacitor, sig_);
+            _proposeOnDst(_b, sig_, packetId_, root_);
+
+            vm.expectEmit(true, false, false, false);
+            emit ExecutionSuccess(msgId);
+
+            packetId = packetId_;
+        }
+
+        _executePayloadOnDst(
+            _b,
+            _a.chainSlug,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            executionFee,
+            payload,
+            proof
+        );
+
+        assertEq(dstCounter__.counter(), amount);
+        assertEq(srcCounter__.counter(), 0);
+        assertTrue(_b.socket__.messageExecuted(msgId));
+
+        vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
+        _executePayloadOnDst(
+            _b,
+            _a.chainSlug,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            executionFee,
+            payload,
+            proof
+        );
     }
 
     function getLatestSignature(
