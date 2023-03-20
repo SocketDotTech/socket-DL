@@ -129,7 +129,7 @@ contract Setup is Test {
 
         hoax(_socketOwner);
         cc_.executionManager__.grantRole(EXECUTOR_ROLE, address(this));
-        
+
         _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
         _addTransmitters(transmitterPrivateKeys_, cc_, cc_.chainSlug);
     }
