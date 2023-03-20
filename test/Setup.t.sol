@@ -345,9 +345,9 @@ contract Setup is Test {
         console.log("executor address is: ", _executor);
 
         uint256 executionFeeCalc = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                _b.chainSlug
-            );
+            _msgGasLimit,
+            _b.chainSlug
+        );
 
         ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
             msgId_,
