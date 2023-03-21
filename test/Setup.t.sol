@@ -346,16 +346,9 @@ contract Setup is Test {
     ) internal {
         hoax(_executor);
 
-        console.log("executor address is: ", _executor);
-
-        uint256 executionFeeCalc = _a.executionManager__.getMinFees(
-            _msgGasLimit,
-            _b.chainSlug
-        );
-
         ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
             msgId_,
-            executionFeeCalc,
+            executionFee_,
             msgGasLimit_,
             payload_,
             proof_
