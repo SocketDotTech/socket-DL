@@ -68,18 +68,20 @@ contract HappyTest is Setup {
             );
 
             uint256 value = switchboardFees +
-                    socketFees +
-                    verificationFee +
-                    executionFee;
+                socketFees +
+                verificationFee +
+                executionFee;
 
             // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
             // verificationFees also should go to Executor, hence we do the additional computation below
-           executionFee = verificationFee + executionFee; 
+            executionFee = verificationFee + executionFee;
 
             hoax(_plugOwner);
-            srcCounter__.remoteAddOperation{
-                value: value
-            }(_b.chainSlug, amount, _msgGasLimit);
+            srcCounter__.remoteAddOperation{value: value}(
+                _b.chainSlug,
+                amount,
+                _msgGasLimit
+            );
         }
 
         uint256 msgId = _packMessageId(_a.chainSlug, 0);
@@ -269,7 +271,7 @@ contract HappyTest is Setup {
 
             // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
             // verificationFees also should go to Executor, hence we do the additional computation below
-           executionFee = executionOverhead + executionFee; 
+            executionFee = executionOverhead + executionFee;
 
             // send 2 messages
             (msgId1, root1) = outbound(0, amount, executionFee, fees, payload);
