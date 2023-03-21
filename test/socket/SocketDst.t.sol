@@ -15,6 +15,7 @@ contract SocketDstTest is Setup {
     uint256 proposeGasLimit = 100000;
     uint256 sourceGasPrice = 1200000;
     uint256 relativeGasPrice = 1100000;
+    address immutable _invalidExecutor = address(uint160(c++));
 
     bool isFast = true;
     bytes32[] roots;
@@ -23,6 +24,7 @@ contract SocketDstTest is Setup {
     error InvalidAttester();
     error InsufficientFees();
     error InvalidProof();
+    error NotExecutor();
     event ExecutionSuccess(uint256 msgId);
     event ExecutionFailed(uint256 msgId, string result);
     event ExecutionFailedBytes(uint256 msgId, bytes result);
@@ -264,7 +266,7 @@ contract SocketDstTest is Setup {
             packetId = packetId_;
         }
 
-        _executePayloadOnDst(
+        executePayloadOnDst(
             _b,
             _a.chainSlug,
             address(dstCounter__),
@@ -273,7 +275,8 @@ contract SocketDstTest is Setup {
             _msgGasLimit,
             executionFee,
             payload,
-            proof
+            proof,
+            _executor
         );
 
         assertEq(dstCounter__.counter(), amount);
@@ -281,7 +284,7 @@ contract SocketDstTest is Setup {
         assertTrue(_b.socket__.messageExecuted(msgId));
 
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
-        _executePayloadOnDst(
+        executePayloadOnDst(
             _b,
             _a.chainSlug,
             address(dstCounter__),
@@ -290,7 +293,8 @@ contract SocketDstTest is Setup {
             _msgGasLimit,
             executionFee,
             payload,
-            proof
+            proof,
+            _executor
         );
     }
 
@@ -347,9 +351,8 @@ contract SocketDstTest is Setup {
             packetId = packetId_;
         }
 
-
         vm.expectRevert(InvalidProof.selector);
-        _executePayloadOnDst(
+        executePayloadOnDst(
             _b,
             _a.chainSlug,
             address(dstCounter__),
@@ -358,8 +361,106 @@ contract SocketDstTest is Setup {
             _msgGasLimit,
             executionFee,
             payload,
-            proof
+            proof,
+            _executor
         );
+    }
+
+    function testExecuteMessageWithInvalidExecutor() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+        bytes memory proof = abi.encode(0);
+
+        uint256 index = isFast ? 0 : 1;
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        uint256 executionFee;
+        {
+            (uint256 switchboardFees, uint256 verificationFee) = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_b.chainSlug);
+
+            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
+            executionFee = _a.executionManager__.getMinFees(
+                _msgGasLimit,
+                _b.chainSlug
+            );
+
+            uint256 value = switchboardFees +
+                socketFees +
+                verificationFee +
+                executionFee;
+
+            // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+            // verificationFees also should go to Executor, hence we do the additional computation below
+            executionFee = verificationFee + executionFee;
+
+            hoax(_plugOwner);
+            srcCounter__.remoteAddOperation{value: value}(
+                _b.chainSlug,
+                amount,
+                _msgGasLimit
+            );
+        }
+
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+        uint256 packetId;
+        {
+            (
+                bytes32 root_,
+                uint256 packetId_,
+                bytes memory sig_
+            ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+
+            _sealOnSrc(_a, capacitor, sig_);
+            _proposeOnDst(_b, sig_, packetId_, root_);
+
+            packetId = packetId_;
+        }
+
+        vm.expectRevert(NotExecutor.selector);
+        executePayloadOnDst(
+            _b,
+            _a.chainSlug,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            executionFee,
+            payload,
+            proof,
+            _invalidExecutor
+        );
+    }
+
+    function executePayloadOnDst(
+        ChainContext storage dst_,
+        uint256,
+        address remotePlug_,
+        uint256 packetId_,
+        uint256 msgId_,
+        uint256 msgGasLimit_,
+        uint256 executionFee_,
+        bytes memory payload_,
+        bytes memory proof_,
+        address executor
+    ) internal {
+        hoax(executor);
+
+        ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
+            msgId_,
+            executionFee_,
+            msgGasLimit_,
+            payload_,
+            proof_
+        );
+
+        dst_.socket__.execute(packetId_, remotePlug_, msgDetails);
     }
 
     function getLatestSignature(
