@@ -22,6 +22,7 @@ contract SocketDstTest is Setup {
     error AlreadyAttested();
     error InvalidAttester();
     error InsufficientFees();
+    error InvalidProof();
     event ExecutionSuccess(uint256 msgId);
     event ExecutionFailed(uint256 msgId, string result);
     event ExecutionFailedBytes(uint256 msgId, bytes result);
@@ -228,15 +229,21 @@ contract SocketDstTest is Setup {
                 _b.chainSlug
             );
 
-            console.log("executionFee is: ", executionFee);
+            uint256 value = switchboardFees +
+                socketFees +
+                verificationFee +
+                executionFee;
+
+            // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+            // verificationFees also should go to Executor, hence we do the additional computation below
+            executionFee = verificationFee + executionFee;
 
             hoax(_plugOwner);
-            srcCounter__.remoteAddOperation{
-                value: switchboardFees +
-                    socketFees +
-                    verificationFee +
-                    executionFee
-            }(_b.chainSlug, amount, _msgGasLimit);
+            srcCounter__.remoteAddOperation{value: value}(
+                _b.chainSlug,
+                amount,
+                _msgGasLimit
+            );
         }
 
         uint256 msgId = _packMessageId(_a.chainSlug, 0);
@@ -274,6 +281,74 @@ contract SocketDstTest is Setup {
         assertTrue(_b.socket__.messageExecuted(msgId));
 
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
+        _executePayloadOnDst(
+            _b,
+            _a.chainSlug,
+            address(dstCounter__),
+            packetId,
+            msgId,
+            _msgGasLimit,
+            executionFee,
+            payload,
+            proof
+        );
+    }
+
+    function testExecuteMessageWithInvalidProof() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+        bytes memory proof = abi.encode(0);
+
+        uint256 index = isFast ? 0 : 1;
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        uint256 executionFee;
+        {
+            (uint256 switchboardFees, uint256 verificationFee) = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_b.chainSlug);
+
+            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
+            executionFee = _a.executionManager__.getMinFees(
+                _msgGasLimit,
+                _b.chainSlug
+            );
+
+            uint256 value = switchboardFees +
+                socketFees +
+                verificationFee +
+                executionFee;
+
+            hoax(_plugOwner);
+            srcCounter__.remoteAddOperation{value: value}(
+                _b.chainSlug,
+                amount,
+                _msgGasLimit
+            );
+        }
+
+        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+        uint256 packetId;
+        {
+            (
+                bytes32 root_,
+                uint256 packetId_,
+                bytes memory sig_
+            ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+
+            _sealOnSrc(_a, capacitor, sig_);
+            _proposeOnDst(_b, sig_, packetId_, root_);
+
+            packetId = packetId_;
+        }
+
+
+        vm.expectRevert(InvalidProof.selector);
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
