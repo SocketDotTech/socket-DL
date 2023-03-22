@@ -70,9 +70,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlWithUint {
     /**
      * @notice pause execution
      */
-    function tripGlobal(
-        uint256 srcChainSlug_
-    ) external onlyRoleWithUint(srcChainSlug_) {
+    function tripGlobal() external onlyOwner {
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
     }
