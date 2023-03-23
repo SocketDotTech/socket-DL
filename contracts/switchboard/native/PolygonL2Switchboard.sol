@@ -74,7 +74,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         return roots[packetId_] == root_;
     }
 
-    function _getSwitchboardFees(
+    function _getMinSwitchboardFees(
         uint256,
         uint256 dstRelativeGasPrice_,
         uint256 sourceGasPrice_

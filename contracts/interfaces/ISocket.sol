@@ -10,7 +10,7 @@ interface ISocket {
      * @param dstPlug remote plug address
      * @param msgId message id packed with remoteChainSlug and nonce
      * @param msgGasLimit gas limit needed to execute the inbound at remote
-     * @param fees fees provided by msg sender
+     * @param totalFees total fees provided by msg sender
      * @param payload the data which will be used by inbound at remote
      */
     event MessageTransmitted(
@@ -21,7 +21,7 @@ interface ISocket {
         uint256 msgId,
         uint256 msgGasLimit,
         uint256 executionFee,
-        uint256 fees,
+        uint256 totalFees,
         bytes payload
     );
 

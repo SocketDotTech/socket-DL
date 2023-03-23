@@ -14,9 +14,6 @@ abstract contract SocketDst is SocketBase {
     error NotExecutor();
     error VerificationFailed();
 
-    // srcChainSlug => switchboardAddress => executorAddress => fees
-    mapping(uint256 => mapping(address => mapping(address => uint256)))
-        public feesEarned;
     // msgId => message status
     mapping(uint256 => bool) public messageExecuted;
     // capacitorAddr|chainSlug|packetId
@@ -86,10 +83,6 @@ abstract contract SocketDst is SocketBase {
         PlugConfig storage plugConfig = _plugConfigs[
             (uint256(uint160(localPlug_)) << 96) | remoteSlug
         ];
-
-        feesEarned[remoteSlug][address(plugConfig.inboundSwitchboard__)][
-            msg.sender
-        ] += messageDetails_.executionFee;
 
         bytes32 packedMessage = hasher__.packMessage(
             remoteSlug,

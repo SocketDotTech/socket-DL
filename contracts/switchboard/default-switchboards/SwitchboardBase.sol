@@ -22,12 +22,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlWithUint {
     event FeesWithdrawn(address account, uint256 value);
 
     error TransferFailed();
-    error FeesNotEnough();
 
-    function payFees(uint256 dstChainSlug_) external payable override {
-        (uint256 minExpectedFees, ) = _calculateMinFees(dstChainSlug_);
-        if (msg.value < minExpectedFees) revert FeesNotEnough();
-    }
+    function payFees(uint256 dstChainSlug_) external payable override {}
 
     function getMinFees(
         uint256 dstChainSlug_
@@ -42,7 +38,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlWithUint {
             dstChainSlug_
         );
 
-        switchboardFee = _getSwitchboardFees(
+        switchboardFee = _getMinSwitchboardFees(
             dstChainSlug_,
             dstRelativeGasPrice
         );
@@ -51,7 +47,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlWithUint {
             dstRelativeGasPrice;
     }
 
-    function _getSwitchboardFees(
+    function _getMinSwitchboardFees(
         uint256 dstChainSlug_,
         uint256 dstRelativeGasPrice_
     ) internal view virtual returns (uint256);

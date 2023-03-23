@@ -14,9 +14,7 @@ contract ExecutionManager is IExecutionManager, AccessControl {
         0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
 
     event FeesWithdrawn(address account, uint256 amount);
-
     error TransferFailed();
-    error InsufficientExecutionFees();
 
     constructor(
         IGasPriceOracle gasPriceOracle_,
@@ -34,19 +32,16 @@ contract ExecutionManager is IExecutionManager, AccessControl {
     function payFees(
         uint256 msgGasLimit_,
         uint256 siblingChainSlug_
-    ) external payable override {
-        if (msg.value < _getExecutionFees(msgGasLimit_, siblingChainSlug_))
-            revert InsufficientExecutionFees();
-    }
+    ) external payable override {}
 
     function getMinFees(
         uint256 msgGasLimit_,
         uint256 siblingChainSlug_
     ) external view override returns (uint256) {
-        return _getExecutionFees(msgGasLimit_, siblingChainSlug_);
+        return _getMinExecutionFees(msgGasLimit_, siblingChainSlug_);
     }
 
-    function _getExecutionFees(
+    function _getMinExecutionFees(
         uint256 msgGasLimit_,
         uint256 dstChainSlug_
     ) internal view returns (uint256) {

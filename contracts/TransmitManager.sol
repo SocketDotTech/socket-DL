@@ -60,10 +60,7 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
         return (transmitter, _hasRoleWithUint(siblingSlug, transmitter));
     }
 
-    function payFees(uint256 siblingChainSlug_) external payable override {
-        if (msg.value < _calculateMinFees(siblingChainSlug_))
-            revert InsufficientTransmitFees();
-    }
+    function payFees(uint256 siblingChainSlug_) external payable override {}
 
     function getMinFees(
         uint256 siblingChainSlug_

@@ -107,7 +107,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         return true;
     }
 
-    function _getSwitchboardFees(
+    function _getMinSwitchboardFees(
         uint256,
         uint256 dstRelativeGasPrice_,
         uint256 sourceGasPrice_
