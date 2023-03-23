@@ -286,7 +286,6 @@ contract Setup is Test {
         bytes32 digest = keccak256(
             abi.encode(remoteChainSlug_, packetId, root)
         );
-
         sig = _createSignature(digest, _transmitterPrivateKey);
     }
 
@@ -297,7 +296,6 @@ contract Setup is Test {
         bytes32 digest = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest_)
         );
-
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(privateKey_, digest);
         sig = new bytes(65);
         bytes1 v32 = bytes1(sigV);

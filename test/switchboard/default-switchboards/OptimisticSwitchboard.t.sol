@@ -19,6 +19,7 @@ contract OptimisticSwitchboardTest is Setup {
 
     function setUp() external {
         _a.chainSlug = uint32(uint256(1));
+        watcher = vm.addr(_watcherPrivateKey);
 
         vm.startPrank(_socketOwner);
 
@@ -33,17 +34,9 @@ contract OptimisticSwitchboardTest is Setup {
             _executionOverhead
         );
 
-        watcher = vm.addr(_watcherPrivateKey);
-
-        optimisticSwitchboard.grantWatcherRole(
-            remoteChainSlug,
-            vm.addr(_watcherPrivateKey)
-        );
-        optimisticSwitchboard.grantWatcherRole(
-            _a.chainSlug,
-            vm.addr(_watcherPrivateKey)
-        );
-        optimisticSwitchboard.grantWatcherRole(
+        optimisticSwitchboard.grantRoleWithUint(remoteChainSlug, watcher);
+        optimisticSwitchboard.grantRoleWithUint(_a.chainSlug, watcher);
+        optimisticSwitchboard.grantRoleWithUint(
             remoteChainSlug,
             vm.addr(_altWatcherPrivateKey)
         );
@@ -55,7 +48,7 @@ contract OptimisticSwitchboardTest is Setup {
         hoax(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit SwitchboardTripped(true);
-        optimisticSwitchboard.tripGlobal(true);
+        optimisticSwitchboard.tripGlobal();
         assertTrue(optimisticSwitchboard.tripGlobalFuse());
     }
 
@@ -75,32 +68,32 @@ contract OptimisticSwitchboardTest is Setup {
     }
 
     function testTripSingle() external {
-        hoax(_socketOwner);
+        hoax(watcher);
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
-        optimisticSwitchboard.tripPath(srcChainSlug, true);
+        optimisticSwitchboard.tripPath(srcChainSlug);
         assertTrue(optimisticSwitchboard.tripSinglePath(srcChainSlug));
     }
 
     function testNonOwnerToTripSingle() external {
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectRevert();
-        optimisticSwitchboard.tripPath(srcChainSlug, true);
+        optimisticSwitchboard.tripPath(srcChainSlug);
     }
 
     function testUnTripAfterTripSingle() external {
-        hoax(_socketOwner);
+        hoax(watcher);
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
-        optimisticSwitchboard.tripPath(srcChainSlug, true);
+        optimisticSwitchboard.tripPath(srcChainSlug);
         assertTrue(optimisticSwitchboard.tripSinglePath(srcChainSlug));
 
         hoax(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, false);
-        optimisticSwitchboard.tripPath(srcChainSlug, false);
+        optimisticSwitchboard.untripPath(srcChainSlug);
         assertFalse(optimisticSwitchboard.tripSinglePath(srcChainSlug));
     }
 
@@ -129,15 +122,14 @@ contract OptimisticSwitchboardTest is Setup {
         assertFalse(isAllowed);
     }
 
-    function testIsAllowedWhenAPathIsTripped() external {
+    function testIsAllowedWhenAPathIsTrippedByOwner() external {
         uint256 proposeTime = block.timestamp -
             optimisticSwitchboard.timeoutInSeconds();
 
-        hoax(_socketOwner);
-
+        hoax(watcher);
         vm.expectEmit(false, false, false, true);
         emit PathTripped(_a.chainSlug, true);
-        optimisticSwitchboard.tripPath(_a.chainSlug, true);
+        optimisticSwitchboard.tripPath(_a.chainSlug);
 
         bool isAllowed = optimisticSwitchboard.allowPacket(
             0,
@@ -155,34 +147,17 @@ contract OptimisticSwitchboardTest is Setup {
 
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.grantWatcherRole(remoteChainSlug, watcher2);
+        optimisticSwitchboard.grantRoleWithUint(remoteChainSlug, watcher2);
         vm.stopPrank();
     }
 
     function testRevokeWatcherRole() external {
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.revokeWatcherRole(
+        optimisticSwitchboard.revokeRoleWithUint(
             remoteChainSlug,
             vm.addr(_altWatcherPrivateKey)
         );
-        vm.stopPrank();
-    }
-
-    function testRedundantGrantWatcherRole() public {
-        vm.startPrank(_socketOwner);
-
-        vm.expectRevert(WatcherFound.selector);
-        optimisticSwitchboard.grantWatcherRole(remoteChainSlug, watcher);
-
-        vm.stopPrank();
-    }
-
-    function testRevokeWatcherRoleFail() public {
-        vm.startPrank(_socketOwner);
-
-        vm.expectRevert(WatcherNotFound.selector);
-        optimisticSwitchboard.revokeWatcherRole(remoteChainSlug, vm.addr(c++));
         vm.stopPrank();
     }
 }
