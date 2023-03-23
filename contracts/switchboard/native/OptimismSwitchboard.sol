@@ -8,7 +8,7 @@ import "./NativeSwitchboardBase.sol";
 
 contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
     uint256 public receivePacketGasLimit;
-    uint256 public l2ReceiveGasLimit;
+    uint256 public l1ReceiveGasLimit;
 
     address public remoteNativeSwitchboard;
     // stores the roots received from native bridge
@@ -19,7 +19,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
     event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit);
     event RootReceived(uint256 packetId, bytes32 root);
-    event UpdatedL2ReceiveGasLimit(uint256 l2ReceiveGasLimit);
+    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit);
 
     error InvalidSender();
     error NoRootFound();
@@ -35,7 +35,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
 
     constructor(
         uint256 receivePacketGasLimit_,
-        uint256 l2ReceiveGasLimit_,
+        uint256 l1ReceiveGasLimit_,
         uint256 initialConfirmationGasLimit_,
         uint256 executionOverhead_,
         address remoteNativeSwitchboard_,
@@ -44,7 +44,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
     ) AccessControl(owner_) {
         receivePacketGasLimit = receivePacketGasLimit_;
 
-        l2ReceiveGasLimit = l2ReceiveGasLimit_;
+        l1ReceiveGasLimit = l1ReceiveGasLimit_;
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
         executionOverhead = executionOverhead_;
 
@@ -112,19 +112,19 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         uint256 dstRelativeGasPrice_,
         uint256 sourceGasPrice_
     ) internal view override returns (uint256) {
-        // l2ReceiveGasLimit will be 0 when switchboard is deployed on L1
+        // l1ReceiveGasLimit will be 0 when switchboard is deployed on L1
         return
             initateNativeConfirmationGasLimit *
             sourceGasPrice_ +
-            l2ReceiveGasLimit *
+            l1ReceiveGasLimit *
             dstRelativeGasPrice_;
     }
 
-    function updateL2ReceiveGasLimit(
-        uint256 l2ReceiveGasLimit_
+    function updateL1ReceiveGasLimit(
+        uint256 l1ReceiveGasLimit_
     ) external onlyOwner {
-        l2ReceiveGasLimit = l2ReceiveGasLimit_;
-        emit UpdatedL2ReceiveGasLimit(l2ReceiveGasLimit_);
+        l1ReceiveGasLimit = l1ReceiveGasLimit_;
+        emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
     }
 
     function updateRemoteNativeSwitchboard(

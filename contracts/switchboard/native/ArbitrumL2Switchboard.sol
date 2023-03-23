@@ -98,7 +98,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
             dstRelativeGasPrice_;
     }
 
-    function updateL2ReceiveGasLimit(
+    function updateL1ReceiveGasLimit(
         uint256 l1ReceiveGasLimit_
     ) external onlyOwner {
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
