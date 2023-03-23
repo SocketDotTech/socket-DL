@@ -93,5 +93,5 @@ export function getJsonRpcUrl(chain: keyof typeof chainIds): string {
 
 export const getProviderFromChainName = (chainId: keyof typeof chainIds) => {
   const jsonRpcUrl = getJsonRpcUrl(chainId);
-  return new ethers.providers.JsonRpcProvider(jsonRpcUrl);
+  return new ethers.providers.StaticJsonRpcProvider(jsonRpcUrl);
 };
