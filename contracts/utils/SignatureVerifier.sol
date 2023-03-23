@@ -14,12 +14,13 @@ contract SignatureVerifier is ISignatureVerifier {
         bytes32 root_,
         bytes calldata signature_
     ) external pure override returns (address signer) {
-        return SignatureVerifierLib.recoverSigner(
-            destChainSlug_,
-            packetId_,
-            root_,
-            signature_
-        );
+        return
+            SignatureVerifierLib.recoverSigner(
+                destChainSlug_,
+                packetId_,
+                root_,
+                signature_
+            );
     }
 
     /**
@@ -29,6 +30,7 @@ contract SignatureVerifier is ISignatureVerifier {
         bytes32 digest_,
         bytes memory signature_
     ) public pure override returns (address signer) {
-        return SignatureVerifierLib.recoverSignerFromDigest(digest_, signature_);
+        return
+            SignatureVerifierLib.recoverSignerFromDigest(digest_, signature_);
     }
 }
