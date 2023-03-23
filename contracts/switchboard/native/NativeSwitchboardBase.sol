@@ -25,9 +25,13 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     event FeesWithdrawn(address account, uint256 value);
 
     error TransferFailed();
+    error FeesNotEnough();
 
     // assumption: natives have 18 decimals
-    function payFees(uint256 dstChainSlug_) external payable override {}
+    function payFees(uint256 dstChainSlug_) external payable override {
+        (uint256 expectedFees, ) = _calculateMinFees(dstChainSlug_);
+        if (msg.value < expectedFees) revert FeesNotEnough();
+    }
 
     function getMinFees(
         uint256 dstChainSlug_
