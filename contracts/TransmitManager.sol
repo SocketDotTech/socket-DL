@@ -12,13 +12,14 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
     ISignatureVerifier public signatureVerifier__;
     IGasPriceOracle public gasPriceOracle__;
 
-    uint256 public chainSlug;
+    uint256 public immutable chainSlug;
     uint256 public sealGasLimit;
     mapping(uint256 => uint256) public proposeGasLimit;
 
     error TransferFailed();
     error InsufficientTransmitFees();
 
+    event GasPriceOracleSet(address gasPriceOracle);
     event SealGasLimitSet(uint256 gasLimit);
     event ProposeGasLimitSet(uint256 dstChainSlug, uint256 gasLimit);
     event FeesWithdrawn(address account, uint256 value);
@@ -43,6 +44,8 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
     }
 
     // @param slugs_ packs the siblingChainSlug & sigChainSlug
+    // @dev signature sent to this function can be reused on other chains
+    // @dev hence caller should add some identifier to stop this.
     // slugs_(256) = siblingChainSlug(128) | sigChainSlug(128)
     // @dev sibling chain slug is required to check the transmitter role
     // @dev sig chain slug is required by signature. On src, this is sibling slug while on
@@ -117,6 +120,15 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
     ) external onlyOwner {
         proposeGasLimit[dstChainSlug_] = gasLimit_;
         emit ProposeGasLimitSet(dstChainSlug_, gasLimit_);
+    }
+
+    /**
+     * @notice updates gasPriceOracle__
+     * @param gasPriceOracle_ address of Gas Price Oracle
+     */
+    function setGasPriceOracle(address gasPriceOracle_) external onlyOwner {
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
+        emit GasPriceOracleSet(gasPriceOracle_);
     }
 
     /**
