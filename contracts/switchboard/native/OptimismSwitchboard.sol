@@ -68,7 +68,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
 
     function initateNativeConfirmation(uint256 packetId_) external {
         uint256 capacitorPacketCount = uint256(uint64(packetId_));
-        bytes32 root = capacitor__.getRootById(capacitorPacketCount);
+        bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
         bytes memory data = abi.encodeWithSelector(
             INativeReceiver.receivePacket.selector,
             packetId_,

@@ -111,13 +111,13 @@ contract SingleCapacitorTest is Test {
 
     function _assertNextPacket(bytes32 root_, uint256 packetId_) private {
         uint256 nextPacketId = _sa.getLatestPacketCount() + 1;
-        bytes32 root = _sa.getRootById(nextPacketId);
+        bytes32 root = _sa.getRootByCount(nextPacketId);
         assertEq(root, root_, "Root Invalid");
         assertEq(nextPacketId, packetId_, "packetId Invalid");
     }
 
     function _assertPacketById(bytes32 root_, uint256 packetId_) private {
-        bytes32 root = _sa.getRootById(packetId_);
+        bytes32 root = _sa.getRootByCount(packetId_);
         assertEq(root, root_, "Root Invalid");
     }
 

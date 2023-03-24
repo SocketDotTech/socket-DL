@@ -36,7 +36,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
      */
     function initateNativeConfirmation(uint256 packetId_) external payable {
         uint256 capacitorPacketCount = uint256(uint64(packetId_));
-        bytes32 root = capacitor__.getRootById(capacitorPacketCount);
+        bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encode(packetId_, root);

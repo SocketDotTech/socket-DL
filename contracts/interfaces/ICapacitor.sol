@@ -37,7 +37,7 @@ interface ICapacitor {
      * @param id the id assigned to packet
      * @return root root hash corresponding to given id
      */
-    function getRootById(uint256 id) external view returns (bytes32 root);
+    function getRootByCount(uint256 id) external view returns (bytes32 root);
 
     /**
      * @notice seals the packet

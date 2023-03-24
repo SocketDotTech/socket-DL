@@ -46,7 +46,7 @@ abstract contract BaseCapacitor is ICapacitor, Ownable {
 
     /// returns the root of packet for given id
     /// @inheritdoc ICapacitor
-    function getRootById(
+    function getRootByCount(
         uint256 id_
     ) external view virtual override returns (bytes32) {
         return _roots[id_];
