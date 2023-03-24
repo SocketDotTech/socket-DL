@@ -71,7 +71,12 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
             .checkTransmitter(
                 siblingChainSlug_,
                 keccak256(
-                    abi.encode(siblingChainSlug_, nonce_, relativeGasPrice_)
+                    abi.encode(
+                        chainSlug,
+                        siblingChainSlug_,
+                        nonce_,
+                        relativeGasPrice_
+                    )
                 ),
                 signature_
             );
