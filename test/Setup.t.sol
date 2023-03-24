@@ -44,6 +44,7 @@ contract Setup is Test {
     uint256 internal _capacitorType = 1;
     bytes32 internal EXECUTOR_ROLE =
         0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
+    uint256 internal constant DEFAULT_BATCH_LENGTH = 0;
 
     struct SocketConfigContext {
         uint256 siblingChainSlug;
@@ -232,6 +233,7 @@ contract Setup is Test {
         vm.startPrank(deployer_);
         cc_.socket__.registerSwitchBoard(
             switchBoardAddress_,
+            DEFAULT_BATCH_LENGTH,
             uint32(remoteChainSlug_),
             uint32(capacitorType_)
         );
@@ -313,7 +315,7 @@ contract Setup is Test {
         bytes memory sig_
     ) internal {
         hoax(_raju);
-        src_.socket__.seal(capacitor, sig_);
+        src_.socket__.seal(DEFAULT_BATCH_LENGTH, capacitor, sig_);
     }
 
     function _proposeOnDst(

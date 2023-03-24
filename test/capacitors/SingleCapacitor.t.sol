@@ -17,29 +17,16 @@ contract SingleCapacitorTest is Test {
 
     function setUp() external {
         hoax(_owner);
-        _sa = new SingleCapacitor(_socket);
+        _sa = new SingleCapacitor(_socket, _owner);
     }
 
     function testSetUp() external {
         assertEq(_sa.owner(), _owner, "Owner not set");
 
-        assertTrue(
-            _sa.hasRole(_sa.SOCKET_ROLE(), _socket),
-            "Socket role not set"
-        );
+        assertTrue(_sa.socket() == _socket, "Socket role not set");
 
         _assertPacketById(bytes32(0), 0);
         _assertPacketToBeSealed(bytes32(0), 0);
-    }
-
-    function testSetSocket() external {
-        address newSocket = address(8);
-        vm.expectRevert(Ownable.OnlyOwner.selector);
-        _sa.setSocket(newSocket);
-
-        hoax(_owner);
-        _sa.setSocket(newSocket);
-        assertTrue(_sa.hasRole(_sa.SOCKET_ROLE(), newSocket));
     }
 
     function testAddMessage() external {
@@ -101,10 +88,7 @@ contract SingleCapacitorTest is Test {
 
     function testAddMessageByRaju() external {
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControl.NoPermit.selector,
-                _sa.SOCKET_ROLE()
-            )
+            abi.encodeWithSelector(BaseCapacitor.OnlySocket.selector)
         );
         hoax(_raju);
         _sa.addPackedMessage(_message_0);
@@ -113,13 +97,10 @@ contract SingleCapacitorTest is Test {
     function testSealPacketByRaju() external {
         _addPackedMessage(_message_0);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControl.NoPermit.selector,
-                _sa.SOCKET_ROLE()
-            )
+            abi.encodeWithSelector(BaseCapacitor.OnlySocket.selector)
         );
         hoax(_raju);
-        _sa.sealPacket();
+        _sa.sealPacket(0);
     }
 
     function _assertPacketToBeSealed(bytes32 root_, uint256 packetId_) private {
@@ -147,6 +128,6 @@ contract SingleCapacitorTest is Test {
 
     function _sealPacket() private returns (bytes32 root, uint256 packetId) {
         hoax(_socket);
-        (root, packetId) = _sa.sealPacket();
+        (root, packetId) = _sa.sealPacket(0);
     }
 }
