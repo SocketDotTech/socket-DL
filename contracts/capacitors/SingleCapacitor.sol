@@ -7,16 +7,19 @@ contract SingleCapacitor is BaseCapacitor {
     /**
      * @notice initialises the contract with socket address
      */
-    constructor(address socket_) BaseCapacitor(socket_) {}
+    constructor(
+        address socket_,
+        address owner_
+    ) BaseCapacitor(socket_, owner_) {}
 
     /// adds the packed message to a packet
     /// @inheritdoc ICapacitor
     function addPackedMessage(
         bytes32 packedMessage_
-    ) external override onlyRole(SOCKET_ROLE) {
-        uint256 packetCount = _packets;
+    ) external override onlySocket {
+        uint256 packetCount = _nextPacketCount;
         _roots[packetCount] = packedMessage_;
-        _packets++;
+        _nextPacketCount++;
 
         emit MessageAdded(packedMessage_, packetCount, packedMessage_);
     }
@@ -25,10 +28,10 @@ contract SingleCapacitor is BaseCapacitor {
         external
         virtual
         override
-        onlyRole(SOCKET_ROLE)
+        onlySocket
         returns (bytes32, uint256)
     {
-        uint256 packetCount = _sealedPackets++;
+        uint256 packetCount = _nextSealCount++;
         bytes32 root = _roots[packetCount];
 
         if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();

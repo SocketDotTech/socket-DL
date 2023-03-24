@@ -32,14 +32,9 @@ contract HashChainCapacitor is BaseCapacitor {
         emit MessageAdded(packedMessage_, packetCount, _roots[packetCount]);
     }
 
-    function sealPacket()
-        external
-        virtual
-        override
-        onlyRole(SOCKET_ROLE)
-        returns (bytes32, uint256)
-    {
-        uint256 packetCount = _sealedPackets++;
+    function sealPacket(
+    ) external virtual override onlySocket returns (bytes32, uint256) {
+        uint256 packetCount = _nextSealCount++;
 
         if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
         bytes32 root = _roots[packetCount];
