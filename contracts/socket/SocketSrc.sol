@@ -159,11 +159,12 @@ abstract contract SocketSrc is SocketBase {
     }
 
     function seal(
+        uint256 batchSize_,
         address capacitorAddress_,
         bytes calldata signature_
     ) external payable nonReentrant {
         (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
-            .sealPacket();
+            .sealPacket(batchSize_);
 
         uint256 packetId = (chainSlug << 224) |
             (uint256(uint160(capacitorAddress_)) << 64) |

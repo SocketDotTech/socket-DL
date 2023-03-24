@@ -46,5 +46,7 @@ interface ICapacitor {
      * @return root root hash of the packet
      * @return packetCount id of the packed sealed
      */
-    function sealPacket() external returns (bytes32 root, uint256 packetCount);
+    function sealPacket(
+        uint256 batchSize_
+    ) external returns (bytes32 root, uint256 packetCount);
 }
