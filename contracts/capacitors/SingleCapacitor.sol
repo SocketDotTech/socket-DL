@@ -32,8 +32,6 @@ contract SingleCapacitor is BaseCapacitor {
         bytes32 root = _roots[packetCount];
 
         if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
-
-        emit PacketComplete(root, packetCount);
         return (root, packetCount);
     }
 }

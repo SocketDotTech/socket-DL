@@ -44,7 +44,6 @@ contract HashChainCapacitor is BaseCapacitor {
         if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
         bytes32 root = _roots[packetCount];
 
-        emit PacketComplete(root, packetCount);
         return (root, packetCount);
     }
 }
