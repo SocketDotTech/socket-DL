@@ -6,6 +6,7 @@ import "./capacitors/SingleCapacitor.sol";
 import "./capacitors/HashChainCapacitor.sol";
 import "./decapacitors/SingleDecapacitor.sol";
 import "./decapacitors/HashChainDecapacitor.sol";
+
 import "./libraries/RescueFundsLib.sol";
 import "./utils/Ownable.sol";
 
@@ -17,12 +18,18 @@ contract CapacitorFactory is ICapacitorFactory, Ownable(msg.sender) {
         uint256 capacitorType_,
         uint256 /** siblingChainSlug */
     ) external override returns (ICapacitor, IDecapacitor) {
+        address owner = this.owner();
+
         if (capacitorType_ == SINGLE_CAPACITOR) {
+            return (
+                new SingleCapacitor(msg.sender, owner),
+                new SingleDecapacitor(owner)
+            );
         }
         if (capacitorType_ == HASH_CHAIN_CAPACITOR) {
             return (
-                new HashChainCapacitor(msg.sender),
-                new HashChainDecapacitor()
+                new HashChainCapacitor(msg.sender, owner),
+                new HashChainDecapacitor(owner)
             );
         }
         revert InvalidCapacitorType();
