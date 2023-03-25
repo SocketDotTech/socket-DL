@@ -16,6 +16,8 @@ contract ExecutionManager is IExecutionManager, AccessControl {
         0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
 
     event FeesWithdrawn(address account, uint256 amount);
+    event GasPriceOracleSet(address gasPriceOracle);
+
     error TransferFailed();
 
     constructor(
@@ -56,6 +58,15 @@ contract ExecutionManager is IExecutionManager, AccessControl {
             dstChainSlug_
         );
         return msgGasLimit_ * dstRelativeGasPrice;
+    }
+
+    /**
+     * @notice updates gasPriceOracle__
+     * @param gasPriceOracle_ address of Gas Price Oracle
+     */
+    function setGasPriceOracle(address gasPriceOracle_) external onlyOwner {
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
+        emit GasPriceOracleSet(gasPriceOracle_);
     }
 
     // TODO: to support fee distribution
