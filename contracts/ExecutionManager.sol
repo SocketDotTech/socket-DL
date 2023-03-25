@@ -4,7 +4,9 @@ pragma solidity 0.8.7;
 import "./interfaces/IExecutionManager.sol";
 import "./interfaces/IGasPriceOracle.sol";
 import "./utils/AccessControl.sol";
+
 import "./libraries/RescueFundsLib.sol";
+import "./libraries/SignatureVerifierLib.sol";
 
 contract ExecutionManager is IExecutionManager, AccessControl {
     IGasPriceOracle public gasPriceOracle__;
@@ -24,9 +26,14 @@ contract ExecutionManager is IExecutionManager, AccessControl {
     }
 
     function isExecutor(
-        address executor_
-    ) external view override returns (bool) {
-        return _hasRole(_EXECUTOR_ROLE, executor_);
+        bytes32 packedMessage,
+        bytes memory sig
+    ) external view override returns (address executor, bool isValidExecutor) {
+        executor = SignatureVerifierLib.recoverSignerFromDigest(
+            packedMessage,
+            sig
+        );
+        isValidExecutor = _hasRole(_EXECUTOR_ROLE, executor);
     }
 
     function payFees(
@@ -52,6 +59,7 @@ contract ExecutionManager is IExecutionManager, AccessControl {
     }
 
     // TODO: to support fee distribution
+    // lib same as rescueFunds
     /**
      * @notice transfers the fees collected to `account_`
      * @param account_ address to transfer ETH

@@ -101,7 +101,8 @@ interface ISocket {
     function execute(
         uint256 packetId,
         address localPlug,
-        ISocket.MessageDetails calldata messageDetails_
+        ISocket.MessageDetails calldata messageDetails_,
+        bytes memory signature
     ) external;
 
     /**
