@@ -19,9 +19,6 @@ contract ExecutionManagerTest is Setup {
     uint256 immutable ownerPrivateKey = c++;
     address owner;
 
-    uint256 immutable executorPrivateKey = c++;
-    address executor;
-
     uint256 immutable nonExecutorPrivateKey = c++;
     address nonExecutor;
 
@@ -51,10 +48,11 @@ contract ExecutionManagerTest is Setup {
     function setUp() public {
         owner = vm.addr(ownerPrivateKey);
         transmitter = vm.addr(transmitterPrivateKey);
-        executor = vm.addr(executorPrivateKey);
         nonExecutor = vm.addr(nonExecutorPrivateKey);
         feesPayer = vm.addr(feesPayerPrivateKey);
         feesWithdrawer = vm.addr(feesWithdrawerPrivateKey);
+
+        _executor = vm.addr(executorPrivateKey);
 
         gasPriceOracle = new GasPriceOracle(owner, chainSlug);
         executionManager = new ExecutionManager(gasPriceOracle, owner);
@@ -69,7 +67,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         vm.startPrank(owner);
-        executionManager.grantRole(EXECUTOR_ROLE, executor);
+        executionManager.grantRole(EXECUTOR_ROLE, _executor);
         transmitManager.grantRoleWithUint(chainSlug, transmitter);
         transmitManager.grantRoleWithUint(destChainSlug, transmitter);
         gasPriceOracle.setTransmitManager(transmitManager);
@@ -108,7 +106,13 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testIsExecutor() public {
-        assertTrue(executionManager.isExecutor(executor));
+        bytes32 packedMessage = bytes32("RANDOM_ROOT");
+        bytes memory sig = _createSignature(packedMessage, executorPrivateKey);
+        (, bool isValidExecutor) = executionManager.isExecutor(
+            packedMessage,
+            sig
+        );
+        assertTrue(isValidExecutor);
     }
 
     function testGetMinFees() public {
