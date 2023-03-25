@@ -14,18 +14,22 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
     // chain slug => relative gas price
     mapping(uint256 => uint256) public override relativeGasPrice;
 
-    mapping(address => mapping(uint256 => bool)) public nonces;
+    // transmitter => nextNonce
+    mapping(address => uint256) public nextNonce;
 
     // gas price of source chain
     uint256 public override sourceGasPrice;
     uint256 public immutable chainSlug;
 
-    event GasPriceUpdated(uint256 dstChainSlug, uint256 relativeGasPrice);
     event TransmitManagerUpdated(address transmitManager);
+    event RelativeGasPriceUpdated(
+        uint256 dstChainSlug,
+        uint256 relativeGasPrice
+    );
     event SourceGasPriceUpdated(uint256 sourceGasPrice);
 
     error TransmitterNotFound();
-    error SignatureAlreadyUsed();
+    error NonceAlreadyUsed();
 
     constructor(address owner_, uint256 chainSlug_) Ownable(owner_) {
         chainSlug = chainSlug_;
@@ -48,10 +52,13 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
             );
 
         if (!isTransmitter) revert TransmitterNotFound();
-        if (nonces[transmitter][nonce_]) revert SignatureAlreadyUsed();
 
-        nonces[transmitter][nonce_] = true;
+        uint256 nonce = nextNonce[transmitter]++;
+        if (nonce_ != nonce) revert NonceAlreadyUsed();
+
         sourceGasPrice = sourceGasPrice_;
+        updatedAt[chainSlug] = block.timestamp;
+
         emit SourceGasPriceUpdated(sourceGasPrice);
     }
 
@@ -82,13 +89,13 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
             );
 
         if (!isTransmitter) revert TransmitterNotFound();
-        if (nonces[transmitter][nonce_]) revert SignatureAlreadyUsed();
+        uint256 nonce = nextNonce[transmitter]++;
+        if (nonce_ != nonce) revert NonceAlreadyUsed();
 
-        nonces[transmitter][nonce_] = true;
         relativeGasPrice[siblingChainSlug_] = relativeGasPrice_;
         updatedAt[siblingChainSlug_] = block.timestamp;
 
-        emit GasPriceUpdated(siblingChainSlug_, relativeGasPrice_);
+        emit RelativeGasPriceUpdated(siblingChainSlug_, relativeGasPrice_);
     }
 
     function getGasPrices(
