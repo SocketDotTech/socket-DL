@@ -5,8 +5,8 @@ import "../../interfaces/native-bridge/IInbox.sol";
 import "../../interfaces/native-bridge/IOutbox.sol";
 import "../../interfaces/native-bridge/IBridge.sol";
 import "../../interfaces/native-bridge/INativeReceiver.sol";
-
 import "./NativeSwitchboardBase.sol";
+import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     address public remoteRefundAddress;
@@ -135,7 +135,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     function updateRefundAddresses(
         address remoteRefundAddress_,
         address callValueRefundAddress_
-    ) external onlyOwner {
+    ) external onlyRole(GOVERNANCE_ROLE) {
         remoteRefundAddress = remoteRefundAddress_;
         callValueRefundAddress = callValueRefundAddress_;
 
@@ -145,19 +145,23 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         );
     }
 
-    function updateDynamicFees(uint256 dynamicFees_) external onlyOwner {
+    function updateDynamicFees(
+        uint256 dynamicFees_
+    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         dynamicFees = dynamicFees_;
         emit UpdatedDynamicFees(dynamicFees_);
     }
 
-    function updateInboxAddresses(address inbox_) external onlyOwner {
+    function updateInboxAddresses(
+        address inbox_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         inbox__ = IInbox(inbox_);
         emit UpdatedInboxAddress(inbox_);
     }
 
     function updateRemoteNativeSwitchboard(
         address remoteNativeSwitchboard_
-    ) external onlyOwner {
+    ) external onlyRole(GOVERNANCE_ROLE) {
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }
