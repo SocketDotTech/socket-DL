@@ -6,6 +6,7 @@ import "../../interfaces/native-bridge/INativeReceiver.sol";
 
 import "../../libraries/AddressAliasHelper.sol";
 import "./NativeSwitchboardBase.sol";
+import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
     address public remoteNativeSwitchboard;
@@ -100,14 +101,14 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
 
     function updateL1ReceiveGasLimit(
         uint256 l1ReceiveGasLimit_
-    ) external onlyOwner {
+    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
         emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
     }
 
     function updateRemoteNativeSwitchboard(
         address remoteNativeSwitchboard_
-    ) external onlyOwner {
+    ) external onlyRole(GOVERNANCE_ROLE) {
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }
