@@ -5,6 +5,7 @@ import "../../interfaces/native-bridge/ICrossDomainMessenger.sol";
 import "../../interfaces/native-bridge/INativeReceiver.sol";
 
 import "./NativeSwitchboardBase.sol";
+import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
     uint256 public receivePacketGasLimit;
@@ -122,21 +123,21 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
 
     function updateL1ReceiveGasLimit(
         uint256 l1ReceiveGasLimit_
-    ) external onlyOwner {
+    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
         emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
     }
 
     function updateRemoteNativeSwitchboard(
         address remoteNativeSwitchboard_
-    ) external onlyOwner {
+    ) external onlyRole(GOVERNANCE_ROLE) {
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }
 
     function updateReceivePacketGasLimit(
         uint256 receivePacketGasLimit_
-    ) external onlyOwner {
+    ) external onlyRole(GOVERNANCE_ROLE) {
         receivePacketGasLimit = receivePacketGasLimit_;
         emit UpdatedReceivePacketGasLimit(receivePacketGasLimit_);
     }
