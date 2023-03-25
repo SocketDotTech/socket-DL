@@ -5,11 +5,11 @@ import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IGasPriceOracle.sol";
 import "../../interfaces/ICapacitor.sol";
 
-import "../../utils/AccessControlWithUint.sol";
+import "../../utils/AccessControlExtended.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
-abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
+abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
     ICapacitor public capacitor__;
 
