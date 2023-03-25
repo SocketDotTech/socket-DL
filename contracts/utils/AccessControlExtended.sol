@@ -21,6 +21,12 @@ abstract contract AccessControlExtended is AccessControl {
         _grantRole(bytes32(role_), grantee_);
     }
 
+    modifier onlyRole(bytes32 roleName_, uint256 chainSlug_) {
+        if (!_hasRole(bytes32(abi.encode(roleName_, chainSlug_)), msg.sender))
+            revert NoPermit(role_);
+        _;
+    }
+
     function grantRole(
         bytes32 roleName_,
         uint256 chainSlug_,
