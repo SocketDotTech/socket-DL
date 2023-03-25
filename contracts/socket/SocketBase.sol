@@ -5,16 +5,14 @@ import "../interfaces/IHasher.sol";
 import "../interfaces/ITransmitManager.sol";
 import "../interfaces/IExecutionManager.sol";
 
-import "../utils/ReentrancyGuard.sol";
 import "./SocketConfig.sol";
 
-abstract contract SocketBase is SocketConfig, ReentrancyGuard {
+abstract contract SocketBase is SocketConfig {
     IHasher public hasher__;
     ITransmitManager public transmitManager__;
     IExecutionManager public executionManager__;
 
     uint256 public chainSlug;
-
     error InvalidAttester();
 
     event HasherSet(address hasher);

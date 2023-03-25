@@ -36,8 +36,8 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable override returns (uint256 msgId) {
-        PlugConfig storage plugConfig = _plugConfigs[
-            (uint256(uint160(msg.sender)) << 96) | remoteChainSlug_
+        PlugConfig storage plugConfig = _plugConfigs[msg.sender][
+            remoteChainSlug_
         ];
         uint256 localChainSlug = chainSlug;
 
@@ -112,9 +112,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 remoteChainSlug_,
         address plug_
     ) external view returns (uint256 executionFee) {
-        PlugConfig storage plugConfig = _plugConfigs[
-            (uint256(uint160(plug_)) << 96) | remoteChainSlug_
-        ];
+        PlugConfig storage plugConfig = _plugConfigs[plug_][remoteChainSlug_];
 
         (
             uint256 transmitFees,
@@ -162,7 +160,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 batchSize_,
         address capacitorAddress_,
         bytes calldata signature_
-    ) external payable nonReentrant {
+    ) external payable {
         (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket(batchSize_);
 

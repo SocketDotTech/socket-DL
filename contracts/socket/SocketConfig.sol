@@ -5,7 +5,6 @@ import "../interfaces/ISocket.sol";
 import "../utils/Ownable.sol";
 import "../interfaces/ICapacitorFactory.sol";
 import "../interfaces/ISwitchboard.sol";
-import {AccessControl} from "../utils/AccessControl.sol";
 
 abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
     struct PlugConfig {
@@ -26,8 +25,8 @@ abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
     // switchboard => siblingChainSlug => IDecapacitor
     mapping(address => mapping(uint256 => IDecapacitor)) public decapacitors__;
 
-    // plug | remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
-    mapping(uint256 => PlugConfig) internal _plugConfigs;
+    // plug => remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
+    mapping(address => mapping(uint256 => PlugConfig)) internal _plugConfigs;
 
     event SwitchboardAdded(
         address switchboard,
@@ -45,6 +44,7 @@ abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
         emit CapacitorFactorySet(capacitorFactory_);
     }
 
+    // it's msg.sender's responsibility to set correct sibling slug
     function registerSwitchBoard(
         address switchBoardAddress_,
         uint256 maxBatchLength_,
@@ -91,8 +91,8 @@ abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
             address(0)
         ) revert InvalidConnection();
 
-        PlugConfig storage _plugConfig = _plugConfigs[
-            (uint256(uint160(msg.sender)) << 96) | siblingChainSlug_
+        PlugConfig storage _plugConfig = _plugConfigs[msg.sender][
+            siblingChainSlug_
         ];
 
         _plugConfig.siblingPlug = siblingPlug_;
@@ -130,8 +130,8 @@ abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
             address decapacitor__
         )
     {
-        PlugConfig memory _plugConfig = _plugConfigs[
-            (uint256(uint160(plugAddress_)) << 96) | siblingChainSlug_
+        PlugConfig memory _plugConfig = _plugConfigs[plugAddress_][
+            siblingChainSlug_
         ];
 
         return (

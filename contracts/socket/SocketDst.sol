@@ -63,7 +63,7 @@ abstract contract SocketDst is SocketBase {
     }
 
     /**
-     * @notice executes a message
+     * @notice executes a message, fees will go to recovered executor address
      * @param packetId_ packet id
      * @param localPlug_ remote plug address
      * @param messageDetails_ the details needed for message verification
@@ -80,9 +80,7 @@ abstract contract SocketDst is SocketBase {
 
         uint256 remoteSlug = uint256(messageDetails_.msgId >> 224);
 
-        PlugConfig storage plugConfig = _plugConfigs[
-            (uint256(uint160(localPlug_)) << 96) | remoteSlug
-        ];
+        PlugConfig storage plugConfig = _plugConfigs[localPlug_][remoteSlug];
 
         bytes32 packedMessage = hasher__.packMessage(
             remoteSlug,
