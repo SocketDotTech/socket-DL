@@ -7,6 +7,7 @@ import "./utils/AccessControl.sol";
 
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/SignatureVerifierLib.sol";
+import "./libraries/FeesHelper.sol";
 
 contract ExecutionManager is IExecutionManager, AccessControl {
     IGasPriceOracle public gasPriceOracle__;
@@ -15,7 +16,6 @@ contract ExecutionManager is IExecutionManager, AccessControl {
     bytes32 private constant _EXECUTOR_ROLE =
         0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
 
-    event FeesWithdrawn(address account, uint256 amount);
     event GasPriceOracleSet(address gasPriceOracle);
 
     error TransferFailed();
@@ -69,20 +69,8 @@ contract ExecutionManager is IExecutionManager, AccessControl {
         emit GasPriceOracleSet(gasPriceOracle_);
     }
 
-    // TODO: to support fee distribution
-    // lib same as rescueFunds
-    /**
-     * @notice transfers the fees collected to `account_`
-     * @param account_ address to transfer ETH
-     */
     function withdrawFees(address account_) external onlyOwner {
-        require(account_ != address(0));
-
-        uint256 amount = address(this).balance;
-        (bool success, ) = account_.call{value: amount}("");
-        if (!success) revert TransferFailed();
-
-        emit FeesWithdrawn(account_, amount);
+        FeesHelper.withdrawFees(account_);
     }
 
     function rescueFunds(

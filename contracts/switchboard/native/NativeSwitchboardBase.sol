@@ -7,6 +7,7 @@ import "../../interfaces/ICapacitor.sol";
 
 import "../../utils/AccessControlWithUint.sol";
 import "../../libraries/RescueFundsLib.sol";
+import "../../libraries/FeesHelper.sol";
 
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     IGasPriceOracle public gasPriceOracle__;
@@ -22,7 +23,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     event CapacitorSet(address capacitor);
     event GasPriceOracleSet(address gasPriceOracle);
     event InitiatedNativeConfirmation(uint256 packetId);
-    event FeesWithdrawn(address account, uint256 value);
 
     error TransferFailed();
     error FeesNotEnough();
@@ -127,19 +127,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
         emit GasPriceOracleSet(gasPriceOracle_);
     }
 
-    // TODO: to support fee distribution
-    /**
-     * @notice transfers the fees collected to `account_`
-     * @param account_ address to transfer ETH
-     */
     function withdrawFees(address account_) external onlyOwner {
-        require(account_ != address(0));
-
-        uint256 value = address(this).balance;
-        (bool success, ) = account_.call{value: value}("");
-        if (!success) revert TransferFailed();
-
-        emit FeesWithdrawn(account_, value);
+        FeesHelper.withdrawFees(account_);
     }
 
     function rescueFunds(
