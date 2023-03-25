@@ -93,7 +93,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @notice pause execution
      */
-    function tripGlobal(uint256 srcChainSlug_) external onlyRole(TRIP_ROLE) {
+    function tripGlobal() external onlyRole(TRIP_ROLE) {
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
     }
