@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import "fx-portal/tunnel/FxBaseChildTunnel.sol";
 import "./NativeSwitchboardBase.sol";
+import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     // stores the roots received from native bridge
@@ -88,7 +89,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
 
     function updateL1ReceiveGasLimit(
         uint256 l1ReceiveGasLimit_
-    ) external onlyOwner {
+    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
         emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
     }
@@ -97,12 +98,16 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
      * @notice Update the address of the FxChild
      * @param fxChild_ The address of the new FxChild
      **/
-    function updateFxChild(address fxChild_) external onlyOwner {
+    function updateFxChild(
+        address fxChild_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         emit FxChildUpdate(fxChild, fxChild_);
         fxChild = fxChild_;
     }
 
-    function updateFxRootTunnel(address fxRootTunnel_) external onlyOwner {
+    function updateFxRootTunnel(
+        address fxRootTunnel_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         emit FxRootTunnelSet(fxRootTunnel, fxRootTunnel_);
         fxRootTunnel = fxRootTunnel_;
     }
