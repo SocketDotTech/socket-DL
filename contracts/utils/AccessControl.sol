@@ -2,9 +2,8 @@
 pragma solidity 0.8.7;
 
 import "./Ownable.sol";
-import "./Roles.sol";
 
-abstract contract AccessControl is Ownable, Roles {
+abstract contract AccessControl is Ownable {
     // role => address => permit
     mapping(bytes32 => mapping(address => bool)) private _permits;
 
