@@ -8,9 +8,9 @@ import "./interfaces/IGasPriceOracle.sol";
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/FeesHelper.sol";
-import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "./utils/AccessRoles.sol";
+import {GOVERNANCE_ROLE, TRANSMITTER_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "./utils/AccessRoles.sol";
 
-contract TransmitManager is ITransmitManager, AccessControlWithUint {
+contract TransmitManager is ITransmitManager, AccessControlExtended {
     ISignatureVerifier public signatureVerifier__;
     IGasPriceOracle public gasPriceOracle__;
 
@@ -61,7 +61,10 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
             signature_
         );
 
-        return (transmitter, _hasRoleWithUint(siblingSlug, transmitter));
+        return (
+            transmitter,
+            _hasRole(TRANSMITTER_ROLE, siblingSlug, transmitter)
+        );
     }
 
     function payFees(uint32 siblingChainSlug_) external payable override {}
