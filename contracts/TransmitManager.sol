@@ -5,7 +5,7 @@ import "./interfaces/ITransmitManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./interfaces/IGasPriceOracle.sol";
 
-import "./utils/AccessControlWithUint.sol";
+import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/FeesHelper.sol";
 import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "./utils/AccessRoles.sol";
@@ -37,7 +37,7 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
         address owner_,
         uint32 chainSlug_,
         uint256 sealGasLimit_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         chainSlug = chainSlug_;
         sealGasLimit = sealGasLimit_;
         signatureVerifier__ = signatureVerifier_;

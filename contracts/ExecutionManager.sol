@@ -3,13 +3,13 @@ pragma solidity 0.8.7;
 
 import "./interfaces/IExecutionManager.sol";
 import "./interfaces/IGasPriceOracle.sol";
-import "./utils/AccessControl.sol";
-
+import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/SignatureVerifierLib.sol";
 import "./libraries/FeesHelper.sol";
+import {WITHDRAW_ROLE, RESCUE_ROLE} from "./utils/AccessRoles.sol";
 
-contract ExecutionManager is IExecutionManager, AccessControl {
+contract ExecutionManager is IExecutionManager, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
 
     // keccak256("EXECUTOR")
@@ -23,7 +23,7 @@ contract ExecutionManager is IExecutionManager, AccessControl {
     constructor(
         IGasPriceOracle gasPriceOracle_,
         address owner_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
     }
 
@@ -67,12 +67,12 @@ contract ExecutionManager is IExecutionManager, AccessControl {
      * @notice updates gasPriceOracle__
      * @param gasPriceOracle_ address of Gas Price Oracle
      */
-    function setGasPriceOracle(address gasPriceOracle_) external onlyOwner {
+    function setGasPriceOracle(address gasPriceOracle_) external onlyRole(GOVERNANCE_ROLE) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         emit GasPriceOracleSet(gasPriceOracle_);
     }
 
-    function withdrawFees(address account_) external onlyOwner {
+    function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         FeesHelper.withdrawFees(account_);
     }
 
@@ -80,7 +80,7 @@ contract ExecutionManager is IExecutionManager, AccessControl {
         address token_,
         address userAddress_,
         uint256 amount_
-    ) external onlyOwner {
+    ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

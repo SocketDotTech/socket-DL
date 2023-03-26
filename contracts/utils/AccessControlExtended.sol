@@ -4,23 +4,6 @@ pragma solidity 0.8.7;
 import "./AccessControl.sol";
 
 abstract contract AccessControlExtended is AccessControl {
-    modifier onlyRoleWithUint(uint256 role_) {
-        bytes32 role = bytes32(role_);
-        if (!_hasRole(role, msg.sender)) revert NoPermit(role);
-        _;
-    }
-
-    function grantRoleWithUint(
-        uint256 role_,
-        address grantee_
-    ) external virtual onlyOwner {
-        _grantRoleWithUint(role_, grantee_);
-    }
-
-    function _grantRoleWithUint(uint256 role_, address grantee_) internal {
-        _grantRole(bytes32(role_), grantee_);
-    }
-
     modifier onlyRole(bytes32 roleName_, uint256 chainSlug_) {
         if (!_hasRole(bytes32(abi.encode(roleName_, chainSlug_)), msg.sender))
             revert NoPermit(role_);
