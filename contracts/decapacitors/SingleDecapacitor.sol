@@ -3,13 +3,14 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IDecapacitor.sol";
 import "../libraries/RescueFundsLib.sol";
-import "../utils/Ownable.sol";
+import "../utils/AccessControlExtended.sol";
+import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
-contract SingleDecapacitor is IDecapacitor, Ownable {
+contract SingleDecapacitor is IDecapacitor, AccessControlExtended {
     /**
      * @notice initialises the contract with owner address
      */
-    constructor(address owner_) Ownable(owner_) {}
+    constructor(address owner_) AccessControlExtended(owner_) {}
 
     /// returns if the packed message is the part of a merkle tree or not
     /// @inheritdoc IDecapacitor
@@ -25,7 +26,7 @@ contract SingleDecapacitor is IDecapacitor, Ownable {
         address token_,
         address userAddress_,
         uint256 amount_
-    ) external onlyOwner {
+    ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }
