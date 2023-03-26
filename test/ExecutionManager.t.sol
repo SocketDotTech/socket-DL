@@ -73,8 +73,16 @@ contract ExecutionManagerTest is Setup {
         gasPriceOracle.setTransmitManager(transmitManager);
         vm.stopPrank();
 
-        assertTrue(transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug, transmitter));
-        assertTrue(transmitManager.hasRole(TRANSMITTER_ROLE, destChainSlug, transmitter));
+        assertTrue(
+            transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug, transmitter)
+        );
+        assertTrue(
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                destChainSlug,
+                transmitter
+            )
+        );
 
         bytes32 digest = keccak256(
             abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)

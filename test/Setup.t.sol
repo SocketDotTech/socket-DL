@@ -150,7 +150,11 @@ contract Setup is Test {
             remoteChainSlug_,
             _executionOverhead
         );
-        optimisticSwitchboard.grantRole(WATCHER_ROLE, remoteChainSlug_, _watcher);
+        optimisticSwitchboard.grantRole(
+            WATCHER_ROLE,
+            remoteChainSlug_,
+            _watcher
+        );
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(

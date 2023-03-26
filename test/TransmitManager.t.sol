@@ -189,33 +189,61 @@ contract TransmitManagerTest is Setup {
 
     function testGrantTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter)
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                chainSlug2,
+                nonTransmitter
+            )
         );
 
         vm.startPrank(owner);
         transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter);
         vm.stopPrank();
 
-        assertTrue(transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter));
+        assertTrue(
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                chainSlug2,
+                nonTransmitter
+            )
+        );
     }
 
     function testRevokeTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter)
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                chainSlug2,
+                nonTransmitter
+            )
         );
 
         vm.startPrank(owner);
         transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter);
         vm.stopPrank();
 
-        assertTrue(transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter));
+        assertTrue(
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                chainSlug2,
+                nonTransmitter
+            )
+        );
 
         vm.startPrank(owner);
-        transmitManager.revokeRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter);
+        transmitManager.revokeRole(
+            TRANSMITTER_ROLE,
+            chainSlug2,
+            nonTransmitter
+        );
         vm.stopPrank();
 
         assertFalse(
-            transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter)
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                chainSlug2,
+                nonTransmitter
+            )
         );
     }
 
