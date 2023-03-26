@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../Setup.t.sol";
+import {SOCKET_ROLE} from "../../contracts/utils/AccessRoles.sol";
 
 contract HashChainCapacitorTest is Setup {
     address immutable _owner = address(uint160(c++));
@@ -24,7 +25,10 @@ contract HashChainCapacitorTest is Setup {
     function testSetUp() external {
         assertEq(_hcCapacitor.owner(), _owner, "Owner not set");
 
-        assertTrue(_hcCapacitor.socket() == _socket, "Socket role not set");
+        assertTrue(
+            _hcCapacitor.hasRole(SOCKET_ROLE, _socket),
+            "Socket role not set"
+        );
 
         _assertPacketById(bytes32(0), 0);
         _assertPacketToBeSealed(bytes32(0), 0);

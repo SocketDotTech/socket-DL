@@ -14,6 +14,7 @@ import "../contracts/TransmitManager.sol";
 import "../contracts/GasPriceOracle.sol";
 import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
+import {WATCHER_ROLE, TRANSMITTER_ROLE} from "../contracts/utils/AccessRoles.sol";
 
 contract Setup is Test {
     uint256 internal c = 1;
@@ -149,7 +150,7 @@ contract Setup is Test {
             remoteChainSlug_,
             _executionOverhead
         );
-        optimisticSwitchboard.grantRoleWithUint(remoteChainSlug_, _watcher);
+        optimisticSwitchboard.grantRole(WATCHER_ROLE, remoteChainSlug_, _watcher);
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
@@ -272,7 +273,8 @@ contract Setup is Test {
             // deduce transmitter address from private key
             transmitter = vm.addr(transmitterPrivateKeys_[index]);
             // grant transmitter role
-            cc_.transmitManager__.grantRoleWithUint(
+            cc_.transmitManager__.grantRole(
+                TRANSMITTER_ROLE,
                 remoteChainSlug_,
                 transmitter
             );

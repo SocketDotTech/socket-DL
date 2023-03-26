@@ -5,6 +5,7 @@ import "./interfaces/IGasPriceOracle.sol";
 import "./interfaces/ITransmitManager.sol";
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
+import {GOVERNANCE_ROLE, RESCUE_ROLE} from "./utils/AccessRoles.sol";
 
 contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
     ITransmitManager public transmitManager__;

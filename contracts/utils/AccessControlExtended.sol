@@ -3,19 +3,21 @@ pragma solidity 0.8.7;
 
 import "./AccessControl.sol";
 
-abstract contract AccessControlExtended is AccessControl {
-    modifier onlyRole(bytes32 roleName_, uint256 chainSlug_) {
+contract AccessControlExtended is AccessControl {
+    modifier onlyRoleWithChainSlug(bytes32 roleName_, uint256 chainSlug_) {
         if (!_hasRole(bytes32(abi.encode(roleName_, chainSlug_)), msg.sender))
-            revert NoPermit(role_);
+            revert NoPermit(roleName_);
         _;
     }
+
+    constructor(address owner_) AccessControl(owner_) {}
 
     function grantRole(
         bytes32 roleName_,
         uint256 chainSlug_,
         address grantee_
     ) external virtual onlyOwner {
-        _grantRole(role_, chainSlug_, grantee_);
+        _grantRole(roleName_, chainSlug_, grantee_);
     }
 
     function _grantRole(
@@ -23,7 +25,7 @@ abstract contract AccessControlExtended is AccessControl {
         uint256 chainSlug_,
         address grantee_
     ) internal {
-        _grantRole(bytes32(abi.encode(role_, chainSlug_)), grantee_);
+        _grantRole(bytes32(abi.encode(roleName_, chainSlug_)), grantee_);
     }
 
     function hasRole(
@@ -39,7 +41,7 @@ abstract contract AccessControlExtended is AccessControl {
         uint256 chainSlug_,
         address address_
     ) internal view returns (bool) {
-        return _hasRole(bytes32(abi.encode(role_, chainSlug_)), address_);
+        return _hasRole(bytes32(abi.encode(roleName_, chainSlug_)), address_);
     }
 
     function revokeRole(
@@ -47,14 +49,14 @@ abstract contract AccessControlExtended is AccessControl {
         uint256 chainSlug_,
         address grantee_
     ) external virtual onlyOwner {
-        _revokeRole(role_, chainSlug_, grantee_);
+        _revokeRole(roleName_, chainSlug_, grantee_);
     }
 
     function _revokeRole(
-        bytes32 role_,
+        bytes32 roleName_,
         uint256 chainSlug_,
         address revokee_
     ) internal {
-        _revokeRole(bytes32(abi.encode(role_, chainSlug_)), revokee_);
+        _revokeRole(bytes32(abi.encode(roleName_, chainSlug_)), revokee_);
     }
 }

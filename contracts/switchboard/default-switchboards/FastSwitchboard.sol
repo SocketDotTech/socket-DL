@@ -98,7 +98,7 @@ contract FastSwitchboard is SwitchboardBase {
     function setAttestGasLimit(
         uint256 dstChainSlug_,
         uint256 attestGasLimit_
-    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
+    ) external onlyRoleWithChainSlug(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
         attestGasLimit[dstChainSlug_] = attestGasLimit_;
         emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
     }

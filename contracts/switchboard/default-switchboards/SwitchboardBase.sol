@@ -79,7 +79,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     function tripPath(
         uint256 srcChainSlug_
-    ) external onlyRole(TRIP_ROLE, srcChainSlug_) {
+    ) external onlyRoleWithChainSlug(TRIP_ROLE, srcChainSlug_) {
         //source chain based tripping
         tripSinglePath[srcChainSlug_] = true;
         emit PathTripped(srcChainSlug_, true);
@@ -98,7 +98,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     function untripPath(
         uint256 srcChainSlug_
-    ) external onlyRole(UNTRIP_ROLE, srcChainSlug_) {
+    ) external onlyRoleWithChainSlug(UNTRIP_ROLE, srcChainSlug_) {
         tripSinglePath[srcChainSlug_] = false;
         emit PathTripped(srcChainSlug_, false);
     }
@@ -118,7 +118,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     function setExecutionOverhead(
         uint256 dstChainSlug_,
         uint256 executionOverhead_
-    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
+    ) external onlyRoleWithChainSlug(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
         executionOverhead[dstChainSlug_] = executionOverhead_;
         emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
     }

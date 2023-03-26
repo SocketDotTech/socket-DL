@@ -65,8 +65,8 @@ contract TransmitManagerTest is Setup {
 
         vm.startPrank(owner);
         gasPriceOracle.setTransmitManager(transmitManager);
-        transmitManager.grantRoleWithUint(chainSlug, transmitter);
-        transmitManager.grantRoleWithUint(destChainSlug, transmitter);
+        transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug, transmitter);
+        transmitManager.grantRole(TRANSMITTER_ROLE, destChainSlug, transmitter);
 
         vm.expectEmit(false, false, false, true);
         emit SealGasLimitSet(sealGasLimit);
@@ -189,33 +189,33 @@ contract TransmitManagerTest is Setup {
 
     function testGrantTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRoleWithUint(chainSlug2, nonTransmitter)
+            transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter)
         );
 
         vm.startPrank(owner);
-        transmitManager.grantRoleWithUint(chainSlug2, nonTransmitter);
+        transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter);
         vm.stopPrank();
 
-        assertTrue(transmitManager.hasRoleWithUint(chainSlug2, nonTransmitter));
+        assertTrue(transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter));
     }
 
     function testRevokeTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRoleWithUint(chainSlug2, nonTransmitter)
+            transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter)
         );
 
         vm.startPrank(owner);
-        transmitManager.grantRoleWithUint(chainSlug2, nonTransmitter);
+        transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter);
         vm.stopPrank();
 
-        assertTrue(transmitManager.hasRoleWithUint(chainSlug2, nonTransmitter));
+        assertTrue(transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter));
 
         vm.startPrank(owner);
-        transmitManager.revokeRoleWithUint(chainSlug2, nonTransmitter);
+        transmitManager.revokeRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter);
         vm.stopPrank();
 
         assertFalse(
-            transmitManager.hasRoleWithUint(chainSlug2, nonTransmitter)
+            transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter)
         );
     }
 

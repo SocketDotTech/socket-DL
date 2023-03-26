@@ -112,7 +112,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     function setProposeGasLimit(
         uint256 dstChainSlug_,
         uint256 gasLimit_
-    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
+    ) external onlyRoleWithChainSlug(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
         proposeGasLimit[dstChainSlug_] = gasLimit_;
         emit ProposeGasLimitSet(dstChainSlug_, gasLimit_);
     }
