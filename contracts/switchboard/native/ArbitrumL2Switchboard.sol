@@ -39,7 +39,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
         address remoteNativeSwitchboard_,
         address owner_,
         IGasPriceOracle gasPriceOracle_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
         executionOverhead = executionOverhead_;

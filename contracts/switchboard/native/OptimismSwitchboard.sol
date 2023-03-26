@@ -42,7 +42,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         address remoteNativeSwitchboard_,
         address owner_,
         IGasPriceOracle gasPriceOracle_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         receivePacketGasLimit = receivePacketGasLimit_;
 
         l1ReceiveGasLimit = l1ReceiveGasLimit_;

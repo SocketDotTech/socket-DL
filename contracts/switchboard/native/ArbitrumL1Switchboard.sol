@@ -50,7 +50,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         address inbox_,
         address owner_,
         IGasPriceOracle gasPriceOracle_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         dynamicFees = dynamicFees_;
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
         executionOverhead = executionOverhead_;
