@@ -42,7 +42,9 @@ abstract contract SocketBase is SocketConfig {
      * @notice updates executionManager_
      * @param executionManager_ address of Execution Manager
      */
-    function setExecutionManager(address executionManager_) external onlyOwner {
+    function setExecutionManager(
+        address executionManager_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         executionManager__ = IExecutionManager(executionManager_);
         emit ExecutionManagerSet(executionManager_);
     }
