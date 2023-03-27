@@ -5,7 +5,6 @@ import "forge-std/Test.sol";
 import "../../contracts/capacitors/SingleCapacitor.sol";
 import {SOCKET_ROLE} from "../../contracts/utils/AccessRoles.sol";
 
-
 contract SingleCapacitorTest is Test {
     uint256 internal c = 1;
     address immutable _owner = address(uint160(c++));
@@ -25,10 +24,7 @@ contract SingleCapacitorTest is Test {
     function testSetUp() external {
         assertEq(_sa.owner(), _owner, "Owner not set");
 
-        assertTrue(
-            _sa.hasRole(SOCKET_ROLE, _socket),
-            "Socket role not set"
-        );
+        assertTrue(_sa.hasRole(SOCKET_ROLE, _socket), "Socket role not set");
 
         _assertPacketById(bytes32(0), 0);
         _assertPacketToBeSealed(bytes32(0), 0);

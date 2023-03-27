@@ -37,7 +37,8 @@ contract OptimisticSwitchboardTest is Setup {
         optimisticSwitchboard.grantRole(WATCHER_ROLE, remoteChainSlug, watcher);
         optimisticSwitchboard.grantRole(WATCHER_ROLE, _a.chainSlug, watcher);
         optimisticSwitchboard.grantRole(
-            WATCHER_ROLE, remoteChainSlug,
+            WATCHER_ROLE,
+            remoteChainSlug,
             vm.addr(_altWatcherPrivateKey)
         );
 
@@ -147,7 +148,11 @@ contract OptimisticSwitchboardTest is Setup {
 
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.grantRole(WATCHER_ROLE, remoteChainSlug, watcher2);
+        optimisticSwitchboard.grantRole(
+            WATCHER_ROLE,
+            remoteChainSlug,
+            watcher2
+        );
         vm.stopPrank();
     }
 
