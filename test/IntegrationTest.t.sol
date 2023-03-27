@@ -78,6 +78,7 @@ contract HappyTest is Setup {
 
             _sealOnSrc(_a, capacitor, sig_);
             _proposeOnDst(_b, sig_, packetId_, root_);
+            _attestOnDst(_b, packetId_);
             root = root_;
             _attestOnDst(address(_b.configs__[0].switchboard__), packetId_);
             packetId = packetId_;
