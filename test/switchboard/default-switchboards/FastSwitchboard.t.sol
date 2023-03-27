@@ -6,12 +6,12 @@ import "../../Setup.t.sol";
 contract FastSwitchboardTest is Setup {
     bool isFast = true;
     uint256 immutable remoteChainSlug = uint32(uint256(2));
-    uint256 immutable packetId = 1;
+    bytes32 immutable packetId = bytes32(0);
     address watcher;
     address altWatcher;
 
     event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
-    event PacketAttested(uint256 packetId, address attester);
+    event PacketAttested(bytes32 packetId, address attester);
     event SwitchboardTripped(bool tripGlobalFuse_);
     event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
 

@@ -14,12 +14,12 @@ contract HappyTest is Setup {
     bytes32[] roots;
     uint256 index = isFast ? 0 : 1;
 
-    event ExecutionSuccess(uint256 msgId);
-    event ExecutionFailed(uint256 msgId, string result);
-    event ExecutionFailedBytes(uint256 msgId, bytes result);
+    event ExecutionSuccess(bytes32 msgId);
+    event ExecutionFailed(bytes32 msgId, string result);
+    event ExecutionFailedBytes(bytes32 msgId, bytes result);
     event PacketVerifiedAndSealed(
         address indexed transmitter,
-        uint256 indexed packetId,
+        bytes32 indexed packetId,
         bytes32 root,
         bytes signature
     );
@@ -68,12 +68,12 @@ contract HappyTest is Setup {
         }
 
         // uint256 msgId = _packMessageId(_a.chainSlug, 0);
-        uint256 packetId;
+        bytes32 packetId;
         bytes32 root;
         {
             (
                 bytes32 root_,
-                uint256 packetId_,
+                bytes32 packetId_,
                 bytes memory sig_
             ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
 
@@ -144,7 +144,7 @@ contract HappyTest is Setup {
 
         (
             bytes32 root,
-            uint256 packetId,
+            bytes32 packetId,
             bytes memory sig
         ) = _getLatestSignature(_b, capacitor, _a.chainSlug);
 
@@ -174,7 +174,7 @@ contract HappyTest is Setup {
         uint256 executionFees,
         uint256 fees,
         bytes memory payload
-    ) internal returns (uint256 msgId, bytes32 root) {
+    ) internal returns (bytes32 msgId, bytes32 root) {
         uint256 msgGasLimit = _msgGasLimit;
         uint256 dstSlug = _b.chainSlug;
 
@@ -198,10 +198,10 @@ contract HappyTest is Setup {
         );
     }
 
-    function sealAndPropose(address capacitor) internal returns (uint256) {
+    function sealAndPropose(address capacitor) internal returns (bytes32) {
         (
             bytes32 root_,
-            uint256 packetId_,
+            bytes32 packetId_,
             bytes memory sig_
         ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
 
@@ -238,9 +238,9 @@ contract HappyTest is Setup {
         );
 
         uint256 executionFee;
-        uint256 msgId1;
+        bytes32 msgId1;
         bytes32 root1;
-        uint256 msgId2;
+        bytes32 msgId2;
         bytes32 root2;
         {
             (uint256 switchboardFees, uint256 executionOverhead) = srcConfig
@@ -264,7 +264,7 @@ contract HappyTest is Setup {
         }
 
         // seal 2 messages together
-        uint256 packetId = sealAndPropose(address(srcConfig.capacitor__));
+        bytes32 packetId = sealAndPropose(address(srcConfig.capacitor__));
         roots.push(root1);
         roots.push(root2);
 
@@ -337,7 +337,7 @@ contract HappyTest is Setup {
 
     function _attesterChecks(
         address capacitor
-    ) internal returns (uint256 packetId, bytes32 root) {
+    ) internal returns (bytes32 packetId, bytes32 root) {
         bytes memory sig;
         (root, packetId, sig) = _getLatestSignature(
             _a,

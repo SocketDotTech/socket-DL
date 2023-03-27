@@ -57,10 +57,10 @@ contract ArbitrumL1SwitchboardTest is Setup {
 
         (
             bytes32 root,
-            uint256 packetId,
+            bytes32 packetId,
             bytes memory sig
         ) = _getLatestSignature(_a, address(singleCapacitor), _b.chainSlug);
-        uint256 capacitorPacketCount = uint256(uint64(packetId));
+        uint64 capacitorPacketCount = uint64(uint256(packetId));
 
         bytes memory data = abi.encodeWithSelector(
             INativeReceiver.receivePacket.selector,
@@ -127,8 +127,11 @@ contract ArbitrumL1SwitchboardTest is Setup {
 
         cc_.hasher__ = new Hasher();
         cc_.sigVerifier__ = new SignatureVerifier();
-        cc_.capacitorFactory__ = new CapacitorFactory();
-        cc_.gasPriceOracle__ = new GasPriceOracle(deployer_, cc_.chainSlug);
+        cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
+        cc_.gasPriceOracle__ = new GasPriceOracle(
+            deployer_,
+            uint32(cc_.chainSlug)
+        );
         cc_.executionManager__ = new ExecutionManager(
             cc_.gasPriceOracle__,
             deployer_
@@ -149,7 +152,8 @@ contract ArbitrumL1SwitchboardTest is Setup {
             address(cc_.hasher__),
             address(cc_.transmitManager__),
             address(cc_.executionManager__),
-            address(cc_.capacitorFactory__)
+            address(cc_.capacitorFactory__),
+            deployer_
         );
 
         vm.stopPrank();

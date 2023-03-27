@@ -56,7 +56,7 @@ contract Setup is Test {
     }
 
     struct ChainContext {
-        uint256 chainSlug;
+        uint32 chainSlug;
         Socket socket__;
         Hasher hasher__;
         SignatureVerifier sigVerifier__;
@@ -198,7 +198,7 @@ contract Setup is Test {
 
         cc_.hasher__ = new Hasher();
         cc_.sigVerifier__ = new SignatureVerifier();
-        cc_.capacitorFactory__ = new CapacitorFactory();
+        cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
         cc_.gasPriceOracle__ = new GasPriceOracle(deployer_, cc_.chainSlug);
         cc_.executionManager__ = new ExecutionManager(
             cc_.gasPriceOracle__,
@@ -220,7 +220,8 @@ contract Setup is Test {
             address(cc_.hasher__),
             address(cc_.transmitManager__),
             address(cc_.executionManager__),
-            address(cc_.capacitorFactory__)
+            address(cc_.capacitorFactory__),
+            deployer_
         );
 
         vm.stopPrank();
@@ -284,7 +285,7 @@ contract Setup is Test {
         ChainContext storage src_,
         address capacitor_,
         uint256 remoteChainSlug_
-    ) internal returns (bytes32 root, uint256 packetId, bytes memory sig) {
+    ) internal returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint256 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
@@ -324,7 +325,7 @@ contract Setup is Test {
     function _proposeOnDst(
         ChainContext storage dst_,
         bytes memory sig_,
-        uint256 packetId_,
+        bytes32 packetId_,
         bytes32 root_
     ) internal {
         hoax(_raju);
@@ -335,8 +336,8 @@ contract Setup is Test {
         ChainContext storage dst_,
         uint256,
         address remotePlug_,
-        uint256 packetId_,
-        uint256 msgId_,
+        bytes32 packetId_,
+        bytes32 msgId_,
         uint256 msgGasLimit_,
         uint256 executionFee_,
         bytes32 packedMessage_,
@@ -358,19 +359,21 @@ contract Setup is Test {
     function _packMessageId(
         uint256 srcChainSlug,
         uint256 nonce
-    ) internal pure returns (uint256) {
-        return (srcChainSlug << 224) | nonce;
+    ) internal pure returns (bytes32) {
+        return bytes32((srcChainSlug << 224) | nonce);
     }
 
     function _getPackedId(
         address capacitorAddr_,
         uint256 chainSlug_,
         uint256 id_
-    ) internal pure returns (uint256) {
+    ) internal pure returns (bytes32) {
         return
-            (chainSlug_ << 224) |
-            (uint256(uint160(capacitorAddr_)) << 64) |
-            id_;
+            bytes32(
+                (chainSlug_ << 224) |
+                    (uint256(uint160(capacitorAddr_)) << 64) |
+                    id_
+            );
     }
 
     // to ignore this file from coverage

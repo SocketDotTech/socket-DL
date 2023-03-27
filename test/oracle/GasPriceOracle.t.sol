@@ -5,8 +5,8 @@ import "../Setup.t.sol";
 
 contract GasPriceOracleTest is Setup {
     GasPriceOracle internal gasPriceOracle;
-    uint256 chainSlug = uint32(uint256(0x2013AA263));
-    uint256 destChainSlug = uint32(uint256(0x2013AA264));
+    uint32 chainSlug = uint32(uint256(0x2013AA263));
+    uint32 destChainSlug = uint32(uint256(0x2013AA264));
     uint256 transmitterPrivateKey = c++;
     address immutable transmitter = vm.addr(transmitterPrivateKey);
 
@@ -153,7 +153,7 @@ contract GasPriceOracleTest is Setup {
         bytes memory sig = _createSignature(digest, _altTransmitterPrivateKey);
 
         gasPriceOracle.setRelativeGasPrice(
-            destChainSlug,
+            uint32(destChainSlug),
             gasPriceOracleNonce++,
             relativeGasPrice,
             sig

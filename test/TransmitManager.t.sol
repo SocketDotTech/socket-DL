@@ -9,9 +9,9 @@ contract TransmitManagerTest is Setup {
     address public constant NATIVE_TOKEN_ADDRESS =
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
-    uint256 chainSlug = uint32(uint256(0x2013AA263));
-    uint256 destChainSlug = uint32(uint256(0x2013AA264));
-    uint256 chainSlug2 = uint32(uint256(0x2113AA263));
+    uint32 chainSlug = uint32(uint256(0x2013AA263));
+    uint32 destChainSlug = uint32(uint256(0x2013AA264));
+    uint32 chainSlug2 = uint32(uint256(0x2113AA263));
 
     uint256 immutable ownerPrivateKey = c++;
     address owner;
