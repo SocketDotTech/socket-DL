@@ -401,6 +401,21 @@ contract Setup is Test {
         dst_.socket__.propose(packetId_, root_, sig_);
     }
 
+    function _attestOnDst(
+        ChainContext storage dst_,
+        bytes32 packetId_
+    ) internal {
+        uint256 dstChainSlug = dst_.chainSlug;
+
+        bytes32 digest = keccak256(abi.encode(dstChainSlug, packetId_));
+
+        // generate attest-signature
+        bytes memory attestSignature = _createSignature(digest, _watcherPrivateKey);
+
+        // attest with packetId_, dstChainSlug and signature
+        dst_.configs__[0].switchboard__.attest(packetId_, dstChainSlug, attestSignature);
+    }
+
     function _executePayloadOnDst(
         ChainContext storage dst_,
         uint256,
