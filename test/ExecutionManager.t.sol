@@ -67,7 +67,14 @@ contract ExecutionManagerTest is Setup {
         );
 
         vm.startPrank(owner);
+        gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
+        gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
+        gasPriceOracle.setTransmitManager(transmitManager);
+
         executionManager.grantRole(EXECUTOR_ROLE, executor);
+        executionManager.grantRole(RESCUE_ROLE, owner);
+        executionManager.grantRole(WITHDRAW_ROLE, owner);
+
         transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug, transmitter);
         transmitManager.grantRole(TRANSMITTER_ROLE, destChainSlug, transmitter);
         gasPriceOracle.setTransmitManager(transmitManager);
