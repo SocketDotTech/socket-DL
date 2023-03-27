@@ -64,9 +64,15 @@ contract TransmitManagerTest is Setup {
         );
 
         vm.startPrank(owner);
+        gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
+        gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
         gasPriceOracle.setTransmitManager(transmitManager);
         transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug, transmitter);
         transmitManager.grantRole(TRANSMITTER_ROLE, destChainSlug, transmitter);
+        transmitManager.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
+        transmitManager.grantRole(RESCUE_ROLE, owner);
+        transmitManager.grantRole(WITHDRAW_ROLE, owner);
+        transmitManager.grantRole(GOVERNANCE_ROLE, owner);
 
         vm.expectEmit(false, false, false, true);
         emit SealGasLimitSet(sealGasLimit);
