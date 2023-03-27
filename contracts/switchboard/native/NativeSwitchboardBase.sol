@@ -33,10 +33,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     error AlreadyInitialised();
 
     // assumption: natives have 18 decimals
-    function payFees(uint256 dstChainSlug_) external payable override {
-        (uint256 expectedFees, ) = _calculateMinFees(dstChainSlug_);
-        if (msg.value < expectedFees) revert FeesNotEnough();
-    }
+    function payFees(uint256 dstChainSlug_) external payable override {}
 
     function getMinFees(
         uint256 dstChainSlug_
