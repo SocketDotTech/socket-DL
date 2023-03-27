@@ -286,11 +286,11 @@ contract Setup is Test {
         address capacitor_,
         uint256 remoteChainSlug_
     ) internal returns (bytes32 root, bytes32 packetId, bytes memory sig) {
-        uint256 id;
+        uint64 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
         bytes32 digest = keccak256(
-            abi.encode(remoteChainSlug_, packetId, root)
+            abi.encode(uint32(remoteChainSlug_), packetId, root)
         );
         sig = _createSignature(digest, _transmitterPrivateKey);
     }

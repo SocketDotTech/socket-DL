@@ -49,7 +49,7 @@ abstract contract SocketDst is SocketBase {
 
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
-                _getChainSlug(packetId_) << 128,
+                _getChainSlug(packetId_),
                 keccak256(abi.encode(chainSlug, packetId_, root_)),
                 signature_
             );

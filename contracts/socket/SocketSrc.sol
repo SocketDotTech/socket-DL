@@ -164,17 +164,16 @@ abstract contract SocketSrc is SocketBase {
         address capacitorAddress_,
         bytes calldata signature_
     ) external payable {
-        (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
+        (bytes32 root, uint64 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket(batchSize_);
 
         bytes32 packetId = bytes32(
-            (chainSlug << 224) |
+            (uint256(chainSlug) << 224) |
                 (uint256(uint160(capacitorAddress_)) << 64) |
                 packetCount
         );
 
         uint32 siblingChainSlug = capacitorToSlug[capacitorAddress_];
-
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
                 siblingChainSlug,
