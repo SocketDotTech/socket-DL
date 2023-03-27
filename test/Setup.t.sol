@@ -157,6 +157,7 @@ contract Setup is Test {
         );
         vm.startPrank(_socketOwner);
 
+        optimisticSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         optimisticSwitchboard.setExecutionOverhead(
             remoteChainSlug_,
             _executionOverhead
@@ -190,6 +191,8 @@ contract Setup is Test {
         );
 
         vm.startPrank(_socketOwner);
+        fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         fastSwitchboard.setExecutionOverhead(
             remoteChainSlug_,
             _executionOverhead
