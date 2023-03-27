@@ -29,6 +29,9 @@ contract OptimisticSwitchboardTest is Setup {
             1
         );
 
+        optimisticSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
+        optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+
         optimisticSwitchboard.setExecutionOverhead(
             remoteChainSlug,
             _executionOverhead
@@ -46,16 +49,21 @@ contract OptimisticSwitchboardTest is Setup {
     }
 
     function testTripGlobal() external {
-        hoax(_socketOwner);
+        vm.startPrank(_socketOwner);
+
+        optimisticSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
+
         vm.expectEmit(false, false, false, true);
         emit SwitchboardTripped(true);
         optimisticSwitchboard.tripGlobal();
+        vm.stopPrank();
         assertTrue(optimisticSwitchboard.tripGlobalFuse());
     }
 
     function testTripPath() external {
-        hoax(watcher);
+        vm.startPrank(_socketOwner);
         uint256 srcChainSlug = _a.chainSlug;
+        optimisticSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
         optimisticSwitchboard.tripPath(srcChainSlug);
@@ -68,15 +76,6 @@ contract OptimisticSwitchboardTest is Setup {
         optimisticSwitchboard.tripPath(srcChainSlug);
     }
 
-    function testTripSingle() external {
-        hoax(watcher);
-        uint256 srcChainSlug = _a.chainSlug;
-        vm.expectEmit(false, false, false, true);
-        emit PathTripped(srcChainSlug, true);
-        optimisticSwitchboard.tripPath(srcChainSlug);
-        assertTrue(optimisticSwitchboard.tripSinglePath(srcChainSlug));
-    }
-
     function testNonOwnerToTripSingle() external {
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectRevert();
@@ -84,8 +83,14 @@ contract OptimisticSwitchboardTest is Setup {
     }
 
     function testUnTripAfterTripSingle() external {
-        hoax(watcher);
         uint256 srcChainSlug = _a.chainSlug;
+
+        vm.startPrank(_socketOwner);
+        optimisticSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
+        optimisticSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
+        vm.stopPrank();
+
+        hoax(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
         optimisticSwitchboard.tripPath(srcChainSlug);
@@ -127,15 +132,19 @@ contract OptimisticSwitchboardTest is Setup {
         uint256 proposeTime = block.timestamp -
             optimisticSwitchboard.timeoutInSeconds();
 
-        hoax(watcher);
+        vm.startPrank(_socketOwner);
+
+        uint256 srcChainSlug = _a.chainSlug;
+        optimisticSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
+
         vm.expectEmit(false, false, false, true);
-        emit PathTripped(_a.chainSlug, true);
-        optimisticSwitchboard.tripPath(_a.chainSlug);
+        emit PathTripped(srcChainSlug, true);
+        optimisticSwitchboard.tripPath(srcChainSlug);
 
         bool isAllowed = optimisticSwitchboard.allowPacket(
             0,
             0,
-            _a.chainSlug,
+            srcChainSlug,
             proposeTime
         );
 
