@@ -17,7 +17,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     IInbox public inbox__;
 
     // stores the roots received from native bridge
-    mapping(uint256 => bytes32) public roots;
+    mapping(bytes32 => bytes32) public roots;
 
     event UpdatedInboxAddress(address inbox);
     event UpdatedRefundAddresses(
@@ -25,7 +25,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         address callValueRefundAddress
     );
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
-    event RootReceived(uint256 packetId, bytes32 root);
+    event RootReceived(bytes32 packetId, bytes32 root);
     event UpdatedDynamicFees(uint256 dynamicFees);
 
     error InvalidSender();
@@ -64,12 +64,12 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     }
 
     function initateNativeConfirmation(
-        uint256 packetId_,
+        bytes32 packetId_,
         uint256 maxSubmissionCost_,
         uint256 maxGas_,
         uint256 gasPriceBid_
     ) external payable {
-        uint256 capacitorPacketCount = uint256(uint64(packetId_));
+        uint256 capacitorPacketCount = uint256(uint64(uint256(packetId_)));
         bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
         if (root == bytes32(0)) revert NoRootFound();
 
@@ -98,7 +98,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     }
 
     function receivePacket(
-        uint256 packetId_,
+        bytes32 packetId_,
         bytes32 root_
     ) external override onlyRemoteSwitchboard {
         roots[packetId_] = root_;
@@ -111,7 +111,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
      */
     function allowPacket(
         bytes32 root_,
-        uint256 packetId_,
+        bytes32 packetId_,
         uint256,
         uint256
     ) external view override returns (bool) {

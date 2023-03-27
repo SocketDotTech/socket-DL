@@ -5,7 +5,7 @@ import "./SwitchboardBase.sol";
 
 contract FastSwitchboard is SwitchboardBase {
     uint256 public immutable timeoutInSeconds;
-    mapping(uint256 => bool) public isPacketValid;
+    mapping(bytes32 => bool) public isPacketValid;
 
     // dst chain slug => total watchers registered
     mapping(uint256 => uint256) public totalWatchers;
@@ -14,13 +14,13 @@ contract FastSwitchboard is SwitchboardBase {
     mapping(uint256 => uint256) public attestGasLimit;
 
     // attester => packetId => is attested
-    mapping(address => mapping(uint256 => bool)) public isAttested;
+    mapping(address => mapping(bytes32 => bool)) public isAttested;
 
     // packetId => total attestations
-    mapping(uint256 => uint256) public attestations;
+    mapping(bytes32 => uint256) public attestations;
 
     event SocketSet(address newSocket);
-    event PacketAttested(uint256 packetId, address attester);
+    event PacketAttested(bytes32 packetId, address attester);
     event AttestGasLimitSet(uint256 dstChainSlug, uint256 attestGasLimit);
 
     error WatcherFound();
@@ -38,7 +38,7 @@ contract FastSwitchboard is SwitchboardBase {
     }
 
     function attest(
-        uint256 packetId_,
+        bytes32 packetId_,
         uint256 srcChainSlug_,
         bytes calldata signature_
     ) external {
@@ -63,7 +63,7 @@ contract FastSwitchboard is SwitchboardBase {
      */
     function allowPacket(
         bytes32,
-        uint256 packetId_,
+        bytes32 packetId_,
         uint256 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {
@@ -135,7 +135,7 @@ contract FastSwitchboard is SwitchboardBase {
      */
     function _recoverSigner(
         uint256 srcChainSlug_,
-        uint256 packetId_,
+        bytes32 packetId_,
         bytes memory signature_
     ) private pure returns (address signer) {
         bytes32 digest = keccak256(abi.encode(srcChainSlug_, packetId_));

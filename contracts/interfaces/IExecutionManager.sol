@@ -16,7 +16,7 @@ interface IExecutionManager {
 
     function updateExecutionFees(
         address executor,
-        uint256 msgId,
-        uint256 executionFees
+        uint256 executionFees,
+        bytes32 msgId
     ) external;
 }

@@ -15,10 +15,10 @@ abstract contract SocketDst is SocketBase {
     error VerificationFailed();
 
     // msgId => message status
-    mapping(uint256 => bool) public messageExecuted;
+    mapping(bytes32 => bool) public messageExecuted;
     // capacitorAddr|chainSlug|packetId
-    mapping(uint256 => bytes32) public override packetIdRoots;
-    mapping(uint256 => uint256) public rootProposedAt;
+    mapping(bytes32 => bytes32) public override packetIdRoots;
+    mapping(bytes32 => uint256) public rootProposedAt;
 
     /**
      * @notice emits the packet details when proposed at remote
@@ -28,7 +28,7 @@ abstract contract SocketDst is SocketBase {
      */
     event PacketProposed(
         address indexed transmitter,
-        uint256 indexed packetId,
+        bytes32 indexed packetId,
         bytes32 root
     );
 
@@ -38,10 +38,10 @@ abstract contract SocketDst is SocketBase {
      * @param oldRoot old root
      * @param newRoot old root
      */
-    event PacketRootUpdated(uint256 packetId, bytes32 oldRoot, bytes32 newRoot);
+    event PacketRootUpdated(bytes32 packetId, bytes32 oldRoot, bytes32 newRoot);
 
     function propose(
-        uint256 packetId_,
+        bytes32 packetId_,
         bytes32 root_,
         bytes calldata signature_
     ) external {
@@ -69,7 +69,7 @@ abstract contract SocketDst is SocketBase {
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
-        uint256 packetId_,
+        bytes32 packetId_,
         address localPlug_,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature_
@@ -116,7 +116,7 @@ abstract contract SocketDst is SocketBase {
     }
 
     function _verify(
-        uint256 packetId_,
+        bytes32 packetId_,
         uint256 remoteChainSlug_,
         bytes32 packedMessage_,
         PlugConfig storage plugConfig_,
@@ -146,7 +146,7 @@ abstract contract SocketDst is SocketBase {
         address localPlug_,
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
-        uint256 msgId_,
+        bytes32 msgId_,
         bytes calldata payload_
     ) internal {
         try
@@ -157,8 +157,8 @@ abstract contract SocketDst is SocketBase {
         {
             executionManager__.updateExecutionFees(
                 executor,
-                msgId_,
-                executionFee
+                executionFee,
+                msgId_
             );
             emit ExecutionSuccess(msgId_);
         } catch Error(string memory reason) {
@@ -172,13 +172,13 @@ abstract contract SocketDst is SocketBase {
         }
     }
 
-    function isPacketProposed(uint256 packetId_) external view returns (bool) {
+    function isPacketProposed(bytes32 packetId_) external view returns (bool) {
         return packetIdRoots[packetId_] == bytes32(0) ? false : true;
     }
 
     function _getChainSlug(
-        uint256 packetId_
+        bytes32 packetId_
     ) internal pure returns (uint256 chainSlug_) {
-        chainSlug_ = uint32(packetId_ >> 224);
+        chainSlug_ = uint32(uint256(packetId_) >> 224);
     }
 }

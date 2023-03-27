@@ -19,7 +19,7 @@ abstract contract SocketSrc is SocketBase {
      */
     event PacketVerifiedAndSealed(
         address indexed transmitter,
-        uint256 indexed packetId,
+        bytes32 indexed packetId,
         bytes32 root,
         bytes signature
     );
@@ -35,7 +35,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes calldata payload_
-    ) external payable override returns (uint256 msgId) {
+    ) external payable override returns (bytes32 msgId) {
         PlugConfig storage plugConfig = _plugConfigs[msg.sender][
             remoteChainSlug_
         ];
@@ -44,7 +44,9 @@ abstract contract SocketSrc is SocketBase {
         // Packs the local plug, local chain slug, remote chain slug and nonce
         // messageCount++ will take care of msg id overflow as well
         // msgId(256) = localChainSlug(32) | nonce(224)
-        msgId = (uint256(uint32(localChainSlug)) << 224) | messageCount++;
+        msgId = bytes32(
+            (uint256(uint32(localChainSlug)) << 224) | messageCount++
+        );
 
         uint256 executionFee = _deductFees(
             msgGasLimit_,
@@ -164,9 +166,11 @@ abstract contract SocketSrc is SocketBase {
         (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket(batchSize_);
 
-        uint256 packetId = (chainSlug << 224) |
-            (uint256(uint160(capacitorAddress_)) << 64) |
-            packetCount;
+        bytes32 packetId = bytes32(
+            (chainSlug << 224) |
+                (uint256(uint160(capacitorAddress_)) << 64) |
+                packetCount
+        );
 
         uint256 siblingChainSlug = capacitorToSlug[capacitorAddress_];
 

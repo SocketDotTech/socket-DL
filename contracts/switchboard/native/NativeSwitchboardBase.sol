@@ -25,7 +25,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     event InitialConfirmationGasLimitSet(uint256 gasLimit);
     event CapacitorSet(address capacitor);
     event GasPriceOracleSet(address gasPriceOracle);
-    event InitiatedNativeConfirmation(uint256 packetId);
+    event InitiatedNativeConfirmation(bytes32 packetId);
     event CapacitorRegistered(address capacitor, uint256 maxPacketSize);
 
     error TransferFailed();

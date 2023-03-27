@@ -39,7 +39,7 @@ contract ExecutionManager is IExecutionManager, AccessControl {
     }
 
     // these details might be needed for on-chain fee distribution later
-    function updateExecutionFees(address, uint256, uint256) external override {}
+    function updateExecutionFees(address, uint256, bytes32) external override {}
 
     function payFees(
         uint256 msgGasLimit_,

@@ -6,12 +6,12 @@ import "./NativeSwitchboardBase.sol";
 
 contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     // stores the roots received from native bridge
-    mapping(uint256 => bytes32) public roots;
+    mapping(bytes32 => bytes32) public roots;
     uint256 public l1ReceiveGasLimit;
 
     event FxChildUpdate(address oldFxChild, address newFxChild);
     event FxRootTunnelSet(address fxRootTunnel, address newFxRootTunnel);
-    event RootReceived(uint256 packetId, bytes32 root);
+    event RootReceived(bytes32 packetId, bytes32 root);
     event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit);
 
     error NoRootFound();
@@ -34,8 +34,8 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     /**
      * @param packetId_ - packet id
      */
-    function initateNativeConfirmation(uint256 packetId_) external payable {
-        uint256 capacitorPacketCount = uint256(uint64(packetId_));
+    function initateNativeConfirmation(bytes32 packetId_) external payable {
+        uint256 capacitorPacketCount = uint256(uint64(uint256(packetId_)));
         bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
         if (root == bytes32(0)) revert NoRootFound();
 
@@ -52,9 +52,9 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         address rootMessageSender_,
         bytes memory data_
     ) internal override validateSender(rootMessageSender_) {
-        (uint256 packetId, bytes32 root) = abi.decode(
+        (bytes32 packetId, bytes32 root) = abi.decode(
             data_,
-            (uint256, bytes32)
+            (bytes32, bytes32)
         );
         roots[packetId] = root;
         emit RootReceived(packetId, root);
@@ -66,7 +66,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
      */
     function allowPacket(
         bytes32 root_,
-        uint256 packetId_,
+        bytes32 packetId_,
         uint256,
         uint256
     ) external view override returns (bool) {
