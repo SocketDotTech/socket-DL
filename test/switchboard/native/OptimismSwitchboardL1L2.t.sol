@@ -190,8 +190,6 @@ contract OptimismSwitchboardL1L2Test is Setup {
         );
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
 
-        optimismSwitchboard.setCapacitor(address(singleCapacitor));
-
         vm.stopPrank();
     }
 }

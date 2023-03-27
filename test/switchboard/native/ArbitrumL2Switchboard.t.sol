@@ -196,9 +196,6 @@ contract ArbitrumL2SwitchboardTest is Setup {
             remoteChainSlug_
         );
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
-
-        arbitrumL2Switchboard.setCapacitor(address(singleCapacitor));
-
         vm.stopPrank();
     }
 }

@@ -191,9 +191,6 @@ contract OptimismSwitchboardL2L1Test is Setup {
             remoteChainSlug_
         );
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
-
-        optimismSwitchboard.setCapacitor(address(singleCapacitor));
-
         vm.stopPrank();
     }
 }

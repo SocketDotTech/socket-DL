@@ -31,7 +31,6 @@ contract HappyTest is Setup {
         _dualChainSetup(transmitterPivateKeys);
         _deployPlugContracts();
 
-        uint256 index = isFast ? 0 : 1;
         _configPlugContracts(index);
     }
 

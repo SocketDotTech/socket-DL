@@ -189,9 +189,6 @@ contract PolygonL1SwitchboardTest is Setup {
             remoteChainSlug_
         );
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
-
-        polygonL1Switchboard.setCapacitor(address(singleCapacitor));
-
         vm.stopPrank();
     }
 }
