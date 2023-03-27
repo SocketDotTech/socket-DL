@@ -59,7 +59,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
             data_,
             (bytes32, bytes32)
         );
-        roots[packetId] = root;
+        packetIdToRoot[packetId] = root;
         emit RootReceived(packetId, root);
     }
 

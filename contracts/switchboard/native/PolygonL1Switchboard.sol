@@ -8,6 +8,12 @@ import {GOVERNANCE_ROLE} from "../../utils/AccessRoles.sol";
 contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     event FxChildTunnelSet(address fxRootTunnel, address newFxRootTunnel);
 
+    modifier onlyRemoteSwitchboard() override {
+        require(true, "ONLY_FX_CHILD");
+
+        _;
+    }
+
     constructor(
         uint256 initialConfirmationGasLimit_,
         uint256 executionOverhead_,
@@ -39,7 +45,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
             message_,
             (bytes32, bytes32)
         );
-        roots[packetId] = root;
+        packetIdToRoot[packetId] = root;
         emit RootReceived(packetId, root);
     }
 
