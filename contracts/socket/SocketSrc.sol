@@ -48,7 +48,7 @@ abstract contract SocketSrc is SocketBase {
             (uint256(uint32(localChainSlug)) << 224) | messageCount++
         );
 
-        uint256 executionFee = _deductFees(
+        ISocket.Fees memory fees = _deductFees(
             msgGasLimit_,
             remoteChainSlug_,
             plugConfig.outboundSwitchboard__
@@ -61,7 +61,7 @@ abstract contract SocketSrc is SocketBase {
             plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
-            executionFee,
+            fees.executionFee,
             payload_
         );
 
@@ -73,9 +73,8 @@ abstract contract SocketSrc is SocketBase {
             plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
-            executionFee,
-            msg.value,
-            payload_
+            payload_,
+            fees
         );
     }
 
@@ -83,26 +82,33 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgGasLimit_,
         uint256 remoteChainSlug_,
         ISwitchboard switchboard__
-    ) internal returns (uint256 executionFee) {
+    ) internal returns (Fees memory fees) {
+        uint256 minExecutionFees;
         (
-            uint256 transmitFees,
-            uint256 switchboardFees,
-            uint256 verificationFee,
-            uint256 msgExecutionFee
+            fees.transmissionFees,
+            fees.switchboardFees,
+            minExecutionFees
         ) = _getMinFees(msgGasLimit_, remoteChainSlug_, switchboard__);
 
         if (
             msg.value <
-            transmitFees + switchboardFees + verificationFee + msgExecutionFee
+            fees.transmissionFees + fees.switchboardFees + minExecutionFees
         ) revert InsufficientFees();
 
         unchecked {
             // any extra fee is considered as executionFee
-            executionFee = msg.value - transmitFees - switchboardFees;
+            fees.executionFee =
+                msg.value -
+                fees.transmissionFees -
+                fees.switchboardFees;
 
-            transmitManager__.payFees{value: transmitFees}(remoteChainSlug_);
-            switchboard__.payFees{value: switchboardFees}(remoteChainSlug_);
-            executionManager__.payFees{value: executionFee}(
+            transmitManager__.payFees{value: fees.transmissionFees}(
+                remoteChainSlug_
+            );
+            switchboard__.payFees{value: fees.switchboardFees}(
+                remoteChainSlug_
+            );
+            executionManager__.payFees{value: fees.executionFee}(
                 msgGasLimit_,
                 remoteChainSlug_
             );
@@ -113,25 +119,20 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgGasLimit_,
         uint256 remoteChainSlug_,
         address plug_
-    ) external view returns (uint256 executionFee) {
+    ) external view returns (uint256 totalFees) {
         PlugConfig storage plugConfig = _plugConfigs[plug_][remoteChainSlug_];
 
         (
-            uint256 transmitFees,
+            uint256 transmissionFees,
             uint256 switchboardFees,
-            uint256 verificationFee,
-            uint256 msgExecutionFee
+            uint256 executionFee
         ) = _getMinFees(
                 msgGasLimit_,
                 remoteChainSlug_,
                 plugConfig.outboundSwitchboard__
             );
 
-        executionFee =
-            transmitFees +
-            switchboardFees +
-            verificationFee +
-            msgExecutionFee;
+        totalFees = transmissionFees + switchboardFees + executionFee;
     }
 
     function _getMinFees(
@@ -142,20 +143,23 @@ abstract contract SocketSrc is SocketBase {
         internal
         view
         returns (
-            uint256 transmitFees,
+            uint256 transmissionFees,
             uint256 switchboardFees,
-            uint256 verificationFee,
-            uint256 msgExecutionFee
+            uint256 executionFee
         )
     {
-        transmitFees = transmitManager__.getMinFees(remoteChainSlug_);
+        transmissionFees = transmitManager__.getMinFees(remoteChainSlug_);
+
+        uint256 verificationFee;
         (switchboardFees, verificationFee) = switchboard__.getMinFees(
             remoteChainSlug_
         );
-        msgExecutionFee = executionManager__.getMinFees(
+        uint256 msgExecutionFee = executionManager__.getMinFees(
             msgGasLimit_,
             remoteChainSlug_
         );
+
+        executionFee = msgExecutionFee + verificationFee;
     }
 
     function seal(

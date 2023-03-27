@@ -3,6 +3,17 @@ pragma solidity 0.8.7;
 
 interface ISocket {
     /**
+     * @param transmissionFees fees needed for transmission
+     * @param switchboardFees fees needed by switchboard
+     * @param executionFee fees needed for execution
+     */
+    struct Fees {
+        uint256 transmissionFees;
+        uint256 switchboardFees;
+        uint256 executionFee;
+    }
+
+    /**
      * @notice emits the message details when a new message arrives at outbound
      * @param localChainSlug local chain slug
      * @param localPlug local plug address
@@ -10,7 +21,6 @@ interface ISocket {
      * @param dstPlug remote plug address
      * @param msgId message id packed with remoteChainSlug and nonce
      * @param msgGasLimit gas limit needed to execute the inbound at remote
-     * @param totalFees total fees provided by msg sender
      * @param payload the data which will be used by inbound at remote
      */
     event MessageOutbound(
@@ -20,9 +30,8 @@ interface ISocket {
         address dstPlug,
         bytes32 msgId,
         uint256 msgGasLimit,
-        uint256 executionFee,
-        uint256 totalFees,
-        bytes payload
+        bytes payload,
+        Fees fees
     );
 
     /**
