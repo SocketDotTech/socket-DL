@@ -165,9 +165,13 @@ contract OptimismSwitchboardL1L2Test is Setup {
             l2ReceiveGasLimit_,
             initialConfirmationGasLimit_,
             executionOverhead_,
-            remoteNativeSwitchboard_,
             _socketOwner,
             cc_.gasPriceOracle__
+        );
+
+        hoax(_socketOwner);
+        optimismSwitchboard.updateRemoteNativeSwitchboard(
+            remoteNativeSwitchboard_
         );
 
         scc_ = registerSwitchbaord(

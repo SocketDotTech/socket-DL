@@ -2,30 +2,20 @@
 pragma solidity 0.8.7;
 
 import "../../interfaces/native-bridge/ICrossDomainMessenger.sol";
-import "../../interfaces/native-bridge/INativeReceiver.sol";
 
 import "./NativeSwitchboardBase.sol";
 import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
-contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
+contract OptimismSwitchboard is NativeSwitchboardBase {
     uint256 public receivePacketGasLimit;
     uint256 public l1ReceiveGasLimit;
 
-    address public remoteNativeSwitchboard;
-    // stores the roots received from native bridge
-    mapping(bytes32 => bytes32) public roots;
-
     ICrossDomainMessenger public crossDomainMessenger__;
 
-    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
     event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit);
-    event RootReceived(bytes32 packetId, bytes32 root);
     event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit);
 
-    error InvalidSender();
-    error NoRootFound();
-
-    modifier onlyRemoteSwitchboard() {
+    modifier onlyRemoteSwitchboard() override {
         if (
             msg.sender != address(crossDomainMessenger__) &&
             crossDomainMessenger__.xDomainMessageSender() !=
@@ -39,18 +29,18 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
         uint256 l1ReceiveGasLimit_,
         uint256 initialConfirmationGasLimit_,
         uint256 executionOverhead_,
-        address remoteNativeSwitchboard_,
         address owner_,
         IGasPriceOracle gasPriceOracle_
-    ) AccessControlExtended(owner_) {
+    )
+        AccessControlExtended(owner_)
+        NativeSwitchboardBase(
+            initialConfirmationGasLimit_,
+            executionOverhead_,
+            gasPriceOracle_
+        )
+    {
         receivePacketGasLimit = receivePacketGasLimit_;
-
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
-        initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
-        executionOverhead = executionOverhead_;
-
-        remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        gasPriceOracle__ = gasPriceOracle_;
 
         if ((block.chainid == 10 || block.chainid == 420)) {
             crossDomainMessenger__ = ICrossDomainMessenger(
@@ -68,13 +58,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
     }
 
     function initateNativeConfirmation(bytes32 packetId_) external {
-        uint64 capacitorPacketCount = uint64(uint256(packetId_));
-        bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
-        bytes memory data = abi.encodeWithSelector(
-            INativeReceiver.receivePacket.selector,
-            packetId_,
-            root
-        );
+        bytes memory data = _encodeRemoteCall(packetId_);
 
         crossDomainMessenger__.sendMessage(
             remoteNativeSwitchboard,
@@ -82,30 +66,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
             uint32(receivePacketGasLimit)
         );
         emit InitiatedNativeConfirmation(packetId_);
-    }
-
-    function receivePacket(
-        bytes32 packetId_,
-        bytes32 root_
-    ) external override onlyRemoteSwitchboard {
-        roots[packetId_] = root_;
-        emit RootReceived(packetId_, root_);
-    }
-
-    /**
-     * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId_ packet id
-     */
-    function allowPacket(
-        bytes32 root_,
-        bytes32 packetId_,
-        uint32,
-        uint256
-    ) external view override returns (bool) {
-        if (tripGlobalFuse) return false;
-        if (roots[packetId_] != root_) return false;
-
-        return true;
     }
 
     function _getMinSwitchboardFees(
@@ -126,13 +86,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase, INativeReceiver {
     ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
         emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
-    }
-
-    function updateRemoteNativeSwitchboard(
-        address remoteNativeSwitchboard_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }
 
     function updateReceivePacketGasLimit(

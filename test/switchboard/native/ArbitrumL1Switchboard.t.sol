@@ -176,7 +176,6 @@ contract ArbitrumL1SwitchboardTest is Setup {
             dynamicFees_,
             initialConfirmationGasLimit_,
             executionOverhead_,
-            remoteNativeSwitchboard_,
             inbox_,
             _socketOwner,
             cc_.gasPriceOracle__
@@ -185,6 +184,9 @@ contract ArbitrumL1SwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
         arbitrumL1Switchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         arbitrumL1Switchboard.setExecutionOverhead(_executionOverhead);
+        arbitrumL1Switchboard.updateRemoteNativeSwitchboard(
+            remoteNativeSwitchboard_
+        );
         vm.stopPrank();
 
         scc_ = registerSwitchbaord(

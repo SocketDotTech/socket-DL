@@ -20,6 +20,10 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
 
     uint256 public executionOverhead;
     uint256 public initateNativeConfirmationGasLimit;
+    address public remoteNativeSwitchboard;
+
+    // stores the roots received from native bridge
+    mapping(bytes32 => bytes32) public roots;
 
     event SwitchboardTripped(bool tripGlobalFuse);
     event ExecutionOverheadSet(uint256 executionOverhead);
@@ -28,10 +32,66 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     event GasPriceOracleSet(address gasPriceOracle);
     event InitiatedNativeConfirmation(bytes32 packetId);
     event CapacitorRegistered(address capacitor, uint256 maxPacketSize);
+    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
+    event RootReceived(bytes32 packetId, bytes32 root);
 
     error TransferFailed();
     error FeesNotEnough();
     error AlreadyInitialised();
+    error InvalidSender();
+    error NoRootFound();
+
+    modifier onlyRemoteSwitchboard() virtual {
+        _;
+    }
+
+    constructor(
+        uint256 initialConfirmationGasLimit_,
+        uint256 executionOverhead_,
+        IGasPriceOracle gasPriceOracle_
+    ) {
+        initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
+        executionOverhead = executionOverhead_;
+        gasPriceOracle__ = gasPriceOracle_;
+    }
+
+    function _encodeRemoteCall(
+        bytes32 packetId_
+    ) internal view returns (bytes memory data) {
+        uint64 capacitorPacketCount = uint64(uint256(packetId_));
+        bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
+        if (root == bytes32(0)) revert NoRootFound();
+
+        data = abi.encodeWithSelector(
+            this.receivePacket.selector,
+            packetId_,
+            root
+        );
+    }
+
+    function receivePacket(
+        bytes32 packetId_,
+        bytes32 root_
+    ) external onlyRemoteSwitchboard {
+        roots[packetId_] = root_;
+        emit RootReceived(packetId_, root_);
+    }
+
+    /**
+     * @notice verifies if the packet satisfies needed checks before execution
+     * @param packetId_ packet id
+     */
+    function allowPacket(
+        bytes32 root_,
+        bytes32 packetId_,
+        uint32,
+        uint256
+    ) external view override returns (bool) {
+        if (tripGlobalFuse) return false;
+        if (roots[packetId_] != root_) return false;
+
+        return true;
+    }
 
     // assumption: natives have 18 decimals
     function payFees(uint32 dstChainSlug_) external payable override {}
@@ -137,6 +197,13 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     ) external onlyRole(GOVERNANCE_ROLE) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         emit GasPriceOracleSet(gasPriceOracle_);
+    }
+
+    function updateRemoteNativeSwitchboard(
+        address remoteNativeSwitchboard_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        remoteNativeSwitchboard = remoteNativeSwitchboard_;
+        emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }
 
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
