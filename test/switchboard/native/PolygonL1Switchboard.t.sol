@@ -178,7 +178,8 @@ contract PolygonL1SwitchboardTest is Setup {
             switchBoardAddress_,
             DEFAULT_BATCH_LENGTH,
             uint32(remoteChainSlug_),
-            uint32(capacitorType_)
+            uint32(capacitorType_),
+            _socketOwner
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;

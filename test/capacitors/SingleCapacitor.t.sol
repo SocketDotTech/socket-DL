@@ -3,6 +3,8 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 import "../../contracts/capacitors/SingleCapacitor.sol";
+import {SOCKET_ROLE} from "../../contracts/utils/AccessRoles.sol";
+
 
 contract SingleCapacitorTest is Test {
     uint256 internal c = 1;
@@ -23,7 +25,10 @@ contract SingleCapacitorTest is Test {
     function testSetUp() external {
         assertEq(_sa.owner(), _owner, "Owner not set");
 
-        assertTrue(_sa.socket() == _socket, "Socket role not set");
+        assertTrue(
+            _sa.hasRole(SOCKET_ROLE, _socket),
+            "Socket role not set"
+        );
 
         _assertPacketById(bytes32(0), 0);
         _assertPacketToBeSealed(bytes32(0), 0);
