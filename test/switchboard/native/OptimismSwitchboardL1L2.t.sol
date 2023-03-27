@@ -169,17 +169,17 @@ contract OptimismSwitchboardL1L2Test is Setup {
             cc_.gasPriceOracle__
         );
 
-        hoax(_socketOwner);
-        optimismSwitchboard.updateRemoteNativeSwitchboard(
-            remoteNativeSwitchboard_
-        );
-
         scc_ = registerSwitchbaord(
             cc_,
             _socketOwner,
             address(optimismSwitchboard),
             remoteChainSlug_,
             capacitorType_
+        );
+
+        hoax(_socketOwner);
+        optimismSwitchboard.updateRemoteNativeSwitchboard(
+            remoteNativeSwitchboard_
         );
     }
 
