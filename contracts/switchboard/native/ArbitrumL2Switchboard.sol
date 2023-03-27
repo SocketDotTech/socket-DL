@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../../interfaces/native-bridge/IArbSys.sol";
+import "openzeppelin-contracts/contracts/vendor/arbitrum/IArbSys.sol";
 
 import "../../libraries/AddressAliasHelper.sol";
 import "./NativeSwitchboardBase.sol";

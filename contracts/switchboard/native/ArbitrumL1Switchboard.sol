@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../../interfaces/native-bridge/IInbox.sol";
-import "../../interfaces/native-bridge/IOutbox.sol";
-import "../../interfaces/native-bridge/IBridge.sol";
+import "openzeppelin-contracts/contracts/vendor/arbitrum/IBridge.sol";
+import "openzeppelin-contracts/contracts/vendor/arbitrum/IInbox.sol";
+import "openzeppelin-contracts/contracts/vendor/arbitrum/IOutbox.sol";
+
 import "./NativeSwitchboardBase.sol";
 import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
@@ -22,7 +23,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     event UpdatedArbitrumNativeFee(uint256 arbitrumNativeFee);
 
     modifier onlyRemoteSwitchboard() override {
-        IBridge bridge__ = inbox__.bridge();
+        IBridge bridge__ = IBridge(inbox__.bridge());
         if (msg.sender != address(bridge__)) revert InvalidSender();
 
         IOutbox outbox__ = IOutbox(bridge__.activeOutbox());

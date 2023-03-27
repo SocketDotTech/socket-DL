@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../../interfaces/native-bridge/ICrossDomainMessenger.sol";
-
+import "openzeppelin-contracts/contracts/vendor/optimism/ICrossDomainMessenger.sol";
 import "./NativeSwitchboardBase.sol";
 import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
