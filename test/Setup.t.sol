@@ -14,7 +14,7 @@ import "../contracts/TransmitManager.sol";
 import "../contracts/GasPriceOracle.sol";
 import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
-import {WATCHER_ROLE, TRANSMITTER_ROLE} from "../contracts/utils/AccessRoles.sol";
+import {WATCHER_ROLE, TRANSMITTER_ROLE, GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../contracts/utils/AccessRoles.sol";
 
 contract Setup is Test {
     uint256 internal c = 1;
@@ -155,6 +155,7 @@ contract Setup is Test {
             remoteChainSlug_,
             _watcher
         );
+        
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
@@ -210,6 +211,9 @@ contract Setup is Test {
             deployer_
         );
 
+        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
+        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
+
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
             cc_.gasPriceOracle__,
@@ -217,6 +221,8 @@ contract Setup is Test {
             cc_.chainSlug,
             _sealGasLimit
         );
+
+        cc_.transmitManager__.grantRole(GAS_LIMIT_UPDATER_ROLE, cc_.chainSlug, deployer_);
 
         cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
 
