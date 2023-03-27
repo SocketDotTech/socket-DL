@@ -64,7 +64,7 @@ abstract contract SocketSrc is SocketBase {
         );
 
         plugConfig.capacitor__.addPackedMessage(packedMessage);
-        emit MessageTransmitted(
+        emit MessageOutbound(
             localChainSlug,
             msg.sender,
             remoteChainSlug_,

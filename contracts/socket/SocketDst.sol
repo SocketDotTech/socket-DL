@@ -17,7 +17,7 @@ abstract contract SocketDst is SocketBase {
     // msgId => message status
     mapping(uint256 => bool) public messageExecuted;
     // capacitorAddr|chainSlug|packetId
-    mapping(uint256 => bytes32) public override remoteRoots;
+    mapping(uint256 => bytes32) public override packetIdRoots;
     mapping(uint256 => uint256) public rootProposedAt;
 
     /**
@@ -45,7 +45,7 @@ abstract contract SocketDst is SocketBase {
         bytes32 root_,
         bytes calldata signature_
     ) external {
-        if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
+        if (packetIdRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
 
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
@@ -56,7 +56,7 @@ abstract contract SocketDst is SocketBase {
 
         if (!isTransmitter) revert InvalidAttester();
 
-        remoteRoots[packetId_] = root_;
+        packetIdRoots[packetId_] = root_;
         rootProposedAt[packetId_] = block.timestamp;
 
         emit PacketProposed(transmitter, packetId_, root_);
@@ -93,10 +93,8 @@ abstract contract SocketDst is SocketBase {
             messageDetails_.payload
         );
 
-        (, bool isValidExecutor) = executionManager__.isExecutor(
-            packedMessage,
-            signature_
-        );
+        (address executor, bool isValidExecutor) = executionManager__
+            .isExecutor(packedMessage, signature_);
         if (!isValidExecutor) revert NotExecutor();
 
         _verify(
@@ -107,6 +105,8 @@ abstract contract SocketDst is SocketBase {
             messageDetails_.decapacitorProof
         );
         _execute(
+            executor,
+            messageDetails_.executionFee,
             localPlug_,
             remoteSlug,
             messageDetails_.msgGasLimit,
@@ -124,7 +124,7 @@ abstract contract SocketDst is SocketBase {
     ) internal view {
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
-                remoteRoots[packetId_],
+                packetIdRoots[packetId_],
                 packetId_,
                 remoteChainSlug_,
                 rootProposedAt[packetId_]
@@ -133,7 +133,7 @@ abstract contract SocketDst is SocketBase {
 
         if (
             !plugConfig_.decapacitor__.verifyMessageInclusion(
-                remoteRoots[packetId_],
+                packetIdRoots[packetId_],
                 packedMessage_,
                 decapacitorProof_
             )
@@ -141,6 +141,8 @@ abstract contract SocketDst is SocketBase {
     }
 
     function _execute(
+        address executor,
+        uint256 executionFee,
         address localPlug_,
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
@@ -153,6 +155,11 @@ abstract contract SocketDst is SocketBase {
                 payload_
             )
         {
+            executionManager__.updateExecutionFees(
+                executor,
+                msgId_,
+                executionFee
+            );
             emit ExecutionSuccess(msgId_);
         } catch Error(string memory reason) {
             // catch failing revert() and require()
@@ -165,23 +172,8 @@ abstract contract SocketDst is SocketBase {
         }
     }
 
-    /**
-     * @notice updates root for given packet id
-     * @param packetId_ id of packet to be updated
-     * @param newRoot_ new root
-     */
-    function updatePacketRoot(
-        uint256 packetId_,
-        bytes32 newRoot_
-    ) external onlyOwner {
-        bytes32 oldRoot = remoteRoots[packetId_];
-        remoteRoots[packetId_] = newRoot_;
-
-        emit PacketRootUpdated(packetId_, oldRoot, newRoot_);
-    }
-
     function isPacketProposed(uint256 packetId_) external view returns (bool) {
-        return remoteRoots[packetId_] == bytes32(0) ? false : true;
+        return packetIdRoots[packetId_] == bytes32(0) ? false : true;
     }
 
     function _getChainSlug(

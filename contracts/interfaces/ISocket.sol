@@ -13,7 +13,7 @@ interface ISocket {
      * @param totalFees total fees provided by msg sender
      * @param payload the data which will be used by inbound at remote
      */
-    event MessageTransmitted(
+    event MessageOutbound(
         uint256 localChainSlug,
         address localPlug,
         uint256 dstChainSlug,
@@ -119,5 +119,5 @@ interface ISocket {
         address outboundSwitchboard_
     ) external;
 
-    function remoteRoots(uint256 packetId_) external view returns (bytes32);
+    function packetIdRoots(uint256 packetId_) external view returns (bytes32);
 }
