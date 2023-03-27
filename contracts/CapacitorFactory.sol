@@ -17,7 +17,7 @@ contract CapacitorFactory is ICapacitorFactory, Ownable(msg.sender) {
     function deploy(
         uint256 capacitorType_,
         uint256 /** siblingChainSlug */,
-        uint256 /** maxBatchLength */
+        uint256 /** maxPacketLength */
     ) external override returns (ICapacitor, IDecapacitor) {
         address owner = this.owner();
 

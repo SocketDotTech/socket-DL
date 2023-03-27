@@ -10,7 +10,11 @@ import "../../libraries/FeesHelper.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlWithUint {
     IGasPriceOracle public gasPriceOracle__;
+
+    bool public isInitialised;
     bool public tripGlobalFuse;
+    uint256 public maxPacketSize;
+
     mapping(uint256 => uint256) public executionOverhead;
 
     // sourceChain => isPaused
@@ -20,8 +24,10 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlWithUint {
     event SwitchboardTripped(bool tripGlobalFuse);
     event ExecutionOverheadSet(uint256 dstChainSlug, uint256 executionOverhead);
     event GasPriceOracleSet(address gasPriceOracle);
+    event CapacitorRegistered(address capacitor, uint256 maxPacketSize);
 
     error TransferFailed();
+    error AlreadyInitialised();
 
     function payFees(uint256 dstChainSlug_) external payable override {}
 
@@ -51,6 +57,22 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlWithUint {
         uint256 dstChainSlug_,
         uint256 dstRelativeGasPrice_
     ) internal view virtual returns (uint256);
+
+    /**
+     * @notice set capacitor address and packet size
+     * @param capacitor_ capacitor address
+     * @param maxPacketSize_ max messages allowed in one packet
+     */
+    function registerCapacitor(
+        address capacitor_,
+        uint256 maxPacketSize_
+    ) external override {
+        if (isInitialised) revert AlreadyInitialised();
+
+        isInitialised = true;
+        maxPacketSize = maxPacketSize_;
+        emit CapacitorRegistered(capacitor_, maxPacketSize_);
+    }
 
     /**
      * @notice pause a path

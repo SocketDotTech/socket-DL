@@ -2,6 +2,11 @@
 pragma solidity 0.8.7;
 
 interface ISwitchboard {
+    function registerCapacitor(
+        address capacitor_,
+        uint256 maxPacketSize_
+    ) external;
+
     function allowPacket(
         bytes32 root,
         uint256 packetId,

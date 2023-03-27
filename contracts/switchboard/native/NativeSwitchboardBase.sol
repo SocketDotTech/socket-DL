@@ -13,7 +13,10 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     IGasPriceOracle public gasPriceOracle__;
     ICapacitor public capacitor__;
 
+    bool public isInitialised;
     bool public tripGlobalFuse;
+    uint256 public maxPacketSize;
+
     uint256 public executionOverhead;
     uint256 public initateNativeConfirmationGasLimit;
 
@@ -23,9 +26,11 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     event CapacitorSet(address capacitor);
     event GasPriceOracleSet(address gasPriceOracle);
     event InitiatedNativeConfirmation(uint256 packetId);
+    event CapacitorRegistered(address capacitor, uint256 maxPacketSize);
 
     error TransferFailed();
     error FeesNotEnough();
+    error AlreadyInitialised();
 
     // assumption: natives have 18 decimals
     function payFees(uint256 dstChainSlug_) external payable override {
@@ -70,6 +75,24 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     ) internal view virtual returns (uint256);
 
     /**
+     * @notice set capacitor address and packet size
+     * @param capacitor_ capacitor address
+     * @param maxPacketSize_ max messages allowed in one packet
+     */
+    function registerCapacitor(
+        address capacitor_,
+        uint256 maxPacketSize_
+    ) external override {
+        if (isInitialised) revert AlreadyInitialised();
+
+        isInitialised = true;
+        maxPacketSize = maxPacketSize_;
+        capacitor__ = ICapacitor(capacitor_);
+
+        emit CapacitorRegistered(capacitor_, maxPacketSize_);
+    }
+
+    /**
      * @notice pause execution
      */
     function tripGlobal(
@@ -107,15 +130,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     ) external onlyOwner {
         initateNativeConfirmationGasLimit = gasLimit_;
         emit InitialConfirmationGasLimitSet(gasLimit_);
-    }
-
-    /**
-     * @notice updates capacitor address
-     * @param capacitor_ new capacitor
-     */
-    function setCapacitor(address capacitor_) external onlyOwner {
-        capacitor__ = ICapacitor(capacitor_);
-        emit CapacitorSet(capacitor_);
     }
 
     /**
