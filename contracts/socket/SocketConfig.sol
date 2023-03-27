@@ -6,7 +6,7 @@ import "../utils/Ownable.sol";
 import "../interfaces/ICapacitorFactory.sol";
 import "../interfaces/ISwitchboard.sol";
 
-abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
+abstract contract SocketConfig is ISocket, Ownable {
     struct PlugConfig {
         address siblingPlug;
         ICapacitor capacitor__;

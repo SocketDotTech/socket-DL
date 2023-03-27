@@ -10,9 +10,11 @@ import "./decapacitors/HashChainDecapacitor.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./utils/Ownable.sol";
 
-contract CapacitorFactory is ICapacitorFactory, Ownable(msg.sender) {
+contract CapacitorFactory is ICapacitorFactory, Ownable {
     uint256 private constant SINGLE_CAPACITOR = 1;
     uint256 private constant HASH_CHAIN_CAPACITOR = 2;
+
+    constructor(address owner_) Ownable(owner_) {}
 
     function deploy(
         uint256 capacitorType_,
