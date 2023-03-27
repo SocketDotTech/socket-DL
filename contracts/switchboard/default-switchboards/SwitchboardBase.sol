@@ -29,16 +29,16 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlWithUint {
     error TransferFailed();
     error AlreadyInitialised();
 
-    function payFees(uint256 dstChainSlug_) external payable override {}
+    function payFees(uint32 dstChainSlug_) external payable override {}
 
     function getMinFees(
-        uint256 dstChainSlug_
+        uint32 dstChainSlug_
     ) external view override returns (uint256, uint256) {
         return _calculateMinFees(dstChainSlug_);
     }
 
     function _calculateMinFees(
-        uint256 dstChainSlug_
+        uint32 dstChainSlug_
     ) internal view returns (uint256 switchboardFee, uint256 verificationFee) {
         uint256 dstRelativeGasPrice = gasPriceOracle__.relativeGasPrice(
             dstChainSlug_

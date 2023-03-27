@@ -126,7 +126,7 @@ abstract contract SocketDst is SocketBase {
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
                 packetIdRoots[packetId_],
                 packetId_,
-                remoteChainSlug_,
+                uint32(remoteChainSlug_),
                 rootProposedAt[packetId_]
             )
         ) revert VerificationFailed();
@@ -178,7 +178,7 @@ abstract contract SocketDst is SocketBase {
 
     function _getChainSlug(
         bytes32 packetId_
-    ) internal pure returns (uint256 chainSlug_) {
+    ) internal pure returns (uint32 chainSlug_) {
         chainSlug_ = uint32(uint256(packetId_) >> 224);
     }
 }

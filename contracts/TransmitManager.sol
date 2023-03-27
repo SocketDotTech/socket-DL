@@ -13,7 +13,7 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
     ISignatureVerifier public signatureVerifier__;
     IGasPriceOracle public gasPriceOracle__;
 
-    uint256 public immutable chainSlug;
+    uint32 public immutable chainSlug;
     uint256 public sealGasLimit;
     mapping(uint256 => uint256) public proposeGasLimit;
 
@@ -34,7 +34,7 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
         ISignatureVerifier signatureVerifier_,
         IGasPriceOracle gasPriceOracle_,
         address owner_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 sealGasLimit_
     ) AccessControl(owner_) {
         chainSlug = chainSlug_;
@@ -51,7 +51,7 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
     // @dev sig chain slug is required by signature. On src, this is sibling slug while on
     // destination, it is current chain slug
     function checkTransmitter(
-        uint256 siblingSlug,
+        uint32 siblingSlug,
         bytes32 digest_,
         bytes calldata signature_
     ) external view override returns (address, bool) {
@@ -63,16 +63,16 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
         return (transmitter, _hasRoleWithUint(siblingSlug, transmitter));
     }
 
-    function payFees(uint256 siblingChainSlug_) external payable override {}
+    function payFees(uint32 siblingChainSlug_) external payable override {}
 
     function getMinFees(
-        uint256 siblingChainSlug_
+        uint32 siblingChainSlug_
     ) external view override returns (uint256) {
         return _calculateMinFees(siblingChainSlug_);
     }
 
     function _calculateMinFees(
-        uint256 siblingChainSlug_
+        uint32 siblingChainSlug_
     ) internal view returns (uint256 minTransmissionFees) {
         (
             uint256 sourceGasPrice,

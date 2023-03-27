@@ -10,13 +10,13 @@ interface ISwitchboard {
     function allowPacket(
         bytes32 root,
         bytes32 packetId,
-        uint256 srcChainSlug,
+        uint32 srcChainSlug,
         uint256 proposeTime
     ) external view returns (bool);
 
-    function payFees(uint256 dstChainSlug) external payable;
+    function payFees(uint32 dstChainSlug) external payable;
 
     function getMinFees(
-        uint256 dstChainSlug
+        uint32 dstChainSlug
     ) external view returns (uint256 switchboardFee, uint256 verificationFee);
 }

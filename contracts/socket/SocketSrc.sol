@@ -5,9 +5,6 @@ import "../interfaces/ICapacitor.sol";
 import "./SocketBase.sol";
 
 abstract contract SocketSrc is SocketBase {
-    // incrementing nonce, should be handled in next socket version.
-    uint256 public messageCount;
-
     error InsufficientFees();
 
     /**
@@ -50,7 +47,7 @@ abstract contract SocketSrc is SocketBase {
 
         ISocket.Fees memory fees = _deductFees(
             msgGasLimit_,
-            remoteChainSlug_,
+            uint32(remoteChainSlug_),
             plugConfig.outboundSwitchboard__
         );
 
@@ -80,7 +77,7 @@ abstract contract SocketSrc is SocketBase {
 
     function _deductFees(
         uint256 msgGasLimit_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         ISwitchboard switchboard__
     ) internal returns (Fees memory fees) {
         uint256 minExecutionFees;
@@ -117,7 +114,7 @@ abstract contract SocketSrc is SocketBase {
 
     function getMinFees(
         uint256 msgGasLimit_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         address plug_
     ) external view returns (uint256 totalFees) {
         PlugConfig storage plugConfig = _plugConfigs[plug_][remoteChainSlug_];
@@ -137,7 +134,7 @@ abstract contract SocketSrc is SocketBase {
 
     function _getMinFees(
         uint256 msgGasLimit_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         ISwitchboard switchboard__
     )
         internal
@@ -176,7 +173,7 @@ abstract contract SocketSrc is SocketBase {
                 packetCount
         );
 
-        uint256 siblingChainSlug = capacitorToSlug[capacitorAddress_];
+        uint32 siblingChainSlug = capacitorToSlug[capacitorAddress_];
 
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(

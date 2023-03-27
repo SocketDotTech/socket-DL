@@ -69,7 +69,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         uint256 maxGas_,
         uint256 gasPriceBid_
     ) external payable {
-        uint256 capacitorPacketCount = uint256(uint64(uint256(packetId_)));
+        uint64 capacitorPacketCount = uint64(uint256(packetId_));
         bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
         if (root == bytes32(0)) revert NoRootFound();
 
@@ -112,7 +112,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     function allowPacket(
         bytes32 root_,
         bytes32 packetId_,
-        uint256,
+        uint32,
         uint256
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;

@@ -12,14 +12,14 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
     // plugs/switchboards/transmitter can use it to ensure prices are updated
     mapping(uint256 => uint256) public updatedAt;
     // chain slug => relative gas price
-    mapping(uint256 => uint256) public override relativeGasPrice;
+    mapping(uint32 => uint256) public override relativeGasPrice;
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
 
     // gas price of source chain
     uint256 public override sourceGasPrice;
-    uint256 public immutable chainSlug;
+    uint32 public immutable chainSlug;
 
     event TransmitManagerUpdated(address transmitManager);
     event RelativeGasPriceUpdated(
@@ -31,7 +31,7 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
     error TransmitterNotFound();
     error NonceAlreadyUsed();
 
-    constructor(address owner_, uint256 chainSlug_) Ownable(owner_) {
+    constructor(address owner_, uint32 chainSlug_) Ownable(owner_) {
         chainSlug = chainSlug_;
     }
 
@@ -69,7 +69,7 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
      * So that when it is multiplied with gas limits at other contracts, we get correct values.
      */
     function setRelativeGasPrice(
-        uint256 siblingChainSlug_,
+        uint32 siblingChainSlug_,
         uint256 nonce_,
         uint256 relativeGasPrice_,
         bytes calldata signature_
@@ -99,7 +99,7 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
     }
 
     function getGasPrices(
-        uint256 siblingChainSlug_
+        uint32 siblingChainSlug_
     ) external view override returns (uint256, uint256) {
         return (sourceGasPrice, relativeGasPrice[siblingChainSlug_]);
     }

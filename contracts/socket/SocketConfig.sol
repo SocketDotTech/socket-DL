@@ -18,7 +18,7 @@ abstract contract SocketConfig is ISocket, Ownable {
     ICapacitorFactory public capacitorFactory__;
 
     // siblingChainSlug => capacitor address
-    mapping(address => uint256) public capacitorToSlug;
+    mapping(address => uint32) public capacitorToSlug;
 
     // switchboard => siblingChainSlug => ICapacitor
     mapping(address => mapping(uint256 => ICapacitor)) public capacitors__;

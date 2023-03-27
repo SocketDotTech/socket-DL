@@ -64,7 +64,7 @@ contract FastSwitchboard is SwitchboardBase {
     function allowPacket(
         bytes32,
         bytes32 packetId_,
-        uint256 srcChainSlug_,
+        uint32 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {
         if (tripGlobalFuse || tripSinglePath[srcChainSlug_]) return false;

@@ -7,13 +7,13 @@ import "../libraries/RescueFundsLib.sol";
 
 abstract contract BaseCapacitor is ICapacitor, Ownable {
     /// an incrementing id for each new packet created
-    uint256 internal _nextPacketCount;
-    uint256 internal _nextSealCount;
+    uint64 internal _nextPacketCount;
+    uint64 internal _nextSealCount;
 
     address public immutable socket;
 
     /// maps the packet id with the root hash generated while adding message
-    mapping(uint256 => bytes32) internal _roots;
+    mapping(uint64 => bytes32) internal _roots;
 
     error NoPendingPacket();
     error OnlySocket();
@@ -38,16 +38,16 @@ abstract contract BaseCapacitor is ICapacitor, Ownable {
         view
         virtual
         override
-        returns (bytes32, uint256)
+        returns (bytes32, uint64)
     {
-        uint256 toSeal = _nextSealCount;
+        uint64 toSeal = _nextSealCount;
         return (_roots[toSeal], toSeal);
     }
 
     /// returns the root of packet for given id
     /// @inheritdoc ICapacitor
     function getRootByCount(
-        uint256 id_
+        uint64 id_
     ) external view virtual override returns (bytes32) {
         return _roots[id_];
     }

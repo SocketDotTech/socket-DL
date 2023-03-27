@@ -20,7 +20,7 @@ contract HashChainCapacitor is BaseCapacitor {
     function addPackedMessage(
         bytes32 packedMessage_
     ) external override onlySocket {
-        uint256 packetCount = _nextPacketCount;
+        uint64 packetCount = _nextPacketCount;
 
         _roots[packetCount] = keccak256(
             abi.encode(_roots[packetCount], packedMessage_)
@@ -37,8 +37,8 @@ contract HashChainCapacitor is BaseCapacitor {
 
     function sealPacket(
         uint256
-    ) external virtual override onlySocket returns (bytes32, uint256) {
-        uint256 packetCount = _nextSealCount++;
+    ) external virtual override onlySocket returns (bytes32, uint64) {
+        uint64 packetCount = _nextSealCount++;
 
         if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
         bytes32 root = _roots[packetCount];

@@ -12,7 +12,10 @@ abstract contract SocketBase is SocketConfig {
     ITransmitManager public transmitManager__;
     IExecutionManager public executionManager__;
 
-    uint256 public chainSlug;
+    uint32 public chainSlug;
+    // incrementing nonce, should be handled in next socket version.
+    uint224 public messageCount;
+
     error InvalidAttester();
 
     event HasherSet(address hasher);

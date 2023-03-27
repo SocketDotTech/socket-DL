@@ -43,19 +43,19 @@ contract ExecutionManager is IExecutionManager, AccessControl {
 
     function payFees(
         uint256 msgGasLimit_,
-        uint256 siblingChainSlug_
+        uint32 siblingChainSlug_
     ) external payable override {}
 
     function getMinFees(
         uint256 msgGasLimit_,
-        uint256 siblingChainSlug_
+        uint32 siblingChainSlug_
     ) external view override returns (uint256) {
         return _getMinExecutionFees(msgGasLimit_, siblingChainSlug_);
     }
 
     function _getMinExecutionFees(
         uint256 msgGasLimit_,
-        uint256 dstChainSlug_
+        uint32 dstChainSlug_
     ) internal view returns (uint256) {
         uint256 dstRelativeGasPrice = gasPriceOracle__.relativeGasPrice(
             dstChainSlug_
