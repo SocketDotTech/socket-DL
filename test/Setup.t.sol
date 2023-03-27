@@ -111,7 +111,18 @@ contract Setup is Test {
         // deploy socket setup
         _deploySocket(cc_, _socketOwner);
 
+        vm.startPrank(_socketOwner);
+
+        cc_.transmitManager__.grantRole(
+            GAS_LIMIT_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        vm.stopPrank();
+
         hoax(_socketOwner);
+
         cc_.transmitManager__.setProposeGasLimit(
             remoteChainSlug_,
             _proposeGasLimit
@@ -155,7 +166,7 @@ contract Setup is Test {
             remoteChainSlug_,
             _watcher
         );
-        
+
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
@@ -222,7 +233,11 @@ contract Setup is Test {
             _sealGasLimit
         );
 
-        cc_.transmitManager__.grantRole(GAS_LIMIT_UPDATER_ROLE, cc_.chainSlug, deployer_);
+        cc_.transmitManager__.grantRole(
+            GAS_LIMIT_UPDATER_ROLE,
+            cc_.chainSlug,
+            deployer_
+        );
 
         cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
 

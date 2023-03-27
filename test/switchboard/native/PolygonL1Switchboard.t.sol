@@ -10,7 +10,7 @@ import "../../../contracts/ExecutionManager.sol";
 import "../../../contracts/CapacitorFactory.sol";
 import "../../../contracts/interfaces/ICapacitor.sol";
 
-// Goerli -> Optimism-Goerli
+// Goerli -> mumbai
 // Switchboard on Goerli (5) for mumbai-testnet (80001) as remote is: 0xDe5c161D61D069B0F2069518BB4110568D465465
 // RemoteNativeSwitchBoard i.e SwitchBoard on mumbai-testnet (80001) is:0x029ce68B3A6B3B3713CaC23a39c9096f279c8Ad2
 contract PolygonL1SwitchboardTest is Setup {
@@ -84,6 +84,16 @@ contract PolygonL1SwitchboardTest is Setup {
         // deploy socket setup
         deploySocket(cc_, _socketOwner);
 
+        vm.startPrank(_socketOwner);
+
+        cc_.transmitManager__.grantRole(
+            GAS_LIMIT_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        vm.stopPrank();
+
         hoax(_socketOwner);
         cc_.transmitManager__.setProposeGasLimit(
             remoteChainSlug_,
@@ -128,6 +138,9 @@ contract PolygonL1SwitchboardTest is Setup {
             cc_.chainSlug,
             _sealGasLimit
         );
+
+        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
+        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
 
         cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
 
@@ -194,6 +207,8 @@ contract PolygonL1SwitchboardTest is Setup {
             remoteChainSlug_
         );
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
+
+        polygonL1Switchboard.grantRole(GOVERNANCE_ROLE, deployer_);
         vm.stopPrank();
     }
 }

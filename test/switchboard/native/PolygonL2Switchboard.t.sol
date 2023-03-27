@@ -10,7 +10,7 @@ import "../../../contracts/ExecutionManager.sol";
 import "../../../contracts/CapacitorFactory.sol";
 import "../../../contracts/interfaces/ICapacitor.sol";
 
-// Goerli -> Optimism-Goerli
+// Goerli -> mumbai
 contract PolygonL2SwitchboardTest is Setup {
     bytes32[] roots;
 
@@ -28,10 +28,7 @@ contract PolygonL2SwitchboardTest is Setup {
         _a.chainSlug = uint32(uint256(80001));
         _b.chainSlug = uint32(uint256(5));
 
-        uint256 fork = vm.createFork(
-            vm.envString("POLYGON_MUMBAI_RPC"),
-            32375450
-        );
+        uint256 fork = vm.createFork(vm.envString("MUMBAI_RPC"), 32375450);
         vm.selectFork(fork);
 
         uint256[] memory transmitterPivateKeys = new uint256[](1);
@@ -83,6 +80,16 @@ contract PolygonL2SwitchboardTest is Setup {
         // deploy socket setup
         deploySocket(cc_, _socketOwner);
 
+        vm.startPrank(_socketOwner);
+
+        cc_.transmitManager__.grantRole(
+            GAS_LIMIT_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        vm.stopPrank();
+
         hoax(_socketOwner);
         cc_.transmitManager__.setProposeGasLimit(
             remoteChainSlug_,
@@ -127,6 +134,9 @@ contract PolygonL2SwitchboardTest is Setup {
             cc_.chainSlug,
             _sealGasLimit
         );
+
+        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
+        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
 
         cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
 
@@ -193,6 +203,8 @@ contract PolygonL2SwitchboardTest is Setup {
             remoteChainSlug_
         );
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
+
+        polygonL2Switchboard.grantRole(GOVERNANCE_ROLE, deployer_);
         vm.stopPrank();
     }
 }
