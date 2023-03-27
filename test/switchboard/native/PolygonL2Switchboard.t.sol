@@ -28,7 +28,10 @@ contract PolygonL2SwitchboardTest is Setup {
         _a.chainSlug = uint32(uint256(80001));
         _b.chainSlug = uint32(uint256(5));
 
-        uint256 fork = vm.createFork(vm.envString("MUMBAI_RPC"), 32375450);
+        uint256 fork = vm.createFork(
+            vm.envString("POLYGON_MUMBAI_RPC"),
+            32375450
+        );
         vm.selectFork(fork);
 
         uint256[] memory transmitterPivateKeys = new uint256[](1);
@@ -55,12 +58,11 @@ contract PolygonL2SwitchboardTest is Setup {
 
         singleCapacitor.addPackedMessage(packedMessage);
 
-        (
-            bytes32 root,
-            bytes32 packetId,
-            bytes memory sig
-        ) = _getLatestSignature(_a, address(singleCapacitor), _b.chainSlug);
-        uint64 capacitorPacketCount = uint64(uint256(packetId));
+        (, bytes32 packetId, bytes memory sig) = _getLatestSignature(
+            _a,
+            address(singleCapacitor),
+            _b.chainSlug
+        );
         polygonL2Switchboard.initateNativeConfirmation(packetId);
         vm.stopPrank();
     }
@@ -187,8 +189,7 @@ contract PolygonL2SwitchboardTest is Setup {
             switchBoardAddress_,
             DEFAULT_BATCH_LENGTH,
             uint32(remoteChainSlug_),
-            uint32(capacitorType_),
-            _socketOwner
+            uint32(capacitorType_)
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;

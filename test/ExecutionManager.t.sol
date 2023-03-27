@@ -71,7 +71,7 @@ contract ExecutionManagerTest is Setup {
         gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
         gasPriceOracle.setTransmitManager(transmitManager);
 
-        executionManager.grantRole(EXECUTOR_ROLE, executor);
+        executionManager.grantRole(EXECUTOR_ROLE, _executor);
         executionManager.grantRole(RESCUE_ROLE, owner);
         executionManager.grantRole(WITHDRAW_ROLE, owner);
 

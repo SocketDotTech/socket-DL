@@ -134,7 +134,7 @@ contract OptimisticSwitchboardTest is Setup {
 
         vm.startPrank(_socketOwner);
 
-        uint256 srcChainSlug = _a.chainSlug;
+        uint32 srcChainSlug = _a.chainSlug;
         optimisticSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
 
         vm.expectEmit(false, false, false, true);

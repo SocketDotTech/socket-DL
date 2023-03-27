@@ -111,9 +111,8 @@ contract HashChainCapacitorTest is Setup {
         _hcCapacitor.sealPacket(DEFAULT_BATCH_LENGTH);
     }
 
-    function _assertPacketToBeSealed(bytes32 root_, uint256 packetId_) private {
-        (bytes32 root, uint256 packetId) = _hcCapacitor
-            .getNextPacketToBeSealed();
+    function _assertPacketToBeSealed(bytes32, uint256 packetId_) private {
+        (, uint256 packetId) = _hcCapacitor.getNextPacketToBeSealed();
         assertEq(packetId, packetId_, "packetId Invalid");
     }
 

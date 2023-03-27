@@ -55,17 +55,10 @@ contract ArbitrumL1SwitchboardTest is Setup {
 
         singleCapacitor.addPackedMessage(packedMessage);
 
-        (
-            bytes32 root,
-            bytes32 packetId,
-            bytes memory sig
-        ) = _getLatestSignature(_a, address(singleCapacitor), _b.chainSlug);
-        uint64 capacitorPacketCount = uint64(uint256(packetId));
-
-        bytes memory data = abi.encodeWithSelector(
-            INativeReceiver.receivePacket.selector,
-            142338053211946203843372037510719759027017556012094709780189064200192,
-            "0x46043ac1fe69103527e585b20a75d2288cd87291c71d44ae80c5ce908f1cf169"
+        (, bytes32 packetId, ) = _getLatestSignature(
+            _a,
+            address(singleCapacitor),
+            _b.chainSlug
         );
 
         vm.mockCall(
@@ -215,8 +208,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
             switchBoardAddress_,
             DEFAULT_BATCH_LENGTH,
             uint32(remoteChainSlug_),
-            uint32(capacitorType_),
-            _socketOwner
+            uint32(capacitorType_)
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
