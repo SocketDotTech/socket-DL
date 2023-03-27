@@ -79,8 +79,8 @@ contract HappyTest is Setup {
 
             _sealOnSrc(_a, capacitor, sig_);
             _proposeOnDst(_b, sig_, packetId_, root_);
-            _attestOnDst(_b, packetId_);
             root = root_;
+            _attestOnDst(_b, packetId_);
             vm.expectEmit(true, false, false, false);
             emit ExecutionSuccess(_packMessageId(_a.chainSlug, 0));
 

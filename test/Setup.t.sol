@@ -197,6 +197,8 @@ contract Setup is Test {
         );
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
         fastSwitchboard.setAttestGasLimit(remoteChainSlug_, _attestGasLimit);
+        console.log("fastSwitchboard -> total watchers role for chainSlug: ", fastSwitchboard.totalWatchers(remoteChainSlug_) , remoteChainSlug_);
+
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
@@ -369,10 +371,21 @@ contract Setup is Test {
         bytes32 digest = keccak256(abi.encode(dstChainSlug, packetId_));
 
         // generate attest-signature
-        bytes memory attestSignature = _createSignature(digest, _watcherPrivateKey);
+        bytes memory attestSignature = _createSignature(
+            digest,
+            _watcherPrivateKey
+        );
 
         // attest with packetId_, dstChainSlug and signature
-        dst_.configs__[0].switchboard__.attest(packetId_, dstChainSlug, attestSignature);
+        address switchboardAddress = address(dst_.configs__[0].switchboard__);
+        console.log("switchboardAddress is: ", switchboardAddress);
+        console.log("_watcher is: ", _watcher);
+
+        FastSwitchboard(switchboardAddress).attest(
+            packetId_,
+            dstChainSlug,
+            attestSignature
+        );
     }
 
     function _executePayloadOnDst(
