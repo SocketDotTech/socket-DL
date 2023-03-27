@@ -34,7 +34,7 @@ contract HappyTest is Setup {
         _configPlugContracts(index);
     }
 
-    function testRemoteAddFromAtoB() external {
+    function testRemoteAddFromAtoB1() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
             keccak256("OP_ADD"),
@@ -78,7 +78,7 @@ contract HappyTest is Setup {
 
             _sealOnSrc(_a, capacitor, sig_);
             _proposeOnDst(_b, sig_, packetId_, root_);
-
+            _attestOnDst(_b, packetId_);
             root = root_;
             _attestOnDst(address(_b.configs__[0].switchboard__), packetId_);
             packetId = packetId_;
