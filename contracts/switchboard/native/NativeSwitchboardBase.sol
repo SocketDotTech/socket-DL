@@ -23,7 +23,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     address public remoteNativeSwitchboard;
 
     // stores the roots received from native bridge
-    mapping(bytes32 => bytes32) public roots;
+    mapping(bytes32 => bytes32) public packetIdToRoot;
 
     event SwitchboardTripped(bool tripGlobalFuse);
     event ExecutionOverheadSet(uint256 executionOverhead);
@@ -73,7 +73,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         bytes32 packetId_,
         bytes32 root_
     ) external onlyRemoteSwitchboard {
-        roots[packetId_] = root_;
+        packetIdToRoot[packetId_] = root_;
         emit RootReceived(packetId_, root_);
     }
 
@@ -88,7 +88,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
-        if (roots[packetId_] != root_) return false;
+        if (packetIdToRoot[packetId_] != root_) return false;
 
         return true;
     }

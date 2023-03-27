@@ -10,7 +10,7 @@ import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.s
 contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     address public remoteRefundAddress;
     address public callValueRefundAddress;
-    uint256 public dynamicFees;
+    uint256 public arbitrumNativeFee;
 
     IInbox public inbox__;
 
@@ -19,7 +19,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         address remoteRefundAddress,
         address callValueRefundAddress
     );
-    event UpdatedDynamicFees(uint256 dynamicFees);
+    event UpdatedArbitrumNativeFee(uint256 arbitrumNativeFee);
 
     modifier onlyRemoteSwitchboard() override {
         IBridge bridge__ = inbox__.bridge();
@@ -33,7 +33,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     }
 
     constructor(
-        uint256 dynamicFees_,
+        uint256 arbitrumNativeFee_,
         uint256 initialConfirmationGasLimit_,
         uint256 executionOverhead_,
         address inbox_,
@@ -48,7 +48,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         )
     {
         inbox__ = IInbox(inbox_);
-        dynamicFees = dynamicFees_;
+        arbitrumNativeFee = arbitrumNativeFee_;
 
         remoteRefundAddress = msg.sender;
         callValueRefundAddress = msg.sender;
@@ -88,7 +88,9 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         // TODO: check if dynamic fees can be divided into more constants
         // arbitrum: check src contract
         return
-            initateNativeConfirmationGasLimit * sourceGasPrice_ + dynamicFees;
+            initateNativeConfirmationGasLimit *
+            sourceGasPrice_ +
+            arbitrumNativeFee;
     }
 
     function updateRefundAddresses(
@@ -104,11 +106,11 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         );
     }
 
-    function updateDynamicFees(
-        uint256 dynamicFees_
+    function updateArbitrumNativeFee(
+        uint256 arbitrumNativeFee_
     ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
-        dynamicFees = dynamicFees_;
-        emit UpdatedDynamicFees(dynamicFees_);
+        arbitrumNativeFee = arbitrumNativeFee_;
+        emit UpdatedArbitrumNativeFee(arbitrumNativeFee_);
     }
 
     function updateInboxAddresses(
