@@ -38,6 +38,9 @@ contract ExecutionManager is IExecutionManager, AccessControl {
         isValidExecutor = _hasRole(_EXECUTOR_ROLE, executor);
     }
 
+    // these details might be needed for on-chain fee distribution later
+    function updateExecutionFees(address, uint256, uint256) external override {}
+
     function payFees(
         uint256 msgGasLimit_,
         uint256 siblingChainSlug_

@@ -13,4 +13,10 @@ interface IExecutionManager {
         uint256 msgGasLimit,
         uint256 dstSlug
     ) external view returns (uint256);
+
+    function updateExecutionFees(
+        address executor,
+        uint256 msgId,
+        uint256 executionFees
+    ) external;
 }
