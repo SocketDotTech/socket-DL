@@ -22,6 +22,8 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         address callValueRefundAddress
     );
     event UpdatedArbitrumNativeFee(uint256 arbitrumNativeFee);
+    event UpdatedBridge(address bridgeAddress);
+    event UpdatedOutbox(address outboxAddress);
 
     modifier onlyRemoteSwitchboard() override {
         if (msg.sender != address(bridge__)) revert InvalidSender();
@@ -118,5 +120,21 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     ) external onlyRole(GOVERNANCE_ROLE) {
         inbox__ = IInbox(inbox_);
         emit UpdatedInboxAddress(inbox_);
+    }
+
+    function updateBridge(
+        address bridgeAddress_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        bridge__ = IBridge(bridgeAddress_);
+
+        emit UpdatedBridge(bridgeAddress_);
+    }
+
+    function updateOutbox(
+        address outboxAddress_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        outbox__ = IOutbox(outboxAddress_);
+
+        emit UpdatedOutbox(outboxAddress_);
     }
 }
