@@ -18,7 +18,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
 
     uint256 receivePacketGasLimit_ = 100000;
     uint256 l2ReceiveGasLimit_ = 100000;
-    uint256 initialConfirmationGasLimit_ = 100000;
+    uint256 initiateGasLimit_ = 100000;
     uint256 executionOverhead_ = 100000;
     address remoteNativeSwitchboard_ =
         0x2D468C4d7e355a4ADe099802A61Ba536220fb3Cb;
@@ -163,7 +163,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
         optimismSwitchboard = new OptimismSwitchboard(
             receivePacketGasLimit_,
             l2ReceiveGasLimit_,
-            initialConfirmationGasLimit_,
+            initiateGasLimit_,
             executionOverhead_,
             _socketOwner,
             cc_.gasPriceOracle__

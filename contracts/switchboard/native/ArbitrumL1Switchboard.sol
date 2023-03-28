@@ -34,7 +34,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
 
     constructor(
         uint256 arbitrumNativeFee_,
-        uint256 initialConfirmationGasLimit_,
+        uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         address inbox_,
         address owner_,
@@ -42,7 +42,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     )
         AccessControlExtended(owner_)
         NativeSwitchboardBase(
-            initialConfirmationGasLimit_,
+            initiateGasLimit_,
             executionOverhead_,
             gasPriceOracle_
         )

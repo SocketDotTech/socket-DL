@@ -1,7 +1,7 @@
 import { constants } from "ethers";
 
 const executionOverhead = 300000;
-const initialConfirmationGasLimit = 300000;
+const initiateGasLimit = 300000;
 const confirmGasLimit = 300000;
 
 export const arbitrumL2Switchboard = (
@@ -12,7 +12,7 @@ export const arbitrumL2Switchboard = (
     contractName: "ArbitrumL2Switchboard",
     args: [
       confirmGasLimit,
-      initialConfirmationGasLimit,
+      initiateGasLimit,
       executionOverhead,
       constants.AddressZero,
       signerAddress,

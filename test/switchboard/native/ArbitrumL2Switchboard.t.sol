@@ -15,7 +15,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
     bytes32[] roots;
 
     uint256 confirmGasLimit_ = 100;
-    uint256 initialConfirmationGasLimit_ = 100;
+    uint256 initiateGasLimit_ = 100;
     uint256 executionOverhead_ = 100;
     address remoteNativeSwitchboard_ =
         0x3f0121d91B5c04B716Ea960790a89b173da7929c;
@@ -165,7 +165,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
     ) internal returns (SocketConfigContext memory scc_) {
         arbitrumL2Switchboard = new ArbitrumL2Switchboard(
             confirmGasLimit_,
-            initialConfirmationGasLimit_,
+            initiateGasLimit_,
             executionOverhead_,
             _socketOwner,
             cc_.gasPriceOracle__

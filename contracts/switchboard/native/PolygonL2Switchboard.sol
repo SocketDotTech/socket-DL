@@ -19,7 +19,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
 
     constructor(
         uint256 confirmGasLimit_,
-        uint256 initialConfirmationGasLimit_,
+        uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         address fxChild_,
         address owner_,
@@ -27,7 +27,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     )
         AccessControlExtended(owner_)
         NativeSwitchboardBase(
-            initialConfirmationGasLimit_,
+            initiateGasLimit_,
             executionOverhead_,
             gasPriceOracle_
         )

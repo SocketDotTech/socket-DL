@@ -2,7 +2,7 @@ import { constants } from "ethers";
 import { bridgeConsts } from "../../constants";
 
 const executionOverhead = 300000;
-const initialConfirmationGasLimit = 300000;
+const initiateGasLimit = 300000;
 const dynamicFees = 300000;
 
 export const arbitrumL1Switchboard = (
@@ -14,7 +14,7 @@ export const arbitrumL1Switchboard = (
     contractName: "ArbitrumL1Switchboard",
     args: [
       dynamicFees,
-      initialConfirmationGasLimit,
+      initiateGasLimit,
       executionOverhead,
       constants.AddressZero,
       bridgeConsts.inbox[network],

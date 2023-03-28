@@ -15,7 +15,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
     bytes32[] roots;
 
     uint256 dynamicFees_ = 100;
-    uint256 initialConfirmationGasLimit_ = 100;
+    uint256 initiateGasLimit_ = 100;
     uint256 executionOverhead_ = 100;
     address remoteNativeSwitchboard_ =
         0x3f0121d91B5c04B716Ea960790a89b173da7929c;
@@ -174,7 +174,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
     ) internal returns (SocketConfigContext memory scc_) {
         arbitrumL1Switchboard = new ArbitrumL1Switchboard(
             dynamicFees_,
-            initialConfirmationGasLimit_,
+            initiateGasLimit_,
             executionOverhead_,
             inbox_,
             _socketOwner,

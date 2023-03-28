@@ -1,7 +1,7 @@
 import { constants } from "ethers";
 
 const executionOverhead = 300000;
-const initialConfirmationGasLimit = 300000;
+const initiateGasLimit = 300000;
 const l2ReceiveGasLimit = 300000;
 const receivePacketGasLimit = 300000;
 
@@ -14,7 +14,7 @@ export const optimismSwitchboard = (
     args: [
       receivePacketGasLimit,
       l2ReceiveGasLimit,
-      initialConfirmationGasLimit,
+      initiateGasLimit,
       executionOverhead,
       constants.AddressZero,
       signerAddress,
