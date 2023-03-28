@@ -19,4 +19,9 @@ export const bridgeConsts = {
     mainnet: "0xfe5e5D361b2ad62c541bAb87C45a0B9B018389a2",
     goerli: "0x3d1d3E34f7fB6D26245E6640E1c50710eFFf15bA",
   },
+  crossDomainMessenger: {
+    mainnet: "0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1",
+    optimism: "0x4200000000000000000000000000000000000007",
+    "optimism-goerli" : "0x4200000000000000000000000000000000000007",
+  }
 };

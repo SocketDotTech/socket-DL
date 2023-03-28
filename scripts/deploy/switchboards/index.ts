@@ -30,7 +30,7 @@ export const getSwitchboardDeployData = (
     } else if (switchboardType === NativeSwitchboard.ARBITRUM_L2) {
       return arbitrumL2Switchboard(oracleAddress, signerAddress);
     } else if (switchboardType === NativeSwitchboard.OPTIMISM) {
-      return optimismSwitchboard(oracleAddress, signerAddress);
+      return optimismSwitchboard(localChain, oracleAddress, signerAddress);
     } else if (switchboardType === NativeSwitchboard.POLYGON_L1) {
       return polygonL1Switchboard(localChain, oracleAddress, signerAddress);
     } else if (switchboardType === NativeSwitchboard.POLYGON_L2) {
