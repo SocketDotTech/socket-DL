@@ -3,7 +3,7 @@ pragma solidity 0.8.7;
 
 import "./SwitchboardBase.sol";
 import "../../libraries/SignatureVerifierLib.sol";
-import {WATCHER_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {WATCHER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract FastSwitchboard is SwitchboardBase {
     uint256 public immutable timeoutInSeconds;

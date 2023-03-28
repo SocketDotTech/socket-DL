@@ -118,11 +118,13 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         (uint256 sourceGasPrice, uint256 dstRelativeGasPrice) = gasPriceOracle__
             .getGasPrices(dstChainSlug_);
 
-        switchboardFee_ = _getMinSwitchboardFees(
-            dstChainSlug_,
-            dstRelativeGasPrice,
-            sourceGasPrice
-        );
+        switchboardFee_ =
+            _getMinSwitchboardFees(
+                dstChainSlug_,
+                dstRelativeGasPrice,
+                sourceGasPrice
+            ) /
+            maxPacketSize;
 
         verificationFee_ = executionOverhead * dstRelativeGasPrice;
     }

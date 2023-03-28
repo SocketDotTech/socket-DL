@@ -45,10 +45,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             dstChainSlug_
         );
 
-        switchboardFee = _getMinSwitchboardFees(
-            dstChainSlug_,
-            dstRelativeGasPrice
-        );
+        switchboardFee =
+            _getMinSwitchboardFees(dstChainSlug_, dstRelativeGasPrice) /
+            maxPacketSize;
         verificationFee =
             executionOverhead[dstChainSlug_] *
             dstRelativeGasPrice;
