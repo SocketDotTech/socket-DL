@@ -4,6 +4,8 @@ pragma solidity 0.8.7;
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IGasPriceOracle.sol";
 import "../../utils/AccessControlExtended.sol";
+
+import "../../libraries/SignatureVerifierLib.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
@@ -23,6 +25,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     // sourceChain => isPaused
     mapping(uint256 => bool) public tripSinglePath;
 
+    // watcher => nextNonce
+    mapping(address => uint256) public nextNonce;
+
     event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
     event SwitchboardTripped(bool tripGlobalFuse);
     event ExecutionOverheadSet(uint256 dstChainSlug, uint256 executionOverhead);
@@ -31,13 +36,16 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     error TransferFailed();
     error AlreadyInitialised();
+    error NonceAlreadyUsed();
 
     constructor(
-        address owner_,
         address gasPriceOracle_,
+        uint256 chainSlug_,
         uint256 timeoutInSeconds_
-    ) AccessControlExtended(owner_) {
+    ) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
+
+        chainSlug = chainSlug_;
         timeoutInSeconds = timeoutInSeconds_;
     }
 
@@ -89,8 +97,23 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @notice pause a path
      */
     function tripPath(
-        uint256 srcChainSlug_
-    ) external onlyRoleWithChainSlug(TRIP_ROLE, srcChainSlug_) {
+        uint256 nonce_,
+        uint256 srcChainSlug_,
+        bytes memory signature_
+    ) external {
+        address watcher = SignatureVerifierLib.recoverSignerFromDigest(
+            // it includes trip status at the end
+            keccak256(
+                abi.encode("TRIP_PATH", srcChainSlug_, chainSlug, nonce_, false)
+            ),
+            signature_
+        );
+
+        if (!_hasRole(TRIP_ROLE, srcChainSlug_, watcher))
+            revert NoPermit(TRIP_ROLE);
+        uint256 nonce = nextNonce[watcher]++;
+        if (nonce_ != nonce) revert NonceAlreadyUsed();
+
         //source chain based tripping
         tripSinglePath[srcChainSlug_] = true;
         emit PathTripped(srcChainSlug_, true);
@@ -99,7 +122,17 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @notice pause execution
      */
-    function tripGlobal() external onlyRole(TRIP_ROLE) {
+    function tripGlobal(uint256 nonce_, bytes memory signature_) external {
+        address watcher = SignatureVerifierLib.recoverSignerFromDigest(
+            // it includes trip status at the end
+            keccak256(abi.encode("TRIP", chainSlug, nonce_, false)),
+            signature_
+        );
+
+        if (!_hasRole(TRIP_ROLE, watcher)) revert NoPermit(TRIP_ROLE);
+        uint256 nonce = nextNonce[watcher]++;
+        if (nonce_ != nonce) revert NonceAlreadyUsed();
+
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
     }
@@ -108,8 +141,29 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @notice unpause a path
      */
     function untripPath(
-        uint256 srcChainSlug_
-    ) external onlyRoleWithChainSlug(UNTRIP_ROLE, srcChainSlug_) {
+        uint256 nonce_,
+        uint256 srcChainSlug_,
+        bytes memory signature_
+    ) external {
+        address watcher = SignatureVerifierLib.recoverSignerFromDigest(
+            // it includes trip status at the end
+            keccak256(
+                abi.encode(
+                    "UNTRIP_PATH",
+                    srcChainSlug_,
+                    chainSlug,
+                    nonce_,
+                    false
+                )
+            ),
+            signature_
+        );
+
+        if (!_hasRole(UNTRIP_ROLE, srcChainSlug_, watcher))
+            revert NoPermit(UNTRIP_ROLE);
+        uint256 nonce = nextNonce[watcher]++;
+        if (nonce_ != nonce) revert NonceAlreadyUsed();
+
         tripSinglePath[srcChainSlug_] = false;
         emit PathTripped(srcChainSlug_, false);
     }
@@ -117,7 +171,17 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @notice unpause execution
      */
-    function untrip() external onlyRole(UNTRIP_ROLE) {
+    function untrip(uint256 nonce_, bytes memory signature_) external {
+        address watcher = SignatureVerifierLib.recoverSignerFromDigest(
+            // it includes trip status at the end
+            keccak256(abi.encode("UNTRIP", chainSlug, nonce_, false)),
+            signature_
+        );
+
+        if (!_hasRole(UNTRIP_ROLE, watcher)) revert NoPermit(UNTRIP_ROLE);
+        uint256 nonce = nextNonce[watcher]++;
+        if (nonce_ != nonce) revert NonceAlreadyUsed();
+
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
     }
@@ -127,9 +191,29 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param executionOverhead_ new execution overhead cost
      */
     function setExecutionOverhead(
+        uint256 nonce_,
         uint256 dstChainSlug_,
-        uint256 executionOverhead_
-    ) external onlyRoleWithChainSlug(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
+        uint256 executionOverhead_,
+        bytes memory signature_
+    ) external {
+        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    "ATTEST_GAS_LIMIT_UPDATE",
+                    nonce_,
+                    chainSlug,
+                    dstChainSlug_,
+                    executionOverhead_
+                )
+            ),
+            signature_
+        );
+
+        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_, gasLimitUpdater))
+            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        uint256 nonce = nextNonce[gasLimitUpdater]++;
+        if (nonce_ != nonce) revert NonceAlreadyUsed();
+
         executionOverhead[dstChainSlug_] = executionOverhead_;
         emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
     }

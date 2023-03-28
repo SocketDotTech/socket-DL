@@ -20,6 +20,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
     }
 
     constructor(
+        uint256 chainSlug_,
         uint256 confirmGasLimit_,
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
@@ -28,6 +29,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
     )
         AccessControlExtended(owner_)
         NativeSwitchboardBase(
+            chainSlug_,
             initiateGasLimit_,
             executionOverhead_,
             gasPriceOracle_
@@ -56,8 +58,27 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
     }
 
     function updateConfirmGasLimit(
-        uint256 confirmGasLimit_
-    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
+        uint256 nonce_,
+        uint256 confirmGasLimit_,
+        bytes memory signature_
+    ) external {
+        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    "L1_RECEIVE_GAS_LIMIT_UPDATE",
+                    chainSlug,
+                    nonce_,
+                    confirmGasLimit_
+                )
+            ),
+            signature_
+        );
+
+        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
+            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        uint256 nonce = nextNonce[gasLimitUpdater]++;
+        if (nonce_ != nonce) revert NonceAlreadyUsed();
+
         confirmGasLimit = confirmGasLimit_;
         emit UpdatedConfirmGasLimit(confirmGasLimit_);
     }

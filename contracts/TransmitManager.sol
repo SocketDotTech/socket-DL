@@ -18,8 +18,12 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     uint256 public sealGasLimit;
     mapping(uint256 => uint256) public proposeGasLimit;
 
+    // transmitter => nextNonce
+    mapping(address => uint256) public nextNonce;
+
     error TransferFailed();
     error InsufficientTransmitFees();
+    error NonceAlreadyUsed();
 
     event GasPriceOracleSet(address gasPriceOracle);
     event SealGasLimitSet(uint256 gasLimit);
@@ -99,8 +103,28 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param gasLimit_ new seal gas limit
      */
     function setSealGasLimit(
-        uint256 gasLimit_
-    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
+        uint256 nonce_,
+        uint256 gasLimit_,
+        bytes calldata signature_
+    ) external {
+        address gasLimitUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    "SEAL_GAS_LIMIT_UPDATE",
+                    chainSlug,
+                    nonce_,
+                    gasLimit_
+                )
+            ),
+            signature_
+        );
+
+        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
+            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+
+        uint256 nonce = nextNonce[gasLimitUpdater]++;
+        if (nonce_ != nonce) revert NonceAlreadyUsed();
+
         sealGasLimit = gasLimit_;
         emit SealGasLimitSet(gasLimit_);
     }
@@ -110,9 +134,29 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param gasLimit_ new propose gas limit
      */
     function setProposeGasLimit(
+        uint256 nonce_,
         uint256 dstChainSlug_,
-        uint256 gasLimit_
-    ) external onlyRoleWithChainSlug(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
+        uint256 gasLimit_,
+        bytes calldata signature_
+    ) external {
+        address gasLimitUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    "PROPOSE_GAS_LIMIT_UPDATE",
+                    chainSlug,
+                    dstChainSlug_,
+                    gasLimit_
+                )
+            ),
+            signature_
+        );
+
+        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_, gasLimitUpdater))
+            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+
+        uint256 nonce = nextNonce[gasLimitUpdater]++;
+        if (nonce_ != nonce) revert NonceAlreadyUsed();
+
         proposeGasLimit[dstChainSlug_] = gasLimit_;
         emit ProposeGasLimitSet(dstChainSlug_, gasLimit_);
     }

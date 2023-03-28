@@ -4,6 +4,16 @@ pragma solidity 0.8.7;
 import "./SwitchboardBase.sol";
 
 contract OptimisticSwitchboard is SwitchboardBase {
+    constructor(
+        address owner_,
+        address gasPriceOracle_,
+        uint256 chainSlug_,
+        uint256 timeoutInSeconds_
+    )
+        AccessControlExtended(owner_)
+        SwitchboardBase(gasPriceOracle_, chainSlug_, timeoutInSeconds_)
+    {}
+
     /**
      * @notice verifies if the packet satisfies needed checks before execution
      * @param srcChainSlug_ source chain slug

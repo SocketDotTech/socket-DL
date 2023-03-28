@@ -28,6 +28,16 @@ contract FastSwitchboard is SwitchboardBase {
     error WatcherNotFound();
     error AlreadyAttested();
 
+    constructor(
+        address owner_,
+        address gasPriceOracle_,
+        uint256 chainSlug_,
+        uint256 timeoutInSeconds_
+    )
+        AccessControlExtended(owner_)
+        SwitchboardBase(gasPriceOracle_, chainSlug_, timeoutInSeconds_)
+    {}
+
     function attest(
         bytes32 packetId_,
         uint256 srcChainSlug_,
@@ -89,9 +99,30 @@ contract FastSwitchboard is SwitchboardBase {
      * @param attestGasLimit_ average gas limit needed for attest function call
      */
     function setAttestGasLimit(
+        uint256 nonce_,
         uint256 dstChainSlug_,
-        uint256 attestGasLimit_
-    ) external onlyRoleWithChainSlug(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
+        uint256 attestGasLimit_,
+        bytes calldata signature_
+    ) external {
+        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    "ATTEST_GAS_LIMIT_UPDATE",
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    attestGasLimit_
+                )
+            ),
+            signature_
+        );
+
+        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_, gasLimitUpdater))
+            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+
+        uint256 nonce = nextNonce[gasLimitUpdater]++;
+        if (nonce_ != nonce) revert NonceAlreadyUsed();
+
         attestGasLimit[dstChainSlug_] = attestGasLimit_;
         emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
     }
