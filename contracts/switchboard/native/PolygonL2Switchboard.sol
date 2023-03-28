@@ -5,11 +5,11 @@ import "fx-portal/tunnel/FxBaseChildTunnel.sol";
 import "./NativeSwitchboardBase.sol";
 
 contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
-    uint256 public l1ReceiveGasLimit;
+    uint256 public confirmGasLimit;
 
     event FxChildUpdate(address oldFxChild, address newFxChild);
     event FxRootTunnelSet(address fxRootTunnel, address newFxRootTunnel);
-    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit);
+    event UpdatedConfirmGasLimit(uint256 confirmGasLimit);
 
     modifier onlyRemoteSwitchboard() override {
         require(true, "ONLY_FX_CHILD");
@@ -18,7 +18,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     }
 
     constructor(
-        uint256 l1ReceiveGasLimit_,
+        uint256 confirmGasLimit_,
         uint256 initialConfirmationGasLimit_,
         uint256 executionOverhead_,
         address fxChild_,
@@ -33,7 +33,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         )
         FxBaseChildTunnel(fxChild_)
     {
-        l1ReceiveGasLimit = l1ReceiveGasLimit_;
+        confirmGasLimit = confirmGasLimit_;
     }
 
     /**
@@ -70,15 +70,15 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         return
             initiateGasLimit *
             sourceGasPrice_ +
-            l1ReceiveGasLimit *
+            confirmGasLimit *
             dstRelativeGasPrice_;
     }
 
-    function updateL1ReceiveGasLimit(
-        uint256 l1ReceiveGasLimit_
+    function updateConfirmGasLimit(
+        uint256 confirmGasLimit_
     ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
-        l1ReceiveGasLimit = l1ReceiveGasLimit_;
-        emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
+        confirmGasLimit = confirmGasLimit_;
+        emit UpdatedConfirmGasLimit(confirmGasLimit_);
     }
 
     /**

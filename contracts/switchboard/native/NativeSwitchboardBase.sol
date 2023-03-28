@@ -28,7 +28,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
 
     event SwitchboardTripped(bool tripGlobalFuse);
     event ExecutionOverheadSet(uint256 executionOverhead);
-    event InitialConfirmationGasLimitSet(uint256 gasLimit);
+    event InitiateGasLimitSet(uint256 gasLimit);
     event CapacitorSet(address capacitor);
     event GasPriceOracleSet(address gasPriceOracle);
     event InitiatedNativeConfirmation(bytes32 packetId);
@@ -186,7 +186,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 gasLimit_
     ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         initiateGasLimit = gasLimit_;
-        emit InitialConfirmationGasLimitSet(gasLimit_);
+        emit InitiateGasLimitSet(gasLimit_);
     }
 
     /**

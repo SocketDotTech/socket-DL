@@ -6,12 +6,12 @@ import "./NativeSwitchboardBase.sol";
 
 contract OptimismSwitchboard is NativeSwitchboardBase {
     uint256 public receivePacketGasLimit;
-    uint256 public l1ReceiveGasLimit;
+    uint256 public confirmGasLimit;
 
     ICrossDomainMessenger public crossDomainMessenger__;
 
     event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit);
-    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit);
+    event UpdatedConfirmGasLimit(uint256 confirmGasLimit);
 
     modifier onlyRemoteSwitchboard() override {
         if (
@@ -24,7 +24,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
 
     constructor(
         uint256 receivePacketGasLimit_,
-        uint256 l1ReceiveGasLimit_,
+        uint256 confirmGasLimit_,
         uint256 initialConfirmationGasLimit_,
         uint256 executionOverhead_,
         address owner_,
@@ -38,7 +38,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         )
     {
         receivePacketGasLimit = receivePacketGasLimit_;
-        l1ReceiveGasLimit = l1ReceiveGasLimit_;
+        confirmGasLimit = confirmGasLimit_;
 
         if ((block.chainid == 10 || block.chainid == 420)) {
             crossDomainMessenger__ = ICrossDomainMessenger(
@@ -71,19 +71,19 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         uint256 dstRelativeGasPrice_,
         uint256 sourceGasPrice_
     ) internal view override returns (uint256) {
-        // l1ReceiveGasLimit will be 0 when switchboard is deployed on L1
+        // confirmGasLimit will be 0 when switchboard is deployed on L1
         return
             initiateGasLimit *
             sourceGasPrice_ +
-            l1ReceiveGasLimit *
+            confirmGasLimit *
             dstRelativeGasPrice_;
     }
 
-    function updateL1ReceiveGasLimit(
-        uint256 l1ReceiveGasLimit_
+    function updateConfirmGasLimit(
+        uint256 confirmGasLimit_
     ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
-        l1ReceiveGasLimit = l1ReceiveGasLimit_;
-        emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
+        confirmGasLimit = confirmGasLimit_;
+        emit UpdatedConfirmGasLimit(confirmGasLimit_);
     }
 
     function updateReceivePacketGasLimit(

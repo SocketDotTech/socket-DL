@@ -2,7 +2,7 @@ import { bridgeConsts } from "../../constants";
 
 const executionOverhead = 300000;
 const initialConfirmationGasLimit = 300000;
-const l1ReceiveGasLimit = 300000;
+const confirmGasLimit = 300000;
 
 export const polygonL2Switchboard = (
   network: string,
@@ -12,7 +12,7 @@ export const polygonL2Switchboard = (
   return {
     contractName: "PolygonL2Switchboard",
     args: [
-      l1ReceiveGasLimit,
+      confirmGasLimit,
       initialConfirmationGasLimit,
       executionOverhead,
       bridgeConsts.fxChild[network],

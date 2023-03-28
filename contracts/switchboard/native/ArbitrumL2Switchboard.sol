@@ -7,9 +7,9 @@ import "../../libraries/AddressAliasHelper.sol";
 import "./NativeSwitchboardBase.sol";
 
 contract ArbitrumL2Switchboard is NativeSwitchboardBase {
-    uint256 public l1ReceiveGasLimit;
+    uint256 public confirmGasLimit;
     IArbSys public immutable arbsys__ = IArbSys(address(100));
-    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit);
+    event UpdatedConfirmGasLimit(uint256 confirmGasLimit);
 
     modifier onlyRemoteSwitchboard() override {
         if (
@@ -20,7 +20,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
     }
 
     constructor(
-        uint256 l1ReceiveGasLimit_,
+        uint256 confirmGasLimit_,
         uint256 initialConfirmationGasLimit_,
         uint256 executionOverhead_,
         address owner_,
@@ -33,7 +33,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
             gasPriceOracle_
         )
     {
-        l1ReceiveGasLimit = l1ReceiveGasLimit_;
+        confirmGasLimit = confirmGasLimit_;
     }
 
     function initateNativeConfirmation(bytes32 packetId_) external {
@@ -51,14 +51,14 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
         return
             initiateGasLimit *
             sourceGasPrice_ +
-            l1ReceiveGasLimit *
+            confirmGasLimit *
             dstRelativeGasPrice_;
     }
 
-    function updateL1ReceiveGasLimit(
-        uint256 l1ReceiveGasLimit_
+    function updateConfirmGasLimit(
+        uint256 confirmGasLimit_
     ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
-        l1ReceiveGasLimit = l1ReceiveGasLimit_;
-        emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
+        confirmGasLimit = confirmGasLimit_;
+        emit UpdatedConfirmGasLimit(confirmGasLimit_);
     }
 }

@@ -2,7 +2,7 @@ import { constants } from "ethers";
 
 const executionOverhead = 300000;
 const initialConfirmationGasLimit = 300000;
-const l1ReceiveGasLimit = 300000;
+const confirmGasLimit = 300000;
 
 export const arbitrumL2Switchboard = (
   oracleAddress: string,
@@ -11,7 +11,7 @@ export const arbitrumL2Switchboard = (
   return {
     contractName: "ArbitrumL2Switchboard",
     args: [
-      l1ReceiveGasLimit,
+      confirmGasLimit,
       initialConfirmationGasLimit,
       executionOverhead,
       constants.AddressZero,

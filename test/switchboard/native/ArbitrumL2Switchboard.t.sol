@@ -14,7 +14,7 @@ import "../../../contracts/interfaces/ICapacitor.sol";
 contract ArbitrumL2SwitchboardTest is Setup {
     bytes32[] roots;
 
-    uint256 l1ReceiveGasLimit_ = 100;
+    uint256 confirmGasLimit_ = 100;
     uint256 initialConfirmationGasLimit_ = 100;
     uint256 executionOverhead_ = 100;
     address remoteNativeSwitchboard_ =
@@ -164,7 +164,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         arbitrumL2Switchboard = new ArbitrumL2Switchboard(
-            l1ReceiveGasLimit_,
+            confirmGasLimit_,
             initialConfirmationGasLimit_,
             executionOverhead_,
             _socketOwner,
