@@ -13,6 +13,8 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     uint256 public arbitrumNativeFee;
 
     IInbox public inbox__;
+    IBridge public bridge__;
+    IOutbox public outbox__;
 
     event UpdatedInboxAddress(address inbox);
     event UpdatedRefundAddresses(
@@ -22,13 +24,9 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     event UpdatedArbitrumNativeFee(uint256 arbitrumNativeFee);
 
     modifier onlyRemoteSwitchboard() override {
-        IBridge bridge__ = IBridge(inbox__.bridge());
         if (msg.sender != address(bridge__)) revert InvalidSender();
-
-        IOutbox outbox__ = IOutbox(bridge__.activeOutbox());
         address l2Sender = outbox__.l2ToL1Sender();
         if (l2Sender != remoteNativeSwitchboard) revert InvalidSender();
-
         _;
     }
 
@@ -38,7 +36,9 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         uint256 executionOverhead_,
         address inbox_,
         address owner_,
-        IGasPriceOracle gasPriceOracle_
+        IGasPriceOracle gasPriceOracle_,
+        address bridge_,
+        address outbox_
     )
         AccessControlExtended(owner_)
         NativeSwitchboardBase(
@@ -49,6 +49,9 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     {
         inbox__ = IInbox(inbox_);
         arbitrumNativeFee = arbitrumNativeFee_;
+
+        bridge__ = IBridge(bridge_);
+        outbox__ = IOutbox(outbox_);
 
         remoteRefundAddress = msg.sender;
         callValueRefundAddress = msg.sender;

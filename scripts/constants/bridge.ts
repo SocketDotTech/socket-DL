@@ -7,6 +7,18 @@ export const bridgeConsts = {
     arbitrum: ethers.constants.AddressZero,
     "arbitrum-goerli": ethers.constants.AddressZero,
   },
+  bridge: {
+    mainnet: "0x8315177aB297bA92A06054cE80a67Ed4DBd7ed3a",
+    goerli: "0xaf4159A80B6Cc41ED517DB1c453d1Ef5C2e4dB72",
+    arbitrum: ethers.constants.AddressZero,
+    "arbitrum-goerli": ethers.constants.AddressZero,
+  },
+  outbox: {
+    mainnet: ethers.constants.AddressZero,
+    goerli: ethers.constants.AddressZero,
+    arbitrum: ethers.constants.AddressZero,
+    "arbitrum-goerli": ethers.constants.AddressZero,
+  },
   fxChild: {
     "polygon-mainnet": "0x8397259c983751DAf40400790063935a11afa28a",
     "polygon-mumbai": "0xCf73231F28B7331BBe3124B907840A94851f9f11",

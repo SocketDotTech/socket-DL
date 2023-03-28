@@ -20,6 +20,8 @@ contract ArbitrumL1SwitchboardTest is Setup {
     address remoteNativeSwitchboard_ =
         0x3f0121d91B5c04B716Ea960790a89b173da7929c;
     address inbox_ = 0x6BEbC4925716945D46F0Ec336D5C2564F419682C;
+    address bridge_ = 0xaf4159A80B6Cc41ED517DB1c453d1Ef5C2e4dB72;
+    address outbox_ = 0x0000000000000000000000000000000000000000;
     IGasPriceOracle gasPriceOracle_;
 
     ArbitrumL1Switchboard arbitrumL1Switchboard;
@@ -178,7 +180,9 @@ contract ArbitrumL1SwitchboardTest is Setup {
             executionOverhead_,
             inbox_,
             _socketOwner,
-            cc_.gasPriceOracle__
+            cc_.gasPriceOracle__,
+            bridge_,
+            outbox_
         );
 
         vm.startPrank(_socketOwner);

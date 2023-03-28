@@ -20,6 +20,8 @@ export const arbitrumL1Switchboard = (
       bridgeConsts.inbox[network],
       signerAddress,
       oracleAddress,
+      bridgeConsts.bridge[network],
+      bridgeConsts.outbox[network],
     ],
     path: "contracts/switchboard/native/ArbitrumL1Switchboard.sol",
   };
