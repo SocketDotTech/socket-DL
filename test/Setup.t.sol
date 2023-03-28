@@ -197,7 +197,11 @@ contract Setup is Test {
         );
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
         fastSwitchboard.setAttestGasLimit(remoteChainSlug_, _attestGasLimit);
-        console.log("fastSwitchboard -> total watchers role for chainSlug: ", fastSwitchboard.totalWatchers(remoteChainSlug_) , remoteChainSlug_);
+        console.log(
+            "fastSwitchboard -> total watchers role for chainSlug: ",
+            fastSwitchboard.totalWatchers(remoteChainSlug_),
+            remoteChainSlug_
+        );
 
         vm.stopPrank();
 
