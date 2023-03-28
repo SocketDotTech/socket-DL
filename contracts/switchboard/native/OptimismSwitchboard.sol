@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 import "openzeppelin-contracts/contracts/vendor/optimism/ICrossDomainMessenger.sol";
 import "./NativeSwitchboardBase.sol";
-import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract OptimismSwitchboard is NativeSwitchboardBase {
     uint256 public receivePacketGasLimit;

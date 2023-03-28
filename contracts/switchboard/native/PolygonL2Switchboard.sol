@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 import "fx-portal/tunnel/FxBaseChildTunnel.sol";
 import "./NativeSwitchboardBase.sol";
-import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     uint256 public l1ReceiveGasLimit;

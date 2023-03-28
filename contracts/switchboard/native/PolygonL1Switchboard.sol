@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 import "fx-portal/tunnel/FxBaseRootTunnel.sol";
 import "./NativeSwitchboardBase.sol";
-import {GOVERNANCE_ROLE} from "../../utils/AccessRoles.sol";
 
 contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     event FxChildTunnelSet(address fxRootTunnel, address newFxRootTunnel);

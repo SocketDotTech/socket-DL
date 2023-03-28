@@ -6,7 +6,6 @@ import "openzeppelin-contracts/contracts/vendor/arbitrum/IInbox.sol";
 import "openzeppelin-contracts/contracts/vendor/arbitrum/IOutbox.sol";
 
 import "./NativeSwitchboardBase.sol";
-import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     address public remoteRefundAddress;

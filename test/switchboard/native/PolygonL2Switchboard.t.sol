@@ -58,7 +58,7 @@ contract PolygonL2SwitchboardTest is Setup {
 
         singleCapacitor.addPackedMessage(packedMessage);
 
-        (, bytes32 packetId, bytes memory sig) = _getLatestSignature(
+        (, bytes32 packetId, ) = _getLatestSignature(
             _a,
             address(singleCapacitor),
             _b.chainSlug

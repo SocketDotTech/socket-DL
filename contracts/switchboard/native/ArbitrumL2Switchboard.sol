@@ -5,7 +5,6 @@ import "openzeppelin-contracts/contracts/vendor/arbitrum/IArbSys.sol";
 
 import "../../libraries/AddressAliasHelper.sol";
 import "./NativeSwitchboardBase.sol";
-import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract ArbitrumL2Switchboard is NativeSwitchboardBase {
     uint256 public l1ReceiveGasLimit;

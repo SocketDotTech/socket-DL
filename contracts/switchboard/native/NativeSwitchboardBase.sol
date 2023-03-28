@@ -7,8 +7,9 @@ import "../../interfaces/ICapacitor.sol";
 
 import "../../utils/AccessControlExtended.sol";
 import "../../libraries/RescueFundsLib.sol";
-import {GAS_LIMIT_UPDATER_ROLE, GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE} from "../../utils/AccessRoles.sol";
 import "../../libraries/FeesHelper.sol";
+
+import {GAS_LIMIT_UPDATER_ROLE, GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE} from "../../utils/AccessRoles.sol";
 
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
