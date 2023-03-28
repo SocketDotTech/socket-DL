@@ -20,7 +20,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     uint256 public maxPacketSize;
 
     uint256 public executionOverhead;
-    uint256 public initateNativeConfirmationGasLimit;
+    uint256 public initiateGasLimit;
     address public remoteNativeSwitchboard;
 
     // stores the roots received from native bridge
@@ -47,11 +47,11 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     constructor(
-        uint256 initialConfirmationGasLimit_,
+        uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         IGasPriceOracle gasPriceOracle_
     ) {
-        initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
+        initiateGasLimit = initiateGasLimit_;
         executionOverhead = executionOverhead_;
         gasPriceOracle__ = gasPriceOracle_;
     }
@@ -179,13 +179,13 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice updates initateNativeConfirmationGasLimit
-     * @param gasLimit_ new gas limit for initiateNativeConfirmation
+     * @notice updates initiateGasLimit
+     * @param gasLimit_ new gas limit for initiateGasLimit
      */
-    function setInitialConfirmationGasLimit(
+    function setInitiateGasLimit(
         uint256 gasLimit_
     ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
-        initateNativeConfirmationGasLimit = gasLimit_;
+        initiateGasLimit = gasLimit_;
         emit InitialConfirmationGasLimitSet(gasLimit_);
     }
 

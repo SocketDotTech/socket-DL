@@ -88,7 +88,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         // TODO: check if dynamic fees can be divided into more constants
         // arbitrum: check src contract
         return
-            initateNativeConfirmationGasLimit *
+            initiateGasLimit *
             sourceGasPrice_ +
             arbitrumNativeFee;
     }

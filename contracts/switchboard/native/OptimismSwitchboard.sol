@@ -73,7 +73,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
     ) internal view override returns (uint256) {
         // l1ReceiveGasLimit will be 0 when switchboard is deployed on L1
         return
-            initateNativeConfirmationGasLimit *
+            initiateGasLimit *
             sourceGasPrice_ +
             l1ReceiveGasLimit *
             dstRelativeGasPrice_;

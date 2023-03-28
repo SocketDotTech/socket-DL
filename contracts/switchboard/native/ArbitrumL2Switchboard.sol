@@ -49,7 +49,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
         uint256 sourceGasPrice_
     ) internal view override returns (uint256) {
         return
-            initateNativeConfirmationGasLimit *
+            initiateGasLimit *
             sourceGasPrice_ +
             l1ReceiveGasLimit *
             dstRelativeGasPrice_;
