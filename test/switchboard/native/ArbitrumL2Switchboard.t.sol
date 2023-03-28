@@ -67,7 +67,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
             abi.encode("0x")
         );
 
-        arbitrumL2Switchboard.initateNativeConfirmation(packetId);
+        arbitrumL2Switchboard.initiateNativeConfirmation(packetId);
         vm.stopPrank();
     }
 

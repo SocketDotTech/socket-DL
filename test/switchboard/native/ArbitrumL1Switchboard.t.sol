@@ -69,7 +69,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
             abi.encode("0x")
         );
 
-        arbitrumL1Switchboard.initateNativeConfirmation{value: 1e18}(
+        arbitrumL1Switchboard.initiateNativeConfirmation{value: 1e18}(
             packetId,
             10000,
             10000,

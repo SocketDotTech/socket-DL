@@ -36,7 +36,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
         confirmGasLimit = confirmGasLimit_;
     }
 
-    function initateNativeConfirmation(bytes32 packetId_) external {
+    function initiateNativeConfirmation(bytes32 packetId_) external {
         bytes memory data = _encodeRemoteCall(packetId_);
 
         arbsys__.sendTxToL1(remoteNativeSwitchboard, data);

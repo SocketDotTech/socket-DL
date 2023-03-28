@@ -39,7 +39,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     /**
      * @param packetId_ - packet id
      */
-    function initateNativeConfirmation(bytes32 packetId_) external payable {
+    function initiateNativeConfirmation(bytes32 packetId_) external payable {
         bytes memory data = _encodeRemoteCall(packetId_);
 
         _sendMessageToRoot(data);

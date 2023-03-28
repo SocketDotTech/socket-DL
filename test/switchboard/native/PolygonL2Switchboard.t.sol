@@ -63,7 +63,7 @@ contract PolygonL2SwitchboardTest is Setup {
             address(singleCapacitor),
             _b.chainSlug
         );
-        polygonL2Switchboard.initateNativeConfirmation(packetId);
+        polygonL2Switchboard.initiateNativeConfirmation(packetId);
         vm.stopPrank();
     }
 

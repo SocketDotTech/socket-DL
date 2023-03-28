@@ -65,7 +65,7 @@ contract OptimismSwitchboardL2L1Test is Setup {
             address(singleCapacitor),
             _b.chainSlug
         );
-        optimismSwitchboard.initateNativeConfirmation(packetId);
+        optimismSwitchboard.initiateNativeConfirmation(packetId);
         vm.stopPrank();
     }
 

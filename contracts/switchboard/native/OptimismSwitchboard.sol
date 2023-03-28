@@ -55,7 +55,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         }
     }
 
-    function initateNativeConfirmation(bytes32 packetId_) external {
+    function initiateNativeConfirmation(bytes32 packetId_) external {
         bytes memory data = _encodeRemoteCall(packetId_);
 
         crossDomainMessenger__.sendMessage(

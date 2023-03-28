@@ -54,7 +54,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         callValueRefundAddress = msg.sender;
     }
 
-    function initateNativeConfirmation(
+    function initiateNativeConfirmation(
         bytes32 packetId_,
         uint256 maxSubmissionCost_,
         uint256 maxGas_,
