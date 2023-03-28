@@ -2,7 +2,7 @@ import { constants } from "ethers";
 
 const executionOverhead = 300000;
 const initiateGasLimit = 300000;
-const l2ReceiveGasLimit = 300000;
+const confirmGasLimit = 300000;
 const receivePacketGasLimit = 300000;
 
 export const optimismSwitchboard = (
@@ -13,7 +13,7 @@ export const optimismSwitchboard = (
     contractName: "OptimismSwitchboard",
     args: [
       receivePacketGasLimit,
-      l2ReceiveGasLimit,
+      confirmGasLimit,
       initiateGasLimit,
       executionOverhead,
       constants.AddressZero,

@@ -17,7 +17,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
     bytes32[] roots;
 
     uint256 receivePacketGasLimit_ = 100000;
-    uint256 l2ReceiveGasLimit_ = 100000;
+    uint256 confirmGasLimit_ = 100000;
     uint256 initiateGasLimit_ = 100000;
     uint256 executionOverhead_ = 100000;
     address remoteNativeSwitchboard_ =
@@ -162,7 +162,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
     ) internal returns (SocketConfigContext memory scc_) {
         optimismSwitchboard = new OptimismSwitchboard(
             receivePacketGasLimit_,
-            l2ReceiveGasLimit_,
+            confirmGasLimit_,
             initiateGasLimit_,
             executionOverhead_,
             _socketOwner,
