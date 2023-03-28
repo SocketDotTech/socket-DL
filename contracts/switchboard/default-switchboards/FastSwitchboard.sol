@@ -6,7 +6,6 @@ import "../../libraries/SignatureVerifierLib.sol";
 import {WATCHER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract FastSwitchboard is SwitchboardBase {
-    uint256 public immutable timeoutInSeconds;
     mapping(bytes32 => bool) public isPacketValid;
 
     // dst chain slug => total watchers registered
@@ -28,16 +27,6 @@ contract FastSwitchboard is SwitchboardBase {
     error WatcherFound();
     error WatcherNotFound();
     error AlreadyAttested();
-    error InvalidSigLength();
-
-    constructor(
-        address owner_,
-        address gasPriceOracle_,
-        uint256 timeoutInSeconds_
-    ) AccessControlExtended(owner_) {
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
-        timeoutInSeconds = timeoutInSeconds_;
-    }
 
     function attest(
         bytes32 packetId_,

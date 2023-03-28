@@ -15,6 +15,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     bool public isInitialised;
     bool public tripGlobalFuse;
     uint256 public maxPacketSize;
+    uint256 public immutable chainSlug;
+    uint256 public immutable timeoutInSeconds;
 
     mapping(uint256 => uint256) public executionOverhead;
 
@@ -29,6 +31,15 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     error TransferFailed();
     error AlreadyInitialised();
+
+    constructor(
+        address owner_,
+        address gasPriceOracle_,
+        uint256 timeoutInSeconds_
+    ) AccessControlExtended(owner_) {
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
+        timeoutInSeconds = timeoutInSeconds_;
+    }
 
     function payFees(uint32 dstChainSlug_) external payable override {}
 

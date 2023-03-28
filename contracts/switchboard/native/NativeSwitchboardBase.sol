@@ -22,6 +22,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     uint256 public executionOverhead;
     uint256 public initiateGasLimit;
     address public remoteNativeSwitchboard;
+    uint256 public immutable chainSlug;
 
     // stores the roots received from native bridge
     mapping(bytes32 => bytes32) public packetIdToRoot;
@@ -47,10 +48,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     constructor(
+        uint256 chainSlug_,
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         IGasPriceOracle gasPriceOracle_
     ) {
+        chainSlug = chainSlug_;
         initiateGasLimit = initiateGasLimit_;
         executionOverhead = executionOverhead_;
         gasPriceOracle__ = gasPriceOracle_;
