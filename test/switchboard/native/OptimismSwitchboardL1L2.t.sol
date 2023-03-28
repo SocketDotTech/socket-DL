@@ -16,12 +16,14 @@ import "../../../contracts/interfaces/ICapacitor.sol";
 contract OptimismSwitchboardL1L2Test is Setup {
     bytes32[] roots;
 
-    uint256 receivePacketGasLimit_ = 100000;
+    uint256 receiveGasLimit_ = 100000;
     uint256 confirmGasLimit_ = 100000;
     uint256 initiateGasLimit_ = 100000;
     uint256 executionOverhead_ = 100000;
     address remoteNativeSwitchboard_ =
         0x2D468C4d7e355a4ADe099802A61Ba536220fb3Cb;
+    address crossDomainManagerAddress_ =
+        0x5086d1eEF304eb5284A0f6720f79403b4e9bE294;
     IGasPriceOracle gasPriceOracle_;
 
     OptimismSwitchboard optimismSwitchboard;
@@ -161,13 +163,13 @@ contract OptimismSwitchboardL1L2Test is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         optimismSwitchboard = new OptimismSwitchboard(
-            receivePacketGasLimit_,
+            receiveGasLimit_,
             confirmGasLimit_,
             initiateGasLimit_,
             executionOverhead_,
             _socketOwner,
             cc_.gasPriceOracle__,
-            0x5086d1eEF304eb5284A0f6720f79403b4e9bE294
+            crossDomainManagerAddress_
         );
 
         scc_ = registerSwitchbaord(

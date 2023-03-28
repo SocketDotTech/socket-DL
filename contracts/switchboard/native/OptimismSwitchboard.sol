@@ -5,12 +5,12 @@ import "openzeppelin-contracts/contracts/vendor/optimism/ICrossDomainMessenger.s
 import "./NativeSwitchboardBase.sol";
 
 contract OptimismSwitchboard is NativeSwitchboardBase {
-    uint256 public receivePacketGasLimit;
+    uint256 public receiveGasLimit;
     uint256 public confirmGasLimit;
 
     ICrossDomainMessenger public immutable crossDomainMessenger__;
 
-    event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit);
+    event UpdatedReceiveGasLimit(uint256 receiveGasLimit);
     event UpdatedConfirmGasLimit(uint256 confirmGasLimit);
 
     modifier onlyRemoteSwitchboard() override {
@@ -23,7 +23,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
     }
 
     constructor(
-        uint256 receivePacketGasLimit_,
+        uint256 receiveGasLimit_,
         uint256 confirmGasLimit_,
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
@@ -38,7 +38,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
             gasPriceOracle_
         )
     {
-        receivePacketGasLimit = receivePacketGasLimit_;
+        receiveGasLimit = receiveGasLimit_;
         confirmGasLimit = confirmGasLimit_;
         crossDomainMessenger__ = ICrossDomainMessenger(crossDomainMessenger_);
     }
@@ -49,7 +49,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         crossDomainMessenger__.sendMessage(
             remoteNativeSwitchboard,
             data,
-            uint32(receivePacketGasLimit)
+            uint32(receiveGasLimit)
         );
         emit InitiatedNativeConfirmation(packetId_);
     }
@@ -74,10 +74,10 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         emit UpdatedConfirmGasLimit(confirmGasLimit_);
     }
 
-    function updateReceivePacketGasLimit(
-        uint256 receivePacketGasLimit_
+    function updateReceiveGasLimit(
+        uint256 receiveGasLimit_
     ) external onlyRole(GOVERNANCE_ROLE) {
-        receivePacketGasLimit = receivePacketGasLimit_;
-        emit UpdatedReceivePacketGasLimit(receivePacketGasLimit_);
+        receiveGasLimit = receiveGasLimit_;
+        emit UpdatedReceiveGasLimit(receiveGasLimit_);
     }
 }
