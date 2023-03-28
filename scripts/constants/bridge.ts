@@ -22,6 +22,7 @@ export const bridgeConsts = {
   crossDomainMessenger: {
     mainnet: "0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1",
     optimism: "0x4200000000000000000000000000000000000007",
-    "optimism-goerli" : "0x4200000000000000000000000000000000000007",
-  }
+    "optimism-goerli": "0x4200000000000000000000000000000000000007",
+    goerli: "0x5086d1eEF304eb5284A0f6720f79403b4e9bE294",
+  },
 };
