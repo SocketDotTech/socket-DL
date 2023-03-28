@@ -167,7 +167,8 @@ contract OptimismSwitchboardL2L1Test is Setup {
             initiateGasLimit_,
             executionOverhead_,
             _socketOwner,
-            cc_.gasPriceOracle__
+            cc_.gasPriceOracle__,
+            0x4200000000000000000000000000000000000007
         );
 
         scc_ = registerSwitchbaord(

@@ -8,7 +8,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
     uint256 public receivePacketGasLimit;
     uint256 public confirmGasLimit;
 
-    ICrossDomainMessenger public crossDomainMessenger__;
+    ICrossDomainMessenger public immutable crossDomainMessenger__;
 
     event UpdatedReceivePacketGasLimit(uint256 receivePacketGasLimit);
     event UpdatedConfirmGasLimit(uint256 confirmGasLimit);
@@ -28,7 +28,8 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         address owner_,
-        IGasPriceOracle gasPriceOracle_
+        IGasPriceOracle gasPriceOracle_,
+        address crossDomainMessenger_
     )
         AccessControlExtended(owner_)
         NativeSwitchboardBase(
@@ -39,20 +40,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
     {
         receivePacketGasLimit = receivePacketGasLimit_;
         confirmGasLimit = confirmGasLimit_;
-
-        if ((block.chainid == 10 || block.chainid == 420)) {
-            crossDomainMessenger__ = ICrossDomainMessenger(
-                0x4200000000000000000000000000000000000007
-            );
-        } else {
-            crossDomainMessenger__ = block.chainid == 1
-                ? ICrossDomainMessenger(
-                    0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1
-                )
-                : ICrossDomainMessenger(
-                    0x5086d1eEF304eb5284A0f6720f79403b4e9bE294
-                );
-        }
+        crossDomainMessenger__ = ICrossDomainMessenger(crossDomainMessenger_);
     }
 
     function initiateNativeConfirmation(bytes32 packetId_) external {
