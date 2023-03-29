@@ -87,7 +87,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
                     "L1_RECEIVE_GAS_LIMIT_UPDATE",
                     chainSlug,
                     nonce_,
-                    l1ReceiveGasLimit_
+                    confirmGasLimit_
                 )
             ),
             signature_

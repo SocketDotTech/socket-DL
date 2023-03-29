@@ -18,12 +18,13 @@ import {WATCHER_ROLE, TRANSMITTER_ROLE, GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE}
 
 contract Setup is Test {
     uint256 internal c = 1;
-    address immutable _socketOwner = address(uint160(c++));
     address immutable _plugOwner = address(uint160(c++));
     address immutable _raju = address(uint160(c++));
 
     uint256 immutable executorPrivateKey = c++;
+    uint256 immutable _socketOwnerPrivateKey = c++;
 
+    address _socketOwner;
     address _executor;
     address _transmitter;
     address _altTransmitter;
@@ -46,6 +47,10 @@ contract Setup is Test {
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 0;
+
+    uint256 transmitterNonce;
+    uint256 optimisticNonce;
+    uint256 fastNonce;
 
     struct SocketConfigContext {
         uint256 siblingChainSlug;
@@ -85,6 +90,7 @@ contract Setup is Test {
         _a.chainSlug = uint32(uint256(0x2013AA263));
         _b.chainSlug = uint32(uint256(0x2013AA264));
 
+        _socketOwner = vm.addr(_socketOwnerPrivateKey);
         _watcher = vm.addr(_watcherPrivateKey);
         _transmitter = vm.addr(_transmitterPrivateKey);
         _executor = vm.addr(executorPrivateKey);
@@ -119,11 +125,16 @@ contract Setup is Test {
 
         vm.stopPrank();
 
-        hoax(_socketOwner);
+        bytes32 digest = keccak256(
+            abi.encode(cc_.chainSlug, transmitterNonce, _proposeGasLimit)
+        );
+        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
 
         cc_.transmitManager__.setProposeGasLimit(
+            transmitterNonce++,
             remoteChainSlug_,
-            _proposeGasLimit
+            _proposeGasLimit,
+            sig
         );
 
         // deploy default configs: fast, slow
@@ -151,14 +162,23 @@ contract Setup is Test {
         OptimisticSwitchboard optimisticSwitchboard = new OptimisticSwitchboard(
             _socketOwner,
             address(cc_.gasPriceOracle__),
+            cc_.chainSlug,
             _timeoutInSeconds
         );
         vm.startPrank(_socketOwner);
 
         optimisticSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
+
+        bytes32 digest = keccak256(
+            abi.encode(cc_.chainSlug, optimisticNonce, _executionOverhead)
+        );
+        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
+
         optimisticSwitchboard.setExecutionOverhead(
+            optimisticNonce++,
             remoteChainSlug_,
-            _executionOverhead
+            _executionOverhead,
+            sig
         );
         optimisticSwitchboard.grantRole(
             WATCHER_ROLE,
@@ -185,19 +205,40 @@ contract Setup is Test {
         FastSwitchboard fastSwitchboard = new FastSwitchboard(
             _socketOwner,
             address(cc_.gasPriceOracle__),
+            cc_.chainSlug,
             _timeoutInSeconds
         );
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
         fastSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
-        fastSwitchboard.setExecutionOverhead(
-            remoteChainSlug_,
-            _executionOverhead
-        );
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
-        fastSwitchboard.setAttestGasLimit(remoteChainSlug_, _attestGasLimit);
+
         vm.stopPrank();
+
+        bytes32 digest = keccak256(
+            abi.encode(cc_.chainSlug, fastNonce, _executionOverhead)
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
+
+        fastSwitchboard.setExecutionOverhead(
+            fastNonce++,
+            remoteChainSlug_,
+            _executionOverhead,
+            sig
+        );
+
+        digest = keccak256(
+            abi.encode(cc_.chainSlug, fastNonce, _attestGasLimit)
+        );
+        sig = _createSignature(digest, _socketOwnerPrivateKey);
+
+        fastSwitchboard.setAttestGasLimit(
+            fastNonce++,
+            remoteChainSlug_,
+            _attestGasLimit,
+            sig
+        );
 
         scc_ = _registerSwitchbaord(
             cc_,

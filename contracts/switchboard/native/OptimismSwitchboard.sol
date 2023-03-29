@@ -80,7 +80,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
                     "L1_RECEIVE_GAS_LIMIT_UPDATE",
                     chainSlug,
                     nonce_,
-                    l1ReceiveGasLimit_
+                    confirmGasLimit_
                 )
             ),
             signature_
