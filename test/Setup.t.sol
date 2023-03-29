@@ -46,14 +46,11 @@ contract Setup is Test {
     uint256 internal _attestGasLimit = 150000;
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
-    uint256 internal constant DEFAULT_BATCH_LENGTH = 0;
-
-    uint256 transmitterNonce;
-    uint256 optimisticNonce;
-    uint256 fastNonce;
+    uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
 
     struct SocketConfigContext {
         uint256 siblingChainSlug;
+        uint256 switchboardNonce;
         ICapacitor capacitor__;
         IDecapacitor decapacitor__;
         ISwitchboard switchboard__;
@@ -61,6 +58,7 @@ contract Setup is Test {
 
     struct ChainContext {
         uint32 chainSlug;
+        uint256 transmitterNonce;
         Socket socket__;
         Hasher hasher__;
         SignatureVerifier sigVerifier__;
@@ -126,12 +124,17 @@ contract Setup is Test {
         vm.stopPrank();
 
         bytes32 digest = keccak256(
-            abi.encode(cc_.chainSlug, transmitterNonce, _proposeGasLimit)
+            abi.encode(
+                "PROPOSE_GAS_LIMIT_UPDATE",
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                _proposeGasLimit
+            )
         );
-        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
-
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
         cc_.transmitManager__.setProposeGasLimit(
-            transmitterNonce++,
+            cc_.transmitterNonce++,
             remoteChainSlug_,
             _proposeGasLimit,
             sig
@@ -165,17 +168,25 @@ contract Setup is Test {
             cc_.chainSlug,
             _timeoutInSeconds
         );
+
+        uint256 nonce = 0;
         vm.startPrank(_socketOwner);
 
         optimisticSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
 
         bytes32 digest = keccak256(
-            abi.encode(cc_.chainSlug, optimisticNonce, _executionOverhead)
+            abi.encode(
+                "ATTEST_GAS_LIMIT_UPDATE",
+                nonce,
+                cc_.chainSlug,
+                remoteChainSlug_,
+                _executionOverhead
+            )
         );
-        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         optimisticSwitchboard.setExecutionOverhead(
-            optimisticNonce++,
+            nonce++,
             remoteChainSlug_,
             _executionOverhead,
             sig
@@ -192,6 +203,7 @@ contract Setup is Test {
             cc_,
             _socketOwner,
             address(optimisticSwitchboard),
+            nonce,
             remoteChainSlug_,
             capacitorType_
         );
@@ -208,6 +220,7 @@ contract Setup is Test {
             cc_.chainSlug,
             _timeoutInSeconds
         );
+        uint256 nonce = 0;
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
@@ -217,24 +230,36 @@ contract Setup is Test {
         vm.stopPrank();
 
         bytes32 digest = keccak256(
-            abi.encode(cc_.chainSlug, fastNonce, _executionOverhead)
+            abi.encode(
+                "ATTEST_GAS_LIMIT_UPDATE",
+                nonce,
+                cc_.chainSlug,
+                remoteChainSlug_,
+                _executionOverhead
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         fastSwitchboard.setExecutionOverhead(
-            fastNonce++,
+            nonce++,
             remoteChainSlug_,
             _executionOverhead,
             sig
         );
 
         digest = keccak256(
-            abi.encode(cc_.chainSlug, fastNonce, _attestGasLimit)
+            abi.encode(
+                "ATTEST_GAS_LIMIT_UPDATE",
+                cc_.chainSlug,
+                remoteChainSlug_,
+                nonce,
+                _attestGasLimit
+            )
         );
         sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         fastSwitchboard.setAttestGasLimit(
-            fastNonce++,
+            nonce++,
             remoteChainSlug_,
             _attestGasLimit,
             sig
@@ -244,6 +269,7 @@ contract Setup is Test {
             cc_,
             _socketOwner,
             address(fastSwitchboard),
+            nonce,
             remoteChainSlug_,
             capacitorType_
         );
@@ -299,6 +325,7 @@ contract Setup is Test {
         ChainContext storage cc_,
         address deployer_,
         address switchBoardAddress_,
+        uint256 nonce_,
         uint256 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
@@ -311,6 +338,7 @@ contract Setup is Test {
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
+        scc_.switchboardNonce = nonce_;
         scc_.capacitor__ = cc_.socket__.capacitors__(
             switchBoardAddress_,
             remoteChainSlug_
@@ -402,12 +430,11 @@ contract Setup is Test {
     }
 
     function _attestOnDst(
-        ChainContext storage dst_,
+        address switchboardAddress,
         bytes32 packetId_
     ) internal {
-        uint256 dstChainSlug = dst_.chainSlug;
-
-        bytes32 digest = keccak256(abi.encode(dstChainSlug, packetId_));
+        uint256 srcSlug = uint256(packetId_) >> 224;
+        bytes32 digest = keccak256(abi.encode(srcSlug, packetId_));
 
         // generate attest-signature
         bytes memory attestSignature = _createSignature(
@@ -415,14 +442,10 @@ contract Setup is Test {
             _watcherPrivateKey
         );
 
-        // attest with packetId_, dstChainSlug and signature
-        address switchboardAddress = address(dst_.configs__[0].switchboard__);
-        console.log("switchboardAddress is: ", switchboardAddress);
-        console.log("_watcher is: ", _watcher);
-
+        // attest with packetId_, srcSlug and signature
         FastSwitchboard(switchboardAddress).attest(
             packetId_,
-            dstChainSlug,
+            srcSlug,
             attestSignature
         );
     }

@@ -34,7 +34,7 @@ contract HappyTest is Setup {
         _configPlugContracts(index);
     }
 
-    function testRemoteAddFromAtoB1() external {
+    function testRemoteAddFromAtoB() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
             keccak256("OP_ADD"),
@@ -44,7 +44,6 @@ contract HappyTest is Setup {
         bytes memory proof = abi.encode(0);
 
         address capacitor = address(_a.configs__[index].capacitor__);
-
         uint256 executionFee;
         {
             (uint256 switchboardFees, uint256 verificationFee) = _a
@@ -79,14 +78,14 @@ contract HappyTest is Setup {
 
             _sealOnSrc(_a, capacitor, sig_);
             _proposeOnDst(_b, sig_, packetId_, root_);
-            root = root_;
-            _attestOnDst(_b, packetId_);
-            vm.expectEmit(true, false, false, false);
-            emit ExecutionSuccess(_packMessageId(_a.chainSlug, 0));
 
+            root = root_;
+            _attestOnDst(address(_b.configs__[0].switchboard__), packetId_);
             packetId = packetId_;
         }
 
+        vm.expectEmit(true, false, false, false);
+        emit ExecutionSuccess(_packMessageId(_a.chainSlug, 0));
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
@@ -150,6 +149,7 @@ contract HappyTest is Setup {
 
         _sealOnSrc(_b, capacitor, sig);
         _proposeOnDst(_a, sig, packetId, root);
+        _attestOnDst(address(_a.configs__[0].switchboard__), packetId);
 
         _executePayloadOnDst(
             _a,
@@ -268,6 +268,11 @@ contract HappyTest is Setup {
         roots.push(root1);
         roots.push(root2);
 
+        _attestOnDst(
+            address(_b.configs__[_b.configs__.length - 1].switchboard__),
+            packetId
+        );
+
         // execute msg 1
         vm.expectEmit(true, false, false, false);
         emit ExecutionSuccess(msgId1);
@@ -280,7 +285,7 @@ contract HappyTest is Setup {
             msgId1,
             _msgGasLimit,
             executionFee,
-            root2,
+            root1,
             payload,
             abi.encode(roots)
         );
