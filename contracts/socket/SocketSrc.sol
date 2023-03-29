@@ -38,12 +38,7 @@ abstract contract SocketSrc is SocketBase {
         ];
         uint256 localChainSlug = chainSlug;
 
-        // Packs the local plug, local chain slug, remote chain slug and nonce
-        // messageCount++ will take care of msg id overflow as well
-        // msgId(256) = localChainSlug(32) | nonce(224)
-        msgId = bytes32(
-            (uint256(uint32(localChainSlug)) << 224) | messageCount++
-        );
+        msgId = _encodeMsgId(localChainSlug);
 
         ISocket.Fees memory fees = _deductFees(
             msgGasLimit_,
@@ -167,11 +162,7 @@ abstract contract SocketSrc is SocketBase {
         (bytes32 root, uint64 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket(batchSize_);
 
-        bytes32 packetId = bytes32(
-            (uint256(chainSlug) << 224) |
-                (uint256(uint160(capacitorAddress_)) << 64) |
-                packetCount
-        );
+        bytes32 packetId = _encodePacketId(capacitorAddress_, packetCount);
 
         uint32 siblingChainSlug = capacitorToSlug[capacitorAddress_];
         (address transmitter, bool isTransmitter) = transmitManager__
@@ -183,5 +174,24 @@ abstract contract SocketSrc is SocketBase {
 
         if (!isTransmitter) revert InvalidAttester();
         emit PacketVerifiedAndSealed(transmitter, packetId, root, signature_);
+    }
+
+    // Packs the local plug, local chain slug, remote chain slug and nonce
+    // messageCount++ will take care of msg id overflow as well
+    // msgId(256) = localChainSlug(32) | nonce(224)
+    function _encodeMsgId(uint256 slug_) internal returns (bytes32) {
+        return bytes32((uint256(uint32(slug_)) << 224) | messageCount++);
+    }
+
+    function _encodePacketId(
+        address capacitorAddress_,
+        uint256 packetCount_
+    ) internal view returns (bytes32) {
+        return
+            bytes32(
+                (uint256(chainSlug) << 224) |
+                    (uint256(uint160(capacitorAddress_)) << 64) |
+                    packetCount_
+            );
     }
 }
