@@ -8,6 +8,7 @@ contract OptimisticSwitchboardTest is Setup {
     uint256 immutable remoteChainSlug = uint32(uint256(2));
     uint256 immutable packetId = 1;
     address watcher;
+    uint256 nonce;
 
     event SwitchboardTripped(bool tripGlobalFuse_);
     event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
@@ -18,6 +19,7 @@ contract OptimisticSwitchboardTest is Setup {
     OptimisticSwitchboard optimisticSwitchboard;
 
     function setUp() external {
+        initialise();
         _a.chainSlug = uint32(uint256(1));
         watcher = vm.addr(_watcherPrivateKey);
 
@@ -26,15 +28,29 @@ contract OptimisticSwitchboardTest is Setup {
         optimisticSwitchboard = new OptimisticSwitchboard(
             _socketOwner,
             address(uint160(c++)),
+            _a.chainSlug,
             1
         );
 
         optimisticSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
+        bytes32 digest = keccak256(
+            abi.encode(
+                "EXECUTION_OVERHEAD_UPDATE",
+                nonce,
+                _a.chainSlug,
+                remoteChainSlug,
+                _executionOverhead
+            )
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
+
         optimisticSwitchboard.setExecutionOverhead(
+            nonce++,
             remoteChainSlug,
-            _executionOverhead
+            _executionOverhead,
+            sig
         );
 
         optimisticSwitchboard.grantRole(WATCHER_ROLE, remoteChainSlug, watcher);
@@ -53,9 +69,14 @@ contract OptimisticSwitchboardTest is Setup {
 
         optimisticSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
+        bytes32 digest = keccak256(
+            abi.encode("TRIP", _a.chainSlug, nonce, true)
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
+
         vm.expectEmit(false, false, false, true);
         emit SwitchboardTripped(true);
-        optimisticSwitchboard.tripGlobal();
+        optimisticSwitchboard.tripGlobal(nonce++, sig);
         vm.stopPrank();
         assertTrue(optimisticSwitchboard.tripGlobalFuse());
     }
@@ -64,22 +85,27 @@ contract OptimisticSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
         uint256 srcChainSlug = _a.chainSlug;
         optimisticSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
+
+        bytes32 digest = keccak256(
+            abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, true)
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
+
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
-        optimisticSwitchboard.tripPath(srcChainSlug);
+        optimisticSwitchboard.tripPath(nonce++, srcChainSlug, sig);
         assertTrue(optimisticSwitchboard.tripSinglePath(srcChainSlug));
     }
 
     function testNonWatcherToTripPath() external {
         uint256 srcChainSlug = _a.chainSlug;
-        vm.expectRevert();
-        optimisticSwitchboard.tripPath(srcChainSlug);
-    }
+        bytes32 digest = keccak256(
+            abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, false)
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
-    function testNonOwnerToTripSingle() external {
-        uint256 srcChainSlug = _a.chainSlug;
         vm.expectRevert();
-        optimisticSwitchboard.tripPath(srcChainSlug);
+        optimisticSwitchboard.tripPath(nonce++, srcChainSlug, sig);
     }
 
     function testUnTripAfterTripSingle() external {
@@ -91,15 +117,25 @@ contract OptimisticSwitchboardTest is Setup {
         vm.stopPrank();
 
         hoax(_socketOwner);
+        bytes32 digest = keccak256(
+            abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, true)
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
+
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
-        optimisticSwitchboard.tripPath(srcChainSlug);
+        optimisticSwitchboard.tripPath(nonce++, srcChainSlug, sig);
         assertTrue(optimisticSwitchboard.tripSinglePath(srcChainSlug));
 
         hoax(_socketOwner);
+        digest = keccak256(
+            abi.encode("UNTRIP_PATH", _a.chainSlug, srcChainSlug, nonce, false)
+        );
+        sig = _createSignature(digest, _socketOwnerPrivateKey);
+
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, false);
-        optimisticSwitchboard.untripPath(srcChainSlug);
+        optimisticSwitchboard.untripPath(nonce++, srcChainSlug, sig);
         assertFalse(optimisticSwitchboard.tripSinglePath(srcChainSlug));
     }
 
@@ -137,9 +173,14 @@ contract OptimisticSwitchboardTest is Setup {
         uint32 srcChainSlug = _a.chainSlug;
         optimisticSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
 
+        bytes32 digest = keccak256(
+            abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, true)
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
+
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
-        optimisticSwitchboard.tripPath(srcChainSlug);
+        optimisticSwitchboard.tripPath(nonce++, srcChainSlug, sig);
 
         bool isAllowed = optimisticSwitchboard.allowPacket(
             0,

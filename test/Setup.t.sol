@@ -82,16 +82,19 @@ contract Setup is Test {
     ChainContext _a;
     ChainContext _b;
 
-    function _dualChainSetup(
-        uint256[] memory transmitterPrivateKeys_
-    ) internal {
-        _a.chainSlug = uint32(uint256(0x2013AA263));
-        _b.chainSlug = uint32(uint256(0x2013AA264));
-
+    function initialise() internal {
         _socketOwner = vm.addr(_socketOwnerPrivateKey);
         _watcher = vm.addr(_watcherPrivateKey);
         _transmitter = vm.addr(_transmitterPrivateKey);
         _executor = vm.addr(executorPrivateKey);
+    }
+
+    function _dualChainSetup(
+        uint256[] memory transmitterPrivateKeys_
+    ) internal {
+        initialise();
+        _a.chainSlug = uint32(uint256(0x2013AA263));
+        _b.chainSlug = uint32(uint256(0x2013AA264));
 
         _deployContractsOnSingleChain(
             _a,
