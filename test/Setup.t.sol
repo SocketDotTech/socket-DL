@@ -176,7 +176,7 @@ contract Setup is Test {
 
         bytes32 digest = keccak256(
             abi.encode(
-                "ATTEST_GAS_LIMIT_UPDATE",
+                "EXECUTION_OVERHEAD_UPDATE",
                 nonce,
                 cc_.chainSlug,
                 remoteChainSlug_,
@@ -231,7 +231,7 @@ contract Setup is Test {
 
         bytes32 digest = keccak256(
             abi.encode(
-                "ATTEST_GAS_LIMIT_UPDATE",
+                "EXECUTION_OVERHEAD_UPDATE",
                 nonce,
                 cc_.chainSlug,
                 remoteChainSlug_,

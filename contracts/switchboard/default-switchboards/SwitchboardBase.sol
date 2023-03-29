@@ -104,7 +104,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         address watcher = SignatureVerifierLib.recoverSignerFromDigest(
             // it includes trip status at the end
             keccak256(
-                abi.encode("TRIP_PATH", srcChainSlug_, chainSlug, nonce_, false)
+                abi.encode("TRIP_PATH", srcChainSlug_, chainSlug, nonce_, true)
             ),
             signature_
         );
@@ -125,7 +125,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
         address watcher = SignatureVerifierLib.recoverSignerFromDigest(
             // it includes trip status at the end
-            keccak256(abi.encode("TRIP", chainSlug, nonce_, false)),
+            keccak256(abi.encode("TRIP", chainSlug, nonce_, true)),
             signature_
         );
 
@@ -150,8 +150,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             keccak256(
                 abi.encode(
                     "UNTRIP_PATH",
-                    srcChainSlug_,
                     chainSlug,
+                    srcChainSlug_,
                     nonce_,
                     false
                 )
@@ -199,7 +199,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
-                    "ATTEST_GAS_LIMIT_UPDATE",
+                    "EXECUTION_OVERHEAD_UPDATE",
                     nonce_,
                     chainSlug,
                     dstChainSlug_,
