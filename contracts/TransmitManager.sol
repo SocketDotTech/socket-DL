@@ -145,6 +145,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
                     "PROPOSE_GAS_LIMIT_UPDATE",
                     chainSlug,
                     dstChainSlug_,
+                    nonce_,
                     gasLimit_
                 )
             ),
