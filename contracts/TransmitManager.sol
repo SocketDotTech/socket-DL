@@ -23,7 +23,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
     error TransferFailed();
     error InsufficientTransmitFees();
-    error NonceAlreadyUsed();
+    error InvalidNonce();
 
     event GasPriceOracleSet(address gasPriceOracle);
     event SealGasLimitSet(uint256 gasLimit);
@@ -123,7 +123,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
             revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
 
         uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         sealGasLimit = gasLimit_;
         emit SealGasLimitSet(gasLimit_);
@@ -156,7 +156,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
             revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
 
         uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         proposeGasLimit[dstChainSlug_] = gasLimit_;
         emit ProposeGasLimitSet(dstChainSlug_, gasLimit_);

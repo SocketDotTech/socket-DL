@@ -36,7 +36,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     error TransferFailed();
     error AlreadyInitialised();
-    error NonceAlreadyUsed();
+    error InvalidNonce();
 
     constructor(
         address gasPriceOracle_,
@@ -112,7 +112,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         if (!_hasRole(TRIP_ROLE, srcChainSlug_, watcher))
             revert NoPermit(TRIP_ROLE);
         uint256 nonce = nextNonce[watcher]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         //source chain based tripping
         tripSinglePath[srcChainSlug_] = true;
@@ -131,7 +131,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
         if (!_hasRole(TRIP_ROLE, watcher)) revert NoPermit(TRIP_ROLE);
         uint256 nonce = nextNonce[watcher]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
@@ -162,7 +162,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         if (!_hasRole(UNTRIP_ROLE, srcChainSlug_, watcher))
             revert NoPermit(UNTRIP_ROLE);
         uint256 nonce = nextNonce[watcher]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         tripSinglePath[srcChainSlug_] = false;
         emit PathTripped(srcChainSlug_, false);
@@ -180,7 +180,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
         if (!_hasRole(UNTRIP_ROLE, watcher)) revert NoPermit(UNTRIP_ROLE);
         uint256 nonce = nextNonce[watcher]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
@@ -212,7 +212,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_, gasLimitUpdater))
             revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
         uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         executionOverhead[dstChainSlug_] = executionOverhead_;
         emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);

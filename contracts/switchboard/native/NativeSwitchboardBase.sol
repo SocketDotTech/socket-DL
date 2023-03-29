@@ -45,7 +45,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     error AlreadyInitialised();
     error InvalidSender();
     error NoRootFound();
-    error NonceAlreadyUsed();
+    error InvalidNonce();
 
     modifier onlyRemoteSwitchboard() virtual {
         _;
@@ -173,7 +173,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         if (!_hasRole(TRIP_ROLE, watcher)) revert NoPermit(TRIP_ROLE);
 
         uint256 nonce = nextNonce[watcher]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
@@ -191,7 +191,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
 
         if (!_hasRole(UNTRIP_ROLE, watcher)) revert NoPermit(UNTRIP_ROLE);
         uint256 nonce = nextNonce[watcher]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
@@ -221,7 +221,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
             revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
         uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         executionOverhead = executionOverhead_;
         emit ExecutionOverheadSet(executionOverhead_);
@@ -251,7 +251,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
             revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
         uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         initiateGasLimit = gasLimit_;
         emit InitiateGasLimitSet(gasLimit_);

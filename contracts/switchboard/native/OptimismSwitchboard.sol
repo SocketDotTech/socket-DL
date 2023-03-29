@@ -89,7 +89,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
             revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
         uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         confirmGasLimit = confirmGasLimit_;
         emit UpdatedConfirmGasLimit(confirmGasLimit_);

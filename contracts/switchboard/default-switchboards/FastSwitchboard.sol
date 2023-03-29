@@ -121,7 +121,7 @@ contract FastSwitchboard is SwitchboardBase {
             revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
 
         uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         attestGasLimit[dstChainSlug_] = attestGasLimit_;
         emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
