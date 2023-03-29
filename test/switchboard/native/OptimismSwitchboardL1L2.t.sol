@@ -2,19 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "../../Setup.t.sol";
-import "forge-std/Test.sol";
 import "../../../contracts/switchboard/native/OptimismSwitchboard.sol";
-import "../../../contracts/TransmitManager.sol";
-import "../../../contracts/GasPriceOracle.sol";
-import "../../../contracts/ExecutionManager.sol";
-import "../../../contracts/CapacitorFactory.sol";
-import "../../../contracts/interfaces/ICapacitor.sol";
 
 // Goerli -> Optimism-Goerli
 // Switchboard on Goerli (5) for Optimism (420) as remote is: 0x793753781B45565C68392c4BB556C1bEcFC42F24
 // RemoteNativeSwitchBoard i.e SwitchBoard on Optimism-Goerli (420) is:0x2D468C4d7e355a4ADe099802A61Ba536220fb3Cb
 contract OptimismSwitchboardL1L2Test is Setup {
     bytes32[] roots;
+    uint256 nonce;
 
     uint256 receiveGasLimit_ = 100000;
     uint256 confirmGasLimit_ = 100000;
@@ -30,6 +25,8 @@ contract OptimismSwitchboardL1L2Test is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
+        initialise();
+
         _a.chainSlug = uint32(uint256(5));
         _b.chainSlug = uint32(uint256(420));
 
@@ -94,11 +91,21 @@ contract OptimismSwitchboardL1L2Test is Setup {
 
         vm.stopPrank();
 
-        hoax(_socketOwner);
-
+        bytes32 digest = keccak256(
+            abi.encode(
+                "PROPOSE_GAS_LIMIT_UPDATE",
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                _proposeGasLimit
+            )
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
         cc_.transmitManager__.setProposeGasLimit(
+            cc_.transmitterNonce++,
             remoteChainSlug_,
-            _proposeGasLimit
+            _proposeGasLimit,
+            sig
         );
 
         SocketConfigContext memory scc_ = addOptimismSwitchboard(
@@ -163,6 +170,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         optimismSwitchboard = new OptimismSwitchboard(
+            cc_.chainSlug,
             receiveGasLimit_,
             confirmGasLimit_,
             initiateGasLimit_,

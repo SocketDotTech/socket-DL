@@ -210,8 +210,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             keccak256(
                 abi.encode(
                     "EXECUTION_OVERHEAD_UPDATE",
-                    chainSlug,
                     nonce_,
+                    chainSlug,
                     executionOverhead_
                 )
             ),
