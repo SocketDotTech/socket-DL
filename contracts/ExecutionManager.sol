@@ -13,8 +13,6 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
     event GasPriceOracleSet(address gasPriceOracle);
 
-    error TransferFailed();
-
     constructor(
         IGasPriceOracle gasPriceOracle_,
         address owner_

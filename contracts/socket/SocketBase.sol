@@ -6,7 +6,6 @@ import "../interfaces/ITransmitManager.sol";
 import "../interfaces/IExecutionManager.sol";
 
 import "./SocketConfig.sol";
-import {GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
 
 abstract contract SocketBase is SocketConfig {
     IHasher public hasher__;

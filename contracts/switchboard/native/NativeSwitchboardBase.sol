@@ -40,7 +40,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
     event RootReceived(bytes32 packetId, bytes32 root);
 
-    error TransferFailed();
     error FeesNotEnough();
     error AlreadyInitialised();
     error InvalidSender();

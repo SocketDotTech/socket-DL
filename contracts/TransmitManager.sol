@@ -21,7 +21,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
 
-    error TransferFailed();
     error InsufficientTransmitFees();
     error InvalidNonce();
 

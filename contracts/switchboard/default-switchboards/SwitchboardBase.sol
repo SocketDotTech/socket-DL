@@ -34,7 +34,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     event GasPriceOracleSet(address gasPriceOracle);
     event CapacitorRegistered(address capacitor, uint256 maxPacketSize);
 
-    error TransferFailed();
     error AlreadyInitialised();
     error InvalidNonce();
 

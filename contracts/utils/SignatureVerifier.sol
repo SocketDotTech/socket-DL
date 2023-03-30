@@ -5,8 +5,6 @@ import "../interfaces/ISignatureVerifier.sol";
 import "../libraries/SignatureVerifierLib.sol";
 
 contract SignatureVerifier is ISignatureVerifier {
-    error InvalidSigLength();
-
     /// @inheritdoc ISignatureVerifier
     function recoverSigner(
         uint256 destChainSlug_,
