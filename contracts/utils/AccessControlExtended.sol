@@ -20,6 +20,15 @@ contract AccessControlExtended is AccessControl {
         _grantRole(roleName_, chainSlug_, grantee_);
     }
 
+    function grantBatchRole(
+        bytes32[] calldata roleNames_,
+        address[] calldata grantees_
+    ) external virtual onlyOwner {
+        require(roleNames_.length == grantees_.length);
+        for (uint256 index = 0; index < roleNames_.length; index++)
+            _grantRole(roleNames_[index], grantees_[index]);
+    }
+
     function _grantRole(
         bytes32 roleName_,
         uint256 chainSlug_,
