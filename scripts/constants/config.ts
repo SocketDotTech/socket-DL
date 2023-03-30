@@ -96,9 +96,6 @@ export const proposeGasLimit: {
   mainnet: 300000,
 };
 
-export const EXECUTOR_ROLE =
-  "0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767";
-
 export const switchboards = {
   "arbitrum-goerli": {
     goerli: {

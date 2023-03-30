@@ -8,13 +8,13 @@ import {
   deployContractWithArgs,
   storeAddresses,
   getInstance,
+  getRoleHash,
 } from "./utils";
 import { chainIds } from "../constants/networks";
 
 import {
   executorAddress,
   transmitterAddress,
-  EXECUTOR_ROLE,
   sealGasLimit,
 } from "../constants/config";
 import { ChainSocketAddresses } from "../../src";
@@ -76,13 +76,26 @@ export const main = async () => {
 
     let capacitorFactory: Contract;
     if (!addresses["CapacitorFactory"]) {
-      capacitorFactory = await deployContractWithoutArgs(
+      capacitorFactory = await deployContractWithArgs(
         "CapacitorFactory",
+        [socketSigner.address],
         socketSigner,
         "contracts/CapacitorFactory.sol"
       );
       addresses["CapacitorFactory"] = capacitorFactory.address;
       await storeAddresses(addresses, chainIds[network]);
+
+      const tx = await capacitorFactory
+        .connect(socketSigner)
+        ["grantRole(bytes32,address)"](
+          getRoleHash("RESCUE_ROLE"),
+          socketSigner.address
+        );
+      console.log(
+        `Assigned RESCUE_ROLE role to ${socketSigner.address}: ${tx.hash}`
+      );
+
+      await tx.wait();
     } else {
       capacitorFactory = await getInstance(
         "CapacitorFactory",
@@ -100,6 +113,19 @@ export const main = async () => {
       );
       addresses["GasPriceOracle"] = gasPriceOracle.address;
       await storeAddresses(addresses, chainIds[network]);
+
+      const grantee = socketSigner.address;
+      const tx = await gasPriceOracle
+        .connect(socketSigner)
+        ["grantBatchRole(bytes32[],address[])"](
+          [getRoleHash("RESCUE_ROLE"), getRoleHash("GOVERNANCE_ROLE")],
+          [grantee, grantee]
+        );
+      console.log(
+        `Assigned gas price oracle batch roles to ${grantee}: ${tx.hash}`
+      );
+
+      await tx.wait();
     } else {
       gasPriceOracle = await getInstance(
         "GasPriceOracle",
@@ -117,6 +143,24 @@ export const main = async () => {
       );
       addresses["ExecutionManager"] = executionManager.address;
       await storeAddresses(addresses, chainIds[network]);
+
+      const grantee = socketSigner.address;
+      const tx = await executionManager
+        .connect(socketSigner)
+        ["grantBatchRole(bytes32[],address[])"](
+          [
+            getRoleHash("WITHDRAW_ROLE"),
+            getRoleHash("RESCUE_ROLE"),
+            getRoleHash("GOVERNANCE_ROLE"),
+            getRoleHash("EXECUTOR_ROLE"),
+          ],
+          [grantee, grantee, grantee, executorAddress[network]]
+        );
+      console.log(
+        `Assigned execution manager batch roles to ${grantee}: ${tx.hash}`
+      );
+
+      await tx.wait();
     } else {
       executionManager = await getInstance(
         "ExecutionManager",
@@ -140,6 +184,38 @@ export const main = async () => {
       );
       addresses["TransmitManager"] = transmitManager.address;
       await storeAddresses(addresses, chainIds[network]);
+
+      const grantee = socketSigner.address;
+      const tx = await transmitManager
+        .connect(socketSigner)
+        ["grantBatchRole(bytes32[],address[])"](
+          [
+            getRoleHash("WITHDRAW_ROLE"),
+            getRoleHash("RESCUE_ROLE"),
+            getRoleHash("GOVERNANCE_ROLE"),
+            getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
+          ],
+          [grantee, grantee, grantee, transmitterAddress[network]]
+        );
+      console.log(
+        `Assigned transmit manager batch roles to ${grantee}: ${tx.hash}`
+      );
+
+      await tx.wait();
+
+      //grant transmitter role to transmitter-address for current network
+      const grantTransmitterRoleTxn = await transmitManager
+        .connect(socketSigner)
+        ["grantRole(bytes32,uint256,address)"](
+          getRoleHash("TRANSMITTER_ROLE"),
+          chainIds[network],
+          transmitterAddress[network]
+        );
+
+      console.log(
+        `Setting transmitter role for current chain: ${grantTransmitterRoleTxn.hash}`
+      );
+      await grantTransmitterRoleTxn.wait();
     } else {
       transmitManager = await getInstance(
         "TransmitManager",
@@ -154,18 +230,6 @@ export const main = async () => {
         .setTransmitManager(transmitManager.address);
       console.log(`Setting transmit manager in oracle: ${tx.hash}`);
       await tx.wait();
-
-      //grant transmitter role to transmitter-address
-      const transmitter = transmitterAddress[network];
-
-      const grantTransmitterRoleTxn = await transmitManager
-        .connect(socketSigner)
-        .grantTransmitterRole(chainIds[network], transmitter);
-
-      console.log(
-        `Setting transmitter manager in oracle has transactionHash: ${grantTransmitterRoleTxn.hash}`
-      );
-      await grantTransmitterRoleTxn.wait();
     }
 
     let socket: Contract;
@@ -178,12 +242,26 @@ export const main = async () => {
           transmitManager.address,
           executionManager.address,
           capacitorFactory.address,
+          socketSigner.address,
         ],
         socketSigner,
         "contracts/socket/Socket.sol"
       );
       addresses["Socket"] = socket.address;
       await storeAddresses(addresses, chainIds[network]);
+
+      const grantee = socketSigner.address;
+      const tx = await socket
+        .connect(socketSigner)
+        ["grantBatchRole(bytes32[],address[])"](
+          [getRoleHash("RESCUE_ROLE"), getRoleHash("GOVERNANCE_ROLE")],
+          [grantee, grantee]
+        );
+      console.log(
+        `Assigned transmit manager batch roles to ${grantee}: ${tx.hash}`
+      );
+
+      await tx.wait();
     } else {
       socket = await getInstance("Socket", addresses["Socket"]);
     }
@@ -202,16 +280,6 @@ export const main = async () => {
       socket = await getInstance("Counter", addresses["Counter"]);
     }
     console.log("Contracts deployed!");
-
-    // configure
-    const tx = await executionManager
-      .connect(socketSigner)
-      .grantRole(EXECUTOR_ROLE, executorAddress[network]);
-    console.log(
-      `Assigned executor role to ${executorAddress[network]}: ${tx.hash}`
-    );
-
-    await tx.wait();
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
     throw error;
