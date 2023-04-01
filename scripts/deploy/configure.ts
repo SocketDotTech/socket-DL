@@ -11,6 +11,7 @@ import {
 import { config } from "./config";
 import {
   deployedAddressPath,
+  getChainRoleHash,
   getInstance,
   getSigners,
   getSwitchboardAddress,
@@ -23,6 +24,7 @@ import {
 } from "../../src";
 
 const capacitorType = 1;
+const maxPacketLength = 10;
 
 export const main = async () => {
   try {
@@ -55,6 +57,7 @@ export const main = async () => {
             integrations[index],
             chain,
             capacitorType,
+            maxPacketLength,
             remoteChain,
             socketSigner,
             localConfigUpdated
@@ -240,20 +243,18 @@ const configTransmitter = async (
   );
   const remoteChainSlug = chainSlugs[remoteChain];
 
-  const isSet = await transmitManager.isTransmitter(
-    transmitter,
-    remoteChainSlug
-  );
-  if (!isSet) {
-    const tx = await transmitManager
-      .connect(signer)
-      .grantTransmitterRole(remoteChainSlug, transmitter);
-
-    console.log(
-      `Setting transmitter ${transmitter} for ${remoteChainSlug} chain id! Transaction Hash: ${tx.hash}`
+  //roles
+  const tx = await transmitManager
+    .connect(signer)
+    ["grantBatchRole(bytes32[],address[])"](
+      [
+        getChainRoleHash("TRANSMITTER_ROLE", remoteChainSlug),
+        getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", remoteChainSlug),
+      ],
+      [transmitter, transmitter]
     );
-    await tx.wait();
-  }
+  console.log(`Assigned transmitter batch roles to ${transmitter}: ${tx.hash}`);
+  await tx.wait();
 
   const gasLimit = await transmitManager.proposeGasLimit(remoteChainSlug);
   if (parseInt(gasLimit) !== proposeGasLimit[remoteChain]) {

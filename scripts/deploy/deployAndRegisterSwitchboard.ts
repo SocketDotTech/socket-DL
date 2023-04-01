@@ -4,11 +4,13 @@ import {
   createObj,
   deployContractWithArgs,
   getCapacitorAddress,
+  getChainRoleHash,
   getInstance,
+  getRoleHash,
   getSwitchboardAddress,
   storeAddresses,
 } from "./utils";
-import { chainSlugs } from "../constants";
+import { chainSlugs, transmitterAddress } from "../constants";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { ChainSocketAddresses, IntegrationTypes } from "../../src";
 import { getSwitchboardDeployData } from "./switchboards";
@@ -19,6 +21,7 @@ export default async function deployAndRegisterSwitchboard(
   integrationType: IntegrationTypes,
   network: string,
   capacitorType: number,
+  maxPacketLength: number,
   remoteChain: string,
   signer: SignerWithAddress,
   sourceConfig: ChainSocketAddresses
@@ -67,6 +70,21 @@ export default async function deployAndRegisterSwitchboard(
       }
 
       await storeAddresses(sourceConfig, chainSlugs[network]);
+
+      const grantee = signer.address;
+      const tx = await switchboard
+        .connect(signer)
+        ["grantBatchRole(bytes32[],address[])"](
+          [
+            getRoleHash("TRIP_ROLE"),
+            getRoleHash("UNTRIP_ROLE"),
+            getRoleHash("GOVERNANCE_ROLE"),
+            getRoleHash("WITHDRAW_ROLE"),
+            getRoleHash("RESCUE_ROLE"),
+          ],
+          [grantee, grantee, grantee, grantee, grantee]
+        );
+      console.log(`Assigned switchboard batch roles to ${grantee}: ${tx.hash}`);
     } else {
       switchboard = await getInstance(contractName, result.switchboardAddr);
     }
@@ -75,11 +93,33 @@ export default async function deployAndRegisterSwitchboard(
       switchboard.address,
       remoteChainSlug,
       capacitorType,
+      maxPacketLength,
       signer,
       integrationType,
       sourceConfig
     );
     await storeAddresses(sourceConfig, chainSlugs[network]);
+
+    if (
+      contractName === "FastSwitchboard" ||
+      contractName === "OptimisticSwitchboard"
+    ) {
+      const grantee = transmitterAddress[network];
+      const tx = await switchboard
+        .connect(signer)
+        ["grantBatchRole(bytes32[],address[])"](
+          [
+            getChainRoleHash("TRIP_ROLE", chainSlugs[remoteChain]),
+            getChainRoleHash("UNTRIP_ROLE", chainSlugs[remoteChain]),
+            getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainSlugs[remoteChain]),
+          ],
+          [grantee, grantee, grantee]
+        );
+      console.log(
+        `Assigned default switchboard batch roles to ${grantee}: ${tx.hash}`
+      );
+      await tx.wait();
+    }
 
     if (contractName === "FastSwitchboard") {
       await setupFast(
@@ -93,27 +133,20 @@ export default async function deployAndRegisterSwitchboard(
       await setupOptimistic(
         switchboard,
         chainSlugs[remoteChain],
-        network,
         remoteChain,
         signer
       );
     } else {
-      const capacitor = getCapacitorAddress(
-        remoteChainSlug,
-        IntegrationTypes.native,
-        sourceConfig
+      const grantLimitUpdaterRoleTxn = await switchboard
+        .connect(signer)
+        ["grantRole(bytes32,address)"](
+          getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
+          transmitterAddress[network]
+        );
+      console.log(
+        `Setting gas limit updater role for native switchboard: ${grantLimitUpdaterRoleTxn.hash}`
       );
-      const capacitorAddr = await switchboard.capacitor__();
-      if (
-        capacitorAddr.toString().toLowerCase() !==
-        capacitor.toString().toLowerCase()
-      ) {
-        const setCapacitorTx = await switchboard
-          .connect(signer)
-          .setCapacitor(capacitor);
-        console.log(`Adding Capacitor ${capacitor}: ${setCapacitorTx.hash}`);
-        await setCapacitorTx.wait();
-      }
+      await grantLimitUpdaterRoleTxn.wait();
     }
 
     return sourceConfig;

@@ -15,6 +15,14 @@ export const deployedAddressPath = path.join(
 export const getRoleHash = (role: string) =>
   ethers.utils.keccak256(ethers.utils.toUtf8Bytes(role)).toString();
 
+export const getChainRoleHash = (role: string, chainSlug: number) =>
+  ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ["string", "uint256"],
+      [role, chainSlug]
+    )
+  );
+
 export const deployContractWithoutArgs = async (
   contractName: string,
   signer: SignerWithAddress,

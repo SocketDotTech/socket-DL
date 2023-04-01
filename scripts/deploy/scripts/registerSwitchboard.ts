@@ -7,6 +7,7 @@ export default async function registerSwitchBoard(
   switchBoardAddress: string,
   remoteChainSlug: string,
   capacitorType: number,
+  maxPacketLength: number,
   signer: SignerWithAddress,
   integrationType: IntegrationTypes,
   config: ChainSocketAddresses
@@ -23,6 +24,7 @@ export default async function registerSwitchBoard(
         .connect(signer)
         .registerSwitchBoard(
           switchBoardAddress,
+          maxPacketLength,
           remoteChainSlug,
           capacitorType
         );

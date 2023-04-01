@@ -1,4 +1,4 @@
-import { bridgeConsts } from "../../constants";
+import { bridgeConsts, chainSlugs } from "../../constants";
 
 const executionOverhead = 300000;
 const initiateGasLimit = 300000;
@@ -12,6 +12,7 @@ export const polygonL2Switchboard = (
   return {
     contractName: "PolygonL2Switchboard",
     args: [
+      chainSlugs[network],
       confirmGasLimit,
       initiateGasLimit,
       executionOverhead,

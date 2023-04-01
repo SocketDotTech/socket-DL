@@ -1,9 +1,9 @@
 import { constants } from "ethers";
-import { bridgeConsts } from "../../constants";
+import { bridgeConsts, chainSlugs } from "../../constants";
 
 const executionOverhead = 300000;
 const initiateGasLimit = 300000;
-const dynamicFees = 300000;
+const arbitrumNativeFee = 300000;
 
 export const arbitrumL1Switchboard = (
   network: string,
@@ -13,7 +13,8 @@ export const arbitrumL1Switchboard = (
   return {
     contractName: "ArbitrumL1Switchboard",
     args: [
-      dynamicFees,
+      chainSlugs[network],
+      arbitrumNativeFee,
       initiateGasLimit,
       executionOverhead,
       constants.AddressZero,
