@@ -10,81 +10,14 @@
     "TransmitManager": "0x4D0B394B3c934E66F812C1f506800Df712A59FFe"
   },
   "5": {
-    "Counter": "0x8944F3da2cf1458C008525Af61118a8Cec4DA804",
-    "CapacitorFactory": "0x44b626169A0885Bb26a6A7691Fb163bdF0ddB164",
-    "ExecutionManager": "0x868581F58a5993b7a40131F9CB2212a2Ec460A45",
-    "GasPriceOracle": "0x71cE387807A83583c352ef09eeD9D0A32CDD9E26",
-    "Hasher": "0x4Bf0ff7460cCd07c43102Cc36D12aF16E63d8caD",
-    "SignatureVerifier": "0x2bC3bfc8793F3C7CF7f368Fa8e3f6a253280672D",
-    "Socket": "0x25f5FB0dc3d098018CD420e25bE21b3ec535521A",
-    "TransmitManager": "0xE6926609F1bEf58595f8Bf75324e8e73f340b397",
-    "integrations": {
-      "97": {
-        "FAST": {
-          "switchboard": "0xFE221c03DA4Db005dE5055a8696A07DDFa47951d",
-          "capacitor": "0x46DEE4eEBc004821F136c78872b82dbcABBe0D72",
-          "decapacitor": "0xDF3738B43226f9030A83BcD3663b742A152a9f80"
-        },
-        "OPTIMISTIC": {
-          "switchboard": "0xCb94C8EE50880d8A3F8CbdcA04dCb7632Bf2C64F",
-          "capacitor": "0xaBBcD48f14E621baB30BF31185d3FeEefb921eE7",
-          "decapacitor": "0x864B411D9977893B352D2E58ACFD8b020C93Ee56"
-        }
-      },
-      "420": {
-        "NATIVE_BRIDGE": {
-          "switchboard": "0x793753781B45565C68392c4BB556C1bEcFC42F24",
-          "capacitor": "0xFcB835b098Bb562A712764436cd7436aAb71F7f5",
-          "decapacitor": "0xbAb885161031FeB4cd2b7608Bf6fb87E34D6Cb28"
-        },
-        "FAST": {
-          "switchboard": "0xFE221c03DA4Db005dE5055a8696A07DDFa47951d",
-          "capacitor": "0x17424395a59d55765dC5Add81ECcAD404137e110",
-          "decapacitor": "0xaFAA2d79BB62bfcBb5F4f85a4B442eCDE1f2fff8"
-        },
-        "OPTIMISTIC": {
-          "switchboard": "0xCb94C8EE50880d8A3F8CbdcA04dCb7632Bf2C64F",
-          "capacitor": "0x721a75Cf03431cD1E01cd1eDE2cc6eF32Cc4C2E7",
-          "decapacitor": "0x8Fa7Dc5E56FE8DeD3649De6De488e565D2061121"
-        }
-      },
-      "80001": {
-        "NATIVE_BRIDGE": {
-          "switchboard": "0xDe5c161D61D069B0F2069518BB4110568D465465",
-          "capacitor": "0x2021b25938AEEeBCa1564ae64135bd478F4C7B27",
-          "decapacitor": "0xF017F20661f135b71Fd39e34134A3a46A0ED4a27"
-        },
-        "FAST": {
-          "switchboard": "0xFE221c03DA4Db005dE5055a8696A07DDFa47951d",
-          "capacitor": "0x004dC6b3C9E45B4c6e6Dbf02Cc4043450Ce6eCf9",
-          "decapacitor": "0xEed7819A790e3bf9fDB7Bd075F7B93e501450297"
-        },
-        "OPTIMISTIC": {
-          "switchboard": "0xCb94C8EE50880d8A3F8CbdcA04dCb7632Bf2C64F",
-          "capacitor": "0xEE9EF1F6599D4C2D004C04Dda9e618dA86358F7f",
-          "decapacitor": "0xb4Cef73c6F40e91D7730FAa6EeF6d60BB98CcAe0"
-        }
-      },
-      "421613": {
-        "NATIVE_BRIDGE": {
-          "switchboard": "0x862246365b74d65554886f24925a6009e93B48b4",
-          "capacitor": "0x1d3f1f5Cd158c145B94fAAAB0486a472E92a8B7b",
-          "decapacitor": "0xd40a7Ff08C5C6d6B47DCf4914a1c1Db1367F2735"
-        },
-        "FAST": {
-          "switchboard": "0xFE221c03DA4Db005dE5055a8696A07DDFa47951d",
-          "capacitor": "0xcFa1ce107701234518eBFe297918cB7cbC69d4Ec",
-          "decapacitor": "0x0c1d93041E919593397B16ED2b4bed07E90451c8"
-        },
-        "OPTIMISTIC": {
-          "switchboard": "0xCb94C8EE50880d8A3F8CbdcA04dCb7632Bf2C64F",
-          "capacitor": "0x63ADD06d09aA62A0Eeb4043f2a756E667855e252",
-          "decapacitor": "0x88e81cEDBA3C49A8b9A338DB957eD230C88E890b"
-        }
-      }
-    },
-    "FastSwitchboard": "0xFE221c03DA4Db005dE5055a8696A07DDFa47951d",
-    "OptimisticSwitchboard": "0xCb94C8EE50880d8A3F8CbdcA04dCb7632Bf2C64F"
+    "Counter": "0xA6132acDd47230cD03831b86919b85e8BEB475E5",
+    "CapacitorFactory": "0x646496c428ad00aCD5d3420019717322A637a121",
+    "ExecutionManager": "0xdD75d24105fc75EBD6c8cBe4BF15c67BA137fb94",
+    "GasPriceOracle": "0xecBfA6Fb339c8a93837F0F439D652d111A09B1f5",
+    "Hasher": "0x143BBe734af05BEdE31230624fE83E149A81Ae0B",
+    "SignatureVerifier": "0xBA78C1db03a2feB1Ca391AE3C1f429fc5e3646C0",
+    "Socket": "0x97770668A6c097fC34b6957f66dC7746BD9B6D52",
+    "TransmitManager": "0x6f7E66e2c81c4c80A68D132Fc9Fb8F6B638b2CD0"
   },
   "10": {
     "Counter": "0xE19cC72ad60d0aE127E2c8d7C016cf67e15c5493",
