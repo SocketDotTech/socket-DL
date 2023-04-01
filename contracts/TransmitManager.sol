@@ -8,7 +8,7 @@ import "./interfaces/IGasPriceOracle.sol";
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/FeesHelper.sol";
-import {GOVERNANCE_ROLE, TRANSMITTER_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "./utils/AccessRoles.sol";
+import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "./utils/AccessRoles.sol";
 
 contract TransmitManager is ITransmitManager, AccessControlExtended {
     ISignatureVerifier public signatureVerifier__;
@@ -66,7 +66,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
         return (
             transmitter,
-            _hasRole(TRANSMITTER_ROLE, siblingSlug, transmitter)
+            _hasRole("TRANSMITTER_ROLE", siblingSlug, transmitter)
         );
     }
 
@@ -151,8 +151,8 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_, gasLimitUpdater))
-            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        if (!_hasRole("GAS_LIMIT_UPDATER_ROLE", dstChainSlug_, gasLimitUpdater))
+            revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
 
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();

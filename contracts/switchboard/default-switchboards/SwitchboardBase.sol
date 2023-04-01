@@ -9,7 +9,7 @@ import "../../libraries/SignatureVerifierLib.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
-import {TRIP_ROLE, UNTRIP_ROLE, GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE, WITHDRAW_ROLE, RESCUE_ROLE} from "../../utils/AccessRoles.sol";
+import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
@@ -108,8 +108,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole(TRIP_ROLE, srcChainSlug_, watcher))
-            revert NoPermit(TRIP_ROLE);
+        if (!_hasRole("TRIP_ROLE", srcChainSlug_, watcher))
+            revert NoPermit("TRIP_ROLE");
         uint256 nonce = nextNonce[watcher]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -128,7 +128,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole(TRIP_ROLE, watcher)) revert NoPermit(TRIP_ROLE);
+        if (!_hasRole("TRIP_ROLE", watcher)) revert NoPermit("TRIP_ROLE");
         uint256 nonce = nextNonce[watcher]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -158,8 +158,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole(UNTRIP_ROLE, srcChainSlug_, watcher))
-            revert NoPermit(UNTRIP_ROLE);
+        if (!_hasRole("UNTRIP_ROLE", srcChainSlug_, watcher))
+            revert NoPermit("UNTRIP_ROLE");
         uint256 nonce = nextNonce[watcher]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -177,7 +177,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole(UNTRIP_ROLE, watcher)) revert NoPermit(UNTRIP_ROLE);
+        if (!_hasRole("UNTRIP_ROLE", watcher)) revert NoPermit("UNTRIP_ROLE");
         uint256 nonce = nextNonce[watcher]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -208,8 +208,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_, gasLimitUpdater))
-            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        if (!_hasRole("GAS_LIMIT_UPDATER_ROLE", dstChainSlug_, gasLimitUpdater))
+            revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 

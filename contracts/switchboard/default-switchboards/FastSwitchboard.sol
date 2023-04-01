@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 import "./SwitchboardBase.sol";
 import "../../libraries/SignatureVerifierLib.sol";
-import {WATCHER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract FastSwitchboard is SwitchboardBase {
     mapping(bytes32 => bool) public isPacketValid;
@@ -49,7 +48,7 @@ contract FastSwitchboard is SwitchboardBase {
         );
 
         if (isAttested[watcher][packetId_]) revert AlreadyAttested();
-        if (!_hasRole(WATCHER_ROLE, srcChainSlug_, watcher))
+        if (!_hasRole("WATCHER_ROLE", srcChainSlug_, watcher))
             revert WatcherNotFound();
 
         isAttested[watcher][packetId_] = true;
@@ -117,8 +116,8 @@ contract FastSwitchboard is SwitchboardBase {
             signature_
         );
 
-        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_, gasLimitUpdater))
-            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        if (!_hasRole("GAS_LIMIT_UPDATER_ROLE", dstChainSlug_, gasLimitUpdater))
+            revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
 
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
@@ -135,9 +134,9 @@ contract FastSwitchboard is SwitchboardBase {
         uint256 srcChainSlug_,
         address watcher_
     ) external onlyRole(GOVERNANCE_ROLE) {
-        if (_hasRole(WATCHER_ROLE, srcChainSlug_, watcher_))
+        if (_hasRole("WATCHER_ROLE", srcChainSlug_, watcher_))
             revert WatcherFound();
-        _grantRole(WATCHER_ROLE, srcChainSlug_, watcher_);
+        _grantRole("WATCHER_ROLE", srcChainSlug_, watcher_);
 
         totalWatchers[srcChainSlug_]++;
     }
@@ -150,9 +149,9 @@ contract FastSwitchboard is SwitchboardBase {
         uint256 srcChainSlug_,
         address watcher_
     ) external onlyRole(GOVERNANCE_ROLE) {
-        if (!_hasRole(WATCHER_ROLE, srcChainSlug_, watcher_))
+        if (!_hasRole("WATCHER_ROLE", srcChainSlug_, watcher_))
             revert WatcherNotFound();
-        _revokeRole(WATCHER_ROLE, srcChainSlug_, watcher_);
+        _revokeRole("WATCHER_ROLE", srcChainSlug_, watcher_);
 
         totalWatchers[srcChainSlug_]--;
     }
