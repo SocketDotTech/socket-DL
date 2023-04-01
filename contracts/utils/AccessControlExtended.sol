@@ -34,7 +34,7 @@ contract AccessControlExtended is AccessControl {
         uint256 chainSlug_,
         address grantee_
     ) internal {
-        _grantRole(bytes32(abi.encode(roleName_, chainSlug_)), grantee_);
+        _grantRole(keccak256(abi.encode(roleName_, chainSlug_)), grantee_);
     }
 
     function hasRole(
