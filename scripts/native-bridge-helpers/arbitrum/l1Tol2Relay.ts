@@ -7,7 +7,7 @@ import { L1TransactionReceipt, L1ToL2MessageStatus } from "@arbitrum/sdk";
 
 import { getInstance, deployedAddressPath } from "../../deploy/utils";
 import { packPacketId } from "../../deploy/scripts/packetId";
-import { chainIds, getJsonRpcUrl, contractNames } from "../../constants";
+import { chainSlugs, getJsonRpcUrl, contractNames } from "../../constants";
 
 // get providers for source and destination
 const localChain = "goerli";
@@ -112,12 +112,15 @@ export const main = async () => {
     }
     const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
 
-    if (!addresses[chainIds[localChain]] || !addresses[chainIds[remoteChain]]) {
+    if (
+      !addresses[chainSlugs[localChain]] ||
+      !addresses[chainSlugs[remoteChain]]
+    ) {
       throw new Error("Deployed Addresses not found");
     }
 
-    const l1Config = addresses[chainIds[localChain]];
-    const l2Config = addresses[chainIds[remoteChain]];
+    const l1Config = addresses[chainSlugs[localChain]];
+    const l2Config = addresses[chainSlugs[remoteChain]];
 
     // get socket contracts for both chains
     // counter l1, counter l2, seal, execute
@@ -126,7 +129,7 @@ export const main = async () => {
     const l1Capacitor: Contract = (
       await getInstance(
         "SingleCapacitor",
-        l1Config["integrations"]?.[chainIds[remoteChain]]?.[
+        l1Config["integrations"]?.[chainSlugs[remoteChain]]?.[
           contracts.integrationType
         ]?.["capacitor"]
       )
@@ -134,7 +137,7 @@ export const main = async () => {
     const l1Notary: Contract = (
       await getInstance(
         contracts.notary,
-        l1Config["integrations"]?.[chainIds[remoteChain]]?.[
+        l1Config["integrations"]?.[chainSlugs[remoteChain]]?.[
           contracts.integrationType
         ]?.["notary"]
       )
@@ -150,7 +153,7 @@ export const main = async () => {
       outboundTxReceipt.logs[1].data
     );
     const packedPacketId = packPacketId(
-      chainIds[localChain],
+      chainSlugs[localChain],
       l1Capacitor.address,
       packetId
     );
@@ -158,7 +161,7 @@ export const main = async () => {
     const digest = keccak256(
       defaultAbiCoder.encode(
         ["uint256", "uint256", "bytes32"],
-        [chainIds[remoteChain], packedPacketId, newRootHash]
+        [chainSlugs[remoteChain], packedPacketId, newRootHash]
       )
     );
 
@@ -168,7 +171,7 @@ export const main = async () => {
       newRootHash,
       "0x",
       l1Notary.address,
-      l2Config["integrations"]?.[chainIds[localChain]]?.[
+      l2Config["integrations"]?.[chainSlugs[localChain]]?.[
         contracts.integrationType
       ]?.["notary"]
     );

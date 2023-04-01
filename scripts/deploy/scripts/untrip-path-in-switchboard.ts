@@ -1,19 +1,23 @@
 import { ethers } from "hardhat";
-import { getInstance, getChainId } from "../utils";
+import { getInstance, getChainSlug } from "../utils";
 import { Contract } from "ethers";
-import { ChainId, getSwitchboardAddress, IntegrationTypes } from "../../../src";
+import {
+  ChainSlug,
+  getSwitchboardAddress,
+  IntegrationTypes,
+} from "../../../src";
 
 export const main = async () => {
   try {
-    const chainId = await getChainId();
-    const srcChainId = ChainId.GOERLI;
+    const chainSlug = await getChainSlug();
+    const srcChainSlug = ChainSlug.GOERLI;
     const privateKey = "";
 
     const signer = new ethers.Wallet(privateKey, ethers.provider);
 
     const switchBoardAddress = getSwitchboardAddress(
-      chainId,
-      srcChainId,
+      chainSlug,
+      srcChainSlug,
       IntegrationTypes.fast
     );
 
@@ -24,13 +28,13 @@ export const main = async () => {
 
     const untripTxn = await switchboard
       .connect(signer)
-      ["tripPath(uint256,bool)"](srcChainId, false);
+      ["tripPath(uint256,bool)"](srcChainSlug, false);
     await untripTxn.wait();
 
-    const isTripped = await switchboard.tripSinglePath(srcChainId);
+    const isTripped = await switchboard.tripSinglePath(srcChainSlug);
 
     console.log(
-      `trip indicator for srcChainId: ${srcChainId} and switchBoard on ChainId: ${chainId} is: ${isTripped}`
+      `trip indicator for srcChainSlug: ${srcChainSlug} and switchBoard on ChainSlug: ${chainSlug} is: ${isTripped}`
     );
   } catch (error) {
     console.log("Error while sending untrip transaction", error);

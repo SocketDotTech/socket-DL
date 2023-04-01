@@ -8,7 +8,7 @@ import {
   getSwitchboardAddress,
   storeAddresses,
 } from "./utils";
-import { chainIds } from "../constants";
+import { chainSlugs } from "../constants";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { ChainSocketAddresses, IntegrationTypes } from "../../src";
 import { getSwitchboardDeployData } from "./switchboards";
@@ -24,10 +24,10 @@ export default async function deployAndRegisterSwitchboard(
   sourceConfig: ChainSocketAddresses
 ) {
   try {
-    const remoteChainSlug = chainIds[remoteChain];
+    const remoteChainSlug = chainSlugs[remoteChain];
 
     const result = getOrStoreSwitchboardAddress(
-      chainIds[remoteChain],
+      chainSlugs[remoteChain],
       integrationType,
       sourceConfig
     );
@@ -50,7 +50,12 @@ export default async function deployAndRegisterSwitchboard(
       );
       sourceConfig = createObj(
         sourceConfig,
-        ["integrations", chainIds[remoteChain], integrationType, "switchboard"],
+        [
+          "integrations",
+          chainSlugs[remoteChain],
+          integrationType,
+          "switchboard",
+        ],
         switchboard.address
       );
 
@@ -61,7 +66,7 @@ export default async function deployAndRegisterSwitchboard(
         sourceConfig["FastSwitchboard"] = switchboard.address;
       }
 
-      await storeAddresses(sourceConfig, chainIds[network]);
+      await storeAddresses(sourceConfig, chainSlugs[network]);
     } else {
       switchboard = await getInstance(contractName, result.switchboardAddr);
     }
@@ -74,12 +79,12 @@ export default async function deployAndRegisterSwitchboard(
       integrationType,
       sourceConfig
     );
-    await storeAddresses(sourceConfig, chainIds[network]);
+    await storeAddresses(sourceConfig, chainSlugs[network]);
 
     if (contractName === "FastSwitchboard") {
       await setupFast(
         switchboard,
-        chainIds[remoteChain],
+        chainSlugs[remoteChain],
         network,
         remoteChain,
         signer
@@ -87,7 +92,7 @@ export default async function deployAndRegisterSwitchboard(
     } else if (contractName === "OptimisticSwitchboard") {
       await setupOptimistic(
         switchboard,
-        chainIds[remoteChain],
+        chainSlugs[remoteChain],
         network,
         remoteChain,
         signer

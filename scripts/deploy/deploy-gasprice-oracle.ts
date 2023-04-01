@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithArgs, getAddresses, storeAddresses } from "./utils";
-import { chainIds } from "../constants/networks";
+import { chainSlugs } from "../constants/networks";
 import { transmitterAddress } from "../constants/config";
 
 /**
@@ -22,14 +22,14 @@ export const main = async () => {
 
     const gasPriceOracle: Contract = await deployContractWithArgs(
       "GasPriceOracle",
-      [socketSigner.address, chainIds[network]],
+      [socketSigner.address, chainSlugs[network]],
       socketSigner,
       "contracts/GasPriceOracle.sol"
     );
 
-    const addresses = await getAddresses(chainIds[network]);
+    const addresses = await getAddresses(chainSlugs[network]);
     addresses["GasPriceOracle"] = gasPriceOracle.address;
-    await storeAddresses(addresses, chainIds[network]);
+    await storeAddresses(addresses, chainSlugs[network]);
 
     const transmitManagerAddress = addresses["TransmitManager"];
 
@@ -50,7 +50,7 @@ export const main = async () => {
     );
     const grantTransmitterRoleTxn = await transmitManagerInstance
       .connect(socketSigner)
-      .grantTransmitterRole(chainIds[network], transmitter);
+      .grantTransmitterRole(chainSlugs[network], transmitter);
 
     console.log(
       `granted transmitter role to ${transmitter} and resulting transactionHash is: ${grantTransmitterRoleTxn.hash}`

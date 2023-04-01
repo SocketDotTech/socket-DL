@@ -2,14 +2,14 @@ import fs from "fs";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { getInstance, getChainId, deployedAddressPath } from "../utils";
+import { getInstance, getChainSlug, deployedAddressPath } from "../utils";
 import { Contract } from "ethers";
 
-const remoteChainId = "";
+const remoteChainSlug = "";
 
 export const main = async () => {
   try {
-    const chainId = await getChainId();
+    const chainSlug = await getChainSlug();
     const amount = 100;
     const msgGasLimit = "19000000";
     const gasLimit = 200485;
@@ -24,17 +24,17 @@ export const main = async () => {
 
     const counter: Contract = await getInstance(
       "Counter",
-      config[chainId]["Counter"]
+      config[chainSlug]["Counter"]
     );
     await counter
       .connect(signer)
-      .remoteAddOperation(remoteChainId, amount, msgGasLimit, {
+      .remoteAddOperation(remoteChainSlug, amount, msgGasLimit, {
         gasLimit,
         value: fees,
       });
 
     console.log(
-      `Sent remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`
+      `Sent remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}`
     );
   } catch (error) {
     console.log("Error while sending transaction", error);

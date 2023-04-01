@@ -1,7 +1,7 @@
-import { ChainId, IntegrationTypes } from "../../../src";
+import { ChainSlug, IntegrationTypes } from "../../../src";
 
 function getSwitchboardAddress(
-  chainId: ChainId | string,
+  chainSlug: ChainSlug | string,
   integrationType: IntegrationTypes,
   config: any
 ) {
@@ -10,25 +10,27 @@ function getSwitchboardAddress(
   } else if (integrationType === IntegrationTypes.optimistic) {
     return config?.["OptimisticSwitchboard"];
   } else
-    return config?.["integrations"]?.[chainId]?.[integrationType]?.[
+    return config?.["integrations"]?.[chainSlug]?.[integrationType]?.[
       "switchboard"
     ];
 }
 
 function getCapacitorAddress(
-  chainId: ChainId,
+  chainSlug: ChainSlug,
   integrationType: IntegrationTypes,
   config: any
 ) {
-  return config?.["integrations"]?.[chainId]?.[integrationType]?.["capacitor"];
+  return config?.["integrations"]?.[chainSlug]?.[integrationType]?.[
+    "capacitor"
+  ];
 }
 
 function getDecapacitorAddress(
-  chainId: ChainId,
+  chainSlug: ChainSlug,
   integrationType: IntegrationTypes,
   config: any
 ) {
-  return config?.["integrations"]?.[chainId]?.[integrationType]?.[
+  return config?.["integrations"]?.[chainSlug]?.[integrationType]?.[
     "decapacitor"
   ];
 }

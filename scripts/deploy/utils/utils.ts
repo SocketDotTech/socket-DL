@@ -62,8 +62,8 @@ export const verify = async (
   args: any[]
 ) => {
   try {
-    const chainId = await getChainId();
-    if (chainId === 31337) return;
+    const chainSlug = await getChainSlug();
+    if (chainSlug === 31337) return;
 
     await sleep(40);
     await run("verify:verify", {
@@ -85,7 +85,7 @@ export const getInstance = async (
 ): Promise<Contract> =>
   (await ethers.getContractFactory(contractName)).attach(address);
 
-export const getChainId = async (): Promise<number> => {
+export const getChainSlug = async (): Promise<number> => {
   if (network.config.chainId === undefined)
     throw new Error("chain id not found");
   return Number(network.config.chainId);
@@ -98,7 +98,7 @@ export const integrationType = (integrationName: string) =>
 
 export const storeAddresses = async (
   addresses: ChainSocketAddresses,
-  chainId: number
+  chainSlug: number
 ) => {
   if (!fs.existsSync(deployedAddressPath)) {
     await fs.promises.mkdir(deployedAddressPath);
@@ -114,14 +114,14 @@ export const storeAddresses = async (
     deploymentAddresses = JSON.parse(deploymentAddressesString);
   }
 
-  deploymentAddresses[chainId] = addresses;
+  deploymentAddresses[chainSlug] = addresses;
   fs.writeFileSync(
     deployedAddressPath,
     JSON.stringify(deploymentAddresses, null, 2)
   );
 };
 
-export const getAddresses = async (chainId: number) => {
+export const getAddresses = async (chainSlug: number) => {
   if (!fs.existsSync(deployedAddressPath)) {
     await fs.promises.mkdir(deployedAddressPath);
   }
@@ -136,7 +136,7 @@ export const getAddresses = async (chainId: number) => {
     deploymentAddresses = JSON.parse(deploymentAddressesString);
   }
 
-  return deploymentAddresses[chainId];
+  return deploymentAddresses[chainSlug];
 };
 
 export const createObj = function (obj, keys, value) {

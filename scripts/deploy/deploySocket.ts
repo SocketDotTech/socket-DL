@@ -10,7 +10,7 @@ import {
   getInstance,
   getRoleHash,
 } from "./utils";
-import { chainIds } from "../constants/networks";
+import { chainSlugs } from "../constants/networks";
 
 import {
   executorAddress,
@@ -53,7 +53,7 @@ export const main = async () => {
         "contracts/utils/SignatureVerifier.sol"
       );
       addresses["SignatureVerifier"] = signatureVerifier.address;
-      await storeAddresses(addresses, chainIds[network]);
+      await storeAddresses(addresses, chainSlugs[network]);
     } else {
       signatureVerifier = await getInstance(
         "SignatureVerifier",
@@ -69,7 +69,7 @@ export const main = async () => {
         "contracts/utils/Hasher.sol"
       );
       addresses["Hasher"] = hasher.address;
-      await storeAddresses(addresses, chainIds[network]);
+      await storeAddresses(addresses, chainSlugs[network]);
     } else {
       hasher = await getInstance("Hasher", addresses["Hasher"]);
     }
@@ -83,7 +83,7 @@ export const main = async () => {
         "contracts/CapacitorFactory.sol"
       );
       addresses["CapacitorFactory"] = capacitorFactory.address;
-      await storeAddresses(addresses, chainIds[network]);
+      await storeAddresses(addresses, chainSlugs[network]);
 
       const tx = await capacitorFactory
         .connect(socketSigner)
@@ -107,12 +107,12 @@ export const main = async () => {
     if (!addresses["GasPriceOracle"]) {
       gasPriceOracle = await deployContractWithArgs(
         "GasPriceOracle",
-        [socketSigner.address, chainIds[network]],
+        [socketSigner.address, chainSlugs[network]],
         socketSigner,
         "contracts/GasPriceOracle.sol"
       );
       addresses["GasPriceOracle"] = gasPriceOracle.address;
-      await storeAddresses(addresses, chainIds[network]);
+      await storeAddresses(addresses, chainSlugs[network]);
 
       const grantee = socketSigner.address;
       const tx = await gasPriceOracle
@@ -142,7 +142,7 @@ export const main = async () => {
         "contracts/ExecutionManager.sol"
       );
       addresses["ExecutionManager"] = executionManager.address;
-      await storeAddresses(addresses, chainIds[network]);
+      await storeAddresses(addresses, chainSlugs[network]);
 
       const grantee = socketSigner.address;
       const tx = await executionManager
@@ -176,14 +176,14 @@ export const main = async () => {
           signatureVerifier.address,
           gasPriceOracle.address,
           socketSigner.address,
-          chainIds[network],
+          chainSlugs[network],
           sealGasLimit[network],
         ],
         socketSigner,
         "contracts/TransmitManager.sol"
       );
       addresses["TransmitManager"] = transmitManager.address;
-      await storeAddresses(addresses, chainIds[network]);
+      await storeAddresses(addresses, chainSlugs[network]);
 
       const grantee = socketSigner.address;
       const tx = await transmitManager
@@ -208,7 +208,7 @@ export const main = async () => {
         .connect(socketSigner)
         ["grantRole(bytes32,uint256,address)"](
           getRoleHash("TRANSMITTER_ROLE"),
-          chainIds[network],
+          chainSlugs[network],
           transmitterAddress[network]
         );
 
@@ -237,7 +237,7 @@ export const main = async () => {
       socket = await deployContractWithArgs(
         "Socket",
         [
-          chainIds[network],
+          chainSlugs[network],
           hasher.address,
           transmitManager.address,
           executionManager.address,
@@ -248,7 +248,7 @@ export const main = async () => {
         "contracts/socket/Socket.sol"
       );
       addresses["Socket"] = socket.address;
-      await storeAddresses(addresses, chainIds[network]);
+      await storeAddresses(addresses, chainSlugs[network]);
 
       const grantee = socketSigner.address;
       const tx = await socket
@@ -275,7 +275,7 @@ export const main = async () => {
         "contracts/examples/Counter.sol"
       );
       addresses["Counter"] = counter.address;
-      await storeAddresses(addresses, chainIds[network]);
+      await storeAddresses(addresses, chainSlugs[network]);
     } else {
       socket = await getInstance("Counter", addresses["Counter"]);
     }

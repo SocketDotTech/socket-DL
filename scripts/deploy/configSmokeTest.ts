@@ -3,7 +3,7 @@ import hre from "hardhat";
 import { constants, utils } from "ethers";
 import {
   transmitterAddress,
-  chainIds,
+  chainSlugs,
   executorAddress,
   switchboards,
   proposeGasLimit,
@@ -49,11 +49,11 @@ const checkSocket = async (
 
   const capacitor__ = await socket.capacitors__(
     switchboard,
-    chainIds[remoteChain]
+    chainSlugs[remoteChain]
   );
   const decapacitor__ = await socket.decapacitors__(
     switchboard,
-    chainIds[remoteChain]
+    chainSlugs[remoteChain]
   );
 
   assert(
@@ -73,7 +73,7 @@ const checkTransmitter = async (chain, remoteChain, transmitManagerAddr) => {
   // check role
   const hasTransmitterRole = await roleExist(
     transmitManager,
-    utils.hexZeroPad(utils.hexlify(chainIds[remoteChain]), 32),
+    utils.hexZeroPad(utils.hexlify(chainSlugs[remoteChain]), 32),
     transmitterAddress[chain]
   );
   assert(
@@ -83,7 +83,7 @@ const checkTransmitter = async (chain, remoteChain, transmitManagerAddr) => {
 
   // check propose gas limit
   const proposeGasLimit__ = await transmitManager.proposeGasLimit(
-    chainIds[remoteChain]
+    chainSlugs[remoteChain]
   );
   assert(
     parseInt(proposeGasLimit__) === proposeGasLimit[remoteChain],
@@ -152,10 +152,10 @@ const checkSwitchboard = async (
     const switchboard = await getInstance("FastSwitchboard", localSwitchboard);
 
     const executionOverheadOnChain = await switchboard.executionOverhead(
-      chainIds[remoteChain]
+      chainSlugs[remoteChain]
     );
     const watcherRoleSet = await switchboard.hasRole(
-      utils.hexZeroPad(utils.hexlify(chainIds[remoteChain]), 32),
+      utils.hexZeroPad(utils.hexlify(chainSlugs[remoteChain]), 32),
       watcherAddress[chain]
     );
 
@@ -170,7 +170,7 @@ const checkSwitchboard = async (
 
     if (configurationType === IntegrationTypes.fast) {
       const attestGasLimitOnChain = await switchboard.attestGasLimit(
-        chainIds[remoteChain]
+        chainSlugs[remoteChain]
       );
       assert(
         parseInt(attestGasLimitOnChain) !== 0,
@@ -190,12 +190,15 @@ export const verifyConfig = async (
   }
 
   const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
-  if (!addresses[chainIds[localChain]] || !addresses[chainIds[remoteChain]]) {
+  if (
+    !addresses[chainSlugs[localChain]] ||
+    !addresses[chainSlugs[remoteChain]]
+  ) {
     throw new Error("Deployed Addresses not found");
   }
 
-  let remoteConfig = addresses[chainIds[remoteChain]];
-  let localConfig = addresses[chainIds[localChain]];
+  let remoteConfig = addresses[chainSlugs[remoteChain]];
+  let localConfig = addresses[chainSlugs[localChain]];
 
   // contracts exist:
   // core contracts
@@ -227,33 +230,33 @@ export const verifyConfig = async (
 
   // config related contracts
   let localSwitchboard = getSwitchboardAddress(
-    chainIds[remoteChain],
+    chainSlugs[remoteChain],
     configurationType,
     localConfig
   );
   let localCapacitor = getCapacitorAddress(
-    chainIds[remoteChain],
+    chainSlugs[remoteChain],
     configurationType,
     localConfig
   );
   let localDecapacitor = getDecapacitorAddress(
-    chainIds[remoteChain],
+    chainSlugs[remoteChain],
     configurationType,
     localConfig
   );
 
   let remoteSwitchboard = getSwitchboardAddress(
-    chainIds[localChain],
+    chainSlugs[localChain],
     configurationType,
     remoteConfig
   );
   let remoteCapacitor = getCapacitorAddress(
-    chainIds[localChain],
+    chainSlugs[localChain],
     configurationType,
     remoteConfig
   );
   let remoteDecapacitor = getDecapacitorAddress(
-    chainIds[localChain],
+    chainSlugs[localChain],
     configurationType,
     remoteConfig
   );

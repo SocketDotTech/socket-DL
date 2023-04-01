@@ -7,7 +7,7 @@ dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
 const infuraApiKey: string | undefined = process.env.INFURA_API_KEY;
 
-export const chainIds = {
+export const chainSlugs = {
   avalanche: 43114,
   bsc: 56,
   goerli: 5,
@@ -22,7 +22,7 @@ export const chainIds = {
   "polygon-mumbai": 80001,
 };
 
-export const networkToChainId = {
+export const networkToChainSlug = {
   43114: "avalanche",
   56: "bsc",
   5: "goerli",
@@ -37,7 +37,7 @@ export const networkToChainId = {
   80001: "polygon-mumbai",
 };
 
-export function getJsonRpcUrl(chain: keyof typeof chainIds): string {
+export function getJsonRpcUrl(chain: keyof typeof chainSlugs): string {
   let jsonRpcUrl: string;
   switch (chain) {
     case "arbitrum":
@@ -91,7 +91,9 @@ export function getJsonRpcUrl(chain: keyof typeof chainIds): string {
   return jsonRpcUrl;
 }
 
-export const getProviderFromChainName = (chainId: keyof typeof chainIds) => {
-  const jsonRpcUrl = getJsonRpcUrl(chainId);
+export const getProviderFromChainName = (
+  chainSlug: keyof typeof chainSlugs
+) => {
+  const jsonRpcUrl = getJsonRpcUrl(chainSlug);
   return new ethers.providers.JsonRpcProvider(jsonRpcUrl);
 };

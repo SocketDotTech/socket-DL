@@ -4,7 +4,7 @@ import { Web3ClientPlugin } from "@maticnetwork/maticjs-ethers";
 import { providers, Wallet } from "ethers";
 use(Web3ClientPlugin);
 
-import { chainIds, contractNames, getJsonRpcUrl } from "../../constants";
+import { chainSlugs, contractNames, getJsonRpcUrl } from "../../constants";
 import { deployedAddressPath, getInstance } from "../../deploy/utils";
 
 // get providers for source and destination
@@ -26,10 +26,13 @@ export const main = async () => {
     }
     const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
 
-    if (!addresses[chainIds[localChain]] || !addresses[chainIds[remoteChain]]) {
+    if (
+      !addresses[chainSlugs[localChain]] ||
+      !addresses[chainSlugs[remoteChain]]
+    ) {
       throw new Error("Deployed Addresses not found");
     }
-    const l2Config = addresses[chainIds[remoteChain]];
+    const l2Config = addresses[chainSlugs[remoteChain]];
 
     // get socket contracts for both chains
     // counter l1, counter l2, seal, execute
@@ -37,7 +40,7 @@ export const main = async () => {
     const l2Notary = (
       await getInstance(
         contracts.notary,
-        l2Config[contracts.notary][chainIds[remoteChain]]
+        l2Config[contracts.notary][chainSlugs[remoteChain]]
       )
     ).connect(l2Wallet);
 

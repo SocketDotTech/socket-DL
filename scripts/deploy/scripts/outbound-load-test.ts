@@ -3,7 +3,7 @@ import { BigNumber, ethers } from "ethers";
 import { Contract } from "ethers";
 require("dotenv").config();
 import yargs from "yargs";
-import { chainIds, getProviderFromChainName } from "../../constants";
+import { chainSlugs, getProviderFromChainName } from "../../constants";
 import * as CounterABI from "../../../artifacts/contracts/examples/Counter.sol/Counter.json";
 import path from "path";
 
@@ -19,7 +19,7 @@ export const main = async () => {
   const msgGasLimit = "19000000";
   const gasLimit = 200485;
   const fees = "20000000000000000";
-  let remoteChainId;
+  let remoteChainSlug;
 
   try {
     const argv = await yargs
@@ -52,8 +52,8 @@ export const main = async () => {
         },
       }).argv;
 
-    const chain = argv.chain as keyof typeof chainIds;
-    const chainId = chainIds[chain];
+    const chain = argv.chain as keyof typeof chainSlugs;
+    const chainSlug = chainSlugs[chain];
 
     const providerInstance = getProviderFromChainName(chain);
 
@@ -62,8 +62,8 @@ export const main = async () => {
       providerInstance
     );
 
-    const remoteChain = argv.remoteChain as keyof typeof chainIds;
-    remoteChainId = chainIds[remoteChain];
+    const remoteChain = argv.remoteChain as keyof typeof chainSlugs;
+    remoteChainSlug = chainSlugs[remoteChain];
 
     const numOfRequests = argv.numOfRequests as number;
     const waitTime = argv.waitTime as number;
@@ -72,7 +72,7 @@ export const main = async () => {
       fs.readFileSync(deployedAddressPath, "utf-8")
     );
 
-    const counterAddress = config[chainId]["Counter"];
+    const counterAddress = config[chainSlug]["Counter"];
 
     const counter: Contract = new ethers.Contract(
       counterAddress,
@@ -83,7 +83,7 @@ export const main = async () => {
     for (let i = 0; i < numOfRequests; i++) {
       const tx = await counter
         .connect(signer)
-        .remoteAddOperation(remoteChainId, amount, msgGasLimit, {
+        .remoteAddOperation(remoteChainSlug, amount, msgGasLimit, {
           gasLimit,
           value: BigNumber.from(fees),
         });
@@ -93,7 +93,7 @@ export const main = async () => {
       console.log(
         `remoteAddOperation-tx with hash: ${JSON.stringify(
           tx.hash
-        )} was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`
+        )} was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}`
       );
 
       if (waitTime && waitTime > 0) {
@@ -102,7 +102,7 @@ export const main = async () => {
     }
   } catch (error) {
     console.log(
-      `Error while sending remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainId}`
+      `Error while sending remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}`
     );
     console.error("Error while sending transaction", error);
     throw error;

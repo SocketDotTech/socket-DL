@@ -2,8 +2,8 @@ import fs from "fs";
 import hre from "hardhat";
 import { constants, Contract } from "ethers";
 import {
-  chainIds,
-  networkToChainId,
+  chainSlugs,
+  networkToChainSlug,
   proposeGasLimit,
   switchboards,
   transmitterAddress,
@@ -59,7 +59,7 @@ export const main = async () => {
             socketSigner,
             localConfigUpdated
           );
-          addresses[chainIds[chain]] = localConfigUpdated;
+          addresses[chainSlugs[chain]] = localConfigUpdated;
           console.log("Done! 🚀");
         }
 
@@ -78,7 +78,7 @@ export const main = async () => {
         if (remoteConfig["Counter"])
           await setSocketConfig(
             socket,
-            chainIds[remoteChain],
+            chainSlugs[remoteChain],
             remoteConfig["Counter"],
             chainSetups[index]["configForCounter"],
             localConfigUpdated,
@@ -97,7 +97,7 @@ export const main = async () => {
 const setRemoteSwitchboards = async (addresses) => {
   try {
     for (let srcChain in addresses) {
-      await hre.changeNetwork(networkToChainId[srcChain]);
+      await hre.changeNetwork(networkToChainSlug[srcChain]);
       const { socketSigner } = await getSigners();
 
       for (let dstChain in addresses[srcChain]?.["integrations"]) {
@@ -105,8 +105,8 @@ const setRemoteSwitchboards = async (addresses) => {
 
         if (dstConfig?.[IntegrationTypes.native]) {
           const srcSwitchboardType =
-            switchboards[networkToChainId[srcChain]]?.[
-              networkToChainId[dstChain]
+            switchboards[networkToChainSlug[srcChain]]?.[
+              networkToChainSlug[dstChain]
             ]?.["switchboard"];
           const dstSwitchboardAddress = getSwitchboardAddress(
             srcChain,
@@ -182,12 +182,12 @@ const validateChainSetup = (addresses, chain, chainSetups) => {
   let remoteChain = chainSetups["remoteChain"];
   if (chain === remoteChain) throw new Error("Wrong chains");
 
-  if (!addresses[chainIds[chain]] || !addresses[chainIds[remoteChain]]) {
+  if (!addresses[chainSlugs[chain]] || !addresses[chainSlugs[remoteChain]]) {
     throw new Error("Deployed Addresses not found");
   }
 
-  let remoteConfig = addresses[chainIds[remoteChain]];
-  let localConfig = addresses[chainIds[chain]];
+  let remoteConfig = addresses[chainSlugs[remoteChain]];
+  let localConfig = addresses[chainSlugs[chain]];
 
   return { remoteChain, remoteConfig, localConfig };
 };
@@ -238,7 +238,7 @@ const configTransmitter = async (
     "TransmitManager",
     localConfig["TransmitManager"]
   );
-  const remoteChainSlug = chainIds[remoteChain];
+  const remoteChainSlug = chainSlugs[remoteChain];
 
   const isSet = await transmitManager.isTransmitter(
     transmitter,
