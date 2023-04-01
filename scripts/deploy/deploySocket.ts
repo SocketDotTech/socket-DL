@@ -84,18 +84,6 @@ export const main = async () => {
       );
       addresses["CapacitorFactory"] = capacitorFactory.address;
       await storeAddresses(addresses, chainSlugs[network]);
-
-      const tx = await capacitorFactory
-        .connect(socketSigner)
-        ["grantRole(bytes32,address)"](
-          getRoleHash("RESCUE_ROLE"),
-          socketSigner.address
-        );
-      console.log(
-        `Assigned RESCUE_ROLE role to ${socketSigner.address}: ${tx.hash}`
-      );
-
-      await tx.wait();
     } else {
       capacitorFactory = await getInstance(
         "CapacitorFactory",
