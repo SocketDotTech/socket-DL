@@ -194,8 +194,8 @@ export const main = async () => {
       //grant transmitter role to transmitter-address for current network
       const grantTransmitterRoleTxn = await transmitManager
         .connect(socketSigner)
-        ["grantRole(bytes32,uint256,address)"](
-          getRoleHash("TRANSMITTER_ROLE"),
+        ["grantRole(string,uint256,address)"](
+          "TRANSMITTER_ROLE",
           chainSlugs[network],
           transmitterAddress[network]
         );
