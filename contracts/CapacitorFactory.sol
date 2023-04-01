@@ -15,7 +15,9 @@ contract CapacitorFactory is ICapacitorFactory, AccessControlExtended {
     uint256 private constant SINGLE_CAPACITOR = 1;
     uint256 private constant HASH_CHAIN_CAPACITOR = 2;
 
-    constructor(address owner_) AccessControlExtended(owner_) {}
+    constructor(address owner_) AccessControlExtended(owner_) {
+        _grantRole(RESCUE_ROLE, owner_);
+    }
 
     function deploy(
         uint256 capacitorType_,

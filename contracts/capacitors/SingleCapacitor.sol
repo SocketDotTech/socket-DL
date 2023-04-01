@@ -10,7 +10,9 @@ contract SingleCapacitor is BaseCapacitor {
     constructor(
         address socket_,
         address owner_
-    ) BaseCapacitor(socket_, owner_) {}
+    ) BaseCapacitor(socket_, owner_) {
+        _grantRole(RESCUE_ROLE, owner_);
+    }
 
     /// adds the packed message to a packet
     /// @inheritdoc ICapacitor

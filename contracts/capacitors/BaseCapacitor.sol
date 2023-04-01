@@ -4,7 +4,7 @@ pragma solidity 0.8.7;
 import "../interfaces/ICapacitor.sol";
 import "../utils/AccessControlExtended.sol";
 import "../libraries/RescueFundsLib.sol";
-import {SOCKET_ROLE, RESCUE_ROLE} from "../utils/AccessRoles.sol";
+import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
 abstract contract BaseCapacitor is ICapacitor, AccessControlExtended {
     /// an incrementing id for each new packet created

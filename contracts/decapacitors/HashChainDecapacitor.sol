@@ -10,7 +10,9 @@ contract HashChainDecapacitor is IDecapacitor, AccessControlExtended {
     /**
      * @notice initialises the contract with owner address
      */
-    constructor(address owner_) AccessControlExtended(owner_) {}
+    constructor(address owner_) AccessControlExtended(owner_) {
+        _grantRole(RESCUE_ROLE, owner_);
+    }
 
     /// returns if the packed message is the part of a merkle tree or not
     /// @inheritdoc IDecapacitor
