@@ -14,7 +14,7 @@ import "../contracts/TransmitManager.sol";
 import "../contracts/GasPriceOracle.sol";
 import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
-import {WATCHER_ROLE, TRANSMITTER_ROLE, GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../contracts/utils/AccessRoles.sol";
+import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRIP_ROLE, UNTRIP_ROLE} from "../contracts/utils/AccessRoles.sol";
 
 contract Setup is Test {
     uint256 internal c = 1;
@@ -119,7 +119,7 @@ contract Setup is Test {
         vm.startPrank(_socketOwner);
 
         cc_.transmitManager__.grantRole(
-            GAS_LIMIT_UPDATER_ROLE,
+            "GAS_LIMIT_UPDATER_ROLE",
             remoteChainSlug_,
             _socketOwner
         );
@@ -175,7 +175,11 @@ contract Setup is Test {
         uint256 nonce = 0;
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
+        optimisticSwitchboard.grantRole(
+            "GAS_LIMIT_UPDATER_ROLE",
+            remoteChainSlug_,
+            _socketOwner
+        );
 
         bytes32 digest = keccak256(
             abi.encode(
@@ -195,7 +199,7 @@ contract Setup is Test {
             sig
         );
         optimisticSwitchboard.grantRole(
-            WATCHER_ROLE,
+            "WATCHER_ROLE",
             remoteChainSlug_,
             _watcher
         );
@@ -227,7 +231,11 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-        fastSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(
+            "GAS_LIMIT_UPDATER_ROLE",
+            remoteChainSlug_,
+            _socketOwner
+        );
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
 
         vm.stopPrank();
@@ -305,7 +313,7 @@ contract Setup is Test {
         );
 
         cc_.transmitManager__.grantRole(
-            GAS_LIMIT_UPDATER_ROLE,
+            "GAS_LIMIT_UPDATER_ROLE",
             cc_.chainSlug,
             deployer_
         );
@@ -372,7 +380,7 @@ contract Setup is Test {
             transmitter = vm.addr(transmitterPrivateKeys_[index]);
             // grant transmitter role
             cc_.transmitManager__.grantRole(
-                TRANSMITTER_ROLE,
+                "TRANSMITTER_ROLE",
                 remoteChainSlug_,
                 transmitter
             );

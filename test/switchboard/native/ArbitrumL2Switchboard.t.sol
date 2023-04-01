@@ -92,7 +92,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
 
         cc_.transmitManager__.grantRole(
-            GAS_LIMIT_UPDATER_ROLE,
+            "GAS_LIMIT_UPDATER_ROLE",
             remoteChainSlug_,
             _socketOwner
         );

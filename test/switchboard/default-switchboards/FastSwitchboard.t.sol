@@ -36,7 +36,11 @@ contract FastSwitchboardTest is Setup {
             1
         );
 
-        fastSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(
+            "GAS_LIMIT_UPDATER_ROLE",
+            remoteChainSlug,
+            _socketOwner
+        );
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
         bytes32 digest = keccak256(
@@ -149,7 +153,7 @@ contract FastSwitchboardTest is Setup {
 
     function testTripGlobal() external {
         vm.startPrank(_socketOwner);
-        fastSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
+        fastSwitchboard.grantRole("TRIP_ROLE", _socketOwner);
 
         bytes32 digest = keccak256(
             abi.encode("TRIP", _a.chainSlug, nonce, true)
@@ -168,7 +172,7 @@ contract FastSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
 
         uint256 srcChainSlug = _a.chainSlug;
-        fastSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
+        fastSwitchboard.grantRole("TRIP_ROLE", srcChainSlug, _socketOwner);
 
         bytes32 digest = keccak256(
             abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, true)
@@ -198,8 +202,8 @@ contract FastSwitchboardTest is Setup {
         uint256 srcChainSlug = _a.chainSlug;
 
         vm.startPrank(_socketOwner);
-        fastSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
-        fastSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
+        fastSwitchboard.grantRole("TRIP_ROLE", srcChainSlug, _socketOwner);
+        fastSwitchboard.grantRole("UNTRIP_ROLE", srcChainSlug, _socketOwner);
         vm.stopPrank();
 
         bytes32 digest = keccak256(

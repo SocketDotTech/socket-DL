@@ -75,17 +75,21 @@ contract ExecutionManagerTest is Setup {
         executionManager.grantRole(RESCUE_ROLE, owner);
         executionManager.grantRole(WITHDRAW_ROLE, owner);
 
-        transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug, transmitter);
-        transmitManager.grantRole(TRANSMITTER_ROLE, destChainSlug, transmitter);
+        transmitManager.grantRole("TRANSMITTER_ROLE", chainSlug, transmitter);
+        transmitManager.grantRole(
+            "TRANSMITTER_ROLE",
+            destChainSlug,
+            transmitter
+        );
         gasPriceOracle.setTransmitManager(transmitManager);
         vm.stopPrank();
 
         assertTrue(
-            transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug, transmitter)
+            transmitManager.hasRole("TRANSMITTER_ROLE", chainSlug, transmitter)
         );
         assertTrue(
             transmitManager.hasRole(
-                TRANSMITTER_ROLE,
+                "TRANSMITTER_ROLE",
                 destChainSlug,
                 transmitter
             )

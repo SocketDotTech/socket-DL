@@ -32,7 +32,11 @@ contract OptimisticSwitchboardTest is Setup {
             1
         );
 
-        optimisticSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
+        optimisticSwitchboard.grantRole(
+            "GAS_LIMIT_UPDATER_ROLE",
+            remoteChainSlug,
+            _socketOwner
+        );
         optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
         bytes32 digest = keccak256(
@@ -53,10 +57,14 @@ contract OptimisticSwitchboardTest is Setup {
             sig
         );
 
-        optimisticSwitchboard.grantRole(WATCHER_ROLE, remoteChainSlug, watcher);
-        optimisticSwitchboard.grantRole(WATCHER_ROLE, _a.chainSlug, watcher);
         optimisticSwitchboard.grantRole(
-            WATCHER_ROLE,
+            "WATCHER_ROLE",
+            remoteChainSlug,
+            watcher
+        );
+        optimisticSwitchboard.grantRole("WATCHER_ROLE", _a.chainSlug, watcher);
+        optimisticSwitchboard.grantRole(
+            "WATCHER_ROLE",
             remoteChainSlug,
             vm.addr(_altWatcherPrivateKey)
         );
@@ -67,7 +75,7 @@ contract OptimisticSwitchboardTest is Setup {
     function testTripGlobal() external {
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
+        optimisticSwitchboard.grantRole("TRIP_ROLE", _socketOwner);
 
         bytes32 digest = keccak256(
             abi.encode("TRIP", _a.chainSlug, nonce, true)
@@ -84,7 +92,11 @@ contract OptimisticSwitchboardTest is Setup {
     function testTripPath() external {
         vm.startPrank(_socketOwner);
         uint256 srcChainSlug = _a.chainSlug;
-        optimisticSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
+        optimisticSwitchboard.grantRole(
+            "TRIP_ROLE",
+            srcChainSlug,
+            _socketOwner
+        );
 
         bytes32 digest = keccak256(
             abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, true)
@@ -112,8 +124,16 @@ contract OptimisticSwitchboardTest is Setup {
         uint256 srcChainSlug = _a.chainSlug;
 
         vm.startPrank(_socketOwner);
-        optimisticSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
-        optimisticSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
+        optimisticSwitchboard.grantRole(
+            "TRIP_ROLE",
+            srcChainSlug,
+            _socketOwner
+        );
+        optimisticSwitchboard.grantRole(
+            "UNTRIP_ROLE",
+            srcChainSlug,
+            _socketOwner
+        );
         vm.stopPrank();
 
         hoax(_socketOwner);
@@ -171,7 +191,11 @@ contract OptimisticSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
 
         uint32 srcChainSlug = _a.chainSlug;
-        optimisticSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
+        optimisticSwitchboard.grantRole(
+            "TRIP_ROLE",
+            srcChainSlug,
+            _socketOwner
+        );
 
         bytes32 digest = keccak256(
             abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, true)
@@ -199,7 +223,7 @@ contract OptimisticSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
 
         optimisticSwitchboard.grantRole(
-            WATCHER_ROLE,
+            "WATCHER_ROLE",
             remoteChainSlug,
             watcher2
         );
@@ -210,7 +234,7 @@ contract OptimisticSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
 
         optimisticSwitchboard.revokeRole(
-            WATCHER_ROLE,
+            "WATCHER_ROLE",
             remoteChainSlug,
             vm.addr(_altWatcherPrivateKey)
         );

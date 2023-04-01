@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 import "../../contracts/capacitors/SingleCapacitor.sol";
-import {SOCKET_ROLE} from "../../contracts/utils/AccessRoles.sol";
 
 contract SingleCapacitorTest is Test {
     uint256 internal c = 1;

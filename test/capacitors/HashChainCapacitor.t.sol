@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "../Setup.t.sol";
-import {SOCKET_ROLE} from "../../contracts/utils/AccessRoles.sol";
 
 contract HashChainCapacitorTest is Setup {
     address immutable _owner = address(uint160(c++));
