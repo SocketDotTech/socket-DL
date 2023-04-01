@@ -479,14 +479,14 @@
     "OptimisticSwitchboard": "0x76c8d762b11321837D4A2Fa1Fd19651Ca365F0BE"
   },
   "80001": {
-    "Counter": "0xDaaFB5d21C5d92F36547d79b9Ae14334c8DD6C43",
-    "CapacitorFactory": "0x1c96Fb582A86c735eee41C81D73F273371A3f0D1",
-    "ExecutionManager": "0x8644f238738dccf2Ef3a16f72d4512ae84C4D878",
-    "GasPriceOracle": "0xa7aFb23a3FB084631c686D84f58118724946Eb6f",
-    "Hasher": "0x7610C5Af7B0A813DA2B1be688FD7C51961D2Ea41",
-    "SignatureVerifier": "0x37DDD2B8765458D8f124e2eFc60949B99d537eF8",
-    "Socket": "0x7D60d965AA4D8a03fE46b65B9fC643EbC0F2F802",
-    "TransmitManager": "0x61260E5eF54F52c72CbD15758403E3208c829640",
+    "Counter": "0x2b09798Cf27CD95c07D55073D86797E812F6fc90",
+    "CapacitorFactory": "0x53B3cB6c6F4cF667fe2004Cf8bd7e82F67971404",
+    "ExecutionManager": "0x7EaEF5efB0472eC7E49341FcC471cEaAEbf2B062",
+    "GasPriceOracle": "0x4a298145BcadA63c14aE14EB258Ff43F3b1E8Cd7",
+    "Hasher": "0x61C8549374AE1884BaB3390E8C3154Cc5c7AD5fa",
+    "SignatureVerifier": "0x5229003d0D94b7c55395222c802DF3770b9DFbeC",
+    "Socket": "0x34C43CEf5fdCF61C9e90b4232b54d5cb9BD27cA8",
+    "TransmitManager": "0x4be89a6ef0972615de8cb72840Dc1c3CA6D87ed5",
     "integrations": {
       "5": {
         "FAST": {
@@ -546,14 +546,14 @@
     "OptimisticSwitchboard": "0x87fFe813e8ccD6d5d11279E9D21eA527E213561E"
   },
   "421613": {
-    "Counter": "0x94648B55221fF2C597C395b6eea609F968BD6353",
-    "CapacitorFactory": "0xed3C7088e834ccF9402b0C81B0cC1aFAe2928b0E",
-    "ExecutionManager": "0xF7E4fd166E2b43EC8a63D88ff0eB23172dBe528b",
-    "GasPriceOracle": "0x488E768ebD6fC16F3A0627205C4C751c20eB840b",
-    "Hasher": "0x0cf9390e625FC8A399fA1FA02aC62a3eb616c45d",
-    "SignatureVerifier": "0x1183cB27798021D90d508A065Ca83d53E61Bcbc6",
-    "Socket": "0xFDb0F2d15C052CE87DeFF39e092eD5A97C6AeC22",
-    "TransmitManager": "0x9baCB64c05F13776bA80a2B8969a2936e2A447f3",
+    "Counter": "0x7652E45Fc0B41D21AAdcE561e0BC002eEee61966",
+    "CapacitorFactory": "0x53B3cB6c6F4cF667fe2004Cf8bd7e82F67971404",
+    "ExecutionManager": "0x7EaEF5efB0472eC7E49341FcC471cEaAEbf2B062",
+    "GasPriceOracle": "0x4a298145BcadA63c14aE14EB258Ff43F3b1E8Cd7",
+    "Hasher": "0x61C8549374AE1884BaB3390E8C3154Cc5c7AD5fa",
+    "SignatureVerifier": "0x5229003d0D94b7c55395222c802DF3770b9DFbeC",
+    "Socket": "0x34C43CEf5fdCF61C9e90b4232b54d5cb9BD27cA8",
+    "TransmitManager": "0x4be89a6ef0972615de8cb72840Dc1c3CA6D87ed5",
     "integrations": {
       "5": {
         "NATIVE_BRIDGE": {
