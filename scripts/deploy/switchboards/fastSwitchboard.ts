@@ -62,8 +62,8 @@ export const setupFast = async (
     const attestGasLimitOnChain = await switchboard.attestGasLimit(
       remoteChainSlug
     );
-    const watcherRoleSet = await switchboard.hasRole(
-      getRoleHash("WATCHER_ROLE"),
+    const watcherRoleSet = await switchboard["hasRole(string,uint256,address)"](
+      "WATCHER_ROLE",
       remoteChainSlug,
       watcherAddress[localChain]
     );
