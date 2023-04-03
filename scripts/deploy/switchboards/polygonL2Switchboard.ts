@@ -6,6 +6,7 @@ const confirmGasLimit = 300000;
 
 export const polygonL2Switchboard = (
   network: string,
+  socketAddress: string,
   oracleAddress: string,
   signerAddress: string
 ) => {
@@ -18,6 +19,7 @@ export const polygonL2Switchboard = (
       executionOverhead,
       bridgeConsts.fxChild[network],
       signerAddress,
+      socketAddress,
       oracleAddress,
     ],
     path: "contracts/switchboard/native/PolygonL2Switchboard.sol",

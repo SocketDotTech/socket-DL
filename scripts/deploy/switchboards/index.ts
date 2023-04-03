@@ -15,26 +15,62 @@ export const getSwitchboardDeployData = (
   integrationType,
   localChain,
   remoteChain,
+  socketAddress,
   oracleAddress,
   signerAddress
 ) => {
   if (integrationType === IntegrationTypes.fast) {
-    return fastSwitchboard(localChain, oracleAddress, signerAddress);
+    return fastSwitchboard(
+      localChain,
+      socketAddress,
+      oracleAddress,
+      signerAddress
+    );
   } else if (integrationType === IntegrationTypes.optimistic) {
-    return optimisticSwitchboard(localChain, oracleAddress, signerAddress);
+    return optimisticSwitchboard(
+      localChain,
+      socketAddress,
+      oracleAddress,
+      signerAddress
+    );
   } else if (integrationType === IntegrationTypes.native) {
     const switchboardType =
       switchboards[localChain]?.[remoteChain]?.["switchboard"];
     if (switchboardType === NativeSwitchboard.ARBITRUM_L1) {
-      return arbitrumL1Switchboard(localChain, oracleAddress, signerAddress);
+      return arbitrumL1Switchboard(
+        localChain,
+        socketAddress,
+        oracleAddress,
+        signerAddress
+      );
     } else if (switchboardType === NativeSwitchboard.ARBITRUM_L2) {
-      return arbitrumL2Switchboard(localChain, oracleAddress, signerAddress);
+      return arbitrumL2Switchboard(
+        localChain,
+        socketAddress,
+        oracleAddress,
+        signerAddress
+      );
     } else if (switchboardType === NativeSwitchboard.OPTIMISM) {
-      return optimismSwitchboard(localChain, oracleAddress, signerAddress);
+      return optimismSwitchboard(
+        localChain,
+        socketAddress,
+        oracleAddress,
+        signerAddress
+      );
     } else if (switchboardType === NativeSwitchboard.POLYGON_L1) {
-      return polygonL1Switchboard(localChain, oracleAddress, signerAddress);
+      return polygonL1Switchboard(
+        localChain,
+        socketAddress,
+        oracleAddress,
+        signerAddress
+      );
     } else if (switchboardType === NativeSwitchboard.POLYGON_L2) {
-      return polygonL2Switchboard(localChain, oracleAddress, signerAddress);
+      return polygonL2Switchboard(
+        localChain,
+        socketAddress,
+        oracleAddress,
+        signerAddress
+      );
     } else {
       return { contractName: "", args: [], path: "" };
     }

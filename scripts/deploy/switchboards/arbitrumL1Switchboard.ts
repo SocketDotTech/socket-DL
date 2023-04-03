@@ -7,6 +7,7 @@ const arbitrumNativeFee = 300000;
 
 export const arbitrumL1Switchboard = (
   network: string,
+  socketAddress: string,
   oracleAddress: string,
   signerAddress: string
 ) => {
@@ -19,6 +20,7 @@ export const arbitrumL1Switchboard = (
       executionOverhead,
       bridgeConsts.inbox[network],
       signerAddress,
+      socketAddress,
       oracleAddress,
       bridgeConsts.bridge[network],
       bridgeConsts.outbox[network],

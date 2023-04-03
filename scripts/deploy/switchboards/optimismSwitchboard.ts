@@ -8,6 +8,7 @@ const receiveGasLimit = 300000;
 
 export const optimismSwitchboard = async (
   network: string,
+  socketAddress: string,
   oracleAddress: string,
   signerAddress: string
 ) => {
@@ -28,6 +29,7 @@ export const optimismSwitchboard = async (
       executionOverhead,
       constants.AddressZero,
       signerAddress,
+      socketAddress,
       oracleAddress,
       crossDomainMessengerAddress,
     ],

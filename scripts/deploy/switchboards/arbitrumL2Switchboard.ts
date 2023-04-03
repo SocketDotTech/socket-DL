@@ -7,6 +7,7 @@ const confirmGasLimit = 300000;
 
 export const arbitrumL2Switchboard = (
   network: string,
+  socketAddress: string,
   oracleAddress: string,
   signerAddress: string
 ) => {
@@ -18,6 +19,7 @@ export const arbitrumL2Switchboard = (
       initiateGasLimit,
       executionOverhead,
       signerAddress,
+      socketAddress,
       oracleAddress,
     ],
     path: "contracts/switchboard/native/ArbitrumL2Switchboard.sol",

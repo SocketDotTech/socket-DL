@@ -1,9 +1,8 @@
-import { constants, Contract } from "ethers";
+import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   createObj,
   deployContractWithArgs,
-  getCapacitorAddress,
   getChainRoleHash,
   getInstance,
   getRoleHash,
@@ -15,7 +14,6 @@ import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { ChainSocketAddresses, IntegrationTypes } from "../../src";
 import { getSwitchboardDeployData } from "./switchboards";
 import { setupFast } from "./switchboards/fastSwitchboard";
-import { setupOptimistic } from "./switchboards/optimisticSwitchboard";
 
 export default async function deployAndRegisterSwitchboard(
   integrationType: IntegrationTypes,
@@ -38,6 +36,7 @@ export default async function deployAndRegisterSwitchboard(
       integrationType,
       network,
       remoteChain,
+      sourceConfig["Socket"],
       sourceConfig["GasPriceOracle"],
       signer.address
     );
