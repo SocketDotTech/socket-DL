@@ -54,7 +54,7 @@ contract FastSwitchboard is SwitchboardBase {
         isAttested[watcher][packetId_] = true;
         attestations[packetId_]++;
 
-        if (attestations[packetId_] == totalWatchers[srcChainSlug_])
+        if (attestations[packetId_] >= totalWatchers[srcChainSlug_])
             isPacketValid[packetId_] = true;
 
         emit PacketAttested(packetId_, watcher);
