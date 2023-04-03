@@ -1,7 +1,8 @@
 import { RelayerConfig } from "./types";
 import { config as dotenvConfig } from "dotenv";
 import { resolve } from "path";
-const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "../../../.env";
+const dotenvConfigPath: string =
+  process.env.DOTENV_CONFIG_PATH || "../../../.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
 export const loadRelayerConfigs = (): Map<number, RelayerConfig> => {
@@ -37,7 +38,6 @@ export const loadRelayerConfigs = (): Map<number, RelayerConfig> => {
       ozRelayerKey: ozRelayerKeys[index],
       ozRelayerSecret: ozRelayerSecrets[index],
     });
-
   });
 
   return relayerConfigs;

@@ -5,7 +5,11 @@ import { loadRelayerConfigs } from "./deploy/utils/relayer.config";
 export const main = async () => {
   const relayerConfigs = loadRelayerConfigs();
   console.log(`relayerConfigs: ${relayerConfigs.size}`);
-  console.log(`relayerConfig value: ${JSON.stringify(relayerConfigs.get(chainSlugs["arbitrum"]))}`);
+  console.log(
+    `relayerConfig value: ${JSON.stringify(
+      relayerConfigs.get(chainSlugs["arbitrum"])
+    )}`
+  );
 };
 
 main()

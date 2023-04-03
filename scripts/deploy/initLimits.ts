@@ -18,7 +18,7 @@ export const main = async () => {
 
     for (let chainSlugCode in config) {
       console.log(`setting initLimits for chain: ${chainSlugCode}`);
-      const chainSlugCd : typeof chainSlugs = chainSlugs;
+      const chainSlugCd: typeof chainSlugs = chainSlugs;
       const chainSlugStringVal = chainSlugCode;
       const chainId = chainSlugs[chainSlugStringVal];
       const deployedAddressConfig: ChainSocketAddresses = await getAddresses(
