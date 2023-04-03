@@ -84,7 +84,7 @@ export const verify = async (
   }
 };
 
-export const sleep = (delay) =>
+export const sleep = (delay: number) =>
   new Promise((resolve) => setTimeout(resolve, delay * 1000));
 
 export const getInstance = async (
