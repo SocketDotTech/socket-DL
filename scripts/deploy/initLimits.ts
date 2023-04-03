@@ -4,25 +4,28 @@ import { DefenderRelaySigner } from "defender-relay-client/lib/ethers";
 import { config } from "./config";
 import { getAddresses } from "./utils";
 import { chainSlugs } from "../constants";
-import { ChainId, loadRelayerConfigs } from "./utils/relayer.config";
+import { loadRelayerConfigs } from "./utils/relayer.config";
 import { RelayerConfig, relayTxSpeed } from "./utils/types";
 import { ChainSocketAddresses } from "../../src/types";
 import * as FastSwitchboardABI from "../../artifacts/contracts/switchboard/default-switchboards/FastSwitchboard.sol/FastSwitchboard.json";
 import * as OptimisticSwitchboardABI from "../../artifacts/contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol/OptimisticSwitchboard.json";
 import * as TransmitManagerABI from "../../artifacts/contracts/TransmitManager.sol/TransmitManager.json";
 
+// npx ts-node scripts/deploy/initLimits.ts
 export const main = async () => {
   try {
-    const relayerConfigs: Map<ChainId, RelayerConfig> = loadRelayerConfigs();
+    const relayerConfigs: Map<number, RelayerConfig> = loadRelayerConfigs();
 
-    for (let chain in config) {
-      console.log(`setting initLimits for chain: ${chain}`);
-      const chainId = chainSlugs[chain];
+    for (let chainSlugCode in config) {
+      console.log(`setting initLimits for chain: ${chainSlugCode}`);
+      const chainSlugCd : typeof chainSlugs = chainSlugs;
+      const chainSlugStringVal = chainSlugCode;
+      const chainId = chainSlugs[chainSlugStringVal];
       const deployedAddressConfig: ChainSocketAddresses = await getAddresses(
         chainId
       );
       console.log(
-        `for chain: ${chain} , looked-up deployedAddressConfigs: ${JSON.stringify(
+        `for chainSlugCode: ${chainSlugCode} , looked-up deployedAddressConfigs: ${JSON.stringify(
           deployedAddressConfig
         )}`
       );

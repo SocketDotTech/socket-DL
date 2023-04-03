@@ -1,21 +1,12 @@
 import { RelayerConfig } from "./types";
+import { config as dotenvConfig } from "dotenv";
+import { resolve } from "path";
+const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "../../../.env";
+dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
-export declare enum ChainId {
-  GOERLI = 5,
-  MUMBAI = 80001,
-  ARBITRUM_TESTNET = 421613,
-  OPTIMISM_TESTNET = 420,
-  BSC_TESTNET = 97,
-  MAINNET = 1,
-  POLYGON = 137,
-  ARBITRUM = 42161,
-  OPTIMISM = 10,
-  BSC = 56,
-}
-
-export const loadRelayerConfigs = (): Map<ChainId, RelayerConfig> => {
-  const relayerConfigs: Map<ChainId, RelayerConfig> = new Map<
-    ChainId,
+export const loadRelayerConfigs = (): Map<number, RelayerConfig> => {
+  const relayerConfigs: Map<number, RelayerConfig> = new Map<
+    number,
     RelayerConfig
   >();
 
@@ -46,6 +37,7 @@ export const loadRelayerConfigs = (): Map<ChainId, RelayerConfig> => {
       ozRelayerKey: ozRelayerKeys[index],
       ozRelayerSecret: ozRelayerSecrets[index],
     });
+
   });
 
   return relayerConfigs;
