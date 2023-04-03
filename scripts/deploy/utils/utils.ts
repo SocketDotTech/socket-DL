@@ -5,7 +5,11 @@ import { ContractFactory, Contract } from "ethers";
 import { Address } from "hardhat-deploy/dist/types";
 import path from "path";
 import fs from "fs";
-import { ChainSocketAddresses, DeploymentAddresses } from "../../../src";
+import {
+  ChainSlug,
+  ChainSocketAddresses,
+  DeploymentAddresses,
+} from "../../../src";
 
 export const deployedAddressPath = path.join(
   __dirname,
@@ -106,7 +110,7 @@ export const integrationType = (integrationName: string) =>
 
 export const storeAddresses = async (
   addresses: ChainSocketAddresses,
-  chainSlug: number
+  chainSlug: ChainSlug
 ) => {
   if (!fs.existsSync(deployedAddressPath)) {
     await fs.promises.mkdir(deployedAddressPath);
@@ -129,7 +133,7 @@ export const storeAddresses = async (
   );
 };
 
-export const getAddresses = async (chainSlug: number) => {
+export const getAddresses = async (chainSlug: ChainSlug) => {
   if (!fs.existsSync(deployedAddressPath)) {
     await fs.promises.mkdir(deployedAddressPath);
   }
@@ -147,11 +151,16 @@ export const getAddresses = async (chainSlug: number) => {
   return deploymentAddresses[chainSlug];
 };
 
-export const createObj = function (obj, keys, value) {
+export const createObj = function (
+  obj: { [key: string]: any },
+  keys: string[],
+  value: any
+) {
   if (keys.length === 1) {
     obj[keys[0]] = value;
   } else {
     const key = keys.shift();
+    if (key === undefined) return obj;
     obj[key] = createObj(
       typeof obj[key] === "undefined" ? {} : obj[key],
       keys,
