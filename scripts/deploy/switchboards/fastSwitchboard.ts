@@ -76,51 +76,6 @@ export const setupFast = async (
       console.log(`grantWatcherRoleTx: ${grantWatcherRoleTx.hash}`);
       await grantWatcherRoleTx.wait();
     }
-
-    // fees setup
-    let nonce = await switchboard.nextNonce(signer.address);
-
-    if (parseInt(executionOverheadOnChain) !== executionOverhead[remoteChain]) {
-      const digest = createDigest(
-        "EXECUTION_OVERHEAD_UPDATE",
-        nonce,
-        chainSlugs[localChain],
-        remoteChainSlug,
-        executionOverhead[remoteChain]
-      );
-      const signature = createSignature(digest, signer);
-      const setExecutionOverheadTx = await switchboard
-        .connect(signer)
-        .setExecutionOverhead(
-          nonce++,
-          remoteChainSlug,
-          executionOverhead[remoteChain],
-          signature
-        );
-      console.log(`setExecutionOverheadTx: ${setExecutionOverheadTx.hash}`);
-      await setExecutionOverheadTx.wait();
-    }
-
-    if (parseInt(attestGasLimitOnChain) !== attestGasLimit[remoteChain]) {
-      const digest = createDigest(
-        "ATTEST_GAS_LIMIT_UPDATE",
-        chainSlugs[localChain],
-        remoteChainSlug,
-        nonce,
-        attestGasLimit[remoteChain]
-      );
-      const signature = createSignature(digest, signer);
-      const setAttestGasLimitTx = await switchboard
-        .connect(signer)
-        .setAttestGasLimit(
-          nonce++,
-          remoteChainSlug,
-          attestGasLimit[remoteChain],
-          signature
-        );
-      console.log(`setAttestGasLimitTx: ${setAttestGasLimitTx.hash}`);
-      await setAttestGasLimitTx.wait();
-    }
   } catch (error) {
     console.log("Error in setting up fast switchboard", error);
   }

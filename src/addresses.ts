@@ -16,7 +16,7 @@ function getSwitchboardAddress(
 
   if (!switchboardAddress) {
     throw new Error(
-      `Switchboard adddess for ${srcChainSlug}-${dstChainSlug}-${integration} not found`
+      `Switchboard address for ${srcChainSlug}-${dstChainSlug}-${integration} not found`
     );
   }
 

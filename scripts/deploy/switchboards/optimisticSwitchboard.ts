@@ -29,26 +29,3 @@ export const optimisticSwitchboard = (
     path: "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
   };
 };
-
-export const setupOptimistic = async (
-  switchboard: Contract,
-  remoteChainSlug: number,
-  remoteChain: string,
-  signer: SignerWithAddress
-) => {
-  try {
-    const executionOverheadOnChain = await switchboard.executionOverhead(
-      remoteChainSlug
-    );
-
-    if (parseInt(executionOverheadOnChain) !== executionOverhead[remoteChain]) {
-      const setExecutionOverheadTx = await switchboard
-        .connect(signer)
-        .setExecutionOverhead(remoteChainSlug, executionOverhead[remoteChain]);
-      console.log(`setExecutionOverheadTx: ${setExecutionOverheadTx.hash}`);
-      await setExecutionOverheadTx.wait();
-    }
-  } catch (error) {
-    console.log("Error in setting up optimistic switchboard", error);
-  }
-};

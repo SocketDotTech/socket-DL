@@ -154,7 +154,7 @@ const checkSwitchboard = async (
     const executionOverheadOnChain = await switchboard.executionOverhead(
       chainSlugs[remoteChain]
     );
-    const watcherRoleSet = await switchboard.hasRole(
+    const watcherRoleSet = await switchboard["hasRole(bytes32,address)"](
       utils.hexZeroPad(utils.hexlify(chainSlugs[remoteChain]), 32),
       watcherAddress[chain]
     );

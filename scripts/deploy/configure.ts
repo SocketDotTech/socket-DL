@@ -255,18 +255,6 @@ const configTransmitter = async (
     );
   console.log(`Assigned transmitter batch roles to ${transmitter}: ${tx.hash}`);
   await tx.wait();
-
-  const gasLimit = await transmitManager.proposeGasLimit(remoteChainSlug);
-  if (parseInt(gasLimit) !== proposeGasLimit[remoteChain]) {
-    const tx = await transmitManager
-      .connect(signer)
-      .setProposeGasLimit(remoteChainSlug, proposeGasLimit[remoteChain]);
-
-    console.log(
-      `Setting propose gas limit ${proposeGasLimit[remoteChain]} for ${remoteChainSlug} chain id! Transaction Hash: ${tx.hash}`
-    );
-    await tx.wait();
-  }
 };
 
 main()
