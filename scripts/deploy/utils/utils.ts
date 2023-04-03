@@ -133,6 +133,24 @@ export const storeAddresses = async (
   );
 };
 
+export const getChainSlugsFromDeployedAddresses = async () => {
+  if (!fs.existsSync(deployedAddressPath)) {
+    await fs.promises.mkdir(deployedAddressPath);
+  }
+
+  const outputExists = fs.existsSync(deployedAddressPath);
+  let deploymentAddresses: DeploymentAddresses = {};
+  if (outputExists) {
+    const deploymentAddressesString = fs.readFileSync(
+      deployedAddressPath,
+      "utf-8"
+    );
+    deploymentAddresses = JSON.parse(deploymentAddressesString);
+
+    return Object.keys(deploymentAddresses);
+  }
+};
+
 export const getAddresses = async (chainSlug: ChainSlug) => {
   if (!fs.existsSync(deployedAddressPath)) {
     await fs.promises.mkdir(deployedAddressPath);

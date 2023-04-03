@@ -8,9 +8,9 @@ export const getIntegrationsForAChainSlug = async (
 ) => {
   const chainId = chainSlugs[chainSlug];
 
-  const deployedAddressConfig: ChainSocketAddresses = await getAddresses(
+  const deployedAddressConfig: ChainSocketAddresses = (await getAddresses(
     chainId
-  );
+  )) as ChainSocketAddresses;
 
   console.log(
     `for chainSlugCode: ${chainSlug} , looked-up deployedAddressConfigs: ${JSON.stringify(
