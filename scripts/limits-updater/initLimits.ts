@@ -1,15 +1,11 @@
 import { Contract, Signer } from "ethers";
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
-import { DefenderRelaySigner } from "defender-relay-client/lib/ethers";
-import { config } from "./config";
 import {
   attestGasLimit,
   chainSlugs,
   executionOverhead,
   proposeGasLimit,
 } from "../constants";
-import { loadRelayerConfigs } from "./utils/relayer.config";
-import { RelayerConfig, relayTxSpeed } from "./utils/types";
+import { getSigner } from "../deploy/utils/relayer.config";
 import { ChainSocketAddresses } from "../../src/types";
 import * as FastSwitchboardABI from "../../artifacts/contracts/switchboard/default-switchboards/FastSwitchboard.sol/FastSwitchboard.json";
 import * as OptimisticSwitchboardABI from "../../artifacts/contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol/OptimisticSwitchboard.json";
@@ -51,25 +47,7 @@ export const setLimitsForAChainSlug = async (
       )}`
     );
 
-    const relayerConfigs: Map<number, RelayerConfig> = loadRelayerConfigs();
-
-    //get RelayerConfig for the chainId
-    const relayerConfig: RelayerConfig = relayerConfigs.get(
-      chainId
-    ) as RelayerConfig;
-
-    const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(
-      relayerConfig.rpc
-    );
-
-    const signer: Signer = new DefenderRelaySigner(
-      {
-        apiKey: relayerConfig.ozRelayerKey,
-        apiSecret: relayerConfig.ozRelayerSecret,
-      },
-      provider,
-      { speed: relayTxSpeed }
-    );
+    const signer: Signer = getSigner(chainId);
 
     const integrations = deployedAddressConfig.integrations;
 
@@ -126,8 +104,6 @@ export const setLimitsForAChainSlug = async (
 // npx ts-node scripts/deploy/initLimits.ts
 export const setLimits = async () => {
   try {
-    const relayerConfigs: Map<number, RelayerConfig> = loadRelayerConfigs();
-
     // for (let chainSlugCode in chainSlugs.keys) {
     //   setLimitsForAChainSlug(chainSlugCode);
     // }

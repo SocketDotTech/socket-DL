@@ -1,6 +1,9 @@
-import { RelayerConfig } from "./types";
+import { RelayerConfig, relayTxSpeed } from "./types";
+import { Contract, Signer } from "ethers";
 import { config as dotenvConfig } from "dotenv";
 import { resolve } from "path";
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
+import { DefenderRelaySigner } from "defender-relay-client/lib/ethers";
 const dotenvConfigPath: string =
   process.env.DOTENV_CONFIG_PATH || "../../../.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -54,4 +57,28 @@ export const loadRelayerConfigs = (): Map<number, RelayerConfig> => {
   });
 
   return relayerConfigs;
+};
+
+const relayerConfigs: Map<number, RelayerConfig> = loadRelayerConfigs();
+
+export const getSigner = (chainSlug: number) => {
+  //get RelayerConfig for the chainId
+  const relayerConfig: RelayerConfig = relayerConfigs.get(
+    chainSlug
+  ) as RelayerConfig;
+
+  const provider: StaticJsonRpcProvider = new StaticJsonRpcProvider(
+    relayerConfig.rpc
+  );
+
+  const signer: Signer = new DefenderRelaySigner(
+    {
+      apiKey: relayerConfig.ozRelayerKey,
+      apiSecret: relayerConfig.ozRelayerSecret,
+    },
+    provider,
+    { speed: relayTxSpeed }
+  );
+
+  return signer;
 };
