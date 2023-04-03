@@ -17,7 +17,6 @@ export const arbitrumL1Switchboard = (
       arbitrumNativeFee,
       initiateGasLimit,
       executionOverhead,
-      constants.AddressZero,
       bridgeConsts.inbox[network],
       signerAddress,
       oracleAddress,
