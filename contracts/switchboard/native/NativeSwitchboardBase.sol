@@ -14,15 +14,18 @@ import {GAS_LIMIT_UPDATER_ROLE, GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRI
 
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
-    ICapacitor public capacitor__;
 
-    bool public isInitialised;
     bool public tripGlobalFuse;
+
+    ICapacitor public capacitor__;
+    bool public isInitialised;
     uint256 public maxPacketSize;
 
     uint256 public executionOverhead;
     uint256 public initiateGasLimit;
     address public remoteNativeSwitchboard;
+    address public socket;
+
     uint256 public immutable chainSlug;
 
     // stores the roots received from native bridge
@@ -45,17 +48,20 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     error InvalidSender();
     error NoRootFound();
     error InvalidNonce();
+    error OnlySocket();
 
     modifier onlyRemoteSwitchboard() virtual {
         _;
     }
 
     constructor(
+        address socket_,
         uint256 chainSlug_,
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         IGasPriceOracle gasPriceOracle_
     ) {
+        socket = socket_;
         chainSlug = chainSlug_;
         initiateGasLimit = initiateGasLimit_;
         executionOverhead = executionOverhead_;
@@ -147,9 +153,11 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param maxPacketSize_ max messages allowed in one packet
      */
     function registerCapacitor(
+        uint256,
         address capacitor_,
         uint256 maxPacketSize_
     ) external override {
+        if (msg.sender != socket) revert OnlySocket();
         if (isInitialised) revert AlreadyInitialised();
 
         isInitialised = true;

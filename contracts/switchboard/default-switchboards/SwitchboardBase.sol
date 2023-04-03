@@ -14,11 +14,13 @@ import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE} fro
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
 
-    bool public isInitialised;
     bool public tripGlobalFuse;
-    uint256 public maxPacketSize;
+    address public socket;
     uint256 public immutable chainSlug;
     uint256 public immutable timeoutInSeconds;
+
+    mapping(uint256 => bool) public isInitialised;
+    mapping(uint256 => uint256) public maxPacketSize;
 
     mapping(uint256 => uint256) public executionOverhead;
 
@@ -32,18 +34,24 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     event SwitchboardTripped(bool tripGlobalFuse);
     event ExecutionOverheadSet(uint256 dstChainSlug, uint256 executionOverhead);
     event GasPriceOracleSet(address gasPriceOracle);
-    event CapacitorRegistered(address capacitor, uint256 maxPacketSize);
+    event CapacitorRegistered(
+        uint256 siblingChainSlug,
+        address capacitor,
+        uint256 maxPacketSize
+    );
 
     error AlreadyInitialised();
     error InvalidNonce();
+    error OnlySocket();
 
     constructor(
         address gasPriceOracle_,
+        address socket_,
         uint256 chainSlug_,
         uint256 timeoutInSeconds_
     ) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
-
+        socket = socket_;
         chainSlug = chainSlug_;
         timeoutInSeconds = timeoutInSeconds_;
     }
@@ -65,7 +73,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
         switchboardFee =
             _getMinSwitchboardFees(dstChainSlug_, dstRelativeGasPrice) /
-            maxPacketSize;
+            maxPacketSize[dstChainSlug_];
         verificationFee =
             executionOverhead[dstChainSlug_] *
             dstRelativeGasPrice;
@@ -82,14 +90,16 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param maxPacketSize_ max messages allowed in one packet
      */
     function registerCapacitor(
+        uint256 siblingChainSlug_,
         address capacitor_,
         uint256 maxPacketSize_
     ) external override {
-        if (isInitialised) revert AlreadyInitialised();
+        if (msg.sender != socket) revert OnlySocket();
+        if (isInitialised[siblingChainSlug_]) revert AlreadyInitialised();
 
-        isInitialised = true;
-        maxPacketSize = maxPacketSize_;
-        emit CapacitorRegistered(capacitor_, maxPacketSize_);
+        isInitialised[siblingChainSlug_] = true;
+        maxPacketSize[siblingChainSlug_] = maxPacketSize_;
+        emit CapacitorRegistered(siblingChainSlug_, capacitor_, maxPacketSize_);
     }
 
     /**

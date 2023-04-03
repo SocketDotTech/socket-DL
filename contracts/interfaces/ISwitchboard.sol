@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 interface ISwitchboard {
     function registerCapacitor(
+        uint256 siblingChainSlug_,
         address capacitor_,
         uint256 maxPacketSize_
     ) external;

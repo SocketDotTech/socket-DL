@@ -29,11 +29,13 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         address owner_,
+        address socket_,
         IGasPriceOracle gasPriceOracle_,
         address crossDomainMessenger_
     )
         AccessControlExtended(owner_)
         NativeSwitchboardBase(
+            socket_,
             chainSlug_,
             initiateGasLimit_,
             executionOverhead_,

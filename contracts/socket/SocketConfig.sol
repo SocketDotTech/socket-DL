@@ -74,6 +74,7 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
         decapacitors__[switchBoardAddress_][siblingChainSlug_] = decapacitor__;
 
         ISwitchboard(switchBoardAddress_).registerCapacitor(
+            siblingChainSlug_,
             address(capacitor__),
             maxPacketLength_
         );

@@ -29,12 +29,13 @@ contract FastSwitchboard is SwitchboardBase {
 
     constructor(
         address owner_,
+        address socket_,
         address gasPriceOracle_,
         uint256 chainSlug_,
         uint256 timeoutInSeconds_
     )
         AccessControlExtended(owner_)
-        SwitchboardBase(gasPriceOracle_, chainSlug_, timeoutInSeconds_)
+        SwitchboardBase(gasPriceOracle_, socket_, chainSlug_, timeoutInSeconds_)
     {}
 
     function attest(

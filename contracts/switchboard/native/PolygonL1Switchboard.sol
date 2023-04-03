@@ -20,10 +20,12 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         address checkpointManager_,
         address fxRoot_,
         address owner_,
+        address socket_,
         IGasPriceOracle gasPriceOracle_
     )
         AccessControlExtended(owner_)
         NativeSwitchboardBase(
+            socket_,
             chainSlug_,
             initiateGasLimit_,
             executionOverhead_,
