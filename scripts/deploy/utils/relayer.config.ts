@@ -10,19 +10,24 @@ export declare enum ChainId {
   POLYGON = 137,
   ARBITRUM = 42161,
   OPTIMISM = 10,
-  BSC = 56
+  BSC = 56,
 }
 
-export const getRelayerConfig = (
-  chains: ChainId[]
-): Map<ChainId, RelayerConfig> => {
-  const relayerConfigs: Map<ChainId, RelayerConfig> = new Map<ChainId, RelayerConfig>();
+export const loadRelayerConfigs = (): Map<ChainId, RelayerConfig> => {
+  const relayerConfigs: Map<ChainId, RelayerConfig> = new Map<
+    ChainId,
+    RelayerConfig
+  >();
 
   const rpcs = (process.env.RPC_LIST || "").split(",") as string[];
   const ozRelayerKeys = (process.env.OZ_RELAYER_KEY_LIST || "").split(
     ","
   ) as string[];
   const ozRelayerSecrets = (process.env.OZ_RELAYER_SECRET_LIST || "").split(
+    ","
+  ) as string[];
+
+  const chains: string[] = (process.env.CHAIN_LIST || "").split(
     ","
   ) as string[];
 
@@ -35,13 +40,13 @@ export const getRelayerConfig = (
   }
 
   chains.map(async (chain, index) => {
-    relayerConfigs.set(chain, {
-      chainId: chain,
+    relayerConfigs.set(parseInt(chain), {
+      chainId: parseInt(chain),
       rpc: rpcs[index],
       ozRelayerKey: ozRelayerKeys[index],
       ozRelayerSecret: ozRelayerSecrets[index],
     });
-  })
+  });
 
   return relayerConfigs;
 };
