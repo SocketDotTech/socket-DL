@@ -167,6 +167,7 @@ contract Setup is Test {
     ) internal returns (SocketConfigContext memory scc_) {
         OptimisticSwitchboard optimisticSwitchboard = new OptimisticSwitchboard(
             _socketOwner,
+            address(cc_.socket__),
             address(cc_.gasPriceOracle__),
             cc_.chainSlug,
             _timeoutInSeconds
@@ -223,6 +224,7 @@ contract Setup is Test {
     ) internal returns (SocketConfigContext memory scc_) {
         FastSwitchboard fastSwitchboard = new FastSwitchboard(
             _socketOwner,
+            address(cc_.socket__),
             address(cc_.gasPriceOracle__),
             cc_.chainSlug,
             _timeoutInSeconds

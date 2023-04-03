@@ -174,6 +174,7 @@ contract PolygonL1SwitchboardTest is Setup {
             checkpointManager_,
             fxRoot_,
             _socketOwner,
+            address(cc_.socket__),
             cc_.gasPriceOracle__
         );
 

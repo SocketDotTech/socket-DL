@@ -183,6 +183,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
             initiateGasLimit_,
             executionOverhead_,
             _socketOwner,
+            address(cc_.socket__),
             cc_.gasPriceOracle__
         );
 

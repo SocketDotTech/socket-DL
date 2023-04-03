@@ -32,6 +32,7 @@ contract FastSwitchboardTest is Setup {
         fastSwitchboard = new FastSwitchboard(
             _socketOwner,
             address(uint160(c++)),
+            address(uint160(c++)),
             _a.chainSlug,
             1
         );

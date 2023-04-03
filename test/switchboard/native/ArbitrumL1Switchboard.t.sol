@@ -189,6 +189,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
             executionOverhead_,
             inbox_,
             _socketOwner,
+            address(cc_.socket__),
             cc_.gasPriceOracle__,
             bridge_,
             outbox_

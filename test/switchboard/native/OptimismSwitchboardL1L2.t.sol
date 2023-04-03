@@ -176,6 +176,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
             initiateGasLimit_,
             executionOverhead_,
             _socketOwner,
+            address(cc_.socket__),
             cc_.gasPriceOracle__,
             crossDomainManagerAddress_
         );
