@@ -3,11 +3,11 @@ import {
   ChainSocketAddresses,
   Configs,
   Integrations,
-} from "../../src";
+} from "../../../src";
 import {
   getAddresses,
   getChainSlugsFromDeployedAddresses,
-} from "../deploy/utils";
+} from "../../deploy/utils";
 
 // npx ts-node scripts/limits-updater/query-all-integrations.ts
 export const main = async () => {
@@ -22,6 +22,8 @@ export const main = async () => {
     const addresses = (await getAddresses(chainSlug)) as ChainSocketAddresses;
 
     const integrations: Integrations = addresses.integrations as Integrations;
+
+    const transmitManager: string = addresses.TransmitManager as string;
 
     if (integrations) {
       console.log(`For sourceChainId: ${chainSlug} \n`);

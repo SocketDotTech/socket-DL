@@ -1,6 +1,6 @@
-import { chainSlugs } from "../constants";
-import { ChainSocketAddresses } from "../../src/types";
-import { getAddresses } from "../deploy/utils";
+import { chainSlugs } from "../../constants";
+import { ChainSocketAddresses } from "../../../src/types";
+import { getAddresses } from "../../deploy/utils";
 
 // npx ts-node scripts/deploy/get-integrations.ts
 export const getIntegrationsForAChainSlug = async (

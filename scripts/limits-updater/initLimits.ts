@@ -5,13 +5,15 @@ import {
   executionOverhead,
   proposeGasLimit,
 } from "../constants";
-import { getSigner } from "../deploy/utils/relayer.config";
+import { getSigner } from "./relayer.config";
 import { ChainSocketAddresses } from "../../src/types";
 import * as FastSwitchboardABI from "../../artifacts/contracts/switchboard/default-switchboards/FastSwitchboard.sol/FastSwitchboard.json";
 import * as OptimisticSwitchboardABI from "../../artifacts/contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol/OptimisticSwitchboard.json";
 import * as TransmitManagerABI from "../../artifacts/contracts/TransmitManager.sol/TransmitManager.json";
-import { deployedAddressPath } from "../deploy/utils";
-import fs from "fs";
+import {
+  getAddresses,
+  getChainSlugsFromDeployedAddresses,
+} from "../deploy/utils";
 
 export const setLimitsForAChainSlug = async (
   chainSlug: keyof typeof chainSlugs
@@ -23,23 +25,19 @@ export const setLimitsForAChainSlug = async (
     );
 
     //const deployedAddressConfig: ChainSocketAddresses = await getAddresses(chainId);
-    const localChain = "arbitrum-goerli";
+    // const localChain = "arbitrum-goerli";
 
-    if (!fs.existsSync(deployedAddressPath)) {
-      throw new Error("addresses.json not found");
-    }
-    const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
+    // if (!fs.existsSync(deployedAddressPath)) {
+    //   throw new Error("addresses.json not found");
+    // }
+    // const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
 
-    const deployedAddressConfig: ChainSocketAddresses =
-      addresses[chainSlugs[localChain]];
+    // const deployedAddressConfig: ChainSocketAddresses =
+    //   addresses[chainSlugs[localChain]];
 
-    //const deployedAddressConfig: ChainSocketAddresses = await getAddresses[chainSlugs[localChain]];
-
-    // const addresses = deployedAddresses;
-
-    // console.log(`deployedAddresses are: ${Object.keys(addresses)}`);
-
-    // const deployedAddressConfig: ChainSocketAddresses = addresses[chainId];
+    const deployedAddressConfig: ChainSocketAddresses = await getAddresses[
+      chainId
+    ];
 
     console.log(
       `for chainSlugCode: ${chainSlug} , looked-up deployedAddressConfigs: ${JSON.stringify(
@@ -104,11 +102,12 @@ export const setLimitsForAChainSlug = async (
 // npx ts-node scripts/deploy/initLimits.ts
 export const setLimits = async () => {
   try {
-    // for (let chainSlugCode in chainSlugs.keys) {
-    //   setLimitsForAChainSlug(chainSlugCode);
-    // }
+    const chainSlugsDecoded: string[] =
+      (await getChainSlugsFromDeployedAddresses()) as string[];
 
-    setLimitsForAChainSlug("arbitrum-goerli");
+    for (let chainSlugCode in chainSlugsDecoded) {
+      setLimitsForAChainSlug(chainSlugCode as keyof typeof chainSlugs);
+    }
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;

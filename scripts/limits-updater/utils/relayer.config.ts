@@ -1,4 +1,4 @@
-import { RelayerConfig, relayTxSpeed } from "./types";
+import { RelayerConfig, relayTxSpeed } from "../../deploy/utils/types";
 import { Contract, Signer } from "ethers";
 import { config as dotenvConfig } from "dotenv";
 import { resolve } from "path";
@@ -60,6 +60,15 @@ export const loadRelayerConfigs = (): Map<number, RelayerConfig> => {
 };
 
 const relayerConfigs: Map<number, RelayerConfig> = loadRelayerConfigs();
+
+export const getRpcProvider = (chainSlug: number) => {
+  //get RelayerConfig for the chainId
+  const relayerConfig: RelayerConfig = relayerConfigs.get(
+    chainSlug
+  ) as RelayerConfig;
+
+  return new StaticJsonRpcProvider(relayerConfig.rpc);
+};
 
 export const getSigner = (chainSlug: number) => {
   //get RelayerConfig for the chainId
