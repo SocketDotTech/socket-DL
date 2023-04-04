@@ -83,49 +83,49 @@ export const sealGasLimit: {
 export const proposeGasLimit: {
   [key: string]: number;
 } = {
-  "bsc-testnet": 300000,
-  "polygon-mainnet": 300000,
-  bsc: 300000,
-  "polygon-mumbai": 300000,
-  "arbitrum-goerli": 300000,
-  "optimism-goerli": 300000,
-  goerli: 300000,
-  hardhat: 300000,
-  arbitrum: 300000,
-  optimism: 300000,
-  mainnet: 300000,
+  "bsc-testnet": 80000,
+  "polygon-mainnet": 80000,
+  bsc: 80000,
+  "polygon-mumbai": 80000,
+  "arbitrum-goerli": 1000000,
+  "optimism-goerli": 80000,
+  goerli: 80000,
+  hardhat: 80000,
+  arbitrum: 1000000,
+  optimism: 80000,
+  mainnet: 80000,
 };
 
 export const attestGasLimit: {
   [key: string]: number;
 } = {
-  "bsc-testnet": 300000,
-  "polygon-mainnet": 300000,
-  bsc: 300000,
-  "polygon-mumbai": 300000,
-  "arbitrum-goerli": 300000,
-  "optimism-goerli": 300000,
-  goerli: 300000,
-  hardhat: 300000,
-  arbitrum: 300000,
-  optimism: 300000,
-  mainnet: 300000,
+  "bsc-testnet": 80000,
+  "polygon-mainnet": 80000,
+  bsc: 80000,
+  "polygon-mumbai": 80000,
+  "arbitrum-goerli": 1000000,
+  "optimism-goerli": 80000,
+  goerli: 80000,
+  hardhat: 80000,
+  arbitrum: 1000000,
+  optimism: 80000,
+  mainnet: 80000,
 };
 
 export const executionOverhead: {
   [key: string]: number;
 } = {
-  "bsc-testnet": 300000,
-  "polygon-mainnet": 300000,
-  bsc: 300000,
-  "polygon-mumbai": 300000,
-  "arbitrum-goerli": 300000,
-  "optimism-goerli": 300000,
-  goerli: 300000,
-  hardhat: 300000,
-  arbitrum: 300000,
-  optimism: 300000,
-  mainnet: 300000,
+  "bsc-testnet": 40000,
+  "polygon-mainnet": 40000,
+  bsc: 40000,
+  "polygon-mumbai": 40000,
+  "arbitrum-goerli": 500000,
+  "optimism-goerli": 40000,
+  goerli: 40000,
+  hardhat: 40000,
+  arbitrum: 500000,
+  optimism: 40000,
+  mainnet: 40000,
 };
 
 export const switchboards = {
