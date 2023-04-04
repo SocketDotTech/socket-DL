@@ -27,7 +27,7 @@ export const setExecutionOverhead = async (
 
     const digest = keccak256(
       defaultAbiCoder.encode(
-        ["string", "uint256", "uint32", "uint32", "uint256"],
+        ["string", "uint256", "uint256", "uint256", "uint256"],
         [
           "EXECUTION_OVERHEAD_UPDATE",
           nonce,

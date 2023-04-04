@@ -28,7 +28,7 @@ export const setProposeGasLimit = async (
 
     const digest = keccak256(
       defaultAbiCoder.encode(
-        ["string", "uint32", "uint32", "uint256", "uint256"],
+        ["string", "uint256", "uint256", "uint256", "uint256"],
         [
           "PROPOSE_GAS_LIMIT_UPDATE",
           srcChainId,

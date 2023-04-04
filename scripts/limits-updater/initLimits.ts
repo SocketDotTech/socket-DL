@@ -52,12 +52,18 @@ export const setLimitsForAChainSlug = async (
         const proposeGasLimitValue =
           proposeGasLimit[networkToChainSlug[dstChainId]];
 
-        await setProposeGasLimit(
+        const isProposeUpdateSuccessful = await setProposeGasLimit(
           chainId,
           dstChainId,
           transmitManagerAddress,
           proposeGasLimitValue
         );
+
+        if(isProposeUpdateSuccessful) {
+          console.log(`TransmitManager - Successfully updated proposeLimit: ${proposeGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`);
+        } else {
+          throw new Error(`TransmitManager - Failed to update proposeLimit: ${proposeGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`);
+        }
 
         if (chainAddresses.FAST) {
           const config: Configs = chainAddresses.FAST as Configs;
@@ -68,12 +74,14 @@ export const setLimitsForAChainSlug = async (
           const attestGasLimitValue =
             attestGasLimit[networkToChainSlug[dstChainId]];
 
-          await setAttestGasLimit(
+            const isAttestUpdateSuccessful = await setAttestGasLimit(
             chainId,
             dstChainId,
             switchboardAddress,
             attestGasLimitValue
           );
+
+          console.log(`FAST-Switchboard Successfully updated attestGasLimit: ${attestGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`)
 
           //lookup for executionOverhead for the chainSlugCode
           const executionOverheadValue =
@@ -85,6 +93,8 @@ export const setLimitsForAChainSlug = async (
             switchboardAddress,
             executionOverheadValue
           );
+
+          console.log(`FAST-Switchboard Successfully updated executionOverhead: ${executionOverheadValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`)
         }
 
         if (chainAddresses.OPTIMISTIC) {
@@ -104,6 +114,8 @@ export const setLimitsForAChainSlug = async (
             switchboardAddress,
             executionOverheadValue
           );
+
+          console.log(`OPTIMISTIC-Switchboard Successfully updated executionOverhead: ${executionOverheadValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`)
         }
       }
 

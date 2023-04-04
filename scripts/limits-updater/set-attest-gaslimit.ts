@@ -27,7 +27,7 @@ export const setAttestGasLimit = async (
 
     const digest = keccak256(
       defaultAbiCoder.encode(
-        ["string", "uint32", "uint32", "uint256", "uint256"],
+        ["string", "uint256", "uint256", "uint256", "uint256"],
         [
           "ATTEST_GAS_LIMIT_UPDATE",
           srcChainId,
