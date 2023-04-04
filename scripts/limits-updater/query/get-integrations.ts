@@ -19,7 +19,7 @@ export const getIntegrationsForAChainSlug = async (
   );
 };
 
-// npx ts-node scripts/deploy/initLimits.ts
+// npx ts-node scripts/limits-updater/query/get-integrations.ts
 export const getIntegrations = async () => {
   try {
     getIntegrationsForAChainSlug("arbitrum-goerli");

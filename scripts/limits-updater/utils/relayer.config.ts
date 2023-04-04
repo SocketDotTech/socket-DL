@@ -1,5 +1,5 @@
-import { RelayerConfig, relayTxSpeed } from "../../deploy/utils/types";
-import { Contract, Signer } from "ethers";
+import { RelayerConfig, relayTxSpeed } from "./types";
+import { Signer } from "ethers";
 import { config as dotenvConfig } from "dotenv";
 import { resolve } from "path";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
@@ -7,19 +7,6 @@ import { DefenderRelaySigner } from "defender-relay-client/lib/ethers";
 const dotenvConfigPath: string =
   process.env.DOTENV_CONFIG_PATH || "../../../.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
-
-export declare enum ChainId {
-  GOERLI = 5,
-  MUMBAI = 80001,
-  ARBITRUM_TESTNET = 421613,
-  OPTIMISM_TESTNET = 420,
-  BSC_TESTNET = 97,
-  MAINNET = 1,
-  POLYGON = 137,
-  ARBITRUM = 42161,
-  OPTIMISM = 10,
-  BSC = 56,
-}
 
 export const loadRelayerConfigs = (): Map<number, RelayerConfig> => {
   const relayerConfigs: Map<number, RelayerConfig> = new Map<

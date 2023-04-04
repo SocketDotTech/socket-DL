@@ -1,5 +1,5 @@
-import { chainSlugs } from "./constants";
-import { loadRelayerConfigs } from "./deploy/utils/relayer.config";
+import { chainSlugs } from "../../constants";
+import { loadRelayerConfigs } from "../utils/relayer.config";
 
 // npx ts-node scripts/query-relayer-config.ts
 export const main = async () => {

@@ -1,17 +1,18 @@
 import { Contract, Signer } from "ethers";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { attestGasLimit } from "../constants";
+import { attestGasLimit, chainSlugs } from "../constants";
 import { getSigner } from "./utils/relayer.config";
 import * as FastSwitchboardABI from "../../artifacts/contracts/switchboard/default-switchboards/FastSwitchboard.sol/FastSwitchboard.json";
 import { isTransactionSuccessful } from "./utils/transaction-helper";
 
 export const setAttestGasLimit = async (
-  srcChainSlug: number,
-  dstChainSlug: number,
-  switchboardAddress: string
+  srcChainId: number,
+  dstChainId: number,
+  switchboardAddress: string,
+  attestGasLimit: number
 ) => {
   try {
-    const signer: Signer = getSigner(srcChainSlug);
+    const signer: Signer = getSigner(srcChainId);
 
     const signerAddress: string = await signer.getAddress();
 
@@ -21,9 +22,6 @@ export const setAttestGasLimit = async (
       signer
     );
 
-    //TODO set AttestGasLimit in switchboard
-    const attestGasLimitValue = attestGasLimit[srcChainSlug];
-
     // get nextNonce from switchboard
     let nonce: number = await fastSwitchBoardInstance.nextNonce(signerAddress);
 
@@ -32,10 +30,10 @@ export const setAttestGasLimit = async (
         ["string", "uint32", "uint32", "uint256", "uint256"],
         [
           "ATTEST_GAS_LIMIT_UPDATE",
-          srcChainSlug,
-          dstChainSlug,
+          srcChainId,
+          dstChainId,
           nonce,
-          attestGasLimitValue,
+          attestGasLimit,
         ]
       )
     );
@@ -44,14 +42,14 @@ export const setAttestGasLimit = async (
 
     const tx = await fastSwitchBoardInstance.setAttestGasLimit(
       nonce,
-      dstChainSlug,
-      attestGasLimitValue,
+      dstChainId,
+      attestGasLimit,
       signature
     );
 
     await tx.wait();
 
-    return isTransactionSuccessful(tx.hash, srcChainSlug);
+    return isTransactionSuccessful(tx.hash, srcChainId);
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;

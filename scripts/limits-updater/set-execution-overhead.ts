@@ -1,17 +1,18 @@
 import { Contract, Signer } from "ethers";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { executionOverhead } from "../constants";
+import { chainSlugs, executionOverhead } from "../constants";
 import { getSigner } from "./utils/relayer.config";
 import * as FastSwitchboardABI from "../../artifacts/contracts/switchboard/default-switchboards/FastSwitchboard.sol/FastSwitchboard.json";
 import { isTransactionSuccessful } from "./utils/transaction-helper";
 
 export const setExecutionOverhead = async (
-  srcChainSlug: number,
-  dstChainSlug: number,
-  switchboardAddress: string
+  srcChainId: number,
+  dstChainId: number,
+  switchboardAddress: string,
+  executionOverhead: number
 ) => {
   try {
-    const signer: Signer = getSigner(srcChainSlug);
+    const signer: Signer = getSigner(srcChainId);
 
     const signerAddress: string = await signer.getAddress();
 
@@ -21,9 +22,6 @@ export const setExecutionOverhead = async (
       signer
     );
 
-    //set executionOverhead in switchboard
-    const executionOverheadValue = executionOverhead[srcChainSlug];
-
     // get nextNonce from switchboard
     let nonce: number = await switchBoardInstance.nextNonce(signerAddress);
 
@@ -31,12 +29,11 @@ export const setExecutionOverhead = async (
       defaultAbiCoder.encode(
         ["string", "uint256", "uint32", "uint32", "uint256"],
         [
-          "ATTEST_GAS_LIMIT_UPDATE",
+          "EXECUTION_OVERHEAD_UPDATE",
           nonce,
-          srcChainSlug,
-          dstChainSlug,
-          ,
-          executionOverheadValue,
+          srcChainId,
+          dstChainId,
+          executionOverhead,
         ]
       )
     );
@@ -45,14 +42,14 @@ export const setExecutionOverhead = async (
 
     const tx = await switchBoardInstance.setExecutionOverhead(
       nonce,
-      dstChainSlug,
-      executionOverheadValue,
+      dstChainId,
+      executionOverhead,
       signature
     );
 
     await tx.wait();
 
-    return isTransactionSuccessful(tx.hash, srcChainSlug);
+    return isTransactionSuccessful(tx.hash, srcChainId);
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;

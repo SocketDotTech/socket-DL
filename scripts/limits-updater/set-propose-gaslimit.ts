@@ -1,17 +1,17 @@
 import { Contract, Signer } from "ethers";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { proposeGasLimit } from "../constants";
 import { getSigner } from "./utils/relayer.config";
 import * as TransmitManagerABI from "../../artifacts/contracts/TransmitManager.sol/TransmitManager.json";
 import { isTransactionSuccessful } from "./utils/transaction-helper";
 
 export const setProposeGasLimit = async (
-  srcChainSlug: number,
-  dstChainSlug: number,
-  transmitManagerAddress: string
+  srcChainId: number,
+  dstChainId: number,
+  transmitManagerAddress: string,
+  proposeGasLimit: number
 ) => {
   try {
-    const signer: Signer = getSigner(srcChainSlug);
+    const signer: Signer = getSigner(srcChainId);
 
     const transmitterAddress: string = await signer.getAddress();
 
@@ -20,9 +20,6 @@ export const setProposeGasLimit = async (
       TransmitManagerABI.abi,
       signer
     );
-
-    //fetch proposeGasLimit from config
-    const proposeGasLimitValue = proposeGasLimit[srcChainSlug];
 
     // get nextNonce from TransmitManager
     let nonce: number = await transmitManagerInstance.nextNonce(
@@ -33,11 +30,11 @@ export const setProposeGasLimit = async (
       defaultAbiCoder.encode(
         ["string", "uint32", "uint32", "uint256", "uint256"],
         [
-          "ATTEST_GAS_LIMIT_UPDATE",
-          srcChainSlug,
-          dstChainSlug,
+          "PROPOSE_GAS_LIMIT_UPDATE",
+          srcChainId,
+          dstChainId,
           nonce,
-          proposeGasLimitValue,
+          proposeGasLimit,
         ]
       )
     );
@@ -46,14 +43,14 @@ export const setProposeGasLimit = async (
 
     const tx = await transmitManagerInstance.setProposeGasLimit(
       nonce,
-      dstChainSlug,
-      proposeGasLimitValue,
+      dstChainId,
+      proposeGasLimit,
       signature
     );
 
     await tx.wait();
 
-    return isTransactionSuccessful(tx.hash, srcChainSlug);
+    return isTransactionSuccessful(tx.hash, srcChainId);
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;

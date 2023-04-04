@@ -1,112 +1,125 @@
-import { Contract, Signer } from "ethers";
 import {
   attestGasLimit,
+  chainSlugKeys,
   chainSlugs,
   executionOverhead,
+  networkToChainSlug,
   proposeGasLimit,
 } from "../constants";
-import { getSigner } from "./relayer.config";
-import { ChainSocketAddresses } from "../../src/types";
-import * as FastSwitchboardABI from "../../artifacts/contracts/switchboard/default-switchboards/FastSwitchboard.sol/FastSwitchboard.json";
-import * as OptimisticSwitchboardABI from "../../artifacts/contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol/OptimisticSwitchboard.json";
-import * as TransmitManagerABI from "../../artifacts/contracts/TransmitManager.sol/TransmitManager.json";
 import {
-  getAddresses,
-  getChainSlugsFromDeployedAddresses,
-} from "../deploy/utils";
+  ChainAddresses,
+  ChainSocketAddresses,
+  Configs,
+  Integrations,
+} from "../../src/types";
+import { getAddresses } from "../deploy/utils";
+import { setAttestGasLimit } from "./set-attest-gaslimit";
+import { setExecutionOverhead } from "./set-execution-overhead";
+import { setProposeGasLimit } from "./set-propose-gaslimit";
 
 export const setLimitsForAChainSlug = async (
-  chainSlug: keyof typeof chainSlugs
+  chainSlugCode: keyof typeof chainSlugs
 ) => {
   try {
-    const chainId = chainSlugs[chainSlug];
+    const chainId = chainSlugs[chainSlugCode];
     console.log(
-      `setting initLimits for chain: ${chainSlug} and chainId: ${chainId}`
+      `setting initLimits for chainSlug: ${chainSlugCode} and chainId: ${chainId}`
     );
 
-    //const deployedAddressConfig: ChainSocketAddresses = await getAddresses(chainId);
-    // const localChain = "arbitrum-goerli";
-
-    // if (!fs.existsSync(deployedAddressPath)) {
-    //   throw new Error("addresses.json not found");
-    // }
-    // const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
-
-    // const deployedAddressConfig: ChainSocketAddresses =
-    //   addresses[chainSlugs[localChain]];
-
-    const deployedAddressConfig: ChainSocketAddresses = await getAddresses[
+    const deployedAddressConfig = (await getAddresses(
       chainId
-    ];
+    )) as ChainSocketAddresses;
 
-    console.log(
-      `for chainSlugCode: ${chainSlug} , looked-up deployedAddressConfigs: ${JSON.stringify(
-        deployedAddressConfig
-      )}`
-    );
-
-    const signer: Signer = getSigner(chainId);
-
-    const integrations = deployedAddressConfig.integrations;
-
-    for (let integration in integrations) {
-      console.log(`integration is: ${JSON.stringify(integration)}`);
-
-      //if(integration.)
-    }
-
-    //get fastSwitchBoard Address
-    const fastSwitchBoardAddress =
-      deployedAddressConfig.FastSwitchboard as string;
-
-    const fastSwitchBoardInstance: Contract = new Contract(
-      fastSwitchBoardAddress,
-      FastSwitchboardABI.abi,
-      signer
-    );
-
-    //get Optimistic SwitchBoard Address
-    const optimisticSwitchBoardAddress =
-      deployedAddressConfig.OptimisticSwitchboard as string;
-
-    const optimisticSwitchBoardInstance: Contract = new Contract(
-      optimisticSwitchBoardAddress,
-      OptimisticSwitchboardABI.abi,
-      signer
-    );
-
-    //TODO set ExecutionOverhead in OptimisticSwitchboard
-    const executionOverheadValue = executionOverhead[chainSlug];
-
-    //TODO set AttestGasLimit in OptimisticSwitchboard
-    const attestGasLimitValue = attestGasLimit[chainSlug];
+    const integrations: Integrations =
+      deployedAddressConfig.integrations as Integrations;
 
     //get TransmitManager Address
     const transmitManagerAddress =
       deployedAddressConfig.TransmitManager as string;
 
-    const transmitManherInstance: Contract = new Contract(
-      transmitManagerAddress,
-      TransmitManagerABI.abi,
-      signer
-    );
+    if (integrations) {
+      console.log(`For sourceChainId: ${chainId} \n`);
 
-    //TODO set ProposeGasLimit in TransmitManager
-    const proposeGasLimitValue = proposeGasLimit[chainSlug];
+      const keys = Object.keys(integrations);
+      const values = Object.values(integrations);
+
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i].toString();
+        const dstChainId = parseInt(key);
+        const chainAddresses: ChainAddresses = values[i];
+
+        //lookup for proposeGasLimit for the chainSlugCode
+        const proposeGasLimitValue =
+          proposeGasLimit[networkToChainSlug[dstChainId]];
+
+        await setProposeGasLimit(
+          chainId,
+          dstChainId,
+          transmitManagerAddress,
+          proposeGasLimitValue
+        );
+
+        if (chainAddresses.FAST) {
+          const config: Configs = chainAddresses.FAST as Configs;
+          const switchboardAddress = config.switchboard as string;
+          console.log(`FAST Switchboard address is: ${config.switchboard}`);
+
+          //lookup for AttestGasLimit for the chainSlugCode
+          const attestGasLimitValue =
+            attestGasLimit[networkToChainSlug[dstChainId]];
+
+          await setAttestGasLimit(
+            chainId,
+            dstChainId,
+            switchboardAddress,
+            attestGasLimitValue
+          );
+
+          //lookup for executionOverhead for the chainSlugCode
+          const executionOverheadValue =
+            executionOverhead[networkToChainSlug[dstChainId]];
+
+          await setExecutionOverhead(
+            chainId,
+            dstChainId,
+            switchboardAddress,
+            executionOverheadValue
+          );
+        }
+
+        if (chainAddresses.OPTIMISTIC) {
+          const config: Configs = chainAddresses.OPTIMISTIC as Configs;
+          const switchboardAddress = config.switchboard as string;
+          console.log(
+            `Optimistic Switchboard address is: ${config.switchboard}`
+          );
+
+          //lookup for executionOverhead for the chainSlugCode
+          const executionOverheadValue =
+            executionOverhead[networkToChainSlug[dstChainId]];
+
+          await setExecutionOverhead(
+            chainId,
+            dstChainId,
+            switchboardAddress,
+            executionOverheadValue
+          );
+        }
+      }
+
+      console.log(`-------------------------------------\n\n`);
+    }
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;
   }
 };
 
-// npx ts-node scripts/deploy/initLimits.ts
+// npx ts-node scripts/limits-updater/initLimits.ts
 export const setLimits = async () => {
   try {
-    const chainSlugsDecoded: string[] =
-      (await getChainSlugsFromDeployedAddresses()) as string[];
-
-    for (let chainSlugCode in chainSlugsDecoded) {
-      setLimitsForAChainSlug(chainSlugCode as keyof typeof chainSlugs);
+    for (let chainSlugKey of chainSlugKeys) {
+      setLimitsForAChainSlug(chainSlugKey as keyof typeof chainSlugs);
     }
   } catch (error) {
     console.log("Error while sending transaction", error);
