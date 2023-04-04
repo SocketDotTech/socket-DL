@@ -245,9 +245,7 @@ export const main = async () => {
           [getRoleHash("RESCUE_ROLE"), getRoleHash("GOVERNANCE_ROLE")],
           [grantee, grantee]
         );
-      console.log(
-        `Assigned transmit manager batch roles to ${grantee}: ${tx.hash}`
-      );
+      console.log(`Assigned socket batch roles to ${grantee}: ${tx.hash}`);
 
       await tx.wait();
     } else {
