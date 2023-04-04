@@ -73,13 +73,9 @@ contract FastSwitchboard is SwitchboardBase {
         uint256 proposeTime_
     ) external view override returns (bool) {
         if (tripGlobalFuse || tripSinglePath[srcChainSlug_]) return false;
-
-        if (
-            !isPacketValid[packetId_] ||
-            block.timestamp - proposeTime_ < timeoutInSeconds
-        ) return false;
-
-        return true;
+        if (isPacketValid[packetId_]) return true;
+        if (block.timestamp - proposeTime_ > timeoutInSeconds) return true;
+        return false;
     }
 
     function _getMinSwitchboardFees(
