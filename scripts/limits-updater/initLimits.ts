@@ -59,10 +59,14 @@ export const setLimitsForAChainSlug = async (
           proposeGasLimitValue
         );
 
-        if(isProposeUpdateSuccessful) {
-          console.log(`TransmitManager - Successfully updated proposeLimit: ${proposeGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`);
+        if (isProposeUpdateSuccessful) {
+          console.log(
+            `TransmitManager - Successfully updated proposeLimit: ${proposeGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
+          );
         } else {
-          throw new Error(`TransmitManager - Failed to update proposeLimit: ${proposeGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`);
+          throw new Error(
+            `TransmitManager - Failed to update proposeLimit: ${proposeGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
+          );
         }
 
         if (chainAddresses.FAST) {
@@ -74,14 +78,16 @@ export const setLimitsForAChainSlug = async (
           const attestGasLimitValue =
             attestGasLimit[networkToChainSlug[dstChainId]];
 
-            const isAttestUpdateSuccessful = await setAttestGasLimit(
+          const isAttestUpdateSuccessful = await setAttestGasLimit(
             chainId,
             dstChainId,
             switchboardAddress,
             attestGasLimitValue
           );
 
-          console.log(`FAST-Switchboard Successfully updated attestGasLimit: ${attestGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`)
+          console.log(
+            `FAST-Switchboard Successfully updated attestGasLimit: ${attestGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
+          );
 
           //lookup for executionOverhead for the chainSlugCode
           const executionOverheadValue =
@@ -94,7 +100,9 @@ export const setLimitsForAChainSlug = async (
             executionOverheadValue
           );
 
-          console.log(`FAST-Switchboard Successfully updated executionOverhead: ${executionOverheadValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`)
+          console.log(
+            `FAST-Switchboard Successfully updated executionOverhead: ${executionOverheadValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
+          );
         }
 
         if (chainAddresses.OPTIMISTIC) {
@@ -115,7 +123,9 @@ export const setLimitsForAChainSlug = async (
             executionOverheadValue
           );
 
-          console.log(`OPTIMISTIC-Switchboard Successfully updated executionOverhead: ${executionOverheadValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`)
+          console.log(
+            `OPTIMISTIC-Switchboard Successfully updated executionOverhead: ${executionOverheadValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
+          );
         }
       }
 
