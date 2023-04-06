@@ -40,6 +40,25 @@ export const networkToChainSlug = {
 
 export const chainSlugKeys: string[] = Object.values(networkToChainSlug);
 
+export function getChainSlugFromId(chainId: number) {
+  switch (chainId) {
+    case ChainSlug.OPTIMISM:
+      return "Optimism";
+
+    case ChainSlug.ARBITRUM:
+      return "Arbitrum";
+
+    case ChainSlug.BSC:
+      return "bsc";
+
+    case ChainSlug.BSC_TESTNET:
+      return "bsc-testnet";
+
+    default:
+      throw new Error("Failed to lookup chainSlugCode from chainId");
+  }
+}
+
 export function getJsonRpcUrl(chain: keyof typeof chainSlugs): string {
   let jsonRpcUrl: string;
   switch (chain) {

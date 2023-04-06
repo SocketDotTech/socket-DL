@@ -30,8 +30,14 @@ export const setLimitsForAChainSlug = async (
       chainId
     )) as ChainSocketAddresses;
 
+    console.log(
+      `deployedAddressConfig are: ${JSON.stringify(deployedAddressConfig)}`
+    );
+
     const integrations: Integrations =
       deployedAddressConfig.integrations as Integrations;
+
+    console.log(`integrations are: ${JSON.stringify(integrations)}`);
 
     //get TransmitManager Address
     const transmitManagerAddress =
@@ -48,9 +54,11 @@ export const setLimitsForAChainSlug = async (
         const dstChainId = parseInt(key);
         const chainAddresses: ChainAddresses = values[i];
 
+        const chainSlugCode = "optimism-goerli";
+        // networkToChainSlug[dstChainId]
+
         //lookup for proposeGasLimit for the chainSlugCode
-        const proposeGasLimitValue =
-          proposeGasLimit[networkToChainSlug[dstChainId]];
+        const proposeGasLimitValue = proposeGasLimit[chainSlugCode];
 
         const isProposeUpdateSuccessful = await setProposeGasLimit(
           chainId,
@@ -75,8 +83,7 @@ export const setLimitsForAChainSlug = async (
           console.log(`FAST Switchboard address is: ${config.switchboard}`);
 
           //lookup for AttestGasLimit for the chainSlugCode
-          const attestGasLimitValue =
-            attestGasLimit[networkToChainSlug[dstChainId]];
+          const attestGasLimitValue = attestGasLimit[chainSlugCode];
 
           const isAttestUpdateSuccessful = await setAttestGasLimit(
             chainId,
@@ -90,8 +97,7 @@ export const setLimitsForAChainSlug = async (
           );
 
           //lookup for executionOverhead for the chainSlugCode
-          const executionOverheadValue =
-            executionOverhead[networkToChainSlug[dstChainId]];
+          const executionOverheadValue = executionOverhead[chainSlugCode];
 
           await setExecutionOverhead(
             chainId,
@@ -113,8 +119,7 @@ export const setLimitsForAChainSlug = async (
           );
 
           //lookup for executionOverhead for the chainSlugCode
-          const executionOverheadValue =
-            executionOverhead[networkToChainSlug[dstChainId]];
+          const executionOverheadValue = executionOverhead[chainSlugCode];
 
           await setExecutionOverhead(
             chainId,
@@ -140,9 +145,10 @@ export const setLimitsForAChainSlug = async (
 // npx ts-node scripts/limits-updater/initLimits.ts
 export const setLimits = async () => {
   try {
-    for (let chainSlugKey of chainSlugKeys) {
-      setLimitsForAChainSlug(chainSlugKey as keyof typeof chainSlugs);
-    }
+    // for (let chainSlugKey of chainSlugKeys) {
+    //   setLimitsForAChainSlug(chainSlugKey as keyof typeof chainSlugs);
+    // }
+    setLimitsForAChainSlug("optimism-goerli");
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;
