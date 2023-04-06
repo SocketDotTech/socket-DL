@@ -1,4 +1,3 @@
-import { constants } from "ethers";
 import { bridgeConsts, chainSlugs } from "../../constants";
 
 const executionOverhead = 300000;
@@ -6,7 +5,7 @@ const initiateGasLimit = 300000;
 const confirmGasLimit = 300000;
 const receiveGasLimit = 300000;
 
-export const optimismSwitchboard = async (
+export const optimismSwitchboard = (
   network: string,
   socketAddress: string,
   oracleAddress: string,
@@ -27,11 +26,10 @@ export const optimismSwitchboard = async (
       confirmGasLimit,
       initiateGasLimit,
       executionOverhead,
-      constants.AddressZero,
       signerAddress,
       socketAddress,
       oracleAddress,
-      crossDomainMessengerAddress,
+      bridgeConsts.crossDomainMessenger[network],
     ],
     path: "contracts/switchboard/native/OptimismSwitchboard.sol",
   };
