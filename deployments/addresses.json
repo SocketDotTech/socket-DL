@@ -1,13 +1,36 @@
 {
   "1": {
-    "Counter": "",
-    "CapacitorFactory": "0x9C0763930BcA7DDb9275B5e0D67500aE6dFD3A00",
-    "ExecutionManager": "0xc68EF89A141Ca6ee27520fF68faC45a0aF9E23d1",
-    "GasPriceOracle": "0xaD270e5263234c9fAb94713405d7F1cCF2BBEe0F",
-    "Hasher": "0x87bAf2E4c6A5E58F652F7996eb445223DDAc22C9",
-    "SignatureVerifier": "0x0B5bA4B6898cB56305CaF8ED619a1759631268aF",
-    "Socket": "",
-    "TransmitManager": "0x4D0B394B3c934E66F812C1f506800Df712A59FFe"
+    "Counter": "0x98bBfbdDA0f32c411b1cE821B495aAb1bD43C680",
+    "CapacitorFactory": "0x50cD99661C604da8d36Db001e86Df976E13A7Cf0",
+    "ExecutionManager": "0x86350a98802C71A143644Ca740D40e00AAA2F3bE",
+    "GasPriceOracle": "0xFDC28fA368c33DEC7853d63B65FC5Cfe01B212fc",
+    "Hasher": "0xfc2140e9A83693CBd8b54C42AFf83ecb627c2Ec7",
+    "SignatureVerifier": "0x19791877C020f7Cd5Ca1c97bdd5D268a52dbB0ff",
+    "Socket": "0xF4b503a883C6E63dF1DCbCC560a6FBd28a2e9Ac5",
+    "TransmitManager": "0xB39Cb89dfD708115616fdA1a2735613931B14181",
+    "integrations": {
+      "10": {
+        "NATIVE_BRIDGE": {
+          "switchboard": "0x330A8c38A015954DdC53FB1303352eDaC030902a",
+          "capacitor": "0x9aB94ED014F61D44406c93B20ec7D9cFc0cE880a",
+          "decapacitor": "0x56BCDf11BdCF6eac2E7B0926164716cAbF0eB0Fb"
+        }
+      },
+      "137": {
+        "NATIVE_BRIDGE": {
+          "switchboard": "0x03D51955216a7E6F301e0613515fA86A6f3d59A9",
+          "capacitor": "0xa2a955f5B051802d6B0166E656E5c6DD8FC750dD",
+          "decapacitor": "0x13205a7Cd84193A5F4358465aF1AA6952eCa9736"
+        }
+      },
+      "42161": {
+        "NATIVE_BRIDGE": {
+          "switchboard": "0x0777Ab388f065FC3CdB96008C701751827Ee171B",
+          "capacitor": "0x4Beb2359fE958763A59375ebfd13413A586E5ADD",
+          "decapacitor": "0x0c9BB895271840C84214e622B991C0C7aAB81aF8"
+        }
+      }
+    }
   },
   "5": {
     "Counter": "0x6C691B15448b10a0Fdc6410564d4B41db52Bf320",
@@ -25,8 +48,14 @@
           "capacitor": "0x853d6aE842E138BFE6B3Bf3B53AB2E77354e3194",
           "decapacitor": "0x9F69a1D68e33803Cf9766a8520557D5e81b48F5e"
         }
+      },
+      "421613": {
+        "FAST": {
+          "switchboard": "0x7228F7CEaaF9dD32eA8e059902E32CAE363f2569"
+        }
       }
-    }
+    },
+    "FastSwitchboard": "0x7228F7CEaaF9dD32eA8e059902E32CAE363f2569"
   },
   "10": {
     "Counter": "0xFAE13FC12a111CD31Ea02Ae554A59Fb18fD45127",
