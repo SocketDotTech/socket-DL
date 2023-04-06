@@ -17,8 +17,8 @@ const deployedAddressPath = path.join(
 export const main = async () => {
   const amount = 100;
   const msgGasLimit = "100000";
-  const gasLimit =  185766;
-  
+  const gasLimit = 185766;
+
   // 0.00003
 
   let remoteChainSlug;
@@ -87,7 +87,7 @@ export const main = async () => {
         .connect(signer)
         .remoteAddOperation(remoteChainSlug, amount, msgGasLimit, {
           gasLimit,
-          value: ethers.utils.parseUnits("30000", 'gwei').toNumber()
+          value: ethers.utils.parseUnits("30000", "gwei").toNumber(),
         });
 
       await tx.wait();
