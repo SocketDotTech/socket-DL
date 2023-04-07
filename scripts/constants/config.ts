@@ -13,7 +13,7 @@ export const transmitterAddress: {
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   arbitrum: "0x95e655674C6889F80fa024ebA86cdE29D69028A6",
   optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
-  mainnet: "0x6956063c490fa746c9801ccc41baba8a8b678068",
+  mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
 };
 
 export const watcherAddress: {
@@ -29,7 +29,7 @@ export const watcherAddress: {
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   arbitrum: "0x95e655674C6889F80fa024ebA86cdE29D69028A6",
   optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
-  mainnet: "0x6956063c490fa746c9801ccc41baba8a8b678068",
+  mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
 };
 
 export const executorAddress: {
@@ -45,7 +45,7 @@ export const executorAddress: {
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   arbitrum: "0x95e655674C6889F80fa024ebA86cdE29D69028A6",
   optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
-  mainnet: "0x6956063c490fa746c9801ccc41baba8a8b678068",
+  mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
 };
 
 export const timeout: {
