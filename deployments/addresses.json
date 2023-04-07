@@ -67,6 +67,13 @@
     "Socket": "0x2959eBC446A4dFB30b04AfD62B0cBD3F914306B4",
     "TransmitManager": "0x69C9832f1018EcB9823e804ACe69BcAe0F298B51",
     "integrations": {
+      "1": {
+        "NATIVE_BRIDGE": {
+          "switchboard": "0x52be561Fa9900c0B99578D30594B84A435739164",
+          "capacitor": "0xC09E3f3FAee010D1eBf21FE394A335dDA85019e7",
+          "decapacitor": "0xf5a8C280aD9d849436391052D743f3115dbfd7d6"
+        }
+      },
       "56": {
         "FAST": {
           "switchboard": "0x8654cB74011C9972dd63Ed691d310e1BAA85Fe9E",
@@ -177,6 +184,13 @@
     "Socket": "0x4c8D9ab0F4f6A959092248982bd58D2C964957d6",
     "TransmitManager": "0x1C205913D4d6742C47CdC44e779F8cbF89aaa0fd",
     "integrations": {
+      "1": {
+        "NATIVE_BRIDGE": {
+          "switchboard": "0xeb43Ea4B4e800c260ad1c85eB465d4b558510e1a",
+          "capacitor": "0xD304eEDcB88510dD6C4F60D0Ce9eD40e0D6F19C2",
+          "decapacitor": "0x00bd654471C6704F0e69Ff081954C3c475b4240F"
+        }
+      },
       "10": {
         "FAST": {
           "switchboard": "0x2521b29FD8d3787Ab42141f55F6b462E6115C737",
@@ -237,6 +251,13 @@
     "Socket": "0xD381c5DF0De84281b26404E69d0866550B864953",
     "TransmitManager": "0x5d2A7185F0f03ED88067b9Fa02252946fccaA0B8",
     "integrations": {
+      "1": {
+        "NATIVE_BRIDGE": {
+          "switchboard": "0xFcCD1E450ca0d89EAe8B676B74225d0D6549762f",
+          "capacitor": "0x82293C0c3c80943627037714A51cC212e3Dbb348",
+          "decapacitor": "0x640641180c19D9062C3b759495E519017Ba4Ed53"
+        }
+      },
       "10": {
         "FAST": {
           "switchboard": "0x72be9F48226934A42A891075469F2Df185DC6fDb",
