@@ -5,15 +5,19 @@ import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IGasPriceOracle.sol";
 import "../../interfaces/ICapacitor.sol";
 
-import "../../utils/AccessControlWithUint.sol";
+import "../../utils/AccessControlExtended.sol";
 import "../../libraries/RescueFundsLib.sol";
+import {GAS_LIMIT_UPDATER_ROLE, GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE} from "../../utils/AccessRoles.sol";
 import "../../libraries/FeesHelper.sol";
 
-abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
+abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
     ICapacitor public capacitor__;
 
+    bool public isInitialised;
     bool public tripGlobalFuse;
+    uint256 public maxPacketSize;
+
     uint256 public executionOverhead;
     uint256 public initateNativeConfirmationGasLimit;
 
@@ -22,19 +26,18 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     event InitialConfirmationGasLimitSet(uint256 gasLimit);
     event CapacitorSet(address capacitor);
     event GasPriceOracleSet(address gasPriceOracle);
-    event InitiatedNativeConfirmation(uint256 packetId);
+    event InitiatedNativeConfirmation(bytes32 packetId);
+    event CapacitorRegistered(address capacitor, uint256 maxPacketSize);
 
     error TransferFailed();
     error FeesNotEnough();
+    error AlreadyInitialised();
 
     // assumption: natives have 18 decimals
-    function payFees(uint256 dstChainSlug_) external payable override {
-        (uint256 expectedFees, ) = _calculateMinFees(dstChainSlug_);
-        if (msg.value < expectedFees) revert FeesNotEnough();
-    }
+    function payFees(uint32 dstChainSlug_) external payable override {}
 
     function getMinFees(
-        uint256 dstChainSlug_
+        uint32 dstChainSlug_
     )
         external
         view
@@ -45,7 +48,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     }
 
     function _calculateMinFees(
-        uint256 dstChainSlug_
+        uint32 dstChainSlug_
     )
         internal
         view
@@ -70,11 +73,27 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     ) internal view virtual returns (uint256);
 
     /**
+     * @notice set capacitor address and packet size
+     * @param capacitor_ capacitor address
+     * @param maxPacketSize_ max messages allowed in one packet
+     */
+    function registerCapacitor(
+        address capacitor_,
+        uint256 maxPacketSize_
+    ) external override {
+        if (isInitialised) revert AlreadyInitialised();
+
+        isInitialised = true;
+        maxPacketSize = maxPacketSize_;
+        capacitor__ = ICapacitor(capacitor_);
+
+        emit CapacitorRegistered(capacitor_, maxPacketSize_);
+    }
+
+    /**
      * @notice pause execution
      */
-    function tripGlobal(
-        uint256 srcChainSlug_
-    ) external onlyRoleWithUint(srcChainSlug_) {
+    function tripGlobal() external onlyRole(TRIP_ROLE) {
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
     }
@@ -82,7 +101,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     /**
      * @notice unpause execution
      */
-    function untrip() external onlyOwner {
+    function untrip() external onlyRole(UNTRIP_ROLE) {
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
     }
@@ -93,7 +112,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
      */
     function setExecutionOverhead(
         uint256 executionOverhead_
-    ) external onlyOwner {
+    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         executionOverhead = executionOverhead_;
         emit ExecutionOverheadSet(executionOverhead_);
     }
@@ -104,30 +123,23 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
      */
     function setInitialConfirmationGasLimit(
         uint256 gasLimit_
-    ) external onlyOwner {
+    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         initateNativeConfirmationGasLimit = gasLimit_;
         emit InitialConfirmationGasLimitSet(gasLimit_);
-    }
-
-    /**
-     * @notice updates capacitor address
-     * @param capacitor_ new capacitor
-     */
-    function setCapacitor(address capacitor_) external onlyOwner {
-        capacitor__ = ICapacitor(capacitor_);
-        emit CapacitorSet(capacitor_);
     }
 
     /**
      * @notice updates gasPriceOracle_ address
      * @param gasPriceOracle_ new gasPriceOracle_
      */
-    function setGasPriceOracle(address gasPriceOracle_) external onlyOwner {
+    function setGasPriceOracle(
+        address gasPriceOracle_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         emit GasPriceOracleSet(gasPriceOracle_);
     }
 
-    function withdrawFees(address account_) external onlyOwner {
+    function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         FeesHelper.withdrawFees(account_);
     }
 
@@ -135,7 +147,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
         address token_,
         address userAddress_,
         uint256 amount_
-    ) external onlyOwner {
+    ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

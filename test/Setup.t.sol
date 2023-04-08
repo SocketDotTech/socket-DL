@@ -14,6 +14,7 @@ import "../contracts/TransmitManager.sol";
 import "../contracts/GasPriceOracle.sol";
 import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
+import {WATCHER_ROLE, TRANSMITTER_ROLE, GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../contracts/utils/AccessRoles.sol";
 
 contract Setup is Test {
     uint256 internal c = 1;
@@ -44,8 +45,6 @@ contract Setup is Test {
     uint256 internal _attestGasLimit = 150000;
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
-    bytes32 internal EXECUTOR_ROLE =
-        0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 0;
 
     struct SocketConfigContext {
@@ -56,7 +55,7 @@ contract Setup is Test {
     }
 
     struct ChainContext {
-        uint256 chainSlug;
+        uint32 chainSlug;
         Socket socket__;
         Hasher hasher__;
         SignatureVerifier sigVerifier__;
@@ -110,7 +109,18 @@ contract Setup is Test {
         // deploy socket setup
         _deploySocket(cc_, _socketOwner);
 
+        vm.startPrank(_socketOwner);
+
+        cc_.transmitManager__.grantRole(
+            GAS_LIMIT_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        vm.stopPrank();
+
         hoax(_socketOwner);
+
         cc_.transmitManager__.setProposeGasLimit(
             remoteChainSlug_,
             _proposeGasLimit
@@ -145,11 +155,17 @@ contract Setup is Test {
         );
         vm.startPrank(_socketOwner);
 
+        optimisticSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         optimisticSwitchboard.setExecutionOverhead(
             remoteChainSlug_,
             _executionOverhead
         );
-        optimisticSwitchboard.grantRoleWithUint(remoteChainSlug_, _watcher);
+        optimisticSwitchboard.grantRole(
+            WATCHER_ROLE,
+            remoteChainSlug_,
+            _watcher
+        );
+
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
@@ -173,12 +189,20 @@ contract Setup is Test {
         );
 
         vm.startPrank(_socketOwner);
+        fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         fastSwitchboard.setExecutionOverhead(
             remoteChainSlug_,
             _executionOverhead
         );
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
         fastSwitchboard.setAttestGasLimit(remoteChainSlug_, _attestGasLimit);
+        console.log(
+            "fastSwitchboard -> total watchers role for chainSlug: ",
+            fastSwitchboard.totalWatchers(remoteChainSlug_),
+            remoteChainSlug_
+        );
+
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
@@ -198,12 +222,15 @@ contract Setup is Test {
 
         cc_.hasher__ = new Hasher();
         cc_.sigVerifier__ = new SignatureVerifier();
-        cc_.capacitorFactory__ = new CapacitorFactory();
+        cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
         cc_.gasPriceOracle__ = new GasPriceOracle(deployer_, cc_.chainSlug);
         cc_.executionManager__ = new ExecutionManager(
             cc_.gasPriceOracle__,
             deployer_
         );
+
+        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
+        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
 
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
@@ -213,6 +240,12 @@ contract Setup is Test {
             _sealGasLimit
         );
 
+        cc_.transmitManager__.grantRole(
+            GAS_LIMIT_UPDATER_ROLE,
+            cc_.chainSlug,
+            deployer_
+        );
+
         cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
 
         cc_.socket__ = new Socket(
@@ -220,7 +253,8 @@ contract Setup is Test {
             address(cc_.hasher__),
             address(cc_.transmitManager__),
             address(cc_.executionManager__),
-            address(cc_.capacitorFactory__)
+            address(cc_.capacitorFactory__),
+            deployer_
         );
 
         vm.stopPrank();
@@ -271,7 +305,8 @@ contract Setup is Test {
             // deduce transmitter address from private key
             transmitter = vm.addr(transmitterPrivateKeys_[index]);
             // grant transmitter role
-            cc_.transmitManager__.grantRoleWithUint(
+            cc_.transmitManager__.grantRole(
+                TRANSMITTER_ROLE,
                 remoteChainSlug_,
                 transmitter
             );
@@ -284,12 +319,12 @@ contract Setup is Test {
         ChainContext storage src_,
         address capacitor_,
         uint256 remoteChainSlug_
-    ) internal returns (bytes32 root, uint256 packetId, bytes memory sig) {
-        uint256 id;
+    ) internal returns (bytes32 root, bytes32 packetId, bytes memory sig) {
+        uint64 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
         bytes32 digest = keccak256(
-            abi.encode(remoteChainSlug_, packetId, root)
+            abi.encode(uint32(remoteChainSlug_), packetId, root)
         );
         sig = _createSignature(digest, _transmitterPrivateKey);
     }
@@ -324,19 +359,45 @@ contract Setup is Test {
     function _proposeOnDst(
         ChainContext storage dst_,
         bytes memory sig_,
-        uint256 packetId_,
+        bytes32 packetId_,
         bytes32 root_
     ) internal {
         hoax(_raju);
         dst_.socket__.propose(packetId_, root_, sig_);
     }
 
+    function _attestOnDst(
+        ChainContext storage dst_,
+        bytes32 packetId_
+    ) internal {
+        uint256 dstChainSlug = dst_.chainSlug;
+
+        bytes32 digest = keccak256(abi.encode(dstChainSlug, packetId_));
+
+        // generate attest-signature
+        bytes memory attestSignature = _createSignature(
+            digest,
+            _watcherPrivateKey
+        );
+
+        // attest with packetId_, dstChainSlug and signature
+        address switchboardAddress = address(dst_.configs__[0].switchboard__);
+        console.log("switchboardAddress is: ", switchboardAddress);
+        console.log("_watcher is: ", _watcher);
+
+        FastSwitchboard(switchboardAddress).attest(
+            packetId_,
+            dstChainSlug,
+            attestSignature
+        );
+    }
+
     function _executePayloadOnDst(
         ChainContext storage dst_,
         uint256,
         address remotePlug_,
-        uint256 packetId_,
-        uint256 msgId_,
+        bytes32 packetId_,
+        bytes32 msgId_,
         uint256 msgGasLimit_,
         uint256 executionFee_,
         bytes32 packedMessage_,
@@ -358,19 +419,21 @@ contract Setup is Test {
     function _packMessageId(
         uint256 srcChainSlug,
         uint256 nonce
-    ) internal pure returns (uint256) {
-        return (srcChainSlug << 224) | nonce;
+    ) internal pure returns (bytes32) {
+        return bytes32((srcChainSlug << 224) | nonce);
     }
 
     function _getPackedId(
         address capacitorAddr_,
         uint256 chainSlug_,
         uint256 id_
-    ) internal pure returns (uint256) {
+    ) internal pure returns (bytes32) {
         return
-            (chainSlug_ << 224) |
-            (uint256(uint160(capacitorAddr_)) << 64) |
-            id_;
+            bytes32(
+                (chainSlug_ << 224) |
+                    (uint256(uint160(capacitorAddr_)) << 64) |
+                    id_
+            );
     }
 
     // to ignore this file from coverage

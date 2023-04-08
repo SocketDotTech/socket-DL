@@ -10,6 +10,6 @@ interface ICapacitorFactory {
     function deploy(
         uint256 capacitorType,
         uint256 siblingChainSlug,
-        uint256 maxBatchLength
+        uint256 maxPacketLength
     ) external returns (ICapacitor, IDecapacitor);
 }

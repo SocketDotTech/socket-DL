@@ -60,12 +60,10 @@ contract Counter is IPlug {
         bytes calldata payload_
     ) external payable override {
         require(msg.sender == socket, "Counter: Invalid Socket");
-        (bytes32 operationType, uint256 amount, address sender) = abi.decode(
+        (bytes32 operationType, uint256 amount, ) = abi.decode(
             payload_,
             (bytes32, uint256, address)
         );
-
-        if (sender != owner) revert OnlyOwner();
 
         if (operationType == OP_ADD) {
             _addOperation(amount);

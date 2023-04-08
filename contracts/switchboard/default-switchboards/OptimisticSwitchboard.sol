@@ -13,7 +13,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
         address owner_,
         address gasPriceOracle_,
         uint256 timeoutInSeconds_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         timeoutInSeconds = timeoutInSeconds_;
     }
@@ -25,8 +25,8 @@ contract OptimisticSwitchboard is SwitchboardBase {
      */
     function allowPacket(
         bytes32,
-        uint256,
-        uint256 srcChainSlug_,
+        bytes32,
+        uint32 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {
         if (tripGlobalFuse || tripSinglePath[srcChainSlug_]) return false;

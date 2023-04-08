@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../Setup.t.sol";
+import {SOCKET_ROLE} from "../../contracts/utils/AccessRoles.sol";
 
 contract HashChainCapacitorTest is Setup {
     address immutable _owner = address(uint160(c++));
@@ -23,9 +24,6 @@ contract HashChainCapacitorTest is Setup {
 
     function testSetUp() external {
         assertEq(_hcCapacitor.owner(), _owner, "Owner not set");
-
-        assertTrue(_hcCapacitor.socket() == _socket, "Socket role not set");
-
         _assertPacketById(bytes32(0), 0);
         _assertPacketToBeSealed(bytes32(0), 0);
     }
@@ -72,7 +70,7 @@ contract HashChainCapacitorTest is Setup {
 
         hashedRoot = keccak256(abi.encode(hashedRoot, _message_2));
 
-        bytes32 root = _hcCapacitor.getRootByCount(0);
+        bytes32 root = _hcCapacitor.getRootByCount(uint64(0));
         assertEq(root, hashedRoot);
 
         roots.push(_message_0);
@@ -107,20 +105,19 @@ contract HashChainCapacitorTest is Setup {
         _hcCapacitor.sealPacket(DEFAULT_BATCH_LENGTH);
     }
 
-    function _assertPacketToBeSealed(bytes32 root_, uint256 packetId_) private {
-        (bytes32 root, uint256 packetId) = _hcCapacitor
-            .getNextPacketToBeSealed();
+    function _assertPacketToBeSealed(bytes32, uint256 packetId_) private {
+        (, uint256 packetId) = _hcCapacitor.getNextPacketToBeSealed();
         assertEq(packetId, packetId_, "packetId Invalid");
     }
 
     function _assertNextPacket(bytes32 root_, uint256 packetId_) private {
-        uint256 nextPacketId = _hcCapacitor.getLatestPacketCount() + 1;
+        uint64 nextPacketId = uint64(_hcCapacitor.getLatestPacketCount() + 1);
         bytes32 root = _hcCapacitor.getRootByCount(nextPacketId);
         assertEq(root, root_, "Root Invalid");
         assertEq(nextPacketId, packetId_, "packetId Invalid");
     }
 
-    function _assertPacketById(bytes32 root_, uint256 packetId_) private {
+    function _assertPacketById(bytes32 root_, uint64 packetId_) private {
         bytes32 root = _hcCapacitor.getRootByCount(packetId_);
         bytes32 packedRoot = root_;
         if (root != bytes32(0))

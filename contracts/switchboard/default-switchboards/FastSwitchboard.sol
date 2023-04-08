@@ -2,10 +2,11 @@
 pragma solidity 0.8.7;
 
 import "./SwitchboardBase.sol";
+import {WATCHER_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract FastSwitchboard is SwitchboardBase {
     uint256 public immutable timeoutInSeconds;
-    mapping(uint256 => bool) public isPacketValid;
+    mapping(bytes32 => bool) public isPacketValid;
 
     // dst chain slug => total watchers registered
     mapping(uint256 => uint256) public totalWatchers;
@@ -14,13 +15,13 @@ contract FastSwitchboard is SwitchboardBase {
     mapping(uint256 => uint256) public attestGasLimit;
 
     // attester => packetId => is attested
-    mapping(address => mapping(uint256 => bool)) public isAttested;
+    mapping(address => mapping(bytes32 => bool)) public isAttested;
 
     // packetId => total attestations
-    mapping(uint256 => uint256) public attestations;
+    mapping(bytes32 => uint256) public attestations;
 
     event SocketSet(address newSocket);
-    event PacketAttested(uint256 packetId, address attester);
+    event PacketAttested(bytes32 packetId, address attester);
     event AttestGasLimitSet(uint256 dstChainSlug, uint256 attestGasLimit);
 
     error WatcherFound();
@@ -32,20 +33,21 @@ contract FastSwitchboard is SwitchboardBase {
         address owner_,
         address gasPriceOracle_,
         uint256 timeoutInSeconds_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         timeoutInSeconds = timeoutInSeconds_;
     }
 
     function attest(
-        uint256 packetId_,
+        bytes32 packetId_,
         uint256 srcChainSlug_,
         bytes calldata signature_
     ) external {
         address watcher = _recoverSigner(srcChainSlug_, packetId_, signature_);
 
         if (isAttested[watcher][packetId_]) revert AlreadyAttested();
-        if (!_hasRoleWithUint(srcChainSlug_, watcher)) revert WatcherNotFound();
+        if (!_hasRole(WATCHER_ROLE, srcChainSlug_, watcher))
+            revert WatcherNotFound();
 
         isAttested[watcher][packetId_] = true;
         attestations[packetId_]++;
@@ -63,8 +65,8 @@ contract FastSwitchboard is SwitchboardBase {
      */
     function allowPacket(
         bytes32,
-        uint256 packetId_,
-        uint256 srcChainSlug_,
+        bytes32 packetId_,
+        uint32 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {
         if (tripGlobalFuse || tripSinglePath[srcChainSlug_]) return false;
@@ -96,7 +98,7 @@ contract FastSwitchboard is SwitchboardBase {
     function setAttestGasLimit(
         uint256 dstChainSlug_,
         uint256 attestGasLimit_
-    ) external onlyOwner {
+    ) external onlyRoleWithChainSlug(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
         attestGasLimit[dstChainSlug_] = attestGasLimit_;
         emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
     }
@@ -108,9 +110,10 @@ contract FastSwitchboard is SwitchboardBase {
     function grantWatcherRole(
         uint256 srcChainSlug_,
         address watcher_
-    ) external onlyOwner {
-        if (_hasRoleWithUint(srcChainSlug_, watcher_)) revert WatcherFound();
-        _grantRoleWithUint(srcChainSlug_, watcher_);
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        if (_hasRole(WATCHER_ROLE, srcChainSlug_, watcher_))
+            revert WatcherFound();
+        _grantRole(WATCHER_ROLE, srcChainSlug_, watcher_);
 
         totalWatchers[srcChainSlug_]++;
     }
@@ -122,10 +125,10 @@ contract FastSwitchboard is SwitchboardBase {
     function revokeWatcherRole(
         uint256 srcChainSlug_,
         address watcher_
-    ) external onlyOwner {
-        if (!_hasRoleWithUint(srcChainSlug_, watcher_))
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        if (!_hasRole(WATCHER_ROLE, srcChainSlug_, watcher_))
             revert WatcherNotFound();
-        _revokeRoleWithUint(srcChainSlug_, watcher_);
+        _revokeRole(WATCHER_ROLE, srcChainSlug_, watcher_);
 
         totalWatchers[srcChainSlug_]--;
     }
@@ -135,7 +138,7 @@ contract FastSwitchboard is SwitchboardBase {
      */
     function _recoverSigner(
         uint256 srcChainSlug_,
-        uint256 packetId_,
+        bytes32 packetId_,
         bytes memory signature_
     ) private pure returns (address signer) {
         bytes32 digest = keccak256(abi.encode(srcChainSlug_, packetId_));

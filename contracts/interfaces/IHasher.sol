@@ -18,7 +18,7 @@ interface IHasher {
         address srcPlug,
         uint256 dstChainSlug,
         address dstPlug,
-        uint256 msgId,
+        bytes32 msgId,
         uint256 msgGasLimit,
         uint256 executionFee,
         bytes calldata payload

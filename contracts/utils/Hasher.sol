@@ -10,7 +10,7 @@ contract Hasher is IHasher {
         address srcPlug_,
         uint256 dstChainSlug_,
         address dstPlug_,
-        uint256 msgId_,
+        bytes32 msgId_,
         uint256 msgGasLimit_,
         uint256 executionFee_,
         bytes calldata payload_

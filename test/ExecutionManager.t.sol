@@ -9,9 +9,9 @@ contract ExecutionManagerTest is Setup {
     address public constant NATIVE_TOKEN_ADDRESS =
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
-    uint256 chainSlug = uint32(uint256(0x2013AA263));
-    uint256 destChainSlug = uint32(uint256(0x2013AA264));
-    uint256 chainSlug2 = uint32(uint256(0x2113AA263));
+    uint32 chainSlug = uint32(uint256(0x2013AA263));
+    uint32 destChainSlug = uint32(uint256(0x2013AA264));
+    uint32 chainSlug2 = uint32(uint256(0x2113AA263));
 
     uint256 immutable transmitterPrivateKey = c++;
     address transmitter;
@@ -67,14 +67,29 @@ contract ExecutionManagerTest is Setup {
         );
 
         vm.startPrank(owner);
+        gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
+        gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
+        gasPriceOracle.setTransmitManager(transmitManager);
+
         executionManager.grantRole(EXECUTOR_ROLE, _executor);
-        transmitManager.grantRoleWithUint(chainSlug, transmitter);
-        transmitManager.grantRoleWithUint(destChainSlug, transmitter);
+        executionManager.grantRole(RESCUE_ROLE, owner);
+        executionManager.grantRole(WITHDRAW_ROLE, owner);
+
+        transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug, transmitter);
+        transmitManager.grantRole(TRANSMITTER_ROLE, destChainSlug, transmitter);
         gasPriceOracle.setTransmitManager(transmitManager);
         vm.stopPrank();
 
-        assertTrue(transmitManager.hasRoleWithUint(chainSlug, transmitter));
-        assertTrue(transmitManager.hasRoleWithUint(destChainSlug, transmitter));
+        assertTrue(
+            transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug, transmitter)
+        );
+        assertTrue(
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                destChainSlug,
+                transmitter
+            )
+        );
 
         bytes32 digest = keccak256(
             abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)

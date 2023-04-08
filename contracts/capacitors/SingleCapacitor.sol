@@ -17,7 +17,7 @@ contract SingleCapacitor is BaseCapacitor {
     function addPackedMessage(
         bytes32 packedMessage_
     ) external override onlySocket {
-        uint256 packetCount = _nextPacketCount;
+        uint64 packetCount = _nextPacketCount;
         _roots[packetCount] = packedMessage_;
         _nextPacketCount++;
 
@@ -26,8 +26,8 @@ contract SingleCapacitor is BaseCapacitor {
 
     function sealPacket(
         uint256
-    ) external virtual override onlySocket returns (bytes32, uint256) {
-        uint256 packetCount = _nextSealCount++;
+    ) external virtual override onlySocket returns (bytes32, uint64) {
+        uint64 packetCount = _nextSealCount++;
         bytes32 root = _roots[packetCount];
 
         if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();

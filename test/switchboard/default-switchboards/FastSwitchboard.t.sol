@@ -6,12 +6,12 @@ import "../../Setup.t.sol";
 contract FastSwitchboardTest is Setup {
     bool isFast = true;
     uint256 immutable remoteChainSlug = uint32(uint256(2));
-    uint256 immutable packetId = 1;
+    bytes32 immutable packetId = bytes32(0);
     address watcher;
     address altWatcher;
 
     event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
-    event PacketAttested(uint256 packetId, address attester);
+    event PacketAttested(bytes32 packetId, address attester);
     event SwitchboardTripped(bool tripGlobalFuse_);
     event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
 
@@ -33,6 +33,9 @@ contract FastSwitchboardTest is Setup {
             1
         );
 
+        fastSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+
         fastSwitchboard.setExecutionOverhead(
             remoteChainSlug,
             _executionOverhead
@@ -43,8 +46,6 @@ contract FastSwitchboardTest is Setup {
 
         fastSwitchboard.grantWatcherRole(remoteChainSlug, watcher);
         fastSwitchboard.grantWatcherRole(remoteChainSlug, altWatcher);
-
-        fastSwitchboard.grantWatcherRole(_a.chainSlug, watcher);
 
         vm.expectEmit(false, false, false, true);
         emit AttestGasLimitSet(remoteChainSlug, _attestGasLimit);
@@ -116,19 +117,27 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testTripGlobal() external {
-        hoax(_socketOwner);
+        vm.startPrank(_socketOwner);
+        fastSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
         vm.expectEmit(false, false, false, true);
         emit SwitchboardTripped(true);
         fastSwitchboard.tripGlobal();
+        vm.stopPrank();
+
         assertTrue(fastSwitchboard.tripGlobalFuse());
     }
 
     function testTripPath() external {
-        hoax(watcher);
+        vm.startPrank(_socketOwner);
+
         uint256 srcChainSlug = _a.chainSlug;
+        fastSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
+
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
         fastSwitchboard.tripPath(srcChainSlug);
+        vm.stopPrank();
+
         assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
     }
 
@@ -138,16 +147,6 @@ contract FastSwitchboardTest is Setup {
         fastSwitchboard.tripPath(srcChainSlug);
     }
 
-    function testTripSingle() external {
-        hoax(watcher);
-        uint256 srcChainSlug = _a.chainSlug;
-        vm.expectEmit(false, false, false, true);
-        emit PathTripped(srcChainSlug, true);
-        fastSwitchboard.tripPath(srcChainSlug);
-
-        assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
-    }
-
     function testNonOwnerToTripSingle() external {
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectRevert();
@@ -155,8 +154,14 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testUnTripAfterTripSingle() external {
-        hoax(watcher);
         uint256 srcChainSlug = _a.chainSlug;
+
+        vm.startPrank(_socketOwner);
+        fastSwitchboard.grantRole(TRIP_ROLE, srcChainSlug, _socketOwner);
+        fastSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
+        vm.stopPrank();
+
+        hoax(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
         fastSwitchboard.tripPath(srcChainSlug);

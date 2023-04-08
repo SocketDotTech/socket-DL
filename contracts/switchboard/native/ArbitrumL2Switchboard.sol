@@ -6,6 +6,7 @@ import "../../interfaces/native-bridge/INativeReceiver.sol";
 
 import "../../libraries/AddressAliasHelper.sol";
 import "./NativeSwitchboardBase.sol";
+import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
     address public remoteNativeSwitchboard;
@@ -14,10 +15,10 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
     IArbSys public immutable arbsys__ = IArbSys(address(100));
 
     // stores the roots received from native bridge
-    mapping(uint256 => bytes32) public roots;
+    mapping(bytes32 => bytes32) public roots;
 
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
-    event RootReceived(uint256 packetId, bytes32 root);
+    event RootReceived(bytes32 packetId, bytes32 root);
     event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit);
 
     error InvalidSender();
@@ -38,7 +39,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
         address remoteNativeSwitchboard_,
         address owner_,
         IGasPriceOracle gasPriceOracle_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
         executionOverhead = executionOverhead_;
@@ -47,8 +48,8 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
         gasPriceOracle__ = gasPriceOracle_;
     }
 
-    function initateNativeConfirmation(uint256 packetId_) external {
-        uint256 capacitorPacketCount = uint256(uint64(packetId_));
+    function initateNativeConfirmation(bytes32 packetId_) external {
+        uint64 capacitorPacketCount = uint64(uint256(packetId_));
         bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
         if (root == bytes32(0)) revert NoRootFound();
 
@@ -63,7 +64,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
     }
 
     function receivePacket(
-        uint256 packetId_,
+        bytes32 packetId_,
         bytes32 root_
     ) external override onlyRemoteSwitchboard {
         roots[packetId_] = root_;
@@ -76,8 +77,8 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
      */
     function allowPacket(
         bytes32 root_,
-        uint256 packetId_,
-        uint256,
+        bytes32 packetId_,
+        uint32,
         uint256
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
@@ -100,14 +101,14 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase, INativeReceiver {
 
     function updateL1ReceiveGasLimit(
         uint256 l1ReceiveGasLimit_
-    ) external onlyOwner {
+    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         l1ReceiveGasLimit = l1ReceiveGasLimit_;
         emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
     }
 
     function updateRemoteNativeSwitchboard(
         address remoteNativeSwitchboard_
-    ) external onlyOwner {
+    ) external onlyRole(GOVERNANCE_ROLE) {
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }

@@ -2,18 +2,19 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ICapacitor.sol";
-import "../utils/Ownable.sol";
+import "../utils/AccessControlExtended.sol";
 import "../libraries/RescueFundsLib.sol";
+import {SOCKET_ROLE, RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
-abstract contract BaseCapacitor is ICapacitor, Ownable {
+abstract contract BaseCapacitor is ICapacitor, AccessControlExtended {
     /// an incrementing id for each new packet created
-    uint256 internal _nextPacketCount;
-    uint256 internal _nextSealCount;
+    uint64 internal _nextPacketCount;
+    uint64 internal _nextSealCount;
 
     address public immutable socket;
 
     /// maps the packet id with the root hash generated while adding message
-    mapping(uint256 => bytes32) internal _roots;
+    mapping(uint64 => bytes32) internal _roots;
 
     error NoPendingPacket();
     error OnlySocket();
@@ -27,7 +28,7 @@ abstract contract BaseCapacitor is ICapacitor, Ownable {
     /**
      * @notice initialises the contract with socket address
      */
-    constructor(address socket_, address owner_) Ownable(owner_) {
+    constructor(address socket_, address owner_) AccessControlExtended(owner_) {
         socket = socket_;
     }
 
@@ -38,16 +39,16 @@ abstract contract BaseCapacitor is ICapacitor, Ownable {
         view
         virtual
         override
-        returns (bytes32, uint256)
+        returns (bytes32, uint64)
     {
-        uint256 toSeal = _nextSealCount;
+        uint64 toSeal = _nextSealCount;
         return (_roots[toSeal], toSeal);
     }
 
     /// returns the root of packet for given id
     /// @inheritdoc ICapacitor
     function getRootByCount(
-        uint256 id_
+        uint64 id_
     ) external view virtual override returns (bytes32) {
         return _roots[id_];
     }
@@ -60,7 +61,7 @@ abstract contract BaseCapacitor is ICapacitor, Ownable {
         address token_,
         address userAddress_,
         uint256 amount_
-    ) external onlyOwner {
+    ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

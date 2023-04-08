@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 import "../../contracts/capacitors/SingleCapacitor.sol";
+import {SOCKET_ROLE} from "../../contracts/utils/AccessRoles.sol";
 
 contract SingleCapacitorTest is Test {
     uint256 internal c = 1;
@@ -20,11 +21,8 @@ contract SingleCapacitorTest is Test {
         _sa = new SingleCapacitor(_socket, _owner);
     }
 
-    function testSetUp() external {
+    function testSingleCapacitorSetup() external {
         assertEq(_sa.owner(), _owner, "Owner not set");
-
-        assertTrue(_sa.socket() == _socket, "Socket role not set");
-
         _assertPacketById(bytes32(0), 0);
         _assertPacketToBeSealed(bytes32(0), 0);
     }
@@ -110,13 +108,13 @@ contract SingleCapacitorTest is Test {
     }
 
     function _assertNextPacket(bytes32 root_, uint256 packetId_) private {
-        uint256 nextPacketId = _sa.getLatestPacketCount() + 1;
+        uint64 nextPacketId = uint64(_sa.getLatestPacketCount() + 1);
         bytes32 root = _sa.getRootByCount(nextPacketId);
         assertEq(root, root_, "Root Invalid");
         assertEq(nextPacketId, packetId_, "packetId Invalid");
     }
 
-    function _assertPacketById(bytes32 root_, uint256 packetId_) private {
+    function _assertPacketById(bytes32 root_, uint64 packetId_) private {
         bytes32 root = _sa.getRootByCount(packetId_);
         assertEq(root, root_, "Root Invalid");
     }

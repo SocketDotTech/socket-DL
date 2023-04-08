@@ -10,7 +10,7 @@ interface ICapacitor {
      */
     event MessageAdded(
         bytes32 packedMessage,
-        uint256 packetCount,
+        uint64 packetCount,
         bytes32 newRootHash
     );
 
@@ -30,14 +30,14 @@ interface ICapacitor {
     function getNextPacketToBeSealed()
         external
         view
-        returns (bytes32 root, uint256 packetCount);
+        returns (bytes32 root, uint64 packetCount);
 
     /**
      * @notice returns the root of packet for given id
      * @param id the id assigned to packet
      * @return root root hash corresponding to given id
      */
-    function getRootByCount(uint256 id) external view returns (bytes32 root);
+    function getRootByCount(uint64 id) external view returns (bytes32 root);
 
     /**
      * @notice seals the packet
@@ -48,5 +48,5 @@ interface ICapacitor {
      */
     function sealPacket(
         uint256 batchSize_
-    ) external returns (bytes32 root, uint256 packetCount);
+    ) external returns (bytes32 root, uint64 packetCount);
 }

@@ -5,15 +5,16 @@ import "./interfaces/ITransmitManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./interfaces/IGasPriceOracle.sol";
 
-import "./utils/AccessControlWithUint.sol";
+import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/FeesHelper.sol";
+import {GOVERNANCE_ROLE, TRANSMITTER_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "./utils/AccessRoles.sol";
 
-contract TransmitManager is ITransmitManager, AccessControlWithUint {
+contract TransmitManager is ITransmitManager, AccessControlExtended {
     ISignatureVerifier public signatureVerifier__;
     IGasPriceOracle public gasPriceOracle__;
 
-    uint256 public immutable chainSlug;
+    uint32 public immutable chainSlug;
     uint256 public sealGasLimit;
     mapping(uint256 => uint256) public proposeGasLimit;
 
@@ -34,9 +35,9 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
         ISignatureVerifier signatureVerifier_,
         IGasPriceOracle gasPriceOracle_,
         address owner_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 sealGasLimit_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         chainSlug = chainSlug_;
         sealGasLimit = sealGasLimit_;
         signatureVerifier__ = signatureVerifier_;
@@ -51,7 +52,7 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
     // @dev sig chain slug is required by signature. On src, this is sibling slug while on
     // destination, it is current chain slug
     function checkTransmitter(
-        uint256 siblingSlug,
+        uint32 siblingSlug,
         bytes32 digest_,
         bytes calldata signature_
     ) external view override returns (address, bool) {
@@ -60,19 +61,22 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
             signature_
         );
 
-        return (transmitter, _hasRoleWithUint(siblingSlug, transmitter));
+        return (
+            transmitter,
+            _hasRole(TRANSMITTER_ROLE, siblingSlug, transmitter)
+        );
     }
 
-    function payFees(uint256 siblingChainSlug_) external payable override {}
+    function payFees(uint32 siblingChainSlug_) external payable override {}
 
     function getMinFees(
-        uint256 siblingChainSlug_
+        uint32 siblingChainSlug_
     ) external view override returns (uint256) {
         return _calculateMinFees(siblingChainSlug_);
     }
 
     function _calculateMinFees(
-        uint256 siblingChainSlug_
+        uint32 siblingChainSlug_
     ) internal view returns (uint256 minTransmissionFees) {
         (
             uint256 sourceGasPrice,
@@ -86,7 +90,7 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
             siblingRelativeGasPrice;
     }
 
-    function withdrawFees(address account_) external onlyOwner {
+    function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         FeesHelper.withdrawFees(account_);
     }
 
@@ -94,7 +98,9 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
      * @notice updates seal gas limit
      * @param gasLimit_ new seal gas limit
      */
-    function setSealGasLimit(uint256 gasLimit_) external onlyOwner {
+    function setSealGasLimit(
+        uint256 gasLimit_
+    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         sealGasLimit = gasLimit_;
         emit SealGasLimitSet(gasLimit_);
     }
@@ -106,7 +112,7 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
     function setProposeGasLimit(
         uint256 dstChainSlug_,
         uint256 gasLimit_
-    ) external onlyOwner {
+    ) external onlyRoleWithChainSlug(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
         proposeGasLimit[dstChainSlug_] = gasLimit_;
         emit ProposeGasLimitSet(dstChainSlug_, gasLimit_);
     }
@@ -115,7 +121,9 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
      * @notice updates gasPriceOracle__
      * @param gasPriceOracle_ address of Gas Price Oracle
      */
-    function setGasPriceOracle(address gasPriceOracle_) external onlyOwner {
+    function setGasPriceOracle(
+        address gasPriceOracle_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         emit GasPriceOracleSet(gasPriceOracle_);
     }
@@ -126,7 +134,7 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
      */
     function setSignatureVerifier(
         address signatureVerifier_
-    ) external onlyOwner {
+    ) external onlyRole(GOVERNANCE_ROLE) {
         signatureVerifier__ = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
     }
@@ -135,7 +143,7 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
         address token_,
         address userAddress_,
         uint256 amount_
-    ) external onlyOwner {
+    ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

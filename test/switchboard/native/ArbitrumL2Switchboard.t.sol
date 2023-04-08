@@ -54,12 +54,11 @@ contract ArbitrumL2SwitchboardTest is Setup {
 
         singleCapacitor.addPackedMessage(packedMessage);
 
-        (
-            bytes32 root,
-            uint256 packetId,
-            bytes memory sig
-        ) = _getLatestSignature(_a, address(singleCapacitor), _b.chainSlug);
-        uint256 capacitorPacketCount = uint256(uint64(packetId));
+        (, bytes32 packetId, ) = _getLatestSignature(
+            _a,
+            address(singleCapacitor),
+            _b.chainSlug
+        );
         vm.mockCall(
             address(arbitrumL2Switchboard.arbsys__()),
             abi.encodeWithSelector(
@@ -86,6 +85,16 @@ contract ArbitrumL2SwitchboardTest is Setup {
     ) internal {
         // deploy socket setup
         deploySocket(cc_, _socketOwner);
+
+        vm.startPrank(_socketOwner);
+
+        cc_.transmitManager__.grantRole(
+            GAS_LIMIT_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        vm.stopPrank();
 
         hoax(_socketOwner);
         cc_.transmitManager__.setProposeGasLimit(
@@ -114,8 +123,11 @@ contract ArbitrumL2SwitchboardTest is Setup {
 
         cc_.hasher__ = new Hasher();
         cc_.sigVerifier__ = new SignatureVerifier();
-        cc_.capacitorFactory__ = new CapacitorFactory();
-        cc_.gasPriceOracle__ = new GasPriceOracle(deployer_, cc_.chainSlug);
+        cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
+        cc_.gasPriceOracle__ = new GasPriceOracle(
+            deployer_,
+            uint32(cc_.chainSlug)
+        );
         cc_.executionManager__ = new ExecutionManager(
             cc_.gasPriceOracle__,
             deployer_
@@ -129,6 +141,9 @@ contract ArbitrumL2SwitchboardTest is Setup {
             _sealGasLimit
         );
 
+        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
+        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
+
         cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
 
         cc_.socket__ = new Socket(
@@ -136,7 +151,8 @@ contract ArbitrumL2SwitchboardTest is Setup {
             address(cc_.hasher__),
             address(cc_.transmitManager__),
             address(cc_.executionManager__),
-            address(cc_.capacitorFactory__)
+            address(cc_.capacitorFactory__),
+            deployer_
         );
 
         vm.stopPrank();
@@ -157,6 +173,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
         );
 
         vm.startPrank(_socketOwner);
+        arbitrumL2Switchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         arbitrumL2Switchboard.setExecutionOverhead(_executionOverhead);
         vm.stopPrank();
 
@@ -197,8 +214,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
         );
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
 
-        arbitrumL2Switchboard.setCapacitor(address(singleCapacitor));
-
+        arbitrumL2Switchboard.grantRole(GOVERNANCE_ROLE, deployer_);
         vm.stopPrank();
     }
 }

@@ -5,8 +5,8 @@ import "../../interfaces/native-bridge/IInbox.sol";
 import "../../interfaces/native-bridge/IOutbox.sol";
 import "../../interfaces/native-bridge/IBridge.sol";
 import "../../interfaces/native-bridge/INativeReceiver.sol";
-
 import "./NativeSwitchboardBase.sol";
+import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     address public remoteRefundAddress;
@@ -17,7 +17,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     IInbox public inbox__;
 
     // stores the roots received from native bridge
-    mapping(uint256 => bytes32) public roots;
+    mapping(bytes32 => bytes32) public roots;
 
     event UpdatedInboxAddress(address inbox);
     event UpdatedRefundAddresses(
@@ -25,7 +25,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         address callValueRefundAddress
     );
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
-    event RootReceived(uint256 packetId, bytes32 root);
+    event RootReceived(bytes32 packetId, bytes32 root);
     event UpdatedDynamicFees(uint256 dynamicFees);
 
     error InvalidSender();
@@ -50,7 +50,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         address inbox_,
         address owner_,
         IGasPriceOracle gasPriceOracle_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         dynamicFees = dynamicFees_;
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
         executionOverhead = executionOverhead_;
@@ -64,12 +64,12 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     }
 
     function initateNativeConfirmation(
-        uint256 packetId_,
+        bytes32 packetId_,
         uint256 maxSubmissionCost_,
         uint256 maxGas_,
         uint256 gasPriceBid_
     ) external payable {
-        uint256 capacitorPacketCount = uint256(uint64(packetId_));
+        uint64 capacitorPacketCount = uint64(uint256(packetId_));
         bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
         if (root == bytes32(0)) revert NoRootFound();
 
@@ -98,7 +98,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     }
 
     function receivePacket(
-        uint256 packetId_,
+        bytes32 packetId_,
         bytes32 root_
     ) external override onlyRemoteSwitchboard {
         roots[packetId_] = root_;
@@ -111,8 +111,8 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
      */
     function allowPacket(
         bytes32 root_,
-        uint256 packetId_,
-        uint256,
+        bytes32 packetId_,
+        uint32,
         uint256
     ) external view override returns (bool) {
         if (tripGlobalFuse) return false;
@@ -135,7 +135,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
     function updateRefundAddresses(
         address remoteRefundAddress_,
         address callValueRefundAddress_
-    ) external onlyOwner {
+    ) external onlyRole(GOVERNANCE_ROLE) {
         remoteRefundAddress = remoteRefundAddress_;
         callValueRefundAddress = callValueRefundAddress_;
 
@@ -145,19 +145,23 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         );
     }
 
-    function updateDynamicFees(uint256 dynamicFees_) external onlyOwner {
+    function updateDynamicFees(
+        uint256 dynamicFees_
+    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         dynamicFees = dynamicFees_;
         emit UpdatedDynamicFees(dynamicFees_);
     }
 
-    function updateInboxAddresses(address inbox_) external onlyOwner {
+    function updateInboxAddresses(
+        address inbox_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         inbox__ = IInbox(inbox_);
         emit UpdatedInboxAddress(inbox_);
     }
 
     function updateRemoteNativeSwitchboard(
         address remoteNativeSwitchboard_
-    ) external onlyOwner {
+    ) external onlyRole(GOVERNANCE_ROLE) {
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }

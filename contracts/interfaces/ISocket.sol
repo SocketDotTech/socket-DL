@@ -3,6 +3,17 @@ pragma solidity 0.8.7;
 
 interface ISocket {
     /**
+     * @param transmissionFees fees needed for transmission
+     * @param switchboardFees fees needed by switchboard
+     * @param executionFee fees needed for execution
+     */
+    struct Fees {
+        uint256 transmissionFees;
+        uint256 switchboardFees;
+        uint256 executionFee;
+    }
+
+    /**
      * @notice emits the message details when a new message arrives at outbound
      * @param localChainSlug local chain slug
      * @param localPlug local plug address
@@ -10,40 +21,38 @@ interface ISocket {
      * @param dstPlug remote plug address
      * @param msgId message id packed with remoteChainSlug and nonce
      * @param msgGasLimit gas limit needed to execute the inbound at remote
-     * @param totalFees total fees provided by msg sender
      * @param payload the data which will be used by inbound at remote
      */
-    event MessageTransmitted(
+    event MessageOutbound(
         uint256 localChainSlug,
         address localPlug,
         uint256 dstChainSlug,
         address dstPlug,
-        uint256 msgId,
+        bytes32 msgId,
         uint256 msgGasLimit,
-        uint256 executionFee,
-        uint256 totalFees,
-        bytes payload
+        bytes payload,
+        Fees fees
     );
 
     /**
      * @notice emits the status of message after inbound call
      * @param msgId msg id which is executed
      */
-    event ExecutionSuccess(uint256 msgId);
+    event ExecutionSuccess(bytes32 msgId);
 
     /**
      * @notice emits the status of message after inbound call
      * @param msgId msg id which is executed
      * @param result if message reverts, returns the revert message
      */
-    event ExecutionFailed(uint256 msgId, string result);
+    event ExecutionFailed(bytes32 msgId, string result);
 
     /**
      * @notice emits the error message in bytes after inbound call
      * @param msgId msg id which is executed
      * @param result if message reverts, returns the revert message in bytes
      */
-    event ExecutionFailedBytes(uint256 msgId, bytes result);
+    event ExecutionFailedBytes(bytes32 msgId, bytes result);
 
     /**
      * @notice emits the config set by a plug for a remoteChainSlug
@@ -82,10 +91,10 @@ interface ISocket {
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes calldata payload_
-    ) external payable returns (uint256 msgId);
+    ) external payable returns (bytes32 msgId);
 
     struct MessageDetails {
-        uint256 msgId;
+        bytes32 msgId;
         uint256 executionFee;
         uint256 msgGasLimit;
         bytes payload;
@@ -99,7 +108,7 @@ interface ISocket {
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
-        uint256 packetId,
+        bytes32 packetId,
         address localPlug,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature
@@ -119,5 +128,5 @@ interface ISocket {
         address outboundSwitchboard_
     ) external;
 
-    function remoteRoots(uint256 packetId_) external view returns (bytes32);
+    function packetIdRoots(bytes32 packetId_) external view returns (bytes32);
 }

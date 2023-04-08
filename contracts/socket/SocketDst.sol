@@ -15,10 +15,10 @@ abstract contract SocketDst is SocketBase {
     error VerificationFailed();
 
     // msgId => message status
-    mapping(uint256 => bool) public messageExecuted;
+    mapping(bytes32 => bool) public messageExecuted;
     // capacitorAddr|chainSlug|packetId
-    mapping(uint256 => bytes32) public override remoteRoots;
-    mapping(uint256 => uint256) public rootProposedAt;
+    mapping(bytes32 => bytes32) public override packetIdRoots;
+    mapping(bytes32 => uint256) public rootProposedAt;
 
     /**
      * @notice emits the packet details when proposed at remote
@@ -28,7 +28,7 @@ abstract contract SocketDst is SocketBase {
      */
     event PacketProposed(
         address indexed transmitter,
-        uint256 indexed packetId,
+        bytes32 indexed packetId,
         bytes32 root
     );
 
@@ -38,38 +38,38 @@ abstract contract SocketDst is SocketBase {
      * @param oldRoot old root
      * @param newRoot old root
      */
-    event PacketRootUpdated(uint256 packetId, bytes32 oldRoot, bytes32 newRoot);
+    event PacketRootUpdated(bytes32 packetId, bytes32 oldRoot, bytes32 newRoot);
 
     function propose(
-        uint256 packetId_,
+        bytes32 packetId_,
         bytes32 root_,
         bytes calldata signature_
     ) external {
-        if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
+        if (packetIdRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
 
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
-                _getChainSlug(packetId_) << 128,
+                _getChainSlug(packetId_),
                 keccak256(abi.encode(chainSlug, packetId_, root_)),
                 signature_
             );
 
         if (!isTransmitter) revert InvalidAttester();
 
-        remoteRoots[packetId_] = root_;
+        packetIdRoots[packetId_] = root_;
         rootProposedAt[packetId_] = block.timestamp;
 
         emit PacketProposed(transmitter, packetId_, root_);
     }
 
     /**
-     * @notice executes a message
+     * @notice executes a message, fees will go to recovered executor address
      * @param packetId_ packet id
      * @param localPlug_ remote plug address
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
-        uint256 packetId_,
+        bytes32 packetId_,
         address localPlug_,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature_
@@ -80,9 +80,7 @@ abstract contract SocketDst is SocketBase {
 
         uint256 remoteSlug = uint256(messageDetails_.msgId >> 224);
 
-        PlugConfig storage plugConfig = _plugConfigs[
-            (uint256(uint160(localPlug_)) << 96) | remoteSlug
-        ];
+        PlugConfig storage plugConfig = _plugConfigs[localPlug_][remoteSlug];
 
         bytes32 packedMessage = hasher__.packMessage(
             remoteSlug,
@@ -95,10 +93,8 @@ abstract contract SocketDst is SocketBase {
             messageDetails_.payload
         );
 
-        (, bool isValidExecutor) = executionManager__.isExecutor(
-            packedMessage,
-            signature_
-        );
+        (address executor, bool isValidExecutor) = executionManager__
+            .isExecutor(packedMessage, signature_);
         if (!isValidExecutor) revert NotExecutor();
 
         _verify(
@@ -109,6 +105,8 @@ abstract contract SocketDst is SocketBase {
             messageDetails_.decapacitorProof
         );
         _execute(
+            executor,
+            messageDetails_.executionFee,
             localPlug_,
             remoteSlug,
             messageDetails_.msgGasLimit,
@@ -118,7 +116,7 @@ abstract contract SocketDst is SocketBase {
     }
 
     function _verify(
-        uint256 packetId_,
+        bytes32 packetId_,
         uint256 remoteChainSlug_,
         bytes32 packedMessage_,
         PlugConfig storage plugConfig_,
@@ -126,16 +124,16 @@ abstract contract SocketDst is SocketBase {
     ) internal view {
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
-                remoteRoots[packetId_],
+                packetIdRoots[packetId_],
                 packetId_,
-                remoteChainSlug_,
+                uint32(remoteChainSlug_),
                 rootProposedAt[packetId_]
             )
         ) revert VerificationFailed();
 
         if (
             !plugConfig_.decapacitor__.verifyMessageInclusion(
-                remoteRoots[packetId_],
+                packetIdRoots[packetId_],
                 packedMessage_,
                 decapacitorProof_
             )
@@ -143,10 +141,12 @@ abstract contract SocketDst is SocketBase {
     }
 
     function _execute(
+        address executor,
+        uint256 executionFee,
         address localPlug_,
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
-        uint256 msgId_,
+        bytes32 msgId_,
         bytes calldata payload_
     ) internal {
         try
@@ -155,6 +155,11 @@ abstract contract SocketDst is SocketBase {
                 payload_
             )
         {
+            executionManager__.updateExecutionFees(
+                executor,
+                executionFee,
+                msgId_
+            );
             emit ExecutionSuccess(msgId_);
         } catch Error(string memory reason) {
             // catch failing revert() and require()
@@ -167,28 +172,13 @@ abstract contract SocketDst is SocketBase {
         }
     }
 
-    /**
-     * @notice updates root for given packet id
-     * @param packetId_ id of packet to be updated
-     * @param newRoot_ new root
-     */
-    function updatePacketRoot(
-        uint256 packetId_,
-        bytes32 newRoot_
-    ) external onlyOwner {
-        bytes32 oldRoot = remoteRoots[packetId_];
-        remoteRoots[packetId_] = newRoot_;
-
-        emit PacketRootUpdated(packetId_, oldRoot, newRoot_);
-    }
-
-    function isPacketProposed(uint256 packetId_) external view returns (bool) {
-        return remoteRoots[packetId_] == bytes32(0) ? false : true;
+    function isPacketProposed(bytes32 packetId_) external view returns (bool) {
+        return packetIdRoots[packetId_] == bytes32(0) ? false : true;
     }
 
     function _getChainSlug(
-        uint256 packetId_
-    ) internal pure returns (uint256 chainSlug_) {
-        chainSlug_ = uint32(packetId_ >> 224);
+        bytes32 packetId_
+    ) internal pure returns (uint32 chainSlug_) {
+        chainSlug_ = uint32(uint256(packetId_) >> 224);
     }
 }

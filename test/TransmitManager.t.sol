@@ -9,9 +9,9 @@ contract TransmitManagerTest is Setup {
     address public constant NATIVE_TOKEN_ADDRESS =
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
-    uint256 chainSlug = uint32(uint256(0x2013AA263));
-    uint256 destChainSlug = uint32(uint256(0x2013AA264));
-    uint256 chainSlug2 = uint32(uint256(0x2113AA263));
+    uint32 chainSlug = uint32(uint256(0x2013AA263));
+    uint32 destChainSlug = uint32(uint256(0x2013AA264));
+    uint32 chainSlug2 = uint32(uint256(0x2113AA263));
 
     uint256 immutable ownerPrivateKey = c++;
     address owner;
@@ -64,9 +64,15 @@ contract TransmitManagerTest is Setup {
         );
 
         vm.startPrank(owner);
+        gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
+        gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
         gasPriceOracle.setTransmitManager(transmitManager);
-        transmitManager.grantRoleWithUint(chainSlug, transmitter);
-        transmitManager.grantRoleWithUint(destChainSlug, transmitter);
+        transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug, transmitter);
+        transmitManager.grantRole(TRANSMITTER_ROLE, destChainSlug, transmitter);
+        transmitManager.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
+        transmitManager.grantRole(RESCUE_ROLE, owner);
+        transmitManager.grantRole(WITHDRAW_ROLE, owner);
+        transmitManager.grantRole(GOVERNANCE_ROLE, owner);
 
         vm.expectEmit(false, false, false, true);
         emit SealGasLimitSet(sealGasLimit);
@@ -189,33 +195,61 @@ contract TransmitManagerTest is Setup {
 
     function testGrantTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRoleWithUint(chainSlug2, nonTransmitter)
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                chainSlug2,
+                nonTransmitter
+            )
         );
 
         vm.startPrank(owner);
-        transmitManager.grantRoleWithUint(chainSlug2, nonTransmitter);
+        transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter);
         vm.stopPrank();
 
-        assertTrue(transmitManager.hasRoleWithUint(chainSlug2, nonTransmitter));
+        assertTrue(
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                chainSlug2,
+                nonTransmitter
+            )
+        );
     }
 
     function testRevokeTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRoleWithUint(chainSlug2, nonTransmitter)
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                chainSlug2,
+                nonTransmitter
+            )
         );
 
         vm.startPrank(owner);
-        transmitManager.grantRoleWithUint(chainSlug2, nonTransmitter);
+        transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug2, nonTransmitter);
         vm.stopPrank();
 
-        assertTrue(transmitManager.hasRoleWithUint(chainSlug2, nonTransmitter));
+        assertTrue(
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                chainSlug2,
+                nonTransmitter
+            )
+        );
 
         vm.startPrank(owner);
-        transmitManager.revokeRoleWithUint(chainSlug2, nonTransmitter);
+        transmitManager.revokeRole(
+            TRANSMITTER_ROLE,
+            chainSlug2,
+            nonTransmitter
+        );
         vm.stopPrank();
 
         assertFalse(
-            transmitManager.hasRoleWithUint(chainSlug2, nonTransmitter)
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                chainSlug2,
+                nonTransmitter
+            )
         );
     }
 
