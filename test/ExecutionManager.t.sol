@@ -90,7 +90,12 @@ contract ExecutionManagerTest is Setup {
         );
 
         digest = keccak256(
-            abi.encode(destChainSlug, gasPriceOracleNonce, relativeGasPrice)
+            abi.encode(
+                chainSlug,
+                destChainSlug,
+                gasPriceOracleNonce,
+                relativeGasPrice
+            )
         );
         sig = _createSignature(digest, transmitterPrivateKey);
 

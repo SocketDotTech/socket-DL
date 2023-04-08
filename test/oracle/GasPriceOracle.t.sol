@@ -18,7 +18,10 @@ contract GasPriceOracleTest is Setup {
 
     uint256 gasPriceOracleNonce;
 
-    event GasPriceUpdated(uint256 dstChainSlug_, uint256 relativeGasPrice_);
+    event RelativeGasPriceUpdated(
+        uint256 dstChainSlug_,
+        uint256 relativeGasPrice_
+    );
     event TransmitManagerUpdated(address transmitManager);
     event SourceGasPriceUpdated(uint256 sourceGasPrice);
     error TransmitterNotFound();
@@ -69,10 +72,15 @@ contract GasPriceOracleTest is Setup {
         uint256 relativeGasPrice = 1200000;
 
         vm.expectEmit(false, false, false, true);
-        emit GasPriceUpdated(destChainSlug, relativeGasPrice);
+        emit RelativeGasPriceUpdated(destChainSlug, relativeGasPrice);
 
         bytes32 digest = keccak256(
-            abi.encode(destChainSlug, gasPriceOracleNonce, relativeGasPrice)
+            abi.encode(
+                chainSlug,
+                destChainSlug,
+                gasPriceOracleNonce,
+                relativeGasPrice
+            )
         );
         bytes memory sig = _createSignature(digest, transmitterPrivateKey);
 
@@ -82,8 +90,6 @@ contract GasPriceOracleTest is Setup {
             relativeGasPrice,
             sig
         );
-
-        vm.stopPrank();
 
         assert(
             gasPriceOracle.relativeGasPrice(destChainSlug) == relativeGasPrice
@@ -106,7 +112,12 @@ contract GasPriceOracleTest is Setup {
         );
 
         digest = keccak256(
-            abi.encode(destChainSlug, gasPriceOracleNonce, relativeGasPrice)
+            abi.encode(
+                chainSlug,
+                destChainSlug,
+                gasPriceOracleNonce,
+                relativeGasPrice
+            )
         );
         sig = _createSignature(digest, transmitterPrivateKey);
 
@@ -132,7 +143,12 @@ contract GasPriceOracleTest is Setup {
 
         vm.expectRevert(TransmitterNotFound.selector);
         bytes32 digest = keccak256(
-            abi.encode(destChainSlug, gasPriceOracleNonce, relativeGasPrice)
+            abi.encode(
+                chainSlug,
+                destChainSlug,
+                gasPriceOracleNonce,
+                relativeGasPrice
+            )
         );
         bytes memory sig = _createSignature(digest, _altTransmitterPrivateKey);
 
