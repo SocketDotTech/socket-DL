@@ -115,6 +115,30 @@ interface ISocket {
     ) external;
 
     /**
+     * @notice seals data in capacitor for specific batchSizr
+     * @param batchSize_ size of batch to be sealed
+     * @param capacitorAddress_ address of capacitor
+     * @param signature_ signed Data needed for verification
+     */
+    function seal(
+        uint256 batchSize_,
+        address capacitorAddress_,
+        bytes calldata signature_
+    ) external payable;
+
+    /**
+     * @notice proposes a packet
+     * @param packetId_ packet id
+     * @param root_ root data
+     * @param signature_ signed Data needed for verification
+     */
+    function propose(
+        bytes32 packetId_,
+        bytes32 root_,
+        bytes calldata signature_
+    ) external;
+
+    /**
      * @notice sets the config specific to the plug
      * @param siblingChainSlug_ the sibling chain slug
      * @param siblingPlug_ address of plug present at sibling chain to call inbound

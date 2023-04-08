@@ -158,7 +158,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 batchSize_,
         address capacitorAddress_,
         bytes calldata signature_
-    ) external payable {
+    ) external override payable {
         (bytes32 root, uint64 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket(batchSize_);
 
