@@ -44,7 +44,7 @@ abstract contract SocketDst is SocketBase {
         bytes32 packetId_,
         bytes32 root_,
         bytes calldata signature_
-    ) external {
+    ) external override {
         if (packetIdRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
 
         (address transmitter, bool isTransmitter) = transmitManager__

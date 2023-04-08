@@ -101,6 +101,7 @@ export interface ChainSocketAddresses {
   FastSwitchboard?: string;
   OptimisticSwitchboard?: string;
   integrations?: Integrations;
+  SocketBatcher?: string;
 }
 
 export type DeploymentAddresses = {
