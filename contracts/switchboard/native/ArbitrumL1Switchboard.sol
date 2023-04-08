@@ -70,7 +70,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         uint256 gasPriceBid_
     ) external payable {
         uint256 capacitorPacketCount = uint256(uint64(packetId_));
-        bytes32 root = capacitor__.getRootById(capacitorPacketCount);
+        bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
         if (root == bytes32(0)) revert NoRootFound();
 
         bytes memory data = abi.encodeWithSelector(

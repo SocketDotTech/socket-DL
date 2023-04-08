@@ -5,7 +5,12 @@ import "../interfaces/IDecapacitor.sol";
 import "../libraries/RescueFundsLib.sol";
 import "../utils/Ownable.sol";
 
-contract HashChainDecapacitor is IDecapacitor, Ownable(msg.sender) {
+contract HashChainDecapacitor is IDecapacitor, Ownable {
+    /**
+     * @notice initialises the contract with owner address
+     */
+    constructor(address owner_) Ownable(owner_) {}
+
     /// returns if the packed message is the part of a merkle tree or not
     /// @inheritdoc IDecapacitor
     function verifyMessageInclusion(

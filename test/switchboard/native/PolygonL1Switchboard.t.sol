@@ -172,6 +172,7 @@ contract PolygonL1SwitchboardTest is Setup {
         vm.startPrank(deployer_);
         cc_.socket__.registerSwitchBoard(
             switchBoardAddress_,
+            DEFAULT_BATCH_LENGTH,
             uint32(remoteChainSlug_),
             uint32(capacitorType_)
         );

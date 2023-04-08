@@ -47,6 +47,7 @@ abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
 
     function registerSwitchBoard(
         address switchBoardAddress_,
+        uint256 maxBatchLength_,
         uint32 siblingChainSlug_,
         uint32 capacitorType_
     ) external {
@@ -59,7 +60,11 @@ abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
         (
             ICapacitor capacitor__,
             IDecapacitor decapacitor__
-        ) = capacitorFactory__.deploy(capacitorType_, siblingChainSlug_);
+        ) = capacitorFactory__.deploy(
+                capacitorType_,
+                siblingChainSlug_,
+                maxBatchLength_
+            );
 
         capacitorToSlug[address(capacitor__)] = siblingChainSlug_;
         capacitors__[switchBoardAddress_][siblingChainSlug_] = capacitor__;

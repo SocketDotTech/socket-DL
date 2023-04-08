@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "forge-std/Test.sol";
-import "../../contracts/capacitors/HashChainCapacitor.sol";
-import "../../contracts/decapacitors/HashChainDecapacitor.sol";
+import "../Setup.t.sol";
 
-contract HashChainCapacitorTest is Test {
-    uint256 internal c = 1;
+contract HashChainCapacitorTest is Setup {
     address immutable _owner = address(uint160(c++));
     address immutable _socket = address(uint160(c++));
-    address immutable _raju = address(uint160(c++));
+
     bytes32 immutable _message_0 = bytes32(c++);
     bytes32 immutable _message_1 = bytes32(c++);
     bytes32 immutable _message_2 = bytes32(c++);
@@ -20,30 +17,17 @@ contract HashChainCapacitorTest is Test {
 
     function setUp() external {
         hoax(_owner);
-        _hcCapacitor = new HashChainCapacitor(_socket);
-        _hcDecapacitor = new HashChainDecapacitor();
+        _hcCapacitor = new HashChainCapacitor(_socket, _owner);
+        _hcDecapacitor = new HashChainDecapacitor(_owner);
     }
 
     function testSetUp() external {
         assertEq(_hcCapacitor.owner(), _owner, "Owner not set");
 
-        assertTrue(
-            _hcCapacitor.hasRole(_hcCapacitor.SOCKET_ROLE(), _socket),
-            "Socket role not set"
-        );
+        assertTrue(_hcCapacitor.socket() == _socket, "Socket role not set");
 
         _assertPacketById(bytes32(0), 0);
         _assertPacketToBeSealed(bytes32(0), 0);
-    }
-
-    function testSetSocket() external {
-        address newSocket = address(8);
-        vm.expectRevert(Ownable.OnlyOwner.selector);
-        _hcCapacitor.setSocket(newSocket);
-
-        hoax(_owner);
-        _hcCapacitor.setSocket(newSocket);
-        assertTrue(_hcCapacitor.hasRole(_hcCapacitor.SOCKET_ROLE(), newSocket));
     }
 
     function testAddMessage() external {
@@ -88,7 +72,7 @@ contract HashChainCapacitorTest is Test {
 
         hashedRoot = keccak256(abi.encode(hashedRoot, _message_2));
 
-        bytes32 root = _hcCapacitor.getRootById(0);
+        bytes32 root = _hcCapacitor.getRootByCount(0);
         assertEq(root, hashedRoot);
 
         roots.push(_message_0);
@@ -108,10 +92,7 @@ contract HashChainCapacitorTest is Test {
 
     function testAddMessageByRaju() external {
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControl.NoPermit.selector,
-                _hcCapacitor.SOCKET_ROLE()
-            )
+            abi.encodeWithSelector(BaseCapacitor.OnlySocket.selector)
         );
         hoax(_raju);
         _hcCapacitor.addPackedMessage(_message_0);
@@ -120,13 +101,10 @@ contract HashChainCapacitorTest is Test {
     function testSealPacketByRaju() external {
         _addPackedMessage(_message_0);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControl.NoPermit.selector,
-                _hcCapacitor.SOCKET_ROLE()
-            )
+            abi.encodeWithSelector(BaseCapacitor.OnlySocket.selector)
         );
         hoax(_raju);
-        _hcCapacitor.sealPacket();
+        _hcCapacitor.sealPacket(DEFAULT_BATCH_LENGTH);
     }
 
     function _assertPacketToBeSealed(bytes32 root_, uint256 packetId_) private {
@@ -137,13 +115,13 @@ contract HashChainCapacitorTest is Test {
 
     function _assertNextPacket(bytes32 root_, uint256 packetId_) private {
         uint256 nextPacketId = _hcCapacitor.getLatestPacketCount() + 1;
-        bytes32 root = _hcCapacitor.getRootById(nextPacketId);
+        bytes32 root = _hcCapacitor.getRootByCount(nextPacketId);
         assertEq(root, root_, "Root Invalid");
         assertEq(nextPacketId, packetId_, "packetId Invalid");
     }
 
     function _assertPacketById(bytes32 root_, uint256 packetId_) private {
-        bytes32 root = _hcCapacitor.getRootById(packetId_);
+        bytes32 root = _hcCapacitor.getRootByCount(packetId_);
         bytes32 packedRoot = root_;
         if (root != bytes32(0))
             packedRoot = keccak256(abi.encode(bytes32(0), root_));
@@ -157,6 +135,6 @@ contract HashChainCapacitorTest is Test {
 
     function _sealPacket() private returns (bytes32 root, uint256 packetId) {
         hoax(_socket);
-        (root, packetId) = _hcCapacitor.sealPacket();
+        (root, packetId) = _hcCapacitor.sealPacket(DEFAULT_BATCH_LENGTH);
     }
 }

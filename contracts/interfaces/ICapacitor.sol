@@ -15,13 +15,6 @@ interface ICapacitor {
     );
 
     /**
-     * @notice emits when the packet is sealed and indicates it can be send to remote
-     * @param rootHash the packed message hash (to be replaced with the root hash of the merkle tree)
-     * @param packetCount an incremental id assigned to each new packet
-     */
-    event PacketComplete(bytes32 rootHash, uint256 packetCount);
-
-    /**
      * @notice adds the packed message to a packet
      * @dev this should be only executable by socket
      * @dev it will be later replaced with a function adding each message to a merkle tree
@@ -44,7 +37,7 @@ interface ICapacitor {
      * @param id the id assigned to packet
      * @return root root hash corresponding to given id
      */
-    function getRootById(uint256 id) external view returns (bytes32 root);
+    function getRootByCount(uint256 id) external view returns (bytes32 root);
 
     /**
      * @notice seals the packet
@@ -53,5 +46,7 @@ interface ICapacitor {
      * @return root root hash of the packet
      * @return packetCount id of the packed sealed
      */
-    function sealPacket() external returns (bytes32 root, uint256 packetCount);
+    function sealPacket(
+        uint256 batchSize_
+    ) external returns (bytes32 root, uint256 packetCount);
 }
