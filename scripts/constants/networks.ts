@@ -1,4 +1,5 @@
 import { config as dotenvConfig } from "dotenv";
+import { ethers } from "ethers";
 import { resolve } from "path";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
@@ -39,33 +40,58 @@ export const networkToChainId = {
 export function getJsonRpcUrl(chain: keyof typeof chainIds): string {
   let jsonRpcUrl: string;
   switch (chain) {
-    case "arbitrum-goerli":
-      jsonRpcUrl = "https://goerli-rollup.arbitrum.io/rpc";
-      break;
-    case "optimism-goerli":
-      jsonRpcUrl = "https://goerli.optimism.io";
-      break;
-    case "polygon-mumbai":
-      jsonRpcUrl = "https://matic-mumbai.chainstacklabs.com";
-      break;
-    case "avalanche":
-      jsonRpcUrl = "https://api.avax.network/ext/bc/C/rpc";
-      break;
-    case "bsc":
-      jsonRpcUrl = "https://bsc-dataseed1.binance.org";
-      break;
-    case "bsc-testnet":
-      jsonRpcUrl = "https://data-seed-prebsc-1-s1.binance.org:8545";
-      break;
-    case "optimism":
-      jsonRpcUrl = "https://mainnet.optimism.io";
-      break;
     case "arbitrum":
-      jsonRpcUrl = "https://arb1.arbitrum.io/rpc ";
+      jsonRpcUrl = process.env.ARBITRUM_RPC as string;
       break;
+
+    case "arbitrum-goerli":
+      jsonRpcUrl = process.env.ARBITRUM_GOERLI_RPC as string;
+      break;
+
+    case "optimism":
+      jsonRpcUrl = process.env.OPTIMISM_RPC as string;
+      break;
+
+    case "optimism-goerli":
+      jsonRpcUrl = process.env.OPTIMISM_GOERLI_RPC as string;
+      break;
+
+    case "polygon-mainnet":
+      jsonRpcUrl = process.env.POLYGON_RPC as string;
+      break;
+
+    case "polygon-mumbai":
+      jsonRpcUrl = process.env.POLYGON_MUMBAI_RPC as string;
+      break;
+
+    case "avalanche":
+      jsonRpcUrl = process.env.AVAX_RPC as string;
+      break;
+
+    case "bsc":
+      jsonRpcUrl = process.env.BSC_RPC as string;
+      break;
+
+    case "bsc-testnet":
+      jsonRpcUrl = process.env.BSC_TESTNET_RPC as string;
+      break;
+
+    case "mainnet":
+      jsonRpcUrl = process.env.ETHEREUM_RPC as string;
+      break;
+
+    case "goerli":
+      jsonRpcUrl = process.env.GOERLI_RPC as string;
+      break;
+
     default:
       jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
   }
 
   return jsonRpcUrl;
 }
+
+export const getProviderFromChainName = (chainId: keyof typeof chainIds) => {
+  const jsonRpcUrl = getJsonRpcUrl(chainId);
+  return new ethers.providers.StaticJsonRpcProvider(jsonRpcUrl);
+};
