@@ -37,6 +37,11 @@ contract SocketBatcher is AccessControlExtended {
         bytes signature;
     }
 
+    /**
+     * @notice seal a batch of packets from capacitor on sourceChain mentioned in sealRequests
+     * @param socketAddress_ address of socket
+     * @param sealRequests_ the list of requests with packets to be sealed on sourceChain
+     */
     function sealBatch(
         address socketAddress_,
         SealRequest[] calldata sealRequests_
@@ -54,6 +59,11 @@ contract SocketBatcher is AccessControlExtended {
         }
     }
 
+    /**
+     * @notice propose a batch of packets sequentially by socketDestination
+     * @param socketAddress_ address of socket
+     * @param proposeRequests_ the list of requests with packets to be proposed by socketDestination
+     */
     function proposeBatch(
         address socketAddress_,
         ProposeRequest[] calldata proposeRequests_
@@ -71,6 +81,11 @@ contract SocketBatcher is AccessControlExtended {
         }
     }
 
+    /**
+     * @notice attests a batch of Packets
+     * @param switchBoardAddress_ address of switchboard
+     * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
+     */
     function attestBatch(
         address switchBoardAddress_,
         AttestRequest[] calldata attestRequests_
@@ -88,6 +103,11 @@ contract SocketBatcher is AccessControlExtended {
         }
     }
 
+    /**
+     * @notice executes a batch of messages
+     * @param socketAddress_ address of socket
+     * @param executeRequests_ the list of requests with messages to be executed in sequence
+     */
     function executeBatch(
         address socketAddress_,
         ExecuteRequest[] calldata executeRequests_
