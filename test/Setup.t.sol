@@ -14,6 +14,7 @@ import "../contracts/TransmitManager.sol";
 import "../contracts/GasPriceOracle.sol";
 import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
+import {WATCHER_ROLE, TRANSMITTER_ROLE, GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../contracts/utils/AccessRoles.sol";
 
 contract Setup is Test {
     uint256 internal c = 1;
@@ -44,8 +45,6 @@ contract Setup is Test {
     uint256 internal _attestGasLimit = 150000;
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
-    bytes32 internal EXECUTOR_ROLE =
-        0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 0;
 
     struct SocketConfigContext {
@@ -110,7 +109,18 @@ contract Setup is Test {
         // deploy socket setup
         _deploySocket(cc_, _socketOwner);
 
+        vm.startPrank(_socketOwner);
+
+        cc_.transmitManager__.grantRole(
+            GAS_LIMIT_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        vm.stopPrank();
+
         hoax(_socketOwner);
+
         cc_.transmitManager__.setProposeGasLimit(
             remoteChainSlug_,
             _proposeGasLimit
@@ -145,11 +155,17 @@ contract Setup is Test {
         );
         vm.startPrank(_socketOwner);
 
+        optimisticSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         optimisticSwitchboard.setExecutionOverhead(
             remoteChainSlug_,
             _executionOverhead
         );
-        optimisticSwitchboard.grantRoleWithUint(remoteChainSlug_, _watcher);
+        optimisticSwitchboard.grantRole(
+            WATCHER_ROLE,
+            remoteChainSlug_,
+            _watcher
+        );
+
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
@@ -173,12 +189,20 @@ contract Setup is Test {
         );
 
         vm.startPrank(_socketOwner);
+        fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         fastSwitchboard.setExecutionOverhead(
             remoteChainSlug_,
             _executionOverhead
         );
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
         fastSwitchboard.setAttestGasLimit(remoteChainSlug_, _attestGasLimit);
+        console.log(
+            "fastSwitchboard -> total watchers role for chainSlug: ",
+            fastSwitchboard.totalWatchers(remoteChainSlug_),
+            remoteChainSlug_
+        );
+
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
@@ -205,12 +229,21 @@ contract Setup is Test {
             deployer_
         );
 
+        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
+        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
+
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
             cc_.gasPriceOracle__,
             deployer_,
             cc_.chainSlug,
             _sealGasLimit
+        );
+
+        cc_.transmitManager__.grantRole(
+            GAS_LIMIT_UPDATER_ROLE,
+            cc_.chainSlug,
+            deployer_
         );
 
         cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
@@ -272,7 +305,8 @@ contract Setup is Test {
             // deduce transmitter address from private key
             transmitter = vm.addr(transmitterPrivateKeys_[index]);
             // grant transmitter role
-            cc_.transmitManager__.grantRoleWithUint(
+            cc_.transmitManager__.grantRole(
+                TRANSMITTER_ROLE,
                 remoteChainSlug_,
                 transmitter
             );
@@ -330,6 +364,32 @@ contract Setup is Test {
     ) internal {
         hoax(_raju);
         dst_.socket__.propose(packetId_, root_, sig_);
+    }
+
+    function _attestOnDst(
+        ChainContext storage dst_,
+        bytes32 packetId_
+    ) internal {
+        uint256 dstChainSlug = dst_.chainSlug;
+
+        bytes32 digest = keccak256(abi.encode(dstChainSlug, packetId_));
+
+        // generate attest-signature
+        bytes memory attestSignature = _createSignature(
+            digest,
+            _watcherPrivateKey
+        );
+
+        // attest with packetId_, dstChainSlug and signature
+        address switchboardAddress = address(dst_.configs__[0].switchboard__);
+        console.log("switchboardAddress is: ", switchboardAddress);
+        console.log("_watcher is: ", _watcher);
+
+        FastSwitchboard(switchboardAddress).attest(
+            packetId_,
+            dstChainSlug,
+            attestSignature
+        );
     }
 
     function _executePayloadOnDst(

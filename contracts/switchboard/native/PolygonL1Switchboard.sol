@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import "fx-portal/tunnel/FxBaseRootTunnel.sol";
 import "./NativeSwitchboardBase.sol";
+import {GOVERNANCE_ROLE} from "../../utils/AccessRoles.sol";
 
 contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     // stores the roots received from native bridge
@@ -20,7 +21,10 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         address fxRoot_,
         address owner_,
         IGasPriceOracle gasPriceOracle_
-    ) AccessControl(owner_) FxBaseRootTunnel(checkpointManager_, fxRoot_) {
+    )
+        AccessControlExtended(owner_)
+        FxBaseRootTunnel(checkpointManager_, fxRoot_)
+    {
         gasPriceOracle__ = gasPriceOracle_;
 
         initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
@@ -74,7 +78,9 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     }
 
     // set fxChildTunnel if not set already
-    function updateFxChildTunnel(address fxChildTunnel_) external onlyOwner {
+    function updateFxChildTunnel(
+        address fxChildTunnel_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         emit FxChildTunnelSet(fxChildTunnel, fxChildTunnel_);
         fxChildTunnel = fxChildTunnel_;
     }

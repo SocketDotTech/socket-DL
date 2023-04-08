@@ -3,6 +3,8 @@ pragma solidity ^0.8.0;
 
 import "../Setup.t.sol";
 import "lib/openzeppelin-contracts/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
+import "../../contracts/CapacitorFactory.sol";
+import {RESCUE_ROLE} from "../../contracts/utils/AccessRoles.sol";
 
 contract CapacitorFactoryTest is Setup {
     address immutable _owner = address(uint160(c++));
@@ -12,6 +14,7 @@ contract CapacitorFactoryTest is Setup {
 
     CapacitorFactory _cf;
     ERC20PresetFixedSupply _token;
+    error NoPermit(bytes32 role);
 
     function setUp() external {
         uint256 fork = vm.createFork(vm.envString("ETHEREUM_RPC"), 16333752);
@@ -62,13 +65,19 @@ contract CapacitorFactoryTest is Setup {
     function testRescueFunds() external {
         uint256 amount = 1000;
 
+        vm.startPrank(_owner);
+        _cf.grantRole(RESCUE_ROLE, _owner);
+        vm.stopPrank();
+
         hoax(_owner);
         _token.transfer(address(_cf), amount);
 
         uint256 initialBalOfOwner = _token.balanceOf(_raju);
 
         hoax(_raju);
-        vm.expectRevert(Ownable.OnlyOwner.selector);
+        bytes4 selector = bytes4(keccak256("NoPermit(bytes32)"));
+        vm.expectRevert(abi.encodeWithSelector(selector, RESCUE_ROLE));
+
         _cf.rescueFunds(address(_token), _raju, amount);
 
         hoax(_owner);

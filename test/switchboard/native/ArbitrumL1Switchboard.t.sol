@@ -55,17 +55,10 @@ contract ArbitrumL1SwitchboardTest is Setup {
 
         singleCapacitor.addPackedMessage(packedMessage);
 
-        (
-            bytes32 root,
-            bytes32 packetId,
-            bytes memory sig
-        ) = _getLatestSignature(_a, address(singleCapacitor), _b.chainSlug);
-        uint64 capacitorPacketCount = uint64(uint256(packetId));
-
-        bytes memory data = abi.encodeWithSelector(
-            INativeReceiver.receivePacket.selector,
-            142338053211946203843372037510719759027017556012094709780189064200192,
-            "0x46043ac1fe69103527e585b20a75d2288cd87291c71d44ae80c5ce908f1cf169"
+        (, bytes32 packetId, ) = _getLatestSignature(
+            _a,
+            address(singleCapacitor),
+            _b.chainSlug
         );
 
         vm.mockCall(
@@ -99,6 +92,18 @@ contract ArbitrumL1SwitchboardTest is Setup {
     ) internal {
         // deploy socket setup
         deploySocket(cc_, _socketOwner);
+
+        vm.startPrank(_socketOwner);
+
+        cc_.transmitManager__.grantRole(
+            GAS_LIMIT_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        cc_.transmitManager__.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
+
+        vm.stopPrank();
 
         hoax(_socketOwner);
         cc_.transmitManager__.setProposeGasLimit(
@@ -145,6 +150,9 @@ contract ArbitrumL1SwitchboardTest is Setup {
             _sealGasLimit
         );
 
+        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
+        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
+
         cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
 
         cc_.socket__ = new Socket(
@@ -175,6 +183,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
         );
 
         vm.startPrank(_socketOwner);
+        arbitrumL1Switchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         arbitrumL1Switchboard.setExecutionOverhead(_executionOverhead);
         vm.stopPrank();
 
@@ -214,6 +223,8 @@ contract ArbitrumL1SwitchboardTest is Setup {
             remoteChainSlug_
         );
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
+
+        arbitrumL1Switchboard.grantRole(GOVERNANCE_ROLE, deployer_);
         vm.stopPrank();
     }
 }

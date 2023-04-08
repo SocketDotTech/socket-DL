@@ -2,10 +2,11 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ICapacitor.sol";
-import "../utils/Ownable.sol";
+import "../utils/AccessControlExtended.sol";
 import "../libraries/RescueFundsLib.sol";
+import {SOCKET_ROLE, RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
-abstract contract BaseCapacitor is ICapacitor, Ownable {
+abstract contract BaseCapacitor is ICapacitor, AccessControlExtended {
     /// an incrementing id for each new packet created
     uint64 internal _nextPacketCount;
     uint64 internal _nextSealCount;
@@ -27,7 +28,7 @@ abstract contract BaseCapacitor is ICapacitor, Ownable {
     /**
      * @notice initialises the contract with socket address
      */
-    constructor(address socket_, address owner_) Ownable(owner_) {
+    constructor(address socket_, address owner_) AccessControlExtended(owner_) {
         socket = socket_;
     }
 
@@ -60,7 +61,7 @@ abstract contract BaseCapacitor is ICapacitor, Ownable {
         address token_,
         address userAddress_,
         uint256 amount_
-    ) external onlyOwner {
+    ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

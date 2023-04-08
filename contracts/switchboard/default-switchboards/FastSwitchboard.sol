@@ -2,6 +2,7 @@
 pragma solidity 0.8.7;
 
 import "./SwitchboardBase.sol";
+import {WATCHER_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract FastSwitchboard is SwitchboardBase {
     uint256 public immutable timeoutInSeconds;
@@ -32,7 +33,7 @@ contract FastSwitchboard is SwitchboardBase {
         address owner_,
         address gasPriceOracle_,
         uint256 timeoutInSeconds_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         timeoutInSeconds = timeoutInSeconds_;
     }
@@ -45,7 +46,8 @@ contract FastSwitchboard is SwitchboardBase {
         address watcher = _recoverSigner(srcChainSlug_, packetId_, signature_);
 
         if (isAttested[watcher][packetId_]) revert AlreadyAttested();
-        if (!_hasRoleWithUint(srcChainSlug_, watcher)) revert WatcherNotFound();
+        if (!_hasRole(WATCHER_ROLE, srcChainSlug_, watcher))
+            revert WatcherNotFound();
 
         isAttested[watcher][packetId_] = true;
         attestations[packetId_]++;
@@ -96,7 +98,7 @@ contract FastSwitchboard is SwitchboardBase {
     function setAttestGasLimit(
         uint256 dstChainSlug_,
         uint256 attestGasLimit_
-    ) external onlyOwner {
+    ) external onlyRoleWithChainSlug(GAS_LIMIT_UPDATER_ROLE, dstChainSlug_) {
         attestGasLimit[dstChainSlug_] = attestGasLimit_;
         emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
     }
@@ -108,9 +110,10 @@ contract FastSwitchboard is SwitchboardBase {
     function grantWatcherRole(
         uint256 srcChainSlug_,
         address watcher_
-    ) external onlyOwner {
-        if (_hasRoleWithUint(srcChainSlug_, watcher_)) revert WatcherFound();
-        _grantRoleWithUint(srcChainSlug_, watcher_);
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        if (_hasRole(WATCHER_ROLE, srcChainSlug_, watcher_))
+            revert WatcherFound();
+        _grantRole(WATCHER_ROLE, srcChainSlug_, watcher_);
 
         totalWatchers[srcChainSlug_]++;
     }
@@ -122,10 +125,10 @@ contract FastSwitchboard is SwitchboardBase {
     function revokeWatcherRole(
         uint256 srcChainSlug_,
         address watcher_
-    ) external onlyOwner {
-        if (!_hasRoleWithUint(srcChainSlug_, watcher_))
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        if (!_hasRole(WATCHER_ROLE, srcChainSlug_, watcher_))
             revert WatcherNotFound();
-        _revokeRoleWithUint(srcChainSlug_, watcher_);
+        _revokeRole(WATCHER_ROLE, srcChainSlug_, watcher_);
 
         totalWatchers[srcChainSlug_]--;
     }

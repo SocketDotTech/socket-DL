@@ -6,6 +6,7 @@ import "../interfaces/ITransmitManager.sol";
 import "../interfaces/IExecutionManager.sol";
 
 import "./SocketConfig.sol";
+import {GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
 
 abstract contract SocketBase is SocketConfig {
     IHasher public hasher__;
@@ -21,7 +22,7 @@ abstract contract SocketBase is SocketConfig {
     event HasherSet(address hasher);
     event ExecutionManagerSet(address executionManager);
 
-    function setHasher(address hasher_) external onlyOwner {
+    function setHasher(address hasher_) external onlyRole(GOVERNANCE_ROLE) {
         hasher__ = IHasher(hasher_);
         emit HasherSet(hasher_);
     }
@@ -30,7 +31,9 @@ abstract contract SocketBase is SocketConfig {
      * @notice updates transmitManager_
      * @param transmitManager_ address of Transmit Manager
      */
-    function setTransmitManager(address transmitManager_) external onlyOwner {
+    function setTransmitManager(
+        address transmitManager_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         transmitManager__ = ITransmitManager(transmitManager_);
         emit TransmitManagerSet(transmitManager_);
     }
@@ -39,7 +42,9 @@ abstract contract SocketBase is SocketConfig {
      * @notice updates executionManager_
      * @param executionManager_ address of Execution Manager
      */
-    function setExecutionManager(address executionManager_) external onlyOwner {
+    function setExecutionManager(
+        address executionManager_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         executionManager__ = IExecutionManager(executionManager_);
         emit ExecutionManagerSet(executionManager_);
     }

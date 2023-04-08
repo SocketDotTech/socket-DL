@@ -5,11 +5,12 @@ import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IGasPriceOracle.sol";
 import "../../interfaces/ICapacitor.sol";
 
-import "../../utils/AccessControlWithUint.sol";
+import "../../utils/AccessControlExtended.sol";
 import "../../libraries/RescueFundsLib.sol";
+import {GAS_LIMIT_UPDATER_ROLE, GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE} from "../../utils/AccessRoles.sol";
 import "../../libraries/FeesHelper.sol";
 
-abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
+abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
     ICapacitor public capacitor__;
 
@@ -92,9 +93,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     /**
      * @notice pause execution
      */
-    function tripGlobal(
-        uint256 srcChainSlug_
-    ) external onlyRoleWithUint(srcChainSlug_) {
+    function tripGlobal() external onlyRole(TRIP_ROLE) {
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
     }
@@ -102,7 +101,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     /**
      * @notice unpause execution
      */
-    function untrip() external onlyOwner {
+    function untrip() external onlyRole(UNTRIP_ROLE) {
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
     }
@@ -113,7 +112,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
      */
     function setExecutionOverhead(
         uint256 executionOverhead_
-    ) external onlyOwner {
+    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         executionOverhead = executionOverhead_;
         emit ExecutionOverheadSet(executionOverhead_);
     }
@@ -124,7 +123,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
      */
     function setInitialConfirmationGasLimit(
         uint256 gasLimit_
-    ) external onlyOwner {
+    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
         initateNativeConfirmationGasLimit = gasLimit_;
         emit InitialConfirmationGasLimitSet(gasLimit_);
     }
@@ -133,12 +132,14 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
      * @notice updates gasPriceOracle_ address
      * @param gasPriceOracle_ new gasPriceOracle_
      */
-    function setGasPriceOracle(address gasPriceOracle_) external onlyOwner {
+    function setGasPriceOracle(
+        address gasPriceOracle_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         emit GasPriceOracleSet(gasPriceOracle_);
     }
 
-    function withdrawFees(address account_) external onlyOwner {
+    function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         FeesHelper.withdrawFees(account_);
     }
 
@@ -146,7 +147,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
         address token_,
         address userAddress_,
         uint256 amount_
-    ) external onlyOwner {
+    ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

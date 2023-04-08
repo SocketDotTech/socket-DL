@@ -8,13 +8,14 @@ import "./decapacitors/SingleDecapacitor.sol";
 import "./decapacitors/HashChainDecapacitor.sol";
 
 import "./libraries/RescueFundsLib.sol";
-import "./utils/Ownable.sol";
+import "./utils/AccessControlExtended.sol";
+import {RESCUE_ROLE} from "./utils/AccessRoles.sol";
 
-contract CapacitorFactory is ICapacitorFactory, Ownable {
+contract CapacitorFactory is ICapacitorFactory, AccessControlExtended {
     uint256 private constant SINGLE_CAPACITOR = 1;
     uint256 private constant HASH_CHAIN_CAPACITOR = 2;
 
-    constructor(address owner_) Ownable(owner_) {}
+    constructor(address owner_) AccessControlExtended(owner_) {}
 
     function deploy(
         uint256 capacitorType_,
@@ -42,7 +43,7 @@ contract CapacitorFactory is ICapacitorFactory, Ownable {
         address token_,
         address userAddress_,
         uint256 amount_
-    ) external onlyOwner {
+    ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

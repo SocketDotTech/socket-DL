@@ -3,10 +3,11 @@ pragma solidity 0.8.7;
 
 import "./interfaces/IGasPriceOracle.sol";
 import "./interfaces/ITransmitManager.sol";
-import "./utils/AccessControl.sol";
+import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
+import {GOVERNANCE_ROLE, RESCUE_ROLE} from "./utils/AccessRoles.sol";
 
-contract GasPriceOracle is IGasPriceOracle, Ownable {
+contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
     ITransmitManager public transmitManager__;
 
     // plugs/switchboards/transmitter can use it to ensure prices are updated
@@ -31,7 +32,10 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
     error TransmitterNotFound();
     error NonceAlreadyUsed();
 
-    constructor(address owner_, uint32 chainSlug_) Ownable(owner_) {
+    constructor(
+        address owner_,
+        uint32 chainSlug_
+    ) AccessControlExtended(owner_) {
         chainSlug = chainSlug_;
     }
 
@@ -106,7 +110,7 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
 
     function setTransmitManager(
         ITransmitManager transmitManager_
-    ) external onlyOwner {
+    ) external onlyRole(GOVERNANCE_ROLE) {
         transmitManager__ = transmitManager_;
         emit TransmitManagerUpdated(address(transmitManager_));
     }
@@ -115,7 +119,7 @@ contract GasPriceOracle is IGasPriceOracle, Ownable {
         address token_,
         address userAddress_,
         uint256 amount_
-    ) external onlyOwner {
+    ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

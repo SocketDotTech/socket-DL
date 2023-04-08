@@ -2,11 +2,12 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ISocket.sol";
-import "../utils/Ownable.sol";
 import "../interfaces/ICapacitorFactory.sol";
 import "../interfaces/ISwitchboard.sol";
+import "../utils/AccessControlExtended.sol";
+import {GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
 
-abstract contract SocketConfig is ISocket, Ownable {
+abstract contract SocketConfig is ISocket, AccessControlExtended {
     struct PlugConfig {
         address siblingPlug;
         ICapacitor capacitor__;
@@ -39,7 +40,9 @@ abstract contract SocketConfig is ISocket, Ownable {
     error SwitchboardExists();
     error InvalidConnection();
 
-    function setCapacitorFactory(address capacitorFactory_) external onlyOwner {
+    function setCapacitorFactory(
+        address capacitorFactory_
+    ) external onlyRole(GOVERNANCE_ROLE) {
         capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
         emit CapacitorFactorySet(capacitorFactory_);
     }

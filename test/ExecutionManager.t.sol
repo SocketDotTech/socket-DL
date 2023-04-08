@@ -67,14 +67,29 @@ contract ExecutionManagerTest is Setup {
         );
 
         vm.startPrank(owner);
+        gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
+        gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
+        gasPriceOracle.setTransmitManager(transmitManager);
+
         executionManager.grantRole(EXECUTOR_ROLE, _executor);
-        transmitManager.grantRoleWithUint(chainSlug, transmitter);
-        transmitManager.grantRoleWithUint(destChainSlug, transmitter);
+        executionManager.grantRole(RESCUE_ROLE, owner);
+        executionManager.grantRole(WITHDRAW_ROLE, owner);
+
+        transmitManager.grantRole(TRANSMITTER_ROLE, chainSlug, transmitter);
+        transmitManager.grantRole(TRANSMITTER_ROLE, destChainSlug, transmitter);
         gasPriceOracle.setTransmitManager(transmitManager);
         vm.stopPrank();
 
-        assertTrue(transmitManager.hasRoleWithUint(chainSlug, transmitter));
-        assertTrue(transmitManager.hasRoleWithUint(destChainSlug, transmitter));
+        assertTrue(
+            transmitManager.hasRole(TRANSMITTER_ROLE, chainSlug, transmitter)
+        );
+        assertTrue(
+            transmitManager.hasRole(
+                TRANSMITTER_ROLE,
+                destChainSlug,
+                transmitter
+            )
+        );
 
         bytes32 digest = keccak256(
             abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)

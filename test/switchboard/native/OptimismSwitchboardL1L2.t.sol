@@ -40,7 +40,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
         _chainSetup(transmitterPivateKeys);
     }
 
-    function testInitateNativeConfirmation() public {
+    function testInitateNativeConfirmation1() public {
         address socketAddress = address(_a.socket__);
 
         vm.startPrank(socketAddress);
@@ -58,12 +58,11 @@ contract OptimismSwitchboardL1L2Test is Setup {
 
         singleCapacitor.addPackedMessage(packedMessage);
 
-        (
-            bytes32 root,
-            bytes32 packetId,
-            bytes memory sig
-        ) = _getLatestSignature(_a, address(singleCapacitor), _b.chainSlug);
-        uint64 capacitorPacketCount = uint64(uint256(packetId));
+        (, bytes32 packetId, ) = _getLatestSignature(
+            _a,
+            address(singleCapacitor),
+            _b.chainSlug
+        );
         optimismSwitchboard.initateNativeConfirmation(packetId);
         vm.stopPrank();
     }
@@ -83,7 +82,18 @@ contract OptimismSwitchboardL1L2Test is Setup {
         // deploy socket setup
         deploySocket(cc_, _socketOwner);
 
+        vm.startPrank(_socketOwner);
+
+        cc_.transmitManager__.grantRole(
+            GAS_LIMIT_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        vm.stopPrank();
+
         hoax(_socketOwner);
+
         cc_.transmitManager__.setProposeGasLimit(
             remoteChainSlug_,
             _proposeGasLimit
@@ -127,6 +137,9 @@ contract OptimismSwitchboardL1L2Test is Setup {
             cc_.chainSlug,
             _sealGasLimit
         );
+
+        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
+        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
 
         cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
 
@@ -194,6 +207,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
         );
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
 
+        optimismSwitchboard.grantRole(GOVERNANCE_ROLE, deployer_);
         vm.stopPrank();
     }
 }
