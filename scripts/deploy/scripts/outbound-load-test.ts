@@ -13,7 +13,7 @@ const deployedAddressPath = path.join(
 );
 
 // usage:
-// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain optimism --remoteChain polygon-mainnet --numOfRequests 20 --waitTime 5
+// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain optimism --remoteChain polygon-mainnet --numOfRequests 50 --waitTime 100
 export const main = async () => {
   const amount = 100;
   const msgGasLimit = "100000";
@@ -112,7 +112,7 @@ export const main = async () => {
 };
 
 const sleep = (delay: any) =>
-  new Promise((resolve) => setTimeout(resolve, delay * 1000));
+  new Promise((resolve) => setTimeout(resolve, delay));
 
 main()
   .then(() => process.exit(0))
