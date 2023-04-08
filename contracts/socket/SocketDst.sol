@@ -71,9 +71,9 @@ abstract contract SocketDst is SocketBase {
     function execute(
         uint256 packetId_,
         address localPlug_,
-        ISocket.MessageDetails calldata messageDetails_
+        ISocket.MessageDetails calldata messageDetails_,
+        bytes memory signature_
     ) external override {
-        if (!executionManager__.isExecutor(msg.sender)) revert NotExecutor();
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
@@ -94,6 +94,12 @@ abstract contract SocketDst is SocketBase {
             messageDetails_.executionFee,
             messageDetails_.payload
         );
+
+        (, bool isValidExecutor) = executionManager__.isExecutor(
+            packedMessage,
+            signature_
+        );
+        if (!isValidExecutor) revert NotExecutor();
 
         _verify(
             packetId_,

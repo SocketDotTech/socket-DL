@@ -12,6 +12,7 @@ contract HappyTest is Setup {
     uint256 subAmount = 40;
     bool isFast = true;
     bytes32[] roots;
+    uint256 index = isFast ? 0 : 1;
 
     event ExecutionSuccess(uint256 msgId);
     event ExecutionFailed(uint256 msgId, string result);
@@ -43,7 +44,6 @@ contract HappyTest is Setup {
         );
         bytes memory proof = abi.encode(0);
 
-        uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
 
         uint256 executionFee;
@@ -68,8 +68,9 @@ contract HappyTest is Setup {
             }(_b.chainSlug, amount, _msgGasLimit);
         }
 
-        uint256 msgId = _packMessageId(_a.chainSlug, 0);
+        // uint256 msgId = _packMessageId(_a.chainSlug, 0);
         uint256 packetId;
+        bytes32 root;
         {
             (
                 bytes32 root_,
@@ -80,8 +81,9 @@ contract HappyTest is Setup {
             _sealOnSrc(_a, capacitor, sig_);
             _proposeOnDst(_b, sig_, packetId_, root_);
 
+            root = root_;
             vm.expectEmit(true, false, false, false);
-            emit ExecutionSuccess(msgId);
+            emit ExecutionSuccess(_packMessageId(_a.chainSlug, 0));
 
             packetId = packetId_;
         }
@@ -91,16 +93,19 @@ contract HappyTest is Setup {
             _a.chainSlug,
             address(dstCounter__),
             packetId,
-            msgId,
+            _packMessageId(_a.chainSlug, 0),
             _msgGasLimit,
             executionFee,
+            root,
             payload,
             proof
         );
 
         assertEq(dstCounter__.counter(), amount);
         assertEq(srcCounter__.counter(), 0);
-        assertTrue(_b.socket__.messageExecuted(msgId));
+        assertTrue(
+            _b.socket__.messageExecuted(_packMessageId(_a.chainSlug, 0))
+        );
 
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
@@ -108,9 +113,10 @@ contract HappyTest is Setup {
             _a.chainSlug,
             address(dstCounter__),
             packetId,
-            msgId,
+            _packMessageId(_a.chainSlug, 0),
             _msgGasLimit,
             executionFee,
+            root,
             payload,
             proof
         );
@@ -143,7 +149,6 @@ contract HappyTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(_b, capacitor, _a.chainSlug);
 
-        uint256 msgId = _packMessageId(_b.chainSlug, 0);
         _sealOnSrc(_b, capacitor, sig);
         _proposeOnDst(_a, sig, packetId, root);
 
@@ -152,9 +157,10 @@ contract HappyTest is Setup {
             _b.chainSlug,
             address(srcCounter__),
             packetId,
-            msgId,
+            _packMessageId(_b.chainSlug, 0),
             _msgGasLimit,
             0,
+            root,
             payload,
             proof
         );
@@ -275,6 +281,7 @@ contract HappyTest is Setup {
             msgId1,
             _msgGasLimit,
             executionFee,
+            root2,
             payload,
             abi.encode(roots)
         );
@@ -294,6 +301,7 @@ contract HappyTest is Setup {
             msgId2,
             _msgGasLimit,
             executionFee,
+            root2,
             payload,
             abi.encode(roots)
         );

@@ -20,8 +20,10 @@ contract Setup is Test {
     address immutable _socketOwner = address(uint160(c++));
     address immutable _plugOwner = address(uint160(c++));
     address immutable _raju = address(uint160(c++));
-    address immutable _executor = address(uint160(c++));
 
+    uint256 immutable executorPrivateKey = c++;
+
+    address _executor;
     address _transmitter;
     address _altTransmitter;
 
@@ -86,6 +88,7 @@ contract Setup is Test {
 
         _watcher = vm.addr(_watcherPrivateKey);
         _transmitter = vm.addr(_transmitterPrivateKey);
+        _executor = vm.addr(executorPrivateKey);
 
         _deployContractsOnSingleChain(
             _a,
@@ -336,11 +339,10 @@ contract Setup is Test {
         uint256 msgId_,
         uint256 msgGasLimit_,
         uint256 executionFee_,
+        bytes32 packedMessage_,
         bytes memory payload_,
         bytes memory proof_
     ) internal {
-        hoax(_executor);
-
         ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
             msgId_,
             executionFee_,
@@ -349,7 +351,8 @@ contract Setup is Test {
             proof_
         );
 
-        dst_.socket__.execute(packetId_, remotePlug_, msgDetails);
+        bytes memory sig = _createSignature(packedMessage_, executorPrivateKey);
+        dst_.socket__.execute(packetId_, remotePlug_, msgDetails, sig);
     }
 
     function _packMessageId(

@@ -7,6 +7,7 @@ import "./interfaces/IGasPriceOracle.sol";
 
 import "./utils/AccessControlWithUint.sol";
 import "./libraries/RescueFundsLib.sol";
+import "./libraries/FeesHelper.sol";
 
 contract TransmitManager is ITransmitManager, AccessControlWithUint {
     ISignatureVerifier public signatureVerifier__;
@@ -22,7 +23,6 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
     event GasPriceOracleSet(address gasPriceOracle);
     event SealGasLimitSet(uint256 gasLimit);
     event ProposeGasLimitSet(uint256 dstChainSlug, uint256 gasLimit);
-    event FeesWithdrawn(address account, uint256 value);
 
     /**
      * @notice emits when a new signature verifier contract is set
@@ -86,19 +86,8 @@ contract TransmitManager is ITransmitManager, AccessControlWithUint {
             siblingRelativeGasPrice;
     }
 
-    // TODO: to support fee distribution
-    /**
-     * @notice transfers the fees collected to `account_`
-     * @param account_ address to transfer ETH
-     */
     function withdrawFees(address account_) external onlyOwner {
-        require(account_ != address(0));
-
-        uint256 value = address(this).balance;
-        (bool success, ) = account_.call{value: value}("");
-        if (!success) revert TransferFailed();
-
-        emit FeesWithdrawn(account_, value);
+        FeesHelper.withdrawFees(account_);
     }
 
     /**

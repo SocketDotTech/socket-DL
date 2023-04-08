@@ -4,7 +4,10 @@ pragma solidity 0.8.7;
 import "./interfaces/IExecutionManager.sol";
 import "./interfaces/IGasPriceOracle.sol";
 import "./utils/AccessControl.sol";
+
 import "./libraries/RescueFundsLib.sol";
+import "./libraries/SignatureVerifierLib.sol";
+import "./libraries/FeesHelper.sol";
 
 contract ExecutionManager is IExecutionManager, AccessControl {
     IGasPriceOracle public gasPriceOracle__;
@@ -13,7 +16,8 @@ contract ExecutionManager is IExecutionManager, AccessControl {
     bytes32 private constant _EXECUTOR_ROLE =
         0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
 
-    event FeesWithdrawn(address account, uint256 amount);
+    event GasPriceOracleSet(address gasPriceOracle);
+
     error TransferFailed();
 
     constructor(
@@ -24,9 +28,14 @@ contract ExecutionManager is IExecutionManager, AccessControl {
     }
 
     function isExecutor(
-        address executor_
-    ) external view override returns (bool) {
-        return _hasRole(_EXECUTOR_ROLE, executor_);
+        bytes32 packedMessage,
+        bytes memory sig
+    ) external view override returns (address executor, bool isValidExecutor) {
+        executor = SignatureVerifierLib.recoverSignerFromDigest(
+            packedMessage,
+            sig
+        );
+        isValidExecutor = _hasRole(_EXECUTOR_ROLE, executor);
     }
 
     function payFees(
@@ -51,19 +60,17 @@ contract ExecutionManager is IExecutionManager, AccessControl {
         return msgGasLimit_ * dstRelativeGasPrice;
     }
 
-    // TODO: to support fee distribution
     /**
-     * @notice transfers the fees collected to `account_`
-     * @param account_ address to transfer ETH
+     * @notice updates gasPriceOracle__
+     * @param gasPriceOracle_ address of Gas Price Oracle
      */
+    function setGasPriceOracle(address gasPriceOracle_) external onlyOwner {
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
+        emit GasPriceOracleSet(gasPriceOracle_);
+    }
+
     function withdrawFees(address account_) external onlyOwner {
-        require(account_ != address(0));
-
-        uint256 amount = address(this).balance;
-        (bool success, ) = account_.call{value: amount}("");
-        if (!success) revert TransferFailed();
-
-        emit FeesWithdrawn(account_, amount);
+        FeesHelper.withdrawFees(account_);
     }
 
     function rescueFunds(
