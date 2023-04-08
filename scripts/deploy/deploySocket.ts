@@ -28,14 +28,15 @@ export const main = async () => {
     const { getNamedAccounts } = hre;
     const { socketOwner, counterOwner } = await getNamedAccounts();
     let addresses: ChainSocketAddresses = {
-      Counter: "",
-      CapacitorFactory: "",
-      ExecutionManager: "",
-      GasPriceOracle: "",
-      Hasher: "",
-      SignatureVerifier: "",
-      Socket: "",
-      TransmitManager: "",
+      Counter: "0x6ac25c1553BAd85135e298ca59343Bb545314707",
+      CapacitorFactory: "0xca2e2C77Caa0a958693DB4E8C0f4Ca7D9fCD71be",
+      ExecutionManager: "0x97770668A6c097fC34b6957f66dC7746BD9B6D52",
+      GasPriceOracle: "0x8FbB20A548b15C8c154010C7F94C03A7B8414B9B",
+      Hasher: "0x6f7E66e2c81c4c80A68D132Fc9Fb8F6B638b2CD0",
+      SignatureVerifier: "0x4bA73e3b69461bcD32f299aC0Dfc5D8494552EC6",
+      Socket: "0x78a7Be84503e79097968ce6159dD0908fa706F2D",
+      TransmitManager: "0xb8311250c22974d6d7FC54ff5174eBFeE755D952",
+      SocketBatcher: "",
     };
 
     const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
@@ -265,6 +266,25 @@ export const main = async () => {
     } else {
       socket = await getInstance("Counter", addresses["Counter"]);
     }
+
+    // SocketBatcher deployment
+    let socketBatcher: Contract;
+    if (!addresses["SocketBatcher"]) {
+      socketBatcher = await deployContractWithArgs(
+        "SocketBatcher",
+        [socketSigner.address],
+        socketSigner,
+        "contracts/socket/SocketBatcher.sol"
+      );
+      addresses["SocketBatcher"] = socketBatcher.address;
+      await storeAddresses(addresses, chainSlugs[network]);
+    } else {
+      socketBatcher = await getInstance(
+        "SocketBatcher",
+        addresses["SocketBatcher"]
+      );
+    }
+
     console.log("Contracts deployed!");
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
