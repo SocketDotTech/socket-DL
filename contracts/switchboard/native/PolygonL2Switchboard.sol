@@ -3,44 +3,45 @@ pragma solidity 0.8.7;
 
 import "fx-portal/tunnel/FxBaseChildTunnel.sol";
 import "./NativeSwitchboardBase.sol";
-import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
-    // stores the roots received from native bridge
-    mapping(bytes32 => bytes32) public roots;
-    uint256 public l1ReceiveGasLimit;
+    uint256 public confirmGasLimit;
 
     event FxChildUpdate(address oldFxChild, address newFxChild);
     event FxRootTunnelSet(address fxRootTunnel, address newFxRootTunnel);
-    event RootReceived(bytes32 packetId, bytes32 root);
-    event UpdatedL1ReceiveGasLimit(uint256 l1ReceiveGasLimit);
+    event UpdatedConfirmGasLimit(uint256 confirmGasLimit);
 
-    error NoRootFound();
+    modifier onlyRemoteSwitchboard() override {
+        require(true, "ONLY_FX_CHILD");
+
+        _;
+    }
 
     constructor(
-        uint256 l1ReceiveGasLimit_,
-        uint256 initialConfirmationGasLimit_,
+        uint256 confirmGasLimit_,
+        uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         address fxChild_,
         address owner_,
         IGasPriceOracle gasPriceOracle_
-    ) AccessControlExtended(owner_) FxBaseChildTunnel(fxChild_) {
-        gasPriceOracle__ = gasPriceOracle_;
-
-        l1ReceiveGasLimit = l1ReceiveGasLimit_;
-        initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
-        executionOverhead = executionOverhead_;
+    )
+        AccessControlExtended(owner_)
+        NativeSwitchboardBase(
+            initiateGasLimit_,
+            executionOverhead_,
+            gasPriceOracle_
+        )
+        FxBaseChildTunnel(fxChild_)
+    {
+        confirmGasLimit = confirmGasLimit_;
     }
 
     /**
      * @param packetId_ - packet id
      */
-    function initateNativeConfirmation(bytes32 packetId_) external payable {
-        uint64 capacitorPacketCount = uint64(uint256(packetId_));
-        bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
-        if (root == bytes32(0)) revert NoRootFound();
+    function initiateNativeConfirmation(bytes32 packetId_) external payable {
+        bytes memory data = _encodeRemoteCall(packetId_);
 
-        bytes memory data = abi.encode(packetId_, root);
         _sendMessageToRoot(data);
         emit InitiatedNativeConfirmation(packetId_);
     }
@@ -57,22 +58,8 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
             data_,
             (bytes32, bytes32)
         );
-        roots[packetId] = root;
+        packetIdToRoot[packetId] = root;
         emit RootReceived(packetId, root);
-    }
-
-    /**
-     * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId_ packet id
-     */
-    function allowPacket(
-        bytes32 root_,
-        bytes32 packetId_,
-        uint32,
-        uint256
-    ) external view override returns (bool) {
-        if (tripGlobalFuse) return false;
-        return roots[packetId_] == root_;
     }
 
     function _getMinSwitchboardFees(
@@ -81,17 +68,17 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         uint256 sourceGasPrice_
     ) internal view override returns (uint256) {
         return
-            initateNativeConfirmationGasLimit *
+            initiateGasLimit *
             sourceGasPrice_ +
-            l1ReceiveGasLimit *
+            confirmGasLimit *
             dstRelativeGasPrice_;
     }
 
-    function updateL1ReceiveGasLimit(
-        uint256 l1ReceiveGasLimit_
+    function updateConfirmGasLimit(
+        uint256 confirmGasLimit_
     ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
-        l1ReceiveGasLimit = l1ReceiveGasLimit_;
-        emit UpdatedL1ReceiveGasLimit(l1ReceiveGasLimit_);
+        confirmGasLimit = confirmGasLimit_;
+        emit UpdatedConfirmGasLimit(confirmGasLimit_);
     }
 
     /**
@@ -105,9 +92,9 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         fxChild = fxChild_;
     }
 
-    function updateFxRootTunnel(
+    function setFxRootTunnel(
         address fxRootTunnel_
-    ) external onlyRole(GOVERNANCE_ROLE) {
+    ) external override onlyRole(GOVERNANCE_ROLE) {
         emit FxRootTunnelSet(fxRootTunnel, fxRootTunnel_);
         fxRootTunnel = fxRootTunnel_;
     }

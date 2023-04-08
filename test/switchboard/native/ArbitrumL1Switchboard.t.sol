@@ -15,11 +15,13 @@ contract ArbitrumL1SwitchboardTest is Setup {
     bytes32[] roots;
 
     uint256 dynamicFees_ = 100;
-    uint256 initialConfirmationGasLimit_ = 100;
+    uint256 initiateGasLimit_ = 100;
     uint256 executionOverhead_ = 100;
     address remoteNativeSwitchboard_ =
         0x3f0121d91B5c04B716Ea960790a89b173da7929c;
     address inbox_ = 0x6BEbC4925716945D46F0Ec336D5C2564F419682C;
+    address bridge_ = 0xaf4159A80B6Cc41ED517DB1c453d1Ef5C2e4dB72;
+    address outbox_ = 0x0000000000000000000000000000000000000000;
     IGasPriceOracle gasPriceOracle_;
 
     ArbitrumL1Switchboard arbitrumL1Switchboard;
@@ -69,7 +71,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
             abi.encode("0x")
         );
 
-        arbitrumL1Switchboard.initateNativeConfirmation{value: 1e18}(
+        arbitrumL1Switchboard.initiateNativeConfirmation{value: 1e18}(
             packetId,
             10000,
             10000,
@@ -174,17 +176,22 @@ contract ArbitrumL1SwitchboardTest is Setup {
     ) internal returns (SocketConfigContext memory scc_) {
         arbitrumL1Switchboard = new ArbitrumL1Switchboard(
             dynamicFees_,
-            initialConfirmationGasLimit_,
+            initiateGasLimit_,
             executionOverhead_,
-            remoteNativeSwitchboard_,
             inbox_,
             _socketOwner,
-            cc_.gasPriceOracle__
+            cc_.gasPriceOracle__,
+            bridge_,
+            outbox_
         );
 
         vm.startPrank(_socketOwner);
         arbitrumL1Switchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
+        arbitrumL1Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
         arbitrumL1Switchboard.setExecutionOverhead(_executionOverhead);
+        arbitrumL1Switchboard.updateRemoteNativeSwitchboard(
+            remoteNativeSwitchboard_
+        );
         vm.stopPrank();
 
         scc_ = registerSwitchbaord(

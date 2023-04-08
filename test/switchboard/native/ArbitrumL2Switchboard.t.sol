@@ -14,8 +14,8 @@ import "../../../contracts/interfaces/ICapacitor.sol";
 contract ArbitrumL2SwitchboardTest is Setup {
     bytes32[] roots;
 
-    uint256 l1ReceiveGasLimit_ = 100;
-    uint256 initialConfirmationGasLimit_ = 100;
+    uint256 confirmGasLimit_ = 100;
+    uint256 initiateGasLimit_ = 100;
     uint256 executionOverhead_ = 100;
     address remoteNativeSwitchboard_ =
         0x3f0121d91B5c04B716Ea960790a89b173da7929c;
@@ -67,7 +67,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
             abi.encode("0x")
         );
 
-        arbitrumL2Switchboard.initateNativeConfirmation(packetId);
+        arbitrumL2Switchboard.initiateNativeConfirmation(packetId);
         vm.stopPrank();
     }
 
@@ -164,17 +164,21 @@ contract ArbitrumL2SwitchboardTest is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         arbitrumL2Switchboard = new ArbitrumL2Switchboard(
-            l1ReceiveGasLimit_,
-            initialConfirmationGasLimit_,
+            confirmGasLimit_,
+            initiateGasLimit_,
             executionOverhead_,
-            remoteNativeSwitchboard_,
             _socketOwner,
             cc_.gasPriceOracle__
         );
 
         vm.startPrank(_socketOwner);
         arbitrumL2Switchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
+        arbitrumL2Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+
         arbitrumL2Switchboard.setExecutionOverhead(_executionOverhead);
+        arbitrumL2Switchboard.updateRemoteNativeSwitchboard(
+            remoteNativeSwitchboard_
+        );
         vm.stopPrank();
 
         scc_ = registerSwitchbaord(

@@ -16,12 +16,14 @@ import "../../../contracts/interfaces/ICapacitor.sol";
 contract OptimismSwitchboardL1L2Test is Setup {
     bytes32[] roots;
 
-    uint256 receivePacketGasLimit_ = 100000;
-    uint256 l2ReceiveGasLimit_ = 100000;
-    uint256 initialConfirmationGasLimit_ = 100000;
+    uint256 receiveGasLimit_ = 100000;
+    uint256 confirmGasLimit_ = 100000;
+    uint256 initiateGasLimit_ = 100000;
     uint256 executionOverhead_ = 100000;
     address remoteNativeSwitchboard_ =
         0x2D468C4d7e355a4ADe099802A61Ba536220fb3Cb;
+    address crossDomainManagerAddress_ =
+        0x5086d1eEF304eb5284A0f6720f79403b4e9bE294;
     IGasPriceOracle gasPriceOracle_;
 
     OptimismSwitchboard optimismSwitchboard;
@@ -63,7 +65,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
             address(singleCapacitor),
             _b.chainSlug
         );
-        optimismSwitchboard.initateNativeConfirmation(packetId);
+        optimismSwitchboard.initiateNativeConfirmation(packetId);
         vm.stopPrank();
     }
 
@@ -161,13 +163,13 @@ contract OptimismSwitchboardL1L2Test is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         optimismSwitchboard = new OptimismSwitchboard(
-            receivePacketGasLimit_,
-            l2ReceiveGasLimit_,
-            initialConfirmationGasLimit_,
+            receiveGasLimit_,
+            confirmGasLimit_,
+            initiateGasLimit_,
             executionOverhead_,
-            remoteNativeSwitchboard_,
             _socketOwner,
-            cc_.gasPriceOracle__
+            cc_.gasPriceOracle__,
+            crossDomainManagerAddress_
         );
 
         scc_ = registerSwitchbaord(
@@ -176,6 +178,11 @@ contract OptimismSwitchboardL1L2Test is Setup {
             address(optimismSwitchboard),
             remoteChainSlug_,
             capacitorType_
+        );
+
+        hoax(_socketOwner);
+        optimismSwitchboard.updateRemoteNativeSwitchboard(
+            remoteNativeSwitchboard_
         );
     }
 

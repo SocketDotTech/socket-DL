@@ -2,6 +2,7 @@
 pragma solidity 0.8.7;
 
 import "./SwitchboardBase.sol";
+import "../../libraries/SignatureVerifierLib.sol";
 import {WATCHER_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 
 contract FastSwitchboard is SwitchboardBase {
@@ -43,7 +44,10 @@ contract FastSwitchboard is SwitchboardBase {
         uint256 srcChainSlug_,
         bytes calldata signature_
     ) external {
-        address watcher = _recoverSigner(srcChainSlug_, packetId_, signature_);
+        address watcher = SignatureVerifierLib.recoverSignerFromDigest(
+            keccak256(abi.encode(srcChainSlug_, packetId_)),
+            signature_
+        );
 
         if (isAttested[watcher][packetId_]) revert AlreadyAttested();
         if (!_hasRole(WATCHER_ROLE, srcChainSlug_, watcher))
@@ -131,37 +135,5 @@ contract FastSwitchboard is SwitchboardBase {
         _revokeRole(WATCHER_ROLE, srcChainSlug_, watcher_);
 
         totalWatchers[srcChainSlug_]--;
-    }
-
-    /**
-     * @notice returns the address of signer recovered from input signature
-     */
-    function _recoverSigner(
-        uint256 srcChainSlug_,
-        bytes32 packetId_,
-        bytes memory signature_
-    ) private pure returns (address signer) {
-        bytes32 digest = keccak256(abi.encode(srcChainSlug_, packetId_));
-        digest = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
-        );
-        (bytes32 sigR, bytes32 sigS, uint8 sigV) = _splitSignature(signature_);
-
-        // recovered signer is checked for the valid roles later
-        signer = ecrecover(digest, sigV, sigR, sigS);
-    }
-
-    /**
-     * @notice splits the signature into v, r and s.
-     */
-    function _splitSignature(
-        bytes memory signature_
-    ) private pure returns (bytes32 r, bytes32 s, uint8 v) {
-        if (signature_.length != 65) revert InvalidSigLength();
-        assembly {
-            r := mload(add(signature_, 0x20))
-            s := mload(add(signature_, 0x40))
-            v := byte(0, mload(add(signature_, 0x60)))
-        }
     }
 }

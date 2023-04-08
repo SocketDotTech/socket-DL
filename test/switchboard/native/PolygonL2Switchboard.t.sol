@@ -14,8 +14,8 @@ import "../../../contracts/interfaces/ICapacitor.sol";
 contract PolygonL2SwitchboardTest is Setup {
     bytes32[] roots;
 
-    uint256 l1ReceiveGasLimit_ = 300000;
-    uint256 initialConfirmationGasLimit_ = 300000;
+    uint256 confirmGasLimit_ = 300000;
+    uint256 initiateGasLimit_ = 300000;
     uint256 executionOverhead_ = 300000;
     address fxChild_ = 0xCf73231F28B7331BBe3124B907840A94851f9f11;
 
@@ -58,12 +58,12 @@ contract PolygonL2SwitchboardTest is Setup {
 
         singleCapacitor.addPackedMessage(packedMessage);
 
-        (, bytes32 packetId, bytes memory sig) = _getLatestSignature(
+        (, bytes32 packetId, ) = _getLatestSignature(
             _a,
             address(singleCapacitor),
             _b.chainSlug
         );
-        polygonL2Switchboard.initateNativeConfirmation(packetId);
+        polygonL2Switchboard.initiateNativeConfirmation(packetId);
         vm.stopPrank();
     }
 
@@ -160,8 +160,8 @@ contract PolygonL2SwitchboardTest is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         polygonL2Switchboard = new PolygonL2Switchboard(
-            l1ReceiveGasLimit_,
-            initialConfirmationGasLimit_,
+            confirmGasLimit_,
+            initiateGasLimit_,
             executionOverhead_,
             fxChild_,
             _socketOwner,

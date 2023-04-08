@@ -16,7 +16,7 @@ import "../../../contracts/interfaces/ICapacitor.sol";
 contract PolygonL1SwitchboardTest is Setup {
     bytes32[] roots;
 
-    uint256 initialConfirmationGasLimit_ = 300000;
+    uint256 initiateGasLimit_ = 300000;
     uint256 executionOverhead_ = 300000;
     address checkpointManager_ = 0x2890bA17EfE978480615e330ecB65333b880928e;
     address fxRoot_ = 0x3d1d3E34f7fB6D26245E6640E1c50710eFFf15bA;
@@ -64,7 +64,7 @@ contract PolygonL1SwitchboardTest is Setup {
             address(singleCapacitor),
             _b.chainSlug
         );
-        polygonL1Switchboard.initateNativeConfirmation(packetId);
+        polygonL1Switchboard.initiateNativeConfirmation(packetId);
         vm.stopPrank();
     }
 
@@ -161,7 +161,7 @@ contract PolygonL1SwitchboardTest is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         polygonL1Switchboard = new PolygonL1Switchboard(
-            initialConfirmationGasLimit_,
+            initiateGasLimit_,
             executionOverhead_,
             checkpointManager_,
             fxRoot_,

@@ -24,6 +24,7 @@ contract HashChainCapacitorTest is Setup {
 
     function testSetUp() external {
         assertEq(_hcCapacitor.owner(), _owner, "Owner not set");
+        assertTrue(_hcCapacitor.socket() == _socket, "Socket role not set");
         _assertPacketById(bytes32(0), 0);
         _assertPacketToBeSealed(bytes32(0), 0);
     }
