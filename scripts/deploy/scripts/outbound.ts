@@ -13,7 +13,7 @@ export const main = async () => {
     const amount = 100;
     const msgGasLimit = "19000000";
     const gasLimit = 200485;
-    const fees = 20000000000000000;
+    const fees = "20000000000000000";
 
     const config: any = JSON.parse(
       fs.readFileSync(deployedAddressPath, "utf-8")
