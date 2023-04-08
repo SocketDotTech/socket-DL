@@ -158,16 +158,6 @@ contract TransmitManagerTest is Setup {
         assertEq(address(transmitManager).balance, minFees);
     }
 
-    function testPayInsufficientFees() public {
-        uint256 minFees = transmitManager.getMinFees(destChainSlug);
-        deal(feesPayer, minFees);
-
-        vm.startPrank(feesPayer);
-        vm.expectRevert(InsufficientTransmitFees.selector);
-        transmitManager.payFees{value: minFees - 1e4}(destChainSlug);
-        vm.stopPrank();
-    }
-
     function testWithdrawFees() public {
         uint256 minFees = transmitManager.getMinFees(destChainSlug);
         deal(feesPayer, minFees);

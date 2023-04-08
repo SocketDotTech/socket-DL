@@ -65,7 +65,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         return true;
     }
 
-    function _getSwitchboardFees(
+    function _getMinSwitchboardFees(
         uint256,
         uint256,
         uint256 sourceGasPrice_

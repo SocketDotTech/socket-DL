@@ -87,7 +87,7 @@ abstract contract SocketSrc is SocketBase {
             uint256 switchboardFees,
             uint256 verificationFee,
             uint256 msgExecutionFee
-        ) = _getFees(msgGasLimit_, remoteChainSlug_, switchboard__);
+        ) = _getMinFees(msgGasLimit_, remoteChainSlug_, switchboard__);
 
         if (
             msg.value <
@@ -121,7 +121,7 @@ abstract contract SocketSrc is SocketBase {
             uint256 switchboardFees,
             uint256 verificationFee,
             uint256 msgExecutionFee
-        ) = _getFees(
+        ) = _getMinFees(
                 msgGasLimit_,
                 remoteChainSlug_,
                 plugConfig.outboundSwitchboard__
@@ -134,7 +134,7 @@ abstract contract SocketSrc is SocketBase {
             msgExecutionFee;
     }
 
-    function _getFees(
+    function _getMinFees(
         uint256 msgGasLimit_,
         uint256 remoteChainSlug_,
         ISwitchboard switchboard__

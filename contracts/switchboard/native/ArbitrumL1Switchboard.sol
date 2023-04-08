@@ -121,7 +121,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase, INativeReceiver {
         return true;
     }
 
-    function _getSwitchboardFees(
+    function _getMinSwitchboardFees(
         uint256,
         uint256,
         uint256 sourceGasPrice_

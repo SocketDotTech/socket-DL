@@ -34,7 +34,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
         return true;
     }
 
-    function _getSwitchboardFees(
+    function _getMinSwitchboardFees(
         uint256,
         uint256
     ) internal pure override returns (uint256) {
