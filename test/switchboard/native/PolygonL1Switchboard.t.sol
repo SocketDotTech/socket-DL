@@ -2,19 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "../../Setup.t.sol";
-import "forge-std/Test.sol";
 import "../../../contracts/switchboard/native/PolygonL1Switchboard.sol";
-import "../../../contracts/TransmitManager.sol";
-import "../../../contracts/GasPriceOracle.sol";
-import "../../../contracts/ExecutionManager.sol";
-import "../../../contracts/CapacitorFactory.sol";
-import "../../../contracts/interfaces/ICapacitor.sol";
 
 // Goerli -> mumbai
 // Switchboard on Goerli (5) for mumbai-testnet (80001) as remote is: 0xDe5c161D61D069B0F2069518BB4110568D465465
 // RemoteNativeSwitchBoard i.e SwitchBoard on mumbai-testnet (80001) is:0x029ce68B3A6B3B3713CaC23a39c9096f279c8Ad2
 contract PolygonL1SwitchboardTest is Setup {
     bytes32[] roots;
+    uint256 nonce;
 
     uint256 initiateGasLimit_ = 300000;
     uint256 executionOverhead_ = 300000;
@@ -29,6 +24,8 @@ contract PolygonL1SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
+        initialise();
+
         _a.chainSlug = uint32(uint256(5));
         _b.chainSlug = uint32(uint256(80001));
 
@@ -93,12 +90,22 @@ contract PolygonL1SwitchboardTest is Setup {
 
         vm.stopPrank();
 
-        hoax(_socketOwner);
-        cc_.transmitManager__.setProposeGasLimit(
-            remoteChainSlug_,
-            _proposeGasLimit
+        bytes32 digest = keccak256(
+            abi.encode(
+                "PROPOSE_GAS_LIMIT_UPDATE",
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                _proposeGasLimit
+            )
         );
-
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
+        cc_.transmitManager__.setProposeGasLimit(
+            cc_.transmitterNonce++,
+            remoteChainSlug_,
+            _proposeGasLimit,
+            sig
+        );
         SocketConfigContext memory scc_ = addPolygonL1Switchboard(
             cc_,
             remoteChainSlug_,
@@ -161,6 +168,7 @@ contract PolygonL1SwitchboardTest is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         polygonL1Switchboard = new PolygonL1Switchboard(
+            cc_.chainSlug,
             initiateGasLimit_,
             executionOverhead_,
             checkpointManager_,

@@ -34,6 +34,7 @@ contract TransmitManagerTest is Setup {
     uint256 relativeGasPrice = 1100000;
 
     uint256 gasPriceOracleNonce;
+    uint256 ownerNonce;
 
     SignatureVerifier internal signatureVerifier;
     TransmitManager internal transmitManager;
@@ -73,21 +74,46 @@ contract TransmitManagerTest is Setup {
         transmitManager.grantRole(RESCUE_ROLE, owner);
         transmitManager.grantRole(WITHDRAW_ROLE, owner);
         transmitManager.grantRole(GOVERNANCE_ROLE, owner);
-
-        vm.expectEmit(false, false, false, true);
-        emit SealGasLimitSet(sealGasLimit);
-        transmitManager.setSealGasLimit(sealGasLimit);
-
-        vm.expectEmit(false, false, false, true);
-        emit ProposeGasLimitSet(destChainSlug, proposeGasLimit);
-        transmitManager.setProposeGasLimit(destChainSlug, proposeGasLimit);
-
         vm.stopPrank();
 
         bytes32 digest = keccak256(
+            abi.encode(
+                "SEAL_GAS_LIMIT_UPDATE",
+                chainSlug,
+                ownerNonce,
+                sealGasLimit
+            )
+        );
+        bytes memory sig = _createSignature(digest, ownerPrivateKey);
+
+        vm.expectEmit(false, false, false, true);
+        emit SealGasLimitSet(sealGasLimit);
+        transmitManager.setSealGasLimit(ownerNonce++, sealGasLimit, sig);
+
+        digest = keccak256(
+            abi.encode(
+                "PROPOSE_GAS_LIMIT_UPDATE",
+                chainSlug,
+                destChainSlug,
+                ownerNonce,
+                proposeGasLimit
+            )
+        );
+        sig = _createSignature(digest, ownerPrivateKey);
+
+        vm.expectEmit(false, false, false, true);
+        emit ProposeGasLimitSet(destChainSlug, proposeGasLimit);
+        transmitManager.setProposeGasLimit(
+            ownerNonce++,
+            destChainSlug,
+            proposeGasLimit,
+            sig
+        );
+
+        digest = keccak256(
             abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
         );
-        bytes memory sig = _createSignature(digest, transmitterPrivateKey);
+        sig = _createSignature(digest, transmitterPrivateKey);
 
         gasPriceOracle.setSourceGasPrice(
             gasPriceOracleNonce++,

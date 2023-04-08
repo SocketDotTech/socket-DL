@@ -2,17 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "../../Setup.t.sol";
-import "forge-std/Test.sol";
 import "../../../contracts/switchboard/native/PolygonL2Switchboard.sol";
-import "../../../contracts/TransmitManager.sol";
-import "../../../contracts/GasPriceOracle.sol";
-import "../../../contracts/ExecutionManager.sol";
-import "../../../contracts/CapacitorFactory.sol";
-import "../../../contracts/interfaces/ICapacitor.sol";
 
 // Goerli -> mumbai
 contract PolygonL2SwitchboardTest is Setup {
     bytes32[] roots;
+    uint256 nonce;
 
     uint256 confirmGasLimit_ = 300000;
     uint256 initiateGasLimit_ = 300000;
@@ -25,6 +20,7 @@ contract PolygonL2SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
+        initialise();
         _a.chainSlug = uint32(uint256(80001));
         _b.chainSlug = uint32(uint256(5));
 
@@ -92,10 +88,21 @@ contract PolygonL2SwitchboardTest is Setup {
 
         vm.stopPrank();
 
-        hoax(_socketOwner);
+        bytes32 digest = keccak256(
+            abi.encode(
+                "PROPOSE_GAS_LIMIT_UPDATE",
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                _proposeGasLimit
+            )
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
         cc_.transmitManager__.setProposeGasLimit(
+            cc_.transmitterNonce++,
             remoteChainSlug_,
-            _proposeGasLimit
+            _proposeGasLimit,
+            sig
         );
 
         SocketConfigContext memory scc_ = addPolygonL2Switchboard(
@@ -160,6 +167,7 @@ contract PolygonL2SwitchboardTest is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         polygonL2Switchboard = new PolygonL2Switchboard(
+            cc_.chainSlug,
             confirmGasLimit_,
             initiateGasLimit_,
             executionOverhead_,

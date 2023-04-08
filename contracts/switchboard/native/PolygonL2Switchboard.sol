@@ -18,6 +18,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     }
 
     constructor(
+        uint256 chainSlug_,
         uint256 confirmGasLimit_,
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
@@ -27,6 +28,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     )
         AccessControlExtended(owner_)
         NativeSwitchboardBase(
+            chainSlug_,
             initiateGasLimit_,
             executionOverhead_,
             gasPriceOracle_
@@ -75,8 +77,27 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     }
 
     function updateConfirmGasLimit(
-        uint256 confirmGasLimit_
-    ) external onlyRole(GAS_LIMIT_UPDATER_ROLE) {
+        uint256 nonce_,
+        uint256 confirmGasLimit_,
+        bytes memory signature_
+    ) external {
+        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    "L1_RECEIVE_GAS_LIMIT_UPDATE",
+                    chainSlug,
+                    nonce_,
+                    confirmGasLimit_
+                )
+            ),
+            signature_
+        );
+
+        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
+            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        uint256 nonce = nextNonce[gasLimitUpdater]++;
+        if (nonce_ != nonce) revert InvalidNonce();
+
         confirmGasLimit = confirmGasLimit_;
         emit UpdatedConfirmGasLimit(confirmGasLimit_);
     }

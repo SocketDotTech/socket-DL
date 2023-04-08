@@ -30,7 +30,7 @@ contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
     event SourceGasPriceUpdated(uint256 sourceGasPrice);
 
     error TransmitterNotFound();
-    error NonceAlreadyUsed();
+    error InvalidNonce();
 
     constructor(
         address owner_,
@@ -58,7 +58,7 @@ contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
         if (!isTransmitter) revert TransmitterNotFound();
 
         uint256 nonce = nextNonce[transmitter]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         sourceGasPrice = sourceGasPrice_;
         updatedAt[chainSlug] = block.timestamp;
@@ -94,7 +94,7 @@ contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
 
         if (!isTransmitter) revert TransmitterNotFound();
         uint256 nonce = nextNonce[transmitter]++;
-        if (nonce_ != nonce) revert NonceAlreadyUsed();
+        if (nonce_ != nonce) revert InvalidNonce();
 
         relativeGasPrice[siblingChainSlug_] = relativeGasPrice_;
         updatedAt[siblingChainSlug_] = block.timestamp;

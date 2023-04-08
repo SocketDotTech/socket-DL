@@ -13,6 +13,7 @@ import "../../../contracts/interfaces/ICapacitor.sol";
 // Arbitrum Goerli -> Goerli
 contract ArbitrumL2SwitchboardTest is Setup {
     bytes32[] roots;
+    uint256 nonce;
 
     uint256 confirmGasLimit_ = 100;
     uint256 initiateGasLimit_ = 100;
@@ -25,6 +26,8 @@ contract ArbitrumL2SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
+        initialise();
+
         _a.chainSlug = uint32(uint256(421613));
         _b.chainSlug = uint32(uint256(5));
 
@@ -96,10 +99,21 @@ contract ArbitrumL2SwitchboardTest is Setup {
 
         vm.stopPrank();
 
-        hoax(_socketOwner);
+        bytes32 digest = keccak256(
+            abi.encode(
+                "PROPOSE_GAS_LIMIT_UPDATE",
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                _proposeGasLimit
+            )
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
         cc_.transmitManager__.setProposeGasLimit(
+            cc_.transmitterNonce++,
             remoteChainSlug_,
-            _proposeGasLimit
+            _proposeGasLimit,
+            sig
         );
 
         SocketConfigContext memory scc_ = addArbitrumL2Switchboard(
@@ -164,6 +178,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         arbitrumL2Switchboard = new ArbitrumL2Switchboard(
+            cc_.chainSlug,
             confirmGasLimit_,
             initiateGasLimit_,
             executionOverhead_,
@@ -175,7 +190,21 @@ contract ArbitrumL2SwitchboardTest is Setup {
         arbitrumL2Switchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         arbitrumL2Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
-        arbitrumL2Switchboard.setExecutionOverhead(_executionOverhead);
+        bytes32 digest = keccak256(
+            abi.encode(
+                "EXECUTION_OVERHEAD_UPDATE",
+                nonce,
+                cc_.chainSlug,
+                _executionOverhead
+            )
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
+
+        arbitrumL2Switchboard.setExecutionOverhead(
+            nonce++,
+            _executionOverhead,
+            sig
+        );
         arbitrumL2Switchboard.updateRemoteNativeSwitchboard(
             remoteNativeSwitchboard_
         );

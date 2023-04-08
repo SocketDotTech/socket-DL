@@ -23,6 +23,9 @@ contract SingleCapacitorTest is Test {
 
     function testSingleCapacitorSetup() external {
         assertEq(_sa.owner(), _owner, "Owner not set");
+
+        assertTrue(_sa.socket() == _socket, "Socket role not set");
+
         _assertPacketById(bytes32(0), 0);
         _assertPacketToBeSealed(bytes32(0), 0);
     }

@@ -14,6 +14,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     }
 
     constructor(
+        uint256 chainSlug_,
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         address checkpointManager_,
@@ -23,6 +24,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     )
         AccessControlExtended(owner_)
         NativeSwitchboardBase(
+            chainSlug_,
             initiateGasLimit_,
             executionOverhead_,
             gasPriceOracle_

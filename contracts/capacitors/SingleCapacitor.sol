@@ -23,14 +23,4 @@ contract SingleCapacitor is BaseCapacitor {
 
         emit MessageAdded(packedMessage_, packetCount, packedMessage_);
     }
-
-    function sealPacket(
-        uint256
-    ) external virtual override onlySocket returns (bytes32, uint64) {
-        uint64 packetCount = _nextSealCount++;
-        bytes32 root = _roots[packetCount];
-
-        if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
-        return (root, packetCount);
-    }
 }

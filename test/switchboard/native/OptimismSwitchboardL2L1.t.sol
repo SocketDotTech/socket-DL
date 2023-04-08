@@ -2,18 +2,13 @@
 pragma solidity ^0.8.0;
 
 import "../../Setup.t.sol";
-import "forge-std/Test.sol";
 import "../../../contracts/switchboard/native/OptimismSwitchboard.sol";
-import "../../../contracts/TransmitManager.sol";
-import "../../../contracts/GasPriceOracle.sol";
-import "../../../contracts/ExecutionManager.sol";
-import "../../../contracts/CapacitorFactory.sol";
-import "../../../contracts/interfaces/ICapacitor.sol";
 
 // Goerli -> Optimism-Goerli
 // RemoteNativeSwitchBoard i.e SwitchBoard on Goerli (5) is:0x793753781B45565C68392c4BB556C1bEcFC42F24
 contract OptimismSwitchboardL2L1Test is Setup {
     bytes32[] roots;
+    uint256 nonce;
 
     uint256 receiveGasLimit_ = 100000;
     uint256 confirmGasLimit_ = 100000;
@@ -29,6 +24,8 @@ contract OptimismSwitchboardL2L1Test is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
+        initialise();
+
         _a.chainSlug = uint32(uint256(420));
         _b.chainSlug = uint32(uint256(5));
 
@@ -96,10 +93,21 @@ contract OptimismSwitchboardL2L1Test is Setup {
 
         vm.stopPrank();
 
-        hoax(_socketOwner);
+        bytes32 digest = keccak256(
+            abi.encode(
+                "PROPOSE_GAS_LIMIT_UPDATE",
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                _proposeGasLimit
+            )
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
         cc_.transmitManager__.setProposeGasLimit(
+            cc_.transmitterNonce++,
             remoteChainSlug_,
-            _proposeGasLimit
+            _proposeGasLimit,
+            sig
         );
 
         SocketConfigContext memory scc_ = addOptimismSwitchboard(
@@ -164,6 +172,7 @@ contract OptimismSwitchboardL2L1Test is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         optimismSwitchboard = new OptimismSwitchboard(
+            cc_.chainSlug,
             receiveGasLimit_,
             confirmGasLimit_,
             initiateGasLimit_,

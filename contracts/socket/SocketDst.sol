@@ -49,7 +49,7 @@ abstract contract SocketDst is SocketBase {
 
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
-                _getChainSlug(packetId_),
+                uint32(_decodeSlug(packetId_)),
                 keccak256(abi.encode(chainSlug, packetId_, root_)),
                 signature_
             );
@@ -78,7 +78,7 @@ abstract contract SocketDst is SocketBase {
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
 
-        uint256 remoteSlug = uint256(messageDetails_.msgId >> 224);
+        uint256 remoteSlug = _decodeSlug(messageDetails_.msgId);
 
         PlugConfig storage plugConfig = _plugConfigs[localPlug_][remoteSlug];
 
@@ -176,9 +176,9 @@ abstract contract SocketDst is SocketBase {
         return packetIdRoots[packetId_] == bytes32(0) ? false : true;
     }
 
-    function _getChainSlug(
-        bytes32 packetId_
-    ) internal pure returns (uint32 chainSlug_) {
-        chainSlug_ = uint32(uint256(packetId_) >> 224);
+    function _decodeSlug(
+        bytes32 id_
+    ) internal pure returns (uint256 chainSlug_) {
+        chainSlug_ = uint256(id_) >> 224;
     }
 }

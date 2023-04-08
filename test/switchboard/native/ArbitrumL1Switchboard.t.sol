@@ -2,17 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "../../Setup.t.sol";
-import "forge-std/Test.sol";
 import "../../../contracts/switchboard/native/ArbitrumL1Switchboard.sol";
-import "../../../contracts/TransmitManager.sol";
-import "../../../contracts/GasPriceOracle.sol";
-import "../../../contracts/ExecutionManager.sol";
-import "../../../contracts/CapacitorFactory.sol";
-import "../../../contracts/interfaces/ICapacitor.sol";
 
 // Goerli -> Arbitrum-Goerli
 contract ArbitrumL1SwitchboardTest is Setup {
     bytes32[] roots;
+    uint256 nonce;
 
     uint256 dynamicFees_ = 100;
     uint256 initiateGasLimit_ = 100;
@@ -28,6 +23,8 @@ contract ArbitrumL1SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
+        initialise();
+
         _a.chainSlug = uint32(uint256(5));
         _b.chainSlug = uint32(uint256(421613));
 
@@ -107,10 +104,21 @@ contract ArbitrumL1SwitchboardTest is Setup {
 
         vm.stopPrank();
 
-        hoax(_socketOwner);
+        bytes32 digest = keccak256(
+            abi.encode(
+                "PROPOSE_GAS_LIMIT_UPDATE",
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                _proposeGasLimit
+            )
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
         cc_.transmitManager__.setProposeGasLimit(
+            cc_.transmitterNonce++,
             remoteChainSlug_,
-            _proposeGasLimit
+            _proposeGasLimit,
+            sig
         );
 
         SocketConfigContext memory scc_ = addArbitrumL1Switchboard(
@@ -175,6 +183,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         arbitrumL1Switchboard = new ArbitrumL1Switchboard(
+            cc_.chainSlug,
             dynamicFees_,
             initiateGasLimit_,
             executionOverhead_,
@@ -188,7 +197,22 @@ contract ArbitrumL1SwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
         arbitrumL1Switchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         arbitrumL1Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-        arbitrumL1Switchboard.setExecutionOverhead(_executionOverhead);
+
+        bytes32 digest = keccak256(
+            abi.encode(
+                "EXECUTION_OVERHEAD_UPDATE",
+                nonce,
+                cc_.chainSlug,
+                _executionOverhead
+            )
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
+
+        arbitrumL1Switchboard.setExecutionOverhead(
+            nonce++,
+            _executionOverhead,
+            sig
+        );
         arbitrumL1Switchboard.updateRemoteNativeSwitchboard(
             remoteNativeSwitchboard_
         );

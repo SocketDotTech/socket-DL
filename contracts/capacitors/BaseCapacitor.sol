@@ -32,6 +32,16 @@ abstract contract BaseCapacitor is ICapacitor, AccessControlExtended {
         socket = socket_;
     }
 
+    function sealPacket(
+        uint256
+    ) external virtual override onlySocket returns (bytes32, uint64) {
+        uint64 packetCount = _nextSealCount++;
+        if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
+
+        bytes32 root = _roots[packetCount];
+        return (root, packetCount);
+    }
+
     /// returns the latest packet details to be sealed
     /// @inheritdoc ICapacitor
     function getNextPacketToBeSealed()
