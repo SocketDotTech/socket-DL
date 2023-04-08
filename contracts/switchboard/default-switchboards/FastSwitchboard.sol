@@ -5,6 +5,7 @@ import "./SwitchboardBase.sol";
 
 contract FastSwitchboard is SwitchboardBase {
     uint256 public immutable timeoutInSeconds;
+    mapping(uint256 => bool) public isPacketValid;
 
     // dst chain slug => total watchers registered
     mapping(uint256 => uint256) public totalWatchers;
@@ -49,6 +50,9 @@ contract FastSwitchboard is SwitchboardBase {
         isAttested[watcher][packetId_] = true;
         attestations[packetId_]++;
 
+        if (attestations[packetId_] == totalWatchers[srcChainSlug_])
+            isPacketValid[packetId_] = true;
+
         emit PacketAttested(packetId_, watcher);
     }
 
@@ -66,7 +70,7 @@ contract FastSwitchboard is SwitchboardBase {
         if (tripGlobalFuse || tripSinglePath[srcChainSlug_]) return false;
 
         if (
-            attestations[packetId_] < totalWatchers[srcChainSlug_] ||
+            !isPacketValid[packetId_] ||
             block.timestamp - proposeTime_ < timeoutInSeconds
         ) return false;
 

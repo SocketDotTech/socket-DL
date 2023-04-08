@@ -8,6 +8,7 @@ contract FastSwitchboardTest is Setup {
     uint256 immutable remoteChainSlug = uint32(uint256(2));
     uint256 immutable packetId = 1;
     address watcher;
+    address altWatcher;
 
     event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
     event PacketAttested(uint256 packetId, address attester);
@@ -38,19 +39,12 @@ contract FastSwitchboardTest is Setup {
         );
 
         watcher = vm.addr(_watcherPrivateKey);
+        altWatcher = vm.addr(_altWatcherPrivateKey);
 
-        fastSwitchboard.grantWatcherRole(
-            remoteChainSlug,
-            vm.addr(_watcherPrivateKey)
-        );
-        fastSwitchboard.grantWatcherRole(
-            _a.chainSlug,
-            vm.addr(_watcherPrivateKey)
-        );
-        fastSwitchboard.grantWatcherRole(
-            remoteChainSlug,
-            vm.addr(_altWatcherPrivateKey)
-        );
+        fastSwitchboard.grantWatcherRole(remoteChainSlug, watcher);
+        fastSwitchboard.grantWatcherRole(remoteChainSlug, altWatcher);
+
+        fastSwitchboard.grantWatcherRole(_a.chainSlug, watcher);
 
         vm.expectEmit(false, false, false, true);
         emit AttestGasLimitSet(remoteChainSlug, _attestGasLimit);
@@ -64,13 +58,11 @@ contract FastSwitchboardTest is Setup {
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
         vm.expectEmit(false, false, false, true);
-        emit PacketAttested(packetId, vm.addr(_watcherPrivateKey));
+        emit PacketAttested(packetId, watcher);
 
         fastSwitchboard.attest(packetId, remoteChainSlug, sig);
 
-        assertTrue(
-            fastSwitchboard.isAttested(vm.addr(_watcherPrivateKey), packetId)
-        );
+        assertTrue(fastSwitchboard.isAttested(watcher, packetId));
     }
 
     function testDuplicateAttestation() external {
@@ -78,13 +70,11 @@ contract FastSwitchboardTest is Setup {
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
         vm.expectEmit(false, false, false, true);
-        emit PacketAttested(packetId, vm.addr(_watcherPrivateKey));
+        emit PacketAttested(packetId, watcher);
 
         fastSwitchboard.attest(packetId, remoteChainSlug, sig);
 
-        assertTrue(
-            fastSwitchboard.isAttested(vm.addr(_watcherPrivateKey), packetId)
-        );
+        assertTrue(fastSwitchboard.isAttested(watcher, packetId));
 
         vm.expectRevert(AlreadyAttested.selector);
         fastSwitchboard.attest(packetId, remoteChainSlug, sig);
@@ -93,6 +83,12 @@ contract FastSwitchboardTest is Setup {
     function testIsAllowed() external {
         bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
+
+        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+
+        digest = keccak256(abi.encode(remoteChainSlug, packetId));
+        sig = _createSignature(digest, _altWatcherPrivateKey);
+
         fastSwitchboard.attest(packetId, remoteChainSlug, sig);
 
         uint256 proposeTime = block.timestamp -
