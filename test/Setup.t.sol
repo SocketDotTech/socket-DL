@@ -145,7 +145,7 @@ contract Setup is Test {
             remoteChainSlug_,
             _executionOverhead
         );
-        optimisticSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
+        optimisticSwitchboard.grantRoleWithUint(remoteChainSlug_, _watcher);
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
@@ -266,7 +266,7 @@ contract Setup is Test {
             // deduce transmitter address from private key
             transmitter = vm.addr(transmitterPrivateKeys_[index]);
             // grant transmitter role
-            cc_.transmitManager__.grantTransmitterRole(
+            cc_.transmitManager__.grantRoleWithUint(
                 remoteChainSlug_,
                 transmitter
             );
@@ -286,7 +286,6 @@ contract Setup is Test {
         bytes32 digest = keccak256(
             abi.encode(remoteChainSlug_, packetId, root)
         );
-
         sig = _createSignature(digest, _transmitterPrivateKey);
     }
 
@@ -297,7 +296,6 @@ contract Setup is Test {
         bytes32 digest = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest_)
         );
-
         (uint8 sigV, bytes32 sigR, bytes32 sigS) = vm.sign(privateKey_, digest);
         sig = new bytes(65);
         bytes1 v32 = bytes1(sigV);

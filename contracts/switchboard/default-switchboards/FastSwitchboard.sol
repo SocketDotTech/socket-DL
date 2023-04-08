@@ -66,7 +66,7 @@ contract FastSwitchboard is SwitchboardBase {
         if (tripGlobalFuse || tripSinglePath[srcChainSlug_]) return false;
 
         if (
-            attestations[packetId_] < totalWatchers[srcChainSlug_] &&
+            attestations[packetId_] < totalWatchers[srcChainSlug_] ||
             block.timestamp - proposeTime_ < timeoutInSeconds
         ) return false;
 

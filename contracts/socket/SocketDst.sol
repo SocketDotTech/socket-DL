@@ -49,13 +49,14 @@ abstract contract SocketDst is SocketBase {
         bytes calldata signature_
     ) external {
         if (remoteRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
+
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
-                (_getChainSlug(packetId_) << 128) | chainSlug,
-                packetId_,
-                root_,
+                _getChainSlug(packetId_) << 128,
+                keccak256(abi.encode(chainSlug, packetId_, root_)),
                 signature_
             );
+
         if (!isTransmitter) revert InvalidAttester();
 
         remoteRoots[packetId_] = root_;

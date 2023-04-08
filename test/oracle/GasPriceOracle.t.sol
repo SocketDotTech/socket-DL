@@ -1,24 +1,22 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "forge-std/Test.sol";
-import {Vm} from "../../lib/forge-std/src/Vm.sol";
-import "../../lib/forge-std/src/console.sol";
-import "../../contracts/GasPriceOracle.sol";
-import {TransmitManager} from "../../contracts/TransmitManager.sol";
-import {SignatureVerifier} from "../../contracts/utils/SignatureVerifier.sol";
+import "../Setup.t.sol";
 
-contract GasPriceOracleTest is Test {
+contract GasPriceOracleTest is Setup {
     GasPriceOracle internal gasPriceOracle;
     uint256 chainSlug = uint32(uint256(0x2013AA263));
     uint256 destChainSlug = uint32(uint256(0x2013AA264));
-    uint256 internal c = 1;
+    uint256 transmitterPrivateKey = c++;
+    address immutable transmitter = vm.addr(transmitterPrivateKey);
+
     address immutable owner = address(uint160(c++));
-    address immutable transmitter = address(uint160(c++));
     address immutable nonTransmitter = address(uint160(c++));
     uint256 gasLimit = 200000;
     SignatureVerifier internal signatureVerifier;
     TransmitManager internal transmitManager;
+
+    uint256 gasPriceOracleNonce;
 
     event GasPriceUpdated(uint256 dstChainSlug_, uint256 relativeGasPrice_);
     event TransmitManagerUpdated(address transmitManager);
@@ -36,8 +34,8 @@ contract GasPriceOracleTest is Test {
             gasLimit
         );
         vm.startPrank(owner);
-        transmitManager.grantTransmitterRole(chainSlug, transmitter);
-        transmitManager.grantTransmitterRole(destChainSlug, transmitter);
+        transmitManager.grantRoleWithUint(chainSlug, transmitter);
+        transmitManager.grantRoleWithUint(destChainSlug, transmitter);
 
         vm.expectEmit(false, false, false, true);
         emit TransmitManagerUpdated(address(transmitManager));
@@ -47,29 +45,43 @@ contract GasPriceOracleTest is Test {
     }
 
     function testSetSourceGasPrice() public {
-        vm.startPrank(transmitter);
-
         uint256 sourceGasPrice = 1200000;
 
         vm.expectEmit(false, false, false, true);
         emit SourceGasPriceUpdated(sourceGasPrice);
 
-        gasPriceOracle.setSourceGasPrice(sourceGasPrice);
+        bytes32 digest = keccak256(
+            abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
+        );
+        bytes memory sig = _createSignature(digest, transmitterPrivateKey);
+
+        gasPriceOracle.setSourceGasPrice(
+            gasPriceOracleNonce++,
+            sourceGasPrice,
+            sig
+        );
 
         vm.stopPrank();
-
         assert(gasPriceOracle.sourceGasPrice() == sourceGasPrice);
     }
 
     function testSetRelativeGasPrice() public {
-        vm.startPrank(transmitter);
-
         uint256 relativeGasPrice = 1200000;
 
         vm.expectEmit(false, false, false, true);
         emit GasPriceUpdated(destChainSlug, relativeGasPrice);
 
-        gasPriceOracle.setRelativeGasPrice(destChainSlug, relativeGasPrice);
+        bytes32 digest = keccak256(
+            abi.encode(destChainSlug, gasPriceOracleNonce, relativeGasPrice)
+        );
+        bytes memory sig = _createSignature(digest, transmitterPrivateKey);
+
+        gasPriceOracle.setRelativeGasPrice(
+            destChainSlug,
+            gasPriceOracleNonce++,
+            relativeGasPrice,
+            sig
+        );
 
         vm.stopPrank();
 
@@ -79,14 +91,31 @@ contract GasPriceOracleTest is Test {
     }
 
     function testGetGasPrices() public {
-        vm.startPrank(transmitter);
-
         uint256 sourceGasPrice = 1200000;
         uint256 relativeGasPrice = 1100000;
 
-        gasPriceOracle.setSourceGasPrice(sourceGasPrice);
-        gasPriceOracle.setRelativeGasPrice(destChainSlug, relativeGasPrice);
+        bytes32 digest = keccak256(
+            abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
+        );
+        bytes memory sig = _createSignature(digest, transmitterPrivateKey);
 
+        gasPriceOracle.setSourceGasPrice(
+            gasPriceOracleNonce++,
+            sourceGasPrice,
+            sig
+        );
+
+        digest = keccak256(
+            abi.encode(destChainSlug, gasPriceOracleNonce, relativeGasPrice)
+        );
+        sig = _createSignature(digest, transmitterPrivateKey);
+
+        gasPriceOracle.setRelativeGasPrice(
+            destChainSlug,
+            gasPriceOracleNonce++,
+            relativeGasPrice,
+            sig
+        );
         vm.stopPrank();
 
         (
@@ -99,23 +128,38 @@ contract GasPriceOracleTest is Test {
     }
 
     function testNonTransmitterUpdateRelativeGasPrice() public {
-        vm.startPrank(nonTransmitter);
-
         uint256 relativeGasPrice = 1200000;
 
         vm.expectRevert(TransmitterNotFound.selector);
-        gasPriceOracle.setRelativeGasPrice(destChainSlug, relativeGasPrice);
+        bytes32 digest = keccak256(
+            abi.encode(destChainSlug, gasPriceOracleNonce, relativeGasPrice)
+        );
+        bytes memory sig = _createSignature(digest, _altTransmitterPrivateKey);
+
+        gasPriceOracle.setRelativeGasPrice(
+            destChainSlug,
+            gasPriceOracleNonce++,
+            relativeGasPrice,
+            sig
+        );
 
         vm.stopPrank();
     }
 
     function testNonTransmitterUpdateSrcGasPrice() public {
-        vm.startPrank(nonTransmitter);
-
         uint256 sourceGasPrice = 1200000;
 
         vm.expectRevert(TransmitterNotFound.selector);
-        gasPriceOracle.setSourceGasPrice(sourceGasPrice);
+        bytes32 digest = keccak256(
+            abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
+        );
+        bytes memory sig = _createSignature(digest, _altTransmitterPrivateKey);
+
+        gasPriceOracle.setSourceGasPrice(
+            gasPriceOracleNonce++,
+            sourceGasPrice,
+            sig
+        );
 
         vm.stopPrank();
     }

@@ -61,7 +61,6 @@ contract FastSwitchboardTest is Setup {
 
     function testAttest() external {
         bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
-
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
         vm.expectEmit(false, false, false, true);
@@ -76,7 +75,6 @@ contract FastSwitchboardTest is Setup {
 
     function testDuplicateAttestation() external {
         bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
-
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
         vm.expectEmit(false, false, false, true);
@@ -94,7 +92,6 @@ contract FastSwitchboardTest is Setup {
 
     function testIsAllowed() external {
         bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
-
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
         fastSwitchboard.attest(packetId, remoteChainSlug, sig);
 
@@ -126,7 +123,7 @@ contract FastSwitchboardTest is Setup {
         hoax(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit SwitchboardTripped(true);
-        fastSwitchboard.tripGlobal(true);
+        fastSwitchboard.tripGlobal();
         assertTrue(fastSwitchboard.tripGlobalFuse());
     }
 
@@ -146,32 +143,33 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testTripSingle() external {
-        hoax(_socketOwner);
+        hoax(watcher);
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
-        fastSwitchboard.tripPath(srcChainSlug, true);
+        fastSwitchboard.tripPath(srcChainSlug);
+
         assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
     }
 
     function testNonOwnerToTripSingle() external {
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectRevert();
-        fastSwitchboard.tripPath(srcChainSlug, true);
+        fastSwitchboard.tripPath(srcChainSlug);
     }
 
     function testUnTripAfterTripSingle() external {
-        hoax(_socketOwner);
+        hoax(watcher);
         uint256 srcChainSlug = _a.chainSlug;
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, true);
-        fastSwitchboard.tripPath(srcChainSlug, true);
+        fastSwitchboard.tripPath(srcChainSlug);
         assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
 
         hoax(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, false);
-        fastSwitchboard.tripPath(srcChainSlug, false);
+        fastSwitchboard.untripPath(srcChainSlug);
         assertFalse(fastSwitchboard.tripSinglePath(srcChainSlug));
     }
 

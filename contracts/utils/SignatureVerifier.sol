@@ -15,9 +15,6 @@ contract SignatureVerifier is ISignatureVerifier {
         bytes32 digest = keccak256(
             abi.encode(destChainSlug_, packetId_, root_)
         );
-        digest = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest)
-        );
         signer = recoverSignerFromDigest(digest, signature_);
     }
 
@@ -28,10 +25,13 @@ contract SignatureVerifier is ISignatureVerifier {
         bytes32 digest_,
         bytes memory signature_
     ) public pure override returns (address signer) {
+        bytes32 digest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest_)
+        );
         (bytes32 sigR, bytes32 sigS, uint8 sigV) = _splitSignature(signature_);
 
         // recovered signer is checked for the valid roles later
-        signer = ecrecover(digest_, sigV, sigR, sigS);
+        signer = ecrecover(digest, sigV, sigR, sigS);
     }
 
     /**

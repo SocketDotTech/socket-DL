@@ -5,10 +5,10 @@ import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IGasPriceOracle.sol";
 import "../../interfaces/ICapacitor.sol";
 
-import "../../utils/AccessControl.sol";
+import "../../utils/AccessControlWithUint.sol";
 import "../../libraries/RescueFundsLib.sol";
 
-abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
+abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlWithUint {
     IGasPriceOracle public gasPriceOracle__;
     ICapacitor public capacitor__;
 
@@ -67,7 +67,25 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
         uint256 dstChainSlug_,
         uint256 dstRelativeGasPrice_,
         uint256 sourceGasPrice_
-    ) internal view virtual returns (uint256) {}
+    ) internal view virtual returns (uint256);
+
+    /**
+     * @notice pause execution
+     */
+    function tripGlobal(
+        uint256 srcChainSlug_
+    ) external onlyRoleWithUint(srcChainSlug_) {
+        tripGlobalFuse = true;
+        emit SwitchboardTripped(true);
+    }
+
+    /**
+     * @notice unpause execution
+     */
+    function untrip() external onlyOwner {
+        tripGlobalFuse = false;
+        emit SwitchboardTripped(false);
+    }
 
     /**
      * @notice updates execution overhead
