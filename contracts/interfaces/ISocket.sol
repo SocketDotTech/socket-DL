@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.7;
 
+import "./ITransmitManager.sol";
+import "./IExecutionManager.sol";
+
 interface ISocket {
     /**
      * @param transmissionFees fees needed for transmission
@@ -153,4 +156,10 @@ interface ISocket {
     ) external;
 
     function packetIdRoots(bytes32 packetId_) external view returns (bytes32);
+
+    function getMinFees(
+        uint256 msgGasLimit_,
+        uint32 remoteChainSlug_,
+        address plug_
+    ) external view returns (uint256 totalFees);
 }

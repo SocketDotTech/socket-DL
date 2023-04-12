@@ -111,7 +111,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgGasLimit_,
         uint32 remoteChainSlug_,
         address plug_
-    ) external view returns (uint256 totalFees) {
+    ) external view override returns (uint256 totalFees) {
         PlugConfig storage plugConfig = _plugConfigs[plug_][remoteChainSlug_];
 
         (

@@ -3,31 +3,36 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
+import "../interfaces/ITransmitManager.sol";
+import "../interfaces/ISwitchboard.sol";
+import "../interfaces/IExecutionManager.sol";
 import "../utils/Ownable.sol";
 
 contract Messenger is IPlug, Ownable(msg.sender) {
     // immutables
-    address private immutable _socket;
-    uint256 private immutable _chainSlug;
+    ISocket public immutable _socket__;
+    uint256 public immutable _localChainSlug;
 
-    bytes32 private _message;
-    uint256 public msgGasLimit;
+    bytes32 public _message;
+    uint256 public _msgGasLimit;
 
-    bytes32 private constant _PING = keccak256("PING");
-    bytes32 private constant _PONG = keccak256("PONG");
-
-    uint256 public constant SOCKET_FEE = 0.001 ether;
+    bytes32 public constant _PING = keccak256("PING");
+    bytes32 public constant _PONG = keccak256("PONG");
 
     error NoSocketFee();
 
     constructor(address socket_, uint256 chainSlug_, uint256 msgGasLimit_) {
-        _socket = socket_;
-        _chainSlug = chainSlug_;
+        _socket__ = ISocket(socket_);
+        _localChainSlug = chainSlug_;
 
-        msgGasLimit = msgGasLimit_;
+        _msgGasLimit = msgGasLimit_;
     }
 
     receive() external payable {}
+
+    function updateMsgGasLimit(uint256 msgGasLimit_) external onlyOwner {
+        _msgGasLimit = msgGasLimit_;
+    }
 
     function removeGas(address payable receiver_) external onlyOwner {
         receiver_.transfer(address(this).balance);
@@ -38,10 +43,10 @@ contract Messenger is IPlug, Ownable(msg.sender) {
     }
 
     function sendRemoteMessage(
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         bytes32 message_
     ) external payable {
-        bytes memory payload = abi.encode(_chainSlug, message_);
+        bytes memory payload = abi.encode(_localChainSlug, message_);
         _outbound(remoteChainSlug_, payload);
     }
 
@@ -49,28 +54,28 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         uint256,
         bytes calldata payload_
     ) external payable override {
-        require(msg.sender == _socket, "Counter: Invalid Socket");
-        (uint256 localChainSlug, bytes32 msgDecoded) = abi.decode(
+        require(msg.sender == address(_socket__), "Counter: Invalid Socket");
+        (uint32 remoteChainSlug, bytes32 msgDecoded) = abi.decode(
             payload_,
-            (uint256, bytes32)
+            (uint32, bytes32)
         );
 
         _updateMessage(msgDecoded);
 
         bytes memory newPayload = abi.encode(
-            _chainSlug,
+            _localChainSlug,
             msgDecoded == _PING ? _PONG : _PING
         );
-        _outbound(localChainSlug, newPayload);
+        _outbound(remoteChainSlug, newPayload);
     }
 
     // settings
     function setSocketConfig(
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         address remotePlug_,
         address switchboard_
     ) external onlyOwner {
-        ISocket(_socket).connect(
+        _socket__.connect(
             remoteChainSlug_,
             remotePlug_,
             switchboard_,
@@ -86,12 +91,13 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         _message = message_;
     }
 
-    function _outbound(uint256 targetChain_, bytes memory payload_) private {
-        if (!(address(this).balance >= SOCKET_FEE)) revert NoSocketFee();
-        ISocket(_socket).outbound{value: SOCKET_FEE}(
+    function _outbound(uint32 targetChain_, bytes memory payload_) private {
+        uint256 fee = _socket__.getMinFees(
+            _msgGasLimit,
             targetChain_,
-            msgGasLimit,
-            payload_
+            address(this)
         );
+        if (!(address(this).balance >= fee)) revert NoSocketFee();
+        _socket__.outbound{value: fee}(targetChain_, _msgGasLimit, payload_);
     }
 }
