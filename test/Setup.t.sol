@@ -157,7 +157,12 @@ contract Setup is Test {
         // add roles
         hoax(_socketOwner);
         cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
+
+        hoax(_socketOwner);
+        cc_.executionManager__.grantRole(EXECUTOR_ROLE, address(this));
+
         _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
+        _addTransmitters(transmitterPrivateKeys_, cc_, cc_.chainSlug);
     }
 
     function _addOptimisticSwitchboard(

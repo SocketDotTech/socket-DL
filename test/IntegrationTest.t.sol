@@ -10,6 +10,9 @@ contract HappyTest is Setup {
 
     uint256 addAmount = 100;
     uint256 subAmount = 40;
+    uint256 sourceGasPrice = 1200000;
+    uint256 relativeGasPrice = 1100000;
+
     bool isFast = true;
     bytes32[] roots;
     uint256 index = isFast ? 0 : 1;
@@ -32,6 +35,11 @@ contract HappyTest is Setup {
         _deployPlugContracts();
 
         _configPlugContracts(index);
+
+        vm.startPrank(_transmitter);
+        _a.gasPriceOracle__.setSourceGasPrice(sourceGasPrice);
+        _a.gasPriceOracle__.setRelativeGasPrice(_b.chainSlug, relativeGasPrice);
+        vm.stopPrank();
     }
 
     function testRemoteAddFromAtoB1() external {
@@ -57,13 +65,21 @@ contract HappyTest is Setup {
                 _b.chainSlug
             );
 
+            uint256 value = switchboardFees +
+                socketFees +
+                verificationFee +
+                executionFee;
+
+            // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+            // verificationFees also should go to Executor, hence we do the additional computation below
+            executionFee = verificationFee + executionFee;
+
             hoax(_plugOwner);
-            srcCounter__.remoteAddOperation{
-                value: switchboardFees +
-                    socketFees +
-                    verificationFee +
-                    executionFee
-            }(_b.chainSlug, amount, _msgGasLimit);
+            srcCounter__.remoteAddOperation{value: value}(
+                _b.chainSlug,
+                amount,
+                _msgGasLimit
+            );
         }
 
         // uint256 msgId = _packMessageId(_a.chainSlug, 0);
@@ -256,6 +272,10 @@ contract HappyTest is Setup {
                 executionOverhead +
                 socketFees +
                 executionFee;
+
+            // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+            // verificationFees also should go to Executor, hence we do the additional computation below
+            executionFee = executionOverhead + executionFee;
 
             // send 2 messages
             (msgId1, root1) = outbound(0, amount, executionFee, fees, payload);
