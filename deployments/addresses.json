@@ -112,7 +112,8 @@
       }
     },
     "FastSwitchboard": "0x8654cB74011C9972dd63Ed691d310e1BAA85Fe9E",
-    "OptimisticSwitchboard": "0x4Cfcb1Dd6a7B17E8470650DDaeb9089f9D0B8192"
+    "OptimisticSwitchboard": "0x4Cfcb1Dd6a7B17E8470650DDaeb9089f9D0B8192",
+    "SocketBatcher": "0x06845FE0597cD0027df2d62B152B17E5eBaE22DB"
   },
   "56": {
     "Counter": "0x38904dFD3493674B85734078B83B29657Db51Ac9",
@@ -162,7 +163,8 @@
       }
     },
     "FastSwitchboard": "0x75460e2492238c50A817c4176A247136D4946C3A",
-    "OptimisticSwitchboard": "0x2fdfDc2CC59E2248457f965B71E2e27BD072d093"
+    "OptimisticSwitchboard": "0x2fdfDc2CC59E2248457f965B71E2e27BD072d093",
+    "SocketBatcher": "0x2959eBC446A4dFB30b04AfD62B0cBD3F914306B4"
   },
   "97": {
     "Counter": "0xA6132acDd47230cD03831b86919b85e8BEB475E5",
@@ -230,7 +232,8 @@
       }
     },
     "FastSwitchboard": "0x2521b29FD8d3787Ab42141f55F6b462E6115C737",
-    "OptimisticSwitchboard": "0xf20dE647B5490166A56bdCf34ed7f86C3F14fE42"
+    "OptimisticSwitchboard": "0xf20dE647B5490166A56bdCf34ed7f86C3F14fE42",
+    "SocketBatcher": "0x9773954b3a530568C0F6c7179f4656BF5eF89a3a"
   },
   "420": {
     "Counter": "0xA6132acDd47230cD03831b86919b85e8BEB475E5",
@@ -298,7 +301,8 @@
       }
     },
     "FastSwitchboard": "0x72be9F48226934A42A891075469F2Df185DC6fDb",
-    "OptimisticSwitchboard": "0x6993fDE4D46803e27969572Ab269391924dcb5EB"
+    "OptimisticSwitchboard": "0x6993fDE4D46803e27969572Ab269391924dcb5EB",
+    "SocketBatcher": "0x5a5a25F48742f9d3D0F11b09ED96DBe4E3cCe7b5"
   },
   "80001": {
     "Counter": "0x6ac25c1553BAd85135e298ca59343Bb545314707",
