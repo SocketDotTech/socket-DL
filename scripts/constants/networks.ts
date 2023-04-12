@@ -1,6 +1,7 @@
 import { config as dotenvConfig } from "dotenv";
 import { ethers } from "ethers";
 import { resolve } from "path";
+import { ChainSlug } from "../../src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -36,6 +37,27 @@ export const networkToChainSlug = {
   137: "polygon-mainnet",
   80001: "polygon-mumbai",
 };
+
+export const chainSlugKeys: string[] = Object.values(networkToChainSlug);
+
+export function getChainSlugFromId(chainId: number) {
+  switch (chainId) {
+    case ChainSlug.OPTIMISM:
+      return "Optimism";
+
+    case ChainSlug.ARBITRUM:
+      return "Arbitrum";
+
+    case ChainSlug.BSC:
+      return "bsc";
+
+    case ChainSlug.BSC_TESTNET:
+      return "bsc-testnet";
+
+    default:
+      throw new Error("Failed to lookup chainSlugCode from chainId");
+  }
+}
 
 export function getJsonRpcUrl(chain: keyof typeof chainSlugs): string {
   let jsonRpcUrl: string;

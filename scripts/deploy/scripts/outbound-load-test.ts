@@ -13,12 +13,14 @@ const deployedAddressPath = path.join(
 );
 
 // usage:
-// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain polygon-mumbai --remoteChain goerli --numOfRequests 5 --waitTime 10
+// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain optimism --remoteChain polygon-mainnet --numOfRequests 50 --waitTime 100
 export const main = async () => {
   const amount = 100;
-  const msgGasLimit = "19000000";
-  const gasLimit = 200485;
-  const fees = "20000000000000000";
+  const msgGasLimit = "100000";
+  const gasLimit = 185766;
+
+  // 0.00003
+
   let remoteChainSlug;
 
   try {
@@ -85,7 +87,7 @@ export const main = async () => {
         .connect(signer)
         .remoteAddOperation(remoteChainSlug, amount, msgGasLimit, {
           gasLimit,
-          value: BigNumber.from(fees),
+          value: ethers.utils.parseUnits("30000", "gwei").toNumber(),
         });
 
       await tx.wait();
@@ -110,7 +112,7 @@ export const main = async () => {
 };
 
 const sleep = (delay: any) =>
-  new Promise((resolve) => setTimeout(resolve, delay * 1000));
+  new Promise((resolve) => setTimeout(resolve, delay));
 
 main()
   .then(() => process.exit(0))
