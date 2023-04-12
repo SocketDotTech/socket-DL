@@ -3,17 +3,25 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IDecapacitor.sol";
 import "../libraries/RescueFundsLib.sol";
-import "../utils/Ownable.sol";
+import "../utils/AccessControlExtended.sol";
+import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
-contract HashChainDecapacitor is IDecapacitor, Ownable(msg.sender) {
+contract HashChainDecapacitor is IDecapacitor, AccessControlExtended {
+    /**
+     * @notice initialises the contract with owner address
+     */
+    constructor(address owner_) AccessControlExtended(owner_) {
+        _grantRole(RESCUE_ROLE, owner_);
+    }
+
     /// returns if the packed message is the part of a merkle tree or not
     /// @inheritdoc IDecapacitor
     function verifyMessageInclusion(
         bytes32 root_,
         bytes32 packedMessage_,
-        bytes calldata proof
+        bytes calldata proof_
     ) external pure override returns (bool) {
-        bytes32[] memory chain = abi.decode(proof, (bytes32[]));
+        bytes32[] memory chain = abi.decode(proof_, (bytes32[]));
         uint256 len = chain.length;
         bytes32 generatedRoot;
         bool isIncluded;
@@ -26,10 +34,10 @@ contract HashChainDecapacitor is IDecapacitor, Ownable(msg.sender) {
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
-    ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        address token_,
+        address userAddress_,
+        uint256 amount_
+    ) external onlyRole(RESCUE_ROLE) {
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

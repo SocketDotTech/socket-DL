@@ -2,39 +2,44 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ICapacitor.sol";
-import "../utils/AccessControl.sol";
+import "../utils/AccessControlExtended.sol";
 import "../libraries/RescueFundsLib.sol";
+import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
-abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
-    // keccak256("SOCKET_ROLE")
-    bytes32 public constant SOCKET_ROLE =
-        0x9626cdfde87fcc60a5069beda7850c84f848fb1b20dab826995baf7113491456;
-
+abstract contract BaseCapacitor is ICapacitor, AccessControlExtended {
     /// an incrementing id for each new packet created
-    uint256 internal _packets;
-    uint256 internal _sealedPackets;
+    uint64 internal _nextPacketCount;
+    uint64 internal _nextSealCount;
+
+    address public immutable socket;
 
     /// maps the packet id with the root hash generated while adding message
-    mapping(uint256 => bytes32) internal _roots;
+    mapping(uint64 => bytes32) internal _roots;
 
     error NoPendingPacket();
+    error OnlySocket();
 
-    event SocketSet(address socket_);
+    modifier onlySocket() {
+        if (msg.sender != socket) revert OnlySocket();
+
+        _;
+    }
 
     /**
      * @notice initialises the contract with socket address
      */
-    constructor(address socket_) {
-        _setSocket(socket_);
+    constructor(address socket_, address owner_) AccessControlExtended(owner_) {
+        socket = socket_;
     }
 
-    function setSocket(address socket_) external onlyOwner {
-        _setSocket(socket_);
-        emit SocketSet(socket_);
-    }
+    function sealPacket(
+        uint256
+    ) external virtual override onlySocket returns (bytes32, uint64) {
+        uint64 packetCount = _nextSealCount++;
+        if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
 
-    function _setSocket(address socket_) private {
-        _grantRole(SOCKET_ROLE, socket_);
+        bytes32 root = _roots[packetCount];
+        return (root, packetCount);
     }
 
     /// returns the latest packet details to be sealed
@@ -44,29 +49,29 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl(msg.sender) {
         view
         virtual
         override
-        returns (bytes32, uint256)
+        returns (bytes32, uint64)
     {
-        uint256 toSeal = _sealedPackets;
+        uint64 toSeal = _nextSealCount;
         return (_roots[toSeal], toSeal);
     }
 
     /// returns the root of packet for given id
     /// @inheritdoc ICapacitor
-    function getRootById(
-        uint256 id
+    function getRootByCount(
+        uint64 id_
     ) external view virtual override returns (bytes32) {
-        return _roots[id];
+        return _roots[id_];
     }
 
     function getLatestPacketCount() external view returns (uint256) {
-        return _packets == 0 ? 0 : _packets - 1;
+        return _nextPacketCount == 0 ? 0 : _nextPacketCount - 1;
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
-    ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        address token_,
+        address userAddress_,
+        uint256 amount_
+    ) external onlyRole(RESCUE_ROLE) {
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

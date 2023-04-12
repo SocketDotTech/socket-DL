@@ -33,7 +33,9 @@ contract SingleCapacitorTest is Test {
     }
 
     function testSetSocket() external {
-        address newSocket = address(8);
+        address newSocket = address(uint160(c++));
+
+        hoax(_raju);
         vm.expectRevert(Ownable.OnlyOwner.selector);
         _sa.setSocket(newSocket);
 
@@ -59,15 +61,12 @@ contract SingleCapacitorTest is Test {
         _assertNextPacket(bytes32(0), 1);
     }
 
-    function testAddWithoutSeal() external {
-        _addPackedMessage(_message_0);
-        _addPackedMessage(_message_1);
-    }
-
     function testAddMessageMultiple() external {
         _addPackedMessage(_message_0);
         _addPackedMessage(_message_1);
         _addPackedMessage(_message_2);
+
+        assertEq(_sa._packets(), 3);
 
         assertEq(_sa.getLatestPacketId(), 2);
         (, uint256 packetToSeal) = _sa.getNextPacketToBeSealed();

@@ -5,12 +5,27 @@ import { ContractFactory, Contract } from "ethers";
 import { Address } from "hardhat-deploy/dist/types";
 import path from "path";
 import fs from "fs";
-import { ChainSocketAddresses, DeploymentAddresses } from "../../../src";
+import {
+  ChainSlug,
+  ChainSocketAddresses,
+  DeploymentAddresses,
+} from "../../../src";
 
 export const deployedAddressPath = path.join(
   __dirname,
   "/../../../deployments/addresses.json"
 );
+
+export const getRoleHash = (role: string) =>
+  ethers.utils.keccak256(ethers.utils.toUtf8Bytes(role)).toString();
+
+export const getChainRoleHash = (role: string, chainSlug: number) =>
+  ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ["string", "uint256"],
+      [role, chainSlug]
+    )
+  );
 
 export const deployContractWithoutArgs = async (
   contractName: string,
@@ -31,15 +46,21 @@ export const deployContractWithoutArgs = async (
   }
 };
 
-export async function deployContractWithArgs(contractName: string, args: Array<any>, signer: SignerWithAddress, path: string) {
+export async function deployContractWithArgs(
+  contractName: string,
+  args: Array<any>,
+  signer: SignerWithAddress,
+  path: string
+) {
   try {
     const Contract: ContractFactory = await ethers.getContractFactory(
       contractName
     );
+
     const contract: Contract = await Contract.connect(signer).deploy(...args);
     await contract.deployed();
 
-    await verify(contract.address, contractName, args, path);
+    await verify(contract.address, contractName, path, args);
     return contract;
   } catch (error) {
     throw error;
@@ -53,10 +74,10 @@ export const verify = async (
   args: any[]
 ) => {
   try {
-    const chainId = await getChainId();
-    if (chainId === 31337) return;
+    const chainSlug = await getChainSlug();
+    if (chainSlug === 31337) return;
 
-    await sleep(20);
+    await sleep(40);
     await run("verify:verify", {
       address,
       contract: `${path}:${contractName}`,
@@ -67,13 +88,16 @@ export const verify = async (
   }
 };
 
-export const sleep = (delay) =>
+export const sleep = (delay: number) =>
   new Promise((resolve) => setTimeout(resolve, delay * 1000));
 
-export const getInstance = async (contractName: string, address: Address): Promise<Contract> =>
+export const getInstance = async (
+  contractName: string,
+  address: Address
+): Promise<Contract> =>
   (await ethers.getContractFactory(contractName)).attach(address);
 
-export const getChainId = async (): Promise<number> => {
+export const getChainSlug = async (): Promise<number> => {
   if (network.config.chainId === undefined)
     throw new Error("chain id not found");
   return Number(network.config.chainId);
@@ -86,7 +110,7 @@ export const integrationType = (integrationName: string) =>
 
 export const storeAddresses = async (
   addresses: ChainSocketAddresses,
-  chainId: number
+  chainSlug: ChainSlug
 ) => {
   if (!fs.existsSync(deployedAddressPath)) {
     await fs.promises.mkdir(deployedAddressPath);
@@ -102,18 +126,59 @@ export const storeAddresses = async (
     deploymentAddresses = JSON.parse(deploymentAddressesString);
   }
 
-  deploymentAddresses[chainId] = addresses;
+  deploymentAddresses[chainSlug] = addresses;
   fs.writeFileSync(
     deployedAddressPath,
     JSON.stringify(deploymentAddresses, null, 2)
   );
 };
 
-export const createObj = function (obj, keys, value) {
+export const getChainSlugsFromDeployedAddresses = async () => {
+  if (!fs.existsSync(deployedAddressPath)) {
+    await fs.promises.mkdir(deployedAddressPath);
+  }
+
+  const outputExists = fs.existsSync(deployedAddressPath);
+  let deploymentAddresses: DeploymentAddresses = {};
+  if (outputExists) {
+    const deploymentAddressesString = fs.readFileSync(
+      deployedAddressPath,
+      "utf-8"
+    );
+    deploymentAddresses = JSON.parse(deploymentAddressesString);
+
+    return Object.keys(deploymentAddresses);
+  }
+};
+
+export const getAddresses = async (chainSlug: ChainSlug) => {
+  if (!fs.existsSync(deployedAddressPath)) {
+    await fs.promises.mkdir(deployedAddressPath);
+  }
+
+  const outputExists = fs.existsSync(deployedAddressPath);
+  let deploymentAddresses: DeploymentAddresses = {};
+  if (outputExists) {
+    const deploymentAddressesString = fs.readFileSync(
+      deployedAddressPath,
+      "utf-8"
+    );
+    deploymentAddresses = JSON.parse(deploymentAddressesString);
+  }
+
+  return deploymentAddresses[chainSlug];
+};
+
+export const createObj = function (
+  obj: { [key: string]: any },
+  keys: string[],
+  value: any
+) {
   if (keys.length === 1) {
     obj[keys[0]] = value;
   } else {
     const key = keys.shift();
+    if (key === undefined) return obj;
     obj[key] = createObj(
       typeof obj[key] === "undefined" ? {} : obj[key],
       keys,

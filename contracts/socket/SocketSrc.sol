@@ -5,20 +5,19 @@ import "../interfaces/ICapacitor.sol";
 import "./SocketBase.sol";
 
 abstract contract SocketSrc is SocketBase {
-    // incrementing nonce, should be handled in next socket version.
-    uint256 public _messageCount;
-
     error InsufficientFees();
 
     /**
      * @notice emits the verification and seal confirmation of a packet
      * @param transmitter address of transmitter recovered from sig
      * @param packetId packed id
+     * @param root root
      * @param signature signature of attester
      */
     event PacketVerifiedAndSealed(
         address indexed transmitter,
-        uint256 indexed packetId,
+        bytes32 indexed packetId,
+        bytes32 root,
         bytes signature
     );
 
@@ -33,102 +32,166 @@ abstract contract SocketSrc is SocketBase {
         uint256 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes calldata payload_
-    ) external payable override returns (uint256 msgId) {
-        PlugConfig storage plugConfig = _plugConfigs[
-            (uint256(uint160(msg.sender)) << 96) | remoteChainSlug_
+    ) external payable override returns (bytes32 msgId) {
+        PlugConfig storage plugConfig = _plugConfigs[msg.sender][
+            remoteChainSlug_
         ];
-        uint256 localChainSlug = _chainSlug;
+        uint256 localChainSlug = chainSlug;
 
-        // Packs the local plug, local chain slug, remote chain slug and nonce
-        // _messageCount++ will take care of msg id overflow as well
-        // msgId(256) = localChainSlug(32) | nonce(224)
-        msgId = (uint256(uint32(localChainSlug)) << 224) | _messageCount++;
+        msgId = _encodeMsgId(localChainSlug);
 
-        uint256 executionFee = _deductFees(
+        ISocket.Fees memory fees = _deductFees(
             msgGasLimit_,
-            remoteChainSlug_,
+            uint32(remoteChainSlug_),
             plugConfig.outboundSwitchboard__
         );
 
-        bytes32 packedMessage = _hasher__.packMessage(
+        bytes32 packedMessage = hasher__.packMessage(
             localChainSlug,
             msg.sender,
             remoteChainSlug_,
             plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
-            executionFee,
+            fees.executionFee,
             payload_
         );
 
         plugConfig.capacitor__.addPackedMessage(packedMessage);
-        emit MessageTransmitted(
+        emit MessageOutbound(
             localChainSlug,
             msg.sender,
             remoteChainSlug_,
             plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
-            executionFee,
-            msg.value,
-            payload_
+            payload_,
+            fees
         );
     }
 
     function _deductFees(
         uint256 msgGasLimit_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         ISwitchboard switchboard__
-    ) internal returns (uint256 executionFee) {
-        uint256 transmitFees = _transmitManager__.getMinFees(remoteChainSlug_);
-        (uint256 switchboardFees, uint256 verificationFee) = switchboard__
-            .getMinFees(remoteChainSlug_);
-        uint256 msgExecutionFee = _executionManager__.getMinFees(
-            msgGasLimit_,
-            remoteChainSlug_
-        );
+    ) internal returns (Fees memory fees) {
+        uint256 minExecutionFees;
+        (
+            fees.transmissionFees,
+            fees.switchboardFees,
+            minExecutionFees
+        ) = _getMinFees(msgGasLimit_, remoteChainSlug_, switchboard__);
 
         if (
             msg.value <
-            transmitFees + switchboardFees + verificationFee + msgExecutionFee
+            fees.transmissionFees + fees.switchboardFees + minExecutionFees
         ) revert InsufficientFees();
 
         unchecked {
             // any extra fee is considered as executionFee
-            executionFee = msg.value - transmitFees - switchboardFees;
+            fees.executionFee =
+                msg.value -
+                fees.transmissionFees -
+                fees.switchboardFees;
 
-            _transmitManager__.payFees{value: transmitFees}(remoteChainSlug_);
-            switchboard__.payFees{value: switchboardFees}(remoteChainSlug_);
-            _executionManager__.payFees{value: executionFee}(
+            transmitManager__.payFees{value: fees.transmissionFees}(
+                remoteChainSlug_
+            );
+            switchboard__.payFees{value: fees.switchboardFees}(
+                remoteChainSlug_
+            );
+            executionManager__.payFees{value: fees.executionFee}(
                 msgGasLimit_,
                 remoteChainSlug_
             );
         }
     }
 
+    function getMinFees(
+        uint256 msgGasLimit_,
+        uint32 remoteChainSlug_,
+        address plug_
+    ) external view returns (uint256 totalFees) {
+        PlugConfig storage plugConfig = _plugConfigs[plug_][remoteChainSlug_];
+
+        (
+            uint256 transmissionFees,
+            uint256 switchboardFees,
+            uint256 executionFee
+        ) = _getMinFees(
+                msgGasLimit_,
+                remoteChainSlug_,
+                plugConfig.outboundSwitchboard__
+            );
+
+        totalFees = transmissionFees + switchboardFees + executionFee;
+    }
+
+    function _getMinFees(
+        uint256 msgGasLimit_,
+        uint32 remoteChainSlug_,
+        ISwitchboard switchboard__
+    )
+        internal
+        view
+        returns (
+            uint256 transmissionFees,
+            uint256 switchboardFees,
+            uint256 executionFee
+        )
+    {
+        transmissionFees = transmitManager__.getMinFees(remoteChainSlug_);
+
+        uint256 verificationFee;
+        (switchboardFees, verificationFee) = switchboard__.getMinFees(
+            remoteChainSlug_
+        );
+        uint256 msgExecutionFee = executionManager__.getMinFees(
+            msgGasLimit_,
+            remoteChainSlug_
+        );
+
+        executionFee = msgExecutionFee + verificationFee;
+    }
+
     function seal(
+        uint256 batchSize_,
         address capacitorAddress_,
         bytes calldata signature_
-    ) external payable nonReentrant {
-        (bytes32 root, uint256 packetCount) = ICapacitor(capacitorAddress_)
-            .sealPacket();
+    ) external payable override {
+        (bytes32 root, uint64 packetCount) = ICapacitor(capacitorAddress_)
+            .sealPacket(batchSize_);
 
-        uint256 packetId = (_chainSlug << 224) |
-            (uint256(uint160(capacitorAddress_)) << 64) |
-            packetCount;
+        bytes32 packetId = _encodePacketId(capacitorAddress_, packetCount);
 
-        uint256 siblingChainSlug = _capacitorToSlug[capacitorAddress_];
-
-        (address transmitter, bool isTransmitter) = _transmitManager__
+        uint32 siblingChainSlug = capacitorToSlug[capacitorAddress_];
+        (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
-                (siblingChainSlug << 128) | siblingChainSlug,
-                packetId,
-                root,
+                siblingChainSlug,
+                keccak256(abi.encode(siblingChainSlug, packetId, root)),
                 signature_
             );
 
         if (!isTransmitter) revert InvalidAttester();
+        emit PacketVerifiedAndSealed(transmitter, packetId, root, signature_);
+    }
 
-        emit PacketVerifiedAndSealed(transmitter, packetId, signature_);
+    // Packs the local plug, local chain slug, remote chain slug and nonce
+    // messageCount++ will take care of msg id overflow as well
+    // msgId(256) = localChainSlug(32) | nonce(224)
+    function _encodeMsgId(uint256 slug_) internal returns (bytes32) {
+        return bytes32((uint256(uint32(slug_)) << 224) | messageCount++);
+    }
+
+    function _encodePacketId(
+        address capacitorAddress_,
+        uint256 packetCount_
+    ) internal view returns (bytes32) {
+        return
+            bytes32(
+                (uint256(chainSlug) << 224) |
+                    (uint256(uint160(capacitorAddress_)) << 64) |
+                    packetCount_
+            );
     }
 }

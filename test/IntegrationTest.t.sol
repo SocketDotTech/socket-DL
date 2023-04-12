@@ -10,12 +10,22 @@ contract HappyTest is Setup {
 
     uint256 addAmount = 100;
     uint256 subAmount = 40;
+    uint256 sourceGasPrice = 1200000;
+    uint256 relativeGasPrice = 1100000;
+
     bool isFast = true;
     bytes32[] roots;
+    uint256 index = isFast ? 0 : 1;
 
-    event ExecutionSuccess(uint256 msgId);
-    event ExecutionFailed(uint256 msgId, string result);
-    event ExecutionFailedBytes(uint256 msgId, bytes result);
+    event ExecutionSuccess(bytes32 msgId);
+    event ExecutionFailed(bytes32 msgId, string result);
+    event ExecutionFailedBytes(bytes32 msgId, bytes result);
+    event PacketVerifiedAndSealed(
+        address indexed transmitter,
+        bytes32 indexed packetId,
+        bytes32 root,
+        bytes signature
+    );
 
     function setUp() external {
         uint256[] memory transmitterPivateKeys = new uint256[](1);
@@ -24,11 +34,15 @@ contract HappyTest is Setup {
         _dualChainSetup(transmitterPivateKeys);
         _deployPlugContracts();
 
-        uint256 index = isFast ? 0 : 1;
         _configPlugContracts(index);
+
+        vm.startPrank(_transmitter);
+        _a.gasPriceOracle__.setSourceGasPrice(sourceGasPrice);
+        _a.gasPriceOracle__.setRelativeGasPrice(_b.chainSlug, relativeGasPrice);
+        vm.stopPrank();
     }
 
-    function testRemoteAddFromAtoB() external {
+    function testRemoteAddFromAtoB1() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
             keccak256("OP_ADD"),
@@ -37,9 +51,7 @@ contract HappyTest is Setup {
         );
         bytes memory proof = abi.encode(0);
 
-        uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
-
         uint256 executionFee;
         {
             (uint256 switchboardFees, uint256 verificationFee) = _a
@@ -53,48 +65,60 @@ contract HappyTest is Setup {
                 _b.chainSlug
             );
 
+            uint256 value = switchboardFees +
+                socketFees +
+                verificationFee +
+                executionFee;
+
+            // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+            // verificationFees also should go to Executor, hence we do the additional computation below
+            executionFee = verificationFee + executionFee;
+
             hoax(_plugOwner);
-            srcCounter__.remoteAddOperation{
-                value: switchboardFees +
-                    socketFees +
-                    verificationFee +
-                    executionFee
-            }(_b.chainSlug, amount, _msgGasLimit);
+            srcCounter__.remoteAddOperation{value: value}(
+                _b.chainSlug,
+                amount,
+                _msgGasLimit
+            );
         }
 
-        uint256 msgId = _packMessageId(_a.chainSlug, 0);
-        uint256 packetId;
+        // uint256 msgId = _packMessageId(_a.chainSlug, 0);
+        bytes32 packetId;
+        bytes32 root;
         {
             (
                 bytes32 root_,
-                uint256 packetId_,
+                bytes32 packetId_,
                 bytes memory sig_
             ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
 
             _sealOnSrc(_a, capacitor, sig_);
             _proposeOnDst(_b, sig_, packetId_, root_);
-
-            vm.expectEmit(true, false, false, false);
-            emit ExecutionSuccess(msgId);
-
+            root = root_;
+            _attestOnDst(address(_b.configs__[0].switchboard__), packetId_);
             packetId = packetId_;
         }
 
+        vm.expectEmit(true, false, false, false);
+        emit ExecutionSuccess(_packMessageId(_a.chainSlug, 0));
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
             address(dstCounter__),
             packetId,
-            msgId,
+            _packMessageId(_a.chainSlug, 0),
             _msgGasLimit,
             executionFee,
+            root,
             payload,
             proof
         );
 
         assertEq(dstCounter__.counter(), amount);
         assertEq(srcCounter__.counter(), 0);
-        assertTrue(_b.socket__.messageExecuted(msgId));
+        assertTrue(
+            _b.socket__.messageExecuted(_packMessageId(_a.chainSlug, 0))
+        );
 
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
@@ -102,9 +126,10 @@ contract HappyTest is Setup {
             _a.chainSlug,
             address(dstCounter__),
             packetId,
-            msgId,
+            _packMessageId(_a.chainSlug, 0),
             _msgGasLimit,
             executionFee,
+            root,
             payload,
             proof
         );
@@ -133,22 +158,23 @@ contract HappyTest is Setup {
 
         (
             bytes32 root,
-            uint256 packetId,
+            bytes32 packetId,
             bytes memory sig
         ) = _getLatestSignature(_b, capacitor, _a.chainSlug);
 
-        uint256 msgId = _packMessageId(_b.chainSlug, 0);
         _sealOnSrc(_b, capacitor, sig);
         _proposeOnDst(_a, sig, packetId, root);
+        _attestOnDst(address(_a.configs__[0].switchboard__), packetId);
 
         _executePayloadOnDst(
             _a,
             _b.chainSlug,
             address(srcCounter__),
             packetId,
-            msgId,
+            _packMessageId(_b.chainSlug, 0),
             _msgGasLimit,
             0,
+            root,
             payload,
             proof
         );
@@ -163,7 +189,7 @@ contract HappyTest is Setup {
         uint256 executionFees,
         uint256 fees,
         bytes memory payload
-    ) internal returns (uint256 msgId, bytes32 root) {
+    ) internal returns (bytes32 msgId, bytes32 root) {
         uint256 msgGasLimit = _msgGasLimit;
         uint256 dstSlug = _b.chainSlug;
 
@@ -187,13 +213,15 @@ contract HappyTest is Setup {
         );
     }
 
-    function sealAndPropose(address capacitor) internal returns (uint256) {
+    function sealAndPropose(address capacitor) internal returns (bytes32) {
         (
             bytes32 root_,
-            uint256 packetId_,
+            bytes32 packetId_,
             bytes memory sig_
         ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
 
+        vm.expectEmit(false, false, false, true);
+        emit PacketVerifiedAndSealed(_transmitter, packetId_, root_, sig_);
         _sealOnSrc(_a, capacitor, sig_);
         _proposeOnDst(_b, sig_, packetId_, root_);
 
@@ -225,9 +253,9 @@ contract HappyTest is Setup {
         );
 
         uint256 executionFee;
-        uint256 msgId1;
+        bytes32 msgId1;
         bytes32 root1;
-        uint256 msgId2;
+        bytes32 msgId2;
         bytes32 root2;
         {
             (uint256 switchboardFees, uint256 executionOverhead) = srcConfig
@@ -245,15 +273,24 @@ contract HappyTest is Setup {
                 socketFees +
                 executionFee;
 
+            // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+            // verificationFees also should go to Executor, hence we do the additional computation below
+            executionFee = executionOverhead + executionFee;
+
             // send 2 messages
             (msgId1, root1) = outbound(0, amount, executionFee, fees, payload);
             (msgId2, root2) = outbound(1, amount, executionFee, fees, payload);
         }
 
         // seal 2 messages together
-        uint256 packetId = sealAndPropose(address(srcConfig.capacitor__));
+        bytes32 packetId = sealAndPropose(address(srcConfig.capacitor__));
         roots.push(root1);
         roots.push(root2);
+
+        _attestOnDst(
+            address(_b.configs__[_b.configs__.length - 1].switchboard__),
+            packetId
+        );
 
         // execute msg 1
         vm.expectEmit(true, false, false, false);
@@ -267,6 +304,7 @@ contract HappyTest is Setup {
             msgId1,
             _msgGasLimit,
             executionFee,
+            root1,
             payload,
             abi.encode(roots)
         );
@@ -286,6 +324,7 @@ contract HappyTest is Setup {
             msgId2,
             _msgGasLimit,
             executionFee,
+            root2,
             payload,
             abi.encode(roots)
         );
@@ -322,7 +361,7 @@ contract HappyTest is Setup {
 
     function _attesterChecks(
         address capacitor
-    ) internal returns (uint256 packetId, bytes32 root) {
+    ) internal returns (bytes32 packetId, bytes32 root) {
         bytes memory sig;
         (root, packetId, sig) = _getLatestSignature(
             _a,

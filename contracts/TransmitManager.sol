@@ -3,122 +3,127 @@ pragma solidity 0.8.7;
 
 import "./interfaces/ITransmitManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
-import "./interfaces/IOracle.sol";
+import "./interfaces/IGasPriceOracle.sol";
 
-import "./utils/AccessControl.sol";
+import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
+import "./libraries/FeesHelper.sol";
+import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "./utils/AccessRoles.sol";
 
-contract TransmitManager is ITransmitManager, AccessControl {
-    ISignatureVerifier public signatureVerifier;
-    IOracle public oracle;
+contract TransmitManager is ITransmitManager, AccessControlExtended {
+    ISignatureVerifier public signatureVerifier__;
+    IGasPriceOracle public gasPriceOracle__;
 
-    uint256 public chainSlug;
+    uint32 public immutable chainSlug;
     uint256 public sealGasLimit;
     mapping(uint256 => uint256) public proposeGasLimit;
 
-    error TransferFailed();
-    error InsufficientTransmitFees();
+    // transmitter => nextNonce
+    mapping(address => uint256) public nextNonce;
 
-    event SealGasLimitSet(uint256 gasLimit_);
-    event ProposeGasLimitSet(uint256 dstChainSlug_, uint256 gasLimit_);
-    event FeesWithdrawn(address account_, uint256 value_);
+    error InsufficientTransmitFees();
+    error InvalidNonce();
+
+    event GasPriceOracleSet(address gasPriceOracle);
+    event SealGasLimitSet(uint256 gasLimit);
+    event ProposeGasLimitSet(uint256 dstChainSlug, uint256 gasLimit);
 
     /**
      * @notice emits when a new signature verifier contract is set
-     * @param signatureVerifier_ address of new verifier contract
+     * @param signatureVerifier address of new verifier contract
      */
-    event SignatureVerifierSet(address signatureVerifier_);
+    event SignatureVerifierSet(address signatureVerifier);
 
     constructor(
         ISignatureVerifier signatureVerifier_,
-        IOracle oracle_,
+        IGasPriceOracle gasPriceOracle_,
         address owner_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 sealGasLimit_
-    ) AccessControl(owner_) {
+    ) AccessControlExtended(owner_) {
         chainSlug = chainSlug_;
         sealGasLimit = sealGasLimit_;
-        signatureVerifier = signatureVerifier_;
-        oracle = IOracle(oracle_);
+        signatureVerifier__ = signatureVerifier_;
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
     }
 
     // @param slugs_ packs the siblingChainSlug & sigChainSlug
+    // @dev signature sent to this function can be reused on other chains
+    // @dev hence caller should add some identifier to stop this.
     // slugs_(256) = siblingChainSlug(128) | sigChainSlug(128)
     // @dev sibling chain slug is required to check the transmitter role
     // @dev sig chain slug is required by signature. On src, this is sibling slug while on
     // destination, it is current chain slug
     function checkTransmitter(
-        uint256 slugs_,
-        uint256 packetId_,
-        bytes32 root_,
+        uint32 siblingSlug,
+        bytes32 digest_,
         bytes calldata signature_
     ) external view override returns (address, bool) {
-        address transmitter = signatureVerifier.recoverSigner(
-            type(uint128).max & slugs_,
-            packetId_,
-            root_,
+        address transmitter = signatureVerifier__.recoverSignerFromDigest(
+            digest_,
             signature_
         );
 
         return (
             transmitter,
-            _hasRole(_transmitterRole(slugs_ >> 128), transmitter)
+            _hasRole("TRANSMITTER_ROLE", siblingSlug, transmitter)
         );
     }
 
-    // can be used for different checks related to oracle
-    function isTransmitter(
-        address transmitter_,
-        uint256 siblingChainSlug_
-    ) external view override returns (bool) {
-        return _hasRole(_transmitterRole(siblingChainSlug_), transmitter_);
-    }
-
-    function payFees(uint256 siblingChainSlug_) external payable override {
-        if (msg.value < _calculateFees(siblingChainSlug_))
-            revert InsufficientTransmitFees();
-    }
+    function payFees(uint32 siblingChainSlug_) external payable override {}
 
     function getMinFees(
-        uint256 siblingChainSlug_
+        uint32 siblingChainSlug_
     ) external view override returns (uint256) {
-        return _calculateFees(siblingChainSlug_);
+        return _calculateMinFees(siblingChainSlug_);
     }
 
-    function _calculateFees(
-        uint256 siblingChainSlug_
+    function _calculateMinFees(
+        uint32 siblingChainSlug_
     ) internal view returns (uint256 minTransmissionFees) {
-        uint256 siblingRelativeGasPrice = oracle.relativeGasPrice(
-            siblingChainSlug_
-        );
+        (
+            uint256 sourceGasPrice,
+            uint256 siblingRelativeGasPrice
+        ) = gasPriceOracle__.getGasPrices(siblingChainSlug_);
 
         minTransmissionFees =
             sealGasLimit *
-            tx.gasprice +
+            sourceGasPrice +
             proposeGasLimit[siblingChainSlug_] *
             siblingRelativeGasPrice;
     }
 
-    // TODO: to support fee distribution
-    /**
-     * @notice transfers the fees collected to `account_`
-     * @param account_ address to transfer ETH
-     */
-    function withdrawFees(address account_) external onlyOwner {
-        require(account_ != address(0));
-
-        uint256 value = address(this).balance;
-        (bool success, ) = account_.call{value: value}("");
-        if (!success) revert TransferFailed();
-
-        emit FeesWithdrawn(account_, value);
+    function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
+        FeesHelper.withdrawFees(account_);
     }
 
     /**
      * @notice updates seal gas limit
      * @param gasLimit_ new seal gas limit
      */
-    function setSealGasLimit(uint256 gasLimit_) external onlyOwner {
+    function setSealGasLimit(
+        uint256 nonce_,
+        uint256 gasLimit_,
+        bytes calldata signature_
+    ) external {
+        address gasLimitUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    "SEAL_GAS_LIMIT_UPDATE",
+                    chainSlug,
+                    nonce_,
+                    gasLimit_
+                )
+            ),
+            signature_
+        );
+
+        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
+            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+
+        uint256 nonce = nextNonce[gasLimitUpdater]++;
+        if (nonce_ != nonce) revert InvalidNonce();
+
         sealGasLimit = gasLimit_;
         emit SealGasLimitSet(gasLimit_);
     }
@@ -128,11 +133,43 @@ contract TransmitManager is ITransmitManager, AccessControl {
      * @param gasLimit_ new propose gas limit
      */
     function setProposeGasLimit(
+        uint256 nonce_,
         uint256 dstChainSlug_,
-        uint256 gasLimit_
-    ) external onlyOwner {
+        uint256 gasLimit_,
+        bytes calldata signature_
+    ) external {
+        address gasLimitUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    "PROPOSE_GAS_LIMIT_UPDATE",
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    gasLimit_
+                )
+            ),
+            signature_
+        );
+
+        if (!_hasRole("GAS_LIMIT_UPDATER_ROLE", dstChainSlug_, gasLimitUpdater))
+            revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
+
+        uint256 nonce = nextNonce[gasLimitUpdater]++;
+        if (nonce_ != nonce) revert InvalidNonce();
+
         proposeGasLimit[dstChainSlug_] = gasLimit_;
         emit ProposeGasLimitSet(dstChainSlug_, gasLimit_);
+    }
+
+    /**
+     * @notice updates gasPriceOracle__
+     * @param gasPriceOracle_ address of Gas Price Oracle
+     */
+    function setGasPriceOracle(
+        address gasPriceOracle_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
+        emit GasPriceOracleSet(gasPriceOracle_);
     }
 
     /**
@@ -141,46 +178,16 @@ contract TransmitManager is ITransmitManager, AccessControl {
      */
     function setSignatureVerifier(
         address signatureVerifier_
-    ) external onlyOwner {
-        signatureVerifier = ISignatureVerifier(signatureVerifier_);
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        signatureVerifier__ = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
     }
 
-    /**
-     * @notice adds a transmitter for `remoteChainSlug_` chain
-     * @param remoteChainSlug_ remote chain slug
-     * @param transmitter_ transmitter address
-     */
-    function grantTransmitterRole(
-        uint256 remoteChainSlug_,
-        address transmitter_
-    ) external onlyOwner {
-        _grantRole(_transmitterRole(remoteChainSlug_), transmitter_);
-    }
-
-    /**
-     * @notice removes an transmitter from `remoteChainSlug_` chain list
-     * @param remoteChainSlug_ remote chain slug
-     * @param transmitter_ transmitter address
-     */
-    function revokeTransmitterRole(
-        uint256 remoteChainSlug_,
-        address transmitter_
-    ) external onlyOwner {
-        _revokeRole(_transmitterRole(remoteChainSlug_), transmitter_);
-    }
-
-    function _transmitterRole(
-        uint256 chainSlug_
-    ) internal pure returns (bytes32) {
-        return bytes32(chainSlug_);
-    }
-
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
-    ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        address token_,
+        address userAddress_,
+        uint256 amount_
+    ) external onlyRole(RESCUE_ROLE) {
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

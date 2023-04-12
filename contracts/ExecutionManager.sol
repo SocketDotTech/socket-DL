@@ -2,69 +2,80 @@
 pragma solidity 0.8.7;
 
 import "./interfaces/IExecutionManager.sol";
-import "./interfaces/IOracle.sol";
-import "./utils/AccessControl.sol";
+import "./interfaces/IGasPriceOracle.sol";
+import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
+import "./libraries/SignatureVerifierLib.sol";
+import "./libraries/FeesHelper.sol";
+import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE} from "./utils/AccessRoles.sol";
 
-contract ExecutionManager is IExecutionManager, AccessControl {
-    IOracle public oracle;
+contract ExecutionManager is IExecutionManager, AccessControlExtended {
+    IGasPriceOracle public gasPriceOracle__;
+    event GasPriceOracleSet(address gasPriceOracle);
 
-    // keccak256("EXECUTOR")
-    bytes32 private constant EXECUTOR_ROLE =
-        0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767;
-
-    error TransferFailed();
-    error InsufficientExecutionFees();
-
-    constructor(IOracle oracle_, address owner_) AccessControl(owner_) {
-        oracle = IOracle(oracle_);
+    constructor(
+        IGasPriceOracle gasPriceOracle_,
+        address owner_
+    ) AccessControlExtended(owner_) {
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
     }
 
     function isExecutor(
-        address executor_
-    ) external view override returns (bool) {
-        return _hasRole(EXECUTOR_ROLE, executor_);
+        bytes32 packedMessage,
+        bytes memory sig
+    ) external view override returns (address executor, bool isValidExecutor) {
+        executor = SignatureVerifierLib.recoverSignerFromDigest(
+            packedMessage,
+            sig
+        );
+        isValidExecutor = _hasRole(EXECUTOR_ROLE, executor);
     }
+
+    // these details might be needed for on-chain fee distribution later
+    function updateExecutionFees(address, uint256, bytes32) external override {}
 
     function payFees(
         uint256 msgGasLimit_,
-        uint256 siblingChainSlug_
-    ) external payable override {
-        if (msg.value < _getExecutionFees(msgGasLimit_, siblingChainSlug_))
-            revert InsufficientExecutionFees();
-    }
+        uint32 siblingChainSlug_
+    ) external payable override {}
 
     function getMinFees(
         uint256 msgGasLimit_,
-        uint256 siblingChainSlug_
+        uint32 siblingChainSlug_
     ) external view override returns (uint256) {
-        return _getExecutionFees(msgGasLimit_, siblingChainSlug_);
+        return _getMinExecutionFees(msgGasLimit_, siblingChainSlug_);
     }
 
-    function _getExecutionFees(
-        uint256 msgGasLimit,
-        uint256 dstChainSlug
+    function _getMinExecutionFees(
+        uint256 msgGasLimit_,
+        uint32 dstChainSlug_
     ) internal view returns (uint256) {
-        uint256 dstRelativeGasPrice = oracle.relativeGasPrice(dstChainSlug);
-        return msgGasLimit * dstRelativeGasPrice;
+        uint256 dstRelativeGasPrice = gasPriceOracle__.relativeGasPrice(
+            dstChainSlug_
+        );
+        return msgGasLimit_ * dstRelativeGasPrice;
     }
 
-    // TODO: to support fee distribution
     /**
-     * @notice transfers the fees collected to `account_`
-     * @param account_ address to transfer ETH
+     * @notice updates gasPriceOracle__
+     * @param gasPriceOracle_ address of Gas Price Oracle
      */
-    function withdrawFees(address account_) external onlyOwner {
-        require(account_ != address(0));
-        (bool success, ) = account_.call{value: address(this).balance}("");
-        if (!success) revert TransferFailed();
+    function setGasPriceOracle(
+        address gasPriceOracle_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
+        emit GasPriceOracleSet(gasPriceOracle_);
+    }
+
+    function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
+        FeesHelper.withdrawFees(account_);
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
-    ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        address token_,
+        address userAddress_,
+        uint256 amount_
+    ) external onlyRole(RESCUE_ROLE) {
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

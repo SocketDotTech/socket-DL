@@ -1,20 +1,38 @@
-import { ChainId, IntegrationTypes } from "../../../src";
+import { ChainSlug, IntegrationTypes } from "../../../src";
 
-function getSwitchboardAddress(chainId: ChainId | string, integrationType: IntegrationTypes, config: any) {
-  return config?.["integrations"]?.[chainId]?.[integrationType]?.["switchboard"];
+function getSwitchboardAddress(
+  chainSlug: ChainSlug | string,
+  integrationType: IntegrationTypes,
+  config: any
+) {
+  if (integrationType === IntegrationTypes.fast) {
+    return config?.["FastSwitchboard"];
+  } else if (integrationType === IntegrationTypes.optimistic) {
+    return config?.["OptimisticSwitchboard"];
+  } else
+    return config?.["integrations"]?.[chainSlug]?.[integrationType]?.[
+      "switchboard"
+    ];
 }
 
-function getCapacitorAddress(chainId: ChainId, integrationType: IntegrationTypes, config: any) {
-  return config?.["integrations"]?.[chainId]?.[integrationType]?.["capacitor"];
+function getCapacitorAddress(
+  chainSlug: ChainSlug,
+  integrationType: IntegrationTypes,
+  config: any
+) {
+  return config?.["integrations"]?.[chainSlug]?.[integrationType]?.[
+    "capacitor"
+  ];
 }
 
-function getDecapacitorAddress(chainId: ChainId, integrationType: IntegrationTypes, config: any) {
-  return config?.["integrations"]?.[chainId]?.[integrationType]?.["decapacitor"];
+function getDecapacitorAddress(
+  chainSlug: ChainSlug,
+  integrationType: IntegrationTypes,
+  config: any
+) {
+  return config?.["integrations"]?.[chainSlug]?.[integrationType]?.[
+    "decapacitor"
+  ];
 }
 
-export {
-  getSwitchboardAddress,
-  getCapacitorAddress,
-  getDecapacitorAddress
-};
-
+export { getSwitchboardAddress, getCapacitorAddress, getDecapacitorAddress };

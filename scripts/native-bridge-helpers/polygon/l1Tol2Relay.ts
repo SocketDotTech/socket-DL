@@ -5,7 +5,7 @@ import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { getInstance, deployedAddressPath } from "../../deploy/utils";
 import { ChainSocketAddresses } from "../../deploy/types";
 import { packPacketId } from "../../deploy/scripts/packetId";
-import { chainIds, getJsonRpcUrl, contractNames } from "../../constants";
+import { chainSlugs, getJsonRpcUrl, contractNames } from "../../constants";
 
 // get providers for source and destination
 const localChain = "goerli";
@@ -24,17 +24,20 @@ export const main = async () => {
     }
     const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
 
-    if (!addresses[chainIds[localChain]] || !addresses[chainIds[remoteChain]]) {
+    if (
+      !addresses[chainSlugs[localChain]] ||
+      !addresses[chainSlugs[remoteChain]]
+    ) {
       throw new Error("Deployed Addresses not found");
     }
 
-    const l1Config: ChainSocketAddresses = addresses[chainIds[localChain]];
+    const l1Config: ChainSocketAddresses = addresses[chainSlugs[localChain]];
     const contracts = contractNames("", localChain, remoteChain);
 
     const l1Capacitor: Contract = (
       await getInstance(
         "SingleCapacitor",
-        l1Config["integrations"]?.[chainIds[remoteChain]]?.[
+        l1Config["integrations"]?.[chainSlugs[remoteChain]]?.[
           contracts.integrationType
         ]?.["capacitor"]
       )
@@ -43,7 +46,7 @@ export const main = async () => {
     const l1Notary: Contract = (
       await getInstance(
         contracts.notary,
-        l1Config[contracts.notary]?.[chainIds[remoteChain]]
+        l1Config[contracts.notary]?.[chainSlugs[remoteChain]]
       )
     ).connect(l1Wallet);
 
@@ -59,7 +62,7 @@ export const main = async () => {
     );
 
     const packedPacketId = packPacketId(
-      chainIds[localChain],
+      chainSlugs[localChain],
       l1Capacitor.address,
       packetId
     );
@@ -67,7 +70,7 @@ export const main = async () => {
     const digest = keccak256(
       defaultAbiCoder.encode(
         ["uint256", "uint256", "bytes32"],
-        [chainIds[remoteChain], packedPacketId, newRootHash]
+        [chainSlugs[remoteChain], packedPacketId, newRootHash]
       )
     );
     const signature = await l1Wallet.signMessage(arrayify(digest));

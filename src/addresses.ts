@@ -1,22 +1,22 @@
 // TODO: This is duplicate from socket-dl and should be in its own module
 import addresses from "../deployments/addresses.json";
-import { ChainId, DeploymentAddresses, IntegrationTypes } from "./types";
+import { ChainSlug, DeploymentAddresses, IntegrationTypes } from "./types";
 
 const deploymentAddresses = addresses as DeploymentAddresses;
 
 function getSwitchboardAddress(
-  srcChainId: ChainId,
-  dstChainId: ChainId,
+  srcChainSlug: ChainSlug,
+  dstChainSlug: ChainSlug,
   integration: IntegrationTypes
 ) {
   const switchboardAddress =
-    deploymentAddresses[srcChainId]?.["integrations"]?.[dstChainId]?.[
+    deploymentAddresses[srcChainSlug]?.["integrations"]?.[dstChainSlug]?.[
       integration
     ]?.switchboard;
 
   if (!switchboardAddress) {
     throw new Error(
-      `Switchboard adddess for ${srcChainId}-${dstChainId}-${integration} not found`
+      `Switchboard address for ${srcChainSlug}-${dstChainSlug}-${integration} not found`
     );
   }
 
@@ -24,18 +24,18 @@ function getSwitchboardAddress(
 }
 
 function getCapacitorAddress(
-  srcChainId: ChainId,
-  dstChainId: ChainId,
+  srcChainSlug: ChainSlug,
+  dstChainSlug: ChainSlug,
   integration: IntegrationTypes
 ) {
   const capacitorAddress =
-    deploymentAddresses[srcChainId]?.["integrations"]?.[dstChainId]?.[
+    deploymentAddresses[srcChainSlug]?.["integrations"]?.[dstChainSlug]?.[
       integration
     ]?.capacitor;
 
   if (!capacitorAddress) {
     throw new Error(
-      `Capacitor address for ${srcChainId}-${dstChainId}-${integration} not found`
+      `Capacitor address for ${srcChainSlug}-${dstChainSlug}-${integration} not found`
     );
   }
 
@@ -43,18 +43,18 @@ function getCapacitorAddress(
 }
 
 function getDeCapacitorAddress(
-  srcChainId: ChainId,
-  dstChainId: ChainId,
+  srcChainSlug: ChainSlug,
+  dstChainSlug: ChainSlug,
   integration: IntegrationTypes
 ) {
   const deCapacitorAddress =
-    deploymentAddresses[srcChainId]?.["integrations"]?.[dstChainId]?.[
+    deploymentAddresses[srcChainSlug]?.["integrations"]?.[dstChainSlug]?.[
       integration
     ]?.capacitor;
 
   if (!deCapacitorAddress) {
     throw new Error(
-      `De Capacitor address for ${srcChainId}-${dstChainId}-${integration} not found`
+      `De Capacitor address for ${srcChainSlug}-${dstChainSlug}-${integration} not found`
     );
   }
 

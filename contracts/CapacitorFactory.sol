@@ -6,31 +6,46 @@ import "./capacitors/SingleCapacitor.sol";
 import "./capacitors/HashChainCapacitor.sol";
 import "./decapacitors/SingleDecapacitor.sol";
 import "./decapacitors/HashChainDecapacitor.sol";
-import "./libraries/RescueFundsLib.sol";
-import "./utils/Ownable.sol";
 
-contract CapacitorFactory is ICapacitorFactory, Ownable(msg.sender) {
+import "./libraries/RescueFundsLib.sol";
+import "./utils/AccessControlExtended.sol";
+import {RESCUE_ROLE} from "./utils/AccessRoles.sol";
+
+contract CapacitorFactory is ICapacitorFactory, AccessControlExtended {
+    uint256 private constant SINGLE_CAPACITOR = 1;
+    uint256 private constant HASH_CHAIN_CAPACITOR = 2;
+
+    constructor(address owner_) AccessControlExtended(owner_) {
+        _grantRole(RESCUE_ROLE, owner_);
+    }
+
     function deploy(
-        uint256 capacitorType,
-        uint256 /** siblingChainSlug */
+        uint256 capacitorType_,
+        uint256 /** siblingChainSlug */,
+        uint256 /** maxPacketLength */
     ) external override returns (ICapacitor, IDecapacitor) {
-        if (capacitorType == 1) {
-            return (new SingleCapacitor(msg.sender), new SingleDecapacitor());
-        }
-        if (capacitorType == 2) {
+        address owner = this.owner();
+
+        if (capacitorType_ == SINGLE_CAPACITOR) {
             return (
-                new HashChainCapacitor(msg.sender),
-                new HashChainDecapacitor()
+                new SingleCapacitor(msg.sender, owner),
+                new SingleDecapacitor(owner)
+            );
+        }
+        if (capacitorType_ == HASH_CHAIN_CAPACITOR) {
+            return (
+                new HashChainCapacitor(msg.sender, owner),
+                new HashChainDecapacitor(owner)
             );
         }
         revert InvalidCapacitorType();
     }
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
-    ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token, userAddress, amount);
+        address token_,
+        address userAddress_,
+        uint256 amount_
+    ) external onlyRole(RESCUE_ROLE) {
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

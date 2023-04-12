@@ -6,26 +6,26 @@ import "../interfaces/IHasher.sol";
 contract Hasher is IHasher {
     /// @inheritdoc IHasher
     function packMessage(
-        uint256 srcChainSlug,
-        address srcPlug,
-        uint256 dstChainSlug,
-        address dstPlug,
-        uint256 msgId,
-        uint256 msgGasLimit,
-        uint256 executionFee,
-        bytes calldata payload
+        uint256 srcChainSlug_,
+        address srcPlug_,
+        uint256 dstChainSlug_,
+        address dstPlug_,
+        bytes32 msgId_,
+        uint256 msgGasLimit_,
+        uint256 executionFee_,
+        bytes calldata payload_
     ) external pure override returns (bytes32) {
         return
             keccak256(
                 abi.encode(
-                    srcChainSlug,
-                    srcPlug,
-                    dstChainSlug,
-                    dstPlug,
-                    msgId,
-                    msgGasLimit,
-                    executionFee,
-                    payload
+                    srcChainSlug_,
+                    srcPlug_,
+                    dstChainSlug_,
+                    dstPlug_,
+                    msgId_,
+                    msgGasLimit_,
+                    executionFee_,
+                    payload_
                 )
             );
     }

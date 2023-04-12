@@ -5,20 +5,20 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   getInstance,
   deployContractWithoutArgs,
-  getChainId,
+  getChainSlug,
   deployedAddressPath,
 } from "../utils";
 import { Contract } from "ethers";
 
 export const main = async () => {
   try {
-    const chainId = await getChainId();
-    if (!fs.existsSync(deployedAddressPath + chainId + ".json")) {
+    const chainSlug = await getChainSlug();
+    if (!fs.existsSync(deployedAddressPath + chainSlug + ".json")) {
       throw new Error("Deployed Addresses not found");
     }
 
     const config: any = JSON.parse(
-      fs.readFileSync(deployedAddressPath + chainId + ".json", "utf-8")
+      fs.readFileSync(deployedAddressPath + chainSlug + ".json", "utf-8")
     );
     const { socketOwner } = await getNamedAccounts();
 
@@ -32,7 +32,7 @@ export const main = async () => {
     );
     console.log(
       signatureVerifier.address,
-      `Deployed signatureVerifier for ${chainId}`
+      `Deployed signatureVerifier for ${chainSlug}`
     );
 
     await notary

@@ -9,19 +9,19 @@ library RescueFundsLib {
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     function rescueFunds(
-        address token,
-        address userAddress,
-        uint256 amount
+        address token_,
+        address userAddress_,
+        uint256 amount_
     ) internal {
-        require(userAddress != address(0));
+        require(userAddress_ != address(0));
 
-        if (token == ETH_ADDRESS) {
-            (bool success, ) = userAddress.call{value: address(this).balance}(
+        if (token_ == ETH_ADDRESS) {
+            (bool success, ) = userAddress_.call{value: address(this).balance}(
                 ""
             );
             require(success);
         } else {
-            IERC20(token).transfer(userAddress, amount);
+            IERC20(token_).transfer(userAddress_, amount_);
         }
     }
 }

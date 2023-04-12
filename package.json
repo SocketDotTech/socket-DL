@@ -1,7 +1,7 @@
 {
   "name": "@socket.tech/dl-core",
   "license": "UNLICENSED",
-  "version": "1.0.0",
+  "version": "2.1.4-test.0",
   "description": "Smart contracts for socket data layer.",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -31,6 +31,7 @@
     "@types/chai": "^4.3.0",
     "@types/mocha": "^9.1.0",
     "@types/node": "^18.11.9",
+    "@types/yargs": "^17.0.22",
     "arb-shared-dependencies": "^1.0.0",
     "chai": "^4.3.6",
     "dotenv": "^16.0.3",
@@ -46,15 +47,18 @@
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "ts-node": "^10.7.0",
     "typechain": "^8.0.0",
-    "typescript": "^4.6.4"
+    "typescript": "^4.6.4",
+    "defender-relay-client": "^1.31.1"
   },
   "scripts": {
-    "lint": "prettier --write **.sol",
+    "lint": "prettier \"./**\" --write --ignore-unknown",
     "build": "hardhat export-abi && tsc --project lib.tsconfig.json",
     "abi": "hardhat export-abi"
   },
   "pre-commit": [
     "lint"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "yargs": "^17.7.1"
+  }
 }

@@ -1,7 +1,7 @@
 import fs from "fs";
 import { providers, Wallet } from "ethers";
 import { deployedAddressPath } from "../../deploy/utils";
-import { chainIds, getJsonRpcUrl } from "../../constants";
+import { chainSlugs, getJsonRpcUrl } from "../../constants";
 import { L2ToL1MessageStatus, L2TransactionReceipt } from "@arbitrum/sdk";
 
 // https://goerli.arbiscan.io/txsExit to check message status
@@ -23,7 +23,7 @@ export const main = async () => {
     }
     const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
 
-    if (!addresses[chainIds[l1Chain]] || !addresses[chainIds[l2Chain]]) {
+    if (!addresses[chainSlugs[l1Chain]] || !addresses[chainSlugs[l2Chain]]) {
       throw new Error("Deployed Addresses not found");
     }
 

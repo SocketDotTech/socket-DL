@@ -1,13 +1,27 @@
 import { constants } from "ethers";
+import { chainSlugs } from "../../constants";
 
-const executionOverhead = 300000
-const initialConfirmationGasLimit = 300000
-const l1ReceiveGasLimit = 300000
+const executionOverhead = 300000;
+const initiateGasLimit = 300000;
+const confirmGasLimit = 300000;
 
 export const arbitrumL2Switchboard = (
+  network: string,
   socketAddress: string,
   oracleAddress: string,
   signerAddress: string
 ) => {
-  return { contractName: "ArbitrumL2Switchboard", args: [l1ReceiveGasLimit, initialConfirmationGasLimit, executionOverhead, constants.AddressZero, signerAddress, socketAddress, oracleAddress], path: "contracts/switchboard/native/ArbitrumL2Switchboard.sol" };
+  return {
+    contractName: "ArbitrumL2Switchboard",
+    args: [
+      chainSlugs[network],
+      confirmGasLimit,
+      initiateGasLimit,
+      executionOverhead,
+      signerAddress,
+      socketAddress,
+      oracleAddress,
+    ],
+    path: "contracts/switchboard/native/ArbitrumL2Switchboard.sol",
+  };
 };

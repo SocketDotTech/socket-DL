@@ -17,8 +17,8 @@ For all chains, update the totalRemoteChains in `config.ts` and repeat step 3.
 
 ### Configure:
 
-1. You will find addresses stored in deployments folder as json with file name same as chainid.
-2. In the `config.ts`, update the `remoteChainId` for the chain you want to configure.
+1. You will find addresses stored in deployments folder as json with file name same as chainSlug.
+2. In the `config.ts`, update the `remoteChainSlug` for the chain you want to configure.
 3. Run command `npx hardhat run --network <network-name> srcipts/configure.ts`.
 
-For all chains, update the remoteChainId in `config.ts` and repeat step 3.
+For all chains, update the remoteChainSlug in `config.ts` and repeat step 3.

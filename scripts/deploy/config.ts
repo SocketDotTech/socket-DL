@@ -1,224 +1,272 @@
 import { IntegrationTypes } from "../../src/types";
 
 export const config = {
-  "goerli": [
+  goerli: [
     {
-      "remoteChain": "arbitrum-goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "arbitrum-goerli",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
     {
-      "remoteChain": "optimism-goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "optimism-goerli",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
     {
-      "remoteChain": "polygon-mumbai",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "polygon-mumbai",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
     {
-      "remoteChain": "bsc-testnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "bsc-testnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
   ],
   "arbitrum-goerli": [
     {
-      "remoteChain": "goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "goerli",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
     {
-      "remoteChain": "optimism-goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "optimism-goerli",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "polygon-mumbai",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "polygon-mumbai",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "bsc-testnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "bsc-testnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
   ],
   "optimism-goerli": [
     {
-      "remoteChain": "goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "goerli",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
     {
-      "remoteChain": "arbitrum-goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "arbitrum-goerli",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "polygon-mumbai",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "polygon-mumbai",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "bsc-testnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "bsc-testnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
   ],
   "polygon-mumbai": [
     {
-      "remoteChain": "goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "goerli",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
     {
-      "remoteChain": "arbitrum-goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "arbitrum-goerli",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "optimism-goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "optimism-goerli",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "bsc-testnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "bsc-testnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
   ],
   "bsc-testnet": [
     {
-      "remoteChain": "goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "goerli",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "arbitrum-goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "arbitrum-goerli",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "optimism-goerli",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "optimism-goerli",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "polygon-mumbai",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "polygon-mumbai",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
   ],
   bsc: [
     {
-      "remoteChain": "polygon-mainnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "polygon-mainnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "optimism",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "optimism",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "arbitrum",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "arbitrum",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "mainnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "mainnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
   ],
   "polygon-mainnet": [
     {
-      "remoteChain": "bsc",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "bsc",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "mainnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "mainnet",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
     {
-      "remoteChain": "optimism",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "optimism",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "arbitrum",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "arbitrum",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
   ],
   mainnet: [
     {
-      "remoteChain": "polygon-mainnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "polygon-mainnet",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
     {
-      "remoteChain": "bsc",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "bsc",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "optimism",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "optimism",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
     {
-      "remoteChain": "arbitrum",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "arbitrum",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
   ],
   optimism: [
     {
-      "remoteChain": "polygon-mainnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "polygon-mainnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "mainnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "mainnet",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
     {
-      "remoteChain": "bsc",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "bsc",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "arbitrum",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "arbitrum",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
   ],
   arbitrum: [
     {
-      "remoteChain": "polygon-mainnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "polygon-mainnet",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "mainnet",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration, IntegrationTypes.nativeIntegration],
-      "configForCounter": IntegrationTypes.nativeIntegration
+      remoteChain: "mainnet",
+      config: [
+        IntegrationTypes.fast,
+        IntegrationTypes.optimistic,
+        IntegrationTypes.native,
+      ],
+      configForCounter: IntegrationTypes.native,
     },
     {
-      "remoteChain": "optimism",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "optimism",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
     {
-      "remoteChain": "bsc",
-      "config": [IntegrationTypes.fastIntegration, IntegrationTypes.optimisticIntegration],
-      "configForCounter": IntegrationTypes.fastIntegration
+      remoteChain: "bsc",
+      config: [IntegrationTypes.fast, IntegrationTypes.optimistic],
+      configForCounter: IntegrationTypes.fast,
     },
-  ]
-}
+  ],
+};

@@ -1,0 +1,229 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+import "../../Setup.t.sol";
+import "../../../contracts/switchboard/native/OptimismSwitchboard.sol";
+
+// Goerli -> Optimism-Goerli
+// Switchboard on Goerli (5) for Optimism (420) as remote is: 0x793753781B45565C68392c4BB556C1bEcFC42F24
+// RemoteNativeSwitchBoard i.e SwitchBoard on Optimism-Goerli (420) is:0x2D468C4d7e355a4ADe099802A61Ba536220fb3Cb
+contract OptimismSwitchboardL1L2Test is Setup {
+    bytes32[] roots;
+    uint256 nonce;
+
+    uint256 receiveGasLimit_ = 100000;
+    uint256 confirmGasLimit_ = 100000;
+    uint256 initiateGasLimit_ = 100000;
+    uint256 executionOverhead_ = 100000;
+    address remoteNativeSwitchboard_ =
+        0x2D468C4d7e355a4ADe099802A61Ba536220fb3Cb;
+    address crossDomainManagerAddress_ =
+        0x5086d1eEF304eb5284A0f6720f79403b4e9bE294;
+    IGasPriceOracle gasPriceOracle_;
+
+    OptimismSwitchboard optimismSwitchboard;
+    ICapacitor singleCapacitor;
+
+    function setUp() external {
+        initialise();
+
+        _a.chainSlug = uint32(uint256(5));
+        _b.chainSlug = uint32(uint256(420));
+
+        uint256 fork = vm.createFork(vm.envString("GOERLI_RPC"), 8546564);
+        vm.selectFork(fork);
+
+        uint256[] memory transmitterPivateKeys = new uint256[](1);
+        transmitterPivateKeys[0] = _transmitterPrivateKey;
+
+        _chainSetup(transmitterPivateKeys);
+    }
+
+    function testInitateNativeConfirmation1() public {
+        address socketAddress = address(_a.socket__);
+
+        vm.startPrank(socketAddress);
+
+        bytes32 packedMessage = _a.hasher__.packMessage(
+            _a.chainSlug,
+            msg.sender,
+            _b.chainSlug,
+            0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1,
+            0,
+            1000000,
+            100,
+            abi.encode(msg.sender)
+        );
+
+        singleCapacitor.addPackedMessage(packedMessage);
+
+        (, bytes32 packetId, ) = _getLatestSignature(
+            _a,
+            address(singleCapacitor),
+            _b.chainSlug
+        );
+        optimismSwitchboard.initiateNativeConfirmation(packetId);
+        vm.stopPrank();
+    }
+
+    function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
+        _watcher = vm.addr(_watcherPrivateKey);
+        _transmitter = vm.addr(_transmitterPrivateKey);
+
+        deployContractsOnSingleChain(_a, _b.chainSlug, transmitterPrivateKeys_);
+    }
+
+    function deployContractsOnSingleChain(
+        ChainContext storage cc_,
+        uint256 remoteChainSlug_,
+        uint256[] memory transmitterPrivateKeys_
+    ) internal {
+        // deploy socket setup
+        deploySocket(cc_, _socketOwner);
+
+        vm.startPrank(_socketOwner);
+
+        cc_.transmitManager__.grantRole(
+            "GAS_LIMIT_UPDATER_ROLE",
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        vm.stopPrank();
+
+        bytes32 digest = keccak256(
+            abi.encode(
+                "PROPOSE_GAS_LIMIT_UPDATE",
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                _proposeGasLimit
+            )
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
+        cc_.transmitManager__.setProposeGasLimit(
+            cc_.transmitterNonce++,
+            remoteChainSlug_,
+            _proposeGasLimit,
+            sig
+        );
+
+        SocketConfigContext memory scc_ = addOptimismSwitchboard(
+            cc_,
+            remoteChainSlug_,
+            _capacitorType
+        );
+        cc_.configs__.push(scc_);
+
+        // add roles
+        hoax(_socketOwner);
+        cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
+        _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
+    }
+
+    function deploySocket(
+        ChainContext storage cc_,
+        address deployer_
+    ) internal {
+        vm.startPrank(deployer_);
+
+        cc_.hasher__ = new Hasher();
+        cc_.sigVerifier__ = new SignatureVerifier();
+        cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
+        cc_.gasPriceOracle__ = new GasPriceOracle(
+            deployer_,
+            uint32(cc_.chainSlug)
+        );
+        cc_.executionManager__ = new ExecutionManager(
+            cc_.gasPriceOracle__,
+            deployer_
+        );
+
+        cc_.transmitManager__ = new TransmitManager(
+            cc_.sigVerifier__,
+            cc_.gasPriceOracle__,
+            deployer_,
+            cc_.chainSlug,
+            _sealGasLimit
+        );
+
+        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
+        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
+
+        cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
+
+        cc_.socket__ = new Socket(
+            uint32(cc_.chainSlug),
+            address(cc_.hasher__),
+            address(cc_.transmitManager__),
+            address(cc_.executionManager__),
+            address(cc_.capacitorFactory__),
+            deployer_
+        );
+
+        vm.stopPrank();
+    }
+
+    function addOptimismSwitchboard(
+        ChainContext storage cc_,
+        uint256 remoteChainSlug_,
+        uint256 capacitorType_
+    ) internal returns (SocketConfigContext memory scc_) {
+        optimismSwitchboard = new OptimismSwitchboard(
+            cc_.chainSlug,
+            receiveGasLimit_,
+            confirmGasLimit_,
+            initiateGasLimit_,
+            executionOverhead_,
+            _socketOwner,
+            address(cc_.socket__),
+            cc_.gasPriceOracle__,
+            crossDomainManagerAddress_
+        );
+
+        scc_ = registerSwitchbaord(
+            cc_,
+            _socketOwner,
+            address(optimismSwitchboard),
+            remoteChainSlug_,
+            capacitorType_
+        );
+
+        hoax(_socketOwner);
+        optimismSwitchboard.updateRemoteNativeSwitchboard(
+            remoteNativeSwitchboard_
+        );
+    }
+
+    function registerSwitchbaord(
+        ChainContext storage cc_,
+        address deployer_,
+        address switchBoardAddress_,
+        uint256 remoteChainSlug_,
+        uint256 capacitorType_
+    ) internal returns (SocketConfigContext memory scc_) {
+        vm.startPrank(deployer_);
+        cc_.socket__.registerSwitchBoard(
+            switchBoardAddress_,
+            DEFAULT_BATCH_LENGTH,
+            uint32(remoteChainSlug_),
+            uint32(capacitorType_)
+        );
+
+        scc_.siblingChainSlug = remoteChainSlug_;
+        scc_.capacitor__ = cc_.socket__.capacitors__(
+            switchBoardAddress_,
+            remoteChainSlug_
+        );
+        singleCapacitor = scc_.capacitor__;
+
+        scc_.decapacitor__ = cc_.socket__.decapacitors__(
+            switchBoardAddress_,
+            remoteChainSlug_
+        );
+        scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
+
+        optimismSwitchboard.grantRole(GOVERNANCE_ROLE, deployer_);
+        vm.stopPrank();
+    }
+}

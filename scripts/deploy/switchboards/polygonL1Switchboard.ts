@@ -1,7 +1,7 @@
-import { bridgeConsts } from "../../constants";
+import { bridgeConsts, chainSlugs } from "../../constants";
 
-const executionOverhead = 300000
-const initialConfirmationGasLimit = 300000
+const executionOverhead = 300000;
+const initiateGasLimit = 300000;
 
 export const polygonL1Switchboard = (
   network: string,
@@ -9,5 +9,18 @@ export const polygonL1Switchboard = (
   oracleAddress: string,
   signerAddress: string
 ) => {
-  return { contractName: "PolygonL1Switchboard", args: [initialConfirmationGasLimit, executionOverhead, bridgeConsts.checkpointManager[network], bridgeConsts.fxRoot[network], signerAddress, socketAddress, oracleAddress], path: "contracts/switchboard/native/PolygonL1Switchboard.sol" };
+  return {
+    contractName: "PolygonL1Switchboard",
+    args: [
+      chainSlugs[network],
+      initiateGasLimit,
+      executionOverhead,
+      bridgeConsts.checkpointManager[network],
+      bridgeConsts.fxRoot[network],
+      signerAddress,
+      socketAddress,
+      oracleAddress,
+    ],
+    path: "contracts/switchboard/native/PolygonL1Switchboard.sol",
+  };
 };

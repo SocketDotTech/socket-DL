@@ -5,76 +5,65 @@ import "fx-portal/tunnel/FxBaseRootTunnel.sol";
 import "./NativeSwitchboardBase.sol";
 
 contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
-    // stores the roots received from native bridge
-    mapping(uint256 => bytes32) public roots;
+    event FxChildTunnelSet(address fxRootTunnel, address newFxRootTunnel);
 
-    event FxChildTunnelSet(address fxRootTunnel, address fxRootTunnel_);
-    event RootReceived(uint256 packetId_, bytes32 root_);
+    modifier onlyRemoteSwitchboard() override {
+        require(true, "ONLY_FX_CHILD");
 
-    error NoRootFound();
+        _;
+    }
 
     constructor(
-        uint256 initialConfirmationGasLimit_,
+        uint256 chainSlug_,
+        uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         address checkpointManager_,
         address fxRoot_,
         address owner_,
-        ISocket socket_,
-        IOracle oracle_
-    ) AccessControl(owner_) FxBaseRootTunnel(checkpointManager_, fxRoot_) {
-        socket = socket_;
-        oracle = oracle_;
-
-        initateNativeConfirmationGasLimit = initialConfirmationGasLimit_;
-        executionOverhead = executionOverhead_;
-    }
+        address socket_,
+        IGasPriceOracle gasPriceOracle_
+    )
+        AccessControlExtended(owner_)
+        NativeSwitchboardBase(
+            socket_,
+            chainSlug_,
+            initiateGasLimit_,
+            executionOverhead_,
+            gasPriceOracle_
+        )
+        FxBaseRootTunnel(checkpointManager_, fxRoot_)
+    {}
 
     /**
-     * @param packetId - packet id
+     * @param packetId_ - packet id
      */
-    function initateNativeConfirmation(uint256 packetId) external payable {
-        bytes32 root = socket.remoteRoots(packetId);
-        if (root == bytes32(0)) revert NoRootFound();
-
-        bytes memory data = abi.encode(packetId, root);
+    function initiateNativeConfirmation(bytes32 packetId_) external payable {
+        bytes memory data = _encodeRemoteCall(packetId_);
         _sendMessageToChild(data);
-        emit InitiatedNativeConfirmation(packetId);
+        emit InitiatedNativeConfirmation(packetId_);
     }
 
-    function _processMessageFromChild(bytes memory message) internal override {
-        (uint256 packetId, bytes32 root) = abi.decode(
-            message,
-            (uint256, bytes32)
+    function _processMessageFromChild(bytes memory message_) internal override {
+        (bytes32 packetId, bytes32 root) = abi.decode(
+            message_,
+            (bytes32, bytes32)
         );
-        roots[packetId] = root;
+        packetIdToRoot[packetId] = root;
         emit RootReceived(packetId, root);
     }
 
-    /**
-     * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId packet id
-     */
-    function allowPacket(
-        bytes32 root,
-        uint256 packetId,
+    function _getMinSwitchboardFees(
         uint256,
-        uint256
-    ) external view override returns (bool) {
-        if (tripGlobalFuse) return false;
-        if (roots[packetId] != root) return false;
-
-        return true;
-    }
-
-    function _getSwitchboardFees(
         uint256,
-        uint256
+        uint256 sourceGasPrice_
     ) internal view override returns (uint256) {
-        return initateNativeConfirmationGasLimit * tx.gasprice;
+        return initiateGasLimit * sourceGasPrice_;
     }
 
     // set fxChildTunnel if not set already
-    function updateFxChildTunnel(address fxChildTunnel_) external onlyOwner {
+    function setFxChildTunnel(
+        address fxChildTunnel_
+    ) public override onlyRole(GOVERNANCE_ROLE) {
         emit FxChildTunnelSet(fxChildTunnel, fxChildTunnel_);
         fxChildTunnel = fxChildTunnel_;
     }

@@ -8,7 +8,11 @@ import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 /// @dev Use with caution! Some functions in this library knowingly create dirty bits at the destination of the free memory pointer.
 /// @dev Note that none of the functions in this library check that a token has code at all! That responsibility is delegated to the caller.
 library SafeTransferLib {
-    function safeTransfer(IERC20 token, address to, uint256 amount) internal {
+    function safeTransfer(
+        IERC20 token_,
+        address to_,
+        uint256 amount_
+    ) internal {
         bool success;
 
         /// @solidity memory-safe-assembly
@@ -21,8 +25,8 @@ library SafeTransferLib {
                 freeMemoryPointer,
                 0xa9059cbb00000000000000000000000000000000000000000000000000000000
             )
-            mstore(add(freeMemoryPointer, 4), to) // Append the "to" argument.
-            mstore(add(freeMemoryPointer, 36), amount) // Append the "amount" argument.
+            mstore(add(freeMemoryPointer, 4), to_) // Append the "to" argument.
+            mstore(add(freeMemoryPointer, 36), amount_) // Append the "amount" argument.
 
             success := and(
                 // Set success to whether the call reverted, if not we check it either
@@ -35,7 +39,7 @@ library SafeTransferLib {
                 // We use 0 and 32 to copy up to 32 bytes of return data into the scratch space.
                 // Counterintuitively, this call must be positioned second to the or() call in the
                 // surrounding and() call or else returndatasize() will be zero during the computation.
-                call(gas(), token, 0, freeMemoryPointer, 68, 0, 32)
+                call(gas(), token_, 0, freeMemoryPointer, 68, 0, 32)
             )
         }
 

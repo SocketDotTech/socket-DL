@@ -1,4 +1,4 @@
-import { IntegrationTypes, NativeSwitchboard } from "../../src/types";
+import { NativeSwitchboard } from "../../src/types";
 
 export const transmitterAddress: {
   [key: string]: string;
@@ -13,7 +13,7 @@ export const transmitterAddress: {
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   arbitrum: "0x95e655674C6889F80fa024ebA86cdE29D69028A6",
   optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
-  mainnet: "0x6956063c490fa746c9801ccc41baba8a8b678068",
+  mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
 };
 
 export const watcherAddress: {
@@ -29,7 +29,7 @@ export const watcherAddress: {
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   arbitrum: "0x95e655674C6889F80fa024ebA86cdE29D69028A6",
   optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
-  mainnet: "0x6956063c490fa746c9801ccc41baba8a8b678068",
+  mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
 };
 
 export const executorAddress: {
@@ -45,7 +45,7 @@ export const executorAddress: {
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   arbitrum: "0x95e655674C6889F80fa024ebA86cdE29D69028A6",
   optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
-  mainnet: "0x6956063c490fa746c9801ccc41baba8a8b678068",
+  mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
 };
 
 export const timeout: {
@@ -83,20 +83,50 @@ export const sealGasLimit: {
 export const proposeGasLimit: {
   [key: string]: number;
 } = {
-  "bsc-testnet": 300000,
-  "polygon-mainnet": 300000,
-  bsc: 300000,
-  "polygon-mumbai": 300000,
-  "arbitrum-goerli": 300000,
-  "optimism-goerli": 300000,
-  goerli: 300000,
-  hardhat: 300000,
-  arbitrum: 300000,
-  optimism: 300000,
-  mainnet: 300000,
+  "bsc-testnet": 80000,
+  "polygon-mainnet": 80000,
+  bsc: 80000,
+  "polygon-mumbai": 80000,
+  "arbitrum-goerli": 1000000,
+  "optimism-goerli": 80000,
+  goerli: 80000,
+  hardhat: 80000,
+  arbitrum: 1000000,
+  optimism: 80000,
+  mainnet: 80000,
 };
 
-export const EXECUTOR_ROLE = "0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767"
+export const attestGasLimit: {
+  [key: string]: number;
+} = {
+  "bsc-testnet": 80000,
+  "polygon-mainnet": 80000,
+  bsc: 80000,
+  "polygon-mumbai": 80000,
+  "arbitrum-goerli": 1000000,
+  "optimism-goerli": 80000,
+  goerli: 80000,
+  hardhat: 80000,
+  arbitrum: 1000000,
+  optimism: 80000,
+  mainnet: 80000,
+};
+
+export const executionOverhead: {
+  [key: string]: number;
+} = {
+  "bsc-testnet": 40000,
+  "polygon-mainnet": 40000,
+  bsc: 40000,
+  "polygon-mumbai": 40000,
+  "arbitrum-goerli": 500000,
+  "optimism-goerli": 40000,
+  goerli: 40000,
+  hardhat: 40000,
+  arbitrum: 500000,
+  optimism: 40000,
+  mainnet: 40000,
+};
 
 export const switchboards = {
   "arbitrum-goerli": {

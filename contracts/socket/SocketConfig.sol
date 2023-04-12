@@ -2,12 +2,12 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ISocket.sol";
-import "../utils/Ownable.sol";
 import "../interfaces/ICapacitorFactory.sol";
 import "../interfaces/ISwitchboard.sol";
-import {AccessControl} from "../utils/AccessControl.sol";
+import "../utils/AccessControlExtended.sol";
+import {GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
 
-abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
+abstract contract SocketConfig is ISocket, AccessControlExtended {
     struct PlugConfig {
         address siblingPlug;
         ICapacitor capacitor__;
@@ -16,18 +16,18 @@ abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
         ISwitchboard outboundSwitchboard__;
     }
 
-    ICapacitorFactory public _capacitorFactory__;
+    ICapacitorFactory public capacitorFactory__;
 
     // siblingChainSlug => capacitor address
-    mapping(address => uint256) public _capacitorToSlug;
+    mapping(address => uint32) public capacitorToSlug;
 
     // switchboard => siblingChainSlug => ICapacitor
-    mapping(address => mapping(uint256 => ICapacitor)) public _capacitors__;
+    mapping(address => mapping(uint256 => ICapacitor)) public capacitors__;
     // switchboard => siblingChainSlug => IDecapacitor
-    mapping(address => mapping(uint256 => IDecapacitor)) public _decapacitors__;
+    mapping(address => mapping(uint256 => IDecapacitor)) public decapacitors__;
 
-    // plug | remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
-    mapping(uint256 => PlugConfig) internal _plugConfigs;
+    // plug => remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
+    mapping(address => mapping(uint256 => PlugConfig)) internal _plugConfigs;
 
     event SwitchboardAdded(
         address switchboard,
@@ -35,36 +35,49 @@ abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
         address capacitor,
         address decapacitor
     );
-    event CapacitorFactorySet(address capacitorFactory_);
+    event CapacitorFactorySet(address capacitorFactory);
 
     error SwitchboardExists();
     error InvalidConnection();
 
-    // todo: need event, check for other such functions.
-    function setCapacitorFactory(address capacitorFactory_) external onlyOwner {
-        _capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
+    function setCapacitorFactory(
+        address capacitorFactory_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
         emit CapacitorFactorySet(capacitorFactory_);
     }
 
+    // it's msg.sender's responsibility to set correct sibling slug
     function registerSwitchBoard(
         address switchBoardAddress_,
+        uint256 maxPacketLength_,
         uint32 siblingChainSlug_,
         uint32 capacitorType_
     ) external {
         // only capacitor checked, decapacitor assumed will exist if capacitor does
         if (
-            address(_capacitors__[switchBoardAddress_][siblingChainSlug_]) !=
+            address(capacitors__[switchBoardAddress_][siblingChainSlug_]) !=
             address(0)
         ) revert SwitchboardExists();
 
         (
             ICapacitor capacitor__,
             IDecapacitor decapacitor__
-        ) = _capacitorFactory__.deploy(capacitorType_, siblingChainSlug_);
+        ) = capacitorFactory__.deploy(
+                capacitorType_,
+                siblingChainSlug_,
+                maxPacketLength_
+            );
 
-        _capacitorToSlug[address(capacitor__)] = siblingChainSlug_;
-        _capacitors__[switchBoardAddress_][siblingChainSlug_] = capacitor__;
-        _decapacitors__[switchBoardAddress_][siblingChainSlug_] = decapacitor__;
+        capacitorToSlug[address(capacitor__)] = siblingChainSlug_;
+        capacitors__[switchBoardAddress_][siblingChainSlug_] = capacitor__;
+        decapacitors__[switchBoardAddress_][siblingChainSlug_] = decapacitor__;
+
+        ISwitchboard(switchBoardAddress_).registerCapacitor(
+            siblingChainSlug_,
+            address(capacitor__),
+            maxPacketLength_
+        );
 
         emit SwitchboardAdded(
             switchBoardAddress_,
@@ -81,21 +94,21 @@ abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
         address outboundSwitchboard_
     ) external override {
         if (
-            address(_capacitors__[inboundSwitchboard_][siblingChainSlug_]) ==
+            address(capacitors__[inboundSwitchboard_][siblingChainSlug_]) ==
             address(0) ||
-            address(_capacitors__[outboundSwitchboard_][siblingChainSlug_]) ==
+            address(capacitors__[outboundSwitchboard_][siblingChainSlug_]) ==
             address(0)
         ) revert InvalidConnection();
 
-        PlugConfig storage _plugConfig = _plugConfigs[
-            (uint256(uint160(msg.sender)) << 96) | siblingChainSlug_
+        PlugConfig storage _plugConfig = _plugConfigs[msg.sender][
+            siblingChainSlug_
         ];
 
         _plugConfig.siblingPlug = siblingPlug_;
-        _plugConfig.capacitor__ = _capacitors__[outboundSwitchboard_][
+        _plugConfig.capacitor__ = capacitors__[outboundSwitchboard_][
             siblingChainSlug_
         ];
-        _plugConfig.decapacitor__ = _decapacitors__[inboundSwitchboard_][
+        _plugConfig.decapacitor__ = decapacitors__[inboundSwitchboard_][
             siblingChainSlug_
         ];
         _plugConfig.inboundSwitchboard__ = ISwitchboard(inboundSwitchboard_);
@@ -126,8 +139,8 @@ abstract contract SocketConfig is ISocket, Ownable(msg.sender) {
             address decapacitor__
         )
     {
-        PlugConfig memory _plugConfig = _plugConfigs[
-            (uint256(uint160(plugAddress_)) << 96) | siblingChainSlug_
+        PlugConfig memory _plugConfig = _plugConfigs[plugAddress_][
+            siblingChainSlug_
         ];
 
         return (

@@ -15,4 +15,12 @@ interface ISignatureVerifier {
         bytes32 root_,
         bytes calldata signature_
     ) external pure returns (address signer);
+
+    /**
+     * @notice returns the address of signer recovered from input signature and digest
+     */
+    function recoverSignerFromDigest(
+        bytes32 digest_,
+        bytes memory signature_
+    ) external pure returns (address signer);
 }
