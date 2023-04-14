@@ -6,6 +6,7 @@ import "../utils/AccessControlExtended.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 import {ISocket} from "../interfaces/ISocket.sol";
 import {FastSwitchboard} from "../switchboard/default-switchboards/FastSwitchboard.sol";
+import {INativeRelay} from "../interfaces/INativeRelay.sol";
 
 contract SocketBatcher is AccessControlExtended {
     constructor(address owner_) AccessControlExtended(owner_) {
@@ -35,6 +36,21 @@ contract SocketBatcher is AccessControlExtended {
         address localPlug;
         ISocket.MessageDetails messageDetails;
         bytes signature;
+    }
+
+    struct ArbitrumNativeInitiatorRequest {
+        bytes32 packetId;
+        uint256 maxSubmissionCost;
+        uint256 maxGas;
+        uint256 gasPriceBid;
+    }
+
+    struct NativeInitiatorRequest {
+        bytes32 packetId;
+    }
+
+    struct PolygonReceiveMessageRequest {
+        bytes receivePacketProof;
     }
 
     /**
@@ -119,6 +135,60 @@ contract SocketBatcher is AccessControlExtended {
                 executeRequests_[index].localPlug,
                 executeRequests_[index].messageDetails,
                 executeRequests_[index].signature
+            );
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    function receiveMessageBatch(
+        address polygonRootReceiverAddress_,
+        PolygonReceiveMessageRequest[] calldata polygonReceiveMessageRequests_
+    ) external {
+        uint256 receiveMessagesLength = polygonReceiveMessageRequests_.length;
+        for (uint256 index = 0; index < receiveMessagesLength; ) {
+            INativeRelay(polygonRootReceiverAddress_).receiveMessage(
+                polygonReceiveMessageRequests_[index].receivePacketProof
+            );
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    function initiateArbitrumNativeBatch(
+        address switchboardAddress_,
+        ArbitrumNativeInitiatorRequest[]
+            calldata arbitrumNativeInitiatorRequests_
+    ) external {
+        uint256 arbitrumNativeInitiatorRequestsLength = arbitrumNativeInitiatorRequests_
+                .length;
+        for (
+            uint256 index = 0;
+            index < arbitrumNativeInitiatorRequestsLength;
+
+        ) {
+            INativeRelay(switchboardAddress_).initiateNativeConfirmation(
+                arbitrumNativeInitiatorRequests_[index].packetId,
+                arbitrumNativeInitiatorRequests_[index].maxSubmissionCost,
+                arbitrumNativeInitiatorRequests_[index].maxGas,
+                arbitrumNativeInitiatorRequests_[index].gasPriceBid
+            );
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    function initiateNativeBatch(
+        address switchboardAddress_,
+        NativeInitiatorRequest[] calldata nativeInitiatorRequests_
+    ) external {
+        uint256 nativeInitiatorRequestsLength = nativeInitiatorRequests_.length;
+        for (uint256 index = 0; index < nativeInitiatorRequestsLength; ) {
+            INativeRelay(switchboardAddress_).initiateNativeConfirmation(
+                nativeInitiatorRequests_[index].packetId
             );
             unchecked {
                 ++index;
