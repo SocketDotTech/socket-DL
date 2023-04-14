@@ -43,14 +43,7 @@ contract SocketBatcher is AccessControlExtended {
         uint256 maxSubmissionCost;
         uint256 maxGas;
         uint256 gasPriceBid;
-    }
-
-    struct NativeInitiatorRequest {
-        bytes32 packetId;
-    }
-
-    struct PolygonReceiveMessageRequest {
-        bytes receivePacketProof;
+        uint256 callValue;
     }
 
     /**
@@ -142,14 +135,19 @@ contract SocketBatcher is AccessControlExtended {
         }
     }
 
+    /**
+     * @notice invoke receieve Message on PolygonRootReceiver for a batch of messages in loop
+     * @param polygonRootReceiverAddress_ address of polygonRootReceiver
+     * @param receivePacketProofs_ the list of receivePacketProofs to be sent to receiveHook of polygonRootReceiver
+     */
     function receiveMessageBatch(
         address polygonRootReceiverAddress_,
-        PolygonReceiveMessageRequest[] calldata polygonReceiveMessageRequests_
+        bytes[] calldata receivePacketProofs_
     ) external {
-        uint256 receiveMessagesLength = polygonReceiveMessageRequests_.length;
-        for (uint256 index = 0; index < receiveMessagesLength; ) {
+        uint256 receivePacketProofsLength = receivePacketProofs_.length;
+        for (uint256 index = 0; index < receivePacketProofsLength; ) {
             INativeRelay(polygonRootReceiverAddress_).receiveMessage(
-                polygonReceiveMessageRequests_[index].receivePacketProof
+                receivePacketProofs_[index]
             );
             unchecked {
                 ++index;
@@ -157,11 +155,16 @@ contract SocketBatcher is AccessControlExtended {
         }
     }
 
+    /**
+     * @notice initiate NativeConfirmation on arbitrumChain for a batch of packets in loop
+     * @param switchboardAddress_ address of nativeArbitrumSwitchboard
+     * @param arbitrumNativeInitiatorRequests_ the list of requests with packets to initiate nativeConfirmation on switchboard of arbitrumChain
+     */
     function initiateArbitrumNativeBatch(
         address switchboardAddress_,
         ArbitrumNativeInitiatorRequest[]
             calldata arbitrumNativeInitiatorRequests_
-    ) external {
+    ) external payable {
         uint256 arbitrumNativeInitiatorRequestsLength = arbitrumNativeInitiatorRequests_
                 .length;
         for (
@@ -169,7 +172,9 @@ contract SocketBatcher is AccessControlExtended {
             index < arbitrumNativeInitiatorRequestsLength;
 
         ) {
-            INativeRelay(switchboardAddress_).initiateNativeConfirmation(
+            INativeRelay(switchboardAddress_).initiateNativeConfirmation{
+                value: arbitrumNativeInitiatorRequests_[index].callValue
+            }(
                 arbitrumNativeInitiatorRequests_[index].packetId,
                 arbitrumNativeInitiatorRequests_[index].maxSubmissionCost,
                 arbitrumNativeInitiatorRequests_[index].maxGas,
@@ -181,14 +186,19 @@ contract SocketBatcher is AccessControlExtended {
         }
     }
 
+    /**
+     * @notice initiate NativeConfirmation on nativeChain(s) for a batch of packets in loop
+     * @param switchboardAddress_ address of nativeSwitchboard
+     * @param nativePacketIds_ the list of requests with packets to initiate nativeConfirmation on switchboard of native chains
+     */
     function initiateNativeBatch(
         address switchboardAddress_,
-        NativeInitiatorRequest[] calldata nativeInitiatorRequests_
+        bytes32[] calldata nativePacketIds_
     ) external {
-        uint256 nativeInitiatorRequestsLength = nativeInitiatorRequests_.length;
-        for (uint256 index = 0; index < nativeInitiatorRequestsLength; ) {
+        uint256 nativePacketIdsLength = nativePacketIds_.length;
+        for (uint256 index = 0; index < nativePacketIdsLength; ) {
             INativeRelay(switchboardAddress_).initiateNativeConfirmation(
-                nativeInitiatorRequests_[index].packetId
+                nativePacketIds_[index]
             );
             unchecked {
                 ++index;

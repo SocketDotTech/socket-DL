@@ -13,7 +13,7 @@ interface INativeRelay {
         uint256 maxSubmissionCost,
         uint256 maxGas,
         uint256 gasPriceBid
-    ) external;
+    ) external payable;
 
     function initiateNativeConfirmation(bytes32 packetId) external;
 }
