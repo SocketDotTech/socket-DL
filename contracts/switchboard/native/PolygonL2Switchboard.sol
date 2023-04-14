@@ -50,6 +50,12 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         emit InitiatedNativeConfirmation(packetId_);
     }
 
+    function _encodeRemoteCall(
+        bytes32 packetId_
+    ) internal view returns (bytes memory data) {
+        data = abi.encode(packetId_, _getRoot(packetId_));
+    }
+
     /**
      * validate sender verifies if `rootMessageSender` is the root contract (notary) on L1.
      */

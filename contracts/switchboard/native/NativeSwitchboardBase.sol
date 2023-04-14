@@ -68,18 +68,10 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         gasPriceOracle__ = gasPriceOracle_;
     }
 
-    function _encodeRemoteCall(
-        bytes32 packetId_
-    ) internal view returns (bytes memory data) {
+    function _getRoot(bytes32 packetId_) internal view returns (bytes32 root) {
         uint64 capacitorPacketCount = uint64(uint256(packetId_));
-        bytes32 root = capacitor__.getRootByCount(capacitorPacketCount);
+        root = capacitor__.getRootByCount(capacitorPacketCount);
         if (root == bytes32(0)) revert NoRootFound();
-
-        data = abi.encodeWithSelector(
-            this.receivePacket.selector,
-            packetId_,
-            root
-        );
     }
 
     function receivePacket(
