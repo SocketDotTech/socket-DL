@@ -18,9 +18,9 @@
       },
       "137": {
         "NATIVE_BRIDGE": {
-          "switchboard": "0x03D51955216a7E6F301e0613515fA86A6f3d59A9",
-          "capacitor": "0xa2a955f5B051802d6B0166E656E5c6DD8FC750dD",
-          "decapacitor": "0x13205a7Cd84193A5F4358465aF1AA6952eCa9736"
+          "switchboard": "0xb2dA552c9Baa0e15b13302aBBF7B555aBc8eE4E8",
+          "capacitor": "0x1d84224Bbe0371C25Bcaba4EaAAFA75E01b9C4Ee",
+          "decapacitor": "0x8Bc32FeAbC7c538Ff46CF64102ED57Af70EDbDf9"
         }
       },
       "42161": {
@@ -189,9 +189,9 @@
     "integrations": {
       "1": {
         "NATIVE_BRIDGE": {
-          "switchboard": "0xeb43Ea4B4e800c260ad1c85eB465d4b558510e1a",
-          "capacitor": "0xD304eEDcB88510dD6C4F60D0Ce9eD40e0D6F19C2",
-          "decapacitor": "0x00bd654471C6704F0e69Ff081954C3c475b4240F"
+          "switchboard": "0x494A9da5F191EE6BDb6d9D0f95d880Db9a3b04fb",
+          "capacitor": "0x45e5C33A8362382B8757A025Bc6B42DF0db38FCF",
+          "decapacitor": "0x37E6e2AbcfbB0CCd5b9B005715CFfcb15109c7e4"
         }
       },
       "10": {
@@ -261,6 +261,16 @@
           "switchboard": "0xFcCD1E450ca0d89EAe8B676B74225d0D6549762f",
           "capacitor": "0x82293C0c3c80943627037714A51cC212e3Dbb348",
           "decapacitor": "0x640641180c19D9062C3b759495E519017Ba4Ed53"
+        },
+        "FAST": {
+          "switchboard": "0x72be9F48226934A42A891075469F2Df185DC6fDb",
+          "capacitor": "0x4D606293D7752F60471Eaa5E7F77D0cD9449eb57",
+          "decapacitor": "0x0B7f273912bF470EE7F1677b143969EBd24E5323"
+        },
+        "OPTIMISTIC": {
+          "switchboard": "0x6993fDE4D46803e27969572Ab269391924dcb5EB",
+          "capacitor": "0x1FeE9231F6a550609582d64C1a82ad41db9c9083",
+          "decapacitor": "0xc7fCf41863500A8Ec9788AE124CFE7a5FAe482B0"
         }
       },
       "10": {

@@ -43,6 +43,12 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         emit InitiatedNativeConfirmation(packetId_);
     }
 
+    function _encodeRemoteCall(
+        bytes32 packetId_
+    ) internal view returns (bytes memory data) {
+        data = abi.encode(packetId_, _getRoot(packetId_));
+    }
+
     function _processMessageFromChild(bytes memory message_) internal override {
         (bytes32 packetId, bytes32 root) = abi.decode(
             message_,

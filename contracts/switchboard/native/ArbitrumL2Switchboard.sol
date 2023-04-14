@@ -47,6 +47,16 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
         emit InitiatedNativeConfirmation(packetId_);
     }
 
+    function _encodeRemoteCall(
+        bytes32 packetId_
+    ) internal view returns (bytes memory data) {
+        data = abi.encodeWithSelector(
+            this.receivePacket.selector,
+            packetId_,
+            _getRoot(packetId_)
+        );
+    }
+
     function _getMinSwitchboardFees(
         uint256,
         uint256 dstRelativeGasPrice_,
