@@ -172,7 +172,9 @@ contract SocketBatcher is AccessControlExtended {
             index < arbitrumNativeInitiatorRequestsLength;
 
         ) {
-            INativeRelay(switchboardAddress_).initiateNativeConfirmation{value: arbitrumNativeInitiatorRequests_[index].callValue}(
+            INativeRelay(switchboardAddress_).initiateNativeConfirmation{
+                value: arbitrumNativeInitiatorRequests_[index].callValue
+            }(
                 arbitrumNativeInitiatorRequests_[index].packetId,
                 arbitrumNativeInitiatorRequests_[index].maxSubmissionCost,
                 arbitrumNativeInitiatorRequests_[index].maxGas,
