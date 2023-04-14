@@ -55,7 +55,8 @@
         }
       }
     },
-    "FastSwitchboard": "0x7228F7CEaaF9dD32eA8e059902E32CAE363f2569"
+    "FastSwitchboard": "0x7228F7CEaaF9dD32eA8e059902E32CAE363f2569",
+    "SocketBatcher" : "0x663dc7e91157c58079f55c1bf5ee1bdb6401ca7a"
   },
   "10": {
     "Counter": "0xFAE13FC12a111CD31Ea02Ae554A59Fb18fD45127",
