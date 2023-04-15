@@ -6,71 +6,94 @@ use(Web3ClientPlugin);
 
 import { chainSlugs, getJsonRpcUrl } from "../../constants";
 import { deployedAddressPath, getInstance } from "../../deploy/utils";
-import { Provider, TransactionRequest, TransactionResponse } from "@ethersproject/abstract-provider";
-import {Signer} from "@ethersproject/abstract-signer";
+import {
+  Provider,
+  TransactionRequest,
+  TransactionResponse,
+} from "@ethersproject/abstract-provider";
+import { Signer } from "@ethersproject/abstract-signer";
 import { Bytes } from "@ethersproject/bytes";
 import { Deferrable } from "@ethersproject/properties";
-import { Transaction } from '@ethersproject/transactions';
+import { Transaction } from "@ethersproject/transactions";
 import axios from "axios";
+import { IntegrationTypes } from "../../../src";
 
-type ProviderWithWrapTransaction = Provider & { _wrapTransaction(tx: Transaction, hash?: string): TransactionResponse };
+type ProviderWithWrapTransaction = Provider & {
+  _wrapTransaction(tx: Transaction, hash?: string): TransactionResponse;
+};
 
-const axiosPost = async (url:string, data:any, config:object = {}) => {
-	try {
-		let response = await axios.post(url, data, config);
-		return {success:true,  ...response.data};
-	} catch (error:any) {
-		console.log("status : ", error?.response?.status);
-		return {success:false, ...error?.response?.data} ;
-	}
-}
+const axiosPost = async (url: string, data: any, config: object = {}) => {
+  try {
+    let response = await axios.post(url, data, config);
+    return { success: true, ...response.data };
+  } catch (error: any) {
+    console.log("status : ", error?.response?.status);
+    return { success: false, ...error?.response?.data };
+  }
+};
 
 export class SocketRelaySigner extends Signer {
-    constructor (readonly provider:Provider, readonly relayUrl:string, readonly sequential:boolean = false) {
-        super()
-    }
+  constructor(
+    readonly provider: Provider,
+    readonly relayUrl: string,
+    readonly sequential: boolean = false
+  ) {
+    super();
+  }
 
-    public async getAddress(): Promise<string> {
-        // some random address
-        return "0x5367Efc17020Aa1CF0943bA7eD17f1D3e4c7d7EE";
-    }
-    public async signMessage(message: string | Bytes): Promise<string> {
-        throw new Error(" signMessage not Implemented");
-    }
-    public connect(provider: Provider): Signer {
-        return new SocketRelaySigner(provider, this.relayUrl, this.sequential);
-    }
-    public async signTransaction(transaction: Deferrable<TransactionRequest>): Promise<string> {
-        throw new Error(" signTransaction not Implemented");
-    }
-    public async sendTransaction(transaction: Deferrable<TransactionRequest>): Promise<TransactionResponse> {
-        let payload = {
-            chainId:(await this.provider.getNetwork()).chainId,
-            sequential:this.sequential,
-            ...transaction
-        };
-        console.log("sendTransaction in signer: ", payload);
-        let result = await axiosPost(this.relayUrl, payload);
-        if (!result.success) throw result;
-        let tx = result?.data as Transaction;
-        return (this.provider as ProviderWithWrapTransaction)._wrapTransaction(tx);
-    }
+  public async getAddress(): Promise<string> {
+    // some random address
+    return "0x5367Efc17020Aa1CF0943bA7eD17f1D3e4c7d7EE";
+  }
+  public async signMessage(message: string | Bytes): Promise<string> {
+    throw new Error(" signMessage not Implemented");
+  }
+  public connect(provider: Provider): Signer {
+    return new SocketRelaySigner(provider, this.relayUrl, this.sequential);
+  }
+  public async signTransaction(
+    transaction: Deferrable<TransactionRequest>
+  ): Promise<string> {
+    throw new Error(" signTransaction not Implemented");
+  }
+  public async sendTransaction(
+    transaction: Deferrable<TransactionRequest>
+  ): Promise<TransactionResponse> {
+    let payload = {
+      chainId: (await this.provider.getNetwork()).chainId,
+      sequential: this.sequential,
+      ...transaction,
+    };
+    console.log("sendTransaction in signer: ", payload);
+    let result = await axiosPost(this.relayUrl, payload);
+    if (!result.success) throw result;
+    let tx = result?.data as Transaction;
+    return (this.provider as ProviderWithWrapTransaction)._wrapTransaction(tx);
+  }
 }
 
 // get providers for source and destination
-const privateKey = "0x8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b036";
+const privateKey =
+  "0x8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b036";
 // const privateKey = process.env.DEVNET_PRIVKEY;
-const sealTxHash = "0x8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b036";
+const sealTxHash =
+  "0xd390988d509c89e41f8604e8a8882b4457269532419bb15a9c0a77fb85e1705f";
 
-const localChain = "polygon-mumbai";
-const remoteChain = "goerli";
+const localChain = "polygon-mainnet";
+const remoteChain = "mainnet";
 
 const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(remoteChain));
 const l1Wallet = new Wallet(privateKey, l2Provider);
 const l2Wallet = new Wallet(privateKey, l1Provider);
-const l1Signer = new SocketRelaySigner(l1Provider, "https://google.com");
-const l2Signer = new SocketRelaySigner(l2Provider, "https://google.com");
+const l1Signer = new SocketRelaySigner(
+  l1Provider,
+  "https://9u4hhxgtyi.execute-api.us-east-1.amazonaws.com/dev/v1/relayTx"
+);
+const l2Signer = new SocketRelaySigner(
+  l2Provider,
+  "https://9u4hhxgtyi.execute-api.us-east-1.amazonaws.com/dev/v1/relayTx"
+);
 
 export const main = async () => {
   try {
@@ -94,22 +117,24 @@ export const main = async () => {
     const l1Switchboard = (
       await getInstance(
         "PolygonL1Switchboard",
-        l1Config["integrations"][chainSlugs[localChain]]["switchboard"]
+        l1Config["integrations"][chainSlugs[localChain]][
+          IntegrationTypes.native
+        ]["switchboard"]
       )
     ).connect(l1Signer);
 
     const posClient = new POSClient();
     await posClient.init({
-      network: "testnet",
-      version: "mumbai",
+      network: "mainnet",
+      version: "v1",
       parent: {
-        provider: l2Signer, //new HDWalletProvider(privateKey, parentRPC),
+        provider: l1Signer, //new HDWalletProvider(privateKey, parentRPC),
         defaultConfig: {
           from: "0x5367Efc17020Aa1CF0943bA7eD17f1D3e4c7d7EE",
         },
       },
       child: {
-        provider: l1Signer, //new HDWalletProvider(privateKey, childRPC),
+        provider: l2Signer, //new HDWalletProvider(privateKey, childRPC),
         defaultConfig: {
           from: "0x5367Efc17020Aa1CF0943bA7eD17f1D3e4c7d7EE",
         },
