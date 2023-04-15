@@ -4,7 +4,7 @@ import { Web3ClientPlugin } from "@maticnetwork/maticjs-ethers";
 import { providers, Wallet } from "ethers";
 use(Web3ClientPlugin);
 
-import { chainSlugs, contractNames, getJsonRpcUrl } from "../../constants";
+import { chainSlugs, getJsonRpcUrl } from "../../constants";
 import { deployedAddressPath, getInstance } from "../../deploy/utils";
 
 // get providers for source and destination
@@ -36,11 +36,10 @@ export const main = async () => {
 
     // get socket contracts for both chains
     // counter l1, counter l2, seal, execute
-    const contracts = contractNames("", localChain, remoteChain);
-    const l2Notary = (
+    const l1Switchboard = (
       await getInstance(
-        contracts.notary,
-        l2Config[contracts.notary][chainSlugs[remoteChain]]
+        "PolygonL1Switchboard",
+        l2Config["integrations"][chainSlugs[remoteChain]]["switchboard"]
       )
     ).connect(l2Wallet);
 
@@ -75,7 +74,7 @@ export const main = async () => {
       false
     );
 
-    const tx = await l2Notary.receiveMessage(proof);
+    const tx = await l1Switchboard.receiveMessage(proof);
     await tx.wait();
   } catch (error) {
     console.log("Error while sending transaction", error);
