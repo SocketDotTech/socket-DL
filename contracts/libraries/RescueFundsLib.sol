@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../libraries/SafeTransferLib.sol";
+import "./SafeTransferLib.sol";
 
 library RescueFundsLib {
     using SafeTransferLib for IERC20;
