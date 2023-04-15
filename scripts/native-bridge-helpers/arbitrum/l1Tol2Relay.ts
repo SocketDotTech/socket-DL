@@ -7,13 +7,12 @@ import { L1TransactionReceipt, L1ToL2MessageStatus } from "@arbitrum/sdk";
 
 import { getInstance, deployedAddressPath } from "../../deploy/utils";
 import { packPacketId } from "../../deploy/scripts/packetId";
-import { chainSlugs, getJsonRpcUrl, contractNames } from "../../constants";
+import { chainSlugs, getJsonRpcUrl } from "../../constants";
+import { IntegrationTypes } from "../../../src";
 
 // get providers for source and destination
-const localChain = "goerli";
-const remoteChain = "arbitrum-goerli";
-const outboundTx =
-  "0x6a2da0a61caf7f724125e5a2b90431a3c0d8f6977450c1ea98f983847f657690";
+const localChain = "mainnet";
+const remoteChain = "arbitrum";
 
 const walletPrivateKey = process.env.DEVNET_PRIVKEY;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
@@ -22,27 +21,20 @@ const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(remoteChain));
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 const l2Wallet = new Wallet(walletPrivateKey, l2Provider);
 
-export const getBridgeParams = async (
-  packetNonce,
-  root,
-  signature,
-  from,
-  to
-) => {
-  const attestBytes = defaultAbiCoder.encode(
-    ["uint256", "bytes32", "bytes"],
-    [packetNonce, root, signature]
+export const getBridgeParams = async (packetId, root, from, to) => {
+  const receivePacketBytes = utils.defaultAbiCoder.encode(
+    ["bytes32", "bytes32"],
+    [packetId, root]
   );
-  const attestBytesLength = hexDataLength(attestBytes) + 4; // 4 bytes func identifier
-
+  const receivePacketBytesLength = hexDataLength(receivePacketBytes) + 4; // 4 bytes func identifier
   const l1ToL2MessageGasEstimate = new L1ToL2MessageGasEstimator(l2Provider);
-
-  const _submissionPriceWei =
+  const _submissionPriceWei = (
     await l1ToL2MessageGasEstimate.estimateSubmissionFee(
       l1Provider,
       await l1Provider.getGasPrice(),
-      attestBytesLength
-    );
+      receivePacketBytesLength
+    )
+  ).mul(5);
 
   console.log(
     `Current retryable base submission price: ${_submissionPriceWei.toString()}`
@@ -72,15 +64,9 @@ export const getBridgeParams = async (
    * First, we need to calculate the calldata for the function being called (setGreeting())
    */
 
-  const ABI = [
-    "function attest(uint256 packetId_,bytes32 root_,bytes calldata signature_)",
-  ];
+  const ABI = ["function receivePacket(bytes32 packetId_,bytes32 root_)"];
   const iface = new utils.Interface(ABI);
-  const calldata = iface.encodeFunctionData("attest", [
-    packetNonce,
-    root,
-    signature,
-  ]);
+  const calldata = iface.encodeFunctionData("receivePacket", [packetId, root]);
 
   const maxGas = await l1ToL2MessageGasEstimate.estimateRetryableTicketGasLimit(
     {
@@ -93,11 +79,7 @@ export const getBridgeParams = async (
     },
     utils.parseEther("1")
   );
-  /**
-   * With these three values, we can calculate the total callvalue we'll need our L1 transaction to send to L2
-   */
   const callValue = submissionPriceWei.add(gasPriceBid.mul(maxGas));
-
   console.log(
     `Sending greeting to L2 with ${callValue.toString()} callValue for L2 fees:`
   );
@@ -122,103 +104,61 @@ export const main = async () => {
     const l1Config = addresses[chainSlugs[localChain]];
     const l2Config = addresses[chainSlugs[remoteChain]];
 
-    // get socket contracts for both chains
-    // counter l1, counter l2, seal, execute
-    const contracts = contractNames("", localChain, remoteChain);
+    const packetId =
+      "0x000000014beb2359fe958763a59375ebfd13413a586e5add0000000000000000";
+    const root =
+      "0xfdf8d28b543201f1dc7d9759728bf1f36aa1b2eae5a256dd00c0128b6760985f";
 
-    const l1Capacitor: Contract = (
-      await getInstance(
-        "SingleCapacitor",
-        l1Config["integrations"]?.[chainSlugs[remoteChain]]?.[
-          contracts.integrationType
-        ]?.["capacitor"]
-      )
-    ).connect(l1Wallet);
-    const l1Notary: Contract = (
-      await getInstance(
-        contracts.notary,
-        l1Config["integrations"]?.[chainSlugs[remoteChain]]?.[
-          contracts.integrationType
-        ]?.["notary"]
-      )
-    ).connect(l1Wallet);
-
-    const outboundTxReceipt = await l1Provider.getTransactionReceipt(
-      outboundTx
-    );
-
-    // seal
-    const { packetId, newRootHash } = l1Capacitor.interface.decodeEventLog(
-      "MessageAdded",
-      outboundTxReceipt.logs[1].data
-    );
-    const packedPacketId = packPacketId(
-      chainSlugs[localChain],
-      l1Capacitor.address,
-      packetId
-    );
-
-    const digest = keccak256(
-      defaultAbiCoder.encode(
-        ["uint256", "uint256", "bytes32"],
-        [chainSlugs[remoteChain], packedPacketId, newRootHash]
-      )
-    );
-
-    const signature = await l1Wallet.signMessage(arrayify(digest));
     const { bridgeParams, callValue } = await getBridgeParams(
-      packedPacketId,
-      newRootHash,
-      "0x",
-      l1Notary.address,
+      packetId,
+      root,
+      l1Config["integrations"]?.[chainSlugs[remoteChain]]?.[
+        IntegrationTypes.native
+      ]?.["switchboard"],
       l2Config["integrations"]?.[chainSlugs[localChain]]?.[
-        contracts.integrationType
-      ]?.["notary"]
+        IntegrationTypes.native
+      ]?.["switchboard"]
     );
 
-    console.log(
-      `Sealing with params ${
-        (l1Capacitor.address, bridgeParams, signature, callValue)
-      }`
-    );
+    console.log(`Initiating with params ${bridgeParams} and ${callValue}`);
 
-    const sealTx = await l1Notary.seal(
-      l1Capacitor.address,
-      bridgeParams,
-      signature,
-      {
-        value: callValue,
-      }
-    );
+    // const sealTx = await l1Notary.seal(
+    //   l1Capacitor.address,
+    //   bridgeParams,
+    //   signature,
+    //   {
+    //     value: callValue,
+    //   }
+    // );
 
-    const sealTxReceipt = await sealTx.wait();
+    // const sealTxReceipt = await sealTx.wait();
 
-    // wait for msg to arrive on l2
-    console.log(
-      `Seal txn confirmed on L1! 🙌 ${sealTxReceipt.transactionHash}`
-    );
+    // // wait for msg to arrive on l2
+    // console.log(
+    //   `Seal txn confirmed on L1! 🙌 ${sealTxReceipt.transactionHash}`
+    // );
 
-    const l1TxReceipt = new L1TransactionReceipt(sealTxReceipt);
+    // const l1TxReceipt = new L1TransactionReceipt(sealTxReceipt);
 
-    /**
-     * In principle, a single L1 txn can trigger any number of L1-to-L2 messages (each with its own sequencer number).
-     * In this case, we know our txn triggered only one
-     * Here, We check if our L1 to L2 message is redeemed on L2
-     */
-    const messages = await l1TxReceipt.getL1ToL2Messages(l2Wallet);
-    const message = messages[0];
-    console.log("Waiting for L2 side. It may take 10-15 minutes ⏰⏰");
-    const messageResult = await message.waitForStatus();
-    const status = messageResult.status;
-    if (status === L1ToL2MessageStatus.REDEEMED) {
-      console.log(
-        `L2 retryable txn executed 🥳 ${messageResult.l2TxReceipt.transactionHash}`
-      );
-    } else {
-      console.log(
-        `L2 retryable txn failed with status ${L1ToL2MessageStatus[status]}`
-      );
-    }
+    // /**
+    //  * In principle, a single L1 txn can trigger any number of L1-to-L2 messages (each with its own sequencer number).
+    //  * In this case, we know our txn triggered only one
+    //  * Here, We check if our L1 to L2 message is redeemed on L2
+    //  */
+    // const messages = await l1TxReceipt.getL1ToL2Messages(l2Wallet);
+    // const message = messages[0];
+    // console.log("Waiting for L2 side. It may take 10-15 minutes ⏰⏰");
+    // const messageResult = await message.waitForStatus();
+    // const status = messageResult.status;
+    // if (status === L1ToL2MessageStatus.REDEEMED) {
+    //   console.log(
+    //     `L2 retryable txn executed 🥳 ${messageResult.l2TxReceipt.transactionHash}`
+    //   );
+    // } else {
+    //   console.log(
+    //     `L2 retryable txn failed with status ${L1ToL2MessageStatus[status]}`
+    //   );
+    // }
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;
