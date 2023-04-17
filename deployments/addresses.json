@@ -51,7 +51,9 @@
       },
       "421613": {
         "FAST": {
-          "switchboard": "0x7228F7CEaaF9dD32eA8e059902E32CAE363f2569"
+          "switchboard": "0x7228F7CEaaF9dD32eA8e059902E32CAE363f2569",
+          "capacitor": "0xb862876a22E4eA5A9cd90817d3c4Ba90EB300774",
+          "decapacitor": "0x53E2C577e31746c13269a9222AD4fa348a972D29"
         }
       }
     },
