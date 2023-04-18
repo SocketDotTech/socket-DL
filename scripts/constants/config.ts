@@ -1,5 +1,8 @@
 import { NativeSwitchboard } from "../../src/types";
 
+export const socketOwner = "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa";
+// "0x86Ab95d2c6200b798CA382740597cE715aD0D727";
+
 export const transmitterAddress: {
   [key: string]: string;
 } = {
@@ -11,7 +14,7 @@ export const transmitterAddress: {
   "optimism-goerli": "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
   goerli: "0x3c16684415d0fd630e7f6866021db43ca96479c4",
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  arbitrum: "0x95e655674C6889F80fa024ebA86cdE29D69028A6",
+  arbitrum: "0x15395159e6a0b466737db38c671fc282c4b5cf32",
   optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
   mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
 };
@@ -27,7 +30,7 @@ export const watcherAddress: {
   "optimism-goerli": "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
   goerli: "0x3c16684415d0fd630e7f6866021db43ca96479c4",
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  arbitrum: "0x95e655674C6889F80fa024ebA86cdE29D69028A6",
+  arbitrum: "0x15395159e6a0b466737db38c671fc282c4b5cf32",
   optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
   mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
 };
@@ -43,7 +46,7 @@ export const executorAddress: {
   "optimism-goerli": "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
   goerli: "0x3c16684415d0fd630e7f6866021db43ca96479c4",
   hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  arbitrum: "0x95e655674C6889F80fa024ebA86cdE29D69028A6",
+  arbitrum: "0x15395159e6a0b466737db38c671fc282c4b5cf32",
   optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
   mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
 };

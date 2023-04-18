@@ -128,7 +128,7 @@ export default async function deployAndRegisterSwitchboard(
         remoteChain,
         signer
       );
-    } else {
+    } else if (contractName !== "OptimisticSwitchboard") {
       const grantLimitUpdaterRoleTxn = await switchboard
         .connect(signer)
         ["grantRole(bytes32,address)"](

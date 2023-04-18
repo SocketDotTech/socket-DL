@@ -1,59 +1,145 @@
 import fs from "fs";
 import hre from "hardhat";
-import { constants, utils } from "ethers";
+import { constants } from "ethers";
 import {
   transmitterAddress,
   chainSlugs,
   executorAddress,
   switchboards,
-  proposeGasLimit,
   watcherAddress,
+  socketOwner,
 } from "../constants";
 import { config } from "./config";
 import {
   deployedAddressPath,
   getCapacitorAddress,
+  getChainRoleHash,
   getDecapacitorAddress,
   getInstance,
+  getRoleHash,
   getSwitchboardAddress,
 } from "./utils";
 import { assert } from "console";
 import { IntegrationTypes, NativeSwitchboard } from "../../src";
 
-const executorRole =
-  "0x9cf85f95575c3af1e116e3d37fd41e7f36a8a373623f51ffaaa87fdd032fa767";
-
-const roleExist = async (contract, role, address) =>
-  await contract.hasRole(role, address);
-
-const checkSocket = async (
-  chain,
+async function checkNative(
+  contractAddr,
+  localChain,
   remoteChain,
-  config,
+  remoteSwitchboard
+) {
+  const contractName = switchboards[localChain][remoteChain];
+  const switchboard = await getInstance(contractName, contractAddr);
+
+  let hasRole = await switchboard["hasRole(bytes32,address)"](
+    getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
+    transmitterAddress[localChain]
+  );
+  assert(
+    hasRole,
+    `❌ NativeSwitchboard has wrong GAS_LIMIT_UPDATER_ROLE ${remoteChain}`
+  );
+
+  if (contractName === NativeSwitchboard.POLYGON_L1) {
+    const remoteSb = await switchboard.fxChildTunnel();
+    assert(remoteSb === remoteSwitchboard, "❌ wrong fxChildTunnel set");
+  } else if (contractName === NativeSwitchboard.POLYGON_L2) {
+    const remoteSb = await switchboard.fxRootTunnel();
+    assert(remoteSb === remoteSwitchboard, "❌ wrong fxRootTunnel set");
+  } else {
+    const remoteSb = await switchboard.remoteNativeSwitchboard();
+    assert(remoteSb === remoteSwitchboard, "❌ wrong remote switchboard set");
+  }
+}
+
+async function checkFast(contractAddr, localChain, remoteChain) {
+  const switchboard = await getInstance("FastSwitchboard", contractAddr);
+
+  console.log(contractAddr, "bvhdgvghsdbjhsdjcndjck");
+  let hasRole = await switchboard["hasRole(bytes32,address)"](
+    getChainRoleHash("WATCHER_ROLE", chainSlugs[remoteChain]),
+    watcherAddress[localChain]
+  );
+  assert(hasRole, `❌ FastSwitchboard has wrong TRIP_ROLE ${remoteChain}`);
+}
+
+async function checkDefault(contractAddr, localChain, remoteChain) {
+  const switchboard = await getInstance("FastSwitchboard", contractAddr);
+
+  // check roles
+  let hasRole = await switchboard["hasRole(bytes32,address)"](
+    getChainRoleHash("TRIP_ROLE", chainSlugs[remoteChain]),
+    transmitterAddress[localChain]
+  );
+  assert(hasRole, `❌ Switchboard has wrong TRIP_ROLE ${remoteChain}`);
+
+  hasRole = await switchboard["hasRole(bytes32,address)"](
+    getChainRoleHash("UNTRIP_ROLE", chainSlugs[remoteChain]),
+    transmitterAddress[localChain]
+  );
+  assert(hasRole, `❌ Switchboard has wrong UNTRIP_ROLE ${remoteChain}`);
+
+  hasRole = await switchboard["hasRole(bytes32,address)"](
+    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainSlugs[remoteChain]),
+    transmitterAddress[localChain]
+  );
+  assert(
+    hasRole,
+    `❌ Switchboard has wrong GAS_LIMIT_UPDATER_ROLE ${remoteChain}`
+  );
+}
+
+async function checkSwitchboardRoles(chain, contractAddr) {
+  const switchboard = await getInstance("PolygonL1Switchboard", contractAddr);
+
+  // check roles
+  let hasRole = await switchboard["hasRole(bytes32,address)"](
+    getRoleHash("GOVERNANCE_ROLE"),
+    socketOwner
+  );
+  assert(hasRole, `❌ Switchboard has wrong governance address ${chain}`);
+
+  hasRole = await switchboard["hasRole(bytes32,address)"](
+    getRoleHash("RESCUE_ROLE"),
+    socketOwner
+  );
+  assert(hasRole, `❌ Switchboard has wrong rescue address ${chain}`);
+
+  hasRole = await switchboard["hasRole(bytes32,address)"](
+    getRoleHash("WITHDRAW_ROLE"),
+    socketOwner
+  );
+  assert(hasRole, `❌ Switchboard has wrong withdraw role address ${chain}`);
+
+  hasRole = await switchboard["hasRole(bytes32,address)"](
+    getRoleHash("TRIP_ROLE"),
+    socketOwner
+  );
+  assert(hasRole, `❌ Switchboard has wrong trip role address ${chain}`);
+
+  hasRole = await switchboard["hasRole(bytes32,address)"](
+    getRoleHash("UNTRIP_ROLE"),
+    socketOwner
+  );
+  assert(hasRole, `❌ Switchboard has wrong untrip role address ${chain}`);
+}
+
+async function checkSwitchboardRegistration(
+  siblingChain,
+  socketAddr,
   switchboard,
   capacitor,
   decapacitor
-) => {
-  const socket = await getInstance("Socket", config["Socket"]);
-
-  const executionManager = await getInstance(
-    "ExecutionManager",
-    config["ExecutionManager"]
-  );
-  let hasExecutorRole = await roleExist(
-    executionManager,
-    executorRole,
-    executorAddress[chain]
-  );
-  assert(hasExecutorRole, `❌ Executor Role do not exist for ${chain}`);
+) {
+  const socket = await getInstance("Socket", socketAddr);
 
   const capacitor__ = await socket.capacitors__(
     switchboard,
-    chainSlugs[remoteChain]
+    chainSlugs[siblingChain]
   );
   const decapacitor__ = await socket.decapacitors__(
     switchboard,
-    chainSlugs[remoteChain]
+    chainSlugs[siblingChain]
   );
 
   assert(
@@ -62,172 +148,191 @@ const checkSocket = async (
   );
   assert(capacitor__ === capacitor, "❌ Wrong Capacitor");
   assert(decapacitor__ === decapacitor, "❌ Wrong DeCapacitor");
-};
+}
 
-const checkTransmitter = async (chain, remoteChain, transmitManagerAddr) => {
-  const transmitManager = await getInstance(
-    "TransmitManager",
-    transmitManagerAddr
+async function checkCounter(
+  siblingSlug,
+  localConfig,
+  remoteConfig,
+  integrationType
+) {
+  const socket = await getInstance("Socket", localConfig["Socket"]);
+
+  // check config
+  const config = await socket.getPlugConfig(
+    localConfig["Counter"],
+    chainSlugs[siblingSlug]
   );
 
-  // check role
-  const hasTransmitterRole = await roleExist(
-    transmitManager,
-    utils.hexZeroPad(utils.hexlify(chainSlugs[remoteChain]), 32),
+  if (
+    !localConfig?.["integrations"]?.[chainSlugs[siblingSlug]]?.[integrationType]
+  ) {
+    console.log(
+      `❌ No integration found for ${siblingSlug} for ${integrationType}`
+    );
+    return;
+  }
+
+  const outboundSb =
+    localConfig["integrations"][chainSlugs[siblingSlug]][integrationType];
+  assert(
+    config.siblingPlug == remoteConfig["Counter"] &&
+      config.inboundSwitchboard__ == outboundSb["switchboard"] &&
+      config.outboundSwitchboard__ == outboundSb["switchboard"] &&
+      config.capacitor__ == outboundSb["capacitor"] &&
+      config.decapacitor__ == outboundSb["decapacitor"],
+    `❌ Socket has wrong config set for ${siblingSlug}`
+  );
+}
+
+async function checkTransmitManager(chain, contractAddr, remoteChain) {
+  const transmitManager = await getInstance("TransmitManager", contractAddr);
+
+  // check roles
+  let hasRole = await transmitManager["hasRole(bytes32,address)"](
+    getRoleHash("GOVERNANCE_ROLE"),
+    socketOwner
+  );
+  assert(hasRole, `❌ TransmitManager has wrong governance address ${chain}`);
+
+  hasRole = await transmitManager["hasRole(bytes32,address)"](
+    getRoleHash("RESCUE_ROLE"),
+    socketOwner
+  );
+
+  assert(hasRole, `❌ TransmitManager has wrong rescue address ${chain}`);
+
+  hasRole = await transmitManager["hasRole(bytes32,address)"](
+    getRoleHash("WITHDRAW_ROLE"),
+    socketOwner
+  );
+
+  assert(
+    hasRole,
+    `❌ TransmitManager has wrong withdraw role address ${chain}`
+  );
+
+  hasRole = await transmitManager["hasRole(bytes32,address)"](
+    getChainRoleHash("TRANSMITTER_ROLE", chainSlugs[chain]),
     transmitterAddress[chain]
   );
   assert(
-    hasTransmitterRole,
-    `❌ Transmitter Role do not exist for ${remoteChain} on ${chain}`
+    hasRole,
+    `❌ TransmitManager has wrong transmitter address for ${chain}`
   );
 
-  // check propose gas limit
-  const proposeGasLimit__ = await transmitManager.proposeGasLimit(
-    chainSlugs[remoteChain]
+  hasRole = await transmitManager["hasRole(bytes32,address)"](
+    getChainRoleHash("TRANSMITTER_ROLE", chainSlugs[remoteChain]),
+    transmitterAddress[chain]
   );
   assert(
-    parseInt(proposeGasLimit__) === proposeGasLimit[remoteChain],
-    `❌ Wrong propose gas limit set for ${remoteChain} on ${chain}`
+    hasRole,
+    `❌ TransmitManager has wrong transmitter address for ${remoteChain}`
   );
-};
 
-const checkOracle = async (
-  chain,
-  remoteChain,
-  oracleAddr,
-  transmitManagerAddr
-) => {
+  hasRole = await transmitManager["hasRole(bytes32,address)"](
+    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainSlugs[remoteChain]),
+    transmitterAddress[chain]
+  );
+  assert(
+    hasRole,
+    `❌ TransmitManager has wrong GAS_LIMIT_UPDATER_ROLE for ${remoteChain}`
+  );
+
+  hasRole = await transmitManager["hasRole(bytes32,address)"](
+    getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
+    transmitterAddress[chain]
+  );
+  assert(
+    hasRole,
+    `❌ TransmitManager has wrong GAS_LIMIT_UPDATER_ROLE for ${chain}`
+  );
+}
+
+async function checkExecutionManager(chain, contractAddr) {
+  const executionManager = await getInstance("ExecutionManager", contractAddr);
+
+  // check roles
+  let hasRole = await executionManager["hasRole(bytes32,address)"](
+    getRoleHash("GOVERNANCE_ROLE"),
+    socketOwner
+  );
+  assert(hasRole, `❌ ExecutionManager has wrong governance address ${chain}`);
+
+  hasRole = await executionManager["hasRole(bytes32,address)"](
+    getRoleHash("RESCUE_ROLE"),
+    socketOwner
+  );
+
+  assert(hasRole, `❌ ExecutionManager has wrong rescue address ${chain}`);
+
+  hasRole = await executionManager["hasRole(bytes32,address)"](
+    getRoleHash("WITHDRAW_ROLE"),
+    socketOwner
+  );
+
+  assert(
+    hasRole,
+    `❌ ExecutionManager has wrong withdraw role address ${chain}`
+  );
+
+  hasRole = await executionManager["hasRole(bytes32,address)"](
+    getRoleHash("EXECUTOR_ROLE"),
+    executorAddress[chain]
+  );
+  assert(hasRole, `❌ ExecutionManager has wrong executor address ${chain}`);
+}
+
+async function checkSocket(chain, socketAddr) {
+  const socket = await getInstance("Socket", socketAddr);
+
+  // check roles
+  let hasRole = await socket["hasRole(bytes32,address)"](
+    getRoleHash("GOVERNANCE_ROLE"),
+    socketOwner
+  );
+  assert(hasRole, `❌ Socket has wrong governance address ${chain}`);
+
+  hasRole = await socket["hasRole(bytes32,address)"](
+    getRoleHash("RESCUE_ROLE"),
+    socketOwner
+  );
+
+  assert(hasRole, `❌ Socket has wrong rescue address ${chain}`);
+}
+
+async function checkOracle(chain, oracleAddr, transmitManagerAddr) {
   const oracle = await getInstance("GasPriceOracle", oracleAddr);
 
-  // check transmit manager
+  // check if transmit manager is set
   const transmitManager = await oracle.transmitManager__();
   assert(
     transmitManager.toLowerCase() === transmitManagerAddr.toLowerCase(),
     `❌ TransmitManager not set in oracle on ${chain}`
   );
-};
 
-const checkSwitchboard = async (
-  chain,
-  remoteChain,
-  localSwitchboard,
-  remoteSwitchboard,
-  configurationType
-) => {
-  if (configurationType === IntegrationTypes.native) {
-    const switchboardType = switchboards[chain][remoteChain]["switchboard"];
+  // check roles
+  let hasRole = await oracle["hasRole(bytes32,address)"](
+    getRoleHash("GOVERNANCE_ROLE"),
+    socketOwner
+  );
+  assert(hasRole, `❌ GasPriceOracle has wrong governance address ${chain}`);
 
-    if (switchboardType === NativeSwitchboard.POLYGON_L1) {
-      const switchboard = await getInstance(
-        "PolygonL1Switchboard",
-        localSwitchboard
-      );
-      let childTunnel = await switchboard.fxChildTunnel();
-      assert(
-        childTunnel === remoteSwitchboard,
-        `❌ Wrong childTunnel set for ${chain}`
-      );
-    } else if (switchboardType === NativeSwitchboard.POLYGON_L2) {
-      const switchboard = await getInstance(
-        "PolygonL2Switchboard",
-        localSwitchboard
-      );
-      let rootTunnel = await switchboard.fxRootTunnel();
-      assert(
-        rootTunnel === remoteSwitchboard,
-        `❌ Wrong rootTunnel set for ${chain}`
-      );
-    } else {
-      const switchboard = await getInstance(
-        "ArbitrumL1Switchboard",
-        localSwitchboard
-      );
-      const remoteSwitchboard__ = await switchboard.remoteNativeSwitchboard();
-      assert(
-        remoteSwitchboard__ === remoteSwitchboard,
-        `❌ Wrong remote switchboard set for ${chain}`
-      );
-    }
-  } else {
-    const switchboard = await getInstance("FastSwitchboard", localSwitchboard);
+  hasRole = await oracle["hasRole(bytes32,address)"](
+    getRoleHash("RESCUE_ROLE"),
+    socketOwner
+  );
 
-    const executionOverheadOnChain = await switchboard.executionOverhead(
-      chainSlugs[remoteChain]
-    );
-    const watcherRoleSet = await switchboard["hasRole(bytes32,address)"](
-      utils.hexZeroPad(utils.hexlify(chainSlugs[remoteChain]), 32),
-      watcherAddress[chain]
-    );
+  assert(hasRole, `❌ GasPriceOracle has wrong rescue address ${chain}`);
+}
 
-    assert(
-      parseInt(executionOverheadOnChain) !== 0,
-      "❌ Execution overhead not set on switchboard"
-    );
-    assert(
-      watcherRoleSet,
-      `❌ Watcher Role not set for ${remoteChain} on switchboard`
-    );
-
-    if (configurationType === IntegrationTypes.fast) {
-      const attestGasLimitOnChain = await switchboard.attestGasLimit(
-        chainSlugs[remoteChain]
-      );
-      assert(
-        parseInt(attestGasLimitOnChain) !== 0,
-        `❌ Attest gas limit is 0 for ${remoteChain} on switchboard`
-      );
-    }
-  }
-};
-
-export const verifyConfig = async (
+async function checkIntegration(
   configurationType: IntegrationTypes,
   localChain: string,
-  remoteChain: string
-) => {
-  if (!fs.existsSync(deployedAddressPath)) {
-    throw new Error("addresses.json not found");
-  }
-
-  const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
-  if (
-    !addresses[chainSlugs[localChain]] ||
-    !addresses[chainSlugs[remoteChain]]
-  ) {
-    throw new Error("Deployed Addresses not found");
-  }
-
-  let remoteConfig = addresses[chainSlugs[remoteChain]];
-  let localConfig = addresses[chainSlugs[localChain]];
-
-  // contracts exist:
-  // core contracts
-  if (
-    !localConfig["Hasher"] ||
-    !localConfig["SignatureVerifier"] ||
-    !localConfig["Socket"] ||
-    !localConfig["CapacitorFactory"] ||
-    !localConfig["GasPriceOracle"] ||
-    !localConfig["ExecutionManager"] ||
-    !localConfig["TransmitManager"]
-  ) {
-    console.log(`❌ Core contracts do not exist for ${localChain}`);
-    return;
-  }
-
-  if (
-    !remoteConfig["Hasher"] ||
-    !remoteConfig["SignatureVerifier"] ||
-    !remoteConfig["Socket"] ||
-    !remoteConfig["CapacitorFactory"] ||
-    !remoteConfig["GasPriceOracle"] ||
-    !localConfig["ExecutionManager"] ||
-    !remoteConfig["TransmitManager"]
-  ) {
-    console.log(`❌ Core contracts do not exist for ${remoteChain}`);
-    return;
-  }
-
+  remoteChain: string,
+  localConfig,
+  remoteConfig
+) {
   // config related contracts
   let localSwitchboard = getSwitchboardAddress(
     chainSlugs[remoteChain],
@@ -261,57 +366,81 @@ export const verifyConfig = async (
     remoteConfig
   );
 
-  if (
-    !localSwitchboard ||
-    !localCapacitor ||
-    !localDecapacitor ||
-    !remoteSwitchboard ||
-    !remoteCapacitor ||
-    !remoteDecapacitor
-  ) {
-    console.log(`❌ Config contracts do not exist for ${configurationType}`);
-    return;
+  if (!localSwitchboard || !localCapacitor || !localDecapacitor) {
+    console.log(
+      `❌ Config contracts do not exist for ${configurationType} on ${localChain}`
+    );
+    return { localSwitchboard, remoteSwitchboard };
   }
 
+  if (!remoteSwitchboard || !remoteCapacitor || !remoteDecapacitor) {
+    console.log(
+      `❌ Config contracts do not exist for ${configurationType} on ${remoteChain}`
+    );
+    return { localSwitchboard, remoteSwitchboard };
+  }
   console.log("✅ All contracts exist");
 
-  // Socket: executor roles & config exists
-  await hre.changeNetwork(localChain);
-  await checkSocket(
+  await hre.changeNetwork(remoteChain);
+  await checkSwitchboardRegistration(
     localChain,
+    remoteConfig["Socket"],
+    remoteSwitchboard,
+    remoteCapacitor,
+    remoteDecapacitor
+  );
+
+  await hre.changeNetwork(localChain);
+  await checkSwitchboardRegistration(
     remoteChain,
-    localConfig,
+    localConfig["Socket"],
     localSwitchboard,
     localCapacitor,
     localDecapacitor
   );
-  await checkOracle(
-    localChain,
-    remoteChain,
-    localConfig["GasPriceOracle"],
-    localConfig["TransmitManager"]
-  );
-  await checkTransmitter(
-    localChain,
-    remoteChain,
-    localConfig["TransmitManager"]
-  );
+  console.log("✅ Switchboards registered");
 
-  console.log("✅ All roles checked");
-  console.log(
-    `✅ Socket Config checked for integration type ${configurationType}`
-  );
+  return { localSwitchboard, remoteSwitchboard };
+}
 
-  // optional switchboard settings
-  await checkSwitchboard(
-    localChain,
-    remoteChain,
-    localSwitchboard,
-    remoteSwitchboard,
-    configurationType
-  );
-  console.log("✅ Checked switchboard settings");
-};
+function checkCoreContractAddress(
+  localConfig,
+  remoteConfig,
+  localChain,
+  remoteChain
+) {
+  // contracts exist:
+  // core contracts
+  if (
+    !localConfig["Counter"] ||
+    !localConfig["CapacitorFactory"] ||
+    !localConfig["ExecutionManager"] ||
+    !localConfig["GasPriceOracle"] ||
+    !localConfig["Hasher"] ||
+    !localConfig["SignatureVerifier"] ||
+    !localConfig["Socket"] ||
+    !localConfig["TransmitManager"] ||
+    !localConfig["SocketBatcher"]
+  ) {
+    console.log(`❌ Core contracts do not exist for ${localChain}`);
+    return;
+  }
+
+  if (
+    !remoteConfig["Counter"] ||
+    !remoteConfig["CapacitorFactory"] ||
+    !remoteConfig["ExecutionManager"] ||
+    !remoteConfig["GasPriceOracle"] ||
+    !remoteConfig["Hasher"] ||
+    !remoteConfig["SignatureVerifier"] ||
+    !remoteConfig["Socket"] ||
+    !remoteConfig["TransmitManager"] ||
+    !remoteConfig["SocketBatcher"]
+  ) {
+    console.log(`❌ Core contracts do not exist for ${remoteChain}`);
+    return;
+  }
+}
 
 export const main = async () => {
   try {
@@ -325,12 +454,84 @@ export const main = async () => {
 
         if (chain === remoteChain) throw new Error("Wrong chains");
 
+        if (!fs.existsSync(deployedAddressPath)) {
+          throw new Error("addresses.json not found");
+        }
+
+        const addresses = JSON.parse(
+          fs.readFileSync(deployedAddressPath, "utf-8")
+        );
+        if (
+          !addresses[chainSlugs[chain]] ||
+          !addresses[chainSlugs[remoteChain]]
+        ) {
+          throw new Error("Deployed Addresses not found");
+        }
+
+        let remoteConfig = addresses[chainSlugs[remoteChain]];
+        let localConfig = addresses[chainSlugs[chain]];
+
+        await hre.changeNetwork(chain);
+        checkCoreContractAddress(localConfig, remoteConfig, chain, remoteChain);
+        console.log("✅ Checked Core contracts");
+
+        await checkOracle(
+          chain,
+          localConfig["GasPriceOracle"],
+          localConfig["TransmitManager"]
+        );
+        console.log("✅ Checked Oracle");
+
+        await checkSocket(chain, localConfig["Socket"]);
+        console.log("✅ Checked Socket");
+
+        await checkExecutionManager(chain, localConfig["ExecutionManager"]);
+        console.log("✅ Checked ExecutionManager");
+
+        await checkTransmitManager(
+          chain,
+          localConfig["TransmitManager"],
+          remoteChain
+        );
+        console.log("✅ Checked TransmitManager");
+
+        await checkCounter(
+          remoteChain,
+          localConfig,
+          remoteConfig,
+          chainSetups[index]["configForCounter"]
+        );
+        console.log("✅ Checked Counter");
+
         // verify contracts for different configurations
         for (let index = 0; index < config.length; index++) {
           console.log(
             `\n🚀 Testing for ${chain} and ${remoteChain} for integration type ${config[index]}`
           );
-          await verifyConfig(config[index], chain, remoteChain);
+
+          const { localSwitchboard, remoteSwitchboard } =
+            await checkIntegration(
+              config[index],
+              chain,
+              remoteChain,
+              localConfig,
+              remoteConfig
+            );
+          await checkSwitchboardRoles(chain, localSwitchboard);
+
+          if (config === IntegrationTypes.native) {
+            await checkNative(
+              localSwitchboard,
+              chain,
+              remoteChain,
+              remoteSwitchboard
+            );
+          } else {
+            await checkDefault(localSwitchboard, chain, remoteChain);
+            if (config === IntegrationTypes.fast) {
+              await checkFast(localSwitchboard, chain, remoteChain);
+            }
+          }
         }
       }
     }
