@@ -73,7 +73,8 @@ const addTransaction = (
     (hasRole === true && newRoleStatus === false)
   ) {
     if (!roleTxns[chainId]) roleTxns[chainId] = {};
-    if (!roleTxns[chainId]![contractName]) roleTxns[chainId]![contractName] = [];
+    if (!roleTxns[chainId]![contractName])
+      roleTxns[chainId]![contractName] = [];
     roleTxns[chainId]![contractName]?.push({
       to: contractAddress,
       role,
@@ -105,10 +106,15 @@ const getRoleTxnData = (
   }
 };
 
-const executeRoleTransactions = async (chainId:ChainSlug, newRoleStatus: boolean, wallet:Wallet, provider:Provider) => {
-  
+const executeRoleTransactions = async (
+  chainId: ChainSlug,
+  newRoleStatus: boolean,
+  wallet: Wallet
+) => {
   if (!roleTxns[chainId as any as keyof typeof roleTxns]) return;
-  let contracts = Object.keys(roleTxns[chainId as any as keyof typeof roleTxns]!);
+  let contracts = Object.keys(
+    roleTxns[chainId as any as keyof typeof roleTxns]!
+  );
   for (let i = 0; i < contracts.length; i++) {
     let contractSpecificTxns:
       | { to: string; role: string; grantee: string }[]
@@ -165,26 +171,29 @@ const executeRoleTransactions = async (chainId:ChainSlug, newRoleStatus: boolean
       );
     }
   }
-}
+};
 
-const executeOtherTransactions = async (chainId:ChainSlug, wallet:Wallet, provider:Provider) => {
-  
+const executeOtherTransactions = async (
+  chainId: ChainSlug,
+  wallet: Wallet
+) => {
   if (!otherTxns[chainId as any as keyof typeof otherTxns]) return;
 
   let txnDatas = otherTxns[chainId as any as keyof typeof otherTxns]!;
   for (let i = 0; i < txnDatas.length; i++) {
-
-      let {to, data} = txnDatas[i];
-      let tx = await wallet.sendTransaction({
-        to, data
-      });
-      console.log(`to: ${to}, txHash: ${tx?.hash}`);
+    let { to, data } = txnDatas[i];
+    let tx = await wallet.sendTransaction({
+      to,
+      data,
+    });
+    console.log(`to: ${to}, txHash: ${tx?.hash}`);
   }
-}
+};
 
-
-
-const executeTransactions = async (activeChainSlugs:ChainSlug[], newRoleStatus: boolean) => {
+const executeTransactions = async (
+  activeChainSlugs: ChainSlug[],
+  newRoleStatus: boolean
+) => {
   await Promise.all(
     activeChainSlugs.map(async (chainId) => {
       let provider = getProviderFromChainName(
@@ -193,9 +202,8 @@ const executeTransactions = async (activeChainSlugs:ChainSlug[], newRoleStatus: 
         ] as keyof typeof chainSlugs
       );
       let wallet = new Wallet(process.env.ROLE_ASSIGNER_PRIVATE_KEY!, provider);
-      await executeRoleTransactions(chainId, newRoleStatus, wallet, provider);
-      await executeOtherTransactions(chainId, wallet, provider);
-      
+      await executeRoleTransactions(chainId, newRoleStatus, wallet);
+      await executeOtherTransactions(chainId, wallet);
     })
   );
 };
@@ -212,7 +220,8 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
       newRoleStatus,
     } = params;
 
-    let activeChainSlugs = filterChains.length > 0?filterChains:[...MainnetIds, ...TestnetIds];
+    let activeChainSlugs =
+      filterChains.length > 0 ? filterChains : [...MainnetIds, ...TestnetIds];
     // parallelize chains
     await Promise.all(
       activeChainSlugs.map(async (chainId) => {
@@ -244,7 +253,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
         let provider = getProviderFromChainName(
           networkToChainSlug[chainId] as keyof typeof chainSlugs
         );
-        
+
         let contractNames = Object.keys(REQUIRED_ROLES);
         await Promise.all(
           contractNames.map(async (contractName) => {
@@ -255,16 +264,19 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
               return;
             roleStatus[chainId][contractName] = {};
 
-
-            let contractAddress:string|undefined;
-            if (contractName===CORE_CONTRACTS.NativeSwitchboard) {
-              for(let i=0; i<siblingSlugs.length; i++) {
-                contractAddress = addresses?.["integrations"]?.[siblingSlugs[i]]?.[IntegrationTypes.native]?.switchboard;
+            let contractAddress: string | undefined;
+            if (contractName === CORE_CONTRACTS.NativeSwitchboard) {
+              for (let i = 0; i < siblingSlugs.length; i++) {
+                contractAddress =
+                  addresses?.["integrations"]?.[siblingSlugs[i]]?.[
+                    IntegrationTypes.native
+                  ]?.switchboard;
                 if (contractAddress) break;
               }
             } else {
               //@ts-ignore
-              contractAddress = addresses?.[contractName as keyof ChainSocketAddresses ]
+              contractAddress =
+                addresses?.[contractName as keyof ChainSocketAddresses];
             }
             if (!contractAddress) {
               console.log(chainId, " address not present: ", contractName);
@@ -300,9 +312,9 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
             );
 
             let requiredChainRoles =
-            REQUIRED_CHAIN_ROLES[
-              contractName as keyof typeof REQUIRED_CHAIN_ROLES
-            ];
+              REQUIRED_CHAIN_ROLES[
+                contractName as keyof typeof REQUIRED_CHAIN_ROLES
+              ];
 
             if (requiredChainRoles?.length)
               await Promise.all(
@@ -323,15 +335,21 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                         hasRole;
                       console.log(chainId, contractName, role, hasRole);
 
-                      // If Watcher role in FastSwitchboard, have to call another function 
-                      // to set the role 
-                      if (contractName===CORE_CONTRACTS.FastSwitchboard && 
-                        role===ROLES.WATCHER_ROLE) {
-                          let data = instance.interface.encodeFunctionData(
-                            "grantWatcherRole", [siblingSlug, userAddress]
-                          );
-                          if (!otherTxns[chainId]) otherTxns[chainId] = [];
-                          otherTxns[chainId]?.push({to:instance.address, data});
+                      // If Watcher role in FastSwitchboard, have to call another function
+                      // to set the role
+                      if (
+                        contractName === CORE_CONTRACTS.FastSwitchboard &&
+                        role === ROLES.WATCHER_ROLE
+                      ) {
+                        let data = instance.interface.encodeFunctionData(
+                          "grantWatcherRole",
+                          [siblingSlug, userAddress]
+                        );
+                        if (!otherTxns[chainId]) otherTxns[chainId] = [];
+                        otherTxns[chainId]?.push({
+                          to: instance.address,
+                          data,
+                        });
                       } else {
                         addTransaction(
                           chainId,
@@ -364,7 +382,8 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
       JSON.stringify(otherTxns)
     );
 
-    if (sendTransaction) await executeTransactions(activeChainSlugs, newRoleStatus);
+    if (sendTransaction)
+      await executeTransactions(activeChainSlugs, newRoleStatus);
   } catch (error) {
     console.log("Error while checking roles", error);
     throw error;
@@ -429,7 +448,7 @@ const main = async () => {
   //   newRoleStatus: true,
   // });
 
-  // // Grant roles to transmitterAddress on TransmitManager 
+  // // Grant roles to transmitterAddress on TransmitManager
   // await checkAndUpdateRoles({
   //   userAddress: transmitterAddress,
   //   filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE, ROLES.TRANSMITTER_ROLE],
@@ -504,7 +523,6 @@ const main = async () => {
   //   includeSwitchboard: false,
   //   newRoleStatus: true,
   // });
-
 };
 
 main()
