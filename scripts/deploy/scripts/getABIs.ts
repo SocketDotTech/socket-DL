@@ -8,6 +8,7 @@ import CapacitorABI from "@socket.tech/dl-core/artifacts/abi/ICapacitor.json";
 import FastSwitchboard from "@socket.tech/dl-core/artifacts/abi/FastSwitchboard.json";
 import OptimisticSwitchboard from "@socket.tech/dl-core/artifacts/abi/OptimisticSwitchboard.json";
 import NativeSwitchboard from "@socket.tech/dl-core/artifacts/abi/ArbitrumL1Switchboard.json";
+import AccessControlExtended from "@socket.tech/dl-core/artifacts/abi/AccessControlExtended.json";
 
 export const getABI = {
   TransmitManager: TransmitManagerABI,
@@ -20,4 +21,5 @@ export const getABI = {
   FastSwitchboard,
   OptimisticSwitchboard,
   NativeSwitchboard,
+  AccessControlExtended
 };

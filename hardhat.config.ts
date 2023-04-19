@@ -24,7 +24,7 @@ const isProduction = process.env.NODE_ENV === "production";
 // Ensure that we have all the environment variables we need.
 const mnemonic: string | undefined = process.env.MNEMONIC;
 if (!mnemonic && isProduction) {
-  throw new Error("Please set your MNEMONIC in a .env file");
+  // throw new Error("Please set your MNEMONIC in a .env file");
 }
 
 const infuraApiKey: string | undefined = process.env.INFURA_API_KEY;

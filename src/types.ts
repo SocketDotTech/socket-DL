@@ -25,6 +25,14 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.BSC_TESTNET,
 ];
 
+export const MainnetIds: ChainSlug[] = [
+  ChainSlug.MAINNET,
+  ChainSlug.POLYGON,
+  ChainSlug.ARBITRUM,
+  ChainSlug.OPTIMISM,
+  ChainSlug.BSC,
+];
+
 export const L1Ids: ChainSlug[] = [ChainSlug.MAINNET, ChainSlug.GOERLI];
 
 export const L2Ids: ChainSlug[] = [
@@ -51,9 +59,9 @@ export enum NativeSwitchboard {
  *                                             *
  ***********************************************/
 
-export const MainnetIds: ChainSlug[] = (
-  Object.values(ChainSlug) as ChainSlug[]
-).filter((c) => !TestnetIds.includes(c));
+// export const MainnetIds: ChainSlug[] = (
+//   Object.values(ChainSlug) as ChainSlug[]
+// ).filter((c) => !TestnetIds.includes(c));
 
 export const isTestnet = (chainSlug: ChainSlug) => {
   return TestnetIds.includes(chainSlug);
@@ -120,6 +128,17 @@ export enum ROLES {
   WATCHER_ROLE = "WATCHER_ROLE",
 }
 
+export enum CORE_CONTRACTS {
+  CapacitorFactory = "CapacitorFactory",
+  ExecutionManager = "ExecutionManager",
+  TransmitManager = "TransmitManager",
+  GasPriceOracle = "GasPriceOracle",
+  Socket = "Socket",
+  FastSwitchboard = "FastSwitchboard",
+  OptimisticSwitchboard = "OptimisticSwitchboard",
+  NativeSwitchboard = "NativeSwitchboard"
+} 
+
 export const REQUIRED_ROLES = {
   CapacitorFactory: [ROLES.RESCUE_ROLE],
   ExecutionManager: [
@@ -132,7 +151,7 @@ export const REQUIRED_ROLES = {
     ROLES.GOVERNANCE_ROLE,
     ROLES.WITHDRAW_ROLE,
     ROLES.RESCUE_ROLE,
-    ROLES.EXECUTOR_ROLE,
+    ROLES.GAS_LIMIT_UPDATER_ROLE,
   ],
   GasPriceOracle: [ROLES.GOVERNANCE_ROLE, ROLES.RESCUE_ROLE],
   Socket: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
