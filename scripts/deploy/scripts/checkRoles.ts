@@ -173,10 +173,7 @@ const executeRoleTransactions = async (
   }
 };
 
-const executeOtherTransactions = async (
-  chainId: ChainSlug,
-  wallet: Wallet
-) => {
+const executeOtherTransactions = async (chainId: ChainSlug, wallet: Wallet) => {
   if (!otherTxns[chainId as any as keyof typeof otherTxns]) return;
 
   let txnDatas = otherTxns[chainId as any as keyof typeof otherTxns]!;
