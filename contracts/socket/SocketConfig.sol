@@ -33,7 +33,9 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
         address switchboard,
         uint256 siblingChainSlug,
         address capacitor,
-        address decapacitor
+        address decapacitor,
+        uint256 maxPacketLength,
+        uint32 capacitorType
     );
     event CapacitorFactorySet(address capacitorFactory);
 
@@ -83,7 +85,9 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
             switchBoardAddress_,
             siblingChainSlug_,
             address(capacitor__),
-            address(decapacitor__)
+            address(decapacitor__),
+            maxPacketLength_,
+            capacitorType_
         );
     }
 
