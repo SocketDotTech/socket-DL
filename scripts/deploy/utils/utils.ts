@@ -1,4 +1,4 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { Wallet } from "ethers";
 import { network, ethers, run } from "hardhat";
 
 import { ContractFactory, Contract } from "ethers";
@@ -29,8 +29,7 @@ export const getChainRoleHash = (role: string, chainSlug: number) =>
 
 export const deployContractWithoutArgs = async (
   contractName: string,
-  signer: SignerWithAddress,
-  path: string
+  signer: Wallet
 ): Promise<Contract> => {
   try {
     const Contract: ContractFactory = await ethers.getContractFactory(
@@ -38,8 +37,6 @@ export const deployContractWithoutArgs = async (
     );
     const contractInstance: Contract = await Contract.connect(signer).deploy();
     await contractInstance.deployed();
-    await verify(contractInstance.address, contractName, path, []);
-
     return contractInstance;
   } catch (error) {
     throw error;
@@ -49,8 +46,7 @@ export const deployContractWithoutArgs = async (
 export async function deployContractWithArgs(
   contractName: string,
   args: Array<any>,
-  signer: SignerWithAddress,
-  path: string
+  signer: Wallet
 ) {
   try {
     const Contract: ContractFactory = await ethers.getContractFactory(
@@ -59,8 +55,6 @@ export async function deployContractWithArgs(
 
     const contract: Contract = await Contract.connect(signer).deploy(...args);
     await contract.deployed();
-
-    await verify(contract.address, contractName, path, args);
     return contract;
   } catch (error) {
     throw error;
@@ -77,7 +71,6 @@ export const verify = async (
     const chainSlug = await getChainSlug();
     if (chainSlug === 31337) return;
 
-    await sleep(40);
     await run("verify:verify", {
       address,
       contract: `${path}:${contractName}`,

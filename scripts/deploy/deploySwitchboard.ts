@@ -1,52 +1,61 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { createObj, deployContractWithArgs, storeAddresses } from "./utils";
 import { chainSlugs, switchboards } from "../constants";
 import { ChainSocketAddresses, IntegrationTypes } from "../../src";
 import { getSwitchboardDeployData } from "./switchboards";
+import { Wallet } from "ethers";
 
 export default async function deploySwitchboards(
   network: string,
-  signer: SignerWithAddress,
-  sourceConfig: ChainSocketAddresses
-): Promise<ChainSocketAddresses> {
-  sourceConfig = await deploySwitchboard(
+  signer: Wallet,
+  sourceConfig: ChainSocketAddresses,
+  verificationDetails: any[]
+): Promise<Object> {
+  let result: any;
+  result = await deploySwitchboard(
     IntegrationTypes.fast,
     network,
     "",
     signer,
-    sourceConfig
+    sourceConfig,
+    verificationDetails
   );
 
-  sourceConfig = await deploySwitchboard(
+  result = await deploySwitchboard(
     IntegrationTypes.optimistic,
     network,
     "",
     signer,
-    sourceConfig
+    result.sourceConfig,
+    result.verificationDetails
   );
 
   if (!switchboards[network]) return sourceConfig;
   const siblings = Object.keys(switchboards[network]);
   for (let index = 0; index < siblings.length; index++) {
-    sourceConfig = await deploySwitchboard(
+    result = await deploySwitchboard(
       IntegrationTypes.native,
       network,
       siblings[index],
       signer,
-      sourceConfig
+      result.sourceConfig,
+      result.verificationDetails
     );
   }
 
-  return sourceConfig;
+  return {
+    sourceConfig: result.sourceConfig,
+    verificationDetails: result.verificationDetails,
+  };
 }
 
 async function deploySwitchboard(
   integrationType: IntegrationTypes,
   network: string,
   remoteChain: string,
-  signer: SignerWithAddress,
-  sourceConfig: ChainSocketAddresses
-): Promise<ChainSocketAddresses> {
+  signer: Wallet,
+  sourceConfig: ChainSocketAddresses,
+  verificationDetails: any[]
+): Promise<Object> {
   try {
     const { contractName, args, path } = getSwitchboardDeployData(
       integrationType,
@@ -57,14 +66,12 @@ async function deploySwitchboard(
       signer.address
     );
 
-    console.log(contractName, args, path);
-
     const switchboard = await deployContractWithArgs(
       contractName,
       args,
-      signer,
-      path
+      signer
     );
+    verificationDetails.push([switchboard.address, contractName, path, args]);
 
     sourceConfig = createObj(
       sourceConfig,
@@ -80,7 +87,7 @@ async function deploySwitchboard(
     }
 
     await storeAddresses(sourceConfig, chainSlugs[network]);
-    return sourceConfig;
+    return { sourceConfig, verificationDetails };
   } catch (error) {
     console.log("Error in deploying switchboard", error);
     throw error;

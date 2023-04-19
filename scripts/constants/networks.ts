@@ -1,7 +1,6 @@
 import { config as dotenvConfig } from "dotenv";
 import { ethers } from "ethers";
 import { resolve } from "path";
-import { ChainSlug } from "../../src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -25,38 +24,38 @@ export enum ChainKey {
 }
 
 export const chainSlugs = {
-  avalanche: 43114,
-  bsc: 56,
-  goerli: 5,
-  hardhat: 31337,
-  mainnet: 1,
-  "bsc-testnet": 97,
-  arbitrum: 42161,
-  "arbitrum-goerli": 421613,
-  optimism: 10,
-  "optimism-goerli": 420,
-  "polygon-mainnet": 137,
-  "polygon-mumbai": 80001,
+  [ChainKey.ARBITRUM]: 42161,
+  [ChainKey.ARBITRUM_GOERLI]: 421613,
+  [ChainKey.OPTIMISM]: 10,
+  [ChainKey.OPTIMISM_GOERLI]: 420,
+  [ChainKey.AVALANCHE]: 43114,
+  [ChainKey.BSC]: 56,
+  [ChainKey.BSC_TESTNET]: 97,
+  [ChainKey.MAINNET]: 1,
+  [ChainKey.GOERLI]: 5,
+  [ChainKey.POLYGON_MAINNET]: 137,
+  [ChainKey.POLYGON_MUMBAI]: 80001,
+  [ChainKey.HARDHAT]: 31337,
 };
 
 export const networkToChainSlug = {
-  43114: "avalanche",
-  56: "bsc",
-  5: "goerli",
-  31337: "hardhat",
-  1: "mainnet",
-  97: "bsc-testnet",
-  42161: "arbitrum",
-  421613: "arbitrum-goerli",
-  10: "optimism",
-  420: "optimism-goerli",
-  137: "polygon-mainnet",
-  80001: "polygon-mumbai",
+  43114: ChainKey.AVALANCHE,
+  56: ChainKey.BSC,
+  5: ChainKey.GOERLI,
+  31337: ChainKey.HARDHAT,
+  1: ChainKey.MAINNET,
+  97: ChainKey.BSC_TESTNET,
+  42161: ChainKey.ARBITRUM,
+  421613: ChainKey.ARBITRUM_GOERLI,
+  10: ChainKey.OPTIMISM,
+  420: ChainKey.OPTIMISM_GOERLI,
+  137: ChainKey.POLYGON_MAINNET,
+  80001: ChainKey.POLYGON_MUMBAI,
 };
 
 export const chainSlugKeys: string[] = Object.values(networkToChainSlug);
 
-export function getJsonRpcUrl(chain: keyof typeof chainSlugs): string {
+export function getJsonRpcUrl(chain: ChainKey): string {
   let jsonRpcUrl: string;
   switch (chain) {
     case ChainKey.ARBITRUM:
@@ -110,9 +109,7 @@ export function getJsonRpcUrl(chain: keyof typeof chainSlugs): string {
   return jsonRpcUrl;
 }
 
-export const getProviderFromChainName = (
-  chainSlug: keyof typeof chainSlugs
-) => {
+export const getProviderFromChainName = (chainSlug: ChainKey) => {
   const jsonRpcUrl = getJsonRpcUrl(chainSlug);
   return new ethers.providers.JsonRpcProvider(jsonRpcUrl);
 };
