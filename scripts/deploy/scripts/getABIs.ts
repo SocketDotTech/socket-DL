@@ -21,5 +21,5 @@ export const getABI = {
   FastSwitchboard,
   OptimisticSwitchboard,
   NativeSwitchboard,
-  AccessControlExtended
+  AccessControlExtended,
 };

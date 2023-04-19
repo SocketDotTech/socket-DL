@@ -136,8 +136,8 @@ export enum CORE_CONTRACTS {
   Socket = "Socket",
   FastSwitchboard = "FastSwitchboard",
   OptimisticSwitchboard = "OptimisticSwitchboard",
-  NativeSwitchboard = "NativeSwitchboard"
-} 
+  NativeSwitchboard = "NativeSwitchboard",
+}
 
 export const REQUIRED_ROLES = {
   CapacitorFactory: [ROLES.RESCUE_ROLE],
