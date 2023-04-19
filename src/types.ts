@@ -98,10 +98,10 @@ export interface ChainSocketAddresses {
   SignatureVerifier: string;
   Socket: string;
   TransmitManager: string;
-  FastSwitchboard?: string;
-  OptimisticSwitchboard?: string;
+  FastSwitchboard: string;
+  OptimisticSwitchboard: string;
+  SocketBatcher: string;
   integrations?: Integrations;
-  SocketBatcher?: string;
 }
 
 export type DeploymentAddresses = {

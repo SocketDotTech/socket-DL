@@ -8,6 +8,22 @@ dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
 const infuraApiKey: string | undefined = process.env.INFURA_API_KEY;
 
+export enum ChainKey {
+  ARBITRUM = "arbitrum",
+  ARBITRUM_GOERLI = "arbitrum-goerli",
+  OPTIMISM = "optimism",
+  OPTIMISM_GOERLI = "optimism-goerli",
+  AVALANCHE = "avalanche",
+  AVALANCHE_TESTNET = "avalanche-testnet",
+  BSC = "bsc",
+  BSC_TESTNET = "bsc-testnet",
+  MAINNET = "mainnet",
+  GOERLI = "goerli",
+  POLYGON_MAINNET = "polygon-mainnet",
+  POLYGON_MUMBAI = "polygon-mumbai",
+  HARDHAT = "hardhat",
+}
+
 export const chainSlugs = {
   avalanche: 43114,
   bsc: 56,
@@ -40,69 +56,50 @@ export const networkToChainSlug = {
 
 export const chainSlugKeys: string[] = Object.values(networkToChainSlug);
 
-export function getChainSlugFromId(chainId: number) {
-  switch (chainId) {
-    case ChainSlug.OPTIMISM:
-      return "Optimism";
-
-    case ChainSlug.ARBITRUM:
-      return "Arbitrum";
-
-    case ChainSlug.BSC:
-      return "bsc";
-
-    case ChainSlug.BSC_TESTNET:
-      return "bsc-testnet";
-
-    default:
-      throw new Error("Failed to lookup chainSlugCode from chainId");
-  }
-}
-
 export function getJsonRpcUrl(chain: keyof typeof chainSlugs): string {
   let jsonRpcUrl: string;
   switch (chain) {
-    case "arbitrum":
+    case ChainKey.ARBITRUM:
       jsonRpcUrl = process.env.ARBITRUM_RPC as string;
       break;
 
-    case "arbitrum-goerli":
+    case ChainKey.ARBITRUM_GOERLI:
       jsonRpcUrl = process.env.ARBITRUM_GOERLI_RPC as string;
       break;
 
-    case "optimism":
+    case ChainKey.OPTIMISM:
       jsonRpcUrl = process.env.OPTIMISM_RPC as string;
       break;
 
-    case "optimism-goerli":
+    case ChainKey.OPTIMISM_GOERLI:
       jsonRpcUrl = process.env.OPTIMISM_GOERLI_RPC as string;
       break;
 
-    case "polygon-mainnet":
+    case ChainKey.POLYGON_MAINNET:
       jsonRpcUrl = process.env.POLYGON_RPC as string;
       break;
 
-    case "polygon-mumbai":
+    case ChainKey.POLYGON_MUMBAI:
       jsonRpcUrl = process.env.POLYGON_MUMBAI_RPC as string;
       break;
 
-    case "avalanche":
+    case ChainKey.AVALANCHE:
       jsonRpcUrl = process.env.AVAX_RPC as string;
       break;
 
-    case "bsc":
+    case ChainKey.BSC:
       jsonRpcUrl = process.env.BSC_RPC as string;
       break;
 
-    case "bsc-testnet":
+    case ChainKey.BSC_TESTNET:
       jsonRpcUrl = process.env.BSC_TESTNET_RPC as string;
       break;
 
-    case "mainnet":
+    case ChainKey.MAINNET:
       jsonRpcUrl = process.env.ETHEREUM_RPC as string;
       break;
 
-    case "goerli":
+    case ChainKey.GOERLI:
       jsonRpcUrl = process.env.GOERLI_RPC as string;
       break;
 

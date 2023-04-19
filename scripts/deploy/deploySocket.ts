@@ -12,37 +12,34 @@ import {
 } from "./utils";
 import { chainSlugs } from "../constants/networks";
 
-import {
-  executorAddress,
-  transmitterAddress,
-  sealGasLimit,
-} from "../constants/config";
+import { sealGasLimit } from "../constants/config";
 import { ChainSocketAddresses } from "../../src";
+import deploySwitchboards from "./deploySwitchboard";
+
+let addresses: ChainSocketAddresses = {
+  Counter: "",
+  CapacitorFactory: "",
+  ExecutionManager: "",
+  GasPriceOracle: "",
+  Hasher: "",
+  SignatureVerifier: "",
+  Socket: "",
+  TransmitManager: "",
+  FastSwitchboard: "",
+  OptimisticSwitchboard: "",
+  SocketBatcher: "",
+};
 
 /**
  * Deploys network-independent socket contracts
  */
-export const main = async () => {
+export const deploySocket = async () => {
   try {
-    // assign deployers
+    // assign deployer
     const { getNamedAccounts } = hre;
-    const { socketOwner, counterOwner } = await getNamedAccounts();
-    let addresses: ChainSocketAddresses = {
-      Counter: "",
-      CapacitorFactory: "",
-      ExecutionManager: "",
-      GasPriceOracle: "",
-      Hasher: "",
-      SignatureVerifier: "",
-      Socket: "",
-      TransmitManager: "",
-    };
+    const { socketOwner } = await getNamedAccounts();
 
     const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
-    const counterSigner: SignerWithAddress = await ethers.getSigner(
-      counterOwner
-    );
-
     const network = hre.network.name;
 
     let signatureVerifier: Contract;
@@ -78,7 +75,7 @@ export const main = async () => {
     if (!addresses["CapacitorFactory"]) {
       capacitorFactory = await deployContractWithArgs(
         "CapacitorFactory",
-        [socketSigner.address],
+        [socketOwner],
         socketSigner,
         "contracts/CapacitorFactory.sol"
       );
@@ -106,8 +103,8 @@ export const main = async () => {
       const tx = await gasPriceOracle
         .connect(socketSigner)
         ["grantBatchRole(bytes32[],address[])"](
-          [getRoleHash("RESCUE_ROLE"), getRoleHash("GOVERNANCE_ROLE")],
-          [grantee, grantee]
+          [getRoleHash("GOVERNANCE_ROLE")],
+          [grantee]
         );
       console.log(
         `Assigned gas price oracle batch roles to ${grantee}: ${tx.hash}`
@@ -125,30 +122,30 @@ export const main = async () => {
     if (!addresses["ExecutionManager"]) {
       executionManager = await deployContractWithArgs(
         "ExecutionManager",
-        [gasPriceOracle.address, socketSigner.address],
+        [gasPriceOracle.address, socketOwner],
         socketSigner,
         "contracts/ExecutionManager.sol"
       );
       addresses["ExecutionManager"] = executionManager.address;
       await storeAddresses(addresses, chainSlugs[network]);
 
-      const grantee = socketSigner.address;
-      const tx = await executionManager
-        .connect(socketSigner)
-        ["grantBatchRole(bytes32[],address[])"](
-          [
-            getRoleHash("WITHDRAW_ROLE"),
-            getRoleHash("RESCUE_ROLE"),
-            getRoleHash("GOVERNANCE_ROLE"),
-            getRoleHash("EXECUTOR_ROLE"),
-          ],
-          [grantee, grantee, grantee, executorAddress[network]]
-        );
-      console.log(
-        `Assigned execution manager batch roles to ${grantee}: ${tx.hash}`
-      );
+      // const grantee = socketOwner;
+      // const tx = await executionManager
+      //   .connect(socketSigner)
+      // ["grantBatchRole(bytes32[],address[])"](
+      //   [
+      //     getRoleHash("WITHDRAW_ROLE"),
+      //     getRoleHash("RESCUE_ROLE"),
+      //     getRoleHash("GOVERNANCE_ROLE"),
+      //     getRoleHash("EXECUTOR_ROLE"),
+      //   ],
+      //   [grantee, grantee, grantee, executorAddress[network]]
+      // );
+      // console.log(
+      //   `Assigned execution manager batch roles to ${grantee}: ${tx.hash}`
+      // );
 
-      await tx.wait();
+      // await tx.wait();
     } else {
       executionManager = await getInstance(
         "ExecutionManager",
@@ -163,7 +160,7 @@ export const main = async () => {
         [
           signatureVerifier.address,
           gasPriceOracle.address,
-          socketSigner.address,
+          socketOwner,
           chainSlugs[network],
           sealGasLimit[network],
         ],
@@ -173,37 +170,37 @@ export const main = async () => {
       addresses["TransmitManager"] = transmitManager.address;
       await storeAddresses(addresses, chainSlugs[network]);
 
-      const grantee = socketSigner.address;
-      const tx = await transmitManager
-        .connect(socketSigner)
-        ["grantBatchRole(bytes32[],address[])"](
-          [
-            getRoleHash("WITHDRAW_ROLE"),
-            getRoleHash("RESCUE_ROLE"),
-            getRoleHash("GOVERNANCE_ROLE"),
-            getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
-          ],
-          [grantee, grantee, grantee, transmitterAddress[network]]
-        );
-      console.log(
-        `Assigned transmit manager batch roles to ${grantee}: ${tx.hash}`
-      );
+      // const grantee = socketOwner;
+      // const tx = await transmitManager
+      //   .connect(socketSigner)
+      // ["grantBatchRole(bytes32[],address[])"](
+      //   [
+      //     getRoleHash("WITHDRAW_ROLE"),
+      //     getRoleHash("RESCUE_ROLE"),
+      //     getRoleHash("GOVERNANCE_ROLE"),
+      //     getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
+      //   ],
+      //   [grantee, grantee, grantee, transmitterAddress[network]]
+      // );
+      // console.log(
+      //   `Assigned transmit manager batch roles to ${grantee}: ${tx.hash}`
+      // );
 
-      await tx.wait();
+      // await tx.wait();
 
       //grant transmitter role to transmitter-address for current network
-      const grantTransmitterRoleTxn = await transmitManager
-        .connect(socketSigner)
-        ["grantRole(string,uint256,address)"](
-          "TRANSMITTER_ROLE",
-          chainSlugs[network],
-          transmitterAddress[network]
-        );
+      // const grantTransmitterRoleTxn = await transmitManager
+      //   .connect(socketSigner)
+      // ["grantRole(string,uint256,address)"](
+      //   "TRANSMITTER_ROLE",
+      //   chainSlugs[network],
+      //   transmitterAddress[network]
+      // );
 
-      console.log(
-        `Setting transmitter role for current chain: ${grantTransmitterRoleTxn.hash}`
-      );
-      await grantTransmitterRoleTxn.wait();
+      // console.log(
+      //   `Setting transmitter role for current chain: ${grantTransmitterRoleTxn.hash}`
+      // );
+      // await grantTransmitterRoleTxn.wait();
     } else {
       transmitManager = await getInstance(
         "TransmitManager",
@@ -220,6 +217,15 @@ export const main = async () => {
       await tx.wait();
     }
 
+    const oracleOwner: string = await gasPriceOracle.owner();
+    if (oracleOwner.toLowerCase() !== socketOwner.toLowerCase()) {
+      const tx = await gasPriceOracle
+        .connect(socketSigner)
+        .transferOwnership(socketOwner);
+      console.log(`Setting oracle owner: ${tx.hash}`);
+      await tx.wait();
+    }
+
     let socket: Contract;
     if (!addresses["Socket"]) {
       socket = await deployContractWithArgs(
@@ -230,7 +236,7 @@ export const main = async () => {
           transmitManager.address,
           executionManager.address,
           capacitorFactory.address,
-          socketSigner.address,
+          socketOwner,
         ],
         socketSigner,
         "contracts/socket/Socket.sol"
@@ -238,26 +244,47 @@ export const main = async () => {
       addresses["Socket"] = socket.address;
       await storeAddresses(addresses, chainSlugs[network]);
 
-      const grantee = socketSigner.address;
-      const tx = await socket
-        .connect(socketSigner)
-        ["grantBatchRole(bytes32[],address[])"](
-          [getRoleHash("RESCUE_ROLE"), getRoleHash("GOVERNANCE_ROLE")],
-          [grantee, grantee]
-        );
-      console.log(`Assigned socket batch roles to ${grantee}: ${tx.hash}`);
+      // const grantee = socketOwner;
+      // const tx = await socket
+      //   .connect(socketSigner)
+      // ["grantBatchRole(bytes32[],address[])"](
+      //   [getRoleHash("RESCUE_ROLE"), getRoleHash("GOVERNANCE_ROLE")],
+      //   [grantee, grantee]
+      // );
+      // console.log(`Assigned socket batch roles to ${grantee}: ${tx.hash}`);
 
-      await tx.wait();
+      // await tx.wait();
     } else {
       socket = await getInstance("Socket", addresses["Socket"]);
     }
+
+    // switchboards deploy
+    addresses = await deploySwitchboards(network, socketSigner, addresses);
+
+    let socketBatcher: Contract;
+    if (!addresses["SocketBatcher"]) {
+      socketBatcher = await deployContractWithArgs(
+        "SocketBatcher",
+        [socketSigner.address],
+        socketSigner,
+        "contracts/socket/SocketBatcher.sol"
+      );
+      addresses["SocketBatcher"] = socketBatcher.address;
+      await storeAddresses(addresses, chainSlugs[network]);
+    } else {
+      socketBatcher = await getInstance(
+        "SocketBatcher",
+        addresses["SocketBatcher"]
+      );
+    }
+
     // plug deployments
     let counter: Contract;
     if (!addresses["Counter"]) {
       counter = await deployContractWithArgs(
         "Counter",
         [socket.address],
-        counterSigner,
+        socketSigner,
         "contracts/examples/Counter.sol"
       );
       addresses["Counter"] = counter.address;
@@ -271,10 +298,3 @@ export const main = async () => {
     throw error;
   }
 };
-
-main()
-  .then(() => process.exit(0))
-  .catch((error: Error) => {
-    console.error(error);
-    process.exit(1);
-  });

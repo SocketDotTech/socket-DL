@@ -170,10 +170,10 @@ export const getAddresses = async (chainSlug: ChainSlug) => {
 };
 
 export const createObj = function (
-  obj: { [key: string]: any },
+  obj: ChainSocketAddresses,
   keys: string[],
   value: any
-) {
+): ChainSocketAddresses {
   if (keys.length === 1) {
     obj[keys[0]] = value;
   } else {
