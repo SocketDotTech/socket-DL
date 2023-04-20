@@ -32,7 +32,10 @@ export const main = async () => {
 
           const results = await deploySocket(signer, chain);
 
-          await storeVerificationParams(results.verificationDetails, chainSlugs[chain]);
+          await storeVerificationParams(
+            results.verificationDetails,
+            chainSlugs[chain]
+          );
           allDeployed = results.allDeployed;
         }
       })
