@@ -82,7 +82,7 @@ export function getJsonRpcUrl(chain: ChainKey): string[] {
 
     case ChainKey.ARBITRUM_GOERLI:
       jsonRpcUrl = [
-        process.env.ARBITRUM_RPC as string,
+        process.env.ARB_GOERLI_RPC as string,
         "https://goerli-rollup.arbitrum.io/rpc",
         "https://arb-goerli.g.alchemy.com/v2/demo",
       ];
