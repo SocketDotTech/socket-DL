@@ -1,7 +1,8 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { createObj, getInstance } from "../utils";
-import { ChainSocketAddresses, IntegrationTypes } from "../../../src";
 import { constants } from "ethers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+
+import { createObj, getInstance, storeAddresses } from "./utils";
+import { ChainSocketAddresses, IntegrationTypes } from "../../src";
 
 export default async function registerSwitchBoard(
   switchBoardAddress: string,
@@ -9,9 +10,9 @@ export default async function registerSwitchBoard(
   capacitorType: number,
   maxPacketLength: number,
   signer: SignerWithAddress,
-  integrationType: IntegrationTypes,
+  integrationType: string,
   config: ChainSocketAddresses
-): Promise<ChainSocketAddresses> {
+) {
   try {
     const socket = await getInstance("Socket", config["Socket"]);
     let capacitor = await socket.capacitors__(

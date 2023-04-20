@@ -1,27 +1,16 @@
 import fs from "fs";
 import hre from "hardhat";
-import { constants, Contract } from "ethers";
-import {
-  chainSlugs,
-  networkToChainSlug,
-  proposeGasLimit,
-  switchboards,
-  transmitterAddress,
-} from "../constants";
-import { config } from "./config";
+import { constants } from "ethers";
+import { networkToChainSlug, switchboards } from "../constants";
 import {
   deployedAddressPath,
-  getChainRoleHash,
   getInstance,
   getSigners,
   getSwitchboardAddress,
+  storeAddresses,
 } from "./utils";
-import deployAndRegisterSwitchboard from "./deployAndRegisterSwitchboard";
-import {
-  deploymentAddresses,
-  IntegrationTypes,
-  NativeSwitchboard,
-} from "../../src";
+import { ChainSlug, IntegrationTypes, NativeSwitchboard } from "../../src";
+import registerSwitchBoard from "./registerSwitchboard";
 
 const capacitorType = 1;
 const maxPacketLength = 10;
@@ -32,61 +21,36 @@ export const main = async () => {
       throw new Error("addresses.json not found");
     }
     let addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
+    const chains: ChainSlug[] = Object.keys(addresses) as any as ChainSlug[];
+    let chain: ChainSlug;
 
-    for (let chain in config) {
-      console.log(`Deploying configs for ${chain}`);
-      const chainSetups = config[chain];
+    for (chain of chains) {
+      await hre.changeNetwork(networkToChainSlug[chain]);
+      const { socketSigner } = await getSigners();
+      const integrations = addresses[chain]["integrations"];
 
-      await hre.changeNetwork(chain);
-      const { socketSigner, counterSigner } = await getSigners();
+      if (!addresses[chain]["integrations"]) continue;
+      const integrationList = Object.keys(integrations);
 
-      for (let index = 0; index < chainSetups.length; index++) {
-        const { remoteChain, remoteConfig, localConfig } = validateChainSetup(
-          addresses,
-          chain,
-          chainSetups[index]
+      console.log(`Configuring for ${chain}`);
+      for (let sibling of integrationList) {
+        await Promise.all(
+          Object.keys(integrations[sibling]).map(async (integration) => {
+            const config = integrations[sibling][integration];
+            let updatedDeploymentAddresses = addresses[chain];
+            updatedDeploymentAddresses = await registerSwitchBoard(
+              config["switchboard"],
+              sibling,
+              capacitorType,
+              maxPacketLength,
+              socketSigner,
+              integration,
+              updatedDeploymentAddresses
+            );
+
+            await storeAddresses(updatedDeploymentAddresses, chain);
+          })
         );
-
-        const integrations = chainSetups[index]["config"];
-        let localConfigUpdated = localConfig;
-
-        // deploy contracts for different configurations
-        for (let index = 0; index < integrations.length; index++) {
-          console.log(`Setting up ${integrations[index]} for ${remoteChain}`);
-          localConfigUpdated = await deployAndRegisterSwitchboard(
-            integrations[index],
-            chain,
-            capacitorType,
-            maxPacketLength,
-            remoteChain,
-            socketSigner,
-            localConfigUpdated
-          );
-          addresses[chainSlugs[chain]] = localConfigUpdated;
-          console.log("Done! 🚀");
-        }
-
-        await configTransmitter(
-          transmitterAddress[chain],
-          remoteChain,
-          localConfigUpdated,
-          socketSigner
-        );
-
-        const socket = await getInstance(
-          "Socket",
-          localConfigUpdated["Socket"]
-        );
-
-        if (remoteConfig["Counter"])
-          await setSocketConfig(
-            socket,
-            chainSlugs[remoteChain],
-            remoteConfig["Counter"],
-            chainSetups[index]["configForCounter"],
-            localConfigUpdated,
-            counterSigner
-          );
       }
     }
 
@@ -114,7 +78,7 @@ const setRemoteSwitchboards = async (addresses) => {
           const dstSwitchboardAddress = getSwitchboardAddress(
             srcChain,
             IntegrationTypes.native,
-            deploymentAddresses?.[dstChain]
+            addresses?.[dstChain]
           );
           if (!dstSwitchboardAddress) continue;
 
@@ -179,82 +143,6 @@ const setRemoteSwitchboards = async (addresses) => {
   } catch (error) {
     console.error(error);
   }
-};
-
-const validateChainSetup = (addresses, chain, chainSetups) => {
-  let remoteChain = chainSetups["remoteChain"];
-  if (chain === remoteChain) throw new Error("Wrong chains");
-
-  if (!addresses[chainSlugs[chain]] || !addresses[chainSlugs[remoteChain]]) {
-    throw new Error("Deployed Addresses not found");
-  }
-
-  let remoteConfig = addresses[chainSlugs[remoteChain]];
-  let localConfig = addresses[chainSlugs[chain]];
-
-  return { remoteChain, remoteConfig, localConfig };
-};
-
-const setSocketConfig = async (
-  socket,
-  remoteChainSlug,
-  remoteCounter,
-  integrationType,
-  localConfig,
-  counterSigner
-) => {
-  // add a config to plugs on local and remote
-  const counter: Contract = await getInstance(
-    "Counter",
-    localConfig["Counter"]
-  );
-
-  const switchboard = getSwitchboardAddress(
-    remoteChainSlug,
-    integrationType,
-    localConfig
-  );
-  const configs = await socket.getPlugConfig(counter.address, remoteChainSlug);
-  if (
-    configs["siblingPlug"].toLowerCase() === remoteCounter.toLowerCase() &&
-    configs["inboundSwitchboard__"].toLowerCase() === switchboard.toLowerCase()
-  )
-    return;
-
-  const tx = await counter
-    .connect(counterSigner)
-    .setSocketConfig(remoteChainSlug, remoteCounter, switchboard);
-
-  console.log(
-    `Setting config ${integrationType} for ${remoteChainSlug} chain id! Transaction Hash: ${tx.hash}`
-  );
-  await tx.wait();
-};
-
-const configTransmitter = async (
-  transmitter,
-  remoteChain,
-  localConfig,
-  signer
-) => {
-  const transmitManager: Contract = await getInstance(
-    "TransmitManager",
-    localConfig["TransmitManager"]
-  );
-  const remoteChainSlug = chainSlugs[remoteChain];
-
-  //roles
-  const tx = await transmitManager
-    .connect(signer)
-    ["grantBatchRole(bytes32[],address[])"](
-      [
-        getChainRoleHash("TRANSMITTER_ROLE", remoteChainSlug),
-        getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", remoteChainSlug),
-      ],
-      [transmitter, transmitter]
-    );
-  console.log(`Assigned transmitter batch roles to ${transmitter}: ${tx.hash}`);
-  await tx.wait();
 };
 
 main()
