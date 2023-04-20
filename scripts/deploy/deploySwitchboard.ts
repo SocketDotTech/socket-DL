@@ -10,7 +10,8 @@ export default async function deploySwitchboards(
   sourceConfig: ChainSocketAddresses,
   verificationDetails: any[]
 ): Promise<Object> {
-  let result: any;
+  let result: any = { sourceConfig, verificationDetails };
+
   result = await deploySwitchboard(
     IntegrationTypes.fast,
     network,
@@ -87,9 +88,9 @@ async function deploySwitchboard(
     }
 
     await storeAddresses(sourceConfig, chainSlugs[network]);
-    return { sourceConfig, verificationDetails };
   } catch (error) {
     console.log("Error in deploying switchboard", error);
     throw error;
   }
+  return { sourceConfig, verificationDetails };
 }

@@ -38,6 +38,21 @@ export const chainSlugs = {
   [ChainKey.HARDHAT]: 31337,
 };
 
+export const gasPrice: number | "auto" | undefined = {
+  [ChainKey.ARBITRUM]: "auto",
+  [ChainKey.ARBITRUM_GOERLI]: "auto",
+  [ChainKey.OPTIMISM]: "auto",
+  [ChainKey.OPTIMISM_GOERLI]: 50000000,
+  [ChainKey.AVALANCHE]: "auto",
+  [ChainKey.BSC]: "auto",
+  [ChainKey.BSC_TESTNET]: "auto",
+  [ChainKey.MAINNET]: "auto",
+  [ChainKey.GOERLI]: "auto",
+  [ChainKey.POLYGON_MAINNET]: "auto",
+  [ChainKey.POLYGON_MUMBAI]: "auto",
+  [ChainKey.HARDHAT]: 31337,
+};
+
 export const networkToChainSlug = {
   43114: ChainKey.AVALANCHE,
   56: ChainKey.BSC,
@@ -55,55 +70,81 @@ export const networkToChainSlug = {
 
 export const chainSlugKeys: string[] = Object.values(networkToChainSlug);
 
-export function getJsonRpcUrl(chain: ChainKey): string {
-  let jsonRpcUrl: string;
+export function getJsonRpcUrl(chain: ChainKey): string[] {
+  let jsonRpcUrl: string[];
   switch (chain) {
     case ChainKey.ARBITRUM:
-      jsonRpcUrl = process.env.ARBITRUM_RPC as string;
+      jsonRpcUrl = [
+        process.env.ARBITRUM_RPC as string,
+        "https://arb1.arbitrum.io/rpc",
+      ];
       break;
 
     case ChainKey.ARBITRUM_GOERLI:
-      jsonRpcUrl = process.env.ARBITRUM_GOERLI_RPC as string;
+      jsonRpcUrl = [
+        process.env.ARBITRUM_RPC as string,
+        "https://goerli-rollup.arbitrum.io/rpc",
+        "https://arb-goerli.g.alchemy.com/v2/demo",
+      ];
       break;
 
     case ChainKey.OPTIMISM:
-      jsonRpcUrl = process.env.OPTIMISM_RPC as string;
+      jsonRpcUrl = [
+        process.env.OPTIMISM_RPC as string,
+        "https://mainnet.optimism.io",
+      ];
       break;
 
     case ChainKey.OPTIMISM_GOERLI:
-      jsonRpcUrl = process.env.OPTIMISM_GOERLI_RPC as string;
+      jsonRpcUrl = [
+        process.env.OPTIMISM_GOERLI_RPC as string,
+        "https://goerli.optimism.io",
+        "https://opt-goerli.g.alchemy.com/v2/demo",
+      ];
       break;
 
     case ChainKey.POLYGON_MAINNET:
-      jsonRpcUrl = process.env.POLYGON_RPC as string;
+      jsonRpcUrl = [
+        process.env.POLYGON_RPC as string,
+        "https://polygon-rpc.com/",
+      ];
       break;
 
     case ChainKey.POLYGON_MUMBAI:
-      jsonRpcUrl = process.env.POLYGON_MUMBAI_RPC as string;
+      jsonRpcUrl = [
+        process.env.POLYGON_MUMBAI_RPC as string,
+        "https://rpc-mumbai.maticvigil.com/",
+      ];
       break;
 
     case ChainKey.AVALANCHE:
-      jsonRpcUrl = process.env.AVAX_RPC as string;
+      jsonRpcUrl = [process.env.AVAX_RPC as string];
       break;
 
     case ChainKey.BSC:
-      jsonRpcUrl = process.env.BSC_RPC as string;
+      jsonRpcUrl = [
+        process.env.BSC_RPC as string,
+        "https://bsc-dataseed1.binance.org/",
+      ];
       break;
 
     case ChainKey.BSC_TESTNET:
-      jsonRpcUrl = process.env.BSC_TESTNET_RPC as string;
+      jsonRpcUrl = [
+        process.env.BSC_TESTNET_RPC as string,
+        "https://data-seed-prebsc-1-s1.binance.org:8545/",
+      ];
       break;
 
     case ChainKey.MAINNET:
-      jsonRpcUrl = process.env.ETHEREUM_RPC as string;
+      jsonRpcUrl = [process.env.ETHEREUM_RPC as string];
       break;
 
     case ChainKey.GOERLI:
-      jsonRpcUrl = process.env.GOERLI_RPC as string;
+      jsonRpcUrl = [process.env.GOERLI_RPC as string];
       break;
 
     default:
-      jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
+      jsonRpcUrl = ["https://" + chain + ".infura.io/v3/" + infuraApiKey];
   }
 
   return jsonRpcUrl;
@@ -111,5 +152,10 @@ export function getJsonRpcUrl(chain: ChainKey): string {
 
 export const getProviderFromChainName = (chainSlug: ChainKey) => {
   const jsonRpcUrl = getJsonRpcUrl(chainSlug);
-  return new ethers.providers.JsonRpcProvider(jsonRpcUrl);
+  const providers: any = [];
+
+  jsonRpcUrl.map((rpc) =>
+    providers.push(new ethers.providers.JsonRpcProvider(rpc))
+  );
+  return new ethers.providers.FallbackProvider(providers);
 };

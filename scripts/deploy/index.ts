@@ -1,8 +1,8 @@
 import hre, { ethers } from "hardhat";
 import { deploySocket } from "./deploySocket";
-import { ChainKey, getProviderFromChainName } from "../constants";
+import { ChainKey, chainSlugs, getProviderFromChainName } from "../constants";
 import { Wallet } from "ethers";
-import { verify } from "./utils";
+import { storeVerificationParams, verify } from "./utils";
 
 const chains: Array<ChainKey> = [
   ChainKey.GOERLI,
@@ -22,33 +22,33 @@ export const main = async () => {
   try {
     await Promise.all(
       chains.map(async (chain: ChainKey) => {
-        const providerInstance = getProviderFromChainName(chain);
-        const signer: Wallet = new ethers.Wallet(
-          process.env.SOCKET_SIGNER_KEY as string,
-          providerInstance
-        );
+        let allDeployed = false;
+        while (!allDeployed) {
+          const providerInstance = getProviderFromChainName(chain);
+          const signer: Wallet = new ethers.Wallet(
+            process.env.SOCKET_SIGNER_KEY as string,
+            providerInstance
+          );
 
-        verificationDetails[chain] = await deploySocket(signer, chain);
+          const results = await deploySocket(signer, chain);
+
+          if (verificationDetails[chain]) {
+            verificationDetails[chain] = [
+              ...verificationDetails[chain]!,
+              ...results.verificationDetails,
+            ];
+          } else {
+            verificationDetails[chain] = results.verificationDetails;
+          }
+
+          allDeployed = results.allDeployed;
+        }
+
+        await storeVerificationParams(verificationDetails, chainSlugs[chain]);
       })
     );
-
-    for (let chainIndex = 0; chainIndex < chains.length; chainIndex++) {
-      const chain = chains[chainIndex];
-      hre.changeNetwork(chain);
-
-      if (
-        verificationDetails &&
-        verificationDetails[chain] &&
-        verificationDetails[chain]?.length
-      ) {
-        const len = verificationDetails[chain]?.length;
-        for (let index = 0; index < len!; index++)
-          await verify(...verificationDetails[chain][index]);
-      }
-    }
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
-    throw error;
   }
 };
 

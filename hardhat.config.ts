@@ -14,7 +14,12 @@ import { resolve } from "path";
 import fs from "fs";
 
 import "./tasks/accounts";
-import { chainSlugs, getJsonRpcUrl } from "./scripts/constants/networks";
+import {
+  ChainKey,
+  chainSlugs,
+  gasPrice,
+  getJsonRpcUrl,
+} from "./scripts/constants/networks";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -40,7 +45,8 @@ function getChainConfig(chain: keyof typeof chainSlugs): NetworkUserConfig {
       path: "m/44'/60'/0'/0",
     },
     chainId: chainSlugs[chain],
-    url: getJsonRpcUrl(chain),
+    gasPrice: gasPrice[chain] ? gasPrice[chain] : "auto",
+    url: getJsonRpcUrl(chain)[0],
   };
 }
 
@@ -55,17 +61,17 @@ function getRemappings() {
 let liveNetworks = {};
 if (mnemonic && infuraApiKey && isProduction) {
   liveNetworks = {
-    "arbitrum-goerli": getChainConfig("arbitrum-goerli"),
-    "optimism-goerli": getChainConfig("optimism-goerli"),
-    "polygon-mainnet": getChainConfig("polygon-mainnet"),
-    arbitrum: getChainConfig("arbitrum"),
-    avalanche: getChainConfig("avalanche"),
-    bsc: getChainConfig("bsc"),
-    goerli: getChainConfig("goerli"),
-    mainnet: getChainConfig("mainnet"),
-    optimism: getChainConfig("optimism"),
-    "polygon-mumbai": getChainConfig("polygon-mumbai"),
-    "bsc-testnet": getChainConfig("bsc-testnet"),
+    "arbitrum-goerli": getChainConfig(ChainKey.ARBITRUM_GOERLI),
+    "optimism-goerli": getChainConfig(ChainKey.OPTIMISM_GOERLI),
+    "polygon-mainnet": getChainConfig(ChainKey.POLYGON_MAINNET),
+    arbitrum: getChainConfig(ChainKey.ARBITRUM),
+    avalanche: getChainConfig(ChainKey.AVALANCHE),
+    bsc: getChainConfig(ChainKey.BSC),
+    goerli: getChainConfig(ChainKey.GOERLI),
+    mainnet: getChainConfig(ChainKey.MAINNET),
+    optimism: getChainConfig(ChainKey.OPTIMISM),
+    "polygon-mumbai": getChainConfig(ChainKey.POLYGON_MUMBAI),
+    "bsc-testnet": getChainConfig(ChainKey.BSC_TESTNET),
   };
 }
 

@@ -1,54 +1,55 @@
 import { NativeSwitchboard } from "../../src/types";
 
-export const socketOwner = "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa";
+export const socketOwner = "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34";
+// "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa";
 // "0x86Ab95d2c6200b798CA382740597cE715aD0D727";
 
 export const transmitterAddress: {
   [key: string]: string;
 } = {
-  "bsc-testnet": "0xd37674fb952e0095d352f66a5796f39f18cd631a",
-  "polygon-mainnet": "0x8eCEfE7dd4F86D4a96Ff89eBB34C3c6F7871c4c7",
-  bsc: "0x5FB308DdF9f2df0f2b9916C4b7Ba8915B3a5A565",
-  "polygon-mumbai": "0x4b53d8d45fe48e0039db40bc21f0a3fc70d0a922",
-  "arbitrum-goerli": "0x9bf84fdaa350f37ac8cb82d0042bba624b1be775",
-  "optimism-goerli": "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
-  goerli: "0x3c16684415d0fd630e7f6866021db43ca96479c4",
-  hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  arbitrum: "0x15395159e6a0b466737db38c671fc282c4b5cf32",
-  optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
-  mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
+  "bsc-testnet": "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
+  "polygon-mainnet": "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
+  bsc: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
+  "polygon-mumbai": "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
+  "arbitrum-goerli": "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
+  "optimism-goerli": "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
+  goerli: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
+  hardhat: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
+  arbitrum: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
+  optimism: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
+  mainnet: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
 };
 
 export const watcherAddress: {
   [key: string]: string;
 } = {
-  "bsc-testnet": "0xd37674fb952e0095d352f66a5796f39f18cd631a",
-  "polygon-mainnet": "0x8eCEfE7dd4F86D4a96Ff89eBB34C3c6F7871c4c7",
-  bsc: "0x5FB308DdF9f2df0f2b9916C4b7Ba8915B3a5A565",
-  "polygon-mumbai": "0x4b53d8d45fe48e0039db40bc21f0a3fc70d0a922",
-  "arbitrum-goerli": "0x9bf84fdaa350f37ac8cb82d0042bba624b1be775",
-  "optimism-goerli": "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
-  goerli: "0x3c16684415d0fd630e7f6866021db43ca96479c4",
-  hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  arbitrum: "0x15395159e6a0b466737db38c671fc282c4b5cf32",
-  optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
-  mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
+  "bsc-testnet": "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+  "polygon-mainnet": "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+  bsc: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+  "polygon-mumbai": "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+  "arbitrum-goerli": "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+  "optimism-goerli": "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+  goerli: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+  hardhat: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+  arbitrum: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+  optimism: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+  mainnet: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
 };
 
 export const executorAddress: {
   [key: string]: string;
 } = {
-  "bsc-testnet": "0xd37674fb952e0095d352f66a5796f39f18cd631a",
-  "polygon-mainnet": "0x8eCEfE7dd4F86D4a96Ff89eBB34C3c6F7871c4c7",
-  bsc: "0x5FB308DdF9f2df0f2b9916C4b7Ba8915B3a5A565",
-  "polygon-mumbai": "0x4b53d8d45fe48e0039db40bc21f0a3fc70d0a922",
-  "arbitrum-goerli": "0x9bf84fdaa350f37ac8cb82d0042bba624b1be775",
-  "optimism-goerli": "0x222914bfac6c6f6f10fa1bd38bd5f1d6851bd9ff",
-  goerli: "0x3c16684415d0fd630e7f6866021db43ca96479c4",
-  hardhat: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  arbitrum: "0x15395159e6a0b466737db38c671fc282c4b5cf32",
-  optimism: "0xfceE44a59d4cdF48F58956aa4F1b580D6469a312",
-  mainnet: "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e",
+  "bsc-testnet": "0x8e90345042b2720F33138CC437f8f897AC84A095",
+  "polygon-mainnet": "0x8e90345042b2720F33138CC437f8f897AC84A095",
+  bsc: "0x8e90345042b2720F33138CC437f8f897AC84A095",
+  "polygon-mumbai": "0x8e90345042b2720F33138CC437f8f897AC84A095",
+  "arbitrum-goerli": "0x8e90345042b2720F33138CC437f8f897AC84A095",
+  "optimism-goerli": "0x8e90345042b2720F33138CC437f8f897AC84A095",
+  goerli: "0x8e90345042b2720F33138CC437f8f897AC84A095",
+  hardhat: "0x8e90345042b2720F33138CC437f8f897AC84A095",
+  arbitrum: "0x8e90345042b2720F33138CC437f8f897AC84A095",
+  optimism: "0x8e90345042b2720F33138CC437f8f897AC84A095",
+  mainnet: "0x8e90345042b2720F33138CC437f8f897AC84A095",
 };
 
 export const timeout: {

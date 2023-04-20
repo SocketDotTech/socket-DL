@@ -16,6 +16,11 @@ export const deployedAddressPath = path.join(
   "/../../../deployments/addresses.json"
 );
 
+export const verificationDetailsPath = path.join(
+  __dirname,
+  "/../../../deployments/verification.json"
+);
+
 export const getRoleHash = (role: string) =>
   ethers.utils.keccak256(ethers.utils.toUtf8Bytes(role)).toString();
 
@@ -123,6 +128,31 @@ export const storeAddresses = async (
   fs.writeFileSync(
     deployedAddressPath,
     JSON.stringify(deploymentAddresses, null, 2)
+  );
+};
+
+export const storeVerificationParams = async (
+  verificationDetail: object,
+  chainSlug: ChainSlug
+) => {
+  if (!fs.existsSync(verificationDetailsPath)) {
+    await fs.promises.mkdir(verificationDetailsPath);
+  }
+
+  const outputExists = fs.existsSync(verificationDetailsPath);
+  let verificationDetails: object = {};
+  if (outputExists) {
+    const verificationDetailsString = fs.readFileSync(
+      verificationDetailsPath,
+      "utf-8"
+    );
+    verificationDetails = JSON.parse(verificationDetailsString);
+  }
+
+  verificationDetails[chainSlug] = verificationDetail;
+  fs.writeFileSync(
+    verificationDetailsPath,
+    JSON.stringify(verificationDetails, null, 2)
   );
 };
 

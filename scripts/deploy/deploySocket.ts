@@ -1,8 +1,4 @@
-import hre from "hardhat";
-import { ethers } from "hardhat";
-
 import { Contract, Wallet } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   deployContractWithoutArgs,
   deployContractWithArgs,
@@ -15,20 +11,7 @@ import { chainSlugs } from "../constants/networks";
 import { sealGasLimit, socketOwner } from "../constants/config";
 import { ChainSocketAddresses } from "../../src";
 import deploySwitchboards from "./deploySwitchboard";
-
-let addresses: ChainSocketAddresses = {
-  Counter: "",
-  CapacitorFactory: "",
-  ExecutionManager: "",
-  GasPriceOracle: "",
-  Hasher: "",
-  SignatureVerifier: "",
-  Socket: "",
-  TransmitManager: "",
-  FastSwitchboard: "",
-  OptimisticSwitchboard: "",
-  SocketBatcher: "",
-};
+import address from "../../deployments/addresses.json";
 
 /**
  * Deploys network-independent socket contracts
@@ -37,8 +20,13 @@ export const deploySocket = async (
   socketSigner: Wallet,
   network: string
 ): Promise<any> => {
+  let verificationDetails: any[] = [];
+  let allDeployed = false;
+
   try {
-    let verificationDetails: any[] = [];
+    let addresses: ChainSocketAddresses = address[chainSlugs[network]]
+      ? address[chainSlugs[network]]
+      : {};
 
     let signatureVerifier: Contract;
     if (!addresses["SignatureVerifier"]) {
@@ -54,6 +42,7 @@ export const deploySocket = async (
         [],
       ]);
       addresses["SignatureVerifier"] = signatureVerifier.address;
+      await storeAddresses(addresses, chainSlugs[network]);
     } else {
       signatureVerifier = await getInstance(
         "SignatureVerifier",
@@ -71,6 +60,7 @@ export const deploySocket = async (
         [],
       ]);
       addresses["Hasher"] = hasher.address;
+      await storeAddresses(addresses, chainSlugs[network]);
     } else {
       hasher = await getInstance("Hasher", addresses["Hasher"]);
     }
@@ -89,6 +79,7 @@ export const deploySocket = async (
         [socketOwner],
       ]);
       addresses["CapacitorFactory"] = capacitorFactory.address;
+      await storeAddresses(addresses, chainSlugs[network]);
     } else {
       capacitorFactory = await getInstance(
         "CapacitorFactory",
@@ -100,29 +91,30 @@ export const deploySocket = async (
     if (!addresses["GasPriceOracle"]) {
       gasPriceOracle = await deployContractWithArgs(
         "GasPriceOracle",
-        [socketSigner.address, chainSlugs[network]],
+        [socketOwner, chainSlugs[network]],
         socketSigner
       );
       verificationDetails.push([
         gasPriceOracle.address,
         "GasPriceOracle",
         "contracts/GasPriceOracle.sol",
-        [socketSigner.address, chainSlugs[network]],
+        [socketOwner, chainSlugs[network]],
       ]);
       addresses["GasPriceOracle"] = gasPriceOracle.address;
+      await storeAddresses(addresses, chainSlugs[network]);
 
-      const grantee = socketSigner.address;
-      const tx = await gasPriceOracle
-        .connect(socketSigner)
-        ["grantBatchRole(bytes32[],address[])"](
-          [getRoleHash("GOVERNANCE_ROLE")],
-          [grantee]
-        );
-      console.log(
-        `Assigned gas price oracle batch roles to ${grantee}: ${tx.hash}`
-      );
+      // const grantee = socketSigner.address;
+      // const tx = await gasPriceOracle
+      //   .connect(socketSigner)
+      // ["grantBatchRole(bytes32[],address[])"](
+      //   [getRoleHash("GOVERNANCE_ROLE")],
+      //   [grantee]
+      // );
+      // console.log(
+      //   `Assigned gas price oracle batch roles to ${grantee}: ${tx.hash}`
+      // );
 
-      await tx.wait();
+      // await tx.wait();
     } else {
       gasPriceOracle = await getInstance(
         "GasPriceOracle",
@@ -145,6 +137,7 @@ export const deploySocket = async (
       ]);
 
       addresses["ExecutionManager"] = executionManager.address;
+      await storeAddresses(addresses, chainSlugs[network]);
 
       // const grantee = socketOwner;
       // const tx = await executionManager
@@ -197,6 +190,7 @@ export const deploySocket = async (
         ],
       ]);
       addresses["TransmitManager"] = transmitManager.address;
+      await storeAddresses(addresses, chainSlugs[network]);
 
       // const grantee = socketOwner;
       // const tx = await transmitManager
@@ -236,23 +230,23 @@ export const deploySocket = async (
       );
     }
 
-    const tmAddress: string = await gasPriceOracle.transmitManager__();
-    if (tmAddress.toLowerCase() !== transmitManager.address.toLowerCase()) {
-      const tx = await gasPriceOracle
-        .connect(socketSigner)
-        .setTransmitManager(transmitManager.address);
-      console.log(`Setting transmit manager in oracle: ${tx.hash}`);
-      await tx.wait();
-    }
+    // const tmAddress: string = await gasPriceOracle.transmitManager__();
+    // if (tmAddress.toLowerCase() !== transmitManager.address.toLowerCase()) {
+    //   const tx = await gasPriceOracle
+    //     .connect(socketSigner)
+    //     .setTransmitManager(transmitManager.address);
+    //   console.log(`Setting transmit manager in oracle: ${tx.hash}`);
+    //   await tx.wait();
+    // }
 
-    const oracleOwner: string = await gasPriceOracle.owner();
-    if (oracleOwner.toLowerCase() !== socketOwner.toLowerCase()) {
-      const tx = await gasPriceOracle
-        .connect(socketSigner)
-        .transferOwnership(socketOwner);
-      console.log(`Setting oracle owner: ${tx.hash}`);
-      await tx.wait();
-    }
+    // const oracleOwner: string = await gasPriceOracle.owner();
+    // if (oracleOwner.toLowerCase() !== socketOwner.toLowerCase()) {
+    //   const tx = await gasPriceOracle
+    //     .connect(socketSigner)
+    //     .transferOwnership(socketOwner);
+    //   console.log(`Setting oracle owner: ${tx.hash}`);
+    //   await tx.wait();
+    // }
 
     let socket: Contract;
     if (!addresses["Socket"]) {
@@ -283,6 +277,7 @@ export const deploySocket = async (
       ]);
 
       addresses["Socket"] = socket.address;
+      await storeAddresses(addresses, chainSlugs[network]);
 
       // const grantee = socketOwner;
       // const tx = await socket
@@ -307,22 +302,25 @@ export const deploySocket = async (
     );
 
     addresses = result["sourceConfig"];
+    await storeAddresses(addresses, chainSlugs[network]);
+
     verificationDetails = result["verificationDetails"];
 
     let socketBatcher: Contract;
     if (!addresses["SocketBatcher"]) {
       socketBatcher = await deployContractWithArgs(
         "SocketBatcher",
-        [socketSigner.address],
+        [socketOwner],
         socketSigner
       );
       verificationDetails.push([
         socketBatcher.address,
         "SocketBatcher",
         "contracts/socket/SocketBatcher.sol",
-        [socketSigner.address],
+        [socketOwner],
       ]);
       addresses["SocketBatcher"] = socketBatcher.address;
+      await storeAddresses(addresses, chainSlugs[network]);
     } else {
       socketBatcher = await getInstance(
         "SocketBatcher",
@@ -345,15 +343,15 @@ export const deploySocket = async (
         [socket.address],
       ]);
       addresses["Counter"] = counter.address;
+      await storeAddresses(addresses, chainSlugs[network]);
     } else {
       socket = await getInstance("Counter", addresses["Counter"]);
     }
-    console.log("Contracts deployed!");
-    await storeAddresses(addresses, chainSlugs[network]);
 
-    return verificationDetails;
+    allDeployed = true;
+    console.log("Contracts deployed!");
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
-    throw error;
   }
+  return { verificationDetails, allDeployed };
 };
