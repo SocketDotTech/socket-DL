@@ -38,7 +38,9 @@ export const chainSlugs = {
   [ChainKey.HARDHAT]: 31337,
 };
 
-export const gasPrice: number | "auto" | undefined = {
+export const gasPrice: {
+  [chainKEY in ChainKey]?: number | "auto" | undefined;
+} = {
   [ChainKey.ARBITRUM]: "auto",
   [ChainKey.ARBITRUM_GOERLI]: "auto",
   [ChainKey.OPTIMISM]: "auto",
@@ -152,10 +154,5 @@ export function getJsonRpcUrl(chain: ChainKey): string[] {
 
 export const getProviderFromChainName = (chainSlug: ChainKey) => {
   const jsonRpcUrl = getJsonRpcUrl(chainSlug);
-  const providers: any = [];
-
-  jsonRpcUrl.map((rpc) =>
-    providers.push(new ethers.providers.JsonRpcProvider(rpc))
-  );
-  return new ethers.providers.FallbackProvider(providers);
+  return new ethers.providers.JsonRpcProvider(jsonRpcUrl[0]);
 };
