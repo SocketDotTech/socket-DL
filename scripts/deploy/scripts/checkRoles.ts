@@ -147,6 +147,7 @@ const executeRoleTransactions = async (
         "hash: ",
         tx.hash
       );
+      await tx.wait();
     }
 
     if (revokeRoles.length) {
@@ -162,6 +163,7 @@ const executeRoleTransactions = async (
         "hash: ",
         tx.hash
       );
+      await tx.wait();
     }
   }
 };
