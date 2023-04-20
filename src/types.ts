@@ -25,6 +25,14 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.BSC_TESTNET,
 ];
 
+export const MainnetIds: ChainSlug[] = [
+  ChainSlug.MAINNET,
+  ChainSlug.POLYGON,
+  ChainSlug.ARBITRUM,
+  ChainSlug.OPTIMISM,
+  ChainSlug.BSC,
+];
+
 export const L1Ids: ChainSlug[] = [ChainSlug.MAINNET, ChainSlug.GOERLI];
 
 export const L2Ids: ChainSlug[] = [
@@ -51,9 +59,9 @@ export enum NativeSwitchboard {
  *                                             *
  ***********************************************/
 
-export const MainnetIds: ChainSlug[] = (
-  Object.values(ChainSlug) as ChainSlug[]
-).filter((c) => !TestnetIds.includes(c));
+// export const MainnetIds: ChainSlug[] = (
+//   Object.values(ChainSlug) as ChainSlug[]
+// ).filter((c) => !TestnetIds.includes(c));
 
 export const isTestnet = (chainSlug: ChainSlug) => {
   return TestnetIds.includes(chainSlug);
@@ -107,3 +115,96 @@ export interface ChainSocketAddresses {
 export type DeploymentAddresses = {
   [chainSlug in ChainSlug]?: ChainSocketAddresses;
 };
+
+export enum ROLES {
+  TRANSMITTER_ROLE = "TRANSMITTER_ROLE",
+  GAS_LIMIT_UPDATER_ROLE = "GAS_LIMIT_UPDATER_ROLE",
+  RESCUE_ROLE = "RESCUE_ROLE",
+  WITHDRAW_ROLE = "WITHDRAW_ROLE",
+  GOVERNANCE_ROLE = "GOVERNANCE_ROLE",
+  EXECUTOR_ROLE = "EXECUTOR_ROLE",
+  TRIP_ROLE = "TRIP_ROLE",
+  UNTRIP_ROLE = "UNTRIP_ROLE",
+  WATCHER_ROLE = "WATCHER_ROLE",
+}
+
+export enum CORE_CONTRACTS {
+  CapacitorFactory = "CapacitorFactory",
+  ExecutionManager = "ExecutionManager",
+  TransmitManager = "TransmitManager",
+  GasPriceOracle = "GasPriceOracle",
+  Socket = "Socket",
+  FastSwitchboard = "FastSwitchboard",
+  OptimisticSwitchboard = "OptimisticSwitchboard",
+  NativeSwitchboard = "NativeSwitchboard",
+}
+
+export const REQUIRED_ROLES = {
+  CapacitorFactory: [ROLES.RESCUE_ROLE],
+  ExecutionManager: [
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.EXECUTOR_ROLE,
+  ],
+  TransmitManager: [
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+    ROLES.GAS_LIMIT_UPDATER_ROLE,
+  ],
+  GasPriceOracle: [ROLES.GOVERNANCE_ROLE, ROLES.RESCUE_ROLE],
+  Socket: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
+  FastSwitchboard: [
+    ROLES.TRIP_ROLE,
+    ROLES.UNTRIP_ROLE,
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+  ],
+  OptimisticSwitchboard: [
+    ROLES.TRIP_ROLE,
+    ROLES.UNTRIP_ROLE,
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+  ],
+  NativeSwitchboard: [
+    ROLES.GAS_LIMIT_UPDATER_ROLE,
+    ROLES.TRIP_ROLE,
+    ROLES.UNTRIP_ROLE,
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+  ],
+};
+
+export const REQUIRED_CHAIN_ROLES = {
+  TransmitManager: [ROLES.TRANSMITTER_ROLE, ROLES.GAS_LIMIT_UPDATER_ROLE],
+  FastSwitchboard: [
+    ROLES.WATCHER_ROLE,
+    ROLES.TRIP_ROLE,
+    ROLES.UNTRIP_ROLE,
+    ROLES.GAS_LIMIT_UPDATER_ROLE,
+  ],
+  OptimisticSwitchboard: [
+    ROLES.TRIP_ROLE,
+    ROLES.UNTRIP_ROLE,
+    ROLES.GAS_LIMIT_UPDATER_ROLE,
+  ],
+};
+
+// CapacitorFactory: RESCUE_ROLE
+// ExecutionManager: WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE
+// TransmitManager: GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE
+// GasPriceOracle: GOVERNANCE_ROLE, RESCUE_ROLE
+// Socket: RESCUE_ROLE, GOVERNANCE_ROLE
+// Switchboards:
+// all: TRIP_ROLE, UNTRIP_ROLE, GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE
+// native:GAS_LIMIT_UPDATER_ROLE
+// Capacitor: RESCUE_ROLE
+// Decapacitor: RESCUE_ROLE
+// default:TRIP_ROLE(chain), UNTRIP_ROLE(chain), GAS_LIMIT_UPDATER_ROLE(chain),
+// fast: WATCHER_ROLE(chain)
+// in configure:
+// TransmitManager: TRANSMITTER_ROLE(chain), GAS_LIMIT_UPDATER_ROLE(chain)
