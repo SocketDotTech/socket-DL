@@ -128,5 +128,5 @@ export function getJsonRpcUrl(chain: ChainKey): string {
 
 export const getProviderFromChainName = (chainSlug: ChainKey) => {
   const jsonRpcUrl = getJsonRpcUrl(chainSlug);
-  return new ethers.providers.JsonRpcProvider(jsonRpcUrl[0]);
+  return new ethers.providers.JsonRpcProvider(jsonRpcUrl);
 };
