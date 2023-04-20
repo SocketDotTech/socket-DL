@@ -183,6 +183,7 @@ const executeOtherTransactions = async (chainId: ChainSlug, wallet: Wallet) => {
       to,
       data,
     });
+    await tx.wait();
     console.log(`to: ${to}, txHash: ${tx?.hash}`);
   }
 };
@@ -336,7 +337,9 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                       // to set the role
                       if (
                         contractName === CORE_CONTRACTS.FastSwitchboard &&
-                        role === ROLES.WATCHER_ROLE
+                        role === ROLES.WATCHER_ROLE &&
+                        !hasRole &&
+                        newRoleStatus
                       ) {
                         let data = instance.interface.encodeFunctionData(
                           "grantWatcherRole",
