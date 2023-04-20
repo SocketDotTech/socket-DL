@@ -13,11 +13,6 @@ import {
   isTestnet,
   isMainnet,
 } from "../../../src";
-import {
-  executorAddress,
-  transmitterAddress,
-  sealGasLimit,
-} from "../../constants/config";
 import { getAddresses, getRoleHash, getChainRoleHash } from "../utils";
 import { Contract, Wallet, ethers } from "ethers";
 import { getABI } from "./getABIs";
@@ -26,7 +21,6 @@ import {
   getProviderFromChainName,
   networkToChainSlug,
 } from "../../constants";
-import { Provider } from "@ethersproject/abstract-provider";
 
 let roleStatus: any = {};
 
@@ -35,7 +29,6 @@ interface checkAndUpdateRolesObj {
   filterRoles: ROLES[];
   filterChains: ChainSlug[];
   filterContracts: CORE_CONTRACTS[];
-  includeSwitchboard: boolean;
   newRoleStatus: boolean;
   sendTransaction: boolean;
 }
@@ -59,6 +52,9 @@ let otherTxns: {
   }[];
 } = {};
 
+const isRoleChanged = (hasRole:boolean, newRoleStatus:boolean) => {
+  return (!hasRole && newRoleStatus) || (hasRole && !newRoleStatus);
+}
 const addTransaction = (
   chainId: ChainSlug,
   contractName: CORE_CONTRACTS,
@@ -68,10 +64,7 @@ const addTransaction = (
   userAddress: string,
   newRoleStatus: boolean
 ) => {
-  if (
-    (hasRole === false && newRoleStatus === true) ||
-    (hasRole === true && newRoleStatus === false)
-  ) {
+  if (isRoleChanged(hasRole, newRoleStatus)) {
     if (!roleTxns[chainId]) roleTxns[chainId] = {};
     if (!roleTxns[chainId]![contractName])
       roleTxns[chainId]![contractName] = [];
@@ -183,8 +176,9 @@ const executeOtherTransactions = async (chainId: ChainSlug, wallet: Wallet) => {
       to,
       data,
     });
-    await tx.wait();
     console.log(`to: ${to}, txHash: ${tx?.hash}`);
+    await tx.wait();
+    console.log(`txHash: ${tx?.hash} COMPLETE`);
   }
 };
 
@@ -214,7 +208,6 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
       filterChains,
       filterContracts,
       filterRoles,
-      includeSwitchboard,
       newRoleStatus,
     } = params;
 
@@ -236,18 +229,15 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
           siblingSlugs = MainnetIds.filter(
             (chainSlug) => chainSlug !== chainId
           );
-        console.log(chainId, " Sibling Slugs: ", siblingSlugs);
+        // console.log(chainId, " Sibling Slugs: ", siblingSlugs);
 
         console.log(
-          "checking for network: ",
+          "============= checking for network: ",
           networkToChainSlug[chainId],
           "================="
         );
         let addresses = await getAddresses(chainId);
 
-        let integrations = addresses?.integrations;
-        // let integrationChainIds = integrations ? Object.keys(integrations) : [];
-        // console.log(addresses);
         let provider = getProviderFromChainName(
           networkToChainSlug[chainId] as keyof typeof chainSlugs
         );
@@ -263,6 +253,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
             roleStatus[chainId][contractName] = {};
 
             let contractAddress: string | undefined;
+            // In case of native switchboard, check for address under integrations->NATIVE_BRIDGE
             if (contractName === CORE_CONTRACTS.NativeSwitchboard) {
               for (let i = 0; i < siblingSlugs.length; i++) {
                 contractAddress =
@@ -314,57 +305,65 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                 contractName as keyof typeof REQUIRED_CHAIN_ROLES
               ];
 
-            if (requiredChainRoles?.length)
-              await Promise.all(
-                siblingSlugs.map(async (siblingSlug) => {
-                  roleStatus[chainId][contractName][siblingSlug] = {};
+            if (!requiredChainRoles?.length) return;
+            await Promise.all(
+              siblingSlugs.map(async (siblingSlug) => {
+                roleStatus[chainId][contractName][siblingSlug] = {};
 
-                  await Promise.all(
-                    requiredChainRoles.map(async (role) => {
-                      if (filterRoles.length > 0 && !filterRoles.includes(role))
-                        return;
-                      let hasRole = await instance.callStatic[
-                        "hasRole(bytes32,address)"
-                      ](
-                        getChainRoleHash(role, Number(siblingSlug)),
-                        userAddress
-                      );
-                      roleStatus[chainId][contractName][siblingSlug][role] =
-                        hasRole;
-                      console.log(chainId, contractName, role, hasRole);
+                await Promise.all(
+                  requiredChainRoles.map(async (role) => {
+                    if (filterRoles.length > 0 && !filterRoles.includes(role))
+                      return;
+                    let hasRole = await instance.callStatic[
+                      "hasRole(bytes32,address)"
+                    ](
+                      getChainRoleHash(role, Number(siblingSlug)),
+                      userAddress
+                    );
+                    roleStatus[chainId][contractName][siblingSlug][role] =
+                      hasRole;
+                    // console.log(chainId, contractName, role, hasRole);
 
-                      // If Watcher role in FastSwitchboard, have to call another function
-                      // to set the role
-                      if (
-                        contractName === CORE_CONTRACTS.FastSwitchboard &&
-                        role === ROLES.WATCHER_ROLE &&
-                        !hasRole &&
-                        newRoleStatus
-                      ) {
-                        let data = instance.interface.encodeFunctionData(
+                    // If Watcher role in FastSwitchboard, have to call another function
+                    // to set the role
+                    if (
+                      contractName === CORE_CONTRACTS.FastSwitchboard &&
+                      role === ROLES.WATCHER_ROLE && 
+                      isRoleChanged(hasRole, newRoleStatus)
+                    ) {
+                      let data;
+                      if (newRoleStatus) {
+                        data = instance.interface.encodeFunctionData(
                           "grantWatcherRole",
                           [siblingSlug, userAddress]
-                        );
-                        if (!otherTxns[chainId]) otherTxns[chainId] = [];
-                        otherTxns[chainId]?.push({
-                          to: instance.address,
-                          data,
-                        });
+                        ); 
                       } else {
-                        addTransaction(
-                          chainId,
-                          contractName as CORE_CONTRACTS,
-                          contractAddress!,
-                          hasRole,
-                          getChainRoleHash(role, Number(siblingSlug)),
-                          userAddress,
-                          newRoleStatus
-                        );
+                        data = instance.interface.encodeFunctionData(
+                          "revokeWatcherRole",
+                          [siblingSlug, userAddress]
+                        ); 
                       }
-                    })
-                  );
-                })
-              );
+                      
+                      if (!otherTxns[chainId]) otherTxns[chainId] = [];
+                      otherTxns[chainId]?.push({
+                        to: instance.address,
+                        data,
+                      });
+                    } else {
+                      addTransaction(
+                        chainId,
+                        contractName as CORE_CONTRACTS,
+                        contractAddress!,
+                        hasRole,
+                        getChainRoleHash(role, Number(siblingSlug)),
+                        userAddress,
+                        newRoleStatus
+                      );
+                    }
+                  })
+                );
+              })
+            );
           })
         );
       })
@@ -396,15 +395,18 @@ const main = async () => {
   let transmitterAddress = "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e";
   let watcherAddress = "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e";
 
+  let sendTransaction = false;
+  let newRoleStatus = false;
+  let filterChains = [ChainSlug.MUMBAI];
+
   // // Grant rescue and governance role for GasPriceOracle
   // await checkAndUpdateRoles({
   //   userAddress: ownerAddress,
   //   filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
   //   filterContracts: [CORE_CONTRACTS.GasPriceOracle],
-  //   filterChains: [ChainSlug.GOERLI],
-  //   sendTransaction: false,
-  //   includeSwitchboard: false,
-  //   newRoleStatus: true,
+  //   filterChains,
+  //   sendTransaction,
+  //   newRoleStatus,
   // });
 
   // // Grant rescue,withdraw and governance role for Execution Manager to owner
@@ -416,10 +418,9 @@ const main = async () => {
   //     ROLES.WITHDRAW_ROLE,
   //   ],
   //   filterContracts: [CORE_CONTRACTS.ExecutionManager],
-  //   filterChains: [ChainSlug.GOERLI],
-  //   sendTransaction: false,
-  //   includeSwitchboard: false,
-  //   newRoleStatus: true,
+  //   filterChains,
+  //   sendTransaction,
+  //   newRoleStatus,
   // });
 
   // // Grant executor role for Execution Manager to executorAddress
@@ -427,10 +428,9 @@ const main = async () => {
   //   userAddress: executorAddress,
   //   filterRoles: [ROLES.EXECUTOR_ROLE],
   //   filterContracts: [CORE_CONTRACTS.ExecutionManager],
-  //   filterChains: [ChainSlug.GOERLI],
-  //   sendTransaction: false,
-  //   includeSwitchboard: false,
-  //   newRoleStatus: true,
+  //   filterChains,
+  //   sendTransaction,
+  //   newRoleStatus,
   // });
 
   // // Grant owner roles for TransmitManager
@@ -442,10 +442,9 @@ const main = async () => {
   //     ROLES.WITHDRAW_ROLE,
   //   ],
   //   filterContracts: [CORE_CONTRACTS.TransmitManager],
-  //   filterChains: [ChainSlug.GOERLI],
-  //   sendTransaction: false,
-  //   includeSwitchboard: false,
-  //   newRoleStatus: true,
+  //   filterChains,
+  //   sendTransaction,
+  //   newRoleStatus,
   // });
 
   // // Grant roles to transmitterAddress on TransmitManager
@@ -453,10 +452,9 @@ const main = async () => {
   //   userAddress: transmitterAddress,
   //   filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE, ROLES.TRANSMITTER_ROLE],
   //   filterContracts: [CORE_CONTRACTS.TransmitManager],
-  //   filterChains: [ChainSlug.GOERLI],
-  //   sendTransaction: false,
-  //   includeSwitchboard: false,
-  //   newRoleStatus: true,
+  //   filterChains,
+  //   sendTransaction,
+  //   newRoleStatus,
   // });
 
   // // Grant owner roles in socket
@@ -464,10 +462,9 @@ const main = async () => {
   //   userAddress: ownerAddress,
   //   filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
   //   filterContracts: [CORE_CONTRACTS.Socket],
-  //   filterChains: [ChainSlug.GOERLI],
-  //   sendTransaction: false,
-  //   includeSwitchboard: false,
-  //   newRoleStatus: true,
+  //   filterChains,
+  //   sendTransaction,
+  //   newRoleStatus,
   // });
 
   // // Setup Fast Switchboard roles except WATCHER - TODO : setup for watcher
@@ -475,20 +472,18 @@ const main = async () => {
   //   userAddress: ownerAddress,
   //   filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE, ROLES.TRIP_ROLE, ROLES.UNTRIP_ROLE, ROLES.GAS_LIMIT_UPDATER_ROLE, ROLES.WITHDRAW_ROLE],
   //   filterContracts: [CORE_CONTRACTS.FastSwitchboard],
-  //   filterChains: [ChainSlug.GOERLI],
-  //   sendTransaction: false,
-  //   includeSwitchboard: false,
-  //   newRoleStatus: true,
+  //   filterChains,
+  //   sendTransaction,
+  //   newRoleStatus,
   // });
 
   await checkAndUpdateRoles({
     userAddress: watcherAddress,
     filterRoles: [ROLES.WATCHER_ROLE],
     filterContracts: [CORE_CONTRACTS.FastSwitchboard],
-    filterChains: [...TestnetIds],
-    sendTransaction: false,
-    includeSwitchboard: false,
-    newRoleStatus: true,
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
   });
 
   // // setup roles for optimistic switchboard
@@ -496,10 +491,9 @@ const main = async () => {
   //   userAddress: ownerAddress,
   //   filterRoles: [], // all roles
   //   filterContracts: [CORE_CONTRACTS.OptimisticSwitchboard],
-  //   filterChains: [ChainSlug.GOERLI],
-  //   sendTransaction: false,
-  //   includeSwitchboard: false,
-  //   newRoleStatus: true,
+  //   filterChains,
+  //   sendTransaction,
+  //   newRoleStatus,
   // });
 
   // // Grant owner roles in NativeSwitchboard
@@ -507,21 +501,19 @@ const main = async () => {
   //   userAddress: ownerAddress,
   //   filterRoles: [ROLES.TRIP_ROLE, ROLES.UNTRIP_ROLE, ROLES.GOVERNANCE_ROLE, ROLES.WITHDRAW_ROLE, ROLES.RESCUE_ROLE], // all roles
   //   filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
-  //   filterChains: [ChainSlug.GOERLI],
-  //   sendTransaction: false,
-  //   includeSwitchboard: false,
-  //   newRoleStatus: true,
+  //   filterChains,
+  //   sendTransaction,
+  //   newRoleStatus,
   // });
 
-  // Grant transmitter roles in NativeSwitchboard. just one role - GAS_LIMIT_UPDATER_ROLE
+  // // Grant transmitter roles in NativeSwitchboard. just one role - GAS_LIMIT_UPDATER_ROLE
   // await checkAndUpdateRoles({
   //   userAddress: transmitterAddress,
   //   filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE], // all roles
   //   filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
-  //   filterChains: [ChainSlug.GOERLI],
-  //   sendTransaction: false,
-  //   includeSwitchboard: false,
-  //   newRoleStatus: true,
+  //   filterChains,
+  //   sendTransaction,
+  //   newRoleStatus,
   // });
 };
 
