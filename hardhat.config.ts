@@ -46,7 +46,7 @@ function getChainConfig(chain: keyof typeof chainSlugs): NetworkUserConfig {
     },
     chainId: chainSlugs[chain],
     gasPrice: gasPrice[chain] ? gasPrice[chain] : "auto",
-    url: getJsonRpcUrl(chain)[0],
+    url: getJsonRpcUrl(chain),
   };
 }
 

@@ -72,81 +72,55 @@ export const networkToChainSlug = {
 
 export const chainSlugKeys: string[] = Object.values(networkToChainSlug);
 
-export function getJsonRpcUrl(chain: ChainKey): string[] {
-  let jsonRpcUrl: string[];
+export function getJsonRpcUrl(chain: ChainKey): string {
+  let jsonRpcUrl: string;
   switch (chain) {
     case ChainKey.ARBITRUM:
-      jsonRpcUrl = [
-        process.env.ARBITRUM_RPC as string,
-        "https://arb1.arbitrum.io/rpc",
-      ];
+      jsonRpcUrl = process.env.ARBITRUM_RPC as string;
       break;
 
     case ChainKey.ARBITRUM_GOERLI:
-      jsonRpcUrl = [
-        process.env.ARB_GOERLI_RPC as string,
-        "https://goerli-rollup.arbitrum.io/rpc",
-        "https://arb-goerli.g.alchemy.com/v2/demo",
-      ];
+      jsonRpcUrl = process.env.ARB_GOERLI_RPC as string;
       break;
 
     case ChainKey.OPTIMISM:
-      jsonRpcUrl = [
-        process.env.OPTIMISM_RPC as string,
-        "https://mainnet.optimism.io",
-      ];
+      jsonRpcUrl = process.env.OPTIMISM_RPC as string;
       break;
 
     case ChainKey.OPTIMISM_GOERLI:
-      jsonRpcUrl = [
-        process.env.OPTIMISM_GOERLI_RPC as string,
-        "https://goerli.optimism.io",
-        "https://opt-goerli.g.alchemy.com/v2/demo",
-      ];
+      jsonRpcUrl = process.env.OPTIMISM_GOERLI_RPC as string;
       break;
 
     case ChainKey.POLYGON_MAINNET:
-      jsonRpcUrl = [
-        process.env.POLYGON_RPC as string,
-        "https://polygon-rpc.com/",
-      ];
+      jsonRpcUrl = process.env.POLYGON_RPC as string;
       break;
 
     case ChainKey.POLYGON_MUMBAI:
-      jsonRpcUrl = [
-        process.env.POLYGON_MUMBAI_RPC as string,
-        "https://rpc-mumbai.maticvigil.com/",
-      ];
+      jsonRpcUrl = process.env.POLYGON_MUMBAI_RPC as string;
       break;
 
     case ChainKey.AVALANCHE:
-      jsonRpcUrl = [process.env.AVAX_RPC as string];
+      jsonRpcUrl = process.env.AVAX_RPC as string;
       break;
 
     case ChainKey.BSC:
-      jsonRpcUrl = [
-        process.env.BSC_RPC as string,
-        "https://bsc-dataseed1.binance.org/",
-      ];
+      jsonRpcUrl = process.env.BSC_RPC as string;
       break;
 
     case ChainKey.BSC_TESTNET:
-      jsonRpcUrl = [
-        process.env.BSC_TESTNET_RPC as string,
-        "https://data-seed-prebsc-1-s1.binance.org:8545/",
-      ];
+      jsonRpcUrl = process.env.BSC_TESTNET_RPC as string;
       break;
 
     case ChainKey.MAINNET:
-      jsonRpcUrl = [process.env.ETHEREUM_RPC as string];
+      jsonRpcUrl = process.env.ETHEREUM_RPC as string;
       break;
 
     case ChainKey.GOERLI:
-      jsonRpcUrl = [process.env.GOERLI_RPC as string];
+      jsonRpcUrl = process.env.GOERLI_RPC as string;
       break;
 
     default:
-      jsonRpcUrl = ["https://" + chain + ".infura.io/v3/" + infuraApiKey];
+      jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
   }
 
   return jsonRpcUrl;
