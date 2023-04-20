@@ -32,19 +32,9 @@ export const main = async () => {
 
           const results = await deploySocket(signer, chain);
 
-          if (verificationDetails[chain]) {
-            verificationDetails[chain] = [
-              ...verificationDetails[chain]!,
-              ...results.verificationDetails,
-            ];
-          } else {
-            verificationDetails[chain] = results.verificationDetails;
-          }
-
+          await storeVerificationParams(results.verificationDetails, chainSlugs[chain]);
           allDeployed = results.allDeployed;
         }
-
-        await storeVerificationParams(verificationDetails, chainSlugs[chain]);
       })
     );
   } catch (error) {
