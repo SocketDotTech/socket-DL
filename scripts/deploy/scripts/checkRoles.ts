@@ -263,7 +263,8 @@ export const checkNativeSwitchboardRoles = async ({
 
           if (!roleStatus[chainId][pseudoContractName])
             roleStatus[chainId][pseudoContractName] = {};
-          roleStatus[chainId][pseudoContractName][role] = hasRole;
+          if (isRoleChanged(hasRole, newRoleStatus))
+            roleStatus[chainId][pseudoContractName][role] = hasRole;
           addTransaction(
             chainId,
             pseudoContractName,
@@ -279,6 +280,8 @@ export const checkNativeSwitchboardRoles = async ({
   );
 };
 
+let summary: { params: any; roleStatus: any }[] = [];
+
 export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
   try {
     let {
@@ -290,8 +293,8 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
       newRoleStatus,
     } = params;
 
-    (roleTxns = {}), (otherTxns = {});
-
+    (roleTxns = {}), (otherTxns = {}), (roleStatus = {});
+    console.log("================= checking for : ", params);
     let activeChainSlugs =
       filterChains.length > 0 ? filterChains : [...MainnetIds, ...TestnetIds];
     // parallelize chains
@@ -305,11 +308,11 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
 
         // console.log(chainId, " Sibling Slugs: ", siblingSlugs);
 
-        console.log(
-          "============= checking for network: ",
-          networkToChainSlug[chainId],
-          "================="
-        );
+        // console.log(
+        //   "============= checking for network: ",
+        //   networkToChainSlug[chainId],
+        //   "================="
+        // );
         let addresses = await getAddresses(chainId);
         if (!addresses) return;
         let provider = getProviderFromChainName(
@@ -364,7 +367,8 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                 let hasRole = await instance.callStatic[
                   "hasRole(bytes32,address)"
                 ](getRoleHash(role), userAddress);
-                roleStatus[chainId][contractName][role] = hasRole;
+                if (isRoleChanged(hasRole, newRoleStatus))
+                  roleStatus[chainId][contractName][role] = hasRole;
                 // console.log(chainId, contractName, role, hasRole);
                 addTransaction(
                   chainId,
@@ -395,8 +399,10 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                     let hasRole = await instance.callStatic[
                       "hasRole(bytes32,address)"
                     ](getChainRoleHash(role, Number(siblingSlug)), userAddress);
-                    roleStatus[chainId][contractName][siblingSlug][role] =
-                      hasRole;
+
+                    if (isRoleChanged(hasRole, newRoleStatus))
+                      roleStatus[chainId][contractName][siblingSlug][role] =
+                        hasRole;
                     // console.log(chainId, contractName, role, hasRole);
 
                     // If Watcher role in FastSwitchboard, have to call another function
@@ -444,20 +450,22 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
       })
     );
 
-    console.log(roleStatus, JSON.stringify(roleStatus));
-    console.log(
-      "send transaction: ",
-      sendTransaction,
-      "roleTxns : ",
-      roleTxns,
-      JSON.stringify(roleTxns),
-      "other txns: ",
-      otherTxns,
-      JSON.stringify(otherTxns)
-    );
+    console.log(JSON.stringify(roleStatus));
+    // console.log(
+    //   "send transaction: ",
+    //   sendTransaction,
+    //   "roleTxns : ",
+    //   roleTxns,
+    //   JSON.stringify(roleTxns),
+    //   "other txns: ",
+    //   otherTxns,
+    //   JSON.stringify(otherTxns)
+    // );
 
     if (sendTransaction)
       await executeTransactions(activeChainSlugs, newRoleStatus);
+
+    summary.push({ params, roleStatus });
   } catch (error) {
     console.log("Error while checking roles", error);
     throw error;
@@ -471,7 +479,7 @@ const main = async () => {
   let watcherAddress = "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e";
 
   let sendTransaction = false;
-  let newRoleStatus = true;
+  let newRoleStatus = false;
   let filterChains = [...MainnetIds];
 
   // // Grant rescue and governance role for GasPriceOracle
@@ -619,6 +627,16 @@ const main = async () => {
     filterChains,
     sendTransaction,
     newRoleStatus,
+  });
+
+  console.log(
+    "=========================== SUMMARY ================================="
+  );
+
+  summary.forEach((result) => {
+    console.log("=============================================");
+    console.log(result.params);
+    console.log(result.roleStatus);
   });
 };
 
