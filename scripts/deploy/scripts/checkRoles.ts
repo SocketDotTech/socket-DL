@@ -37,7 +37,7 @@ interface checkAndUpdateRolesObj {
 
 let roleTxns: {
   [chainId in ChainSlug]?: {
-    [contractName:string]: {
+    [contractName: string]: {
       to: string;
       role: string;
       grantee: string;
@@ -231,7 +231,7 @@ export const checkNativeSwitchboardRoles = async ({
 
   await Promise.all(
     siblingSlugs.map(async (siblingSlug) => {
-      let pseudoContractName = contractName+"_"+String(siblingSlug);
+      let pseudoContractName = contractName + "_" + String(siblingSlug);
       let contractAddress =
         addresses?.["integrations"]?.[siblingSlug]?.[IntegrationTypes.native]
           ?.switchboard;
@@ -260,7 +260,7 @@ export const checkNativeSwitchboardRoles = async ({
             getRoleHash(role),
             userAddress
           );
-     
+
           if (!roleStatus[chainId][pseudoContractName])
             roleStatus[chainId][pseudoContractName] = {};
           roleStatus[chainId][pseudoContractName][role] = hasRole;
@@ -290,7 +290,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
       newRoleStatus,
     } = params;
 
-    roleTxns = {}, otherTxns = {};
+    (roleTxns = {}), (otherTxns = {});
 
     let activeChainSlugs =
       filterChains.length > 0 ? filterChains : [...MainnetIds, ...TestnetIds];
@@ -344,7 +344,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
             //@ts-ignore
             contractAddress =
               addresses?.[contractName as keyof ChainSocketAddresses];
-          
+
             if (!contractAddress) {
               console.log(chainId, " address not present: ", contractName);
               return;
@@ -508,19 +508,20 @@ const main = async () => {
   //   newRoleStatus,
   // });
 
-  // // Grant owner roles for TransmitManager
-  // await checkAndUpdateRoles({
-  //   userAddress: ownerAddress,
-  //   filterRoles: [
-  //     ROLES.RESCUE_ROLE,
-  //     ROLES.GOVERNANCE_ROLE,
-  //     ROLES.WITHDRAW_ROLE,
-  //   ],
-  //   filterContracts: [CORE_CONTRACTS.TransmitManager],
-  //   filterChains,
-  //   sendTransaction,
-  //   newRoleStatus,
-  // });
+  // Grant owner roles for TransmitManager
+  await checkAndUpdateRoles({
+    userAddress: ownerAddress,
+    filterRoles: [
+      ROLES.RESCUE_ROLE,
+      ROLES.GOVERNANCE_ROLE,
+      ROLES.WITHDRAW_ROLE,
+      ROLES.GAS_LIMIT_UPDATER_ROLE
+    ],
+    filterContracts: [CORE_CONTRACTS.TransmitManager],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
 
   // // Grant roles to transmitterAddress on TransmitManager
   // await checkAndUpdateRoles({
@@ -551,7 +552,8 @@ const main = async () => {
   //   sendTransaction,
   //   newRoleStatus,
   // });
-
+  
+  // Grant watcher role to watcher for FastSwitchboard
   await checkAndUpdateRoles({
     userAddress: watcherAddress,
     filterRoles: [ROLES.WATCHER_ROLE],
@@ -561,10 +563,20 @@ const main = async () => {
     newRoleStatus,
   });
 
+  // Grant watcher role to watcher for OptimisticSwitchboard
+  await checkAndUpdateRoles({
+    userAddress: watcherAddress,
+    filterRoles: [ROLES.WATCHER_ROLE],
+    filterContracts: [CORE_CONTRACTS.OptimisticSwitchboard],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
   // // setup roles for optimistic switchboard
   // await checkAndUpdateRoles({
   //   userAddress: ownerAddress,
-  //   filterRoles: [], // all roles
+  //   filterRoles: [ROLES.TRIP_ROLE, ROLES.UNTRIP_ROLE, ROLES.GAS_LIMIT_UPDATER_ROLE,], // all roles
   //   filterContracts: [CORE_CONTRACTS.OptimisticSwitchboard],
   //   filterChains,
   //   sendTransaction,
@@ -574,7 +586,14 @@ const main = async () => {
   // Grant owner roles in NativeSwitchboard
   await checkAndUpdateRoles({
     userAddress: ownerAddress,
-    filterRoles: [ROLES.TRIP_ROLE, ROLES.UNTRIP_ROLE, ROLES.GOVERNANCE_ROLE, ROLES.WITHDRAW_ROLE, ROLES.RESCUE_ROLE], // all roles
+    filterRoles: [
+      ROLES.TRIP_ROLE,
+      ROLES.UNTRIP_ROLE,
+      ROLES.GOVERNANCE_ROLE,
+      ROLES.WITHDRAW_ROLE,
+      ROLES.RESCUE_ROLE,
+      ROLES.GAS_LIMIT_UPDATER_ROLE
+    ], // all roles
     filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
     filterChains,
     sendTransaction,
