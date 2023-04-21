@@ -1,6 +1,5 @@
 import { Contract, Signer } from "ethers";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { getSigner } from "./utils/relayer.config";
 import * as TransmitManagerABI from "../../artifacts/contracts/TransmitManager.sol/TransmitManager.json";
 import { isTransactionSuccessful } from "./utils/transaction-helper";
 
@@ -8,13 +7,11 @@ export const setProposeGasLimit = async (
   srcChainId: number,
   dstChainId: number,
   transmitManagerAddress: string,
-  proposeGasLimit: number
+  proposeGasLimit: number,
+  signer: Signer
 ) => {
   try {
-    const signer: Signer = getSigner(srcChainId);
-
     const transmitterAddress: string = await signer.getAddress();
-
     const transmitManagerInstance: Contract = new Contract(
       transmitManagerAddress,
       TransmitManagerABI.abi,
@@ -40,7 +37,6 @@ export const setProposeGasLimit = async (
     );
 
     const signature = await signer.signMessage(arrayify(digest));
-
     const tx = await transmitManagerInstance.setProposeGasLimit(
       nonce,
       dstChainId,
@@ -49,10 +45,8 @@ export const setProposeGasLimit = async (
     );
 
     await tx.wait();
-
     return isTransactionSuccessful(tx.hash, srcChainId);
   } catch (error) {
     console.log("Error while sending transaction", error);
-    throw error;
   }
 };

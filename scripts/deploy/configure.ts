@@ -1,7 +1,13 @@
 import fs from "fs";
 import hre from "hardhat";
 import { constants } from "ethers";
-import { networkToChainSlug, switchboards } from "../constants";
+import {
+  attestGasLimit,
+  executionOverhead,
+  networkToChainSlug,
+  proposeGasLimit,
+  switchboards,
+} from "../constants";
 import {
   deployedAddressPath,
   getInstance,
@@ -20,6 +26,9 @@ import {
   isTestnet,
 } from "../../src";
 import registerSwitchBoard from "./registerSwitchboard";
+import { setProposeGasLimit } from "../limits-updater/set-propose-gaslimit";
+import { setAttestGasLimit } from "../limits-updater/set-attest-gaslimit";
+import { setExecutionOverhead } from "../limits-updater/set-execution-overhead";
 
 const capacitorType = 1;
 const maxPacketLength = 10;
@@ -110,6 +119,41 @@ export const main = async () => {
           await storeAddresses(updatedDeploymentAddresses, chain);
         })
       );
+
+      // set gas limit for all siblings
+      for (let sibling of siblingSlugs) {
+        await setProposeGasLimit(
+          chain,
+          sibling,
+          addr["TransmitManager"],
+          proposeGasLimit[networkToChainSlug[sibling]],
+          socketSigner
+        );
+
+        await setAttestGasLimit(
+          chain,
+          sibling,
+          addr["FastSwitchboard"],
+          attestGasLimit[networkToChainSlug[sibling]],
+          socketSigner
+        );
+
+        await setExecutionOverhead(
+          chain,
+          sibling,
+          addr["FastSwitchboard"],
+          executionOverhead[networkToChainSlug[sibling]],
+          socketSigner
+        );
+
+        await setExecutionOverhead(
+          chain,
+          sibling,
+          addr["OptimisticSwitchboard"],
+          executionOverhead[networkToChainSlug[sibling]],
+          socketSigner
+        );
+      }
     }
 
     await setRemoteSwitchboards(addresses);
