@@ -515,7 +515,7 @@ const main = async () => {
       ROLES.RESCUE_ROLE,
       ROLES.GOVERNANCE_ROLE,
       ROLES.WITHDRAW_ROLE,
-      ROLES.GAS_LIMIT_UPDATER_ROLE
+      ROLES.GAS_LIMIT_UPDATER_ROLE,
     ],
     filterContracts: [CORE_CONTRACTS.TransmitManager],
     filterChains,
@@ -552,7 +552,7 @@ const main = async () => {
   //   sendTransaction,
   //   newRoleStatus,
   // });
-  
+
   // Grant watcher role to watcher for FastSwitchboard
   await checkAndUpdateRoles({
     userAddress: watcherAddress,
@@ -592,7 +592,7 @@ const main = async () => {
       ROLES.GOVERNANCE_ROLE,
       ROLES.WITHDRAW_ROLE,
       ROLES.RESCUE_ROLE,
-      ROLES.GAS_LIMIT_UPDATER_ROLE
+      ROLES.GAS_LIMIT_UPDATER_ROLE,
     ], // all roles
     filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
     filterChains,
