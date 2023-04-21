@@ -1,11 +1,16 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { getInstance, getChainSlug, deployedAddressPath } from "../utils";
 import { Contract } from "ethers";
+import { DeploymentMode } from "../../constants";
 
 const remoteChainSlug = "";
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
 export const main = async () => {
   try {
@@ -16,7 +21,7 @@ export const main = async () => {
     const fees = "20000000000000000";
 
     const config: any = JSON.parse(
-      fs.readFileSync(deployedAddressPath, "utf-8")
+      fs.readFileSync(deployedAddressPath(mode), "utf-8")
     );
 
     const { counterOwner } = await getNamedAccounts();

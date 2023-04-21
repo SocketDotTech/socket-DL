@@ -4,7 +4,6 @@ import {
   deployContractWithArgs,
   storeAddresses,
   getInstance,
-  getRoleHash,
 } from "./utils";
 import { chainSlugs } from "../constants/networks";
 

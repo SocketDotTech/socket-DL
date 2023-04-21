@@ -1,16 +1,25 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
 import { Contract, providers, Wallet } from "ethers";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { getInstance, deployedAddressPath } from "../../deploy/utils";
 import { ChainSocketAddresses } from "../../deploy/types";
 import { packPacketId } from "../../deploy/scripts/packetId";
-import { chainSlugs, getJsonRpcUrl, contractNames } from "../../constants";
+import {
+  chainSlugs,
+  getJsonRpcUrl,
+  contractNames,
+  DeploymentMode,
+} from "../../constants";
 
 // get providers for source and destination
 const localChain = "goerli";
 const remoteChain = "optimism-goerli";
 const ATTEST_GAS_LIMIT = 800000;
 const outboundTxHash = "";
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
 const walletPrivateKey = process.env.DEVNET_PRIVKEY;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
@@ -18,10 +27,12 @@ const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 
 export const main = async () => {
   try {
-    if (!fs.existsSync(deployedAddressPath)) {
+    if (!fs.existsSync(deployedAddressPath(mode))) {
       throw new Error("addresses.json not found");
     }
-    const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
+    const addresses = JSON.parse(
+      fs.readFileSync(deployedAddressPath(mode), "utf-8")
+    );
 
     if (
       !addresses[chainSlugs[localChain]] ||

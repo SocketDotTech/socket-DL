@@ -1,3 +1,6 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -9,16 +12,19 @@ import {
   deployedAddressPath,
 } from "../utils";
 import { Contract } from "ethers";
+import { DeploymentMode } from "../../constants";
+
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
 export const main = async () => {
   try {
     const chainSlug = await getChainSlug();
-    if (!fs.existsSync(deployedAddressPath + chainSlug + ".json")) {
+    if (!fs.existsSync(deployedAddressPath(mode) + chainSlug + ".json")) {
       throw new Error("Deployed Addresses not found");
     }
 
     const config: any = JSON.parse(
-      fs.readFileSync(deployedAddressPath + chainSlug + ".json", "utf-8")
+      fs.readFileSync(deployedAddressPath(mode) + chainSlug + ".json", "utf-8")
     );
     const { socketOwner } = await getNamedAccounts();
 
@@ -27,8 +33,7 @@ export const main = async () => {
 
     const signatureVerifier: Contract = await deployContractWithoutArgs(
       "SignatureVerifier",
-      socketSigner,
-      "contracts/utils/SignatureVerifier.sol"
+      socketSigner
     );
     console.log(
       signatureVerifier.address,

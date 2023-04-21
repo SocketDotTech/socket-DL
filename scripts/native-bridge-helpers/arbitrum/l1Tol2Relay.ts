@@ -1,3 +1,6 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
 import { Contract, providers, Wallet, BigNumber, utils } from "ethers";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
@@ -7,13 +10,14 @@ import { L1TransactionReceipt, L1ToL2MessageStatus } from "@arbitrum/sdk";
 
 import { getInstance, deployedAddressPath } from "../../deploy/utils";
 import { packPacketId } from "../../deploy/scripts/packetId";
-import { chainSlugs, getJsonRpcUrl, contractNames } from "../../constants";
+import { chainSlugs, getJsonRpcUrl, DeploymentMode } from "../../constants";
 
 // get providers for source and destination
 const localChain = "goerli";
 const remoteChain = "arbitrum-goerli";
 const outboundTx =
   "0x6a2da0a61caf7f724125e5a2b90431a3c0d8f6977450c1ea98f983847f657690";
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
 const walletPrivateKey = process.env.DEVNET_PRIVKEY;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
@@ -107,10 +111,12 @@ export const getBridgeParams = async (
 
 export const main = async () => {
   try {
-    if (!fs.existsSync(deployedAddressPath)) {
+    if (!fs.existsSync(deployedAddressPath(mode))) {
       throw new Error("addresses.json not found");
     }
-    const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
+    const addresses = JSON.parse(
+      fs.readFileSync(deployedAddressPath(mode), "utf-8")
+    );
 
     if (
       !addresses[chainSlugs[localChain]] ||

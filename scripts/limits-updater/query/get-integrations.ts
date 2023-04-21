@@ -1,6 +1,11 @@
-import { chainSlugs } from "../../constants";
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
+import { DeploymentMode, chainSlugs } from "../../constants";
 import { ChainSocketAddresses } from "../../../src/types";
 import { getAddresses } from "../../deploy/utils";
+
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
 // npx ts-node scripts/deploy/get-integrations.ts
 export const getIntegrationsForAChainSlug = async (
@@ -9,7 +14,8 @@ export const getIntegrationsForAChainSlug = async (
   const chainId = chainSlugs[chainSlug];
 
   const deployedAddressConfig: ChainSocketAddresses = (await getAddresses(
-    chainId
+    chainId,
+    mode
   )) as ChainSocketAddresses;
 
   console.log(
