@@ -9,7 +9,16 @@ import {
   getSwitchboardAddress,
   storeAddresses,
 } from "./utils";
-import { ChainSlug, IntegrationTypes, NativeSwitchboard } from "../../src";
+import {
+  ChainSlug,
+  ChainSocketAddresses,
+  DeploymentAddresses,
+  IntegrationTypes,
+  MainnetIds,
+  NativeSwitchboard,
+  TestnetIds,
+  isTestnet,
+} from "../../src";
 import registerSwitchBoard from "./registerSwitchboard";
 
 const capacitorType = 1;
@@ -20,24 +29,38 @@ export const main = async () => {
     if (!fs.existsSync(deployedAddressPath)) {
       throw new Error("addresses.json not found");
     }
-    let addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
-    const chains: ChainSlug[] = Object.keys(addresses) as any as ChainSlug[];
+    let addresses: DeploymentAddresses = JSON.parse(
+      fs.readFileSync(deployedAddressPath, "utf-8")
+    );
+    let chains = [...TestnetIds, ...MainnetIds];
     let chain: ChainSlug;
 
     for (chain of chains) {
+      if (!addresses[chain]) continue;
+
       await hre.changeNetwork(networkToChainSlug[chain]);
       const { socketSigner } = await getSigners();
-      const integrations = addresses[chain]["integrations"];
 
-      if (!addresses[chain]["integrations"]) continue;
+      const addr: ChainSocketAddresses = addresses[chain]!;
+      if (!addr["integrations"]) continue;
+
+      const integrations = addr["integrations"] ?? {};
       const integrationList = Object.keys(integrations);
 
+      const list = isTestnet(chain) ? TestnetIds : MainnetIds;
+      const siblingSlugs: ChainSlug[] = list.filter(
+        (chainSlug) => chainSlug !== chain
+      );
+
       console.log(`Configuring for ${chain}`);
+      let updatedDeploymentAddresses = addr;
+
       for (let sibling of integrationList) {
         await Promise.all(
           Object.keys(integrations[sibling]).map(async (integration) => {
             const config = integrations[sibling][integration];
-            let updatedDeploymentAddresses = addresses[chain];
+            if (integration != IntegrationTypes.native) return;
+
             updatedDeploymentAddresses = await registerSwitchBoard(
               config["switchboard"],
               sibling,
@@ -52,12 +75,46 @@ export const main = async () => {
           })
         );
       }
+
+      // register fast
+      await Promise.all(
+        siblingSlugs.map(async (sibling) => {
+          updatedDeploymentAddresses = await registerSwitchBoard(
+            addr["FastSwitchboard"],
+            sibling,
+            capacitorType,
+            maxPacketLength,
+            socketSigner,
+            IntegrationTypes.fast,
+            updatedDeploymentAddresses
+          );
+
+          await storeAddresses(updatedDeploymentAddresses, chain);
+        })
+      );
+
+      // register optimistic
+      await Promise.all(
+        siblingSlugs.map(async (sibling) => {
+          let updatedDeploymentAddresses = addr;
+          updatedDeploymentAddresses = await registerSwitchBoard(
+            addr["OptimisticSwitchboard"],
+            sibling,
+            capacitorType,
+            maxPacketLength,
+            socketSigner,
+            IntegrationTypes.optimistic,
+            updatedDeploymentAddresses
+          );
+
+          await storeAddresses(updatedDeploymentAddresses, chain);
+        })
+      );
     }
 
     await setRemoteSwitchboards(addresses);
   } catch (error) {
     console.log("Error while sending transaction", error);
-    throw error;
   }
 };
 

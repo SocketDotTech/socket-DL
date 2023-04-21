@@ -1,12 +1,12 @@
 import { constants } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { createObj, getInstance, storeAddresses } from "./utils";
-import { ChainSocketAddresses, IntegrationTypes } from "../../src";
+import { createObj, getInstance } from "./utils";
+import { ChainSlug, ChainSocketAddresses } from "../../src";
 
 export default async function registerSwitchBoard(
   switchBoardAddress: string,
-  remoteChainSlug: string,
+  remoteChainSlug: string | ChainSlug,
   capacitorType: number,
   maxPacketLength: number,
   signer: SignerWithAddress,
@@ -42,19 +42,29 @@ export default async function registerSwitchBoard(
       remoteChainSlug
     );
 
-    config = setCapacitorPair(config, remoteChainSlug, integrationType, {
-      capacitor,
-      decapacitor,
-    });
-
-    return config;
+    config = setCapacitorPair(
+      config,
+      remoteChainSlug,
+      integrationType,
+      {
+        capacitor,
+        decapacitor,
+      },
+      switchBoardAddress
+    );
   } catch (error) {
     console.log("Error in registering switchboards", error);
-    throw error;
   }
+  return config;
 }
 
-function setCapacitorPair(config, chainSlug, integrationType, contracts) {
+function setCapacitorPair(
+  config,
+  chainSlug,
+  integrationType,
+  contracts,
+  switchboard
+) {
   config = createObj(
     config,
     ["integrations", chainSlug, integrationType, "capacitor"],
@@ -65,6 +75,12 @@ function setCapacitorPair(config, chainSlug, integrationType, contracts) {
     config,
     ["integrations", chainSlug, integrationType, "decapacitor"],
     contracts["decapacitor"]
+  );
+
+  config = createObj(
+    config,
+    ["integrations", chainSlug, integrationType, "switchboard"],
+    switchboard
   );
 
   return config;
