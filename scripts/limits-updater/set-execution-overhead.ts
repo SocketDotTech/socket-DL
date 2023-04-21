@@ -42,9 +42,8 @@ export const setExecutionOverhead = async (
       executionOverhead,
       signature
     );
-
+    console.log("setting execution overhead", tx.hash, srcChainId);
     await tx.wait();
-
     return isTransactionSuccessful(tx.hash, srcChainId);
   } catch (error) {
     console.log("Error while sending transaction", error);
