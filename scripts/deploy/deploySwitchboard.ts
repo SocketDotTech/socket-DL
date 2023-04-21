@@ -12,35 +12,42 @@ export default async function deploySwitchboards(
 ): Promise<Object> {
   let result: any = { sourceConfig, verificationDetails };
 
-  result = await deploySwitchboard(
-    IntegrationTypes.fast,
-    network,
-    "",
-    signer,
-    sourceConfig,
-    verificationDetails
-  );
-
-  result = await deploySwitchboard(
-    IntegrationTypes.optimistic,
-    network,
-    "",
-    signer,
-    result.sourceConfig,
-    result.verificationDetails
-  );
-
-  if (!switchboards[network]) return sourceConfig;
-  const siblings = Object.keys(switchboards[network]);
-  for (let index = 0; index < siblings.length; index++) {
+  if (!sourceConfig.FastSwitchboard)
     result = await deploySwitchboard(
-      IntegrationTypes.native,
+      IntegrationTypes.fast,
       network,
-      siblings[index],
+      "",
+      signer,
+      sourceConfig,
+      verificationDetails
+    );
+
+  if (!sourceConfig.OptimisticSwitchboard)
+    result = await deploySwitchboard(
+      IntegrationTypes.optimistic,
+      network,
+      "",
       signer,
       result.sourceConfig,
       result.verificationDetails
     );
+
+  if (!switchboards[network]) return result;
+  const siblings = Object.keys(switchboards[network]);
+  for (let index = 0; index < siblings.length; index++) {
+    if (
+      !sourceConfig?.integrations?.[chainSlugs[siblings[index]]]?.[
+        IntegrationTypes.native
+      ]?.["switchboard"]
+    )
+      result = await deploySwitchboard(
+        IntegrationTypes.native,
+        network,
+        siblings[index],
+        signer,
+        result.sourceConfig,
+        result.verificationDetails
+      );
   }
 
   return {

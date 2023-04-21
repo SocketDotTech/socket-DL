@@ -32,6 +32,7 @@ import { setExecutionOverhead } from "../limits-updater/set-execution-overhead";
 
 const capacitorType = 1;
 const maxPacketLength = 10;
+let chains = [...TestnetIds, ...MainnetIds];
 
 export const main = async () => {
   try {
@@ -41,7 +42,6 @@ export const main = async () => {
     let addresses: DeploymentAddresses = JSON.parse(
       fs.readFileSync(deployedAddressPath, "utf-8")
     );
-    let chains = [...TestnetIds, ...MainnetIds];
     let chain: ChainSlug;
 
     for (chain of chains) {
