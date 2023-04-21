@@ -475,38 +475,38 @@ const main = async () => {
   let filterChains = [...MainnetIds];
 
   // // Grant rescue and governance role for GasPriceOracle
-  // await checkAndUpdateRoles({
-  //   userAddress: ownerAddress,
-  //   filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
-  //   filterContracts: [CORE_CONTRACTS.GasPriceOracle],
-  //   filterChains,
-  //   sendTransaction,
-  //   newRoleStatus,
-  // });
+  await checkAndUpdateRoles({
+    userAddress: ownerAddress,
+    filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
+    filterContracts: [CORE_CONTRACTS.GasPriceOracle],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
 
   // // Grant rescue,withdraw and governance role for Execution Manager to owner
-  // await checkAndUpdateRoles({
-  //   userAddress: ownerAddress,
-  //   filterRoles: [
-  //     ROLES.RESCUE_ROLE,
-  //     ROLES.GOVERNANCE_ROLE,
-  //     ROLES.WITHDRAW_ROLE,
-  //   ],
-  //   filterContracts: [CORE_CONTRACTS.ExecutionManager],
-  //   filterChains,
-  //   sendTransaction,
-  //   newRoleStatus,
-  // });
+  await checkAndUpdateRoles({
+    userAddress: ownerAddress,
+    filterRoles: [
+      ROLES.RESCUE_ROLE,
+      ROLES.GOVERNANCE_ROLE,
+      ROLES.WITHDRAW_ROLE,
+    ],
+    filterContracts: [CORE_CONTRACTS.ExecutionManager],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
 
   // // Grant executor role for Execution Manager to executorAddress
-  // await checkAndUpdateRoles({
-  //   userAddress: executorAddress,
-  //   filterRoles: [ROLES.EXECUTOR_ROLE],
-  //   filterContracts: [CORE_CONTRACTS.ExecutionManager],
-  //   filterChains,
-  //   sendTransaction,
-  //   newRoleStatus,
-  // });
+  await checkAndUpdateRoles({
+    userAddress: executorAddress,
+    filterRoles: [ROLES.EXECUTOR_ROLE],
+    filterContracts: [CORE_CONTRACTS.ExecutionManager],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
 
   // Grant owner roles for TransmitManager
   await checkAndUpdateRoles({
@@ -524,34 +524,41 @@ const main = async () => {
   });
 
   // // Grant roles to transmitterAddress on TransmitManager
-  // await checkAndUpdateRoles({
-  //   userAddress: transmitterAddress,
-  //   filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE, ROLES.TRANSMITTER_ROLE],
-  //   filterContracts: [CORE_CONTRACTS.TransmitManager],
-  //   filterChains,
-  //   sendTransaction,
-  //   newRoleStatus,
-  // });
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE, ROLES.TRANSMITTER_ROLE],
+    filterContracts: [CORE_CONTRACTS.TransmitManager],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
 
   // // Grant owner roles in socket
-  // await checkAndUpdateRoles({
-  //   userAddress: ownerAddress,
-  //   filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
-  //   filterContracts: [CORE_CONTRACTS.Socket],
-  //   filterChains,
-  //   sendTransaction,
-  //   newRoleStatus,
-  // });
+  await checkAndUpdateRoles({
+    userAddress: ownerAddress,
+    filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
+    filterContracts: [CORE_CONTRACTS.Socket],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
 
   // // Setup Fast Switchboard roles except WATCHER - TODO : setup for watcher
-  // await checkAndUpdateRoles({
-  //   userAddress: ownerAddress,
-  //   filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE, ROLES.TRIP_ROLE, ROLES.UNTRIP_ROLE, ROLES.GAS_LIMIT_UPDATER_ROLE, ROLES.WITHDRAW_ROLE],
-  //   filterContracts: [CORE_CONTRACTS.FastSwitchboard],
-  //   filterChains,
-  //   sendTransaction,
-  //   newRoleStatus,
-  // });
+  await checkAndUpdateRoles({
+    userAddress: ownerAddress,
+    filterRoles: [
+      ROLES.RESCUE_ROLE,
+      ROLES.GOVERNANCE_ROLE,
+      ROLES.TRIP_ROLE,
+      ROLES.UNTRIP_ROLE,
+      ROLES.GAS_LIMIT_UPDATER_ROLE,
+      ROLES.WITHDRAW_ROLE,
+    ],
+    filterContracts: [CORE_CONTRACTS.FastSwitchboard],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
 
   // Grant watcher role to watcher for FastSwitchboard
   await checkAndUpdateRoles({
@@ -573,15 +580,19 @@ const main = async () => {
     newRoleStatus,
   });
 
-  // // setup roles for optimistic switchboard
-  // await checkAndUpdateRoles({
-  //   userAddress: ownerAddress,
-  //   filterRoles: [ROLES.TRIP_ROLE, ROLES.UNTRIP_ROLE, ROLES.GAS_LIMIT_UPDATER_ROLE,], // all roles
-  //   filterContracts: [CORE_CONTRACTS.OptimisticSwitchboard],
-  //   filterChains,
-  //   sendTransaction,
-  //   newRoleStatus,
-  // });
+  // setup roles for optimistic switchboard
+  await checkAndUpdateRoles({
+    userAddress: ownerAddress,
+    filterRoles: [
+      ROLES.TRIP_ROLE,
+      ROLES.UNTRIP_ROLE,
+      ROLES.GAS_LIMIT_UPDATER_ROLE,
+    ], // all roles
+    filterContracts: [CORE_CONTRACTS.OptimisticSwitchboard],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
 
   // Grant owner roles in NativeSwitchboard
   await checkAndUpdateRoles({
@@ -600,15 +611,15 @@ const main = async () => {
     newRoleStatus,
   });
 
-  // // Grant transmitter roles in NativeSwitchboard. just one role - GAS_LIMIT_UPDATER_ROLE
-  // await checkAndUpdateRoles({
-  //   userAddress: transmitterAddress,
-  //   filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE], // all roles
-  //   filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
-  //   filterChains,
-  //   sendTransaction,
-  //   newRoleStatus,
-  // });
+  // Grant transmitter roles in NativeSwitchboard. just one role - GAS_LIMIT_UPDATER_ROLE
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE], // all roles
+    filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
 };
 
 main()
