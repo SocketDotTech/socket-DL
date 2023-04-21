@@ -65,60 +65,51 @@ export const main = async () => {
       let updatedDeploymentAddresses = addr;
 
       for (let sibling of integrationList) {
-        await Promise.all(
-          Object.keys(integrations[sibling]).map(async (integration) => {
-            const config = integrations[sibling][integration];
-            if (integration != IntegrationTypes.native) return;
-
-            updatedDeploymentAddresses = await registerSwitchBoard(
-              config["switchboard"],
-              sibling,
-              capacitorType,
-              maxPacketLength,
-              socketSigner,
-              integration,
-              updatedDeploymentAddresses
-            );
-
-            await storeAddresses(updatedDeploymentAddresses, chain);
-          })
+        const config = integrations[sibling][IntegrationTypes.native];
+        if (!config) continue;
+        updatedDeploymentAddresses = await registerSwitchBoard(
+          config["switchboard"],
+          sibling,
+          capacitorType,
+          maxPacketLength,
+          socketSigner,
+          IntegrationTypes.native,
+          updatedDeploymentAddresses
         );
+
+        await storeAddresses(updatedDeploymentAddresses, chain);
       }
 
       // register fast
-      await Promise.all(
-        siblingSlugs.map(async (sibling) => {
-          updatedDeploymentAddresses = await registerSwitchBoard(
-            addr["FastSwitchboard"],
-            sibling,
-            capacitorType,
-            maxPacketLength,
-            socketSigner,
-            IntegrationTypes.fast,
-            updatedDeploymentAddresses
-          );
+      for (let sibling of siblingSlugs) {
+        updatedDeploymentAddresses = await registerSwitchBoard(
+          addr["FastSwitchboard"],
+          sibling,
+          capacitorType,
+          maxPacketLength,
+          socketSigner,
+          IntegrationTypes.fast,
+          updatedDeploymentAddresses
+        );
 
-          await storeAddresses(updatedDeploymentAddresses, chain);
-        })
-      );
+        await storeAddresses(updatedDeploymentAddresses, chain);
+      }
 
       // register optimistic
-      await Promise.all(
-        siblingSlugs.map(async (sibling) => {
-          let updatedDeploymentAddresses = addr;
-          updatedDeploymentAddresses = await registerSwitchBoard(
-            addr["OptimisticSwitchboard"],
-            sibling,
-            capacitorType,
-            maxPacketLength,
-            socketSigner,
-            IntegrationTypes.optimistic,
-            updatedDeploymentAddresses
-          );
+      for (let sibling of siblingSlugs) {
+        let updatedDeploymentAddresses = addr;
+        updatedDeploymentAddresses = await registerSwitchBoard(
+          addr["OptimisticSwitchboard"],
+          sibling,
+          capacitorType,
+          maxPacketLength,
+          socketSigner,
+          IntegrationTypes.optimistic,
+          updatedDeploymentAddresses
+        );
 
-          await storeAddresses(updatedDeploymentAddresses, chain);
-        })
-      );
+        await storeAddresses(updatedDeploymentAddresses, chain);
+      }
 
       // set gas limit for all siblings
       for (let sibling of siblingSlugs) {
