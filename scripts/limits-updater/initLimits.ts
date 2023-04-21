@@ -1,9 +1,11 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import {
+  DeploymentMode,
   attestGasLimit,
-  chainSlugKeys,
   chainSlugs,
   executionOverhead,
-  networkToChainSlug,
   proposeGasLimit,
 } from "../constants";
 import {
@@ -17,6 +19,8 @@ import { setAttestGasLimit } from "./set-attest-gaslimit";
 import { setExecutionOverhead } from "./set-execution-overhead";
 import { setProposeGasLimit } from "./set-propose-gaslimit";
 
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
+
 export const setLimitsForAChainSlug = async (
   chainSlugCode: keyof typeof chainSlugs
 ) => {
@@ -27,7 +31,8 @@ export const setLimitsForAChainSlug = async (
     );
 
     const deployedAddressConfig = (await getAddresses(
-      chainId
+      chainId,
+      mode
     )) as ChainSocketAddresses;
 
     console.log(

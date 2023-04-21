@@ -1,23 +1,28 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
 import { getNamedAccounts, ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { getInstance, getChainSlug, deployedAddressPath } from "../utils";
 import { Contract } from "ethers";
-import { executorAddress, attesterAddress } from "../config";
+import { executorAddress, transmitterAddress } from "../../constants/config";
+import { DeploymentMode } from "../../constants";
 
 const remoteChainSlug = "";
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
 export const main = async () => {
   try {
     const chainSlug = await getChainSlug();
 
-    if (!fs.existsSync(deployedAddressPath + chainSlug + ".json")) {
+    if (!fs.existsSync(deployedAddressPath(mode) + chainSlug + ".json")) {
       throw new Error("Deployed Addresses not found");
     }
 
     const config: any = JSON.parse(
-      fs.readFileSync(deployedAddressPath + chainSlug + ".json", "utf-8")
+      fs.readFileSync(deployedAddressPath(mode) + chainSlug + ".json", "utf-8")
     );
 
     const { socketOwner } = await getNamedAccounts();
@@ -28,7 +33,7 @@ export const main = async () => {
 
     await notary
       .connect(signer)
-      .grantAttesterRole(remoteChainSlug, attesterAddress[chainSlug]);
+      .grantAttesterRole(remoteChainSlug, transmitterAddress[chainSlug]);
     await socket.connect(signer).grantExecutorRole(executorAddress[chainSlug]);
     console.log(`Assigned roles to ${executorAddress[chainSlug]}!`);
   } catch (error) {

@@ -1,15 +1,23 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import { Contract } from "ethers";
 require("dotenv").config();
 import yargs from "yargs";
-import { chainSlugs, getProviderFromChainName } from "../../constants";
+import {
+  DeploymentMode,
+  chainSlugs,
+  getProviderFromChainName,
+} from "../../constants";
 import * as CounterABI from "../../../artifacts/contracts/examples/Counter.sol/Counter.json";
 import path from "path";
 
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 const deployedAddressPath = path.join(
   __dirname,
-  "/../../../deployments/addresses.json"
+  `/../../../deployments/${mode}_addresses.json`
 );
 
 // usage:

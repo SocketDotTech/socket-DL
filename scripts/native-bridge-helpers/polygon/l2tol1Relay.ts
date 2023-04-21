@@ -1,13 +1,17 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
 import { use, POSClient } from "@maticnetwork/maticjs";
 import { Web3ClientPlugin } from "@maticnetwork/maticjs-ethers";
 import { providers, Wallet } from "ethers";
 use(Web3ClientPlugin);
 
-import { chainSlugs, contractNames, getJsonRpcUrl } from "../../constants";
+import { DeploymentMode, chainSlugs, getJsonRpcUrl } from "../../constants";
 import { deployedAddressPath, getInstance } from "../../deploy/utils";
 
 // get providers for source and destination
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 const privateKey = process.env.DEVNET_PRIVKEY;
 const sealTxHash = "";
 
@@ -21,10 +25,12 @@ const l2Wallet = new Wallet(privateKey, l2Provider);
 
 export const main = async () => {
   try {
-    if (!fs.existsSync(deployedAddressPath)) {
+    if (!fs.existsSync(deployedAddressPath(mode))) {
       throw new Error("addresses.json not found");
     }
-    const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
+    const addresses = JSON.parse(
+      fs.readFileSync(deployedAddressPath(mode), "utf-8")
+    );
 
     if (
       !addresses[chainSlugs[localChain]] ||

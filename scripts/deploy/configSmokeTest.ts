@@ -1,3 +1,6 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
 import hre from "hardhat";
 import { constants } from "ethers";
@@ -8,6 +11,7 @@ import {
   switchboards,
   watcherAddress,
   socketOwner,
+  DeploymentMode,
 } from "../constants";
 import { config } from "./config";
 import {
@@ -21,6 +25,8 @@ import {
 } from "./utils";
 import { assert } from "console";
 import { IntegrationTypes, NativeSwitchboard } from "../../src";
+
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
 async function checkNative(
   contractAddr,
@@ -454,12 +460,12 @@ export const main = async () => {
 
         if (chain === remoteChain) throw new Error("Wrong chains");
 
-        if (!fs.existsSync(deployedAddressPath)) {
+        if (!fs.existsSync(deployedAddressPath(mode))) {
           throw new Error("addresses.json not found");
         }
 
         const addresses = JSON.parse(
-          fs.readFileSync(deployedAddressPath, "utf-8")
+          fs.readFileSync(deployedAddressPath(mode), "utf-8")
         );
         if (
           !addresses[chainSlugs[chain]] ||

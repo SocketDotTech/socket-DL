@@ -2,6 +2,12 @@ import { config as dotenvConfig } from "dotenv";
 import { ethers } from "ethers";
 import { resolve } from "path";
 
+export enum DeploymentMode {
+  DEV = "dev",
+  PROD = "prod",
+  SURGE = "surge",
+}
+
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 

@@ -10,16 +10,14 @@ import {
   ChainSocketAddresses,
   DeploymentAddresses,
 } from "../../../src";
+import { DeploymentMode } from "../../constants";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-export const deployedAddressPath = path.join(
-  __dirname,
-  "/../../../deployments/addresses.json"
-);
+export const deployedAddressPath = (mode: DeploymentMode) =>
+  path.join(__dirname, `/../../../deployments/${mode}_addresses.json`);
 
-export const verificationDetailsPath = path.join(
-  __dirname,
-  "/../../../deployments/verification.json"
-);
+export const verificationDetailsPath = (mode: DeploymentMode) =>
+  path.join(__dirname, `/../../../deployments/${mode}_verification.json`);
 
 export const getRoleHash = (role: string) =>
   ethers.utils.keccak256(ethers.utils.toUtf8Bytes(role)).toString();
@@ -34,7 +32,7 @@ export const getChainRoleHash = (role: string, chainSlug: number) =>
 
 export const deployContractWithoutArgs = async (
   contractName: string,
-  signer: Wallet
+  signer: Wallet | SignerWithAddress
 ): Promise<Contract> => {
   try {
     const Contract: ContractFactory = await ethers.getContractFactory(
@@ -108,17 +106,18 @@ export const integrationType = (integrationName: string) =>
 
 export const storeAddresses = async (
   addresses: ChainSocketAddresses,
-  chainSlug: ChainSlug
+  chainSlug: ChainSlug,
+  mode: DeploymentMode
 ) => {
-  if (!fs.existsSync(deployedAddressPath)) {
-    await fs.promises.mkdir(deployedAddressPath);
+  if (!fs.existsSync(deployedAddressPath(mode))) {
+    await fs.promises.mkdir(deployedAddressPath(mode));
   }
 
-  const outputExists = fs.existsSync(deployedAddressPath);
+  const outputExists = fs.existsSync(deployedAddressPath(mode));
   let deploymentAddresses: DeploymentAddresses = {};
   if (outputExists) {
     const deploymentAddressesString = fs.readFileSync(
-      deployedAddressPath,
+      deployedAddressPath(mode),
       "utf-8"
     );
     deploymentAddresses = JSON.parse(deploymentAddressesString);
@@ -126,24 +125,25 @@ export const storeAddresses = async (
 
   deploymentAddresses[chainSlug] = addresses;
   fs.writeFileSync(
-    deployedAddressPath,
+    deployedAddressPath(mode),
     JSON.stringify(deploymentAddresses, null, 2)
   );
 };
 
 export const storeVerificationParams = async (
   verificationDetail: object,
-  chainSlug: ChainSlug
+  chainSlug: ChainSlug,
+  mode: DeploymentMode
 ) => {
-  if (!fs.existsSync(verificationDetailsPath)) {
-    await fs.promises.mkdir(verificationDetailsPath);
+  if (!fs.existsSync(verificationDetailsPath(mode))) {
+    await fs.promises.mkdir(verificationDetailsPath(mode));
   }
 
-  const outputExists = fs.existsSync(verificationDetailsPath);
+  const outputExists = fs.existsSync(verificationDetailsPath(mode));
   let verificationDetails: object = {};
   if (outputExists) {
     const verificationDetailsString = fs.readFileSync(
-      verificationDetailsPath,
+      verificationDetailsPath(mode),
       "utf-8"
     );
     verificationDetails = JSON.parse(verificationDetailsString);
@@ -151,21 +151,23 @@ export const storeVerificationParams = async (
 
   verificationDetails[chainSlug] = verificationDetail;
   fs.writeFileSync(
-    verificationDetailsPath,
+    verificationDetailsPath(mode),
     JSON.stringify(verificationDetails, null, 2)
   );
 };
 
-export const getChainSlugsFromDeployedAddresses = async () => {
-  if (!fs.existsSync(deployedAddressPath)) {
-    await fs.promises.mkdir(deployedAddressPath);
+export const getChainSlugsFromDeployedAddresses = async (
+  mode = DeploymentMode.DEV
+) => {
+  if (!fs.existsSync(deployedAddressPath(mode))) {
+    await fs.promises.mkdir(deployedAddressPath(mode));
   }
 
-  const outputExists = fs.existsSync(deployedAddressPath);
+  const outputExists = fs.existsSync(deployedAddressPath(mode));
   let deploymentAddresses: DeploymentAddresses = {};
   if (outputExists) {
     const deploymentAddressesString = fs.readFileSync(
-      deployedAddressPath,
+      deployedAddressPath(mode),
       "utf-8"
     );
     deploymentAddresses = JSON.parse(deploymentAddressesString);
@@ -174,16 +176,19 @@ export const getChainSlugsFromDeployedAddresses = async () => {
   }
 };
 
-export const getAddresses = async (chainSlug: ChainSlug) => {
-  if (!fs.existsSync(deployedAddressPath)) {
-    await fs.promises.mkdir(deployedAddressPath);
+export const getAddresses = async (
+  chainSlug: ChainSlug,
+  mode = DeploymentMode.DEV
+) => {
+  if (!fs.existsSync(deployedAddressPath(mode))) {
+    await fs.promises.mkdir(deployedAddressPath(mode));
   }
 
-  const outputExists = fs.existsSync(deployedAddressPath);
+  const outputExists = fs.existsSync(deployedAddressPath(mode));
   let deploymentAddresses: DeploymentAddresses = {};
   if (outputExists) {
     const deploymentAddressesString = fs.readFileSync(
-      deployedAddressPath,
+      deployedAddressPath(mode),
       "utf-8"
     );
     deploymentAddresses = JSON.parse(deploymentAddressesString);

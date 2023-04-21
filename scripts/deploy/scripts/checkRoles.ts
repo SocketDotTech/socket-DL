@@ -1,5 +1,6 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
+
 import {
   ChainSlug,
   TestnetIds,
@@ -17,12 +18,14 @@ import { getAddresses, getRoleHash, getChainRoleHash } from "../utils";
 import { Contract, Wallet, ethers } from "ethers";
 import { getABI } from "./getABIs";
 import {
+  DeploymentMode,
   chainSlugs,
   getProviderFromChainName,
   networkToChainSlug,
 } from "../../constants";
 
 let roleStatus: any = {};
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
 interface checkAndUpdateRolesObj {
   userAddress: string;
@@ -313,7 +316,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
         //   networkToChainSlug[chainId],
         //   "================="
         // );
-        let addresses = await getAddresses(chainId);
+        let addresses = await getAddresses(chainId, mode);
         if (!addresses) return;
         let provider = getProviderFromChainName(
           networkToChainSlug[chainId] as keyof typeof chainSlugs

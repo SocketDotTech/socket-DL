@@ -1,8 +1,16 @@
-import hre, { ethers } from "hardhat";
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
+import { ethers } from "hardhat";
 import { deploySocket } from "./deploySocket";
-import { ChainKey, chainSlugs, getProviderFromChainName } from "../constants";
+import {
+  ChainKey,
+  DeploymentMode,
+  chainSlugs,
+  getProviderFromChainName,
+} from "../constants";
 import { Wallet } from "ethers";
-import { storeVerificationParams, verify } from "./utils";
+import { storeVerificationParams } from "./utils";
 
 const chains: Array<ChainKey> = [
   ChainKey.GOERLI,
@@ -12,9 +20,7 @@ const chains: Array<ChainKey> = [
   ChainKey.BSC_TESTNET,
 ];
 
-export type VerifyParams = { [chain in ChainKey]?: any[][] };
-let verificationDetails: VerifyParams = {};
-
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 /**
  * Deploys network-independent socket contracts
  */
@@ -34,7 +40,8 @@ export const main = async () => {
 
           await storeVerificationParams(
             results.verificationDetails,
-            chainSlugs[chain]
+            chainSlugs[chain],
+            mode
           );
           allDeployed = results.allDeployed;
         }
