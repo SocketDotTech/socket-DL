@@ -44,7 +44,7 @@ export const gasPrice: {
   [ChainKey.ARBITRUM]: "auto",
   [ChainKey.ARBITRUM_GOERLI]: "auto",
   [ChainKey.OPTIMISM]: "auto",
-  [ChainKey.OPTIMISM_GOERLI]: 50000000,
+  [ChainKey.OPTIMISM_GOERLI]: "auto",
   [ChainKey.AVALANCHE]: "auto",
   [ChainKey.BSC]: "auto",
   [ChainKey.BSC_TESTNET]: "auto",
