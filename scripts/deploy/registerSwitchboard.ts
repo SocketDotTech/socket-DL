@@ -20,6 +20,14 @@ export default async function registerSwitchBoard(
       remoteChainSlug
     );
 
+    console.log(
+      switchBoardAddress,
+      maxPacketLength,
+      remoteChainSlug,
+      capacitorType,
+      "register sb"
+    );
+
     if (capacitor === constants.AddressZero) {
       const registerTx = await socket
         .connect(signer)
@@ -36,6 +44,7 @@ export default async function registerSwitchBoard(
     }
 
     // get capacitor and decapacitor for config
+    console.log(switchBoardAddress, remoteChainSlug, "get sb");
     capacitor = await socket.capacitors__(switchBoardAddress, remoteChainSlug);
     const decapacitor = await socket.decapacitors__(
       switchBoardAddress,
