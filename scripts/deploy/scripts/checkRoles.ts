@@ -37,7 +37,7 @@ interface checkAndUpdateRolesObj {
 
 let roleTxns: {
   [chainId in ChainSlug]?: {
-    [contractName in CORE_CONTRACTS]?: {
+    [contractName:string]: {
       to: string;
       role: string;
       grantee: string;
@@ -52,12 +52,12 @@ let otherTxns: {
   }[];
 } = {};
 
-const isRoleChanged = (hasRole:boolean, newRoleStatus:boolean) => {
+const isRoleChanged = (hasRole: boolean, newRoleStatus: boolean) => {
   return (!hasRole && newRoleStatus) || (hasRole && !newRoleStatus);
-}
+};
 const addTransaction = (
   chainId: ChainSlug,
-  contractName: CORE_CONTRACTS,
+  contractName: string,
   contractAddress: string,
   hasRole: boolean,
   role: string,
@@ -202,6 +202,83 @@ const executeTransactions = async (
   );
 };
 
+const getSiblingSlugs = (chainId: ChainSlug): ChainSlug[] => {
+  if (isTestnet(chainId))
+    return TestnetIds.filter((chainSlug) => chainSlug !== chainId);
+  if (isMainnet(chainId))
+    return MainnetIds.filter((chainSlug) => chainSlug !== chainId);
+  return [];
+};
+
+export const checkNativeSwitchboardRoles = async ({
+  chainId,
+  provider,
+  siblingSlugs,
+  addresses,
+  filterRoles,
+  userAddress,
+  newRoleStatus,
+}: {
+  chainId: ChainSlug;
+  siblingSlugs: ChainSlug[];
+  provider: any;
+  addresses: ChainSocketAddresses | undefined;
+  filterRoles: ROLES[];
+  userAddress: string;
+  newRoleStatus: boolean;
+}) => {
+  let contractName = CORE_CONTRACTS.NativeSwitchboard;
+
+  await Promise.all(
+    siblingSlugs.map(async (siblingSlug) => {
+      let pseudoContractName = contractName+"_"+String(siblingSlug);
+      let contractAddress =
+        addresses?.["integrations"]?.[siblingSlug]?.[IntegrationTypes.native]
+          ?.switchboard;
+
+      if (!contractAddress) {
+        // console.log(
+        //   chainId,
+        //   siblingSlug,
+        //   " address not present: ",
+        //   contractName
+        // );
+        return;
+      }
+      let instance = new Contract(
+        contractAddress,
+        getABI[contractName as keyof typeof getABI],
+        provider
+      );
+      let requiredRoles =
+        REQUIRED_ROLES[contractName as keyof typeof REQUIRED_ROLES];
+
+      await Promise.all(
+        requiredRoles.map(async (role) => {
+          if (filterRoles.length > 0 && !filterRoles.includes(role)) return;
+          let hasRole = await instance.callStatic["hasRole(bytes32,address)"](
+            getRoleHash(role),
+            userAddress
+          );
+     
+          if (!roleStatus[chainId][pseudoContractName])
+            roleStatus[chainId][pseudoContractName] = {};
+          roleStatus[chainId][pseudoContractName][role] = hasRole;
+          addTransaction(
+            chainId,
+            pseudoContractName,
+            contractAddress!,
+            hasRole,
+            getRoleHash(role),
+            userAddress,
+            newRoleStatus
+          );
+        })
+      );
+    })
+  );
+};
+
 export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
   try {
     let {
@@ -213,6 +290,8 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
       newRoleStatus,
     } = params;
 
+    roleTxns = {}, otherTxns = {};
+
     let activeChainSlugs =
       filterChains.length > 0 ? filterChains : [...MainnetIds, ...TestnetIds];
     // parallelize chains
@@ -222,15 +301,8 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
         roleStatus[chainId] = {};
         // roleStatus[chainId]["integrations"] = {};
 
-        let siblingSlugs: ChainSlug[] = [];
-        if (isTestnet(chainId))
-          siblingSlugs = TestnetIds.filter(
-            (chainSlug) => chainSlug !== chainId
-          );
-        if (isMainnet(chainId))
-          siblingSlugs = MainnetIds.filter(
-            (chainSlug) => chainSlug !== chainId
-          );
+        let siblingSlugs = getSiblingSlugs(chainId);
+
         // console.log(chainId, " Sibling Slugs: ", siblingSlugs);
 
         console.log(
@@ -239,7 +311,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
           "================="
         );
         let addresses = await getAddresses(chainId);
-
+        if (!addresses) return;
         let provider = getProviderFromChainName(
           networkToChainSlug[chainId] as keyof typeof chainSlugs
         );
@@ -257,18 +329,22 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
             let contractAddress: string | undefined;
             // In case of native switchboard, check for address under integrations->NATIVE_BRIDGE
             if (contractName === CORE_CONTRACTS.NativeSwitchboard) {
-              for (let i = 0; i < siblingSlugs.length; i++) {
-                contractAddress =
-                  addresses?.["integrations"]?.[siblingSlugs[i]]?.[
-                    IntegrationTypes.native
-                  ]?.switchboard;
-                if (contractAddress) break;
-              }
-            } else {
-              //@ts-ignore
-              contractAddress =
-                addresses?.[contractName as keyof ChainSocketAddresses];
+              await checkNativeSwitchboardRoles({
+                chainId,
+                provider,
+                siblingSlugs,
+                addresses,
+                userAddress,
+                newRoleStatus,
+                filterRoles,
+              });
+              return;
             }
+
+            //@ts-ignore
+            contractAddress =
+              addresses?.[contractName as keyof ChainSocketAddresses];
+          
             if (!contractAddress) {
               console.log(chainId, " address not present: ", contractName);
               return;
@@ -318,10 +394,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                       return;
                     let hasRole = await instance.callStatic[
                       "hasRole(bytes32,address)"
-                    ](
-                      getChainRoleHash(role, Number(siblingSlug)),
-                      userAddress
-                    );
+                    ](getChainRoleHash(role, Number(siblingSlug)), userAddress);
                     roleStatus[chainId][contractName][siblingSlug][role] =
                       hasRole;
                     // console.log(chainId, contractName, role, hasRole);
@@ -330,7 +403,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                     // to set the role
                     if (
                       contractName === CORE_CONTRACTS.FastSwitchboard &&
-                      role === ROLES.WATCHER_ROLE && 
+                      role === ROLES.WATCHER_ROLE &&
                       isRoleChanged(hasRole, newRoleStatus)
                     ) {
                       let data;
@@ -338,14 +411,14 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                         data = instance.interface.encodeFunctionData(
                           "grantWatcherRole",
                           [siblingSlug, userAddress]
-                        ); 
+                        );
                       } else {
                         data = instance.interface.encodeFunctionData(
                           "revokeWatcherRole",
                           [siblingSlug, userAddress]
-                        ); 
+                        );
                       }
-                      
+
                       if (!otherTxns[chainId]) otherTxns[chainId] = [];
                       otherTxns[chainId]?.push({
                         to: instance.address,
@@ -398,8 +471,8 @@ const main = async () => {
   let watcherAddress = "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e";
 
   let sendTransaction = false;
-  let newRoleStatus = false;
-  let filterChains = [ChainSlug.MUMBAI];
+  let newRoleStatus = true;
+  let filterChains = [...MainnetIds];
 
   // // Grant rescue and governance role for GasPriceOracle
   // await checkAndUpdateRoles({
@@ -498,15 +571,15 @@ const main = async () => {
   //   newRoleStatus,
   // });
 
-  // // Grant owner roles in NativeSwitchboard
-  // await checkAndUpdateRoles({
-  //   userAddress: ownerAddress,
-  //   filterRoles: [ROLES.TRIP_ROLE, ROLES.UNTRIP_ROLE, ROLES.GOVERNANCE_ROLE, ROLES.WITHDRAW_ROLE, ROLES.RESCUE_ROLE], // all roles
-  //   filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
-  //   filterChains,
-  //   sendTransaction,
-  //   newRoleStatus,
-  // });
+  // Grant owner roles in NativeSwitchboard
+  await checkAndUpdateRoles({
+    userAddress: ownerAddress,
+    filterRoles: [ROLES.TRIP_ROLE, ROLES.UNTRIP_ROLE, ROLES.GOVERNANCE_ROLE, ROLES.WITHDRAW_ROLE, ROLES.RESCUE_ROLE], // all roles
+    filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
 
   // // Grant transmitter roles in NativeSwitchboard. just one role - GAS_LIMIT_UPDATER_ROLE
   // await checkAndUpdateRoles({
