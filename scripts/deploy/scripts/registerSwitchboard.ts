@@ -1,8 +1,8 @@
 import { constants } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { createObj, getInstance } from "./utils";
-import { ChainSlug, ChainSocketAddresses } from "../../src";
+import { createObj, getInstance } from "../utils";
+import { ChainSlug, ChainSocketAddresses } from "../../../src";
 
 export default async function registerSwitchBoard(
   switchBoardAddress: string,

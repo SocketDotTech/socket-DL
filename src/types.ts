@@ -89,6 +89,12 @@ export enum IntegrationTypes {
   native = "NATIVE_BRIDGE",
 }
 
+export enum DeploymentMode {
+  DEV = "dev",
+  PROD = "prod",
+  SURGE = "surge",
+}
+
 export type Integrations = { [chainSlug in ChainSlug]?: ChainAddresses };
 export type ChainAddresses = { [integration in IntegrationTypes]?: Configs };
 export type Configs = {
