@@ -6,7 +6,11 @@ import { ethers } from "ethers";
 import { Contract } from "ethers";
 require("dotenv").config();
 import yargs from "yargs";
-import { chainSlugs, DeploymentMode, getProviderFromChainName } from "../../constants";
+import {
+  chainSlugs,
+  DeploymentMode,
+  getProviderFromChainName,
+} from "../../constants";
 import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
 
 // import * as CounterABI from "../../../artifacts/contracts/examples/Counter.sol/Counter.json";
@@ -99,8 +103,7 @@ export const main = async () => {
           value: ethers.utils.parseUnits("30000", "gwei").toNumber(),
         });
 
-      
-      console.log()
+      console.log();
 
       // await tx.wait();
 
