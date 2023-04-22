@@ -13,7 +13,6 @@ import {
   ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
-  DeploymentMode,
   IntegrationTypes,
   MainnetIds,
   NativeSwitchboard,
@@ -24,12 +23,9 @@ import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { setProposeGasLimit } from "../limits-updater/set-propose-gaslimit";
 import { setAttestGasLimit } from "../limits-updater/set-attest-gaslimit";
 import { setExecutionOverhead } from "../limits-updater/set-execution-overhead";
+import { capacitorType, maxPacketLength, mode } from "./config";
 
-const capacitorType = 1;
-const maxPacketLength = 10;
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
-
-let chains = [...TestnetIds, ...MainnetIds];
+const chains = [...TestnetIds, ...MainnetIds];
 
 export const main = async () => {
   try {

@@ -1,23 +1,10 @@
-import { config as dotenvConfig } from "dotenv";
-dotenvConfig();
-
 import { ethers } from "hardhat";
 import { Wallet } from "ethers";
 import { deploySocket } from "./scripts/deploySocket";
 import { ChainKey, chainSlugs, getProviderFromChainName } from "../constants";
 import { storeVerificationParams } from "./utils";
-import { ChainSocketAddresses, DeploymentMode, getAddresses } from "../../src";
-
-const chains: Array<ChainKey> = [
-  ChainKey.HARDHAT,
-  ChainKey.GOERLI,
-  ChainKey.ARBITRUM_GOERLI,
-  ChainKey.OPTIMISM_GOERLI,
-  ChainKey.POLYGON_MUMBAI,
-  ChainKey.BSC_TESTNET,
-];
-
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
+import { ChainSocketAddresses, getAddresses } from "../../src";
+import { chains, mode } from "./config";
 
 /**
  * Deploys network-independent socket contracts

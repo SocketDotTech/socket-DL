@@ -1,56 +1,6 @@
 import { NativeSwitchboard } from "../../src/types";
 
 export const socketOwner = "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34";
-// "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa";
-// "0x86Ab95d2c6200b798CA382740597cE715aD0D727";
-
-export const transmitterAddress: {
-  [key: string]: string;
-} = {
-  "bsc-testnet": "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
-  "polygon-mainnet": "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
-  bsc: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
-  "polygon-mumbai": "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
-  "arbitrum-goerli": "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
-  "optimism-goerli": "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
-  goerli: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
-  hardhat: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
-  arbitrum: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
-  optimism: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
-  mainnet: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
-};
-
-export const watcherAddress: {
-  [key: string]: string;
-} = {
-  "bsc-testnet": "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
-  "polygon-mainnet": "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
-  bsc: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
-  "polygon-mumbai": "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
-  "arbitrum-goerli": "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
-  "optimism-goerli": "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
-  goerli: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
-  hardhat: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
-  arbitrum: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
-  optimism: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
-  mainnet: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
-};
-
-export const executorAddress: {
-  [key: string]: string;
-} = {
-  "bsc-testnet": "0x8e90345042b2720F33138CC437f8f897AC84A095",
-  "polygon-mainnet": "0x8e90345042b2720F33138CC437f8f897AC84A095",
-  bsc: "0x8e90345042b2720F33138CC437f8f897AC84A095",
-  "polygon-mumbai": "0x8e90345042b2720F33138CC437f8f897AC84A095",
-  "arbitrum-goerli": "0x8e90345042b2720F33138CC437f8f897AC84A095",
-  "optimism-goerli": "0x8e90345042b2720F33138CC437f8f897AC84A095",
-  goerli: "0x8e90345042b2720F33138CC437f8f897AC84A095",
-  hardhat: "0x8e90345042b2720F33138CC437f8f897AC84A095",
-  arbitrum: "0x8e90345042b2720F33138CC437f8f897AC84A095",
-  optimism: "0x8e90345042b2720F33138CC437f8f897AC84A095",
-  mainnet: "0x8e90345042b2720F33138CC437f8f897AC84A095",
-};
 
 export const timeout: {
   [key: string]: number;
