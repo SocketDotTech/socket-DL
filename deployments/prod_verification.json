@@ -34,26 +34,19 @@
       "0x5035d9B44C29b503ebCC1E7d6223Ae78A37032d6",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x4F04f8Ae9Fc3A9539d00e5e69c3b262b31220d00",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
@@ -65,18 +58,13 @@
       "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        42161
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x10567782c459BC8Bf90B89f7Da189c754203BFEc",
@@ -100,10 +88,7 @@
       "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        137
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -255,9 +240,7 @@
       "0x9Ba3fF23c5373A9C7F0Ceb8b6B5f4C98CEC7D922",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xf096fD1b47DFC14D2320571C5F7eCDb5cad219F0",
@@ -293,26 +276,19 @@
       "0x5035d9B44C29b503ebCC1E7d6223Ae78A37032d6",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x4F04f8Ae9Fc3A9539d00e5e69c3b262b31220d00",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
@@ -324,18 +300,13 @@
       "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        42161
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x10567782c459BC8Bf90B89f7Da189c754203BFEc",
@@ -359,10 +330,7 @@
       "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        137
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -514,9 +482,7 @@
       "0x9Ba3fF23c5373A9C7F0Ceb8b6B5f4C98CEC7D922",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xf096fD1b47DFC14D2320571C5F7eCDb5cad219F0",
@@ -552,26 +518,19 @@
       "0x5035d9B44C29b503ebCC1E7d6223Ae78A37032d6",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x4F04f8Ae9Fc3A9539d00e5e69c3b262b31220d00",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
@@ -583,18 +542,13 @@
       "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        42161
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x10567782c459BC8Bf90B89f7Da189c754203BFEc",
@@ -618,10 +572,7 @@
       "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        137
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -773,17 +724,13 @@
       "0x9Ba3fF23c5373A9C7F0Ceb8b6B5f4C98CEC7D922",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x717faCaA298fa151c6ffad47B5e9c51c41BC2199",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x6fEddE12105F47eAcde493Ee294d207bFE68dcE5"
-      ]
+      ["0x6fEddE12105F47eAcde493Ee294d207bFE68dcE5"]
     ],
     [
       "0x1bb775eF0AE0f5F7F85B78F2c12082E40A885D2f",
@@ -801,9 +748,7 @@
       "0x8A5b09b97b08f67b7d8B9aDaB071a6cb237Bbf5A",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xDf4fF02E2dDe3A08590829d7398Cc31B0255bAb5",
@@ -815,18 +760,13 @@
       "0x66AD32F5F3C42C6B8102e998f24936F57997cE18",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x09b471B83b91bdb1AA361f05770CfcEFF7526b65",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0xf50Ed30A7A6951d830Bc4e6498B5abC7132a4F6C",
@@ -906,17 +846,13 @@
       "0x3c751688261f90369c28b16f3797E623667F69D4",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x49fd4671DC7F836be12cEDEf798d094437C8DC00",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x20EbDc614ABC74386E5EB67A1516eDC6eBD32540"
-      ]
+      ["0x20EbDc614ABC74386E5EB67A1516eDC6eBD32540"]
     ]
   ],
   "137": [
@@ -954,26 +890,19 @@
       "0x5035d9B44C29b503ebCC1E7d6223Ae78A37032d6",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x4F04f8Ae9Fc3A9539d00e5e69c3b262b31220d00",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
@@ -985,18 +914,13 @@
       "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        42161
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x10567782c459BC8Bf90B89f7Da189c754203BFEc",
@@ -1020,10 +944,7 @@
       "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        137
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xf096fD1b47DFC14D2320571C5F7eCDb5cad219F0",
@@ -1059,26 +980,19 @@
       "0x5035d9B44C29b503ebCC1E7d6223Ae78A37032d6",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x4F04f8Ae9Fc3A9539d00e5e69c3b262b31220d00",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
@@ -1090,18 +1004,13 @@
       "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        42161
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x10567782c459BC8Bf90B89f7Da189c754203BFEc",
@@ -1125,10 +1034,7 @@
       "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        137
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -1250,26 +1156,19 @@
       "0x5035d9B44C29b503ebCC1E7d6223Ae78A37032d6",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x4F04f8Ae9Fc3A9539d00e5e69c3b262b31220d00",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
@@ -1281,18 +1180,13 @@
       "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        42161
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x10567782c459BC8Bf90B89f7Da189c754203BFEc",
@@ -1316,10 +1210,7 @@
       "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        137
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -1441,26 +1332,19 @@
       "0x5035d9B44C29b503ebCC1E7d6223Ae78A37032d6",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x4F04f8Ae9Fc3A9539d00e5e69c3b262b31220d00",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
@@ -1472,18 +1356,13 @@
       "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        42161
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x10567782c459BC8Bf90B89f7Da189c754203BFEc",
@@ -1507,10 +1386,7 @@
       "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        137
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -1644,26 +1520,19 @@
       "0x5035d9B44C29b503ebCC1E7d6223Ae78A37032d6",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x4F04f8Ae9Fc3A9539d00e5e69c3b262b31220d00",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
@@ -1675,18 +1544,13 @@
       "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        42161
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x10567782c459BC8Bf90B89f7Da189c754203BFEc",
@@ -1710,10 +1574,7 @@
       "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        137
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -1865,17 +1726,13 @@
       "0x9Ba3fF23c5373A9C7F0Ceb8b6B5f4C98CEC7D922",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x717faCaA298fa151c6ffad47B5e9c51c41BC2199",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x6fEddE12105F47eAcde493Ee294d207bFE68dcE5"
-      ]
+      ["0x6fEddE12105F47eAcde493Ee294d207bFE68dcE5"]
     ],
     [
       "0x1bb775eF0AE0f5F7F85B78F2c12082E40A885D2f",
@@ -1893,18 +1750,13 @@
       "0x8A5b09b97b08f67b7d8B9aDaB071a6cb237Bbf5A",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xF5541Ea3ee034D8f7C397bf77556f07e7562dF9A",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        137
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0x5e01934CB828Cb72a9098c894f10C2Ca26184B0F",
@@ -1983,17 +1835,13 @@
       "0xca75baEf5686BaaA93ccC3060754BD68987cAEf2",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x4f8ecb190b9Ef36113127D97c7f9300875b6563F",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x5dF06cAa38eD2c60a49174176FC745c532426fB4"
-      ]
+      ["0x5dF06cAa38eD2c60a49174176FC745c532426fB4"]
     ]
   ],
   "42161": [
@@ -2031,26 +1879,19 @@
       "0x5035d9B44C29b503ebCC1E7d6223Ae78A37032d6",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x4F04f8Ae9Fc3A9539d00e5e69c3b262b31220d00",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
@@ -2062,18 +1903,13 @@
       "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        42161
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x10567782c459BC8Bf90B89f7Da189c754203BFEc",
@@ -2097,10 +1933,7 @@
       "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        137
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -2252,17 +2085,13 @@
       "0x9Ba3fF23c5373A9C7F0Ceb8b6B5f4C98CEC7D922",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x717faCaA298fa151c6ffad47B5e9c51c41BC2199",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x6fEddE12105F47eAcde493Ee294d207bFE68dcE5"
-      ]
+      ["0x6fEddE12105F47eAcde493Ee294d207bFE68dcE5"]
     ]
   ]
 }
