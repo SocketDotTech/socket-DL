@@ -18,6 +18,11 @@ export const chains: Array<ChainKey> = [
   ChainKey.OPTIMISM_GOERLI,
   ChainKey.POLYGON_MUMBAI,
   ChainKey.BSC_TESTNET,
+  ChainKey.MAINNET,
+  ChainKey.ARBITRUM,
+  ChainKey.OPTIMISM,
+  ChainKey.BSC,
+  ChainKey.POLYGON_MAINNET,
 ];
 
 export const sendTransaction = false;
