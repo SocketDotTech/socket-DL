@@ -11,7 +11,6 @@ import {
   switchboards,
   watcherAddress,
   socketOwner,
-  DeploymentMode,
 } from "../constants";
 import { config } from "./config";
 import {
@@ -24,7 +23,7 @@ import {
   getSwitchboardAddress,
 } from "./utils";
 import { assert } from "console";
-import { IntegrationTypes, NativeSwitchboard } from "../../src";
+import { DeploymentMode, IntegrationTypes, NativeSwitchboard } from "../../src";
 
 const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 

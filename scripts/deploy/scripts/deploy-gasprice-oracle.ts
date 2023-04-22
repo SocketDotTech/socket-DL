@@ -2,9 +2,9 @@ import hre from "hardhat";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployContractWithArgs, getAddresses, storeAddresses } from "./utils";
-import { chainSlugs } from "../constants/networks";
-import { transmitterAddress } from "../constants/config";
+import { deployContractWithArgs, getAddresses, storeAddresses } from "../utils";
+import { chainSlugs } from "../../constants/networks";
+import { transmitterAddress } from "../../constants/config";
 
 /**
  * Deploys gasprice oracle , set transmitManager to oracle followed by granting transmitter role to the transmitter

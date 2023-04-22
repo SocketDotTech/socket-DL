@@ -44,7 +44,7 @@ export const setProposeGasLimit = async (
       signature
     );
 
-    console.log("setting propose gas limit", tx.hash, srcChainId);
+    console.log("setting propose gas limit", tx.hash, srcChainId, dstChainId);
     await tx.wait();
     return isTransactionSuccessful(tx.hash, srcChainId);
   } catch (error) {

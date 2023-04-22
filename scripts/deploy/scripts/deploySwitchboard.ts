@@ -1,14 +1,20 @@
-import { createObj, deployContractWithArgs, storeAddresses } from "./utils";
-import { chainSlugs, switchboards } from "../constants";
-import { ChainSocketAddresses, IntegrationTypes } from "../../src";
-import { getSwitchboardDeployData } from "./switchboards";
+import { createObj, deployContractWithArgs, storeAddresses } from "../utils";
+import { chainSlugs, switchboards } from "../../constants";
+import {
+  ChainSocketAddresses,
+  DeploymentMode,
+  IntegrationTypes,
+} from "../../../src";
+import { getSwitchboardDeployData } from "../switchboards";
 import { Wallet } from "ethers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 export default async function deploySwitchboards(
   network: string,
-  signer: Wallet,
+  signer: SignerWithAddress | Wallet,
   sourceConfig: ChainSocketAddresses,
-  verificationDetails: any[]
+  verificationDetails: any[],
+  mode: DeploymentMode
 ): Promise<Object> {
   let result: any = { sourceConfig, verificationDetails };
 
@@ -19,7 +25,8 @@ export default async function deploySwitchboards(
       "",
       signer,
       sourceConfig,
-      verificationDetails
+      verificationDetails,
+      mode
     );
 
   if (!sourceConfig.OptimisticSwitchboard)
@@ -29,7 +36,8 @@ export default async function deploySwitchboards(
       "",
       signer,
       result.sourceConfig,
-      result.verificationDetails
+      result.verificationDetails,
+      mode
     );
 
   if (!switchboards[network]) return result;
@@ -46,7 +54,8 @@ export default async function deploySwitchboards(
         siblings[index],
         signer,
         result.sourceConfig,
-        result.verificationDetails
+        result.verificationDetails,
+        mode
       );
   }
 
@@ -60,9 +69,10 @@ async function deploySwitchboard(
   integrationType: IntegrationTypes,
   network: string,
   remoteChain: string,
-  signer: Wallet,
+  signer: SignerWithAddress | Wallet,
   sourceConfig: ChainSocketAddresses,
-  verificationDetails: any[]
+  verificationDetails: any[],
+  mode: DeploymentMode
 ): Promise<Object> {
   try {
     const { contractName, args, path } = getSwitchboardDeployData(
@@ -94,7 +104,7 @@ async function deploySwitchboard(
       sourceConfig["FastSwitchboard"] = switchboard.address;
     }
 
-    await storeAddresses(sourceConfig, chainSlugs[network]);
+    await storeAddresses(sourceConfig, chainSlugs[network], mode);
   } catch (error) {
     console.log("Error in deploying switchboard", error);
     throw error;
