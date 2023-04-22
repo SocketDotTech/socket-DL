@@ -69,6 +69,37 @@ contract SocketBatcher is AccessControlExtended {
         bytes signature;
     }
 
+    struct RegisterSwitchboardRequest {
+        address switchBoardAddress;
+        uint256 maxPacketLength;
+        uint32 siblingChainSlug;
+        uint32 capacitorType;
+    }
+
+    /**
+     * @notice set propose gas limit for a list of siblings
+     * @param socketAddress_ address of socket
+     * @param registerSwitchboardsRequests_ the list of requests with gas limit details
+     */
+    function registerSwitchboards(
+        address socketAddress_,
+        RegisterSwitchboardRequest[] calldata registerSwitchboardsRequests_
+    ) external {
+        uint256 registerSwitchboardsLength = registerSwitchboardsRequests_
+            .length;
+        for (uint256 index = 0; index < registerSwitchboardsLength; ) {
+            ISocket(socketAddress_).registerSwitchBoard(
+                registerSwitchboardsRequests_[index].switchBoardAddress,
+                registerSwitchboardsRequests_[index].maxPacketLength,
+                registerSwitchboardsRequests_[index].siblingChainSlug,
+                registerSwitchboardsRequests_[index].capacitorType
+            );
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
     /**
      * @notice set propose gas limit for a list of siblings
      * @param transmitManagerAddress_ address of transmit manager
