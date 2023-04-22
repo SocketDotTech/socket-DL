@@ -41,7 +41,7 @@ export const setAttestGasLimit = async (
       signature
     );
 
-    console.log("setting attest gas limit", tx.hash, srcChainId);
+    console.log("setting attest gas limit", tx.hash, srcChainId, dstChainId);
 
     await tx.wait();
     return isTransactionSuccessful(tx.hash, srcChainId);
