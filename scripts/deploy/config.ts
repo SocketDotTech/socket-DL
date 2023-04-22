@@ -16,22 +16,22 @@ console.log(
 console.log(`Owner address configured to ${socketOwner}`);
 console.log("========================================================");
 
-export const chains: Array<ChainKey> = [
-  ChainKey.GOERLI,
-  ChainKey.ARBITRUM_GOERLI,
-  ChainKey.OPTIMISM_GOERLI,
-  ChainKey.POLYGON_MUMBAI,
-  ChainKey.BSC_TESTNET,
-  ChainKey.MAINNET,
-  ChainKey.ARBITRUM,
-  ChainKey.OPTIMISM,
-  ChainKey.BSC,
-  ChainKey.POLYGON_MAINNET,
+export const chains: Array<ChainSlug> = [
+  ChainSlug.GOERLI,
+  ChainSlug.ARBITRUM_TESTNET,
+  ChainSlug.OPTIMISM_TESTNET,
+  ChainSlug.MUMBAI,
+  ChainSlug.BSC_TESTNET,
+  ChainSlug.MAINNET,
+  ChainSlug.ARBITRUM,
+  ChainSlug.OPTIMISM,
+  ChainSlug.BSC,
+  ChainSlug.POLYGON,
 ];
 
-export const sendTransaction = false;
-export const newRoleStatus = false;
-export const filterChains: number[] = [...MainnetIds];
+export const sendTransaction = true;
+export const newRoleStatus = true;
+export const filterChains: number[] = [...TestnetIds];
 
 export const capacitorType = 1;
 export const maxPacketLength = 1;
