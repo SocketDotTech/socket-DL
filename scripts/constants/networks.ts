@@ -120,7 +120,7 @@ export function getJsonRpcUrl(chain: ChainKey): string {
       break;
 
     case ChainKey.HARDHAT:
-      jsonRpcUrl = "http:://127.0.0.1/8585";
+      jsonRpcUrl = "http://127.0.0.1:8545/";
       break;
 
     default:

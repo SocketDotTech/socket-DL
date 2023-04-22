@@ -19,10 +19,10 @@ function getAddresses(
     case DeploymentMode.DEV:
       addresses = dev_addresses[srcChainSlug];
       break;
-    case DeploymentMode.DEV:
+    case DeploymentMode.PROD:
       addresses = prod_addresses[srcChainSlug];
       break;
-    case DeploymentMode.DEV:
+    case DeploymentMode.SURGE:
       addresses = surge_addresses[srcChainSlug];
       break;
     default:
