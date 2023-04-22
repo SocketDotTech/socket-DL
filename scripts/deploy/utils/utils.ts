@@ -17,6 +17,7 @@ export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
 export const deployedAddressPath = (mode) =>
   deploymentsPath + `${mode}_addresses.json`;
+
 export const getRoleHash = (role: string) =>
   ethers.utils.keccak256(ethers.utils.toUtf8Bytes(role)).toString();
 
@@ -108,7 +109,7 @@ export const storeAddresses = async (
 };
 
 export const storeVerificationParams = async (
-  verificationDetail: object,
+  verificationDetail: any[],
   chainSlug: ChainSlug,
   mode: DeploymentMode
 ) => {
@@ -116,7 +117,6 @@ export const storeVerificationParams = async (
     await fs.promises.mkdir(deploymentsPath);
   }
   const verificationPath = deploymentsPath + `${mode}_verification.json`;
-
   const outputExists = fs.existsSync(verificationPath);
   let verificationDetails: object = {};
   if (outputExists) {
@@ -127,7 +127,11 @@ export const storeVerificationParams = async (
     verificationDetails = JSON.parse(verificationDetailsString);
   }
 
-  verificationDetails[chainSlug] = verificationDetail;
+  verificationDetails[chainSlug] = [
+    ...verificationDetails[chainSlug],
+    ...verificationDetail,
+  ];
+
   fs.writeFileSync(
     verificationPath,
     JSON.stringify(verificationDetails, null, 2)
