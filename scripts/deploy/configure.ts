@@ -19,6 +19,7 @@ import {
   ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
+  DeploymentMode,
   IntegrationTypes,
   MainnetIds,
   NativeSwitchboard,
@@ -32,15 +33,17 @@ import { setExecutionOverhead } from "../limits-updater/set-execution-overhead";
 
 const capacitorType = 1;
 const maxPacketLength = 10;
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
+
 let chains = [...TestnetIds, ...MainnetIds];
 
 export const main = async () => {
   try {
-    if (!fs.existsSync(deployedAddressPath)) {
+    if (!fs.existsSync(deployedAddressPath(mode))) {
       throw new Error("addresses.json not found");
     }
     let addresses: DeploymentAddresses = JSON.parse(
-      fs.readFileSync(deployedAddressPath, "utf-8")
+      fs.readFileSync(deployedAddressPath(mode), "utf-8")
     );
     let chain: ChainSlug;
 
@@ -77,7 +80,7 @@ export const main = async () => {
           updatedDeploymentAddresses
         );
 
-        await storeAddresses(updatedDeploymentAddresses, chain);
+        await storeAddresses(updatedDeploymentAddresses, chain, mode);
       }
 
       // register fast
@@ -92,7 +95,7 @@ export const main = async () => {
           updatedDeploymentAddresses
         );
 
-        await storeAddresses(updatedDeploymentAddresses, chain);
+        await storeAddresses(updatedDeploymentAddresses, chain, mode);
       }
 
       // register optimistic
@@ -108,7 +111,7 @@ export const main = async () => {
           updatedDeploymentAddresses
         );
 
-        await storeAddresses(updatedDeploymentAddresses, chain);
+        await storeAddresses(updatedDeploymentAddresses, chain, mode);
       }
 
       // set gas limit for all siblings
