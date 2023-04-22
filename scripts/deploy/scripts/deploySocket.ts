@@ -159,15 +159,19 @@ async function getOrDeploy(
       deployUtils.signer
     );
     verificationDetails.push([contract.address, contractName, path, args]);
+    console.log(
+      `${contractName} deployed on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
+    );
   } else {
     contract = await getInstance(
       contractName,
       deployUtils.addresses[contractName]
     );
+    console.log(
+      `${contractName} found on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
+    );
   }
 
-  console.log(
-    `${contractName} deployed on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
-  );
+  
   return contract;
 }
