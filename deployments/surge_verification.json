@@ -4,17 +4,13 @@
       "0x9e51CDbD0dC54E314B6b17C69ED34a98B8259A16",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xbf47f1b6aeC8C1Ec47CeBa21f3B868567738C8b2",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x04196C83Ce9438F287aE0B2774AbaB367283C2a6"
-      ]
+      ["0x04196C83Ce9438F287aE0B2774AbaB367283C2a6"]
     ]
   ],
   "56": [],
