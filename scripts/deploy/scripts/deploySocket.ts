@@ -1,6 +1,5 @@
 import { Contract, Wallet } from "ethers";
 import { deployContractWithArgs, storeAddresses, getInstance } from "../utils";
-import { chainSlugs } from "../../constants/networks";
 
 import { sealGasLimit, socketOwner } from "../../constants/config";
 import { ChainSocketAddresses, DeploymentMode } from "../../../src";
@@ -16,7 +15,7 @@ let allDeployed = false;
  */
 export const deploySocket = async (
   socketSigner: SignerWithAddress | Wallet,
-  network: string,
+  chainSlug: number,
   currentMode: DeploymentMode,
   deployedAddresses: ChainSocketAddresses
 ): Promise<any> => {
@@ -24,7 +23,7 @@ export const deploySocket = async (
     addresses: deployedAddresses,
     mode: currentMode,
     signer: socketSigner,
-    currentChainSlug: chainSlugs[network],
+    currentChainSlug: chainSlug,
   };
 
   try {
@@ -35,8 +34,6 @@ export const deploySocket = async (
       deployUtils
     );
     deployUtils.addresses["SignatureVerifier"] = signatureVerifier.address;
-    console.log(deployUtils.addresses);
-
 
     const hasher: Contract = await getOrDeploy(
       "Hasher",
@@ -45,8 +42,6 @@ export const deploySocket = async (
       deployUtils
     );
     deployUtils.addresses["Hasher"] = hasher.address;
-    console.log(deployUtils.addresses);
-
 
     const capacitorFactory: Contract = await getOrDeploy(
       "CapacitorFactory",
@@ -55,18 +50,14 @@ export const deploySocket = async (
       deployUtils
     );
     deployUtils.addresses["CapacitorFactory"] = capacitorFactory.address;
-    console.log(deployUtils.addresses);
-
 
     const gasPriceOracle: Contract = await getOrDeploy(
       "GasPriceOracle",
       "contracts/GasPriceOracle.sol",
-      [socketOwner, chainSlugs[network]],
+      [socketOwner, chainSlug],
       deployUtils
     );
     deployUtils.addresses["GasPriceOracle"] = gasPriceOracle.address;
-    console.log(deployUtils.addresses);
-
 
     const executionManager: Contract = await getOrDeploy(
       "ExecutionManager",
@@ -75,8 +66,6 @@ export const deploySocket = async (
       deployUtils
     );
     deployUtils.addresses["ExecutionManager"] = executionManager.address;
-    console.log(deployUtils.addresses);
-
 
     const transmitManager: Contract = await getOrDeploy(
       "TransmitManager",
@@ -85,20 +74,18 @@ export const deploySocket = async (
         signatureVerifier.address,
         gasPriceOracle.address,
         socketOwner,
-        chainSlugs[network],
-        sealGasLimit[networkToChainSlug[network]],
+        chainSlug,
+        sealGasLimit[networkToChainSlug[chainSlug]],
       ],
       deployUtils
     );
     deployUtils.addresses["TransmitManager"] = transmitManager.address;
-    console.log(deployUtils.addresses);
-
 
     const socket: Contract = await getOrDeploy(
       "Socket",
       "contracts/socket/Socket.sol",
       [
-        chainSlugs[network],
+        chainSlug,
         hasher.address,
         transmitManager.address,
         executionManager.address,
@@ -108,12 +95,10 @@ export const deploySocket = async (
       deployUtils
     );
     deployUtils.addresses["Socket"] = socket.address;
-    console.log(deployUtils.addresses);
-
 
     // switchboards deploy
     const result = await deploySwitchboards(
-      network,
+      networkToChainSlug[chainSlug],
       socketSigner,
       deployedAddresses,
       verificationDetails,
@@ -121,7 +106,6 @@ export const deploySocket = async (
     );
 
     deployUtils.addresses = result["sourceConfig"];
-    console.log(deployUtils.addresses);
 
     verificationDetails = result["verificationDetails"];
 
@@ -132,8 +116,6 @@ export const deploySocket = async (
       deployUtils
     );
     deployUtils.addresses["SocketBatcher"] = socketBatcher.address;
-    console.log(deployUtils.addresses);
-
 
     // plug deployments
     const counter: Contract = await getOrDeploy(
@@ -143,15 +125,19 @@ export const deploySocket = async (
       deployUtils
     );
     deployUtils.addresses["Counter"] = counter.address;
-    console.log(deployUtils.addresses);
 
     allDeployed = true;
+    console.log(deployUtils.addresses);
     console.log("Contracts deployed!");
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
   }
 
-  await storeAddresses(deployUtils.addresses, deployUtils.currentChainSlug, deployUtils.mode);
+  await storeAddresses(
+    deployUtils.addresses,
+    deployUtils.currentChainSlug,
+    deployUtils.mode
+  );
   return { verificationDetails, allDeployed, deployedAddresses };
 };
 

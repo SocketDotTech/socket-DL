@@ -1,9 +1,10 @@
 import { ethers } from "hardhat";
 import { Wallet } from "ethers";
 import { deploySocket } from "./scripts/deploySocket";
-import { ChainKey, chainSlugs, getProviderFromChainName } from "../constants";
+import { getProviderFromChainName, networkToChainSlug } from "../constants";
 import { storeVerificationParams } from "./utils";
 import {
+  ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
   getAllAddresses,
@@ -23,18 +24,19 @@ export const main = async () => {
     }
 
     await Promise.all(
-      chains.map(async (chain: ChainKey) => {
+      chains.map(async (chain: ChainSlug) => {
         let allDeployed = false;
+        const network = networkToChainSlug[chain];
 
         while (!allDeployed) {
-          const providerInstance = getProviderFromChainName(chain);
+          const providerInstance = getProviderFromChainName(network);
           const signer: Wallet = new ethers.Wallet(
             process.env.SOCKET_SIGNER_KEY as string,
             providerInstance
           );
 
-          let chainAddresses = addresses[chain]
-            ? addresses[chain]
+          const chainAddresses: ChainSocketAddresses = addresses[chain]
+            ? (addresses[chain] as ChainSocketAddresses)
             : ({} as ChainSocketAddresses);
 
           const results = await deploySocket(
@@ -46,13 +48,11 @@ export const main = async () => {
 
           await storeVerificationParams(
             results.verificationDetails,
-            chainSlugs[chain],
+            chain,
             mode
           );
           allDeployed = results.allDeployed;
-          addresses[chain] = results.addresses;
-
-          console.log(addresses);
+          addresses[network] = results.addresses;
         }
       })
     );

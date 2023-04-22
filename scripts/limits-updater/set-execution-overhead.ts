@@ -36,7 +36,7 @@ export const setExecutionOverhead = async (
           ["string", "uint256", "uint256", "uint256", "uint256"],
           [
             "EXECUTION_OVERHEAD_UPDATE",
-            nonce++,
+            nonce,
             srcChainId,
             dstChainIds[index],
             executionOverhead[networkToChainSlug[dstChainIds[index]]],
