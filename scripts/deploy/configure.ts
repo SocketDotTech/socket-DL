@@ -1,13 +1,7 @@
 import fs from "fs";
 import hre from "hardhat";
 import { constants } from "ethers";
-import {
-  attestGasLimit,
-  executionOverhead,
-  networkToChainSlug,
-  proposeGasLimit,
-  switchboards,
-} from "../constants";
+import { networkToChainSlug, switchboards } from "../constants";
 import {
   deployedAddressPath,
   getInstance,
@@ -114,40 +108,37 @@ export const main = async () => {
         await storeAddresses(updatedDeploymentAddresses, chain, mode);
       }
 
-      // set gas limit for all siblings
-      for (let sibling of siblingSlugs) {
-        await setProposeGasLimit(
-          chain,
-          sibling,
-          addr["TransmitManager"],
-          proposeGasLimit[networkToChainSlug[sibling]],
-          socketSigner
-        );
+      await setProposeGasLimit(
+        chain,
+        siblingSlugs,
+        addr["TransmitManager"],
+        addr["SocketBatcher"],
+        socketSigner
+      );
 
-        await setAttestGasLimit(
-          chain,
-          sibling,
-          addr["FastSwitchboard"],
-          attestGasLimit[networkToChainSlug[sibling]],
-          socketSigner
-        );
+      await setAttestGasLimit(
+        chain,
+        siblingSlugs,
+        addr["FastSwitchboard"],
+        addr["SocketBatcher"],
+        socketSigner
+      );
 
-        await setExecutionOverhead(
-          chain,
-          sibling,
-          addr["FastSwitchboard"],
-          executionOverhead[networkToChainSlug[sibling]],
-          socketSigner
-        );
+      await setExecutionOverhead(
+        chain,
+        siblingSlugs,
+        addr["FastSwitchboard"],
+        addr["SocketBatcher"],
+        socketSigner
+      );
 
-        await setExecutionOverhead(
-          chain,
-          sibling,
-          addr["OptimisticSwitchboard"],
-          executionOverhead[networkToChainSlug[sibling]],
-          socketSigner
-        );
-      }
+      await setExecutionOverhead(
+        chain,
+        siblingSlugs,
+        addr["OptimisticSwitchboard"],
+        addr["SocketBatcher"],
+        socketSigner
+      );
     }
 
     await setRemoteSwitchboards(addresses);
