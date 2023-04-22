@@ -1,16 +1,9 @@
 import { Contract, Wallet } from "ethers";
-import {
-  deployContractWithArgs,
-  storeAddresses,
-  getInstance,
-} from "../utils";
+import { deployContractWithArgs, storeAddresses, getInstance } from "../utils";
 import { chainSlugs } from "../../constants/networks";
 
 import { sealGasLimit, socketOwner } from "../../constants/config";
-import {
-  ChainSocketAddresses,
-  DeploymentMode,
-} from "../../../src";
+import { ChainSocketAddresses, DeploymentMode } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 

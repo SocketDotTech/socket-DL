@@ -45,7 +45,7 @@ export default async function deploySwitchboards(
   for (let index = 0; index < siblings.length; index++) {
     if (
       !sourceConfig?.integrations?.[chainSlugs[siblings[index]]]?.[
-      IntegrationTypes.native
+        IntegrationTypes.native
       ]?.["switchboard"]
     )
       result = await deploySwitchboard(

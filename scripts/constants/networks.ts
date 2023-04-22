@@ -2,12 +2,6 @@ import { config as dotenvConfig } from "dotenv";
 import { ethers } from "ethers";
 import { resolve } from "path";
 
-export enum DeploymentMode {
-  DEV = "dev",
-  PROD = "prod",
-  SURGE = "surge",
-}
-
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
@@ -123,6 +117,10 @@ export function getJsonRpcUrl(chain: ChainKey): string {
 
     case ChainKey.GOERLI:
       jsonRpcUrl = process.env.GOERLI_RPC as string;
+      break;
+
+    case ChainKey.HARDHAT:
+      jsonRpcUrl = "http:://127.0.0.1/8585";
       break;
 
     default:

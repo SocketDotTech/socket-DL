@@ -25,7 +25,7 @@ import {
   TestnetIds,
   isTestnet,
 } from "../../src";
-import registerSwitchBoard from "./registerSwitchboard";
+import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { setProposeGasLimit } from "../limits-updater/set-propose-gaslimit";
 import { setAttestGasLimit } from "../limits-updater/set-attest-gaslimit";
 import { setExecutionOverhead } from "../limits-updater/set-execution-overhead";

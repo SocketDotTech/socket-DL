@@ -1,5 +1,10 @@
 // TODO: This is duplicate from socket-dl and should be in its own module
-import { ChainSlug, ChainSocketAddresses, DeploymentMode, IntegrationTypes } from "./types";
+import {
+  ChainSlug,
+  ChainSocketAddresses,
+  DeploymentMode,
+  IntegrationTypes,
+} from "./types";
 
 import dev_addresses from "../deployments/dev_addresses.json";
 import prod_addresses from "../deployments/prod_addresses.json";
@@ -84,4 +89,9 @@ function getDeCapacitorAddress(
   return deCapacitorAddress;
 }
 
-export { getSwitchboardAddress, getCapacitorAddress, getDeCapacitorAddress, getAddresses };
+export {
+  getSwitchboardAddress,
+  getCapacitorAddress,
+  getDeCapacitorAddress,
+  getAddresses,
+};
