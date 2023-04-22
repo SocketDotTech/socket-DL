@@ -9,6 +9,7 @@ import { storeVerificationParams } from "./utils";
 import { ChainSocketAddresses, DeploymentMode, getAddresses } from "../../src";
 
 const chains: Array<ChainKey> = [
+  ChainKey.HARDHAT,
   ChainKey.GOERLI,
   ChainKey.ARBITRUM_GOERLI,
   ChainKey.OPTIMISM_GOERLI,
@@ -25,20 +26,21 @@ export const main = async () => {
   try {
     await Promise.all(
       chains.map(async (chain: ChainKey) => {
-        const addresses: ChainSocketAddresses = getAddresses(
-          chainSlugs[chain],
-          mode
-        )
-          ? getAddresses(chainSlugs[chain], mode)
-          : ({} as ChainSocketAddresses);
-
         let allDeployed = false;
+        let addresses: ChainSocketAddresses;
+        try {
+          addresses = getAddresses(chainSlugs[chain], mode);
+        } catch (error) {
+          addresses = {} as ChainSocketAddresses;
+        }
+
         while (!allDeployed) {
           const providerInstance = getProviderFromChainName(chain);
           const signer: Wallet = new ethers.Wallet(
             process.env.SOCKET_SIGNER_KEY as string,
             providerInstance
           );
+
           const results = await deploySocket(signer, chain, mode, addresses);
           await storeVerificationParams(
             results.verificationDetails,

@@ -4,6 +4,7 @@ import {
   ChainSocketAddresses,
   DeploymentMode,
   IntegrationTypes,
+  DeploymentAddresses,
 } from "./types";
 
 import dev_addresses from "../deployments/dev_addresses.json";
@@ -14,21 +15,23 @@ function getAddresses(
   srcChainSlug: ChainSlug,
   mode: DeploymentMode
 ): ChainSocketAddresses {
-  let addresses: ChainSocketAddresses;
+  let addresses: ChainSocketAddresses | undefined;
+
   switch (mode) {
     case DeploymentMode.DEV:
-      addresses = dev_addresses[srcChainSlug];
+      addresses = (dev_addresses as DeploymentAddresses)[srcChainSlug];
       break;
     case DeploymentMode.PROD:
-      addresses = prod_addresses[srcChainSlug];
+      addresses = (prod_addresses as DeploymentAddresses)[srcChainSlug];
       break;
     case DeploymentMode.SURGE:
-      addresses = surge_addresses[srcChainSlug];
+      addresses = (surge_addresses as DeploymentAddresses)[srcChainSlug];
       break;
     default:
       throw new Error("No Mode Provided");
   }
 
+  if (!addresses) throw new Error("addresses not found");
   return addresses;
 }
 
