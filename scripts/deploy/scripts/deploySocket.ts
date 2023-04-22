@@ -138,7 +138,11 @@ export const deploySocket = async (
     deployUtils.currentChainSlug,
     deployUtils.mode
   );
-  return { verificationDetails, allDeployed, deployedAddresses };
+  return {
+    verificationDetails,
+    allDeployed,
+    deployedAddresses: deployUtils.addresses,
+  };
 };
 
 async function getOrDeploy(
