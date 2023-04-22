@@ -10,6 +10,12 @@ export const mode = process.env.DEPLOYMENT_MODE as
 
 console.log("========================================================");
 console.log("Deployment started for MODE", mode);
+console.log(
+  `Make sure ${mode}_addresses.json and ${mode}_verification.json is cleared for given networks if redeploying!!`
+);
+console.log(
+  `Owner address configured to ${socketOwner}`
+);
 console.log("========================================================");
 
 export const chains: Array<ChainKey> = [

@@ -1,4 +1,4 @@
-import { createObj, deployContractWithArgs, storeAddresses } from "../utils";
+import { createObj, deployContractWithArgs } from "../utils";
 import { chainSlugs, switchboards } from "../../constants";
 import {
   ChainSocketAddresses,
@@ -103,8 +103,6 @@ async function deploySwitchboard(
     if (integrationType === IntegrationTypes.fast) {
       sourceConfig["FastSwitchboard"] = switchboard.address;
     }
-
-    await storeAddresses(sourceConfig, chainSlugs[network], mode);
   } catch (error) {
     console.log("Error in deploying switchboard", error);
     throw error;

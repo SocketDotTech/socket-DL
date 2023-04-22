@@ -207,7 +207,7 @@ const executeTransactions = async (
           chainId as any as ChainSlug
         ] as keyof typeof chainSlugs
       );
-      let wallet = new Wallet(process.env.ROLE_ASSIGNER_PRIVATE_KEY!, provider);
+      let wallet = new Wallet(process.env.SOCKET_SIGNER_KEY!, provider);
       await executeRoleTransactions(chainId, newRoleStatus, wallet);
       await executeOtherTransactions(chainId, wallet);
     })

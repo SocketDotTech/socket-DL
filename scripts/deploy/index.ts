@@ -3,7 +3,11 @@ import { Wallet } from "ethers";
 import { deploySocket } from "./scripts/deploySocket";
 import { ChainKey, chainSlugs, getProviderFromChainName } from "../constants";
 import { storeVerificationParams } from "./utils";
-import { ChainSocketAddresses, getAddresses } from "../../src";
+import {
+  ChainSocketAddresses,
+  DeploymentAddresses,
+  getAllAddresses,
+} from "../../src";
 import { chains, mode } from "./config";
 
 /**
@@ -11,15 +15,16 @@ import { chains, mode } from "./config";
  */
 export const main = async () => {
   try {
+    let addresses: DeploymentAddresses;
+    try {
+      addresses = getAllAddresses(mode);
+    } catch (error) {
+      addresses = {} as DeploymentAddresses;
+    }
+
     await Promise.all(
       chains.map(async (chain: ChainKey) => {
         let allDeployed = false;
-        let addresses: ChainSocketAddresses;
-        try {
-          addresses = getAddresses(chainSlugs[chain], mode);
-        } catch (error) {
-          addresses = {} as ChainSocketAddresses;
-        }
 
         while (!allDeployed) {
           const providerInstance = getProviderFromChainName(chain);
@@ -28,13 +33,26 @@ export const main = async () => {
             providerInstance
           );
 
-          const results = await deploySocket(signer, chain, mode, addresses);
+          let chainAddresses = addresses[chain]
+            ? addresses[chain]
+            : ({} as ChainSocketAddresses);
+
+          const results = await deploySocket(
+            signer,
+            chain,
+            mode,
+            chainAddresses
+          );
+
           await storeVerificationParams(
             results.verificationDetails,
             chainSlugs[chain],
             mode
           );
           allDeployed = results.allDeployed;
+          addresses[chain] = results.addresses;
+
+          console.log(addresses);
         }
       })
     );
