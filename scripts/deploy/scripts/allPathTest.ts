@@ -18,17 +18,17 @@ const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 interface RequestObj {
   to: string;
   data: string;
-  chainId: number;
+  chainSlug: number;
   value?: string | BigNumber;
   gasPrice?: string | BigNumber;
   gasLimit: number;
 }
 
-const getSiblingSlugs = (chainId: ChainSlug): ChainSlug[] => {
-  if (isTestnet(chainId))
-    return TestnetIds.filter((chainSlug) => chainSlug !== chainId);
-  if (isMainnet(chainId))
-    return MainnetIds.filter((chainSlug) => chainSlug !== chainId);
+const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
+  if (isTestnet(chainSlug))
+    return TestnetIds.filter((chainSlug) => chainSlug !== chainSlug);
+  if (isMainnet(chainSlug))
+    return MainnetIds.filter((chainSlug) => chainSlug !== chainSlug);
   return [];
 };
 
@@ -56,8 +56,7 @@ const axiosPost = async (url, data, config = {}) => {
 
 const relayTx = async (params: RequestObj) => {
   try {
-    let { to, data, chainId, gasPrice, value, gasLimit } = params;
-    // const baseUrl = "http://localhost:3000/v1"; // localhost
+    let { to, data, chainSlug, gasPrice, value, gasLimit } = params;
     const baseUrl =
       "https://9u4hhxgtyi.execute-api.us-east-1.amazonaws.com/dev/v1";
     let url = baseUrl + "/relayTx";
@@ -65,7 +64,7 @@ const relayTx = async (params: RequestObj) => {
       to,
       data,
       value,
-      chainId,
+      chainSlug,
       gasLimit,
       gasPrice,
       sequential: false,
@@ -93,20 +92,18 @@ export const sendMessagesToAllPaths = async (params: {
     console.log("================= checking for : ", params);
     let activeChainSlugs =
       senderChains.length > 0 ? senderChains : [...MainnetIds, ...TestnetIds];
+
     // parallelize chains
     await Promise.all(
-      activeChainSlugs.map(async (chainId) => {
-        let siblingSlugs = getSiblingSlugs(chainId);
-
-        let addresses = await getAddresses(chainId, mode);
+      activeChainSlugs.map(async (chainSlug) => {
+        let siblingSlugs = getSiblingSlugs(chainSlug);
+        let addresses = await getAddresses(chainSlug, mode);
 
         if (!addresses) return;
 
-        // const counterAddress = config[chainSlug]["Counter"];
-        const counterAddress = "0xefc0c02abca8dda7d2b399d5c41358cc8ff0a183"; // check this
-
+        const counterAddress = addresses["Counter"];
         if (!counterAddress) {
-          console.log(chainId, "counter address not present: ", chainId);
+          console.log(chainSlug, "counter address not present: ", chainSlug);
           return;
         }
 
@@ -122,21 +119,23 @@ export const sendMessagesToAllPaths = async (params: {
               !receiverChains.includes(siblingSlug)
             )
               return;
+
             let data = counter.interface.encodeFunctionData(
               "remoteAddOperation",
               [siblingSlug, amount, msgGasLimit]
             );
             let to = counter.address;
-            let value = ethers.utils.parseUnits("30000", "gwei").toString();
+            let value = ethers.utils.parseUnits("3000000", "gwei").toString();
+
             let response = await relayTx({
               to,
               data,
               value,
               gasLimit,
-              chainId,
+              chainSlug,
             });
             console.log(
-              `Tx sent : ${chainId} -> ${siblingSlug} hash: `,
+              `Tx sent : ${chainSlug} -> ${siblingSlug} hash: `,
               response?.hash
             );
           })
@@ -150,7 +149,7 @@ export const sendMessagesToAllPaths = async (params: {
 };
 
 const main = async () => {
-  let senderChains = [ChainSlug.MUMBAI];
+  let senderChains = [...TestnetIds];
   let receiverChains = TestnetIds;
   await sendMessagesToAllPaths({ senderChains, receiverChains });
 };
