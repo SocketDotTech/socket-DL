@@ -10,7 +10,7 @@ import {
   isMainnet,
   DeploymentMode,
 } from "../../../src";
-import { getAddresses } from "../utils";
+import { getAddresses, getRelayUrl } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
 import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
 import { chains, mode } from "../config";
@@ -21,14 +21,19 @@ interface RequestObj {
   chainSlug: number;
   value?: string | BigNumber;
   gasPrice?: string | BigNumber;
-  gasLimit: number;
+  gasLimit: number | undefined;
 }
 
 const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
+  console.log(chainSlug, isMainnet(chainSlug));
   if (isTestnet(chainSlug))
-    return TestnetIds.filter((chainSlug) => chainSlug !== chainSlug);
+    return TestnetIds.filter(
+      (siblingChainSlug) => chainSlug !== siblingChainSlug
+    );
   if (isMainnet(chainSlug))
-    return MainnetIds.filter((chainSlug) => chainSlug !== chainSlug);
+    return MainnetIds.filter(
+      (siblingChainSlug) => chainSlug !== siblingChainSlug
+    );
   return [];
 };
 
@@ -57,14 +62,13 @@ const axiosPost = async (url, data, config = {}) => {
 const relayTx = async (params: RequestObj) => {
   try {
     let { to, data, chainSlug, gasPrice, value, gasLimit } = params;
-    const baseUrl =
-      "https://9u4hhxgtyi.execute-api.us-east-1.amazonaws.com/dev/v1";
-    let url = baseUrl + "/relayTx";
+    let url = await getRelayUrl(mode);
+    // console.log({url})
     let body = {
       to,
       data,
       value,
-      chainSlug,
+      chainId: chainSlug,
       gasLimit,
       gasPrice,
       sequential: false,
@@ -84,7 +88,7 @@ export const sendMessagesToAllPaths = async (params: {
 }) => {
   const amount = 100;
   const msgGasLimit = "100000";
-  const gasLimit = 185766;
+  let gasLimit: number | undefined = 185766;
 
   try {
     let { senderChains, receiverChains } = params;
@@ -99,13 +103,21 @@ export const sendMessagesToAllPaths = async (params: {
         let siblingSlugs = getSiblingSlugs(chainSlug);
         let addresses = await getAddresses(chainSlug, mode);
 
-        if (!addresses) return;
+        console.log({ chainSlug, siblingSlugs });
+
+        if (!addresses) {
+          console.log("addresses not found for ", chainSlug, addresses);
+          return;
+        }
+
+        // console.log(" 2 ");
 
         const counterAddress = addresses["Counter"];
         if (!counterAddress) {
           console.log(chainSlug, "counter address not present: ", chainSlug);
           return;
         }
+        // console.log(" 3 ");
 
         const counter: Contract = new ethers.Contract(
           counterAddress,
@@ -125,8 +137,14 @@ export const sendMessagesToAllPaths = async (params: {
               [siblingSlug, amount, msgGasLimit]
             );
             let to = counter.address;
-            let value = ethers.utils.parseUnits("3000000", "gwei").toString();
-
+            let value = ethers.utils
+              .parseUnits("3000000", "gwei")
+              .toHexString();
+            gasLimit =
+              chainSlug === ChainSlug.ARBITRUM ||
+              chainSlug === ChainSlug.ARBITRUM_TESTNET
+                ? undefined
+                : gasLimit;
             let response = await relayTx({
               to,
               data,

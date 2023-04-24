@@ -169,6 +169,17 @@ export const getChainSlugsFromDeployedAddresses = async (
   }
 };
 
+export const getRelayUrl = async (mode: DeploymentMode) => {
+  switch (mode) {
+    case DeploymentMode.SURGE:
+      return process.env.RELAYER_URL_SURGE;
+    case DeploymentMode.PROD:
+      return process.env.RELAYER_URL_PROD;
+    default:
+      return process.env.RELAYER_URL_DEV;
+  }
+};
+
 export const getAddresses = async (
   chainSlug: ChainSlug,
   mode = DeploymentMode.DEV
