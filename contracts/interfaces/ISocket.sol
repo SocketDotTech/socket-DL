@@ -155,6 +155,13 @@ interface ISocket {
         address outboundSwitchboard_
     ) external;
 
+    function registerSwitchBoard(
+        address switchBoardAddress_,
+        uint256 maxPacketLength_,
+        uint32 siblingChainSlug_,
+        uint32 capacitorType_
+    ) external;
+
     function packetIdRoots(bytes32 packetId_) external view returns (bytes32);
 
     function getMinFees(

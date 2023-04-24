@@ -1,53 +1,58 @@
-import { config as dotenvConfig } from "dotenv";
-dotenvConfig();
-
 import { ethers } from "hardhat";
 import { Wallet } from "ethers";
 import { deploySocket } from "./scripts/deploySocket";
-import { ChainKey, chainSlugs, getProviderFromChainName } from "../constants";
+import { getProviderFromChainName, networkToChainSlug } from "../constants";
 import { storeVerificationParams } from "./utils";
-import { ChainSocketAddresses, DeploymentMode, getAddresses } from "../../src";
-
-const chains: Array<ChainKey> = [
-  ChainKey.HARDHAT,
-  ChainKey.GOERLI,
-  ChainKey.ARBITRUM_GOERLI,
-  ChainKey.OPTIMISM_GOERLI,
-  ChainKey.POLYGON_MUMBAI,
-  ChainKey.BSC_TESTNET,
-];
-
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
+import {
+  ChainSlug,
+  ChainSocketAddresses,
+  DeploymentAddresses,
+  getAllAddresses,
+} from "../../src";
+import { chains, mode } from "./config";
 
 /**
  * Deploys network-independent socket contracts
  */
 export const main = async () => {
   try {
+    let addresses: DeploymentAddresses;
+    try {
+      addresses = getAllAddresses(mode);
+    } catch (error) {
+      addresses = {} as DeploymentAddresses;
+    }
+
     await Promise.all(
-      chains.map(async (chain: ChainKey) => {
+      chains.map(async (chain: ChainSlug) => {
         let allDeployed = false;
-        let addresses: ChainSocketAddresses;
-        try {
-          addresses = getAddresses(chainSlugs[chain], mode);
-        } catch (error) {
-          addresses = {} as ChainSocketAddresses;
-        }
+        const network = networkToChainSlug[chain];
 
         while (!allDeployed) {
-          const providerInstance = getProviderFromChainName(chain);
+          const providerInstance = getProviderFromChainName(network);
           const signer: Wallet = new ethers.Wallet(
             process.env.SOCKET_SIGNER_KEY as string,
             providerInstance
           );
 
-          const results = await deploySocket(signer, chain, mode, addresses);
+          const chainAddresses: ChainSocketAddresses = addresses[chain]
+            ? (addresses[chain] as ChainSocketAddresses)
+            : ({} as ChainSocketAddresses);
+
+          const results = await deploySocket(
+            signer,
+            chain,
+            mode,
+            chainAddresses
+          );
+
           await storeVerificationParams(
             results.verificationDetails,
-            chainSlugs[chain],
+            chain,
             mode
           );
           allDeployed = results.allDeployed;
+          addresses[network] = results.addresses;
         }
       })
     );

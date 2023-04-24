@@ -13,19 +13,28 @@ import {
   IntegrationTypes,
   isTestnet,
   isMainnet,
-} from "../../../src";
-import { getAddresses, getRoleHash, getChainRoleHash } from "../utils";
+  getAddresses,
+} from "../../src";
+import { getRoleHash, getChainRoleHash } from "./utils";
 import { Contract, Wallet, ethers } from "ethers";
-import { getABI } from "./getABIs";
+import { getABI } from "./scripts/getABIs";
 import {
-  DeploymentMode,
   chainSlugs,
   getProviderFromChainName,
   networkToChainSlug,
-} from "../../constants";
+  socketOwner,
+} from "../constants";
+import {
+  executorAddresses,
+  filterChains,
+  mode,
+  newRoleStatus,
+  sendTransaction,
+  transmitterAddresses,
+  watcherAddresses,
+} from "./config";
 
 let roleStatus: any = {};
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
 interface checkAndUpdateRolesObj {
   userAddress: string;
@@ -198,7 +207,7 @@ const executeTransactions = async (
           chainId as any as ChainSlug
         ] as keyof typeof chainSlugs
       );
-      let wallet = new Wallet(process.env.ROLE_ASSIGNER_PRIVATE_KEY!, provider);
+      let wallet = new Wallet(process.env.SOCKET_SIGNER_KEY!, provider);
       await executeRoleTransactions(chainId, newRoleStatus, wallet);
       await executeOtherTransactions(chainId, wallet);
     })
@@ -316,7 +325,13 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
         //   networkToChainSlug[chainId],
         //   "================="
         // );
-        let addresses = await getAddresses(chainId, mode);
+        let addresses;
+        try {
+          addresses = await getAddresses(chainId, mode);
+        } catch (error) {
+          addresses = undefined;
+        }
+
         if (!addresses) return;
         let provider = getProviderFromChainName(
           networkToChainSlug[chainId] as keyof typeof chainSlugs
@@ -476,14 +491,10 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
 };
 
 const main = async () => {
-  let ownerAddress = "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e";
-  let executorAddress = "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e";
-  let transmitterAddress = "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e";
-  let watcherAddress = "0xb3ce44d09862a04dd27d5fc1eb33371db1c5918e";
-
-  let sendTransaction = false;
-  let newRoleStatus = false;
-  let filterChains = [...MainnetIds];
+  let ownerAddress = socketOwner;
+  let executorAddress = executorAddresses[mode];
+  let transmitterAddress = transmitterAddresses[mode];
+  let watcherAddress = watcherAddresses[mode];
 
   // // Grant rescue and governance role for GasPriceOracle
   await checkAndUpdateRoles({
@@ -649,26 +660,3 @@ main()
     console.error(error);
     process.exit(1);
   });
-
-// let result = {
-//   "5": {
-//     TransmitManager: {
-//       EXECUTOR_ROLE: false,
-//       "80001": {
-//         TRANSMITTER_ROLE: false,
-//       },
-//     },
-//     integrations: {
-//       "80001": {
-//         FastSwitchboard: {
-//           TRIP_ROLE: false, // roleHash(TRIP_ROLE)
-//           UNTRIP_ROLE: false,
-//           WATCHER_ROLE: false, // roleChainHash(WATCHER_ROLE, 80001)
-//           TRIP_ROLE_SLUG: false, // roleChainHash(TRIP_ROLE, 80001)
-//         },
-//         OptimisticSwitchboard: {},
-//         NativeSwitchboard: {},
-//       },
-//     },
-//   },
-// };

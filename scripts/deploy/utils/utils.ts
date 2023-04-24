@@ -108,6 +108,18 @@ export const storeAddresses = async (
   fs.writeFileSync(addressesPath, JSON.stringify(deploymentAddresses, null, 2));
 };
 
+export const storeAllAddresses = async (
+  addresses: DeploymentAddresses,
+  mode: DeploymentMode
+) => {
+  if (!fs.existsSync(deploymentsPath)) {
+    await fs.promises.mkdir(deploymentsPath, { recursive: true });
+  }
+
+  const addressesPath = deploymentsPath + `${mode}_addresses.json`;
+  fs.writeFileSync(addressesPath, JSON.stringify(addresses, null, 2));
+};
+
 export const storeVerificationParams = async (
   verificationDetail: any[],
   chainSlug: ChainSlug,
@@ -127,6 +139,7 @@ export const storeVerificationParams = async (
     verificationDetails = JSON.parse(verificationDetailsString);
   }
 
+  if (!verificationDetails[chainSlug]) verificationDetails[chainSlug] = [];
   verificationDetails[chainSlug] = [
     ...verificationDetails[chainSlug],
     ...verificationDetail,

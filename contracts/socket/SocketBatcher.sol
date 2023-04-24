@@ -5,6 +5,8 @@ import "../libraries/RescueFundsLib.sol";
 import "../utils/AccessControlExtended.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 import {ISocket} from "../interfaces/ISocket.sol";
+import {ITransmitManager} from "../interfaces/ITransmitManager.sol";
+
 import {FastSwitchboard} from "../switchboard/default-switchboards/FastSwitchboard.sol";
 import {INativeRelay} from "../interfaces/INativeRelay.sol";
 
@@ -44,6 +46,127 @@ contract SocketBatcher is AccessControlExtended {
         uint256 maxGas;
         uint256 gasPriceBid;
         uint256 callValue;
+    }
+
+    struct SetProposeGasLimitRequest {
+        uint256 nonce;
+        uint256 dstChainId;
+        uint256 proposeGasLimit;
+        bytes signature;
+    }
+
+    struct SetAttestGasLimitRequest {
+        uint256 nonce;
+        uint256 dstChainId;
+        uint256 attestGasLimit;
+        bytes signature;
+    }
+
+    struct SetExecutionOverheadRequest {
+        uint256 nonce;
+        uint256 dstChainId;
+        uint256 executionOverhead;
+        bytes signature;
+    }
+
+    struct RegisterSwitchboardRequest {
+        address switchBoardAddress;
+        uint256 maxPacketLength;
+        uint32 siblingChainSlug;
+        uint32 capacitorType;
+    }
+
+    /**
+     * @notice set propose gas limit for a list of siblings
+     * @param socketAddress_ address of socket
+     * @param registerSwitchboardsRequests_ the list of requests with gas limit details
+     */
+    function registerSwitchboards(
+        address socketAddress_,
+        RegisterSwitchboardRequest[] calldata registerSwitchboardsRequests_
+    ) external {
+        uint256 registerSwitchboardsLength = registerSwitchboardsRequests_
+            .length;
+        for (uint256 index = 0; index < registerSwitchboardsLength; ) {
+            ISocket(socketAddress_).registerSwitchBoard(
+                registerSwitchboardsRequests_[index].switchBoardAddress,
+                registerSwitchboardsRequests_[index].maxPacketLength,
+                registerSwitchboardsRequests_[index].siblingChainSlug,
+                registerSwitchboardsRequests_[index].capacitorType
+            );
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    /**
+     * @notice set propose gas limit for a list of siblings
+     * @param transmitManagerAddress_ address of transmit manager
+     * @param setProposeGasLimitRequests_ the list of requests with gas limit details
+     */
+    function setProposeGasLimits(
+        address transmitManagerAddress_,
+        SetProposeGasLimitRequest[] calldata setProposeGasLimitRequests_
+    ) external {
+        uint256 setProposeGasLimitLength = setProposeGasLimitRequests_.length;
+        for (uint256 index = 0; index < setProposeGasLimitLength; ) {
+            ITransmitManager(transmitManagerAddress_).setProposeGasLimit(
+                setProposeGasLimitRequests_[index].nonce,
+                setProposeGasLimitRequests_[index].dstChainId,
+                setProposeGasLimitRequests_[index].proposeGasLimit,
+                setProposeGasLimitRequests_[index].signature
+            );
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    /**
+     * @notice set attest gas limit for a list of siblings
+     * @param fastSwitchboardAddress_ address of fast switchboard
+     * @param setAttestGasLimitRequests_ the list of requests with gas limit details
+     */
+    function setAttestGasLimits(
+        address fastSwitchboardAddress_,
+        SetAttestGasLimitRequest[] calldata setAttestGasLimitRequests_
+    ) external {
+        uint256 setAttestGasLimitLength = setAttestGasLimitRequests_.length;
+        for (uint256 index = 0; index < setAttestGasLimitLength; ) {
+            FastSwitchboard(fastSwitchboardAddress_).setAttestGasLimit(
+                setAttestGasLimitRequests_[index].nonce,
+                setAttestGasLimitRequests_[index].dstChainId,
+                setAttestGasLimitRequests_[index].attestGasLimit,
+                setAttestGasLimitRequests_[index].signature
+            );
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    /**
+     * @notice set execution overhead for a list of siblings
+     * @param switchboardAddress_ address of fast switchboard
+     * @param setExecutionOverheadRequests_ the list of requests with gas limit details
+     */
+    function setExecutionOverheadBatch(
+        address switchboardAddress_,
+        SetExecutionOverheadRequest[] calldata setExecutionOverheadRequests_
+    ) external {
+        uint256 sealRequestslength = setExecutionOverheadRequests_.length;
+        for (uint256 index = 0; index < sealRequestslength; ) {
+            FastSwitchboard(switchboardAddress_).setExecutionOverhead(
+                setExecutionOverheadRequests_[index].nonce,
+                setExecutionOverheadRequests_[index].dstChainId,
+                setExecutionOverheadRequests_[index].executionOverhead,
+                setExecutionOverheadRequests_[index].signature
+            );
+            unchecked {
+                ++index;
+            }
+        }
     }
 
     /**

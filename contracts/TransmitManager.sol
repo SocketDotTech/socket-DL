@@ -137,7 +137,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         uint256 dstChainSlug_,
         uint256 gasLimit_,
         bytes calldata signature_
-    ) external {
+    ) external override {
         address gasLimitUpdater = signatureVerifier__.recoverSignerFromDigest(
             keccak256(
                 abi.encode(

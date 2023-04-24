@@ -11,26 +11,33 @@ import dev_addresses from "../deployments/dev_addresses.json";
 import prod_addresses from "../deployments/prod_addresses.json";
 import surge_addresses from "../deployments/surge_addresses.json";
 
-function getAddresses(
-  srcChainSlug: ChainSlug,
-  mode: DeploymentMode
-): ChainSocketAddresses {
-  let addresses: ChainSocketAddresses | undefined;
+function getAllAddresses(mode: DeploymentMode): DeploymentAddresses {
+  let addresses: DeploymentAddresses | undefined;
 
   switch (mode) {
     case DeploymentMode.DEV:
-      addresses = (dev_addresses as DeploymentAddresses)[srcChainSlug];
+      addresses = dev_addresses as DeploymentAddresses;
       break;
     case DeploymentMode.PROD:
-      addresses = (prod_addresses as DeploymentAddresses)[srcChainSlug];
+      addresses = prod_addresses as DeploymentAddresses;
       break;
     case DeploymentMode.SURGE:
-      addresses = (surge_addresses as DeploymentAddresses)[srcChainSlug];
+      addresses = surge_addresses as DeploymentAddresses;
       break;
     default:
       throw new Error("No Mode Provided");
   }
 
+  if (!addresses) throw new Error("addresses not found");
+  return addresses;
+}
+
+function getAddresses(
+  srcChainSlug: ChainSlug,
+  mode: DeploymentMode
+): ChainSocketAddresses {
+  let addresses: ChainSocketAddresses | undefined =
+    getAllAddresses(mode)[srcChainSlug];
   if (!addresses) throw new Error("addresses not found");
   return addresses;
 }
@@ -97,4 +104,5 @@ export {
   getCapacitorAddress,
   getDeCapacitorAddress,
   getAddresses,
+  getAllAddresses,
 };

@@ -55,7 +55,7 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
         uint256 maxPacketLength_,
         uint32 siblingChainSlug_,
         uint32 capacitorType_
-    ) external {
+    ) external override {
         // only capacitor checked, decapacitor assumed will exist if capacitor does
         if (
             address(capacitors__[switchBoardAddress_][siblingChainSlug_]) !=

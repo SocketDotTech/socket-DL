@@ -1,13 +1,7 @@
 import fs from "fs";
 import hre from "hardhat";
 import { constants } from "ethers";
-import {
-  attestGasLimit,
-  executionOverhead,
-  networkToChainSlug,
-  proposeGasLimit,
-  switchboards,
-} from "../constants";
+import { networkToChainSlug, switchboards } from "../constants";
 import {
   deployedAddressPath,
   getInstance,
@@ -19,7 +13,6 @@ import {
   ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
-  DeploymentMode,
   IntegrationTypes,
   MainnetIds,
   NativeSwitchboard,
@@ -30,12 +23,9 @@ import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { setProposeGasLimit } from "../limits-updater/set-propose-gaslimit";
 import { setAttestGasLimit } from "../limits-updater/set-attest-gaslimit";
 import { setExecutionOverhead } from "../limits-updater/set-execution-overhead";
+import { capacitorType, maxPacketLength, mode } from "./config";
 
-const capacitorType = 1;
-const maxPacketLength = 10;
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
-
-let chains = [...TestnetIds, ...MainnetIds];
+const chains = [...TestnetIds, ...MainnetIds];
 
 export const main = async () => {
   try {
@@ -114,40 +104,37 @@ export const main = async () => {
         await storeAddresses(updatedDeploymentAddresses, chain, mode);
       }
 
-      // set gas limit for all siblings
-      for (let sibling of siblingSlugs) {
-        await setProposeGasLimit(
-          chain,
-          sibling,
-          addr["TransmitManager"],
-          proposeGasLimit[networkToChainSlug[sibling]],
-          socketSigner
-        );
+      await setProposeGasLimit(
+        chain,
+        siblingSlugs,
+        addr["TransmitManager"],
+        addr["SocketBatcher"],
+        socketSigner
+      );
 
-        await setAttestGasLimit(
-          chain,
-          sibling,
-          addr["FastSwitchboard"],
-          attestGasLimit[networkToChainSlug[sibling]],
-          socketSigner
-        );
+      await setAttestGasLimit(
+        chain,
+        siblingSlugs,
+        addr["FastSwitchboard"],
+        addr["SocketBatcher"],
+        socketSigner
+      );
 
-        await setExecutionOverhead(
-          chain,
-          sibling,
-          addr["FastSwitchboard"],
-          executionOverhead[networkToChainSlug[sibling]],
-          socketSigner
-        );
+      await setExecutionOverhead(
+        chain,
+        siblingSlugs,
+        addr["FastSwitchboard"],
+        addr["SocketBatcher"],
+        socketSigner
+      );
 
-        await setExecutionOverhead(
-          chain,
-          sibling,
-          addr["OptimisticSwitchboard"],
-          executionOverhead[networkToChainSlug[sibling]],
-          socketSigner
-        );
-      }
+      await setExecutionOverhead(
+        chain,
+        siblingSlugs,
+        addr["OptimisticSwitchboard"],
+        addr["SocketBatcher"],
+        socketSigner
+      );
     }
 
     await setRemoteSwitchboards(addresses);

@@ -1,28 +1,42 @@
 import hre from "hardhat";
-import { ChainKey, networkToChainSlug } from "../constants";
-import verificationParams from "../../deployments/verification.json";
-import { verify } from "./utils/utils";
+import fs from "fs";
 
-export type VerifyParams = { [chain in ChainKey]?: any[][] };
+import { ChainKey, networkToChainSlug } from "../constants";
+import { deploymentsPath, verify } from "./utils/utils";
+import { DeploymentMode } from "../../src";
+
+export type VerifyParams = {
+  [chain in ChainKey]?: VerifyArgs[];
+};
+type VerifyArgs = [string, string, string, any[]];
+
+const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
 /**
  * Deploys network-independent socket contracts
  */
 export const main = async () => {
   try {
+    const path = deploymentsPath + `${mode}_verification.json`;
+    if (!fs.existsSync(path)) {
+      throw new Error("addresses.json not found");
+    }
+    let verificationParams: VerifyParams = JSON.parse(
+      fs.readFileSync(path, "utf-8")
+    );
+
     const chains = Object.keys(verificationParams);
+    if (!chains) return;
+
     for (let chainIndex = 0; chainIndex < chains.length; chainIndex++) {
       const chain = chains[chainIndex];
       hre.changeNetwork(networkToChainSlug[chain]);
 
-      if (
-        verificationParams &&
-        verificationParams[chain] &&
-        verificationParams[chain]?.length
-      ) {
-        const len = verificationParams[chain]?.length;
+      const chainParams: VerifyArgs[] = verificationParams[chain];
+      if (chainParams.length) {
+        const len = chainParams.length;
         for (let index = 0; index < len!; index++)
-          await verify(...verificationParams[chain][index]);
+          await verify(...chainParams[index]);
       }
     }
   } catch (error) {

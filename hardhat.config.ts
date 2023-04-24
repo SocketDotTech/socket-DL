@@ -91,12 +91,13 @@ const config: HardhatUserConfig = {
       goerli: process.env.ETHERSCAN_API_KEY || "",
       mainnet: process.env.ETHERSCAN_API_KEY || "",
       optimisticEthereum: process.env.OPTIMISM_API_KEY || "",
+      optimisticTestnet: process.env.OPTIMISM_API_KEY || "",
       polygon: process.env.POLYGONSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
     },
     customChains: [
       {
-        network: "optimisticEthereum",
+        network: "optimisticTestnet",
         chainId: chainSlugs["optimism-goerli"],
         urls: {
           apiURL: "https://api-goerli-optimistic.etherscan.io/api",
