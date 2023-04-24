@@ -13,7 +13,7 @@ import {
 import { getAddresses } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
 import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
+import { chains, mode } from "../config";
 
 interface RequestObj {
   to: string;
@@ -149,8 +149,8 @@ export const sendMessagesToAllPaths = async (params: {
 };
 
 const main = async () => {
-  let senderChains = [...TestnetIds];
-  let receiverChains = TestnetIds;
+  let senderChains = chains;
+  let receiverChains = chains;
   await sendMessagesToAllPaths({ senderChains, receiverChains });
 };
 
