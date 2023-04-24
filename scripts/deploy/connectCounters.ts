@@ -58,7 +58,7 @@ export const main = async () => {
       ).connect(socketSigner);
 
       for (let index = 0; index < siblingSlugs.length; index++) {
-        const sibling = 56;
+        const sibling = siblingSlugs[index];
         const siblingCounter = addresses?.[sibling]?.["Counter"];
         const switchboard = getSwitchboardAddress(
           chain,
