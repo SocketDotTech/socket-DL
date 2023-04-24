@@ -12,6 +12,7 @@ import {
   REQUIRED_CHAIN_ROLES,
   IntegrationTypes,
   isTestnet,
+  DeploymentMode,
   isMainnet,
   getAddresses,
 } from "../../src";

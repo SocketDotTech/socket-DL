@@ -8,10 +8,10 @@ import {
   MainnetIds,
   isTestnet,
   isMainnet,
+  DeploymentMode
 } from "../../../src";
 import { getAddresses } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
-import { DeploymentMode } from "../../constants";
 import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
 const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
