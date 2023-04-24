@@ -172,6 +172,5 @@ async function getOrDeploy(
     );
   }
 
-  
   return contract;
 }

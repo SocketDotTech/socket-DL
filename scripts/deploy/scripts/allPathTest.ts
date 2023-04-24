@@ -8,7 +8,7 @@ import {
   MainnetIds,
   isTestnet,
   isMainnet,
-  DeploymentMode
+  DeploymentMode,
 } from "../../../src";
 import { getAddresses } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
