@@ -39,7 +39,7 @@ export const main = async () => {
 
       const siblingIntegrationtype: IntegrationTypes[] = siblingSlugs.map(
         (chainSlug) => {
-          return switchboards[networkToChainSlug[chain]][
+          return switchboards?.[networkToChainSlug[chain]]?.[
             networkToChainSlug[chainSlug]
           ]
             ? IntegrationTypes.native
@@ -53,17 +53,35 @@ export const main = async () => {
         await getInstance("Counter", addr["Counter"])
       ).connect(socketSigner);
 
+      const socket: Contract = (
+        await getInstance("Socket", addr["Socket"])
+      ).connect(socketSigner);
+
       for (let index = 0; index < siblingSlugs.length; index++) {
-        const sibling = siblingSlugs[index];
+        const sibling = 56;
+        const siblingCounter = addresses?.[sibling]?.["Counter"];
+        const switchboard = getSwitchboardAddress(
+          chain,
+          sibling,
+          siblingIntegrationtype[index],
+          mode
+        );
+
+        const configs = await socket.getPlugConfig(counter.address, sibling);
+        if (
+          configs["siblingPlug"].toLowerCase() ===
+            siblingCounter?.toLowerCase() &&
+          configs["inboundSwitchboard__"].toLowerCase() ===
+            switchboard.toLowerCase()
+        ) {
+          console.log("Config already set!");
+          continue;
+        }
+
         const tx = await counter.setSocketConfig(
           sibling,
-          addresses?.[sibling]?.["Counter"],
-          getSwitchboardAddress(
-            chain,
-            sibling,
-            siblingIntegrationtype[index],
-            mode
-          )
+          siblingCounter,
+          switchboard
         );
 
         console.log(
