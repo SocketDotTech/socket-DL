@@ -16,8 +16,6 @@ contract GasPriceOracleTest is Setup {
     SignatureVerifier internal signatureVerifier;
     TransmitManager internal transmitManager;
 
-    uint256 gasPriceOracleNonce;
-
     event RelativeGasPriceUpdated(
         uint256 dstChainSlug_,
         uint256 relativeGasPrice_

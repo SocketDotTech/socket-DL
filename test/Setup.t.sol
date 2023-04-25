@@ -47,6 +47,7 @@ contract Setup is Test {
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
+    uint256 gasPriceOracleNonce;
 
     struct SocketConfigContext {
         uint256 siblingChainSlug;
