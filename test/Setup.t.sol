@@ -159,9 +159,6 @@ contract Setup is Test {
         hoax(_socketOwner);
         cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
 
-        hoax(_socketOwner);
-        cc_.executionManager__.grantRole(EXECUTOR_ROLE, address(this));
-
         _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
         _addTransmitters(transmitterPrivateKeys_, cc_, cc_.chainSlug);
     }
@@ -371,6 +368,20 @@ contract Setup is Test {
         vm.stopPrank();
     }
 
+    function sealAndPropose(
+        address capacitor
+    ) internal returns (bytes32 packetId_, bytes32 root_) {
+        bytes memory sig_;
+        (root_, packetId_, sig_) = _getLatestSignature(
+            _a,
+            capacitor,
+            _b.chainSlug
+        );
+
+        _sealOnSrc(_a, capacitor, sig_);
+        _proposeOnDst(_b, sig_, packetId_, root_);
+    }
+
     function _addTransmitters(
         uint256[] memory transmitterPrivateKeys_,
         ChainContext memory cc_,
@@ -469,6 +480,33 @@ contract Setup is Test {
         );
     }
 
+    function _executePayloadOnDstWithExecutor(
+        ChainContext storage dst_,
+        address remotePlug_,
+        bytes32 packetId_,
+        bytes32 msgId_,
+        uint256 msgGasLimit_,
+        uint256 executionFee_,
+        bytes32 packedMessage_,
+        uint256 executorPrivateKey_,
+        bytes memory payload_,
+        bytes memory proof_
+    ) internal {
+        ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
+            msgId_,
+            executionFee_,
+            msgGasLimit_,
+            payload_,
+            proof_
+        );
+
+        bytes memory sig = _createSignature(
+            packedMessage_,
+            executorPrivateKey_
+        );
+        dst_.socket__.execute(packetId_, remotePlug_, msgDetails, sig);
+    }
+
     function _executePayloadOnDst(
         ChainContext storage dst_,
         uint256,
@@ -481,16 +519,18 @@ contract Setup is Test {
         bytes memory payload_,
         bytes memory proof_
     ) internal {
-        ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
+        _executePayloadOnDstWithExecutor(
+            dst_,
+            remotePlug_,
+            packetId_,
             msgId_,
-            executionFee_,
             msgGasLimit_,
+            executionFee_,
+            packedMessage_,
+            executorPrivateKey,
             payload_,
             proof_
         );
-
-        bytes memory sig = _createSignature(packedMessage_, executorPrivateKey);
-        dst_.socket__.execute(packetId_, remotePlug_, msgDetails, sig);
     }
 
     function _packMessageId(

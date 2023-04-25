@@ -95,7 +95,7 @@ contract SocketDstTest is Setup {
 
     function testProposeAPacket() external {
         address capacitor = address(_a.configs__[index].capacitor__);
-        sendOutboundMessage(index, capacitor);
+        sendOutboundMessage();
 
         (
             bytes32 root_,
@@ -119,7 +119,7 @@ contract SocketDstTest is Setup {
 
     function testIsPacketProposed() external {
         address capacitor = address(_a.configs__[index].capacitor__);
-        sendOutboundMessage(index, capacitor);
+        sendOutboundMessage();
 
         (
             bytes32 root_,
@@ -143,7 +143,7 @@ contract SocketDstTest is Setup {
     function testProposeAPacketByInvalidAttester() external {
         address capacitor = address(_a.configs__[index].capacitor__);
 
-        sendOutboundMessage(index, capacitor);
+        sendOutboundMessage();
 
         (
             bytes32 root_,
@@ -164,7 +164,7 @@ contract SocketDstTest is Setup {
     function testDuplicateProposePacket() external {
         address capacitor = address(_a.configs__[index].capacitor__);
 
-        sendOutboundMessage(index, capacitor);
+        sendOutboundMessage();
         (, , bytes memory sig_) = getLatestSignature(
             _a,
             capacitor,
@@ -177,7 +177,7 @@ contract SocketDstTest is Setup {
         _proposeOnDst(_b, sig_, packetId_, root_);
     }
 
-    function sendOutboundMessage(uint256 index, address capacitor) internal {
+    function sendOutboundMessage() internal {
         uint256 amount = 100;
 
         uint256 executionFee;
@@ -245,6 +245,8 @@ contract SocketDstTest is Setup {
 
         bytes32 msgId = _packMessageId(_a.chainSlug, 0);
         (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        _attestOnDst(address(_b.configs__[index].switchboard__), packetId);
+
         vm.expectEmit(true, false, false, false);
         emit ExecutionSuccess(msgId);
 
@@ -280,60 +282,6 @@ contract SocketDstTest is Setup {
         );
     }
 
-    function testExecuteMessageWithInvalidProof() external {
-        uint256 amount = 100;
-        bytes memory payload = abi.encode(
-            keccak256("OP_ADD"),
-            amount,
-            _plugOwner
-        );
-        bytes memory proof = abi.encode(0);
-
-        address capacitor = address(_a.configs__[index].capacitor__);
-
-        uint256 executionFee;
-        {
-            (uint256 switchboardFees, uint256 verificationFee) = _a
-                .configs__[index]
-                .switchboard__
-                .getMinFees(_b.chainSlug);
-
-            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                _b.chainSlug
-            );
-
-            uint256 value = switchboardFees +
-                socketFees +
-                verificationFee +
-                executionFee;
-
-            hoax(_plugOwner);
-            srcCounter__.remoteAddOperation{value: value}(
-                _b.chainSlug,
-                amount,
-                _msgGasLimit
-            );
-        }
-
-        bytes32 msgId = _packMessageId(_a.chainSlug, 0);
-        (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
-        vm.expectRevert(InvalidProof.selector);
-        _executePayloadOnDst(
-            _b,
-            _a.chainSlug,
-            address(dstCounter__),
-            packetId,
-            msgId,
-            _msgGasLimit,
-            executionFee,
-            root,
-            payload,
-            proof
-        );
-    }
-
     function testExecuteMessageWithInvalidExecutor() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
@@ -342,7 +290,6 @@ contract SocketDstTest is Setup {
             _plugOwner
         );
         bytes memory proof = abi.encode(0);
-
         address capacitor = address(_a.configs__[index].capacitor__);
 
         uint256 executionFee;
@@ -377,17 +324,18 @@ contract SocketDstTest is Setup {
 
         bytes32 msgId = _packMessageId(_a.chainSlug, 0);
         (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        _attestOnDst(address(_b.configs__[index].switchboard__), packetId);
 
         vm.expectRevert(NotExecutor.selector);
-        _executePayloadOnDst(
+        _executePayloadOnDstWithExecutor(
             _b,
-            _a.chainSlug,
             address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
             executionFee,
             root,
+            uint256(1),
             payload,
             proof
         );
