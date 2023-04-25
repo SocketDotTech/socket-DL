@@ -173,7 +173,7 @@ contract FastSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
 
         uint256 srcChainSlug = uint256(123);
-        fastSwitchboard.grantRole("TRIP_ROLE", srcChainSlug, _socketOwner);
+        fastSwitchboard.grantRole("WATCHER_ROLE", srcChainSlug, _socketOwner);
 
         bytes32 digest = keccak256(
             abi.encode("TRIP_PATH", srcChainSlug, _a.chainSlug, nonce, true)
@@ -200,15 +200,15 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testUnTripAfterTripSingle() external {
-        uint256 srcChainSlug = _a.chainSlug;
+        uint256 srcChainSlug = uint256(123);
 
         vm.startPrank(_socketOwner);
-        fastSwitchboard.grantRole("TRIP_ROLE", srcChainSlug, _socketOwner);
-        fastSwitchboard.grantRole("UNTRIP_ROLE", srcChainSlug, _socketOwner);
+        fastSwitchboard.grantRole("WATCHER_ROLE", srcChainSlug, _socketOwner);
+        fastSwitchboard.grantRole("UNTRIP_ROLE", _socketOwner);
         vm.stopPrank();
 
         bytes32 digest = keccak256(
-            abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, true)
+            abi.encode("TRIP_PATH", srcChainSlug, _a.chainSlug, nonce, true)
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 

@@ -94,7 +94,7 @@ contract OptimisticSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
         uint256 srcChainSlug = _a.chainSlug;
         optimisticSwitchboard.grantRole(
-            "TRIP_ROLE",
+            "WATCHER_ROLE",
             srcChainSlug,
             _socketOwner
         );
@@ -126,15 +126,11 @@ contract OptimisticSwitchboardTest is Setup {
 
         vm.startPrank(_socketOwner);
         optimisticSwitchboard.grantRole(
-            "TRIP_ROLE",
+            "WATCHER_ROLE",
             srcChainSlug,
             _socketOwner
         );
-        optimisticSwitchboard.grantRole(
-            "UNTRIP_ROLE",
-            srcChainSlug,
-            _socketOwner
-        );
+        optimisticSwitchboard.grantRole("UNTRIP_ROLE", _socketOwner);
         vm.stopPrank();
 
         hoax(_socketOwner);
@@ -193,7 +189,7 @@ contract OptimisticSwitchboardTest is Setup {
 
         uint32 srcChainSlug = _a.chainSlug;
         optimisticSwitchboard.grantRole(
-            "TRIP_ROLE",
+            "WATCHER_ROLE",
             srcChainSlug,
             _socketOwner
         );
