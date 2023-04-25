@@ -1,18 +1,18 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import fs from "fs";
 import { providers, Wallet } from "ethers";
-import { deployedAddressPath } from "../../deploy/utils";
-import { chainSlugs, DeploymentMode, getJsonRpcUrl } from "../../constants";
+import { ChainKey, chainSlugs, getJsonRpcUrl } from "../../constants";
 import { L2ToL1MessageStatus, L2TransactionReceipt } from "@arbitrum/sdk";
+import { getAllAddresses } from "../../../src";
 
 // https://goerli.arbiscan.io/txsExit to check message status
-const l1Chain = "goerli";
-const l2Chain = "arbitrum-goerli";
+const l1Chain = ChainKey.GOERLI;
+const l2Chain = ChainKey.ARBITRUM_GOERLI;
 const sealTxHash =
   "0x0113020a1e3b9f814a78791b9719bf583bb0f25075cde1e754af99f1dcf137a7";
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
+
+import { mode } from "../../deploy/config";
 
 const walletPrivateKey = process.env.DEVNET_PRIVKEY;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));
@@ -22,13 +22,7 @@ const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 
 export const main = async () => {
   try {
-    if (!fs.existsSync(deployedAddressPath(mode))) {
-      throw new Error("addresses.json not found");
-    }
-    const addresses = JSON.parse(
-      fs.readFileSync(deployedAddressPath(mode), "utf-8")
-    );
-
+    const addresses = getAllAddresses(mode);
     if (!addresses[chainSlugs[l1Chain]] || !addresses[chainSlugs[l2Chain]]) {
       throw new Error("Deployed Addresses not found");
     }

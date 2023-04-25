@@ -1,5 +1,9 @@
 import hre from "hardhat";
-import { networkToChainSlug, switchboards } from "../constants";
+import {
+  getDefaultIntegrationType,
+  networkToChainSlug,
+  switchboards,
+} from "../constants";
 import { getInstance, getSigners } from "./utils";
 import {
   ChainSlug,
@@ -39,11 +43,10 @@ export const main = async () => {
 
       const siblingIntegrationtype: IntegrationTypes[] = siblingSlugs.map(
         (chainSlug) => {
-          return switchboards?.[networkToChainSlug[chain]]?.[
+          return getDefaultIntegrationType(
+            networkToChainSlug[chain],
             networkToChainSlug[chainSlug]
-          ]
-            ? IntegrationTypes.native
-            : IntegrationTypes.fast;
+          );
         }
       );
 

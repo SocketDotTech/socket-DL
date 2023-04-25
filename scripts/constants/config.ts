@@ -1,4 +1,5 @@
-import { NativeSwitchboard } from "../../src/types";
+import { IntegrationTypes, NativeSwitchboard } from "../../src/types";
+import { ChainKey } from "./networks";
 
 export const socketOwner = "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34";
 
@@ -80,6 +81,15 @@ export const executionOverhead: {
   arbitrum: 500000,
   optimism: 40000,
   mainnet: 40000,
+};
+
+export const getDefaultIntegrationType = (
+  chain: ChainKey,
+  sibling: ChainKey
+): IntegrationTypes => {
+  return switchboards?.[chain]?.[sibling]
+    ? IntegrationTypes.native
+    : IntegrationTypes.fast;
 };
 
 export const switchboards = {
