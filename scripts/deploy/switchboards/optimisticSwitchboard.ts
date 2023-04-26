@@ -1,4 +1,4 @@
-import { chainKeyToSlug } from "../../../src";
+import { CORE_CONTRACTS, chainKeyToSlug } from "../../../src";
 import { timeout } from "../../constants";
 
 export const optimisticSwitchboard = (
@@ -8,7 +8,7 @@ export const optimisticSwitchboard = (
   signerAddress: string
 ) => {
   return {
-    contractName: "OptimisticSwitchboard",
+    contractName: CORE_CONTRACTS.OptimisticSwitchboard,
     args: [
       signerAddress,
       socketAddress,

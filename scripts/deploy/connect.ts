@@ -1,7 +1,6 @@
 import {
   getDefaultIntegrationType,
   getProviderFromChainName,
-  networkToChainSlug,
 } from "../constants";
 import { getInstance } from "./utils";
 import {
@@ -13,6 +12,7 @@ import {
   TestnetIds,
   getAllAddresses,
   isTestnet,
+  networkToChainSlug,
 } from "../../src";
 import { mode } from "./config";
 import { Contract, Wallet } from "ethers";

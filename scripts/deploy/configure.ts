@@ -1,10 +1,6 @@
 import fs from "fs";
 import { Wallet, constants } from "ethers";
-import {
-  getProviderFromChainName,
-  networkToChainSlug,
-  switchboards,
-} from "../constants";
+import { getProviderFromChainName, switchboards } from "../constants";
 import {
   deployedAddressPath,
   getInstance,
@@ -20,6 +16,7 @@ import {
   NativeSwitchboard,
   TestnetIds,
   isTestnet,
+  networkToChainSlug,
 } from "../../src";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { setProposeGasLimit } from "../limits-updater/set-propose-gaslimit";
@@ -57,7 +54,7 @@ export const main = async () => {
 
       const list = isTestnet(chain) ? TestnetIds : MainnetIds;
       const siblingSlugs: ChainSlug[] = list.filter(
-        (chainSlug) => chainSlug !== chain
+        (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
       );
 
       console.log(`Configuring for ${chain}`);
@@ -180,10 +177,9 @@ const setRemoteSwitchboards = async (addresses) => {
 
           let functionName, sbContract;
           if (srcSwitchboardType === NativeSwitchboard.POLYGON_L1) {
-            sbContract = await getInstance(
-              "PolygonL1Switchboard",
-              srcSwitchboardAddress
-            );
+            sbContract = (
+              await getInstance("PolygonL1Switchboard", srcSwitchboardAddress)
+            ).connect(socketSigner);
 
             const fxChild = await sbContract.fxChildTunnel();
             if (fxChild !== constants.AddressZero) continue;
@@ -193,10 +189,9 @@ const setRemoteSwitchboards = async (addresses) => {
               `Setting ${dstSwitchboardAddress} fx child tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
             );
           } else if (srcSwitchboardType === NativeSwitchboard.POLYGON_L2) {
-            sbContract = await getInstance(
-              "PolygonL2Switchboard",
-              srcSwitchboardAddress
-            );
+            sbContract = (
+              await getInstance("PolygonL2Switchboard", srcSwitchboardAddress)
+            ).connect(socketSigner);
 
             const fxRoot = await sbContract.fxRootTunnel();
             if (fxRoot !== constants.AddressZero) continue;
@@ -206,10 +201,9 @@ const setRemoteSwitchboards = async (addresses) => {
               `Setting ${dstSwitchboardAddress} fx root tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
             );
           } else {
-            sbContract = await getInstance(
-              "ArbitrumL1Switchboard",
-              srcSwitchboardAddress
-            );
+            sbContract = (
+              await getInstance("ArbitrumL1Switchboard", srcSwitchboardAddress)
+            ).connect(socketSigner);
 
             const remoteNativeSwitchboard =
               await sbContract.remoteNativeSwitchboard();

@@ -3,6 +3,7 @@ import { deployContractWithArgs, storeAddresses, getInstance } from "../utils";
 
 import { sealGasLimit } from "../../constants/config";
 import {
+  CORE_CONTRACTS,
   ChainSocketAddresses,
   DeploymentMode,
   networkToChainSlug,
@@ -32,47 +33,51 @@ export const deploySocket = async (
 
   try {
     const signatureVerifier: Contract = await getOrDeploy(
-      "SignatureVerifier",
+      CORE_CONTRACTS.SignatureVerifier,
       "contracts/utils/SignatureVerifier.sol",
       [],
       deployUtils
     );
-    deployUtils.addresses["SignatureVerifier"] = signatureVerifier.address;
+    deployUtils.addresses[CORE_CONTRACTS.SignatureVerifier] =
+      signatureVerifier.address;
 
     const hasher: Contract = await getOrDeploy(
-      "Hasher",
+      CORE_CONTRACTS.Hasher,
       "contracts/utils/Hasher.sol",
       [],
       deployUtils
     );
-    deployUtils.addresses["Hasher"] = hasher.address;
+    deployUtils.addresses[CORE_CONTRACTS.Hasher] = hasher.address;
 
     const capacitorFactory: Contract = await getOrDeploy(
-      "CapacitorFactory",
+      CORE_CONTRACTS.CapacitorFactory,
       "contracts/CapacitorFactory.sol",
       [socketOwner],
       deployUtils
     );
-    deployUtils.addresses["CapacitorFactory"] = capacitorFactory.address;
+    deployUtils.addresses[CORE_CONTRACTS.CapacitorFactory] =
+      capacitorFactory.address;
 
     const gasPriceOracle: Contract = await getOrDeploy(
-      "GasPriceOracle",
+      CORE_CONTRACTS.GasPriceOracle,
       "contracts/GasPriceOracle.sol",
       [socketOwner, chainSlug],
       deployUtils
     );
-    deployUtils.addresses["GasPriceOracle"] = gasPriceOracle.address;
+    deployUtils.addresses[CORE_CONTRACTS.GasPriceOracle] =
+      gasPriceOracle.address;
 
     const executionManager: Contract = await getOrDeploy(
-      "ExecutionManager",
+      CORE_CONTRACTS.ExecutionManager,
       "contracts/ExecutionManager.sol",
       [gasPriceOracle.address, socketOwner],
       deployUtils
     );
-    deployUtils.addresses["ExecutionManager"] = executionManager.address;
+    deployUtils.addresses[CORE_CONTRACTS.ExecutionManager] =
+      executionManager.address;
 
     const transmitManager: Contract = await getOrDeploy(
-      "TransmitManager",
+      CORE_CONTRACTS.TransmitManager,
       "contracts/TransmitManager.sol",
       [
         signatureVerifier.address,
@@ -83,10 +88,11 @@ export const deploySocket = async (
       ],
       deployUtils
     );
-    deployUtils.addresses["TransmitManager"] = transmitManager.address;
+    deployUtils.addresses[CORE_CONTRACTS.TransmitManager] =
+      transmitManager.address;
 
     const socket: Contract = await getOrDeploy(
-      "Socket",
+      CORE_CONTRACTS.Socket,
       "contracts/socket/Socket.sol",
       [
         chainSlug,
@@ -98,7 +104,7 @@ export const deploySocket = async (
       ],
       deployUtils
     );
-    deployUtils.addresses["Socket"] = socket.address;
+    deployUtils.addresses[CORE_CONTRACTS.Socket] = socket.address;
 
     // switchboards deploy
     const result = await deploySwitchboards(

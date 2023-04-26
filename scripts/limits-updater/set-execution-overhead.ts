@@ -4,7 +4,8 @@ import * as FastSwitchboardABI from "../../artifacts/contracts/switchboard/defau
 import * as SocketBatcherABI from "../../artifacts/contracts/socket/SocketBatcher.sol/SocketBatcher.json";
 
 import { isTransactionSuccessful } from "./utils/transaction-helper";
-import { executionOverhead, networkToChainSlug } from "../constants";
+import { executionOverhead } from "../constants";
+import { networkToChainSlug } from "../../src";
 
 export const setExecutionOverhead = async (
   srcChainId: number,

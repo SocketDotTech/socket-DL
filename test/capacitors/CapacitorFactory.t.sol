@@ -2,9 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "../Setup.t.sol";
-import "lib/openzeppelin-contracts/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import "../../contracts/CapacitorFactory.sol";
 import {RESCUE_ROLE} from "../../contracts/utils/AccessRoles.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 
 contract CapacitorFactoryTest is Setup {
     address immutable _owner = address(uint160(c++));

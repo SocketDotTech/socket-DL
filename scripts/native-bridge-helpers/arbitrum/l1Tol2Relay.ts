@@ -18,6 +18,8 @@ import {
 import { L1ToL2MessageStatus, L1TransactionReceipt } from "@arbitrum/sdk";
 
 // get providers for source and destination
+
+// replace following variables to initiate the txn
 const l1Chain = ChainKey.GOERLI;
 const l2Chain = ChainKey.ARBITRUM_GOERLI;
 const packetId =
@@ -32,6 +34,7 @@ const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l2Chain));
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 const l2Wallet = new Wallet(walletPrivateKey, l2Provider);
 
+// usage: npx hardhat run scripts/native-bridge-helpers/arbitrum/l1tol2Relay.ts
 export const getBridgeParams = async (from, to) => {
   const receivePacketBytes = utils.defaultAbiCoder.encode(
     ["bytes32", "bytes32"],
@@ -39,7 +42,6 @@ export const getBridgeParams = async (from, to) => {
   );
 
   console.log(receivePacketBytes, "receivePacketBytes");
-
   const receivePacketBytesLength = hexDataLength(receivePacketBytes) + 4; // 4 bytes func identifier
   console.log(`${receivePacketBytesLength}`, "receivePacketBytesLength");
 

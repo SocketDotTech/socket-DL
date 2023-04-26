@@ -30,7 +30,7 @@ export const main = async () => {
 
     const untripTxn = await switchboard
       .connect(signer)
-    ["tripPath(uint256,bool)"](srcChainSlug, false);
+      ["tripPath(uint256,bool)"](srcChainSlug, false);
     await untripTxn.wait();
 
     const isTripped = await switchboard.tripSinglePath(srcChainSlug);

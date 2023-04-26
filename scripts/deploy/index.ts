@@ -1,13 +1,14 @@
 import { ethers } from "hardhat";
 import { Wallet } from "ethers";
 import { deploySocket } from "./scripts/deploySocket";
-import { getProviderFromChainName, networkToChainSlug } from "../constants";
+import { getProviderFromChainName } from "../constants";
 import { storeVerificationParams } from "./utils";
 import {
   ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
   getAllAddresses,
+  networkToChainSlug,
 } from "../../src";
 import { chains, mode } from "./config";
 

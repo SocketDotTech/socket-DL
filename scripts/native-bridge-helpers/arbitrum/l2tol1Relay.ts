@@ -14,12 +14,13 @@ const sealTxHash =
 
 import { mode } from "../../deploy/config";
 
-const walletPrivateKey = process.env.SOCKET_SIGNER_KEY;
+const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));
 const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l2Chain));
 
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 
+// usage: npx hardhat run scripts/native-bridge-helpers/arbitrum/l2tol1Relay.ts
 export const main = async () => {
   try {
     const addresses = getAllAddresses(mode);

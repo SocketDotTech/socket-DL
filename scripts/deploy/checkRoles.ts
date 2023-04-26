@@ -44,7 +44,6 @@ interface checkAndUpdateRolesObj {
 }
 
 // let roleTxns: any;
-
 let roleTxns: {
   [chainId in ChainSlug]?: {
     [contractName: string]: {
@@ -335,7 +334,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
 
         if (!addresses) return;
         let provider = getProviderFromChainName(
-          networkToChainSlug[chainId] as keyof typeof chainSlugs
+          networkToChainSlug[chainId] as keyof typeof chainKeyToSlug
         );
 
         let contractNames = Object.keys(REQUIRED_ROLES);
