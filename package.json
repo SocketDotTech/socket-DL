@@ -54,7 +54,9 @@
   "scripts": {
     "lint": "prettier \"./**\" --write --ignore-unknown",
     "build": "hardhat export-abi && tsc --project lib.tsconfig.json",
-    "abi": "hardhat export-abi"
+    "abi": "hardhat export-abi",
+    "compile": "forge build",
+    "test": "forge test"
   },
   "pre-commit": [
     "lint"

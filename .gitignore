@@ -2,7 +2,6 @@ dist/
 cache/
 out/
 node_modules/
-deployments/31337.json
 scratchpad/
 
 #Hardhat files
