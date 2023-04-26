@@ -31,11 +31,17 @@ yarn install
 ### Project Layout
 
 ```
+├── contracts
+│   └── Contract.sol - Core contracts
+|
+├── deployments
+│   └── <mode>_addresses.json - Latest deployments on multiple chains
+|
 ├── lib
 │   └── forge-std - forge dependencies installed as git submodules
 |
-├── contracts
-│   └── Contract.sol - Core contracts
+└── scripts
+|   └── contains different scripts needed for
 |
 └── test
 |   └── Contract.t.sol - Tests for core contracts
@@ -57,20 +63,21 @@ yarn lint
 Tests are run using the [Forge](https://github.com/foundry-rs/foundry/tree/master/forge) tool of [Foundry](https://github.com/foundry-rs/foundry).
 
 ```bash=
-forge test
+yarn test
 ```
 
 ### Deploy
 
 Deployments use [Hardhat](https://github.com/NomicFoundation/hardhat)
 
-Local deployments:
+Testnet deployments:
 
 ```bash=
-npx hardhat run scripts/deploy.ts
+bash deploy.sh
 ```
 
 - This will store addresses in deployments/ folder in root which are used to configure the contracts later for each remote chain.
+- For more config related details, see [DEPLOY.md](./scripts//deploy/DEPLOY.md)
 
 ### Publish
 
