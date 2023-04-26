@@ -1,5 +1,4 @@
 import fs from "fs";
-import hre from "hardhat";
 import { Wallet, constants } from "ethers";
 import {
   getProviderFromChainName,
@@ -9,7 +8,6 @@ import {
 import {
   deployedAddressPath,
   getInstance,
-  getSigners,
   getSwitchboardAddress,
   storeAddresses,
 } from "./utils";

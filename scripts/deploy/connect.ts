@@ -1,11 +1,9 @@
-import hre from "hardhat";
 import {
   getDefaultIntegrationType,
   getProviderFromChainName,
   networkToChainSlug,
-  switchboards,
 } from "../constants";
-import { getInstance, getSigners } from "./utils";
+import { getInstance } from "./utils";
 import {
   ChainSlug,
   ChainSocketAddresses,

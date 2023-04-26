@@ -1,8 +1,6 @@
 import { IntegrationTypes, NativeSwitchboard } from "../../src/types";
 import { ChainKey } from "./networks";
 
-export const socketOwner = "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34";
-
 export const timeout: {
   [key: string]: number;
 } = {

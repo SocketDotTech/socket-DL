@@ -1,24 +1,22 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import fs from "fs";
 import hre from "hardhat";
 import { constants } from "ethers";
 import {
   chainSlugs,
   switchboards,
-  socketOwner,
   getDefaultIntegrationType,
   networkToChainSlug,
 } from "../constants";
 import {
   executorAddresses,
   mode,
+  socketOwner,
   transmitterAddresses,
   watcherAddresses,
 } from "./config";
 import {
-  deployedAddressPath,
   getCapacitorAddress,
   getChainRoleHash,
   getDecapacitorAddress,
@@ -44,7 +42,7 @@ async function checkNative(
 
   let hasRole = await switchboard["hasRole(bytes32,address)"](
     getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
-    transmitterAddress[localChain]
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,

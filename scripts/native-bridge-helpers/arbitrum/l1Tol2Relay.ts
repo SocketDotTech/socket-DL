@@ -6,13 +6,8 @@ import { hexDataLength } from "@ethersproject/bytes";
 import { L1ToL2MessageGasEstimator } from "@arbitrum/sdk/dist/lib/message/L1ToL2MessageGasEstimator";
 
 import { getInstance } from "../../deploy/utils";
-import {
-  chainSlugs,
-  getJsonRpcUrl,
-  ChainKey,
-  socketOwner,
-} from "../../constants";
-import { mode } from "../../deploy/config";
+import { chainSlugs, getJsonRpcUrl, ChainKey } from "../../constants";
+import { mode, socketOwner } from "../../deploy/config";
 import {
   IntegrationTypes,
   getAllAddresses,

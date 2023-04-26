@@ -12,7 +12,6 @@ import {
   REQUIRED_CHAIN_ROLES,
   IntegrationTypes,
   isTestnet,
-  DeploymentMode,
   isMainnet,
   getAddresses,
 } from "../../src";
@@ -23,7 +22,6 @@ import {
   chainSlugs,
   getProviderFromChainName,
   networkToChainSlug,
-  socketOwner,
 } from "../constants";
 import {
   executorAddresses,
@@ -31,6 +29,7 @@ import {
   mode,
   newRoleStatus,
   sendTransaction,
+  socketOwner,
   transmitterAddresses,
   watcherAddresses,
 } from "./config";
@@ -244,6 +243,9 @@ export const checkNativeSwitchboardRoles = async ({
 
   await Promise.all(
     siblingSlugs.map(async (siblingSlug) => {
+      if (filterChains.length > 0 && !filterChains.includes(siblingSlug))
+        return;
+
       let pseudoContractName = contractName + "_" + String(siblingSlug);
       let contractAddress =
         addresses?.["integrations"]?.[siblingSlug]?.[IntegrationTypes.native]
@@ -409,6 +411,12 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
             if (!requiredChainRoles?.length) return;
             await Promise.all(
               siblingSlugs.map(async (siblingSlug) => {
+                if (
+                  filterChains.length > 0 &&
+                  !filterChains.includes(siblingSlug)
+                )
+                  return;
+
                 roleStatus[chainId][contractName][siblingSlug] = {};
 
                 await Promise.all(
