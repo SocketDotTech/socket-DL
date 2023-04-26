@@ -28,7 +28,7 @@ const packetId =
 const root =
   "0xc8111d45052c1df62037b92c1fab7c23bda80a0854b81432aee514aaf5f6c440";
 
-const walletPrivateKey = process.env.DEVNET_PRIVKEY;
+const walletPrivateKey = process.env.SOCKET_SIGNER_KEY;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));
 const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l2Chain));
 

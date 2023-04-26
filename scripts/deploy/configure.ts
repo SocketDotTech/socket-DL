@@ -1,7 +1,11 @@
 import fs from "fs";
 import hre from "hardhat";
-import { constants } from "ethers";
-import { networkToChainSlug, switchboards } from "../constants";
+import { Wallet, constants } from "ethers";
+import {
+  getProviderFromChainName,
+  networkToChainSlug,
+  switchboards,
+} from "../constants";
 import {
   deployedAddressPath,
   getInstance,
@@ -40,9 +44,13 @@ export const main = async () => {
     for (chain of chains) {
       if (!addresses[chain]) continue;
 
-      await hre.changeNetwork(networkToChainSlug[chain]);
-      const { socketSigner } = await getSigners();
-
+      const providerInstance = getProviderFromChainName(
+        networkToChainSlug[chain]
+      );
+      const socketSigner: Wallet = new Wallet(
+        process.env.SOCKET_SIGNER_KEY as string,
+        providerInstance
+      );
       const addr: ChainSocketAddresses = addresses[chain]!;
       if (!addr["integrations"]) continue;
 
@@ -146,8 +154,13 @@ export const main = async () => {
 const setRemoteSwitchboards = async (addresses) => {
   try {
     for (let srcChain in addresses) {
-      await hre.changeNetwork(networkToChainSlug[srcChain]);
-      const { socketSigner } = await getSigners();
+      const providerInstance = getProviderFromChainName(
+        networkToChainSlug[srcChain]
+      );
+      const socketSigner: Wallet = new Wallet(
+        process.env.SOCKET_SIGNER_KEY as string,
+        providerInstance
+      );
 
       for (let dstChain in addresses[srcChain]?.["integrations"]) {
         const dstConfig = addresses[srcChain]["integrations"][dstChain];

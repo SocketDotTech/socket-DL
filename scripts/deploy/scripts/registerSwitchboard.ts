@@ -1,4 +1,4 @@
-import { constants } from "ethers";
+import { Wallet, constants } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { createObj, getInstance } from "../utils";
@@ -9,7 +9,7 @@ export default async function registerSwitchBoard(
   remoteChainSlug: string | ChainSlug,
   capacitorType: number,
   maxPacketLength: number,
-  signer: SignerWithAddress,
+  signer: Wallet | SignerWithAddress,
   integrationType: string,
   config: ChainSocketAddresses
 ) {

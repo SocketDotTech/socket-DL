@@ -14,7 +14,7 @@ const sealTxHash =
 
 import { mode } from "../../deploy/config";
 
-const walletPrivateKey = process.env.DEVNET_PRIVKEY;
+const walletPrivateKey = process.env.SOCKET_SIGNER_KEY;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));
 const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l2Chain));
 

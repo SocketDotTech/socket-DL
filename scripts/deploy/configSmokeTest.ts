@@ -5,14 +5,18 @@ import fs from "fs";
 import hre from "hardhat";
 import { constants } from "ethers";
 import {
-  transmitterAddress,
   chainSlugs,
-  executorAddress,
   switchboards,
-  watcherAddress,
   socketOwner,
+  getDefaultIntegrationType,
+  networkToChainSlug,
 } from "../constants";
-import { config } from "./config";
+import {
+  executorAddresses,
+  mode,
+  transmitterAddresses,
+  watcherAddresses,
+} from "./config";
 import {
   deployedAddressPath,
   getCapacitorAddress,
@@ -23,9 +27,11 @@ import {
   getSwitchboardAddress,
 } from "./utils";
 import { assert } from "console";
-import { DeploymentMode, IntegrationTypes, NativeSwitchboard } from "../../src";
-
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
+import {
+  IntegrationTypes,
+  NativeSwitchboard,
+  getAllAddresses,
+} from "../../src";
 
 async function checkNative(
   contractAddr,
@@ -60,10 +66,9 @@ async function checkNative(
 async function checkFast(contractAddr, localChain, remoteChain) {
   const switchboard = await getInstance("FastSwitchboard", contractAddr);
 
-  console.log(contractAddr, "bvhdgvghsdbjhsdjcndjck");
   let hasRole = await switchboard["hasRole(bytes32,address)"](
     getChainRoleHash("WATCHER_ROLE", chainSlugs[remoteChain]),
-    watcherAddress[localChain]
+    watcherAddresses[mode]
   );
   assert(hasRole, `❌ FastSwitchboard has wrong TRIP_ROLE ${remoteChain}`);
 }
@@ -74,19 +79,19 @@ async function checkDefault(contractAddr, localChain, remoteChain) {
   // check roles
   let hasRole = await switchboard["hasRole(bytes32,address)"](
     getChainRoleHash("TRIP_ROLE", chainSlugs[remoteChain]),
-    transmitterAddress[localChain]
+    transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong TRIP_ROLE ${remoteChain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
     getChainRoleHash("UNTRIP_ROLE", chainSlugs[remoteChain]),
-    transmitterAddress[localChain]
+    transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong UNTRIP_ROLE ${remoteChain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
     getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainSlugs[remoteChain]),
-    transmitterAddress[localChain]
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,
@@ -219,7 +224,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
     getChainRoleHash("TRANSMITTER_ROLE", chainSlugs[chain]),
-    transmitterAddress[chain]
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,
@@ -228,7 +233,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
     getChainRoleHash("TRANSMITTER_ROLE", chainSlugs[remoteChain]),
-    transmitterAddress[chain]
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,
@@ -237,7 +242,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
     getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainSlugs[remoteChain]),
-    transmitterAddress[chain]
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,
@@ -246,7 +251,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
     getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
-    transmitterAddress[chain]
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,
@@ -283,7 +288,7 @@ async function checkExecutionManager(chain, contractAddr) {
 
   hasRole = await executionManager["hasRole(bytes32,address)"](
     getRoleHash("EXECUTOR_ROLE"),
-    executorAddress[chain]
+    executorAddresses[mode]
   );
   assert(hasRole, `❌ ExecutionManager has wrong executor address ${chain}`);
 }
@@ -449,29 +454,17 @@ function checkCoreContractAddress(
 
 export const main = async () => {
   try {
-    for (let chain in config) {
+    const addresses = getAllAddresses(mode);
+
+    for (let chain in addresses) {
       console.log(`\n🤖 Testing configs for ${chain}`);
-      const chainSetups = config[chain];
+      const chainSetups = addresses[chain];
 
       for (let index = 0; index < chainSetups.length; index++) {
         let remoteChain = chainSetups[index]["remoteChain"];
         let config = chainSetups[index]["config"];
 
         if (chain === remoteChain) throw new Error("Wrong chains");
-
-        if (!fs.existsSync(deployedAddressPath(mode))) {
-          throw new Error("addresses.json not found");
-        }
-
-        const addresses = JSON.parse(
-          fs.readFileSync(deployedAddressPath(mode), "utf-8")
-        );
-        if (
-          !addresses[chainSlugs[chain]] ||
-          !addresses[chainSlugs[remoteChain]]
-        ) {
-          throw new Error("Deployed Addresses not found");
-        }
 
         let remoteConfig = addresses[chainSlugs[remoteChain]];
         let localConfig = addresses[chainSlugs[chain]];
@@ -504,7 +497,10 @@ export const main = async () => {
           remoteChain,
           localConfig,
           remoteConfig,
-          chainSetups[index]["configForCounter"]
+          getDefaultIntegrationType(
+            networkToChainSlug[chain],
+            networkToChainSlug[remoteConfig]
+          )
         );
         console.log("✅ Checked Counter");
 

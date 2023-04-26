@@ -12,7 +12,7 @@ import { deployedAddressPath, getInstance } from "../../deploy/utils";
 
 // get providers for source and destination
 const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
-const privateKey = process.env.DEVNET_PRIVKEY;
+const privateKey = process.env.SOCKET_SIGNER_KEY;
 const sealTxHash = "";
 
 const localChain = "polygon-mumbai";

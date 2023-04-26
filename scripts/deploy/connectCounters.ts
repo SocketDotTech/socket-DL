@@ -1,6 +1,7 @@
 import hre from "hardhat";
 import {
   getDefaultIntegrationType,
+  getProviderFromChainName,
   networkToChainSlug,
   switchboards,
 } from "../constants";
@@ -16,7 +17,7 @@ import {
   isTestnet,
 } from "../../src";
 import { mode } from "./config";
-import { Contract } from "ethers";
+import { Contract, Wallet } from "ethers";
 import { getSwitchboardAddress } from "../../src";
 
 const chains = [...TestnetIds, ...MainnetIds];
@@ -29,8 +30,13 @@ export const main = async () => {
     for (chain of chains) {
       if (!addresses[chain]) continue;
 
-      await hre.changeNetwork(networkToChainSlug[chain]);
-      const { socketSigner } = await getSigners();
+      const providerInstance = getProviderFromChainName(
+        networkToChainSlug[chain]
+      );
+      const socketSigner: Wallet = new Wallet(
+        process.env.SOCKET_SIGNER_KEY as string,
+        providerInstance
+      );
 
       const addr: ChainSocketAddresses = addresses[chain]!;
       if (!addr["integrations"]) continue;

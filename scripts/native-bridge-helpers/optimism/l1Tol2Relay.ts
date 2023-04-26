@@ -21,7 +21,7 @@ const ATTEST_GAS_LIMIT = 800000;
 const outboundTxHash = "";
 const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
-const walletPrivateKey = process.env.DEVNET_PRIVKEY;
+const walletPrivateKey = process.env.SOCKET_SIGNER_KEY;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 
