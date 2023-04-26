@@ -6,10 +6,12 @@ import { hexDataLength } from "@ethersproject/bytes";
 import { L1ToL2MessageGasEstimator } from "@arbitrum/sdk/dist/lib/message/L1ToL2MessageGasEstimator";
 
 import { getInstance } from "../../deploy/utils";
-import { chainSlugs, getJsonRpcUrl, ChainKey } from "../../constants";
+import { getJsonRpcUrl } from "../../constants";
 import { mode, socketOwner } from "../../deploy/config";
 import {
+  ChainKey,
   IntegrationTypes,
+  chainKeyToSlug,
   getAllAddresses,
   getSwitchboardAddress,
 } from "../../../src";
@@ -88,19 +90,22 @@ export const main = async () => {
   try {
     const addresses = getAllAddresses(mode);
 
-    if (!addresses[chainSlugs[l1Chain]] || !addresses[chainSlugs[l2Chain]]) {
+    if (
+      !addresses[chainKeyToSlug[l1Chain]] ||
+      !addresses[chainKeyToSlug[l2Chain]]
+    ) {
       throw new Error("Deployed Addresses not found");
     }
 
-    const l1Config = addresses[chainSlugs[l1Chain]];
-    const l2Config = addresses[chainSlugs[l2Chain]];
+    const l1Config = addresses[chainKeyToSlug[l1Chain]];
+    const l2Config = addresses[chainKeyToSlug[l2Chain]];
 
     // get socket contracts for both chains
     // counter l1, counter l2, initiateNative, execute
 
     const sbAddr = getSwitchboardAddress(
-      chainSlugs[l1Chain],
-      chainSlugs[l2Chain],
+      chainKeyToSlug[l1Chain],
+      chainKeyToSlug[l2Chain],
       IntegrationTypes.native,
       mode
     );
@@ -112,8 +117,8 @@ export const main = async () => {
     const { bridgeParams, callValue } = await getBridgeParams(
       l1Switchboard.address,
       getSwitchboardAddress(
-        chainSlugs[l2Chain],
-        chainSlugs[l1Chain],
+        chainKeyToSlug[l2Chain],
+        chainKeyToSlug[l1Chain],
         IntegrationTypes.native,
         mode
       )

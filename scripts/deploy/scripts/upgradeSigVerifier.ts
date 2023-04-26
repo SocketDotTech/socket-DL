@@ -7,14 +7,12 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import {
   getInstance,
-  deployContractWithoutArgs,
   getChainSlug,
   deployedAddressPath,
+  deployContractWithArgs,
 } from "../utils";
 import { Contract } from "ethers";
-import { DeploymentMode } from "../../constants";
-
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
+import { mode } from "../config";
 
 export const main = async () => {
   try {
@@ -31,8 +29,9 @@ export const main = async () => {
     const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
     const notary = await getInstance("AdminNotary", config["notary"]);
 
-    const signatureVerifier: Contract = await deployContractWithoutArgs(
+    const signatureVerifier: Contract = await deployContractWithArgs(
       "SignatureVerifier",
+      [],
       socketSigner
     );
     console.log(

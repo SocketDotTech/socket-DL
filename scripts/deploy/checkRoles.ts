@@ -14,15 +14,13 @@ import {
   isTestnet,
   isMainnet,
   getAddresses,
+  chainKeyToSlug,
+  networkToChainSlug,
 } from "../../src";
 import { getRoleHash, getChainRoleHash } from "./utils";
 import { Contract, Wallet, ethers } from "ethers";
 import { getABI } from "./scripts/getABIs";
-import {
-  chainSlugs,
-  getProviderFromChainName,
-  networkToChainSlug,
-} from "../constants";
+import { getProviderFromChainName } from "../constants";
 import {
   executorAddresses,
   filterChains,
@@ -205,7 +203,7 @@ const executeTransactions = async (
       let provider = getProviderFromChainName(
         networkToChainSlug[
           chainId as any as ChainSlug
-        ] as keyof typeof chainSlugs
+        ] as keyof typeof chainKeyToSlug
       );
       let wallet = new Wallet(process.env.SOCKET_SIGNER_KEY!, provider);
       await executeRoleTransactions(chainId, newRoleStatus, wallet);

@@ -7,12 +7,13 @@ import { Web3ClientPlugin } from "@maticnetwork/maticjs-ethers";
 import { providers, Wallet } from "ethers";
 use(Web3ClientPlugin);
 
-import { DeploymentMode, chainSlugs, getJsonRpcUrl } from "../../constants";
+import { getJsonRpcUrl } from "../../constants";
 import { deployedAddressPath, getInstance } from "../../deploy/utils";
+import { mode } from "../../deploy/config";
+import { chainKeyToSlug } from "../../../src";
 
 // get providers for source and destination
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
-const privateKey = process.env.SOCKET_SIGNER_KEY;
+const privateKey = process.env.SOCKET_SIGNER_KEY!;
 const sealTxHash = "";
 
 const localChain = "polygon-mumbai";
@@ -33,12 +34,12 @@ export const main = async () => {
     );
 
     if (
-      !addresses[chainSlugs[localChain]] ||
-      !addresses[chainSlugs[remoteChain]]
+      !addresses[chainKeyToSlug[localChain]] ||
+      !addresses[chainKeyToSlug[remoteChain]]
     ) {
       throw new Error("Deployed Addresses not found");
     }
-    const l2Config = addresses[chainSlugs[remoteChain]];
+    const l2Config = addresses[chainKeyToSlug[remoteChain]];
 
     // get socket contracts for both chains
     // counter l1, counter l2, seal, execute
@@ -46,7 +47,7 @@ export const main = async () => {
     const l2Notary = (
       await getInstance(
         contracts.notary,
-        l2Config[contracts.notary][chainSlugs[remoteChain]]
+        l2Config[contracts.notary][chainKeyToSlug[remoteChain]]
       )
     ).connect(l2Wallet);
 

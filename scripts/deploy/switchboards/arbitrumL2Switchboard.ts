@@ -1,5 +1,4 @@
-import { constants } from "ethers";
-import { chainSlugs } from "../../constants";
+import { chainKeyToSlug } from "../../../src";
 
 const executionOverhead = 300000;
 const initiateGasLimit = 300000;
@@ -14,7 +13,7 @@ export const arbitrumL2Switchboard = (
   return {
     contractName: "ArbitrumL2Switchboard",
     args: [
-      chainSlugs[network],
+      chainKeyToSlug[network],
       confirmGasLimit,
       initiateGasLimit,
       executionOverhead,

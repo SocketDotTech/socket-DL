@@ -8,7 +8,6 @@ import {
   MainnetIds,
   isTestnet,
   isMainnet,
-  DeploymentMode,
 } from "../../../src";
 import { getAddresses, getRelayUrl } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
@@ -142,7 +141,7 @@ export const sendMessagesToAllPaths = async (params: {
               .toHexString();
             gasLimit =
               chainSlug === ChainSlug.ARBITRUM ||
-              chainSlug === ChainSlug.ARBITRUM_TESTNET
+              chainSlug === ChainSlug.ARBITRUM_GOERLI
                 ? undefined
                 : gasLimit;
             let response = await relayTx({

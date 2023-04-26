@@ -7,13 +7,11 @@ import {
   Configs,
   Integrations,
 } from "../../../src";
-import { DeploymentMode } from "../../constants";
 import {
   getAddresses,
   getChainSlugsFromDeployedAddresses,
 } from "../../deploy/utils";
-
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
+import { mode } from "../../deploy/config";
 
 // npx ts-node scripts/limits-updater/query-all-integrations.ts
 export const main = async () => {

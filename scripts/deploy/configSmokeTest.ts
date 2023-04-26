@@ -3,12 +3,7 @@ dotenvConfig();
 
 import hre from "hardhat";
 import { constants } from "ethers";
-import {
-  chainSlugs,
-  switchboards,
-  getDefaultIntegrationType,
-  networkToChainSlug,
-} from "../constants";
+import { switchboards, getDefaultIntegrationType } from "../constants";
 import {
   executorAddresses,
   mode,
@@ -28,7 +23,9 @@ import { assert } from "console";
 import {
   IntegrationTypes,
   NativeSwitchboard,
+  chainKeyToSlug,
   getAllAddresses,
+  networkToChainSlug,
 } from "../../src";
 
 async function checkNative(
@@ -65,7 +62,7 @@ async function checkFast(contractAddr, localChain, remoteChain) {
   const switchboard = await getInstance("FastSwitchboard", contractAddr);
 
   let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("WATCHER_ROLE", chainSlugs[remoteChain]),
+    getChainRoleHash("WATCHER_ROLE", chainKeyToSlug[remoteChain]),
     watcherAddresses[mode]
   );
   assert(hasRole, `❌ FastSwitchboard has wrong TRIP_ROLE ${remoteChain}`);
@@ -76,19 +73,19 @@ async function checkDefault(contractAddr, localChain, remoteChain) {
 
   // check roles
   let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("TRIP_ROLE", chainSlugs[remoteChain]),
+    getChainRoleHash("TRIP_ROLE", chainKeyToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong TRIP_ROLE ${remoteChain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("UNTRIP_ROLE", chainSlugs[remoteChain]),
+    getChainRoleHash("UNTRIP_ROLE", chainKeyToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong UNTRIP_ROLE ${remoteChain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainSlugs[remoteChain]),
+    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainKeyToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(
@@ -143,11 +140,11 @@ async function checkSwitchboardRegistration(
 
   const capacitor__ = await socket.capacitors__(
     switchboard,
-    chainSlugs[siblingChain]
+    chainKeyToSlug[siblingChain]
   );
   const decapacitor__ = await socket.decapacitors__(
     switchboard,
-    chainSlugs[siblingChain]
+    chainKeyToSlug[siblingChain]
   );
 
   assert(
@@ -169,11 +166,13 @@ async function checkCounter(
   // check config
   const config = await socket.getPlugConfig(
     localConfig["Counter"],
-    chainSlugs[siblingSlug]
+    chainKeyToSlug[siblingSlug]
   );
 
   if (
-    !localConfig?.["integrations"]?.[chainSlugs[siblingSlug]]?.[integrationType]
+    !localConfig?.["integrations"]?.[chainKeyToSlug[siblingSlug]]?.[
+      integrationType
+    ]
   ) {
     console.log(
       `❌ No integration found for ${siblingSlug} for ${integrationType}`
@@ -182,7 +181,7 @@ async function checkCounter(
   }
 
   const outboundSb =
-    localConfig["integrations"][chainSlugs[siblingSlug]][integrationType];
+    localConfig["integrations"][chainKeyToSlug[siblingSlug]][integrationType];
   assert(
     config.siblingPlug == remoteConfig["Counter"] &&
       config.inboundSwitchboard__ == outboundSb["switchboard"] &&
@@ -221,7 +220,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("TRANSMITTER_ROLE", chainSlugs[chain]),
+    getChainRoleHash("TRANSMITTER_ROLE", chainKeyToSlug[chain]),
     transmitterAddresses[mode]
   );
   assert(
@@ -230,7 +229,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("TRANSMITTER_ROLE", chainSlugs[remoteChain]),
+    getChainRoleHash("TRANSMITTER_ROLE", chainKeyToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(
@@ -239,7 +238,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainSlugs[remoteChain]),
+    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainKeyToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(
@@ -343,33 +342,33 @@ async function checkIntegration(
 ) {
   // config related contracts
   let localSwitchboard = getSwitchboardAddress(
-    chainSlugs[remoteChain],
+    chainKeyToSlug[remoteChain],
     configurationType,
     localConfig
   );
   let localCapacitor = getCapacitorAddress(
-    chainSlugs[remoteChain],
+    chainKeyToSlug[remoteChain],
     configurationType,
     localConfig
   );
   let localDecapacitor = getDecapacitorAddress(
-    chainSlugs[remoteChain],
+    chainKeyToSlug[remoteChain],
     configurationType,
     localConfig
   );
 
   let remoteSwitchboard = getSwitchboardAddress(
-    chainSlugs[localChain],
+    chainKeyToSlug[localChain],
     configurationType,
     remoteConfig
   );
   let remoteCapacitor = getCapacitorAddress(
-    chainSlugs[localChain],
+    chainKeyToSlug[localChain],
     configurationType,
     remoteConfig
   );
   let remoteDecapacitor = getDecapacitorAddress(
-    chainSlugs[localChain],
+    chainKeyToSlug[localChain],
     configurationType,
     remoteConfig
   );
@@ -464,8 +463,8 @@ export const main = async () => {
 
         if (chain === remoteChain) throw new Error("Wrong chains");
 
-        let remoteConfig = addresses[chainSlugs[remoteChain]];
-        let localConfig = addresses[chainSlugs[chain]];
+        let remoteConfig = addresses[chainKeyToSlug[remoteChain]];
+        let localConfig = addresses[chainKeyToSlug[chain]];
 
         await hre.changeNetwork(chain);
         checkCoreContractAddress(localConfig, remoteConfig, chain, remoteChain);

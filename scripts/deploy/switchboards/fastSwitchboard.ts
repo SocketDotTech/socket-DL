@@ -1,6 +1,8 @@
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { chainSlugs, timeout, watcherAddress } from "../../constants";
+import { timeout } from "../../constants";
+import { chainKeyToSlug } from "../../../src";
+import { watcherAddresses } from "../config";
 
 export const fastSwitchboard = (
   network: string,
@@ -14,7 +16,7 @@ export const fastSwitchboard = (
       signerAddress,
       socketAddress,
       oracleAddress,
-      chainSlugs[network],
+      chainKeyToSlug[network],
       timeout[network],
     ],
     path: "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
@@ -32,14 +34,14 @@ export const setupFast = async (
     const watcherRoleSet = await switchboard["hasRole(string,uint256,address)"](
       "WATCHER_ROLE",
       remoteChainSlug,
-      watcherAddress[localChain]
+      watcherAddresses[localChain]
     );
 
     // role setup
     if (!watcherRoleSet) {
       const grantWatcherRoleTx = await switchboard
         .connect(signer)
-        .grantWatcherRole(remoteChainSlug, watcherAddress[localChain]);
+        .grantWatcherRole(remoteChainSlug, watcherAddresses[localChain]);
       console.log(`grantWatcherRoleTx: ${grantWatcherRoleTx.hash}`);
       await grantWatcherRoleTx.wait();
     }

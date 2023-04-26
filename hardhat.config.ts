@@ -14,12 +14,8 @@ import { resolve } from "path";
 import fs from "fs";
 
 import "./tasks/accounts";
-import {
-  ChainKey,
-  chainSlugs,
-  gasPrice,
-  getJsonRpcUrl,
-} from "./scripts/constants/networks";
+import { gasPrice, getJsonRpcUrl } from "./scripts/constants/networks";
+import { ChainKey, chainKeyToSlug } from "./src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -34,14 +30,14 @@ if (!infuraApiKey && isProduction) {
   throw new Error("Please set your INFURA_API_KEY in a .env file");
 }
 
-function getChainConfig(chain: keyof typeof chainSlugs): NetworkUserConfig {
+function getChainConfig(chain: keyof typeof chainKeyToSlug): NetworkUserConfig {
   return {
     accounts: {
       count: 10,
       mnemonic,
       path: "m/44'/60'/0'/0",
     },
-    chainId: chainSlugs[chain],
+    chainId: chainKeyToSlug[chain],
     gasPrice: gasPrice[chain] ? gasPrice[chain] : "auto",
     url: getJsonRpcUrl(chain),
   };
@@ -95,7 +91,7 @@ const config: HardhatUserConfig = {
     customChains: [
       {
         network: "optimisticTestnet",
-        chainId: chainSlugs["optimism-goerli"],
+        chainId: chainKeyToSlug["optimism-goerli"],
         urls: {
           apiURL: "https://api-goerli-optimistic.etherscan.io/api",
           browserURL: "https://goerli-optimism.etherscan.io/",
@@ -103,7 +99,7 @@ const config: HardhatUserConfig = {
       },
       {
         network: "arbitrumTestnet",
-        chainId: chainSlugs["arbitrum-goerli"],
+        chainId: chainKeyToSlug["arbitrum-goerli"],
         urls: {
           apiURL: "https://api-goerli.arbiscan.io/api",
           browserURL: "https://goerli.arbiscan.io/",
@@ -113,7 +109,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      chainId: chainSlugs.hardhat,
+      chainId: chainKeyToSlug.hardhat,
     },
     ...liveNetworks,
   },

@@ -1,4 +1,5 @@
-import { bridgeConsts, chainSlugs } from "../../constants";
+import { chainKeyToSlug } from "../../../src";
+import { bridgeConsts } from "../../constants";
 
 const executionOverhead = 300000;
 const initiateGasLimit = 300000;
@@ -21,7 +22,7 @@ export const optimismSwitchboard = (
   return {
     contractName: "OptimismSwitchboard",
     args: [
-      chainSlugs[network],
+      chainKeyToSlug[network],
       receiveGasLimit,
       confirmGasLimit,
       initiateGasLimit,

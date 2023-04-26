@@ -3,8 +3,8 @@ import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployContractWithArgs, getAddresses, storeAddresses } from "../utils";
-import { chainSlugs } from "../../constants/networks";
-import { transmitterAddress } from "../../constants/config";
+import { chainKeyToSlug } from "../../../src";
+import { mode, transmitterAddresses } from "../config";
 
 /**
  * Deploys gasprice oracle , set transmitManager to oracle followed by granting transmitter role to the transmitter
@@ -22,14 +22,14 @@ export const main = async () => {
 
     const gasPriceOracle: Contract = await deployContractWithArgs(
       "GasPriceOracle",
-      [socketSigner.address, chainSlugs[network]],
+      [socketSigner.address, chainKeyToSlug[network]],
       socketSigner,
       "contracts/GasPriceOracle.sol"
     );
 
-    const addresses = await getAddresses(chainSlugs[network]);
+    const addresses = await getAddresses(chainKeyToSlug[network]);
     addresses["GasPriceOracle"] = gasPriceOracle.address;
-    await storeAddresses(addresses, chainSlugs[network]);
+    await storeAddresses(addresses, chainKeyToSlug[network]);
 
     const transmitManagerAddress = addresses["TransmitManager"];
 
@@ -42,7 +42,7 @@ export const main = async () => {
     await tx.wait();
 
     //grant transmitter role to transmitter-address
-    const transmitter = transmitterAddress[network];
+    const transmitter = transmitterAddresses[mode];
 
     const TransmitManager = await ethers.getContractFactory("TransmitManager");
     const transmitManagerInstance = TransmitManager.attach(
@@ -50,7 +50,7 @@ export const main = async () => {
     );
     const grantTransmitterRoleTxn = await transmitManagerInstance
       .connect(socketSigner)
-      .grantTransmitterRole(chainSlugs[network], transmitter);
+      .grantTransmitterRole(chainKeyToSlug[network], transmitter);
 
     console.log(
       `granted transmitter role to ${transmitter} and resulting transactionHash is: ${grantTransmitterRoleTxn.hash}`

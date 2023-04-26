@@ -2,10 +2,13 @@ import { Contract, Wallet } from "ethers";
 import { deployContractWithArgs, storeAddresses, getInstance } from "../utils";
 
 import { sealGasLimit } from "../../constants/config";
-import { ChainSocketAddresses, DeploymentMode } from "../../../src";
+import {
+  ChainSocketAddresses,
+  DeploymentMode,
+  networkToChainSlug,
+} from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { networkToChainSlug } from "../../constants";
 import { socketOwner } from "../config";
 
 let verificationDetails: any[] = [];
