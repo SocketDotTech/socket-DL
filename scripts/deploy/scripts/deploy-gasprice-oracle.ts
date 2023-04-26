@@ -23,13 +23,14 @@ export const main = async () => {
     const gasPriceOracle: Contract = await deployContractWithArgs(
       "GasPriceOracle",
       [socketSigner.address, chainKeyToSlug[network]],
-      socketSigner,
-      "contracts/GasPriceOracle.sol"
+      socketSigner
     );
 
     const addresses = await getAddresses(chainKeyToSlug[network]);
+
+    if (!addresses) return;
     addresses["GasPriceOracle"] = gasPriceOracle.address;
-    await storeAddresses(addresses, chainKeyToSlug[network]);
+    await storeAddresses(addresses, chainKeyToSlug[network], mode);
 
     const transmitManagerAddress = addresses["TransmitManager"];
 

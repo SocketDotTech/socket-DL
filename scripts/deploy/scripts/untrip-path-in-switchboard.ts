@@ -6,6 +6,7 @@ import {
   getSwitchboardAddress,
   IntegrationTypes,
 } from "../../../src";
+import { mode } from "../config";
 
 export const main = async () => {
   try {
@@ -18,7 +19,8 @@ export const main = async () => {
     const switchBoardAddress = getSwitchboardAddress(
       chainSlug,
       srcChainSlug,
-      IntegrationTypes.fast
+      IntegrationTypes.fast,
+      mode
     );
 
     const switchboard: Contract = await getInstance(
@@ -28,7 +30,7 @@ export const main = async () => {
 
     const untripTxn = await switchboard
       .connect(signer)
-      ["tripPath(uint256,bool)"](srcChainSlug, false);
+    ["tripPath(uint256,bool)"](srcChainSlug, false);
     await untripTxn.wait();
 
     const isTripped = await switchboard.tripSinglePath(srcChainSlug);

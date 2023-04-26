@@ -22,7 +22,7 @@ export const gasPrice: {
   [ChainKey.GOERLI]: "auto",
   [ChainKey.POLYGON_MAINNET]: "auto",
   [ChainKey.POLYGON_MUMBAI]: "auto",
-  [ChainKey.HARDHAT]: 31337,
+  [ChainKey.HARDHAT]: "auto",
 };
 
 export const chainSlugKeys: string[] = Object.values(networkToChainSlug);
