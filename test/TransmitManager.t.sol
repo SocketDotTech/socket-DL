@@ -33,7 +33,6 @@ contract TransmitManagerTest is Setup {
     uint256 sourceGasPrice = 1200000;
     uint256 relativeGasPrice = 1100000;
 
-    uint256 gasPriceOracleNonce;
     uint256 ownerNonce;
 
     SignatureVerifier internal signatureVerifier;

@@ -36,10 +36,33 @@ contract HappyTest is Setup {
 
         _configPlugContracts(index);
 
-        vm.startPrank(_transmitter);
-        _a.gasPriceOracle__.setSourceGasPrice(sourceGasPrice);
-        _a.gasPriceOracle__.setRelativeGasPrice(_b.chainSlug, relativeGasPrice);
-        vm.stopPrank();
+        bytes32 digest = keccak256(
+            abi.encode(_a.chainSlug, gasPriceOracleNonce, sourceGasPrice)
+        );
+        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
+
+        _a.gasPriceOracle__.setSourceGasPrice(
+            gasPriceOracleNonce++,
+            sourceGasPrice,
+            sig
+        );
+
+        digest = keccak256(
+            abi.encode(
+                _a.chainSlug,
+                _b.chainSlug,
+                gasPriceOracleNonce,
+                relativeGasPrice
+            )
+        );
+        sig = _createSignature(digest, _transmitterPrivateKey);
+
+        _a.gasPriceOracle__.setRelativeGasPrice(
+            _b.chainSlug,
+            gasPriceOracleNonce++,
+            relativeGasPrice,
+            sig
+        );
     }
 
     function testRemoteAddFromAtoB1() external {
@@ -82,21 +105,19 @@ contract HappyTest is Setup {
             );
         }
 
-        // uint256 msgId = _packMessageId(_a.chainSlug, 0);
         bytes32 packetId;
         bytes32 root;
         {
-            (
-                bytes32 root_,
-                bytes32 packetId_,
-                bytes memory sig_
-            ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+            bytes memory sig_;
+            (root, packetId, sig_) = _getLatestSignature(
+                _a,
+                capacitor,
+                _b.chainSlug
+            );
 
             _sealOnSrc(_a, capacitor, sig_);
-            _proposeOnDst(_b, sig_, packetId_, root_);
-            root = root_;
-            _attestOnDst(address(_b.configs__[0].switchboard__), packetId_);
-            packetId = packetId_;
+            _proposeOnDst(_b, sig_, packetId, root);
+            _attestOnDst(address(_b.configs__[0].switchboard__), packetId);
         }
 
         vm.expectEmit(true, false, false, false);
@@ -213,21 +234,6 @@ contract HappyTest is Setup {
         );
     }
 
-    function sealAndPropose(address capacitor) internal returns (bytes32) {
-        (
-            bytes32 root_,
-            bytes32 packetId_,
-            bytes memory sig_
-        ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
-
-        vm.expectEmit(false, false, false, true);
-        emit PacketVerifiedAndSealed(_transmitter, packetId_, root_, sig_);
-        _sealOnSrc(_a, capacitor, sig_);
-        _proposeOnDst(_b, sig_, packetId_, root_);
-
-        return packetId_;
-    }
-
     function testRemoteAddFromAtoBHashCapacitor() external {
         SocketConfigContext memory srcConfig = _addFastSwitchboard(
             _a,
@@ -283,7 +289,7 @@ contract HappyTest is Setup {
         }
 
         // seal 2 messages together
-        bytes32 packetId = sealAndPropose(address(srcConfig.capacitor__));
+        (bytes32 packetId, ) = sealAndPropose(address(srcConfig.capacitor__));
         roots.push(root1);
         roots.push(root2);
 
@@ -357,18 +363,5 @@ contract HappyTest is Setup {
             address(srcCounter__),
             address(_b.configs__[socketConfigIndex].switchboard__)
         );
-    }
-
-    function _attesterChecks(
-        address capacitor
-    ) internal returns (bytes32 packetId, bytes32 root) {
-        bytes memory sig;
-        (root, packetId, sig) = _getLatestSignature(
-            _a,
-            capacitor,
-            _b.chainSlug
-        );
-        _sealOnSrc(_a, capacitor, sig);
-        _proposeOnDst(_b, sig, packetId, root);
     }
 }
