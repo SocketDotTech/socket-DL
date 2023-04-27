@@ -32,7 +32,6 @@ contract ExecutionManagerTest is Setup {
     uint256 proposeGasLimit = 100000;
     uint256 sourceGasPrice = 1200000;
     uint256 relativeGasPrice = 1100000;
-    uint256 gasPriceOracleNonce = 0;
 
     ExecutionManager internal executionManager;
     SignatureVerifier internal signatureVerifier;
