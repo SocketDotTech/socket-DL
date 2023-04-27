@@ -77,7 +77,7 @@ bash deploy.sh
 ```
 
 - This will store addresses in deployments/ folder in root which are used to configure the contracts later for each remote chain.
-- For more config related details, see [DEPLOY.md](./scripts//deploy/DEPLOY.md)
+- For more detailed deployments, see [DEPLOY.md](./scripts//deploy/DEPLOY.md)
 
 ### Publish
 
