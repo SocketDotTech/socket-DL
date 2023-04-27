@@ -6,8 +6,6 @@ import { ChainKey, networkToChainSlug } from "../../src";
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
-const infuraApiKey: string | undefined = process.env.INFURA_API_KEY;
-
 export const gasPrice: {
   [chainKEY in ChainKey]?: number | "auto" | undefined;
 } = {
@@ -79,7 +77,7 @@ export function getJsonRpcUrl(chain: ChainKey): string {
       break;
 
     default:
-      jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
+      throw new Error("JSON RPC URL not found!!");
   }
 
   return jsonRpcUrl;

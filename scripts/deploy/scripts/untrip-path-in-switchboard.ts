@@ -8,12 +8,13 @@ import {
 } from "../../../src";
 import { mode } from "../config";
 
+const srcChainSlug = ChainSlug.GOERLI;
+const privateKey = process.env.SOCKET_SIGNER_KEY;
+
+// update the inputs to the
 export const main = async () => {
   try {
     const chainSlug = await getChainSlug();
-    const srcChainSlug = ChainSlug.GOERLI;
-    const privateKey = "";
-
     const signer = new ethers.Wallet(privateKey, ethers.provider);
 
     const switchBoardAddress = getSwitchboardAddress(

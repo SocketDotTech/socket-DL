@@ -9,7 +9,10 @@ import "hardhat-change-network";
 
 import { config as dotenvConfig } from "dotenv";
 import type { HardhatUserConfig } from "hardhat/config";
-import type { NetworkUserConfig } from "hardhat/types";
+import type {
+  HardhatNetworkAccountUserConfig,
+  NetworkUserConfig,
+} from "hardhat/types";
 import { resolve } from "path";
 import fs from "fs";
 
@@ -19,24 +22,16 @@ import { ChainKey, chainKeyToSlug } from "./src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
-
 const isProduction = process.env.NODE_ENV === "production";
 
 // Ensure that we have all the environment variables we need.
-const mnemonic: string | undefined = process.env.MNEMONIC;
-
-const infuraApiKey: string | undefined = process.env.INFURA_API_KEY;
-if (!infuraApiKey && isProduction) {
-  throw new Error("Please set your INFURA_API_KEY in a .env file");
-}
+if (!process.env.SOCKET_SIGNER_KEY) throw new Error("No private key found");
+const privateKey: HardhatNetworkAccountUserConfig = process.env
+  .SOCKET_SIGNER_KEY as unknown as HardhatNetworkAccountUserConfig;
 
 function getChainConfig(chain: keyof typeof chainKeyToSlug): NetworkUserConfig {
   return {
-    accounts: {
-      count: 10,
-      mnemonic,
-      path: "m/44'/60'/0'/0",
-    },
+    accounts: [`0x${privateKey}`],
     chainId: chainKeyToSlug[chain],
     gasPrice: gasPrice[chain] ? gasPrice[chain] : "auto",
     url: getJsonRpcUrl(chain),
@@ -52,7 +47,7 @@ function getRemappings() {
 }
 
 let liveNetworks = {};
-if (mnemonic && infuraApiKey && isProduction) {
+if (isProduction) {
   liveNetworks = {
     "arbitrum-goerli": getChainConfig(ChainKey.ARBITRUM_GOERLI),
     "optimism-goerli": getChainConfig(ChainKey.OPTIMISM_GOERLI),
@@ -112,20 +107,6 @@ const config: HardhatUserConfig = {
       chainId: chainKeyToSlug.hardhat,
     },
     ...liveNetworks,
-  },
-  namedAccounts: {
-    socketOwner: {
-      default: 0,
-    },
-    counterOwner: {
-      default: 1,
-    },
-    pauser: {
-      default: 2,
-    },
-    user: {
-      default: 3,
-    },
   },
   paths: {
     sources: "./contracts",

@@ -2,7 +2,7 @@ import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
 import fs from "fs";
-import { getNamedAccounts, ethers } from "hardhat";
+import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import {
@@ -24,11 +24,11 @@ export const main = async () => {
     const config: any = JSON.parse(
       fs.readFileSync(deployedAddressPath(mode) + chainSlug + ".json", "utf-8")
     );
-    const { socketOwner } = await getNamedAccounts();
 
-    const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
+    const socketSigners: SignerWithAddress = await ethers.getSigners();
+    const socketSigner = socketSigners[0];
+
     const notary = await getInstance("AdminNotary", config["notary"]);
-
     const signatureVerifier: Contract = await deployContractWithArgs(
       "SignatureVerifier",
       [],

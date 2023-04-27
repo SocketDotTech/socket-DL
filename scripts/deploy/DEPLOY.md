@@ -6,6 +6,7 @@ To deploy the entire setup, follow these steps:
 - [Grant Roles](#grant-roles): grant roles for different actions (watcher/transmitter/executor/governance, etc.)
 - [Configure](#configure): configure chains for their siblings
 - [Connect](#connect): configure example counters to send messages to siblings
+- [Verify setup](#verify-setup): queries contracts available in `${mode}_addresses.json` and checks if everything is set as expected.
 
 There are three different modes for deployment (prod, dev, and surge) which are used in naming address JSON and selecting configurations. All deploy scripts use [config.ts](./config.ts).
 
@@ -59,3 +60,11 @@ This script:
   `npx hardhat run scripts/deploy/connect.ts`
 
 This script connects the plugs to their siblings for all the chains that exist in the `integrations` object for that chain.
+
+### Verify Setup
+
+- To run this script, make sure the contract addresses exist in `${mode}_addresses.json`
+- Run the script with the command:
+  `npx hardhat run scripts/deploy/verifyDeployments.ts`
+
+The output will show if all the configurations are set properly.

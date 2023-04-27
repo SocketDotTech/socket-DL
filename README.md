@@ -41,7 +41,7 @@ yarn install
 │   └── forge-std - forge dependencies installed as git submodules
 |
 └── scripts
-|   └── contains different scripts needed for
+|   └── contains different scripts needed for deployment, configuration and admin related transactions
 |
 └── test
 |   └── Contract.t.sol - Tests for core contracts

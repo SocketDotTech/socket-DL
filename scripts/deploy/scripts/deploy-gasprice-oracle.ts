@@ -14,10 +14,8 @@ import { mode, transmitterAddresses } from "../config";
 export const main = async () => {
   try {
     // assign deployers
-    const { getNamedAccounts } = hre;
-    const { socketOwner } = await getNamedAccounts();
-    const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
-
+    const socketSigners: SignerWithAddress = await ethers.getSigners();
+    const socketSigner = socketSigners[0];
     const network = hre.network.name;
 
     const gasPriceOracle: Contract = await deployContractWithArgs(
