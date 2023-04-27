@@ -12,25 +12,22 @@ import {
   REQUIRED_CHAIN_ROLES,
   IntegrationTypes,
   isTestnet,
-  DeploymentMode,
   isMainnet,
   getAddresses,
+  chainKeyToSlug,
+  networkToChainSlug,
 } from "../../src";
 import { getRoleHash, getChainRoleHash } from "./utils";
 import { Contract, Wallet, ethers } from "ethers";
 import { getABI } from "./scripts/getABIs";
-import {
-  chainSlugs,
-  getProviderFromChainName,
-  networkToChainSlug,
-  socketOwner,
-} from "../constants";
+import { getProviderFromChainName } from "../constants";
 import {
   executorAddresses,
   filterChains,
   mode,
   newRoleStatus,
   sendTransaction,
+  socketOwner,
   transmitterAddresses,
   watcherAddresses,
 } from "./config";
@@ -47,7 +44,6 @@ interface checkAndUpdateRolesObj {
 }
 
 // let roleTxns: any;
-
 let roleTxns: {
   [chainId in ChainSlug]?: {
     [contractName: string]: {
@@ -206,7 +202,7 @@ const executeTransactions = async (
       let provider = getProviderFromChainName(
         networkToChainSlug[
           chainId as any as ChainSlug
-        ] as keyof typeof chainSlugs
+        ] as keyof typeof chainKeyToSlug
       );
       let wallet = new Wallet(process.env.SOCKET_SIGNER_KEY!, provider);
       await executeRoleTransactions(chainId, newRoleStatus, wallet);
@@ -244,6 +240,9 @@ export const checkNativeSwitchboardRoles = async ({
 
   await Promise.all(
     siblingSlugs.map(async (siblingSlug) => {
+      if (filterChains.length > 0 && !filterChains.includes(siblingSlug))
+        return;
+
       let pseudoContractName = contractName + "_" + String(siblingSlug);
       let contractAddress =
         addresses?.["integrations"]?.[siblingSlug]?.[IntegrationTypes.native]
@@ -335,7 +334,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
 
         if (!addresses) return;
         let provider = getProviderFromChainName(
-          networkToChainSlug[chainId] as keyof typeof chainSlugs
+          networkToChainSlug[chainId] as keyof typeof chainKeyToSlug
         );
 
         let contractNames = Object.keys(REQUIRED_ROLES);
@@ -409,6 +408,12 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
             if (!requiredChainRoles?.length) return;
             await Promise.all(
               siblingSlugs.map(async (siblingSlug) => {
+                if (
+                  filterChains.length > 0 &&
+                  !filterChains.includes(siblingSlug)
+                )
+                  return;
+
                 roleStatus[chainId][contractName][siblingSlug] = {};
 
                 await Promise.all(

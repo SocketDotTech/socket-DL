@@ -4,7 +4,8 @@ import * as SocketBatcherABI from "../../artifacts/contracts/socket/SocketBatche
 import * as TransmitManagerABI from "../../artifacts/contracts/TransmitManager.sol/TransmitManager.json";
 
 import { isTransactionSuccessful } from "./utils/transaction-helper";
-import { networkToChainSlug, proposeGasLimit } from "../constants";
+import { proposeGasLimit } from "../constants";
+import { networkToChainSlug } from "../../src";
 
 export const setProposeGasLimit = async (
   srcChainId: number,

@@ -1,11 +1,9 @@
 import fs from "fs";
-import hre from "hardhat";
-import { constants } from "ethers";
-import { networkToChainSlug, switchboards } from "../constants";
+import { Wallet, constants } from "ethers";
+import { getProviderFromChainName, switchboards } from "../constants";
 import {
   deployedAddressPath,
   getInstance,
-  getSigners,
   getSwitchboardAddress,
   storeAddresses,
 } from "./utils";
@@ -18,6 +16,7 @@ import {
   NativeSwitchboard,
   TestnetIds,
   isTestnet,
+  networkToChainSlug,
 } from "../../src";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { setProposeGasLimit } from "../limits-updater/set-propose-gaslimit";
@@ -40,9 +39,13 @@ export const main = async () => {
     for (chain of chains) {
       if (!addresses[chain]) continue;
 
-      await hre.changeNetwork(networkToChainSlug[chain]);
-      const { socketSigner } = await getSigners();
-
+      const providerInstance = getProviderFromChainName(
+        networkToChainSlug[chain]
+      );
+      const socketSigner: Wallet = new Wallet(
+        process.env.SOCKET_SIGNER_KEY as string,
+        providerInstance
+      );
       const addr: ChainSocketAddresses = addresses[chain]!;
       if (!addr["integrations"]) continue;
 
@@ -51,7 +54,7 @@ export const main = async () => {
 
       const list = isTestnet(chain) ? TestnetIds : MainnetIds;
       const siblingSlugs: ChainSlug[] = list.filter(
-        (chainSlug) => chainSlug !== chain
+        (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
       );
 
       console.log(`Configuring for ${chain}`);
@@ -146,8 +149,13 @@ export const main = async () => {
 const setRemoteSwitchboards = async (addresses) => {
   try {
     for (let srcChain in addresses) {
-      await hre.changeNetwork(networkToChainSlug[srcChain]);
-      const { socketSigner } = await getSigners();
+      const providerInstance = getProviderFromChainName(
+        networkToChainSlug[srcChain]
+      );
+      const socketSigner: Wallet = new Wallet(
+        process.env.SOCKET_SIGNER_KEY as string,
+        providerInstance
+      );
 
       for (let dstChain in addresses[srcChain]?.["integrations"]) {
         const dstConfig = addresses[srcChain]["integrations"][dstChain];
@@ -169,10 +177,9 @@ const setRemoteSwitchboards = async (addresses) => {
 
           let functionName, sbContract;
           if (srcSwitchboardType === NativeSwitchboard.POLYGON_L1) {
-            sbContract = await getInstance(
-              "PolygonL1Switchboard",
-              srcSwitchboardAddress
-            );
+            sbContract = (
+              await getInstance("PolygonL1Switchboard", srcSwitchboardAddress)
+            ).connect(socketSigner);
 
             const fxChild = await sbContract.fxChildTunnel();
             if (fxChild !== constants.AddressZero) continue;
@@ -182,10 +189,9 @@ const setRemoteSwitchboards = async (addresses) => {
               `Setting ${dstSwitchboardAddress} fx child tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
             );
           } else if (srcSwitchboardType === NativeSwitchboard.POLYGON_L2) {
-            sbContract = await getInstance(
-              "PolygonL2Switchboard",
-              srcSwitchboardAddress
-            );
+            sbContract = (
+              await getInstance("PolygonL2Switchboard", srcSwitchboardAddress)
+            ).connect(socketSigner);
 
             const fxRoot = await sbContract.fxRootTunnel();
             if (fxRoot !== constants.AddressZero) continue;
@@ -195,10 +201,9 @@ const setRemoteSwitchboards = async (addresses) => {
               `Setting ${dstSwitchboardAddress} fx root tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
             );
           } else {
-            sbContract = await getInstance(
-              "ArbitrumL1Switchboard",
-              srcSwitchboardAddress
-            );
+            sbContract = (
+              await getInstance("ArbitrumL1Switchboard", srcSwitchboardAddress)
+            ).connect(socketSigner);
 
             const remoteNativeSwitchboard =
               await sbContract.remoteNativeSwitchboard();

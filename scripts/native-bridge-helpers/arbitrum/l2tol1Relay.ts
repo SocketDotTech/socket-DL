@@ -2,9 +2,9 @@ import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
 import { providers, Wallet } from "ethers";
-import { ChainKey, chainSlugs, getJsonRpcUrl } from "../../constants";
+import { getJsonRpcUrl } from "../../constants";
 import { L2ToL1MessageStatus, L2TransactionReceipt } from "@arbitrum/sdk";
-import { getAllAddresses } from "../../../src";
+import { ChainKey, chainKeyToSlug, getAllAddresses } from "../../../src";
 
 // https://goerli.arbiscan.io/txsExit to check message status
 const l1Chain = ChainKey.GOERLI;
@@ -14,16 +14,20 @@ const sealTxHash =
 
 import { mode } from "../../deploy/config";
 
-const walletPrivateKey = process.env.DEVNET_PRIVKEY;
+const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));
 const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l2Chain));
 
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 
+// usage: npx hardhat run scripts/native-bridge-helpers/arbitrum/l2tol1Relay.ts
 export const main = async () => {
   try {
     const addresses = getAllAddresses(mode);
-    if (!addresses[chainSlugs[l1Chain]] || !addresses[chainSlugs[l2Chain]]) {
+    if (
+      !addresses[chainKeyToSlug[l1Chain]] ||
+      !addresses[chainKeyToSlug[l2Chain]]
+    ) {
       throw new Error("Deployed Addresses not found");
     }
 

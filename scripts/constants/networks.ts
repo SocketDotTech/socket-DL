@@ -1,42 +1,10 @@
 import { config as dotenvConfig } from "dotenv";
 import { ethers } from "ethers";
 import { resolve } from "path";
+import { ChainKey, networkToChainSlug } from "../../src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
-
-const infuraApiKey: string | undefined = process.env.INFURA_API_KEY;
-
-export enum ChainKey {
-  ARBITRUM = "arbitrum",
-  ARBITRUM_GOERLI = "arbitrum-goerli",
-  OPTIMISM = "optimism",
-  OPTIMISM_GOERLI = "optimism-goerli",
-  AVALANCHE = "avalanche",
-  AVALANCHE_TESTNET = "avalanche-testnet",
-  BSC = "bsc",
-  BSC_TESTNET = "bsc-testnet",
-  MAINNET = "mainnet",
-  GOERLI = "goerli",
-  POLYGON_MAINNET = "polygon-mainnet",
-  POLYGON_MUMBAI = "polygon-mumbai",
-  HARDHAT = "hardhat",
-}
-
-export const chainSlugs = {
-  [ChainKey.ARBITRUM]: 42161,
-  [ChainKey.ARBITRUM_GOERLI]: 421613,
-  [ChainKey.OPTIMISM]: 10,
-  [ChainKey.OPTIMISM_GOERLI]: 420,
-  [ChainKey.AVALANCHE]: 43114,
-  [ChainKey.BSC]: 56,
-  [ChainKey.BSC_TESTNET]: 97,
-  [ChainKey.MAINNET]: 1,
-  [ChainKey.GOERLI]: 5,
-  [ChainKey.POLYGON_MAINNET]: 137,
-  [ChainKey.POLYGON_MUMBAI]: 80001,
-  [ChainKey.HARDHAT]: 31337,
-};
 
 export const gasPrice: {
   [chainKEY in ChainKey]?: number | "auto" | undefined;
@@ -52,22 +20,7 @@ export const gasPrice: {
   [ChainKey.GOERLI]: "auto",
   [ChainKey.POLYGON_MAINNET]: "auto",
   [ChainKey.POLYGON_MUMBAI]: "auto",
-  [ChainKey.HARDHAT]: 31337,
-};
-
-export const networkToChainSlug = {
-  43114: ChainKey.AVALANCHE,
-  56: ChainKey.BSC,
-  5: ChainKey.GOERLI,
-  31337: ChainKey.HARDHAT,
-  1: ChainKey.MAINNET,
-  97: ChainKey.BSC_TESTNET,
-  42161: ChainKey.ARBITRUM,
-  421613: ChainKey.ARBITRUM_GOERLI,
-  10: ChainKey.OPTIMISM,
-  420: ChainKey.OPTIMISM_GOERLI,
-  137: ChainKey.POLYGON_MAINNET,
-  80001: ChainKey.POLYGON_MUMBAI,
+  [ChainKey.HARDHAT]: "auto",
 };
 
 export const chainSlugKeys: string[] = Object.values(networkToChainSlug);
@@ -124,7 +77,7 @@ export function getJsonRpcUrl(chain: ChainKey): string {
       break;
 
     default:
-      jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
+      throw new Error("JSON RPC URL not found!!");
   }
 
   return jsonRpcUrl;

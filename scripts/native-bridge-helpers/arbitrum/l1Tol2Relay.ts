@@ -6,21 +6,20 @@ import { hexDataLength } from "@ethersproject/bytes";
 import { L1ToL2MessageGasEstimator } from "@arbitrum/sdk/dist/lib/message/L1ToL2MessageGasEstimator";
 
 import { getInstance } from "../../deploy/utils";
+import { getJsonRpcUrl } from "../../constants";
+import { mode, socketOwner } from "../../deploy/config";
 import {
-  chainSlugs,
-  getJsonRpcUrl,
   ChainKey,
-  socketOwner,
-} from "../../constants";
-import { mode } from "../../deploy/config";
-import {
   IntegrationTypes,
+  chainKeyToSlug,
   getAllAddresses,
   getSwitchboardAddress,
 } from "../../../src";
 import { L1ToL2MessageStatus, L1TransactionReceipt } from "@arbitrum/sdk";
 
 // get providers for source and destination
+
+// replace following variables to initiate the txn
 const l1Chain = ChainKey.GOERLI;
 const l2Chain = ChainKey.ARBITRUM_GOERLI;
 const packetId =
@@ -28,13 +27,14 @@ const packetId =
 const root =
   "0xc8111d45052c1df62037b92c1fab7c23bda80a0854b81432aee514aaf5f6c440";
 
-const walletPrivateKey = process.env.DEVNET_PRIVKEY;
+const walletPrivateKey = process.env.SOCKET_SIGNER_KEY;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));
 const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l2Chain));
 
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 const l2Wallet = new Wallet(walletPrivateKey, l2Provider);
 
+// usage: npx hardhat run scripts/native-bridge-helpers/arbitrum/l1tol2Relay.ts
 export const getBridgeParams = async (from, to) => {
   const receivePacketBytes = utils.defaultAbiCoder.encode(
     ["bytes32", "bytes32"],
@@ -42,7 +42,6 @@ export const getBridgeParams = async (from, to) => {
   );
 
   console.log(receivePacketBytes, "receivePacketBytes");
-
   const receivePacketBytesLength = hexDataLength(receivePacketBytes) + 4; // 4 bytes func identifier
   console.log(`${receivePacketBytesLength}`, "receivePacketBytesLength");
 
@@ -93,19 +92,22 @@ export const main = async () => {
   try {
     const addresses = getAllAddresses(mode);
 
-    if (!addresses[chainSlugs[l1Chain]] || !addresses[chainSlugs[l2Chain]]) {
+    if (
+      !addresses[chainKeyToSlug[l1Chain]] ||
+      !addresses[chainKeyToSlug[l2Chain]]
+    ) {
       throw new Error("Deployed Addresses not found");
     }
 
-    const l1Config = addresses[chainSlugs[l1Chain]];
-    const l2Config = addresses[chainSlugs[l2Chain]];
+    const l1Config = addresses[chainKeyToSlug[l1Chain]];
+    const l2Config = addresses[chainKeyToSlug[l2Chain]];
 
     // get socket contracts for both chains
     // counter l1, counter l2, initiateNative, execute
 
     const sbAddr = getSwitchboardAddress(
-      chainSlugs[l1Chain],
-      chainSlugs[l2Chain],
+      chainKeyToSlug[l1Chain],
+      chainKeyToSlug[l2Chain],
       IntegrationTypes.native,
       mode
     );
@@ -117,8 +119,8 @@ export const main = async () => {
     const { bridgeParams, callValue } = await getBridgeParams(
       l1Switchboard.address,
       getSwitchboardAddress(
-        chainSlugs[l2Chain],
-        chainSlugs[l1Chain],
+        chainKeyToSlug[l2Chain],
+        chainKeyToSlug[l1Chain],
         IntegrationTypes.native,
         mode
       )

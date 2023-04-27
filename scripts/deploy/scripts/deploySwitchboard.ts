@@ -1,9 +1,10 @@
 import { createObj, deployContractWithArgs } from "../utils";
-import { chainSlugs, switchboards } from "../../constants";
+import { switchboards } from "../../constants";
 import {
   ChainSocketAddresses,
   DeploymentMode,
   IntegrationTypes,
+  chainKeyToSlug,
 } from "../../../src";
 import { getSwitchboardDeployData } from "../switchboards";
 import { Wallet } from "ethers";
@@ -44,7 +45,7 @@ export default async function deploySwitchboards(
   const siblings = Object.keys(switchboards[network]);
   for (let index = 0; index < siblings.length; index++) {
     if (
-      !sourceConfig?.integrations?.[chainSlugs[siblings[index]]]?.[
+      !sourceConfig?.integrations?.[chainKeyToSlug[siblings[index]]]?.[
         IntegrationTypes.native
       ]?.["switchboard"]
     )
@@ -93,7 +94,12 @@ async function deploySwitchboard(
 
     sourceConfig = createObj(
       sourceConfig,
-      ["integrations", chainSlugs[remoteChain], integrationType, "switchboard"],
+      [
+        "integrations",
+        chainKeyToSlug[remoteChain],
+        integrationType,
+        "switchboard",
+      ],
       switchboard.address
     );
 

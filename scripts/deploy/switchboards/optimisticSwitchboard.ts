@@ -1,4 +1,5 @@
-import { chainSlugs, timeout } from "../../constants";
+import { CORE_CONTRACTS, chainKeyToSlug } from "../../../src";
+import { timeout } from "../../constants";
 
 export const optimisticSwitchboard = (
   network: string,
@@ -7,12 +8,12 @@ export const optimisticSwitchboard = (
   signerAddress: string
 ) => {
   return {
-    contractName: "OptimisticSwitchboard",
+    contractName: CORE_CONTRACTS.OptimisticSwitchboard,
     args: [
       signerAddress,
       socketAddress,
       oracleAddress,
-      chainSlugs[network],
+      chainKeyToSlug[network],
       timeout[network],
     ],
     path: "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",

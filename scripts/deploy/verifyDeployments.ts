@@ -1,20 +1,17 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import fs from "fs";
 import hre from "hardhat";
 import { constants } from "ethers";
+import { switchboards, getDefaultIntegrationType } from "../constants";
 import {
-  transmitterAddress,
-  chainSlugs,
-  executorAddress,
-  switchboards,
-  watcherAddress,
+  executorAddresses,
+  mode,
   socketOwner,
-} from "../constants";
-import { config } from "./config";
+  transmitterAddresses,
+  watcherAddresses,
+} from "./config";
 import {
-  deployedAddressPath,
   getCapacitorAddress,
   getChainRoleHash,
   getDecapacitorAddress,
@@ -23,9 +20,14 @@ import {
   getSwitchboardAddress,
 } from "./utils";
 import { assert } from "console";
-import { DeploymentMode, IntegrationTypes, NativeSwitchboard } from "../../src";
-
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
+import {
+  CORE_CONTRACTS,
+  IntegrationTypes,
+  NativeSwitchboard,
+  chainKeyToSlug,
+  getAllAddresses,
+  networkToChainSlug,
+} from "../../src";
 
 async function checkNative(
   contractAddr,
@@ -38,7 +40,7 @@ async function checkNative(
 
   let hasRole = await switchboard["hasRole(bytes32,address)"](
     getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
-    transmitterAddress[localChain]
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,
@@ -60,10 +62,9 @@ async function checkNative(
 async function checkFast(contractAddr, localChain, remoteChain) {
   const switchboard = await getInstance("FastSwitchboard", contractAddr);
 
-  console.log(contractAddr, "bvhdgvghsdbjhsdjcndjck");
   let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("WATCHER_ROLE", chainSlugs[remoteChain]),
-    watcherAddress[localChain]
+    getChainRoleHash("WATCHER_ROLE", chainKeyToSlug[remoteChain]),
+    watcherAddresses[mode]
   );
   assert(hasRole, `❌ FastSwitchboard has wrong TRIP_ROLE ${remoteChain}`);
 }
@@ -73,20 +74,20 @@ async function checkDefault(contractAddr, localChain, remoteChain) {
 
   // check roles
   let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("TRIP_ROLE", chainSlugs[remoteChain]),
-    transmitterAddress[localChain]
+    getChainRoleHash("TRIP_ROLE", chainKeyToSlug[remoteChain]),
+    transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong TRIP_ROLE ${remoteChain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("UNTRIP_ROLE", chainSlugs[remoteChain]),
-    transmitterAddress[localChain]
+    getChainRoleHash("UNTRIP_ROLE", chainKeyToSlug[remoteChain]),
+    transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong UNTRIP_ROLE ${remoteChain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainSlugs[remoteChain]),
-    transmitterAddress[localChain]
+    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainKeyToSlug[remoteChain]),
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,
@@ -136,15 +137,15 @@ async function checkSwitchboardRegistration(
   capacitor,
   decapacitor
 ) {
-  const socket = await getInstance("Socket", socketAddr);
+  const socket = await getInstance(CORE_CONTRACTS.Socket, socketAddr);
 
   const capacitor__ = await socket.capacitors__(
     switchboard,
-    chainSlugs[siblingChain]
+    chainKeyToSlug[siblingChain]
   );
   const decapacitor__ = await socket.decapacitors__(
     switchboard,
-    chainSlugs[siblingChain]
+    chainKeyToSlug[siblingChain]
   );
 
   assert(
@@ -161,16 +162,21 @@ async function checkCounter(
   remoteConfig,
   integrationType
 ) {
-  const socket = await getInstance("Socket", localConfig["Socket"]);
+  const socket = await getInstance(
+    CORE_CONTRACTS.Socket,
+    localConfig[CORE_CONTRACTS.Socket]
+  );
 
   // check config
   const config = await socket.getPlugConfig(
     localConfig["Counter"],
-    chainSlugs[siblingSlug]
+    chainKeyToSlug[siblingSlug]
   );
 
   if (
-    !localConfig?.["integrations"]?.[chainSlugs[siblingSlug]]?.[integrationType]
+    !localConfig?.["integrations"]?.[chainKeyToSlug[siblingSlug]]?.[
+      integrationType
+    ]
   ) {
     console.log(
       `❌ No integration found for ${siblingSlug} for ${integrationType}`
@@ -179,7 +185,7 @@ async function checkCounter(
   }
 
   const outboundSb =
-    localConfig["integrations"][chainSlugs[siblingSlug]][integrationType];
+    localConfig["integrations"][chainKeyToSlug[siblingSlug]][integrationType];
   assert(
     config.siblingPlug == remoteConfig["Counter"] &&
       config.inboundSwitchboard__ == outboundSb["switchboard"] &&
@@ -191,7 +197,10 @@ async function checkCounter(
 }
 
 async function checkTransmitManager(chain, contractAddr, remoteChain) {
-  const transmitManager = await getInstance("TransmitManager", contractAddr);
+  const transmitManager = await getInstance(
+    CORE_CONTRACTS.TransmitManager,
+    contractAddr
+  );
 
   // check roles
   let hasRole = await transmitManager["hasRole(bytes32,address)"](
@@ -218,8 +227,8 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("TRANSMITTER_ROLE", chainSlugs[chain]),
-    transmitterAddress[chain]
+    getChainRoleHash("TRANSMITTER_ROLE", chainKeyToSlug[chain]),
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,
@@ -227,8 +236,8 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("TRANSMITTER_ROLE", chainSlugs[remoteChain]),
-    transmitterAddress[chain]
+    getChainRoleHash("TRANSMITTER_ROLE", chainKeyToSlug[remoteChain]),
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,
@@ -236,8 +245,8 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainSlugs[remoteChain]),
-    transmitterAddress[chain]
+    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainKeyToSlug[remoteChain]),
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,
@@ -246,7 +255,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
     getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
-    transmitterAddress[chain]
+    transmitterAddresses[mode]
   );
   assert(
     hasRole,
@@ -255,7 +264,10 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
 }
 
 async function checkExecutionManager(chain, contractAddr) {
-  const executionManager = await getInstance("ExecutionManager", contractAddr);
+  const executionManager = await getInstance(
+    CORE_CONTRACTS.ExecutionManager,
+    contractAddr
+  );
 
   // check roles
   let hasRole = await executionManager["hasRole(bytes32,address)"](
@@ -283,13 +295,13 @@ async function checkExecutionManager(chain, contractAddr) {
 
   hasRole = await executionManager["hasRole(bytes32,address)"](
     getRoleHash("EXECUTOR_ROLE"),
-    executorAddress[chain]
+    executorAddresses[mode]
   );
   assert(hasRole, `❌ ExecutionManager has wrong executor address ${chain}`);
 }
 
 async function checkSocket(chain, socketAddr) {
-  const socket = await getInstance("Socket", socketAddr);
+  const socket = await getInstance(CORE_CONTRACTS.Socket, socketAddr);
 
   // check roles
   let hasRole = await socket["hasRole(bytes32,address)"](
@@ -340,33 +352,33 @@ async function checkIntegration(
 ) {
   // config related contracts
   let localSwitchboard = getSwitchboardAddress(
-    chainSlugs[remoteChain],
+    chainKeyToSlug[remoteChain],
     configurationType,
     localConfig
   );
   let localCapacitor = getCapacitorAddress(
-    chainSlugs[remoteChain],
+    chainKeyToSlug[remoteChain],
     configurationType,
     localConfig
   );
   let localDecapacitor = getDecapacitorAddress(
-    chainSlugs[remoteChain],
+    chainKeyToSlug[remoteChain],
     configurationType,
     localConfig
   );
 
   let remoteSwitchboard = getSwitchboardAddress(
-    chainSlugs[localChain],
+    chainKeyToSlug[localChain],
     configurationType,
     remoteConfig
   );
   let remoteCapacitor = getCapacitorAddress(
-    chainSlugs[localChain],
+    chainKeyToSlug[localChain],
     configurationType,
     remoteConfig
   );
   let remoteDecapacitor = getDecapacitorAddress(
-    chainSlugs[localChain],
+    chainKeyToSlug[localChain],
     configurationType,
     remoteConfig
   );
@@ -389,7 +401,7 @@ async function checkIntegration(
   await hre.changeNetwork(remoteChain);
   await checkSwitchboardRegistration(
     localChain,
-    remoteConfig["Socket"],
+    remoteConfig[CORE_CONTRACTS.Socket],
     remoteSwitchboard,
     remoteCapacitor,
     remoteDecapacitor
@@ -398,7 +410,7 @@ async function checkIntegration(
   await hre.changeNetwork(localChain);
   await checkSwitchboardRegistration(
     remoteChain,
-    localConfig["Socket"],
+    localConfig[CORE_CONTRACTS.Socket],
     localSwitchboard,
     localCapacitor,
     localDecapacitor
@@ -418,13 +430,13 @@ function checkCoreContractAddress(
   // core contracts
   if (
     !localConfig["Counter"] ||
-    !localConfig["CapacitorFactory"] ||
-    !localConfig["ExecutionManager"] ||
-    !localConfig["GasPriceOracle"] ||
-    !localConfig["Hasher"] ||
-    !localConfig["SignatureVerifier"] ||
-    !localConfig["Socket"] ||
-    !localConfig["TransmitManager"] ||
+    !localConfig[CORE_CONTRACTS.CapacitorFactory] ||
+    !localConfig[CORE_CONTRACTS.ExecutionManager] ||
+    !localConfig[CORE_CONTRACTS.GasPriceOracle] ||
+    !localConfig[CORE_CONTRACTS.Hasher] ||
+    !localConfig[CORE_CONTRACTS.SignatureVerifier] ||
+    !localConfig[CORE_CONTRACTS.Socket] ||
+    !localConfig[CORE_CONTRACTS.TransmitManager] ||
     !localConfig["SocketBatcher"]
   ) {
     console.log(`❌ Core contracts do not exist for ${localChain}`);
@@ -433,13 +445,13 @@ function checkCoreContractAddress(
 
   if (
     !remoteConfig["Counter"] ||
-    !remoteConfig["CapacitorFactory"] ||
-    !remoteConfig["ExecutionManager"] ||
-    !remoteConfig["GasPriceOracle"] ||
-    !remoteConfig["Hasher"] ||
-    !remoteConfig["SignatureVerifier"] ||
-    !remoteConfig["Socket"] ||
-    !remoteConfig["TransmitManager"] ||
+    !remoteConfig[CORE_CONTRACTS.CapacitorFactory] ||
+    !remoteConfig[CORE_CONTRACTS.ExecutionManager] ||
+    !remoteConfig[CORE_CONTRACTS.GasPriceOracle] ||
+    !remoteConfig[CORE_CONTRACTS.Hasher] ||
+    !remoteConfig[CORE_CONTRACTS.SignatureVerifier] ||
+    !remoteConfig[CORE_CONTRACTS.Socket] ||
+    !remoteConfig[CORE_CONTRACTS.TransmitManager] ||
     !remoteConfig["SocketBatcher"]
   ) {
     console.log(`❌ Core contracts do not exist for ${remoteChain}`);
@@ -449,9 +461,11 @@ function checkCoreContractAddress(
 
 export const main = async () => {
   try {
-    for (let chain in config) {
+    const addresses = getAllAddresses(mode);
+
+    for (let chain in addresses) {
       console.log(`\n🤖 Testing configs for ${chain}`);
-      const chainSetups = config[chain];
+      const chainSetups = addresses[chain];
 
       for (let index = 0; index < chainSetups.length; index++) {
         let remoteChain = chainSetups[index]["remoteChain"];
@@ -459,22 +473,8 @@ export const main = async () => {
 
         if (chain === remoteChain) throw new Error("Wrong chains");
 
-        if (!fs.existsSync(deployedAddressPath(mode))) {
-          throw new Error("addresses.json not found");
-        }
-
-        const addresses = JSON.parse(
-          fs.readFileSync(deployedAddressPath(mode), "utf-8")
-        );
-        if (
-          !addresses[chainSlugs[chain]] ||
-          !addresses[chainSlugs[remoteChain]]
-        ) {
-          throw new Error("Deployed Addresses not found");
-        }
-
-        let remoteConfig = addresses[chainSlugs[remoteChain]];
-        let localConfig = addresses[chainSlugs[chain]];
+        let remoteConfig = addresses[chainKeyToSlug[remoteChain]];
+        let localConfig = addresses[chainKeyToSlug[chain]];
 
         await hre.changeNetwork(chain);
         checkCoreContractAddress(localConfig, remoteConfig, chain, remoteChain);
@@ -483,19 +483,22 @@ export const main = async () => {
         await checkOracle(
           chain,
           localConfig["GasPriceOracle"],
-          localConfig["TransmitManager"]
+          localConfig[CORE_CONTRACTS.TransmitManager]
         );
         console.log("✅ Checked Oracle");
 
-        await checkSocket(chain, localConfig["Socket"]);
+        await checkSocket(chain, localConfig[CORE_CONTRACTS.Socket]);
         console.log("✅ Checked Socket");
 
-        await checkExecutionManager(chain, localConfig["ExecutionManager"]);
+        await checkExecutionManager(
+          chain,
+          localConfig[CORE_CONTRACTS.ExecutionManager]
+        );
         console.log("✅ Checked ExecutionManager");
 
         await checkTransmitManager(
           chain,
-          localConfig["TransmitManager"],
+          localConfig[CORE_CONTRACTS.TransmitManager],
           remoteChain
         );
         console.log("✅ Checked TransmitManager");
@@ -504,7 +507,10 @@ export const main = async () => {
           remoteChain,
           localConfig,
           remoteConfig,
-          chainSetups[index]["configForCounter"]
+          getDefaultIntegrationType(
+            networkToChainSlug[chain],
+            networkToChainSlug[remoteConfig]
+          )
         );
         console.log("✅ Checked Counter");
 

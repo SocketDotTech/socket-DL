@@ -1,4 +1,4 @@
-import { constants } from "ethers";
+import { Wallet, constants } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { createObj, getInstance } from "../utils";
@@ -9,23 +9,17 @@ export default async function registerSwitchBoard(
   remoteChainSlug: string | ChainSlug,
   capacitorType: number,
   maxPacketLength: number,
-  signer: SignerWithAddress,
+  signer: Wallet | SignerWithAddress,
   integrationType: string,
   config: ChainSocketAddresses
 ) {
   try {
-    const socket = await getInstance("Socket", config["Socket"]);
+    const socket = (await getInstance("Socket", config["Socket"])).connect(
+      signer
+    );
     let capacitor = await socket.capacitors__(
       switchBoardAddress,
       remoteChainSlug
-    );
-
-    console.log(
-      switchBoardAddress,
-      maxPacketLength,
-      remoteChainSlug,
-      capacitorType,
-      "register sb"
     );
 
     if (capacitor === constants.AddressZero) {
@@ -44,7 +38,6 @@ export default async function registerSwitchBoard(
     }
 
     // get capacitor and decapacitor for config
-    console.log(switchBoardAddress, remoteChainSlug, "get sb");
     capacitor = await socket.capacitors__(switchBoardAddress, remoteChainSlug);
     const decapacitor = await socket.decapacitors__(
       switchBoardAddress,

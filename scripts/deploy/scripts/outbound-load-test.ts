@@ -6,17 +6,12 @@ import { ethers } from "ethers";
 import { Contract } from "ethers";
 require("dotenv").config();
 import yargs from "yargs";
-import {
-  chainSlugs,
-  DeploymentMode,
-  getProviderFromChainName,
-} from "../../constants";
+import { getProviderFromChainName } from "../../constants";
 import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
-
-// import * as CounterABI from "../../../artifacts/contracts/examples/Counter.sol/Counter.json";
 import path from "path";
+import { mode } from "../config";
+import { chainKeyToSlug } from "../../../src";
 
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 const deployedAddressPath = path.join(
   __dirname,
   `/../../../deployments/${mode}_addresses.json`
@@ -30,9 +25,6 @@ export const main = async () => {
   const amount = 100;
   const msgGasLimit = "100000";
   const gasLimit = 185766;
-
-  // 0.00003
-
   let remoteChainSlug;
 
   try {
@@ -66,8 +58,8 @@ export const main = async () => {
         },
       }).argv;
 
-    const chain = argv.chain as keyof typeof chainSlugs;
-    const chainSlug = chainSlugs[chain];
+    const chain = argv.chain as keyof typeof chainKeyToSlug;
+    const chainSlug = chainKeyToSlug[chain];
 
     const providerInstance = getProviderFromChainName(chain);
 
@@ -76,8 +68,8 @@ export const main = async () => {
       providerInstance
     );
 
-    const remoteChain = argv.remoteChain as keyof typeof chainSlugs;
-    remoteChainSlug = chainSlugs[remoteChain];
+    const remoteChain = argv.remoteChain as keyof typeof chainKeyToSlug;
+    remoteChainSlug = chainKeyToSlug[remoteChain];
 
     const numOfRequests = argv.numOfRequests as number;
     const waitTime = argv.waitTime as number;
@@ -105,7 +97,7 @@ export const main = async () => {
 
       console.log();
 
-      // await tx.wait();
+      await tx.wait();
 
       console.log(
         `remoteAddOperation-tx with hash: ${JSON.stringify(
@@ -113,10 +105,9 @@ export const main = async () => {
         )} was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}`
       );
 
-      return;
-      // if (waitTime && waitTime > 0) {
-      //   await sleep(waitTime);
-      // }
+      if (waitTime && waitTime > 0) {
+        await sleep(waitTime);
+      }
     }
   } catch (error) {
     console.log(

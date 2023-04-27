@@ -2,18 +2,12 @@
   "compilerOptions": {
     "target": "es2018",
     "module": "commonjs",
-    "strict": false,
+    "strict": true,
     "esModuleInterop": true,
     "outDir": "dist",
     "declaration": true,
     "resolveJsonModule": true
   },
-  "include": [
-    "./src",
-    "./tasks",
-    "./test",
-    "./typechain-types",
-    "scratchpad/configure.ts"
-  ],
+  "include": ["./src", "./tasks", "./test", "./typechain-types"],
   "files": ["./hardhat.config.ts"]
 }

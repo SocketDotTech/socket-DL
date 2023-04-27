@@ -6,7 +6,7 @@ import { getJsonRpcUrl } from "../../constants";
 const localChain = "optimism-goerli";
 const remoteChain = "goerli";
 
-const walletPrivateKey = process.env.DEVNET_PRIVKEY;
+const walletPrivateKey = process.env.SOCKET_SIGNER_KEY;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 

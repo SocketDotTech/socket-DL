@@ -1,16 +1,14 @@
 import hre from "hardhat";
 import fs from "fs";
 
-import { ChainKey, networkToChainSlug } from "../constants";
 import { deploymentsPath, verify } from "./utils/utils";
-import { DeploymentMode } from "../../src";
+import { mode } from "./config";
+import { ChainKey, networkToChainSlug } from "../../src";
 
 export type VerifyParams = {
   [chain in ChainKey]?: VerifyArgs[];
 };
 type VerifyArgs = [string, string, string, any[]];
-
-const mode = process.env.DEPLOYMENT_MODE as DeploymentMode | DeploymentMode.DEV;
 
 /**
  * Deploys network-independent socket contracts
@@ -30,8 +28,8 @@ export const main = async () => {
 
     for (let chainIndex = 0; chainIndex < chains.length; chainIndex++) {
       const chain = chains[chainIndex];
-      hre.changeNetwork(networkToChainSlug[chain]);
 
+      hre.changeNetwork(networkToChainSlug[chain]);
       const chainParams: VerifyArgs[] = verificationParams[chain];
       if (chainParams.length) {
         const len = chainParams.length;

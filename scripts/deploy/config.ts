@@ -2,11 +2,12 @@ import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
 import { ChainSlug, DeploymentMode, TestnetIds } from "../../src";
-import { socketOwner } from "../constants";
 
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
+
+export const socketOwner = "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34";
 
 console.log("========================================================");
 console.log("Deployment started for MODE", mode);
@@ -18,20 +19,20 @@ console.log("========================================================");
 
 export const chains: Array<ChainSlug> = [
   ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_TESTNET,
-  ChainSlug.OPTIMISM_TESTNET,
-  ChainSlug.MUMBAI,
+  ChainSlug.ARBITRUM_GOERLI,
+  ChainSlug.OPTIMISM_GOERLI,
+  ChainSlug.POLYGON_MUMBAI,
   ChainSlug.BSC_TESTNET,
   ChainSlug.MAINNET,
   ChainSlug.ARBITRUM,
   ChainSlug.OPTIMISM,
   ChainSlug.BSC,
-  ChainSlug.POLYGON,
+  ChainSlug.POLYGON_MAINNET,
 ];
 
-export const sendTransaction = true;
+export const sendTransaction = false;
 export const newRoleStatus = true;
-export const filterChains: number[] = [...TestnetIds];
+export const filterChains: number[] = chains;
 
 export const capacitorType = 1;
 export const maxPacketLength = 1;

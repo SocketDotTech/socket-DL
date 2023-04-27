@@ -4,7 +4,8 @@ import * as FastSwitchboardABI from "../../artifacts/contracts/switchboard/defau
 import * as SocketBatcherABI from "../../artifacts/contracts/socket/SocketBatcher.sol/SocketBatcher.json";
 
 import { isTransactionSuccessful } from "./utils/transaction-helper";
-import { attestGasLimit, networkToChainSlug } from "../constants";
+import { attestGasLimit } from "../constants";
+import { networkToChainSlug } from "../../src";
 
 export const setAttestGasLimit = async (
   srcChainId: number,

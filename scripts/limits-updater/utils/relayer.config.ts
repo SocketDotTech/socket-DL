@@ -4,7 +4,8 @@ import { config as dotenvConfig } from "dotenv";
 import { resolve } from "path";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { DefenderRelaySigner } from "defender-relay-client/lib/ethers";
-import { getJsonRpcUrl, networkToChainSlug } from "../../constants";
+import { getJsonRpcUrl } from "../../constants";
+import { networkToChainSlug } from "../../../src";
 const dotenvConfigPath: string =
   process.env.DOTENV_CONFIG_PATH || "../../../.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
