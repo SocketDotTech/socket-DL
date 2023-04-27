@@ -74,8 +74,8 @@
     },
     "FastSwitchboard": "0x483D7e9dDBbbE0d376986168Ac4d94E35c485C69",
     "OptimisticSwitchboard": "0xD664eF6159562190ea6D1AFa3f0Ea1C0D77D14E3",
-    "SocketBatcher": "0xDC0258dc3dB980090E97EbF4f1FD9Cc3C5AD5894",
-    "Counter": "0xfC5CC93d85861ac82d89fc2D3e56315540E9C8A7"
+    "Counter": "0xfC5CC93d85861ac82d89fc2D3e56315540E9C8A7",
+    "SocketBatcher": "0xCc7eAe7b35a85EaE46aCd852426FaC3b1D3bD57b"
   },
   "10": {
     "SignatureVerifier": "0xDE007c8A9a7Fa8676F9A751b7BC1EF38af76757f",
