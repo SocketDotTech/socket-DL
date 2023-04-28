@@ -76,6 +76,10 @@ contract SocketBatcher is AccessControlExtended {
         uint32 capacitorType;
     }
 
+    struct ReceivePacketProofRequest {
+        bytes proof;
+    }
+
     /**
      * @notice set propose gas limit for a list of siblings
      * @param socketAddress_ address of socket
@@ -265,12 +269,12 @@ contract SocketBatcher is AccessControlExtended {
      */
     function receiveMessageBatch(
         address polygonRootReceiverAddress_,
-        bytes[] calldata receivePacketProofs_
+        ReceivePacketProofRequest[] calldata receivePacketProofs_
     ) external {
         uint256 receivePacketProofsLength = receivePacketProofs_.length;
         for (uint256 index = 0; index < receivePacketProofsLength; ) {
             INativeRelay(polygonRootReceiverAddress_).receiveMessage(
-                receivePacketProofs_[index]
+                receivePacketProofs_[index].proof
             );
             unchecked {
                 ++index;
