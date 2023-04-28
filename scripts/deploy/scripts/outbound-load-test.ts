@@ -1,16 +1,23 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import { Contract } from "ethers";
 require("dotenv").config();
 import yargs from "yargs";
-import { chainSlugs, getProviderFromChainName } from "../../constants";
-import * as CounterABI from "../../../artifacts/contracts/examples/Counter.sol/Counter.json";
+import { getProviderFromChainName } from "../../constants";
+import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
 import path from "path";
+import { mode } from "../config";
+import { chainKeyToSlug } from "../../../src";
 
 const deployedAddressPath = path.join(
   __dirname,
-  "/../../../deployments/addresses.json"
+  `/../../../deployments/${mode}_addresses.json`
 );
+
+// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain polygon-mumbai --remoteChain optimism-goerli --numOfRequests 10 --waitTime 100
 
 // usage:
 // npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain optimism --remoteChain polygon-mainnet --numOfRequests 50 --waitTime 100
@@ -18,9 +25,6 @@ export const main = async () => {
   const amount = 100;
   const msgGasLimit = "100000";
   const gasLimit = 185766;
-
-  // 0.00003
-
   let remoteChainSlug;
 
   try {
@@ -54,8 +58,8 @@ export const main = async () => {
         },
       }).argv;
 
-    const chain = argv.chain as keyof typeof chainSlugs;
-    const chainSlug = chainSlugs[chain];
+    const chain = argv.chain as keyof typeof chainKeyToSlug;
+    const chainSlug = chainKeyToSlug[chain];
 
     const providerInstance = getProviderFromChainName(chain);
 
@@ -64,8 +68,8 @@ export const main = async () => {
       providerInstance
     );
 
-    const remoteChain = argv.remoteChain as keyof typeof chainSlugs;
-    remoteChainSlug = chainSlugs[remoteChain];
+    const remoteChain = argv.remoteChain as keyof typeof chainKeyToSlug;
+    remoteChainSlug = chainKeyToSlug[remoteChain];
 
     const numOfRequests = argv.numOfRequests as number;
     const waitTime = argv.waitTime as number;
@@ -74,11 +78,12 @@ export const main = async () => {
       fs.readFileSync(deployedAddressPath, "utf-8")
     );
 
-    const counterAddress = config[chainSlug]["Counter"];
+    // const counterAddress = config[chainSlug]["Counter"];
+    const counterAddress = "0xefc0c02abca8dda7d2b399d5c41358cc8ff0a183";
 
     const counter: Contract = new ethers.Contract(
       counterAddress,
-      CounterABI.abi,
+      CounterABI,
       signer
     );
 
@@ -89,6 +94,8 @@ export const main = async () => {
           gasLimit,
           value: ethers.utils.parseUnits("30000", "gwei").toNumber(),
         });
+
+      console.log();
 
       await tx.wait();
 

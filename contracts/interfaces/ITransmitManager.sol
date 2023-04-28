@@ -11,4 +11,11 @@ interface ITransmitManager {
     function payFees(uint32 dstSlug) external payable;
 
     function getMinFees(uint32 dstSlug) external view returns (uint256);
+
+    function setProposeGasLimit(
+        uint256 nonce_,
+        uint256 dstChainSlug_,
+        uint256 gasLimit_,
+        bytes calldata signature_
+    ) external;
 }

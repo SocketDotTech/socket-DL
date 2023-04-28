@@ -1,9 +1,13 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
-import { getNamedAccounts, ethers } from "hardhat";
+import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { getInstance, getChainSlug, deployedAddressPath } from "../utils";
 import { Contract } from "ethers";
+import { mode } from "../config";
 
 const remoteChainSlug = "";
 
@@ -16,11 +20,11 @@ export const main = async () => {
     const fees = "20000000000000000";
 
     const config: any = JSON.parse(
-      fs.readFileSync(deployedAddressPath, "utf-8")
+      fs.readFileSync(deployedAddressPath(mode), "utf-8")
     );
 
-    const { counterOwner } = await getNamedAccounts();
-    const signer: SignerWithAddress = await ethers.getSigner(counterOwner);
+    const socketSigners: SignerWithAddress = await ethers.getSigners();
+    const signer = socketSigners[0];
 
     const counter: Contract = await getInstance(
       "Counter",

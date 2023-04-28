@@ -5,7 +5,7 @@ import "fx-portal/tunnel/FxBaseRootTunnel.sol";
 import "./NativeSwitchboardBase.sol";
 
 contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
-    event FxChildTunnelSet(address fxRootTunnel, address newFxRootTunnel);
+    event FxChildTunnelSet(address fxChildTunnel, address newFxChildTunnel);
 
     modifier onlyRemoteSwitchboard() override {
         require(true, "ONLY_FX_CHILD");

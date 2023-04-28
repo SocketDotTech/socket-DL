@@ -1,9 +1,9 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import {
   attestGasLimit,
-  chainSlugKeys,
-  chainSlugs,
   executionOverhead,
-  networkToChainSlug,
   proposeGasLimit,
 } from "../constants";
 import {
@@ -11,23 +11,26 @@ import {
   ChainSocketAddresses,
   Configs,
   Integrations,
+  chainKeyToSlug,
 } from "../../src/types";
 import { getAddresses } from "../deploy/utils";
 import { setAttestGasLimit } from "./set-attest-gaslimit";
 import { setExecutionOverhead } from "./set-execution-overhead";
 import { setProposeGasLimit } from "./set-propose-gaslimit";
+import { mode } from "../deploy/config";
 
 export const setLimitsForAChainSlug = async (
-  chainSlugCode: keyof typeof chainSlugs
+  chainSlugCode: keyof typeof chainKeyToSlug
 ) => {
   try {
-    const chainId = chainSlugs[chainSlugCode];
+    const chainId = chainKeyToSlug[chainSlugCode];
     console.log(
       `setting initLimits for chainSlug: ${chainSlugCode} and chainId: ${chainId}`
     );
 
     const deployedAddressConfig = (await getAddresses(
-      chainId
+      chainId,
+      mode
     )) as ChainSocketAddresses;
 
     console.log(
@@ -146,7 +149,7 @@ export const setLimitsForAChainSlug = async (
 export const setLimits = async () => {
   try {
     // for (let chainSlugKey of chainSlugKeys) {
-    //   setLimitsForAChainSlug(chainSlugKey as keyof typeof chainSlugs);
+    //   setLimitsForAChainSlug(chainSlugKey as keyof typeof chainKeyToSlug);
     // }
     setLimitsForAChainSlug("optimism-goerli");
   } catch (error) {

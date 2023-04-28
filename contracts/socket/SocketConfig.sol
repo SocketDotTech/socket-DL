@@ -33,7 +33,9 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
         address switchboard,
         uint256 siblingChainSlug,
         address capacitor,
-        address decapacitor
+        address decapacitor,
+        uint256 maxPacketLength,
+        uint32 capacitorType
     );
     event CapacitorFactorySet(address capacitorFactory);
 
@@ -53,7 +55,7 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
         uint256 maxPacketLength_,
         uint32 siblingChainSlug_,
         uint32 capacitorType_
-    ) external {
+    ) external override {
         // only capacitor checked, decapacitor assumed will exist if capacitor does
         if (
             address(capacitors__[switchBoardAddress_][siblingChainSlug_]) !=
@@ -83,7 +85,9 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
             switchBoardAddress_,
             siblingChainSlug_,
             address(capacitor__),
-            address(decapacitor__)
+            address(decapacitor__),
+            maxPacketLength_,
+            capacitorType_
         );
     }
 

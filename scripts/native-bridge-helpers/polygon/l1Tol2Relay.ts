@@ -1,43 +1,50 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
 import { Contract, providers, Wallet } from "ethers";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 
 import { getInstance, deployedAddressPath } from "../../deploy/utils";
-import { ChainSocketAddresses } from "../../deploy/types";
 import { packPacketId } from "../../deploy/scripts/packetId";
-import { chainSlugs, getJsonRpcUrl, contractNames } from "../../constants";
+import { getJsonRpcUrl, contractNames } from "../../constants";
+import { mode } from "../../deploy/config";
+import { ChainKey, chainKeyToSlug, ChainSocketAddresses } from "../../../src";
 
 // get providers for source and destination
-const localChain = "goerli";
-const remoteChain = "polygon-mumbai";
+const localChain = ChainKey.GOERLI;
+const remoteChain = ChainKey.POLYGON_MUMBAI;
 const outboundTxHash = "";
 
-const walletPrivateKey = process.env.DEVNET_PRIVKEY;
+const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
 
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 
 export const main = async () => {
   try {
-    if (!fs.existsSync(deployedAddressPath)) {
+    if (!fs.existsSync(deployedAddressPath(mode))) {
       throw new Error("addresses.json not found");
     }
-    const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
+    const addresses = JSON.parse(
+      fs.readFileSync(deployedAddressPath(mode), "utf-8")
+    );
 
     if (
-      !addresses[chainSlugs[localChain]] ||
-      !addresses[chainSlugs[remoteChain]]
+      !addresses[chainKeyToSlug[localChain]] ||
+      !addresses[chainKeyToSlug[remoteChain]]
     ) {
       throw new Error("Deployed Addresses not found");
     }
 
-    const l1Config: ChainSocketAddresses = addresses[chainSlugs[localChain]];
+    const l1Config: ChainSocketAddresses =
+      addresses[chainKeyToSlug[localChain]];
     const contracts = contractNames("", localChain, remoteChain);
 
     const l1Capacitor: Contract = (
       await getInstance(
         "SingleCapacitor",
-        l1Config["integrations"]?.[chainSlugs[remoteChain]]?.[
+        l1Config["integrations"]?.[chainKeyToSlug[remoteChain]]?.[
           contracts.integrationType
         ]?.["capacitor"]
       )
@@ -46,7 +53,7 @@ export const main = async () => {
     const l1Notary: Contract = (
       await getInstance(
         contracts.notary,
-        l1Config[contracts.notary]?.[chainSlugs[remoteChain]]
+        l1Config[contracts.notary]?.[chainKeyToSlug[remoteChain]]
       )
     ).connect(l1Wallet);
 
@@ -62,7 +69,7 @@ export const main = async () => {
     );
 
     const packedPacketId = packPacketId(
-      chainSlugs[localChain],
+      chainKeyToSlug[localChain],
       l1Capacitor.address,
       packetId
     );
@@ -70,7 +77,7 @@ export const main = async () => {
     const digest = keccak256(
       defaultAbiCoder.encode(
         ["uint256", "uint256", "bytes32"],
-        [chainSlugs[remoteChain], packedPacketId, newRootHash]
+        [chainKeyToSlug[remoteChain], packedPacketId, newRootHash]
       )
     );
     const signature = await l1Wallet.signMessage(arrayify(digest));

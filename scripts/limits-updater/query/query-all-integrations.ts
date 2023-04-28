@@ -1,3 +1,6 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import {
   ChainAddresses,
   ChainSocketAddresses,
@@ -8,18 +11,23 @@ import {
   getAddresses,
   getChainSlugsFromDeployedAddresses,
 } from "../../deploy/utils";
+import { mode } from "../../deploy/config";
 
 // npx ts-node scripts/limits-updater/query-all-integrations.ts
 export const main = async () => {
-  const chainSlugsDecoded: string[] =
-    (await getChainSlugsFromDeployedAddresses()) as string[];
+  const chainSlugsDecoded: string[] = (await getChainSlugsFromDeployedAddresses(
+    mode
+  )) as string[];
 
   console.log(`-------------------------------------\n\n`);
 
   for (let slugIndex = 0; slugIndex < chainSlugsDecoded.length; slugIndex++) {
     const chainSlug = parseInt(chainSlugsDecoded[slugIndex]);
 
-    const addresses = (await getAddresses(chainSlug)) as ChainSocketAddresses;
+    const addresses = (await getAddresses(
+      chainSlug,
+      mode
+    )) as ChainSocketAddresses;
 
     const integrations: Integrations = addresses.integrations as Integrations;
 

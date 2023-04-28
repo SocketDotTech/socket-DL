@@ -1,29 +1,33 @@
-import fs from "fs";
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import { providers, Wallet } from "ethers";
-import { deployedAddressPath } from "../../deploy/utils";
-import { chainSlugs, getJsonRpcUrl } from "../../constants";
+import { getJsonRpcUrl } from "../../constants";
 import { L2ToL1MessageStatus, L2TransactionReceipt } from "@arbitrum/sdk";
+import { ChainKey, chainKeyToSlug, getAllAddresses } from "../../../src";
 
 // https://goerli.arbiscan.io/txsExit to check message status
-const l1Chain = "goerli";
-const l2Chain = "arbitrum-goerli";
+const l1Chain = ChainKey.GOERLI;
+const l2Chain = ChainKey.ARBITRUM_GOERLI;
 const sealTxHash =
   "0x0113020a1e3b9f814a78791b9719bf583bb0f25075cde1e754af99f1dcf137a7";
 
-const walletPrivateKey = process.env.DEVNET_PRIVKEY;
+import { mode } from "../../deploy/config";
+
+const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));
 const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l2Chain));
 
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 
+// usage: npx hardhat run scripts/native-bridge-helpers/arbitrum/l2tol1Relay.ts
 export const main = async () => {
   try {
-    if (!fs.existsSync(deployedAddressPath)) {
-      throw new Error("addresses.json not found");
-    }
-    const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
-
-    if (!addresses[chainSlugs[l1Chain]] || !addresses[chainSlugs[l2Chain]]) {
+    const addresses = getAllAddresses(mode);
+    if (
+      !addresses[chainKeyToSlug[l1Chain]] ||
+      !addresses[chainKeyToSlug[l2Chain]]
+    ) {
       throw new Error("Deployed Addresses not found");
     }
 

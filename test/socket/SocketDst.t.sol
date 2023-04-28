@@ -18,6 +18,8 @@ contract SocketDstTest is Setup {
     address immutable _invalidExecutor = address(uint160(c++));
 
     bool isFast = true;
+    uint256 index = isFast ? 0 : 1;
+
     bytes32[] roots;
 
     error AlreadyAttested();
@@ -25,20 +27,20 @@ contract SocketDstTest is Setup {
     error InsufficientFees();
     error InvalidProof();
     error NotExecutor();
-    event ExecutionSuccess(uint256 msgId);
-    event ExecutionFailed(uint256 msgId, string result);
-    event ExecutionFailedBytes(uint256 msgId, bytes result);
+    event ExecutionSuccess(bytes32 msgId);
+    event ExecutionFailed(bytes32 msgId, string result);
+    event ExecutionFailedBytes(bytes32 msgId, bytes result);
 
     event PacketVerifiedAndSealed(
         address indexed transmitter,
-        uint256 indexed packetId,
+        bytes32 indexed packetId,
         bytes32 root,
         bytes signature
     );
 
     event PacketProposed(
         address indexed transmitter,
-        uint256 indexed packetId,
+        bytes32 indexed packetId,
         bytes32 root
     );
 
@@ -47,7 +49,7 @@ contract SocketDstTest is Setup {
         address localPlug,
         uint256 dstChainSlug,
         address dstPlug,
-        uint256 msgId,
+        bytes32 msgId,
         uint256 msgGasLimit,
         uint256 executionFee,
         uint256 fees,
@@ -60,25 +62,44 @@ contract SocketDstTest is Setup {
 
         _dualChainSetup(transmitterPivateKeys);
         _deployPlugContracts();
-
-        uint256 index = isFast ? 0 : 1;
         _configPlugContracts(index);
 
-        vm.startPrank(_transmitter);
-        _a.gasPriceOracle__.setSourceGasPrice(sourceGasPrice);
-        _a.gasPriceOracle__.setRelativeGasPrice(_b.chainSlug, relativeGasPrice);
-        vm.stopPrank();
+        bytes32 digest = keccak256(
+            abi.encode(_a.chainSlug, gasPriceOracleNonce, sourceGasPrice)
+        );
+        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
+
+        _a.gasPriceOracle__.setSourceGasPrice(
+            gasPriceOracleNonce++,
+            sourceGasPrice,
+            sig
+        );
+
+        digest = keccak256(
+            abi.encode(
+                _a.chainSlug,
+                _b.chainSlug,
+                gasPriceOracleNonce,
+                relativeGasPrice
+            )
+        );
+        sig = _createSignature(digest, _transmitterPrivateKey);
+
+        _a.gasPriceOracle__.setRelativeGasPrice(
+            _b.chainSlug,
+            gasPriceOracleNonce++,
+            relativeGasPrice,
+            sig
+        );
     }
 
     function testProposeAPacket() external {
-        uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
-
-        sendOutboundMessage(index, capacitor);
+        sendOutboundMessage();
 
         (
             bytes32 root_,
-            uint256 packetId_,
+            bytes32 packetId_,
             bytes memory sig_
         ) = getLatestSignature(
                 _a,
@@ -86,27 +107,23 @@ contract SocketDstTest is Setup {
                 _b.chainSlug,
                 _transmitterPrivateKey
             );
-
         _sealOnSrc(_a, capacitor, sig_);
 
         vm.expectEmit(false, false, false, true);
         emit PacketProposed(_transmitter, packetId_, root_);
-
         _proposeOnDst(_b, sig_, packetId_, root_);
 
-        assertEq(_b.socket__.remoteRoots(packetId_), root_);
+        assertEq(_b.socket__.packetIdRoots(packetId_), root_);
         assertEq(_b.socket__.rootProposedAt(packetId_), block.timestamp);
     }
 
     function testIsPacketProposed() external {
-        uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
-
-        sendOutboundMessage(index, capacitor);
+        sendOutboundMessage();
 
         (
             bytes32 root_,
-            uint256 packetId_,
+            bytes32 packetId_,
             bytes memory sig_
         ) = getLatestSignature(
                 _a,
@@ -116,25 +133,21 @@ contract SocketDstTest is Setup {
             );
 
         _sealOnSrc(_a, capacitor, sig_);
-
         assertFalse(_b.socket__.isPacketProposed(packetId_));
-
         _proposeOnDst(_b, sig_, packetId_, root_);
 
-        assertEq(_b.socket__.remoteRoots(packetId_), root_);
-
+        assertEq(_b.socket__.packetIdRoots(packetId_), root_);
         assertTrue(_b.socket__.isPacketProposed(packetId_));
     }
 
     function testProposeAPacketByInvalidAttester() external {
-        uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
 
-        sendOutboundMessage(index, capacitor);
+        sendOutboundMessage();
 
         (
             bytes32 root_,
-            uint256 packetId_,
+            bytes32 packetId_,
             bytes memory sig_
         ) = getLatestSignature(
                 _a,
@@ -149,39 +162,23 @@ contract SocketDstTest is Setup {
     }
 
     function testDuplicateProposePacket() external {
-        uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
 
-        sendOutboundMessage(index, capacitor);
-        {
-            (
-                bytes32 root_,
-                uint256 packetId_,
-                bytes memory sig_
-            ) = getLatestSignature(
-                    _a,
-                    capacitor,
-                    _b.chainSlug,
-                    _transmitterPrivateKey
-                );
+        sendOutboundMessage();
+        (, , bytes memory sig_) = getLatestSignature(
+            _a,
+            capacitor,
+            _b.chainSlug,
+            _transmitterPrivateKey
+        );
+        (bytes32 packetId_, bytes32 root_) = sealAndPropose(capacitor);
 
-            _sealOnSrc(_a, capacitor, sig_);
-            _proposeOnDst(_b, sig_, packetId_, root_);
-
-            vm.expectRevert(AlreadyAttested.selector);
-
-            _proposeOnDst(_b, sig_, packetId_, root_);
-        }
+        vm.expectRevert(AlreadyAttested.selector);
+        _proposeOnDst(_b, sig_, packetId_, root_);
     }
 
-    function sendOutboundMessage(uint256 index, address capacitor) internal {
+    function sendOutboundMessage() internal {
         uint256 amount = 100;
-        bytes memory payload = abi.encode(
-            keccak256("OP_ADD"),
-            amount,
-            _plugOwner
-        );
-        bytes memory proof = abi.encode(0);
 
         uint256 executionFee;
         {
@@ -214,8 +211,6 @@ contract SocketDstTest is Setup {
             _plugOwner
         );
         bytes memory proof = abi.encode(0);
-
-        uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
 
         uint256 executionFee;
@@ -248,25 +243,14 @@ contract SocketDstTest is Setup {
             );
         }
 
-        uint256 msgId = _packMessageId(_a.chainSlug, 0);
-        uint256 packetId;
-        {
-            (
-                bytes32 root_,
-                uint256 packetId_,
-                bytes memory sig_
-            ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
+        bytes32 msgId = _packMessageId(_a.chainSlug, 0);
+        (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        _attestOnDst(address(_b.configs__[index].switchboard__), packetId);
 
-            _sealOnSrc(_a, capacitor, sig_);
-            _proposeOnDst(_b, sig_, packetId_, root_);
+        vm.expectEmit(true, false, false, false);
+        emit ExecutionSuccess(msgId);
 
-            vm.expectEmit(true, false, false, false);
-            emit ExecutionSuccess(msgId);
-
-            packetId = packetId_;
-        }
-
-        executePayloadOnDst(
+        _executePayloadOnDst(
             _b,
             _a.chainSlug,
             address(dstCounter__),
@@ -274,9 +258,9 @@ contract SocketDstTest is Setup {
             msgId,
             _msgGasLimit,
             executionFee,
+            root,
             payload,
-            proof,
-            _executor
+            proof
         );
 
         assertEq(dstCounter__.counter(), amount);
@@ -284,7 +268,7 @@ contract SocketDstTest is Setup {
         assertTrue(_b.socket__.messageExecuted(msgId));
 
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
-        executePayloadOnDst(
+        _executePayloadOnDst(
             _b,
             _a.chainSlug,
             address(dstCounter__),
@@ -292,77 +276,9 @@ contract SocketDstTest is Setup {
             msgId,
             _msgGasLimit,
             executionFee,
+            root,
             payload,
-            proof,
-            _executor
-        );
-    }
-
-    function testExecuteMessageWithInvalidProof() external {
-        uint256 amount = 100;
-        bytes memory payload = abi.encode(
-            keccak256("OP_ADD"),
-            amount,
-            _plugOwner
-        );
-        bytes memory proof = abi.encode(0);
-
-        uint256 index = isFast ? 0 : 1;
-        address capacitor = address(_a.configs__[index].capacitor__);
-
-        uint256 executionFee;
-        {
-            (uint256 switchboardFees, uint256 verificationFee) = _a
-                .configs__[index]
-                .switchboard__
-                .getMinFees(_b.chainSlug);
-
-            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                _b.chainSlug
-            );
-
-            uint256 value = switchboardFees +
-                socketFees +
-                verificationFee +
-                executionFee;
-
-            hoax(_plugOwner);
-            srcCounter__.remoteAddOperation{value: value}(
-                _b.chainSlug,
-                amount,
-                _msgGasLimit
-            );
-        }
-
-        uint256 msgId = _packMessageId(_a.chainSlug, 0);
-        uint256 packetId;
-        {
-            (
-                bytes32 root_,
-                uint256 packetId_,
-                bytes memory sig_
-            ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
-
-            _sealOnSrc(_a, capacitor, sig_);
-            _proposeOnDst(_b, sig_, packetId_, root_);
-
-            packetId = packetId_;
-        }
-
-        vm.expectRevert(InvalidProof.selector);
-        executePayloadOnDst(
-            _b,
-            _a.chainSlug,
-            address(dstCounter__),
-            packetId,
-            msgId,
-            _msgGasLimit,
-            executionFee,
-            payload,
-            proof,
-            _executor
+            proof
         );
     }
 
@@ -374,8 +290,6 @@ contract SocketDstTest is Setup {
             _plugOwner
         );
         bytes memory proof = abi.encode(0);
-
-        uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
 
         uint256 executionFee;
@@ -408,59 +322,23 @@ contract SocketDstTest is Setup {
             );
         }
 
-        uint256 msgId = _packMessageId(_a.chainSlug, 0);
-        uint256 packetId;
-        {
-            (
-                bytes32 root_,
-                uint256 packetId_,
-                bytes memory sig_
-            ) = _getLatestSignature(_a, capacitor, _b.chainSlug);
-
-            _sealOnSrc(_a, capacitor, sig_);
-            _proposeOnDst(_b, sig_, packetId_, root_);
-
-            packetId = packetId_;
-        }
+        bytes32 msgId = _packMessageId(_a.chainSlug, 0);
+        (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        _attestOnDst(address(_b.configs__[index].switchboard__), packetId);
 
         vm.expectRevert(NotExecutor.selector);
-        executePayloadOnDst(
+        _executePayloadOnDstWithExecutor(
             _b,
-            _a.chainSlug,
             address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
             executionFee,
+            root,
+            uint256(1),
             payload,
-            proof,
-            _invalidExecutor
+            proof
         );
-    }
-
-    function executePayloadOnDst(
-        ChainContext storage dst_,
-        uint256,
-        address remotePlug_,
-        uint256 packetId_,
-        uint256 msgId_,
-        uint256 msgGasLimit_,
-        uint256 executionFee_,
-        bytes memory payload_,
-        bytes memory proof_,
-        address executor
-    ) internal {
-        hoax(executor);
-
-        ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
-            msgId_,
-            executionFee_,
-            msgGasLimit_,
-            payload_,
-            proof_
-        );
-
-        dst_.socket__.execute(packetId_, remotePlug_, msgDetails);
     }
 
     function getLatestSignature(
@@ -468,7 +346,7 @@ contract SocketDstTest is Setup {
         address capacitor_,
         uint256 remoteChainSlug_,
         uint256 transmitterPrivateKey_
-    ) public returns (bytes32 root, uint256 packetId, bytes memory sig) {
+    ) public returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint256 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);

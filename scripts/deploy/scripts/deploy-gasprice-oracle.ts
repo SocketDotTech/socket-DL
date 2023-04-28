@@ -2,9 +2,9 @@ import hre from "hardhat";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployContractWithArgs, getAddresses, storeAddresses } from "./utils";
-import { chainSlugs } from "../constants/networks";
-import { transmitterAddress } from "../constants/config";
+import { deployContractWithArgs, getAddresses, storeAddresses } from "../utils";
+import { chainKeyToSlug } from "../../../src";
+import { mode, transmitterAddresses } from "../config";
 
 /**
  * Deploys gasprice oracle , set transmitManager to oracle followed by granting transmitter role to the transmitter
@@ -14,22 +14,21 @@ import { transmitterAddress } from "../constants/config";
 export const main = async () => {
   try {
     // assign deployers
-    const { getNamedAccounts } = hre;
-    const { socketOwner } = await getNamedAccounts();
-    const socketSigner: SignerWithAddress = await ethers.getSigner(socketOwner);
-
+    const socketSigners: SignerWithAddress = await ethers.getSigners();
+    const socketSigner = socketSigners[0];
     const network = hre.network.name;
 
     const gasPriceOracle: Contract = await deployContractWithArgs(
       "GasPriceOracle",
-      [socketSigner.address, chainSlugs[network]],
-      socketSigner,
-      "contracts/GasPriceOracle.sol"
+      [socketSigner.address, chainKeyToSlug[network]],
+      socketSigner
     );
 
-    const addresses = await getAddresses(chainSlugs[network]);
+    const addresses = await getAddresses(chainKeyToSlug[network]);
+
+    if (!addresses) return;
     addresses["GasPriceOracle"] = gasPriceOracle.address;
-    await storeAddresses(addresses, chainSlugs[network]);
+    await storeAddresses(addresses, chainKeyToSlug[network], mode);
 
     const transmitManagerAddress = addresses["TransmitManager"];
 
@@ -42,7 +41,7 @@ export const main = async () => {
     await tx.wait();
 
     //grant transmitter role to transmitter-address
-    const transmitter = transmitterAddress[network];
+    const transmitter = transmitterAddresses[mode];
 
     const TransmitManager = await ethers.getContractFactory("TransmitManager");
     const transmitManagerInstance = TransmitManager.attach(
@@ -50,7 +49,7 @@ export const main = async () => {
     );
     const grantTransmitterRoleTxn = await transmitManagerInstance
       .connect(socketSigner)
-      .grantTransmitterRole(chainSlugs[network], transmitter);
+      .grantTransmitterRole(chainKeyToSlug[network], transmitter);
 
     console.log(
       `granted transmitter role to ${transmitter} and resulting transactionHash is: ${grantTransmitterRoleTxn.hash}`

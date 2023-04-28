@@ -5,33 +5,87 @@
  ***********************************************/
 
 export enum ChainSlug {
-  GOERLI = 5,
-  MUMBAI = 80001,
-  ARBITRUM_TESTNET = 421613,
-  OPTIMISM_TESTNET = 420,
+  ARBITRUM = 42161,
+  ARBITRUM_GOERLI = 421613,
+  OPTIMISM = 10,
+  OPTIMISM_GOERLI = 420,
+  BSC = 56,
   BSC_TESTNET = 97,
   MAINNET = 1,
-  POLYGON = 137,
-  ARBITRUM = 42161,
-  OPTIMISM = 10,
-  BSC = 56,
+  GOERLI = 5,
+  POLYGON_MAINNET = 137,
+  POLYGON_MUMBAI = 80001,
 }
+
+export enum ChainKey {
+  ARBITRUM = "arbitrum",
+  ARBITRUM_GOERLI = "arbitrum-goerli",
+  OPTIMISM = "optimism",
+  OPTIMISM_GOERLI = "optimism-goerli",
+  AVALANCHE = "avalanche",
+  AVALANCHE_TESTNET = "avalanche-testnet",
+  BSC = "bsc",
+  BSC_TESTNET = "bsc-testnet",
+  MAINNET = "mainnet",
+  GOERLI = "goerli",
+  POLYGON_MAINNET = "polygon-mainnet",
+  POLYGON_MUMBAI = "polygon-mumbai",
+  HARDHAT = "hardhat",
+}
+
+export const chainKeyToSlug = {
+  [ChainKey.ARBITRUM]: 42161,
+  [ChainKey.ARBITRUM_GOERLI]: 421613,
+  [ChainKey.OPTIMISM]: 10,
+  [ChainKey.OPTIMISM_GOERLI]: 420,
+  [ChainKey.AVALANCHE]: 43114,
+  [ChainKey.BSC]: 56,
+  [ChainKey.BSC_TESTNET]: 97,
+  [ChainKey.MAINNET]: 1,
+  [ChainKey.GOERLI]: 5,
+  [ChainKey.POLYGON_MAINNET]: 137,
+  [ChainKey.POLYGON_MUMBAI]: 80001,
+  [ChainKey.HARDHAT]: 31337,
+};
+
+export const networkToChainSlug = {
+  43114: ChainKey.AVALANCHE,
+  56: ChainKey.BSC,
+  5: ChainKey.GOERLI,
+  31337: ChainKey.HARDHAT,
+  1: ChainKey.MAINNET,
+  97: ChainKey.BSC_TESTNET,
+  42161: ChainKey.ARBITRUM,
+  421613: ChainKey.ARBITRUM_GOERLI,
+  10: ChainKey.OPTIMISM,
+  420: ChainKey.OPTIMISM_GOERLI,
+  137: ChainKey.POLYGON_MAINNET,
+  80001: ChainKey.POLYGON_MUMBAI,
+};
 
 export const TestnetIds: ChainSlug[] = [
   ChainSlug.GOERLI,
-  ChainSlug.MUMBAI,
-  ChainSlug.ARBITRUM_TESTNET,
-  ChainSlug.OPTIMISM_TESTNET,
+  ChainSlug.POLYGON_MUMBAI,
+  ChainSlug.ARBITRUM_GOERLI,
+  ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.BSC_TESTNET,
+];
+
+export const MainnetIds: ChainSlug[] = [
+  ChainSlug.MAINNET,
+  ChainSlug.POLYGON_MAINNET,
+  ChainSlug.ARBITRUM,
+  ChainSlug.OPTIMISM,
+  ChainSlug.BSC,
 ];
 
 export const L1Ids: ChainSlug[] = [ChainSlug.MAINNET, ChainSlug.GOERLI];
 
 export const L2Ids: ChainSlug[] = [
-  ChainSlug.MUMBAI,
-  ChainSlug.ARBITRUM_TESTNET,
-  ChainSlug.OPTIMISM_TESTNET,
-  ChainSlug.POLYGON,
+  ChainSlug.POLYGON_MUMBAI,
+  ChainSlug.ARBITRUM_GOERLI,
+  ChainSlug.OPTIMISM_GOERLI,
+  ChainSlug.POLYGON_MAINNET,
   ChainSlug.ARBITRUM,
   ChainSlug.OPTIMISM,
 ];
@@ -51,9 +105,9 @@ export enum NativeSwitchboard {
  *                                             *
  ***********************************************/
 
-export const MainnetIds: ChainSlug[] = (
-  Object.values(ChainSlug) as ChainSlug[]
-).filter((c) => !TestnetIds.includes(c));
+// export const MainnetIds: ChainSlug[] = (
+//   Object.values(ChainSlug) as ChainSlug[]
+// ).filter((c) => !TestnetIds.includes(c));
 
 export const isTestnet = (chainSlug: ChainSlug) => {
   return TestnetIds.includes(chainSlug);
@@ -81,6 +135,12 @@ export enum IntegrationTypes {
   native = "NATIVE_BRIDGE",
 }
 
+export enum DeploymentMode {
+  DEV = "dev",
+  PROD = "prod",
+  SURGE = "surge",
+}
+
 export type Integrations = { [chainSlug in ChainSlug]?: ChainAddresses };
 export type ChainAddresses = { [integration in IntegrationTypes]?: Configs };
 export type Configs = {
@@ -98,12 +158,83 @@ export interface ChainSocketAddresses {
   SignatureVerifier: string;
   Socket: string;
   TransmitManager: string;
-  FastSwitchboard?: string;
-  OptimisticSwitchboard?: string;
+  FastSwitchboard: string;
+  OptimisticSwitchboard: string;
+  SocketBatcher: string;
   integrations?: Integrations;
-  SocketBatcher?: string;
 }
 
 export type DeploymentAddresses = {
   [chainSlug in ChainSlug]?: ChainSocketAddresses;
+};
+
+export enum ROLES {
+  TRANSMITTER_ROLE = "TRANSMITTER_ROLE",
+  GAS_LIMIT_UPDATER_ROLE = "GAS_LIMIT_UPDATER_ROLE",
+  RESCUE_ROLE = "RESCUE_ROLE",
+  WITHDRAW_ROLE = "WITHDRAW_ROLE",
+  GOVERNANCE_ROLE = "GOVERNANCE_ROLE",
+  EXECUTOR_ROLE = "EXECUTOR_ROLE",
+  TRIP_ROLE = "TRIP_ROLE",
+  UNTRIP_ROLE = "UNTRIP_ROLE",
+  WATCHER_ROLE = "WATCHER_ROLE",
+}
+
+export enum CORE_CONTRACTS {
+  CapacitorFactory = "CapacitorFactory",
+  ExecutionManager = "ExecutionManager",
+  Hasher = "Hasher",
+  SignatureVerifier = "SignatureVerifier",
+  TransmitManager = "TransmitManager",
+  GasPriceOracle = "GasPriceOracle",
+  Socket = "Socket",
+  FastSwitchboard = "FastSwitchboard",
+  OptimisticSwitchboard = "OptimisticSwitchboard",
+  NativeSwitchboard = "NativeSwitchboard",
+}
+
+export const REQUIRED_ROLES = {
+  CapacitorFactory: [ROLES.RESCUE_ROLE],
+  ExecutionManager: [
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.EXECUTOR_ROLE,
+  ],
+  TransmitManager: [
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+    ROLES.GAS_LIMIT_UPDATER_ROLE,
+  ],
+  GasPriceOracle: [ROLES.GOVERNANCE_ROLE, ROLES.RESCUE_ROLE],
+  Socket: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
+  FastSwitchboard: [
+    ROLES.TRIP_ROLE,
+    ROLES.UNTRIP_ROLE,
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+  ],
+  OptimisticSwitchboard: [
+    ROLES.TRIP_ROLE,
+    ROLES.UNTRIP_ROLE,
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+  ],
+  NativeSwitchboard: [
+    ROLES.GAS_LIMIT_UPDATER_ROLE,
+    ROLES.TRIP_ROLE,
+    ROLES.UNTRIP_ROLE,
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+  ],
+};
+
+export const REQUIRED_CHAIN_ROLES = {
+  TransmitManager: [ROLES.TRANSMITTER_ROLE, ROLES.GAS_LIMIT_UPDATER_ROLE],
+  FastSwitchboard: [ROLES.WATCHER_ROLE, ROLES.GAS_LIMIT_UPDATER_ROLE],
+  OptimisticSwitchboard: [ROLES.WATCHER_ROLE, ROLES.GAS_LIMIT_UPDATER_ROLE],
 };

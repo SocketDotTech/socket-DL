@@ -1,11 +1,10 @@
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
+
 import fs from "fs";
 import { use, POSClient } from "@maticnetwork/maticjs";
 import { Web3ClientPlugin } from "@maticnetwork/maticjs-ethers";
 import { providers, Wallet } from "ethers";
-use(Web3ClientPlugin);
-
-import { chainSlugs, getJsonRpcUrl } from "../../constants";
-import { deployedAddressPath, getInstance } from "../../deploy/utils";
 import {
   Provider,
   TransactionRequest,
@@ -16,7 +15,8 @@ import { Bytes } from "@ethersproject/bytes";
 import { Deferrable } from "@ethersproject/properties";
 import { Transaction } from "@ethersproject/transactions";
 import axios from "axios";
-import { IntegrationTypes } from "../../../src";
+
+use(Web3ClientPlugin);
 
 type ProviderWithWrapTransaction = Provider & {
   _wrapTransaction(tx: Transaction, hash?: string): TransactionResponse;
@@ -72,12 +72,14 @@ export class SocketRelaySigner extends Signer {
   }
 }
 
+import { getJsonRpcUrl } from "../../constants";
+import { deployedAddressPath, getInstance } from "../../deploy/utils";
+import { mode } from "../../deploy/config";
+import { chainKeyToSlug, IntegrationTypes } from "../../../src";
+
 // get providers for source and destination
-const privateKey =
-  "0x8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b036";
-// const privateKey = process.env.DEVNET_PRIVKEY;
-const sealTxHash =
-  "0xd390988d509c89e41f8604e8a8882b4457269532419bb15a9c0a77fb85e1705f";
+const privateKey = process.env.SOCKET_SIGNER_KEY!;
+const sealTxHash = "";
 
 const localChain = "polygon-mainnet";
 const remoteChain = "mainnet";
@@ -97,19 +99,20 @@ const l2Signer = new SocketRelaySigner(
 
 export const main = async () => {
   try {
-    if (!fs.existsSync(deployedAddressPath)) {
+    if (!fs.existsSync(deployedAddressPath(mode))) {
       throw new Error("addresses.json not found");
     }
-    const addresses = JSON.parse(fs.readFileSync(deployedAddressPath, "utf-8"));
+    const addresses = JSON.parse(
+      fs.readFileSync(deployedAddressPath(mode), "utf-8")
+    );
 
     if (
-      !addresses[chainSlugs[localChain]] ||
-      !addresses[chainSlugs[remoteChain]]
+      !addresses[chainKeyToSlug[localChain]] ||
+      !addresses[chainKeyToSlug[remoteChain]]
     ) {
       throw new Error("Deployed Addresses not found");
     }
-    const l1Config = addresses[chainSlugs[remoteChain]];
-
+    const l1Config = addresses[chainKeyToSlug[remoteChain]];
     const ABI = ["function receiveMessage(bytes memory receivePacketProof)"];
 
     // get socket contracts for both chains
@@ -117,7 +120,7 @@ export const main = async () => {
     const l1Switchboard = (
       await getInstance(
         "PolygonL1Switchboard",
-        l1Config["integrations"][chainSlugs[localChain]][
+        l1Config["integrations"][chainKeyToSlug[localChain]][
           IntegrationTypes.native
         ]["switchboard"]
       )
