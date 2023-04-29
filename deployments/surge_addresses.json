@@ -74,8 +74,7 @@
     },
     "FastSwitchboard": "0x483D7e9dDBbbE0d376986168Ac4d94E35c485C69",
     "OptimisticSwitchboard": "0xD664eF6159562190ea6D1AFa3f0Ea1C0D77D14E3",
-    "Counter": "0xfC5CC93d85861ac82d89fc2D3e56315540E9C8A7",
-    "SocketBatcher": "0xCc7eAe7b35a85EaE46aCd852426FaC3b1D3bD57b"
+    "Counter": "0xfC5CC93d85861ac82d89fc2D3e56315540E9C8A7"
   },
   "10": {
     "SignatureVerifier": "0xDE007c8A9a7Fa8676F9A751b7BC1EF38af76757f",
@@ -117,8 +116,8 @@
       },
       "137": {
         "FAST": {
-          "capacitor": "0x0000000000000000000000000000000000000000",
-          "decapacitor": "0x0000000000000000000000000000000000000000",
+          "capacitor": "0x8Cec0BAAd46Fc8af39f83f87eb7e244C5aa0c2F3",
+          "decapacitor": "0x58f2b297F273345477202877a38427B511871146",
           "switchboard": "0xcCd5a9bF2250070289a719C153390cb001316C6e"
         },
         "OPTIMISTIC": {
@@ -224,13 +223,13 @@
           "decapacitor": "0x2ca2831ecD7fF0c355cc451D8D743F4794AEcB1B"
         },
         "FAST": {
-          "capacitor": "0x0000000000000000000000000000000000000000",
-          "decapacitor": "0x0000000000000000000000000000000000000000",
+          "capacitor": "0x8CB895Ae028de51e01c92289636a9100b6D4DEF5",
+          "decapacitor": "0x2f231fBFb40dCD7371412232466D8ed3c5c759Bf",
           "switchboard": "0x52a71b10CE5eCf54B6a583A8E1A2a6ADF8C72DaF"
         },
         "OPTIMISTIC": {
           "capacitor": "0x1a1D263f3EA41Ad19198140A71C4eCe46F23C261",
-          "decapacitor": "0x0000000000000000000000000000000000000000",
+          "decapacitor": "0xD304e43CeC9Fe47E8b5b7FF265aB6880bA452eFA",
           "switchboard": "0x73f4c90674a91d8e49286eE511Bc4Bb9C7E0F5a5"
         }
       },
@@ -261,7 +260,7 @@
       "42161": {
         "FAST": {
           "capacitor": "0xAf595ca75AB64BbfE5F978D0399dD4FaD9348729",
-          "decapacitor": "0x0000000000000000000000000000000000000000",
+          "decapacitor": "0xdf9871632Ac35231BB17E00465603E2222496989",
           "switchboard": "0x52a71b10CE5eCf54B6a583A8E1A2a6ADF8C72DaF"
         },
         "OPTIMISTIC": {
