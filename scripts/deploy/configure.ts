@@ -1,5 +1,5 @@
 import fs from "fs";
-import { Wallet, constants } from "ethers";
+import { Contract, Wallet, constants } from "ethers";
 import { getProviderFromChainName, switchboards } from "../constants";
 import {
   deployedAddressPath,
@@ -8,6 +8,7 @@ import {
   storeAddresses,
 } from "./utils";
 import {
+  CORE_CONTRACTS,
   ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
@@ -22,7 +23,7 @@ import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { setProposeGasLimit } from "../limits-updater/set-propose-gaslimit";
 import { setAttestGasLimit } from "../limits-updater/set-attest-gaslimit";
 import { setExecutionOverhead } from "../limits-updater/set-execution-overhead";
-import { capacitorType, maxPacketLength, mode } from "./config";
+import { capacitorType, maxPacketLength, mode, setGasLimits } from "./config";
 
 const chains = [...TestnetIds, ...MainnetIds];
 
@@ -59,6 +60,27 @@ export const main = async () => {
 
       console.log(`Configuring for ${chain}`);
       let updatedDeploymentAddresses = addr;
+
+      const gasPriceOracle: Contract = (
+        await getInstance(
+          CORE_CONTRACTS.GasPriceOracle,
+          addr[CORE_CONTRACTS.GasPriceOracle]
+        )
+      ).connect(socketSigner);
+
+      const tmAddress: string = await gasPriceOracle.transmitManager__();
+      console.log(tmAddress);
+      if (
+        tmAddress.toLowerCase() !==
+        addr[CORE_CONTRACTS.TransmitManager].toLowerCase()
+      ) {
+        const transmitManagerAddr = addr[CORE_CONTRACTS.TransmitManager];
+        const tx = await gasPriceOracle
+          .connect(socketSigner)
+          .setTransmitManager(transmitManagerAddr);
+        console.log(`Setting transmit manager in oracle: ${tx.hash}`);
+        await tx.wait();
+      }
 
       for (let sibling of integrationList) {
         const config = integrations[sibling][IntegrationTypes.native];
@@ -107,37 +129,39 @@ export const main = async () => {
         await storeAddresses(updatedDeploymentAddresses, chain, mode);
       }
 
-      await setProposeGasLimit(
-        chain,
-        siblingSlugs,
-        addr["TransmitManager"],
-        addr["SocketBatcher"],
-        socketSigner
-      );
+      if (setGasLimits) {
+        await setProposeGasLimit(
+          chain,
+          siblingSlugs,
+          addr["TransmitManager"],
+          addr["SocketBatcher"],
+          socketSigner
+        );
 
-      await setAttestGasLimit(
-        chain,
-        siblingSlugs,
-        addr["FastSwitchboard"],
-        addr["SocketBatcher"],
-        socketSigner
-      );
+        await setAttestGasLimit(
+          chain,
+          siblingSlugs,
+          addr["FastSwitchboard"],
+          addr["SocketBatcher"],
+          socketSigner
+        );
 
-      await setExecutionOverhead(
-        chain,
-        siblingSlugs,
-        addr["FastSwitchboard"],
-        addr["SocketBatcher"],
-        socketSigner
-      );
+        await setExecutionOverhead(
+          chain,
+          siblingSlugs,
+          addr["FastSwitchboard"],
+          addr["SocketBatcher"],
+          socketSigner
+        );
 
-      await setExecutionOverhead(
-        chain,
-        siblingSlugs,
-        addr["OptimisticSwitchboard"],
-        addr["SocketBatcher"],
-        socketSigner
-      );
+        await setExecutionOverhead(
+          chain,
+          siblingSlugs,
+          addr["OptimisticSwitchboard"],
+          addr["SocketBatcher"],
+          socketSigner
+        );
+      }
     }
 
     await setRemoteSwitchboards(addresses);
