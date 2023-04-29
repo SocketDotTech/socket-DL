@@ -27,7 +27,7 @@ const packetId =
 const root =
   "0xc8111d45052c1df62037b92c1fab7c23bda80a0854b81432aee514aaf5f6c440";
 
-const walletPrivateKey = process.env.SOCKET_SIGNER_KEY;
+const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));
 const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l2Chain));
 
@@ -77,7 +77,6 @@ export const getBridgeParams = async (from, to) => {
     utils.parseEther("1")
   );
 
-  console.log(from, to, "from,to, from,to, from,to, from,to, from,to, ");
   const callValue = submissionPriceWei.add(gasPriceBid.mul(maxGas));
   console.log(
     `Sending greeting to L2 with ${callValue.toString()} callValue for L2 fees:`
@@ -90,21 +89,6 @@ export const getBridgeParams = async (from, to) => {
 
 export const main = async () => {
   try {
-    const addresses = getAllAddresses(mode);
-
-    if (
-      !addresses[chainKeyToSlug[l1Chain]] ||
-      !addresses[chainKeyToSlug[l2Chain]]
-    ) {
-      throw new Error("Deployed Addresses not found");
-    }
-
-    const l1Config = addresses[chainKeyToSlug[l1Chain]];
-    const l2Config = addresses[chainKeyToSlug[l2Chain]];
-
-    // get socket contracts for both chains
-    // counter l1, counter l2, initiateNative, execute
-
     const sbAddr = getSwitchboardAddress(
       chainKeyToSlug[l1Chain],
       chainKeyToSlug[l2Chain],
@@ -151,11 +135,11 @@ export const main = async () => {
 
     const l1TxReceipt = new L1TransactionReceipt(initiateNativeTxReceipt);
 
-    /**
-     * In principle, a single L1 txn can trigger any number of L1-to-L2 messages (each with its own sequencer number).
-     * In this case, we know our txn triggered only one
-     * Here, We check if our L1 to L2 message is redeemed on L2
-     */
+    // /**
+    //  * In principle, a single L1 txn can trigger any number of L1-to-L2 messages (each with its own sequencer number).
+    //  * In this case, we know our txn triggered only one
+    //  * Here, We check if our L1 to L2 message is redeemed on L2
+    //  */
     const messages = await l1TxReceipt.getL1ToL2Messages(l2Wallet);
     const message = messages[0];
     console.log("Waiting for L2 side. It may take 10-15 minutes ⏰⏰");
