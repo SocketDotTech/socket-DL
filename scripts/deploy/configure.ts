@@ -23,9 +23,13 @@ import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { setProposeGasLimit } from "../limits-updater/set-propose-gaslimit";
 import { setAttestGasLimit } from "../limits-updater/set-attest-gaslimit";
 import { setExecutionOverhead } from "../limits-updater/set-execution-overhead";
-import { capacitorType, maxPacketLength, mode, setGasLimits } from "./config";
-
-const chains = [...TestnetIds, ...MainnetIds];
+import {
+  capacitorType,
+  chains,
+  maxPacketLength,
+  mode,
+  setGasLimits,
+} from "./config";
 
 export const main = async () => {
   try {
