@@ -4,7 +4,7 @@ dotenvConfig();
 import fs from "fs";
 import { use, POSClient } from "@maticnetwork/maticjs";
 import { Web3ClientPlugin } from "@maticnetwork/maticjs-ethers";
-import { providers, Wallet } from "ethers";
+import { providers } from "ethers";
 import {
   Provider,
   TransactionRequest,
@@ -74,27 +74,24 @@ export class SocketRelaySigner extends Signer {
 
 import { getJsonRpcUrl } from "../../constants";
 import { deployedAddressPath, getInstance } from "../../deploy/utils";
-import { mode } from "../../deploy/config";
-import { chainKeyToSlug, IntegrationTypes } from "../../../src";
+import { mode, socketOwner } from "../../deploy/config";
+import { ChainKey, chainKeyToSlug, IntegrationTypes } from "../../../src";
 
 // get providers for source and destination
-const privateKey = process.env.SOCKET_SIGNER_KEY!;
 const sealTxHash = "";
 
-const localChain = "polygon-mainnet";
-const remoteChain = "mainnet";
+const localChain = ChainKey.POLYGON_MAINNET;
+const remoteChain = ChainKey.MAINNET;
 
 const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(remoteChain));
-const l1Wallet = new Wallet(privateKey, l2Provider);
-const l2Wallet = new Wallet(privateKey, l1Provider);
 const l1Signer = new SocketRelaySigner(
   l1Provider,
-  "https://9u4hhxgtyi.execute-api.us-east-1.amazonaws.com/dev/v1/relayTx"
+  process.env.RELAYER_URL_DEV!
 );
 const l2Signer = new SocketRelaySigner(
   l2Provider,
-  "https://9u4hhxgtyi.execute-api.us-east-1.amazonaws.com/dev/v1/relayTx"
+  process.env.RELAYER_URL_DEV!
 );
 
 export const main = async () => {
@@ -128,18 +125,18 @@ export const main = async () => {
 
     const posClient = new POSClient();
     await posClient.init({
-      network: "mainnet",
-      version: "v1",
+      network: remoteChain === ChainKey.MAINNET ? "mainnet" : "testnet",
+      version: remoteChain === ChainKey.MAINNET ? "v1" : "mumbai",
       parent: {
         provider: l1Signer, //new HDWalletProvider(privateKey, parentRPC),
         defaultConfig: {
-          from: "0x5367Efc17020Aa1CF0943bA7eD17f1D3e4c7d7EE",
+          from: socketOwner,
         },
       },
       child: {
         provider: l2Signer, //new HDWalletProvider(privateKey, childRPC),
         defaultConfig: {
-          from: "0x5367Efc17020Aa1CF0943bA7eD17f1D3e4c7d7EE",
+          from: socketOwner,
         },
       },
     });
