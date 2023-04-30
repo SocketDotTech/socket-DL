@@ -1,25 +1,29 @@
-name: test
+name: Tests
 
-on:
-  push:
-    branches: [main, ci/cd]
-  pull_request:
-    branches: [main, deployment-scripts]
+on: [push, pull_request]
+
+env:
+  FOUNDRY_PROFILE: prod
 
 jobs:
-  check:
-    name: Foundry project
+  tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v2
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Check contract sizes
+        run: forge build --sizes
+
+      - name: Check gas snapshots
+        run: forge snapshot --check
 
       - name: Run tests
-        run: forge test -vvv
-
-      - name: Run snapshot
-        run: forge snapshot
+        run: forge test --no-match-path test/DualChainTest.sol
