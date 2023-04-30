@@ -4,8 +4,17 @@ pragma solidity 0.8.7;
 import "./ITransmitManager.sol";
 import "./IExecutionManager.sol";
 
+/**
+ * @title ISocket
+ * @notice An interface for a cross-chain communication contract
+ * @dev This interface provides methods for transmitting and executing messages between chains,
+ * connecting a plug to a remote chain and setting up switchboards for the message transmission
+ * This interface also emits events for important operations such as message transmission, execution status,
+ * and plug connection
+ */
 interface ISocket {
     /**
+     * @notice A struct containing fees required for message transmission and execution
      * @param transmissionFees fees needed for transmission
      * @param switchboardFees fees needed by switchboard
      * @param executionFee fees needed for execution

@@ -278,6 +278,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         FeesHelper.withdrawFees(account_);
     }
 
+    /**
+     * @notice Rescues funds from a contract that has lost access to them.
+     * @param token_ The address of the token contract.
+     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param amount_ The amount of tokens to be rescued.
+     */
     function rescueFunds(
         address token_,
         address userAddress_,

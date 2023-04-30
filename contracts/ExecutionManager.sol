@@ -31,7 +31,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         isValidExecutor = _hasRole(EXECUTOR_ROLE, executor);
     }
 
-    // these details might be needed for on-chain fee distribution later
+    // this will be an onlySocket function which might be needed for on-chain fee distribution later
     function updateExecutionFees(address, uint256, bytes32) external override {}
 
     function payFees(
@@ -71,6 +71,12 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         FeesHelper.withdrawFees(account_);
     }
 
+    /**
+     * @notice Rescues funds from a contract that has lost access to them.
+     * @param token_ The address of the token contract.
+     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param amount_ The amount of tokens to be rescued.
+     */
     function rescueFunds(
         address token_,
         address userAddress_,

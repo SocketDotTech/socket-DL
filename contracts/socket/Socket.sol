@@ -21,6 +21,12 @@ contract Socket is SocketSrc, SocketDst {
         capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
     }
 
+    /**
+     * @notice Rescues funds from a contract that has lost access to them.
+     * @param token_ The address of the token contract.
+     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param amount_ The amount of tokens to be rescued.
+     */
     function rescueFunds(
         address token_,
         address userAddress_,

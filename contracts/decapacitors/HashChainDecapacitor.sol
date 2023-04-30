@@ -6,16 +6,28 @@ import "../libraries/RescueFundsLib.sol";
 import "../utils/AccessControlExtended.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
+/**
+ * @title HashChainDecapacitor
+ * @notice  This is an experimental contract and have known bugs
+ * @notice A contract that verifies whether a message is part of a hash chain or not.
+ * @dev This contract implements the `IDecapacitor` interface.
+ */
 contract HashChainDecapacitor is IDecapacitor, AccessControlExtended {
     /**
-     * @notice initialises the contract with owner address
+     * @notice Initializes the HashChainDecapacitor contract with the owner's address.
+     * @param owner_ The address of the contract owner.
      */
     constructor(address owner_) AccessControlExtended(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
     }
 
-    /// returns if the packed message is the part of a merkle tree or not
-    /// @inheritdoc IDecapacitor
+    /**
+     * @notice Verifies whether a message is included in the given hash chain.
+     * @param root_ The root of the hash chain.
+     * @param packedMessage_ The packed message whose inclusion in the hash chain needs to be verified.
+     * @param proof_ The proof for the inclusion of the packed message in the hash chain.
+     * @return True if the packed message is included in the hash chain and the provided root is the calculated root; otherwise, false.
+     */
     function verifyMessageInclusion(
         bytes32 root_,
         bytes32 packedMessage_,
@@ -33,6 +45,12 @@ contract HashChainDecapacitor is IDecapacitor, AccessControlExtended {
         return root_ == generatedRoot && isIncluded;
     }
 
+    /**
+     * @notice Rescues funds from a contract that has lost access to them.
+     * @param token_ The address of the token contract.
+     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param amount_ The amount of tokens to be rescued.
+     */
     function rescueFunds(
         address token_,
         address userAddress_,
