@@ -4,6 +4,9 @@ on: [push, pull_request]
 
 env:
   FOUNDRY_PROFILE: prod
+  OPTIMISM_GOERLI_RPC: ${{ secrets.OPTIMISM_GOERLI_RPC }}
+  GOERLI_RPC: ${{ secrets.GOERLI_RPC }}
+  POLYGON_MUMBAI_RPC: ${{ secrets.POLYGON_MUMBAI_RPC }}
 
 jobs:
   tests:
@@ -22,8 +25,6 @@ jobs:
       - name: Check contract sizes
         run: forge build --sizes
 
-      - name: Check gas snapshots
+      - name: Run tests and check gas snapshots
         run: forge snapshot --check
 
-      - name: Run tests
-        run: forge test --no-match-path test/DualChainTest.sol
