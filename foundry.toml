@@ -7,9 +7,8 @@ test = 'test'
 solc_version = '0.8.7'
 optimizer = true
 optimizer_runs = 99999
-via_ir = true
-
 via_ir = false
+
 verbosity = 3
 
 # ignore solc warnings for missing license

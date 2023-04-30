@@ -66,8 +66,6 @@ contract GasPriceOracleTest is Setup {
             sourceGasPrice,
             sig
         );
-
-        vm.stopPrank();
         assert(gasPriceOracle.sourceGasPrice() == sourceGasPrice);
     }
 
@@ -130,7 +128,6 @@ contract GasPriceOracleTest is Setup {
             relativeGasPrice,
             sig
         );
-        vm.stopPrank();
 
         (
             uint256 sourceGasPriceActual,
@@ -161,8 +158,6 @@ contract GasPriceOracleTest is Setup {
             relativeGasPrice,
             sig
         );
-
-        vm.stopPrank();
     }
 
     function testNonTransmitterUpdateSrcGasPrice() public {
@@ -179,16 +174,11 @@ contract GasPriceOracleTest is Setup {
             sourceGasPrice,
             sig
         );
-
-        vm.stopPrank();
     }
 
     function testNonOwnerUpdateTransmitManager() public {
-        vm.startPrank(transmitter);
-
+        hoax(transmitter);
         vm.expectRevert();
         gasPriceOracle.setTransmitManager(transmitManager);
-
-        vm.stopPrank();
     }
 }
