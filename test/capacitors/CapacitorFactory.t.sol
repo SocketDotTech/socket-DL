@@ -17,9 +17,6 @@ contract CapacitorFactoryTest is Setup {
     error NoPermit(bytes32 role);
 
     function setUp() external {
-        uint256 fork = vm.createFork(vm.envString("ETHEREUM_RPC"), 16333752);
-        vm.selectFork(fork);
-
         _cf = new CapacitorFactory(_owner);
         _token = new ERC20PresetFixedSupply("TEST", "T", tokenSupply, _owner);
     }
@@ -28,30 +25,28 @@ contract CapacitorFactoryTest is Setup {
         (ICapacitor singleCapacitor, IDecapacitor singleDecapacitor) = _cf
             .deploy(1, siblingChainSlug, DEFAULT_BATCH_LENGTH);
 
-        // TODO
-        // assertEq(
-        //     address(singleCapacitor),
-        //     0x582e4a5B8F0c154922e086061cC6Dd07F056EAC1
-        // );
-        // assertEq(
-        //     address(singleDecapacitor),
-        //     0x0636b2c3241e32Be3dD768C063D278d9ba7bbcB1
-        // );
+        assertEq(
+            address(singleCapacitor),
+            0x104fBc016F4bb334D775a19E8A6510109AC63E00
+        );
+        assertEq(
+            address(singleDecapacitor),
+            0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3
+        );
     }
 
     function testDeployHashChainCapacitor() external {
         (ICapacitor singleCapacitor, IDecapacitor singleDecapacitor) = _cf
             .deploy(2, siblingChainSlug, DEFAULT_BATCH_LENGTH);
 
-        // TODO
-        // assertEq(
-        //     address(singleCapacitor),
-        //     0x582e4a5B8F0c154922e086061cC6Dd07F056EAC1
-        // );
-        // assertEq(
-        //     address(singleDecapacitor),
-        //     0x0636b2c3241e32Be3dD768C063D278d9ba7bbcB1
-        // );
+        assertEq(
+            address(singleCapacitor),
+            0x104fBc016F4bb334D775a19E8A6510109AC63E00
+        );
+        assertEq(
+            address(singleDecapacitor),
+            0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3
+        );
     }
 
     function testDeploy(uint256 capacitorType) external {
