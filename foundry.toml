@@ -7,9 +7,8 @@ test = 'test'
 solc_version = '0.8.7'
 optimizer = true
 optimizer_runs = 99999
-via_ir = true
-
 via_ir = false
+
 verbosity = 3
 
 # ignore solc warnings for missing license
@@ -21,7 +20,7 @@ path_pattern = 'test/Socket.t.sol'
 [profile.prod]
 optimizer = true
 optimizer_runs = 200
-via_ir = true
+via_ir = false
 
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config
