@@ -9,10 +9,20 @@ import "./libraries/SignatureVerifierLib.sol";
 import "./libraries/FeesHelper.sol";
 import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE} from "./utils/AccessRoles.sol";
 
+/**
+ * @title ExecutionManager
+ * @dev Implementation of the IExecutionManager interface, providing functions for executing cross-chain transactions and managing fees.
+ * This contract also implements the AccessControlExtended interface, allowing for role-based access control.
+ */
 contract ExecutionManager is IExecutionManager, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
     event GasPriceOracleSet(address gasPriceOracle);
 
+    /**
+     * @dev Constructor for ExecutionManager contract
+     * @param gasPriceOracle_ Address of the Gas Price Oracle contract
+     * @param owner_ Address of the contract owner
+     */
     constructor(
         IGasPriceOracle gasPriceOracle_,
         address owner_
@@ -20,6 +30,13 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
     }
 
+    /**
+     * @notice Checks whether the provided signer address is an executor for the given packed message and signature
+     * @param packedMessage Packed message to be executed
+     * @param sig Signature of the message
+     * @return executor Address of the executor
+     * @return isValidExecutor Boolean value indicating whether the executor is valid or not
+     */
     function isExecutor(
         bytes32 packedMessage,
         bytes memory sig
@@ -31,14 +48,27 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         isValidExecutor = _hasRole(EXECUTOR_ROLE, executor);
     }
 
-    // this will be an onlySocket function which might be needed for on-chain fee distribution later
+    /**
+     * @dev Function to be used for on-chain fee distribution later
+     */
     function updateExecutionFees(address, uint256, bytes32) external override {}
 
+    /**
+     * @notice Function for paying fees for cross-chain transaction execution
+     * @param msgGasLimit_ Gas limit for the transaction
+     * @param siblingChainSlug_ Sibling chain identifier
+     */
     function payFees(
         uint256 msgGasLimit_,
         uint32 siblingChainSlug_
     ) external payable override {}
 
+    /**
+     * @notice Function for getting the minimum fees required for executing a cross-chain transaction
+     * @param msgGasLimit_ Gas limit for the transaction
+     * @param siblingChainSlug_ Sibling chain identifier
+     * @return Minimum fees required for executing the transaction
+     */
     function getMinFees(
         uint256 msgGasLimit_,
         uint32 siblingChainSlug_
@@ -46,6 +76,12 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         return _getMinExecutionFees(msgGasLimit_, siblingChainSlug_);
     }
 
+    /**
+     * @dev Function for getting the minimum fees required for executing a cross-chain transaction
+     * @param msgGasLimit_ Gas limit for the transaction
+     * @param dstChainSlug_ Destination chain identifier
+     * @return Minimum fees required for executing the transaction
+     */
     function _getMinExecutionFees(
         uint256 msgGasLimit_,
         uint32 dstChainSlug_
@@ -67,6 +103,10 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         emit GasPriceOracleSet(gasPriceOracle_);
     }
 
+    /**
+     * @notice withdraws fees from contract
+     * @param account_ withdraw fees to
+     */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         FeesHelper.withdrawFees(account_);
     }

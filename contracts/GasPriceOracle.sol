@@ -7,31 +7,73 @@ import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import {GOVERNANCE_ROLE, RESCUE_ROLE} from "./utils/AccessRoles.sol";
 
+/**
+ * @title GasPriceOracle
+ * @notice A contract to maintain and update gas prices across multiple chains.
+ * It implements the IGasPriceOracle interface and uses AccessControlExtended to define roles and access permissions.
+ * It also imports other contracts and libraries, including ITransmitManager for transmitting transactions across chains,
+ * and RescueFundsLib for rescuing funds from contracts that have lost access to them.
+ */
 contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
+    /**
+     * @notice The ITransmitManager contract instance that is used to transmit transactions across chains.
+     */
     ITransmitManager public transmitManager__;
-
-    // plugs/switchboards/transmitter can use it to ensure prices are updated
+    /**
+     * @notice A mapping that stores the timestamp of the last update for each chain.
+     */
     mapping(uint256 => uint256) public updatedAt;
-    // chain slug => relative gas price
+    /**
+     * @notice A mapping that stores the relative gas price of each chain.
+     */
     mapping(uint32 => uint256) public override relativeGasPrice;
-
-    // transmitter => nextNonce
+    /**
+     * @notice A mapping that stores the next nonce of each transmitter.
+     */
     mapping(address => uint256) public nextNonce;
-
-    // gas price of source chain
+    /**
+     * @notice The gas price of the source chain.
+     */
     uint256 public override sourceGasPrice;
+    /**
+     * @notice The chain slug of the contract.
+     */
     uint32 public immutable chainSlug;
 
+    /**
+     * @notice An event that is emitted when the transmitManager is updated.
+     * @param transmitManager The address of the new transmitManager.
+     */
     event TransmitManagerUpdated(address transmitManager);
+    /**
+     * @notice An event that is emitted when the relative gas price of a chain is updated.
+     * @param dstChainSlug The chain slug of the destination chain.
+     * @param relativeGasPrice The new relative gas price of the destination chain.
+     */
     event RelativeGasPriceUpdated(
         uint256 dstChainSlug,
         uint256 relativeGasPrice
     );
+    /**
+     * @notice An event that is emitted when the source gas price is updated.
+     * @param sourceGasPrice The new source gas price.
+     */
     event SourceGasPriceUpdated(uint256 sourceGasPrice);
 
+    /**
+     * @dev An error that is thrown when a transmitter is not found.
+     */
     error TransmitterNotFound();
+    /**
+     * @dev An error that is thrown when an invalid nonce is provided.
+     */
     error InvalidNonce();
 
+    /**
+     * @dev Constructs a new GasPriceOracle contract instance.
+     * @param owner_ The address of the owner of the contract.
+     * @param chainSlug_ The chain slug of the contract.
+     */
     constructor(
         address owner_,
         uint32 chainSlug_
@@ -102,12 +144,20 @@ contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
         emit RelativeGasPriceUpdated(siblingChainSlug_, relativeGasPrice_);
     }
 
+    /**
+     * @notice Returns the gas prices for a destination chain.
+     * @param siblingChainSlug_ The identifier of the destination chain.
+     */
     function getGasPrices(
         uint32 siblingChainSlug_
     ) external view override returns (uint256, uint256) {
         return (sourceGasPrice, relativeGasPrice[siblingChainSlug_]);
     }
 
+    /**
+     * @notice updates transmitManager_
+     * @param transmitManager_ address of Transmit Manager
+     */
     function setTransmitManager(
         ITransmitManager transmitManager_
     ) external onlyRole(GOVERNANCE_ROLE) {

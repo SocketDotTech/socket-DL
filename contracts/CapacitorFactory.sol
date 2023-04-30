@@ -11,14 +11,27 @@ import "./libraries/RescueFundsLib.sol";
 import "./utils/AccessControlExtended.sol";
 import {RESCUE_ROLE} from "./utils/AccessRoles.sol";
 
+/**
+ * @title CapacitorFactory
+ * @notice Factory contract for creating capacitor and decapacitor pairs of different types.
+ * @dev The capacitorType_ parameter determines the type of capacitor and decapacitor to deploy.
+ */
 contract CapacitorFactory is ICapacitorFactory, AccessControlExtended {
     uint256 private constant SINGLE_CAPACITOR = 1;
     uint256 private constant HASH_CHAIN_CAPACITOR = 2;
 
+    /**
+     * @notice initialises owner and grants RESCUE_ROLE to owner.
+     * @param owner_ The address of the owner of the contract.
+     */
     constructor(address owner_) AccessControlExtended(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
     }
 
+    /**
+     * @notice Creates a new capacitor and decapacitor pair based on the given type.
+     * @param capacitorType_ The type of capacitor to be created. Can be SINGLE_CAPACITOR or HASH_CHAIN_CAPACITOR.
+     */
     function deploy(
         uint256 capacitorType_,
         uint256 /** siblingChainSlug */,
