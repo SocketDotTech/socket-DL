@@ -22,6 +22,8 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
     uint32 public immutable chainSlug;
     uint256 public sealGasLimit;
+
+    // chain slug => propose gas limit
     mapping(uint256 => uint256) public proposeGasLimit;
 
     // transmitter => nextNonce

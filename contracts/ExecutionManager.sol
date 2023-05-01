@@ -66,6 +66,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
     /**
      * @notice Function for getting the minimum fees required for executing a cross-chain transaction
+     * @dev This function is called at source to calculate the execution cost.
      * @param msgGasLimit_ Gas limit for the transaction
      * @param siblingChainSlug_ Sibling chain identifier
      * @return Minimum fees required for executing the transaction
