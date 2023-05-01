@@ -3,6 +3,12 @@ pragma solidity 0.8.7;
 
 import "./Ownable.sol";
 
+/**
+ * @title AccessControl
+ * @dev This abstract contract implements access control mechanism based on roles.
+ * Each role can have one or more addresses associated with it, which are granted
+ * permission to execute functions with the onlyRole modifier.
+ */
 abstract contract AccessControl is Ownable {
     // role => address => permit
     mapping(bytes32 => mapping(address => bool)) private _permits;
