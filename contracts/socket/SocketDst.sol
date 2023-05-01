@@ -6,17 +6,48 @@ import "../interfaces/IPlug.sol";
 
 import "./SocketBase.sol";
 
+/**
+ * @title SocketDst
+ * @dev SocketDst is an abstract contract that inherits from SocketBase and
+ * provides additional functionality for message execution, packet proposal, and verification.
+ * It manages the mapping of message execution status, packet ID roots, and root proposed
+ * timestamps. It emits events for packet proposal and root updates.
+ * It also includes functions for message execution and verification, as well as a function
+ * to check if a packet has been proposed.
+ */
 abstract contract SocketDst is SocketBase {
+    /*
+     * @dev Error emitted when a message has already been attested
+     */
     error AlreadyAttested();
+    /**
+     * @dev Error emitted when proof is invalid
+     */
     error InvalidProof();
+    /**
+     * @dev Error emitted when a retry is invalid
+     */
     error InvalidRetry();
+    /**
+     * @dev Error emitted when a message has already been executed
+     */
     error MessageAlreadyExecuted();
+    /**
+     * @dev Error emitted when the attester is not valid
+     */
     error NotExecutor();
+    /**
+     * @dev Error emitted when verification fails
+     */
     error VerificationFailed();
 
-    // msgId => message status
+    /**
+     * @dev msgId => message status mapping
+     */
     mapping(bytes32 => bool) public messageExecuted;
-    // capacitorAddr|chainSlug|packetId
+    /**
+     * @dev capacitorAddr|chainSlug|packetId mapping to packetIdRoots
+     */
     mapping(bytes32 => bytes32) public override packetIdRoots;
     mapping(bytes32 => uint256) public rootProposedAt;
 
@@ -40,6 +71,12 @@ abstract contract SocketDst is SocketBase {
      */
     event PacketRootUpdated(bytes32 packetId, bytes32 oldRoot, bytes32 newRoot);
 
+    /**
+     * @dev Function to propose a packet
+     * @param packetId_ Packet ID
+     * @param root_ Packet root
+     * @param signature_ Signature
+     */
     function propose(
         bytes32 packetId_,
         bytes32 root_,
@@ -172,10 +209,20 @@ abstract contract SocketDst is SocketBase {
         }
     }
 
+    /**
+     * @dev Checks whether the specified packet has been proposed.
+     * @param packetId_ The ID of the packet to check.
+     * @return A boolean indicating whether the packet has been proposed or not.
+     */
     function isPacketProposed(bytes32 packetId_) external view returns (bool) {
         return packetIdRoots[packetId_] == bytes32(0) ? false : true;
     }
 
+    /**
+     * @dev Decodes the chain ID from a given packet ID.
+     * @param id_ The ID of the packet to decode the chain ID from.
+     * @return chainSlug_ The chain ID decoded from the packet ID.
+     */
     function _decodeSlug(
         bytes32 id_
     ) internal pure returns (uint256 chainSlug_) {

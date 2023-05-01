@@ -406,6 +406,12 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
               ];
 
             if (!requiredChainRoles?.length) return;
+            if (
+              contractName == CORE_CONTRACTS.TransmitManager &&
+              filterRoles.includes(ROLES.TRANSMITTER_ROLE)
+            ) {
+              siblingSlugs.push(chainId);
+            }
             await Promise.all(
               siblingSlugs.map(async (siblingSlug) => {
                 if (
@@ -554,7 +560,16 @@ const main = async () => {
   // // Grant roles to transmitterAddress on TransmitManager
   await checkAndUpdateRoles({
     userAddress: transmitterAddress,
-    filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE, ROLES.TRANSMITTER_ROLE],
+    filterRoles: [ROLES.TRANSMITTER_ROLE],
+    filterContracts: [CORE_CONTRACTS.TransmitManager],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE],
     filterContracts: [CORE_CONTRACTS.TransmitManager],
     filterChains,
     sendTransaction,

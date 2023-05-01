@@ -1,6 +1,10 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
+/**
+ * @title IPlug
+ * @notice Interface for a plug contract that executes the message received from a source chain.
+ */
 interface IPlug {
     /**
      * @notice executes the message received from source chain

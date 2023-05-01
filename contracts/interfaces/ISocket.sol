@@ -1,11 +1,20 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
 import "./ITransmitManager.sol";
 import "./IExecutionManager.sol";
 
+/**
+ * @title ISocket
+ * @notice An interface for a cross-chain communication contract
+ * @dev This interface provides methods for transmitting and executing messages between chains,
+ * connecting a plug to a remote chain and setting up switchboards for the message transmission
+ * This interface also emits events for important operations such as message transmission, execution status,
+ * and plug connection
+ */
 interface ISocket {
     /**
+     * @notice A struct containing fees required for message transmission and execution
      * @param transmissionFees fees needed for transmission
      * @param switchboardFees fees needed by switchboard
      * @param executionFee fees needed for execution
@@ -14,6 +23,23 @@ interface ISocket {
         uint256 transmissionFees;
         uint256 switchboardFees;
         uint256 executionFee;
+    }
+
+    /**
+     * @title MessageDetails
+     * @dev This struct defines the details of a message to be executed in a Decapacitor contract.
+     */
+    struct MessageDetails {
+        // A unique identifier for the message.
+        bytes32 msgId;
+        // The fee to be paid for executing the message.
+        uint256 executionFee;
+        // The maximum amount of gas that can be used to execute the message.
+        uint256 msgGasLimit;
+        // The payload data to be executed in the message.
+        bytes payload;
+        // The proof data required by the Decapacitor contract to verify the message's authenticity.
+        bytes decapacitorProof;
     }
 
     /**
@@ -96,14 +122,6 @@ interface ISocket {
         bytes calldata payload_
     ) external payable returns (bytes32 msgId);
 
-    struct MessageDetails {
-        bytes32 msgId;
-        uint256 executionFee;
-        uint256 msgGasLimit;
-        bytes payload;
-        bytes decapacitorProof;
-    }
-
     /**
      * @notice executes a message
      * @param packetId packet id
@@ -155,6 +173,13 @@ interface ISocket {
         address outboundSwitchboard_
     ) external;
 
+    /**
+     * @notice Registers a switchboard with a specified address, max packet length, sibling chain slug, and capacitor type.
+     * @param switchBoardAddress_ The address of the switchboard to be registered.
+     * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
+     * @param siblingChainSlug_ The slug of the sibling chain that the switchboard is registered with.
+     * @param capacitorType_ The type of capacitor that the switchboard uses.
+     */
     function registerSwitchBoard(
         address switchBoardAddress_,
         uint256 maxPacketLength_,
@@ -162,8 +187,20 @@ interface ISocket {
         uint32 capacitorType_
     ) external;
 
+    /**
+     * @notice Retrieves the packet id roots for a specified packet id.
+     * @param packetId_ The packet id for which to retrieve the packet id roots.
+     * @return The packet id roots for the specified packet id.
+     */
     function packetIdRoots(bytes32 packetId_) external view returns (bytes32);
 
+    /**
+     * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
+     * @param msgGasLimit_ The gas limit of the message.
+     * @param remoteChainSlug_ The slug of the destination chain for the message.
+     * @param plug_ The address of the plug through which the message is sent.
+     * @return totalFees The minimum fees required for the specified message.
+     */
     function getMinFees(
         uint256 msgGasLimit_,
         uint32 remoteChainSlug_,

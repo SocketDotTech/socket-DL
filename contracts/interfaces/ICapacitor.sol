@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
+/**
+ * @title ICapacitor
+ * @dev Interface for a Capacitor contract that stores and manages messages in packets
+ */
 interface ICapacitor {
     /**
-     * @notice emits the message details when it arrives
+     * @notice emitted when a new message is added to a packet
      * @param packedMessage the message packed with payload, fees and config
      * @param packetCount an incremental id assigned to each new packet
      * @param newRootHash the packed message hash (to be replaced with the root hash of the merkle tree)
@@ -43,6 +47,7 @@ interface ICapacitor {
      * @notice seals the packet
      * @dev also indicates the packet is ready to be shipped and no more messages can be added now.
      * @dev this should be executable by socket only
+     * @param batchSize_ later to be used with packet batching capacitors
      * @return root root hash of the packet
      * @return packetCount id of the packed sealed
      */

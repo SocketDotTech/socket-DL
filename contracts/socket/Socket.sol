@@ -6,7 +6,21 @@ import "./SocketDst.sol";
 import "../libraries/RescueFundsLib.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
+/**
+ * @title Socket
+ * @notice A contract that acts as both a source and destination of cross-chain transactions.
+ * @dev This contract inherits from SocketSrc and SocketDst
+ */
 contract Socket is SocketSrc, SocketDst {
+    /*
+     * @notice constructor for creating a new Socket contract instance.
+     * @param chainSlug_ The unique identifier of the chain this socket belongs to.
+     * @param hasher_ The address of the Hasher contract used to hash the messages before transmitting them.
+     * @param transmitManager_ The address of the TransmitManager contract responsible for transmitting messages.
+     * @param executionManager_ The address of the ExecutionManager contract responsible for executing transactions.
+     * @param capacitorFactory_ The address of the CapacitorFactory contract used to create new Capacitor contracts.
+     * @param owner_ The address of the owner who has the initial admin role.
+     */
     constructor(
         uint32 chainSlug_,
         address hasher_,
@@ -21,6 +35,12 @@ contract Socket is SocketSrc, SocketDst {
         capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
     }
 
+    /**
+     * @notice Rescues funds from a contract that has lost access to them.
+     * @param token_ The address of the token contract.
+     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param amount_ The amount of tokens to be rescued.
+     */
     function rescueFunds(
         address token_,
         address userAddress_,
