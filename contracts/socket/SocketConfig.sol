@@ -32,7 +32,7 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
     // Capacitor factory contract
     ICapacitorFactory public capacitorFactory__;
 
-    // siblingChainSlug => capacitor address
+    // capacitor address => siblingChainSlug
     mapping(address => uint32) public capacitorToSlug;
 
     // switchboard => siblingChainSlug => ICapacitor

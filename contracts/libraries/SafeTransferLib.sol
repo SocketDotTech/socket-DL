@@ -7,6 +7,7 @@ import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/utils/SafeTransferLib.sol)
 /// @dev Use with caution! Some functions in this library knowingly create dirty bits at the destination of the free memory pointer.
 /// @dev Note that none of the functions in this library check that a token has code at all! That responsibility is delegated to the caller.
+/// @dev Note This contract is only used in RescueFunds library for now.
 library SafeTransferLib {
     function safeTransfer(
         IERC20 token_,

@@ -8,10 +8,11 @@ import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
 /**
  * @title BaseCapacitor
- * @dev Abstract base contract for the Capacitors. Implements shared functionality and provides access control.
+ * @dev Abstract base contract for the Capacitors. Implements shared functionality and provides
+ * access control.
  */
 abstract contract BaseCapacitor is ICapacitor, AccessControlExtended {
-    /// an incrementing id for each new packet created
+    /// an incrementing count for each new packet created
     uint64 internal _nextPacketCount;
 
     /// tracks the last packet sealed
@@ -19,7 +20,7 @@ abstract contract BaseCapacitor is ICapacitor, AccessControlExtended {
 
     address public immutable socket;
 
-    /// maps the packet id with the root hash generated while adding message
+    /// maps the packet count with the root hash generated while adding message
     mapping(uint64 => bytes32) internal _roots;
 
     error NoPendingPacket();
@@ -45,6 +46,7 @@ abstract contract BaseCapacitor is ICapacitor, AccessControlExtended {
 
     /**
      * @dev Seals the next pending packet and returns its root hash and packet count.
+     * @dev we use seal packet count to make sure there is no scope of censorship and all the packets get sealed.
      * @return The root hash and packet count of the sealed packet.
      */
     function sealPacket(
@@ -74,13 +76,13 @@ abstract contract BaseCapacitor is ICapacitor, AccessControlExtended {
 
     /**
      * @dev Returns the root hash of the packet with the specified count.
-     * @param id_ The count of the packet.
+     * @param count_ The count of the packet.
      * @return The root hash of the packet.
      */
     function getRootByCount(
-        uint64 id_
+        uint64 count_
     ) external view virtual override returns (bytes32) {
-        return _roots[id_];
+        return _roots[count_];
     }
 
     /**

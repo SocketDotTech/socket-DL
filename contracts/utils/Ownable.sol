@@ -17,7 +17,7 @@ abstract contract Ownable {
     error OnlyNominee();
 
     /**
-     * @dev Sets the contract's owner to the address that deploys the contract.
+     * @dev Sets the contract's owner to the address that is passed to the constructor.
      */
     constructor(address owner_) {
         _claimOwner(owner_);
@@ -75,5 +75,6 @@ abstract contract Ownable {
     function _claimOwner(address claimer_) internal {
         _owner = claimer_;
         _nominee = address(0);
+        emit OwnerClaimed(claimer_);
     }
 }

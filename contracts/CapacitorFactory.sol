@@ -30,6 +30,8 @@ contract CapacitorFactory is ICapacitorFactory, AccessControlExtended {
 
     /**
      * @notice Creates a new capacitor and decapacitor pair based on the given type.
+     * @dev maxPacketLength is not being used with single capacitor system, will be useful later with batching
+     * @dev siblingChainSlug sibling chain slug can be used for chain specific capacitors
      * @param capacitorType_ The type of capacitor to be created. Can be SINGLE_CAPACITOR or HASH_CHAIN_CAPACITOR.
      */
     function deploy(
