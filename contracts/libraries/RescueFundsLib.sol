@@ -5,7 +5,7 @@ import "./SafeTransferLib.sol";
 
 /**
  * @title RescueFundsLib
- * @dev A library that provides a function to rescue funds from a contract that has lost access to them.
+ * @dev A library that provides a function to rescue funds from a contract.
  */
 library RescueFundsLib {
     using SafeTransferLib for IERC20;
@@ -17,9 +17,9 @@ library RescueFundsLib {
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     /**
-     * @dev Rescues funds from a contract that has lost access to them.
+     * @dev Rescues funds from a contract.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param userAddress_ The address of the user.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(

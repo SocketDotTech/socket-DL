@@ -11,8 +11,9 @@ import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE} from "./util
 
 /**
  * @title ExecutionManager
- * @dev Implementation of the IExecutionManager interface, providing functions for executing cross-chain transactions and managing fees.
- * This contract also implements the AccessControlExtended interface, allowing for role-based access control.
+ * @dev Implementation of the IExecutionManager interface, providing functions for executing cross-chain transactions and
+ * managing execution fees. This contract also implements the AccessControlExtended interface, allowing for role-based
+ * access control.
  */
 contract ExecutionManager is IExecutionManager, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;

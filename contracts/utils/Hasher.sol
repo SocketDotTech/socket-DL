@@ -6,6 +6,8 @@ import "../interfaces/IHasher.sol";
 /**
  * @title Hasher
  * @notice contract for hasher contract that calculates the packed message
+ * @dev This contract is modular component in socket to support different message packing algorithms in case of blockchains
+ * not supporting this type of packing.
  */
 contract Hasher is IHasher {
     /// @inheritdoc IHasher

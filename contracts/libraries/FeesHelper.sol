@@ -4,6 +4,8 @@ pragma solidity 0.8.7;
 /**
  * @title FeesHelper
  * @dev A library for managing fee collection and distribution.
+ * @dev This contract will be further developed to support fee distribution to various
+ * participants of the system
  */
 library FeesHelper {
     error TransferFailed();
@@ -11,7 +13,6 @@ library FeesHelper {
 
     /**
      * @dev Transfers the fees collected to the specified address.
-     * @dev This contract will be further developed to support fee distribution to various participants of the system
      * @notice The caller of this function must have the required funds.
      * @param account_ The address to transfer ETH to.
      */

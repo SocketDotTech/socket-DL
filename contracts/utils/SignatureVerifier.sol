@@ -7,6 +7,7 @@ import "../libraries/SignatureVerifierLib.sol";
 /**
  * @title Signature Verifier
  * @notice Verifies the signatures and returns the address of signer recovered from the input signature or digest.
+ * @dev This contract is modular component in socket to support different signing algorithms.
  */
 contract SignatureVerifier is ISignatureVerifier {
     /// @inheritdoc ISignatureVerifier
