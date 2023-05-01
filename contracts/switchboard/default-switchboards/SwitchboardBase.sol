@@ -30,10 +30,34 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
 
+    /**
+     * @dev Emitted when a path is tripped
+     * @param srcChainSlug Chain slug of the source chain
+     * @param tripSinglePath New trip status of the path
+     */
     event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
+    /**
+     * @dev Emitted when Switchboard contract is tripped globally
+     * @param tripGlobalFuse New trip status of the contract
+     */
     event SwitchboardTripped(bool tripGlobalFuse);
+    /**
+     * @dev Emitted when execution overhead is set for a destination chain
+     * @param dstChainSlug Chain slug of the destination chain
+     * @param executionOverhead New execution overhead
+     */
     event ExecutionOverheadSet(uint256 dstChainSlug, uint256 executionOverhead);
+    /**
+     * @dev Emitted when gas price oracle is set
+     * @param gasPriceOracle New gas price oracle address
+     */
     event GasPriceOracleSet(address gasPriceOracle);
+    /**
+     * @dev Emitted when a capacitor is registered
+     * @param siblingChainSlug Chain slug of the sibling chain
+     * @param capacitor Address of the capacitor
+     * @param maxPacketSize Maximum number of messages in one packet
+     */
     event CapacitorRegistered(
         uint256 siblingChainSlug,
         address capacitor,
@@ -44,6 +68,13 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     error InvalidNonce();
     error OnlySocket();
 
+    /**
+     * @dev Constructor of SwitchboardBase
+     * @param gasPriceOracle_ Address of the gas price oracle
+     * @param socket_ Address of the socket contract
+     * @param chainSlug_ Chain slug of the contract
+     * @param timeoutInSeconds_ Timeout duration of the transactions
+     */
     constructor(
         address gasPriceOracle_,
         address socket_,
@@ -56,8 +87,14 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         timeoutInSeconds = timeoutInSeconds_;
     }
 
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function payFees(uint32 dstChainSlug_) external payable override {}
 
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function getMinFees(
         uint32 dstChainSlug_
     ) external view override returns (uint256, uint256) {
