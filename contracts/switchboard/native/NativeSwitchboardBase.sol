@@ -157,7 +157,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     error InvalidNonce();
 
     /**
-     * @dev Error thrown when a function can only be called by the remote switchboard.
+     * @dev Error thrown when a function can only be called by the Socket.
      */
     error OnlySocket();
 
