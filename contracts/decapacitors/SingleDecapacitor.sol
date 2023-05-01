@@ -6,16 +6,27 @@ import "../libraries/RescueFundsLib.sol";
 import "../utils/AccessControlExtended.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
+/**
+ * @title SingleDecapacitor
+ * @notice A decapacitor that verifies messages by checking if the packed message is equal to the root.
+ * @dev This contract inherits from the `IDecapacitor` interface, which
+ * defines the functions for verifying message inclusion.
+ */
 contract SingleDecapacitor is IDecapacitor, AccessControlExtended {
     /**
-     * @notice initialises the contract with owner address
+     * @notice Initializes the SingleDecapacitor contract with an owner address.
+     * @param owner_ The address of the contract owner
      */
     constructor(address owner_) AccessControlExtended(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
     }
 
-    /// returns if the packed message is the part of a merkle tree or not
-    /// @inheritdoc IDecapacitor
+    /**
+     * @notice Returns true if the packed message is equal to the root, indicating that it is part of the packet.
+     * @param root_ The packet root
+     * @param packedMessage_ The packed message to be verified
+     * @return A boolean indicating whether the message is included in the packet or not.
+     */
     function verifyMessageInclusion(
         bytes32 root_,
         bytes32 packedMessage_,
@@ -24,6 +35,12 @@ contract SingleDecapacitor is IDecapacitor, AccessControlExtended {
         return root_ == packedMessage_;
     }
 
+    /**
+     * @notice Rescues funds from a contract that has lost access to them.
+     * @param token_ The address of the token contract.
+     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param amount_ The amount of tokens to be rescued.
+     */
     function rescueFunds(
         address token_,
         address userAddress_,

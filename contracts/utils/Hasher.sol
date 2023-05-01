@@ -3,6 +3,10 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IHasher.sol";
 
+/**
+ * @title Hasher
+ * @notice contract for hasher contract that calculates the packed message
+ */
 contract Hasher is IHasher {
     /// @inheritdoc IHasher
     function packMessage(

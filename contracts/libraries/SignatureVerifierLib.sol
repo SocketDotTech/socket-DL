@@ -1,9 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
+/**
+ * @title SignatureVerifierLib
+ * @notice A library for verifying signatures and recovering the signer's address from a message digest.
+ * @dev This library provides functions for recovering the signer's address from a message digest, splitting a signature into its v, r, and s components, and verifying that the signature is valid. The message digest is created by hashing the concatenation of the destination chain slug, packet ID, and packet data root. The signature must be a 65-byte array, containing the v, r, and s components.
+ */
 library SignatureVerifierLib {
+    /*
+     * @dev Error thrown when signature length is invalid
+     */
     error InvalidSigLength();
 
+    /**
+     * @notice recovers the signer's address from a message digest and signature
+     * @param destChainSlug_ The destination chain slug of the packet
+     * @param packetId_ The ID of the packet
+     * @param root_ The root hash of the packet data
+     * @param signature_ The signature to be verified
+     * @return signer The address of the signer
+     */
     function recoverSigner(
         uint256 destChainSlug_,
         uint256 packetId_,
@@ -18,6 +34,9 @@ library SignatureVerifierLib {
 
     /**
      * @notice returns the address of signer recovered from input signature and digest
+     * @param digest_ The message digest to be signed
+     * @param signature_ The signature to be verified
+     * @return signer The address of the signer
      */
     function recoverSignerFromDigest(
         bytes32 digest_,
@@ -34,6 +53,10 @@ library SignatureVerifierLib {
 
     /**
      * @notice splits the signature into v, r and s.
+     * @param signature_ The signature to be split
+     * @return r The r component of the signature
+     * @return s The s component of the signature
+     * @return v The v component of the signature
      */
     function _splitSignature(
         bytes memory signature_

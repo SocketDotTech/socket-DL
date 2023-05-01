@@ -4,6 +4,10 @@ pragma solidity 0.8.7;
 import "../interfaces/ICapacitor.sol";
 import "./SocketBase.sol";
 
+/**
+ * @title SocketSrc
+ * @dev The SocketSrc contract inherits from SocketBase and provides the functionality to send messages from the local chain to a remote chain via a Capacitor.
+ */
 abstract contract SocketSrc is SocketBase {
     error InsufficientFees();
 
@@ -70,6 +74,13 @@ abstract contract SocketSrc is SocketBase {
         );
     }
 
+    /**
+     * @dev Deducts the fees needed for message transmission and execution
+     * @param msgGasLimit_ The gas limit needed to execute the payload on the remote chain
+     * @param remoteChainSlug_ The slug of the remote chain
+     * @param switchboard__ The address of the switchboard contract
+     * @return fees The fees object
+     */
     function _deductFees(
         uint256 msgGasLimit_,
         uint32 remoteChainSlug_,
@@ -107,6 +118,13 @@ abstract contract SocketSrc is SocketBase {
         }
     }
 
+    /**
+     * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
+     * @param msgGasLimit_ The gas limit of the message.
+     * @param remoteChainSlug_ The slug of the destination chain for the message.
+     * @param plug_ The address of the plug through which the message is sent.
+     * @return totalFees The minimum fees required for the specified message.
+     */
     function getMinFees(
         uint256 msgGasLimit_,
         uint32 remoteChainSlug_,
@@ -154,6 +172,12 @@ abstract contract SocketSrc is SocketBase {
         executionFee = msgExecutionFee + verificationFee;
     }
 
+    /**
+     * @notice seals data in capacitor for specific batchSizr
+     * @param batchSize_ size of batch to be sealed
+     * @param capacitorAddress_ address of capacitor
+     * @param signature_ signed Data needed for verification
+     */
     function seal(
         uint256 batchSize_,
         address capacitorAddress_,

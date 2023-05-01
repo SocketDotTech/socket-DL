@@ -10,29 +10,64 @@ import {ITransmitManager} from "../interfaces/ITransmitManager.sol";
 import {FastSwitchboard} from "../switchboard/default-switchboards/FastSwitchboard.sol";
 import {INativeRelay} from "../interfaces/INativeRelay.sol";
 
+/**
+ * @title SocketBatcher
+ * @notice A contract that facilitates the batching of packets across chains. It manages requests for sealing, proposing, attesting, and executing packets across multiple chains.
+ * It also has functions for setting gas limits, execution overhead, and registering switchboards.
+ * @dev This contract uses the AccessControlExtended contract for managing role-based access control.
+ */
 contract SocketBatcher is AccessControlExtended {
+    /*
+     * @notice Constructs the SocketBatcher contract and grants the RESCUE_ROLE to the contract deployer.
+     * @param owner_ The address of the contract deployer, who will be granted the RESCUE_ROLE.
+     */
     constructor(address owner_) AccessControlExtended(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
     }
 
+    /**
+     * @notice A struct representing a request to seal a batch of packets on the source chain.
+     * @param batchSize The number of packets to be sealed in the batch.
+     * @param capacitorAddress The address of the capacitor contract on the source chain.
+     * @param signature The signature of the packet data.
+     */
     struct SealRequest {
         uint256 batchSize;
         address capacitorAddress;
         bytes signature;
     }
 
+    /**
+     * @notice A struct representing a proposal request for a packet.
+     * @param packetId The ID of the packet being proposed.
+     * @param root The Merkle root of the packet data.
+     * @param signature The signature of the packet data.
+     */
     struct ProposeRequest {
         bytes32 packetId;
         bytes32 root;
         bytes signature;
     }
 
+    /**
+     * @notice A struct representing an attestation request for a packet.
+     * @param packetId The ID of the packet being attested.
+     * @param srcChainSlug The slug of the source chain.
+     * @param signature The signature of the packet data.
+     */
     struct AttestRequest {
         bytes32 packetId;
         uint256 srcChainSlug;
         bytes signature;
     }
 
+    /**
+     * @notice A struct representing a request to execute a packet.
+     * @param packetId The ID of the packet to be executed.
+     * @param localPlug The address of the local plug contract.
+     * @param messageDetails The message details of the packet.
+     * @param signature The signature of the packet data.
+     */
     struct ExecuteRequest {
         bytes32 packetId;
         address localPlug;
@@ -40,6 +75,14 @@ contract SocketBatcher is AccessControlExtended {
         bytes signature;
     }
 
+    /**
+     * @notice A struct representing a request to initiate an Arbitrum native transaction.
+     * @param packetId The ID of the packet to be executed.
+     * @param maxSubmissionCost The maximum submission cost of the transaction.
+     * @param maxGas The maximum amount of gas for the transaction.
+     * @param gasPriceBid The gas price bid for the transaction.
+     * @param callValue The call value of the transaction.
+     */
     struct ArbitrumNativeInitiatorRequest {
         bytes32 packetId;
         uint256 maxSubmissionCost;
@@ -48,6 +91,13 @@ contract SocketBatcher is AccessControlExtended {
         uint256 callValue;
     }
 
+    /**
+     * @notice A struct representing a request to set the propose gas limit for a chain.
+     * @param nonce The nonce of the request.
+     * @param dstChainId The ID of the destination chain.
+     * @param proposeGasLimit The propose gas limit.
+     * @param signature The signature of the request.
+     */
     struct SetProposeGasLimitRequest {
         uint256 nonce;
         uint256 dstChainId;
@@ -55,6 +105,13 @@ contract SocketBatcher is AccessControlExtended {
         bytes signature;
     }
 
+    /**
+     * @notice A struct representing a request to set the attest gas limit for a chain.
+     * @param nonce The nonce of the request.
+     * @param dstChainId The ID of the destination chain.
+     * @param attestGasLimit The propose gas limit.
+     * @param signature The signature of the request.
+     */
     struct SetAttestGasLimitRequest {
         uint256 nonce;
         uint256 dstChainId;
@@ -62,6 +119,13 @@ contract SocketBatcher is AccessControlExtended {
         bytes signature;
     }
 
+    /**
+     * @notice A struct representing a request to set the execution overhead for a chain.
+     * @param nonce The nonce of the request.
+     * @param dstChainId The ID of the destination chain.
+     * @param executionOverhead The propose gas limit.
+     * @param signature The signature of the request.
+     */
     struct SetExecutionOverheadRequest {
         uint256 nonce;
         uint256 dstChainId;
@@ -69,6 +133,13 @@ contract SocketBatcher is AccessControlExtended {
         bytes signature;
     }
 
+    /**
+     * @notice A struct representing a request to register switchboard for a chain.
+     * @param switchBoardAddress The switchboard address.
+     * @param maxPacketLength The max packet length
+     * @param siblingChainSlug The sibling chain slug
+     * @param capacitorType The capacitor type
+     */
     struct RegisterSwitchboardRequest {
         address switchBoardAddress;
         uint256 maxPacketLength;
@@ -76,6 +147,10 @@ contract SocketBatcher is AccessControlExtended {
         uint32 capacitorType;
     }
 
+    /**
+     * @notice A struct representing a request to send proof to polygon root
+     * @param proof proof to submit on root tunnel
+     */
     struct ReceivePacketProofRequest {
         bytes proof;
     }
@@ -333,6 +408,12 @@ contract SocketBatcher is AccessControlExtended {
         }
     }
 
+    /**
+     * @notice Rescues funds from a contract that has lost access to them.
+     * @param token_ The address of the token contract.
+     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param amount_ The amount of tokens to be rescued.
+     */
     function rescueFunds(
         address token_,
         address userAddress_,
