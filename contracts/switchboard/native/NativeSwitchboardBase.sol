@@ -240,13 +240,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     function payFees(uint32 dstChainSlug_) external payable override {}
 
-
     /**
-    * @dev Get the minimum fees for a cross-chain transaction.
-    * @param dstChainSlug_ The destination chain's slug.
-    * @return switchboardFee_ The fee charged by the switchboard for the transaction.
-    * @return verificationFee_ The fee charged by the verifier for the transaction.
-    */
+     * @dev Get the minimum fees for a cross-chain transaction.
+     * @param dstChainSlug_ The destination chain's slug.
+     * @return switchboardFee_ The fee charged by the switchboard for the transaction.
+     * @return verificationFee_ The fee charged by the verifier for the transaction.
+     */
     function getMinFees(
         uint32 dstChainSlug_
     )
@@ -284,7 +283,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
 
         verificationFee_ = executionOverhead * dstRelativeGasPrice;
     }
-
 
     function _getMinSwitchboardFees(
         uint256 dstChainSlug_,
@@ -434,7 +432,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         emit GasPriceOracleSet(gasPriceOracle_);
     }
-
 
     /**
     @dev Update the address of the remote native switchboard contract.
