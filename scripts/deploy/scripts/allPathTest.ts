@@ -13,6 +13,7 @@ import { getAddresses, getRelayUrl } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
 import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
 import { chains, mode } from "../config";
+import { parseUnits } from "ethers/lib/utils";
 
 interface RequestObj {
   to: string;
@@ -22,6 +23,29 @@ interface RequestObj {
   gasPrice?: string | BigNumber;
   gasLimit: number | undefined;
 }
+
+const values = {
+  [ChainSlug.ARBITRUM]: {
+    [ChainSlug.OPTIMISM]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.BSC]: parseUnits("0.003", "ether").toHexString(),
+  },
+  [ChainSlug.OPTIMISM]: {
+    [ChainSlug.ARBITRUM]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.BSC]: parseUnits("0.003", "ether").toHexString(),
+  },
+  [ChainSlug.POLYGON_MAINNET]: {
+    [ChainSlug.ARBITRUM]: parseUnits("1", "ether").toHexString(),
+    [ChainSlug.OPTIMISM]: parseUnits("1", "ether").toHexString(),
+    [ChainSlug.BSC]: parseUnits("1", "ether").toHexString(),
+  },
+  [ChainSlug.BSC]: {
+    [ChainSlug.ARBITRUM]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.OPTIMISM]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
+  },
+};
 
 const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
   console.log(chainSlug, isMainnet(chainSlug));
@@ -136,9 +160,9 @@ export const sendMessagesToAllPaths = async (params: {
               [siblingSlug, amount, msgGasLimit]
             );
             let to = counter.address;
-            let value = ethers.utils
-              .parseUnits("3000000", "gwei")
-              .toHexString();
+            let value =
+              values[chainSlug]?.[siblingSlug] ||
+              ethers.utils.parseUnits("3000000", "gwei").toHexString();
             gasLimit =
               chainSlug === ChainSlug.ARBITRUM ||
               chainSlug === ChainSlug.ARBITRUM_GOERLI
