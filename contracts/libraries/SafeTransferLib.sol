@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
