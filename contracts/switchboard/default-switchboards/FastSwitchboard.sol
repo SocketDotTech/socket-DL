@@ -4,7 +4,13 @@ pragma solidity 0.8.7;
 import "./SwitchboardBase.sol";
 import "../../libraries/SignatureVerifierLib.sol";
 
+/**
+ * @title FastSwitchboard contract
+ * @dev This contract implements a fast version of the SwitchboardBase contract
+ * that enables packet attestations and watchers registration.
+ */
 contract FastSwitchboard is SwitchboardBase {
+    // mapping to store if packet is valid
     mapping(bytes32 => bool) public isPacketValid;
 
     // dst chain slug => total watchers registered
@@ -19,14 +25,28 @@ contract FastSwitchboard is SwitchboardBase {
     // packetId => total attestations
     mapping(bytes32 => uint256) public attestations;
 
+    // Event emitted when a new socket is set
     event SocketSet(address newSocket);
+    // Event emitted when a packet is attested
     event PacketAttested(bytes32 packetId, address attester);
+    // Event emitted when the attest gas limit is set
     event AttestGasLimitSet(uint256 dstChainSlug, uint256 attestGasLimit);
 
+    // Error emitted when a watcher is found
     error WatcherFound();
+    // Error emitted when a watcher is not found
     error WatcherNotFound();
+    // Error emitted when a packet is already attested
     error AlreadyAttested();
 
+    /**
+     * @dev Constructor function for the FastSwitchboard contract
+     * @param owner_ Address of the owner of the contract
+     * @param socket_ Address of the socket contract
+     * @param gasPriceOracle_ Address of the gas price oracle contract
+     * @param chainSlug_ Chain slug of the chain where the contract is deployed
+     * @param timeoutInSeconds_ Timeout in seconds for the packets
+     */
     constructor(
         address owner_,
         address socket_,
@@ -38,6 +58,12 @@ contract FastSwitchboard is SwitchboardBase {
         SwitchboardBase(gasPriceOracle_, socket_, chainSlug_, timeoutInSeconds_)
     {}
 
+    /**
+     * @dev Function to attest a packet
+     * @param packetId_ Packet ID
+     * @param srcChainSlug_ Chain slug of the source chain
+     * @param signature_ Signature of the packet
+     */
     function attest(
         bytes32 packetId_,
         uint256 srcChainSlug_,
