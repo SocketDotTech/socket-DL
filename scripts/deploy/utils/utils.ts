@@ -29,11 +29,18 @@ export const getChainRoleHash = (role: string, chainSlug: number) =>
     )
   );
 
+export interface DeployParams {
+  addresses: ChainSocketAddresses;
+  mode: DeploymentMode;
+  signer: SignerWithAddress | Wallet;
+  currentChainSlug: number;
+}
+
 export const getOrDeploy = async (
   contractName: string,
   path: string,
   args: any[],
-  deployUtils
+  deployUtils: DeployParams
 ): Promise<Contract> => {
   let contract: Contract;
   if (!deployUtils.addresses[contractName]) {

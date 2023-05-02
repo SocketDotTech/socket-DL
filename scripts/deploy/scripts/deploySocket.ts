@@ -1,5 +1,5 @@
 import { Contract, Wallet } from "ethers";
-import { getOrDeploy, storeAddresses } from "../utils";
+import { DeployParams, getOrDeploy, storeAddresses } from "../utils";
 
 import { sealGasLimit } from "../../constants/config";
 import {
@@ -28,7 +28,7 @@ export const deploySocket = async (
   currentMode: DeploymentMode,
   deployedAddresses: ChainSocketAddresses
 ): Promise<ReturnObj> => {
-  const deployUtils = {
+  const deployUtils: DeployParams = {
     addresses: deployedAddresses,
     mode: currentMode,
     signer: socketSigner,
