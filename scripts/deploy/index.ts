@@ -1,8 +1,7 @@
 import { ethers } from "hardhat";
 import { Wallet } from "ethers";
-import { deploySocket } from "./scripts/deploySocket";
+import { ReturnObj, deploySocket } from "./scripts/deploySocket";
 import { getProviderFromChainName } from "../constants";
-import { storeVerificationParams } from "./utils";
 import {
   ChainSlug,
   ChainSocketAddresses,
@@ -40,20 +39,15 @@ export const main = async () => {
             ? (addresses[chain] as ChainSocketAddresses)
             : ({} as ChainSocketAddresses);
 
-          const results = await deploySocket(
+          const results: ReturnObj = await deploySocket(
             signer,
             chain,
             mode,
             chainAddresses
           );
 
-          await storeVerificationParams(
-            results.verificationDetails,
-            chain,
-            mode
-          );
           allDeployed = results.allDeployed;
-          addresses[network] = results.addresses;
+          addresses[network] = results.deployedAddresses;
         }
       })
     );
