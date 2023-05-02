@@ -37,7 +37,7 @@ export const main = async () => {
       if (!addresses[chain] || !surgeAddresses[chain]) continue;
 
       const oracleAddress =
-        surgeAddresses[chain]?.[CORE_CONTRACTS.GasPriceOracle];
+        surgeAddresses[chain]?.[CORE_CONTRACTS.GasPriceOracle]!;
       const addr: ChainSocketAddresses = addresses[chain]!;
       const providerInstance = getProviderFromChainName(
         networkToChainSlug[chain]
@@ -78,23 +78,28 @@ export const main = async () => {
         });
       });
 
-      await Promise.all(
-        contracts.map(async (contract: ContractInfo) => {
-          const instance = (
-            await getInstance(contract.contractName, contract.contractAddr)
-          ).connect(socketSigner);
-          if (
-            !surgeAddresses[chain] &&
-            !surgeAddresses[chain]?.[CORE_CONTRACTS.GasPriceOracle]
-          )
-            return;
-
+      for (const contract of contracts) {
+        const instance = (
+          await getInstance(contract.contractName, contract.contractAddr)
+        ).connect(socketSigner);
+        if (
+          !surgeAddresses[chain] &&
+          !surgeAddresses[chain]?.[CORE_CONTRACTS.GasPriceOracle]
+        )
+          return;
+        const existing = await instance.gasPriceOracle__();
+        console.log(
+          `chain ${chain}, contract ${instance.address}, current oracle ${existing}`
+        );
+        if (existing.toLowerCase() !== oracleAddress.toLowerCase()) {
           const tx = await instance.setGasPriceOracle(oracleAddress);
           console.log(
             `Setting gas price oracle for ${contract.contractAddr} at tx hash ${tx.hash}`
           );
-        })
-      );
+          await tx.wait();
+          console.log("tx done");
+        }
+      }
     }
   } catch (error) {
     console.log("Error while sending transaction", error);
