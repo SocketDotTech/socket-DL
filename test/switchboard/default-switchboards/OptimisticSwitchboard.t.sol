@@ -33,7 +33,7 @@ contract OptimisticSwitchboardTest is Setup {
             1
         );
 
-        optimisticSwitchboard.grantRole(
+        optimisticSwitchboard.grantRoleWithSlug(
             "GAS_LIMIT_UPDATER_ROLE",
             remoteChainSlug,
             _socketOwner
@@ -58,13 +58,17 @@ contract OptimisticSwitchboardTest is Setup {
             sig
         );
 
-        optimisticSwitchboard.grantRole(
+        optimisticSwitchboard.grantRoleWithSlug(
             "WATCHER_ROLE",
             remoteChainSlug,
             watcher
         );
-        optimisticSwitchboard.grantRole("WATCHER_ROLE", _a.chainSlug, watcher);
-        optimisticSwitchboard.grantRole(
+        optimisticSwitchboard.grantRoleWithSlug(
+            "WATCHER_ROLE",
+            _a.chainSlug,
+            watcher
+        );
+        optimisticSwitchboard.grantRoleWithSlug(
             "WATCHER_ROLE",
             remoteChainSlug,
             vm.addr(_altWatcherPrivateKey)
@@ -93,7 +97,7 @@ contract OptimisticSwitchboardTest is Setup {
     function testTripPath() external {
         vm.startPrank(_socketOwner);
         uint256 srcChainSlug = _a.chainSlug;
-        optimisticSwitchboard.grantRole(
+        optimisticSwitchboard.grantRoleWithSlug(
             "WATCHER_ROLE",
             srcChainSlug,
             _socketOwner
@@ -125,7 +129,7 @@ contract OptimisticSwitchboardTest is Setup {
         uint256 srcChainSlug = _a.chainSlug;
 
         vm.startPrank(_socketOwner);
-        optimisticSwitchboard.grantRole(
+        optimisticSwitchboard.grantRoleWithSlug(
             "WATCHER_ROLE",
             srcChainSlug,
             _socketOwner
@@ -188,7 +192,7 @@ contract OptimisticSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
 
         uint32 srcChainSlug = _a.chainSlug;
-        optimisticSwitchboard.grantRole(
+        optimisticSwitchboard.grantRoleWithSlug(
             "WATCHER_ROLE",
             srcChainSlug,
             _socketOwner
@@ -219,7 +223,7 @@ contract OptimisticSwitchboardTest is Setup {
 
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.grantRole(
+        optimisticSwitchboard.grantRoleWithSlug(
             "WATCHER_ROLE",
             remoteChainSlug,
             watcher2
@@ -230,7 +234,7 @@ contract OptimisticSwitchboardTest is Setup {
     function testRevokeWatcherRole() external {
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.revokeRole(
+        optimisticSwitchboard.grantRoleWithSlug(
             "WATCHER_ROLE",
             remoteChainSlug,
             vm.addr(_altWatcherPrivateKey)
