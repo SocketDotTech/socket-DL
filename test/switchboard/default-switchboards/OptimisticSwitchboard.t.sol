@@ -76,7 +76,7 @@ contract OptimisticSwitchboardTest is Setup {
     function testTripGlobal() external {
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.grantRole("TRIP_ROLE", _socketOwner);
+        optimisticSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
         bytes32 digest = keccak256(
             abi.encode("TRIP", _a.chainSlug, nonce, true)
@@ -130,7 +130,7 @@ contract OptimisticSwitchboardTest is Setup {
             srcChainSlug,
             _socketOwner
         );
-        optimisticSwitchboard.grantRole("UNTRIP_ROLE", _socketOwner);
+        optimisticSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
         vm.stopPrank();
 
         hoax(_socketOwner);
