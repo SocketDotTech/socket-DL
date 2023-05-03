@@ -74,8 +74,12 @@ contract ExecutionManagerTest is Setup {
         executionManager.grantRole(RESCUE_ROLE, owner);
         executionManager.grantRole(WITHDRAW_ROLE, owner);
 
-        transmitManager.grantRole("TRANSMITTER_ROLE", chainSlug, transmitter);
-        transmitManager.grantRole(
+        transmitManager.grantRoleWithSlug(
+            "TRANSMITTER_ROLE",
+            chainSlug,
+            transmitter
+        );
+        transmitManager.grantRoleWithSlug(
             "TRANSMITTER_ROLE",
             destChainSlug,
             transmitter
@@ -84,10 +88,14 @@ contract ExecutionManagerTest is Setup {
         vm.stopPrank();
 
         assertTrue(
-            transmitManager.hasRole("TRANSMITTER_ROLE", chainSlug, transmitter)
+            transmitManager.hasRoleWithSlug(
+                "TRANSMITTER_ROLE",
+                chainSlug,
+                transmitter
+            )
         );
         assertTrue(
-            transmitManager.hasRole(
+            transmitManager.hasRoleWithSlug(
                 "TRANSMITTER_ROLE",
                 destChainSlug,
                 transmitter

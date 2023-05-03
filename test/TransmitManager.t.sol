@@ -67,14 +67,18 @@ contract TransmitManagerTest is Setup {
         gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
         gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
         gasPriceOracle.setTransmitManager(transmitManager);
-        transmitManager.grantRole("TRANSMITTER_ROLE", chainSlug, transmitter);
-        transmitManager.grantRole(
+        transmitManager.grantRoleWithSlug(
+            "TRANSMITTER_ROLE",
+            chainSlug,
+            transmitter
+        );
+        transmitManager.grantRoleWithSlug(
             "TRANSMITTER_ROLE",
             destChainSlug,
             transmitter
         );
         transmitManager.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
-        transmitManager.grantRole(
+        transmitManager.grantRoleWithSlug(
             "GAS_LIMIT_UPDATER_ROLE",
             destChainSlug,
             owner
@@ -230,7 +234,7 @@ contract TransmitManagerTest is Setup {
 
     function testGrantTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRole(
+            transmitManager.hasRoleWithSlug(
                 "TRANSMITTER_ROLE",
                 chainSlug2,
                 nonTransmitter
@@ -238,7 +242,7 @@ contract TransmitManagerTest is Setup {
         );
 
         vm.startPrank(owner);
-        transmitManager.grantRole(
+        transmitManager.grantRoleWithSlug(
             "TRANSMITTER_ROLE",
             chainSlug2,
             nonTransmitter
@@ -246,7 +250,7 @@ contract TransmitManagerTest is Setup {
         vm.stopPrank();
 
         assertTrue(
-            transmitManager.hasRole(
+            transmitManager.hasRoleWithSlug(
                 "TRANSMITTER_ROLE",
                 chainSlug2,
                 nonTransmitter
@@ -256,7 +260,7 @@ contract TransmitManagerTest is Setup {
 
     function testRevokeTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRole(
+            transmitManager.hasRoleWithSlug(
                 "TRANSMITTER_ROLE",
                 chainSlug2,
                 nonTransmitter
@@ -264,7 +268,7 @@ contract TransmitManagerTest is Setup {
         );
 
         vm.startPrank(owner);
-        transmitManager.grantRole(
+        transmitManager.grantRoleWithSlug(
             "TRANSMITTER_ROLE",
             chainSlug2,
             nonTransmitter
@@ -272,7 +276,7 @@ contract TransmitManagerTest is Setup {
         vm.stopPrank();
 
         assertTrue(
-            transmitManager.hasRole(
+            transmitManager.hasRoleWithSlug(
                 "TRANSMITTER_ROLE",
                 chainSlug2,
                 nonTransmitter
@@ -280,7 +284,7 @@ contract TransmitManagerTest is Setup {
         );
 
         vm.startPrank(owner);
-        transmitManager.revokeRole(
+        transmitManager.revokeRoleWithSlug(
             "TRANSMITTER_ROLE",
             chainSlug2,
             nonTransmitter
@@ -288,7 +292,7 @@ contract TransmitManagerTest is Setup {
         vm.stopPrank();
 
         assertFalse(
-            transmitManager.hasRole(
+            transmitManager.hasRoleWithSlug(
                 "TRANSMITTER_ROLE",
                 chainSlug2,
                 nonTransmitter

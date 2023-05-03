@@ -119,7 +119,7 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
 
-        cc_.transmitManager__.grantRole(
+        cc_.transmitManager__.grantRoleWithSlug(
             "GAS_LIMIT_UPDATER_ROLE",
             remoteChainSlug_,
             _socketOwner
@@ -179,7 +179,7 @@ contract Setup is Test {
         uint256 nonce = 0;
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.grantRole(
+        optimisticSwitchboard.grantRoleWithSlug(
             "GAS_LIMIT_UPDATER_ROLE",
             remoteChainSlug_,
             _socketOwner
@@ -202,7 +202,7 @@ contract Setup is Test {
             _executionOverhead,
             sig
         );
-        optimisticSwitchboard.grantRole(
+        optimisticSwitchboard.grantRoleWithSlug(
             "WATCHER_ROLE",
             remoteChainSlug_,
             _watcher
@@ -236,7 +236,7 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-        fastSwitchboard.grantRole(
+        fastSwitchboard.grantRoleWithSlug(
             "GAS_LIMIT_UPDATER_ROLE",
             remoteChainSlug_,
             _socketOwner
@@ -317,7 +317,7 @@ contract Setup is Test {
             _sealGasLimit
         );
 
-        cc_.transmitManager__.grantRole(
+        cc_.transmitManager__.grantRoleWithSlug(
             "GAS_LIMIT_UPDATER_ROLE",
             cc_.chainSlug,
             deployer_
@@ -398,7 +398,7 @@ contract Setup is Test {
             // deduce transmitter address from private key
             transmitter = vm.addr(transmitterPrivateKeys_[index]);
             // grant transmitter role
-            cc_.transmitManager__.grantRole(
+            cc_.transmitManager__.grantRoleWithSlug(
                 "TRANSMITTER_ROLE",
                 remoteChainSlug_,
                 transmitter

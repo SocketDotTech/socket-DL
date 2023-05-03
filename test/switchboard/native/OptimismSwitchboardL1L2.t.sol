@@ -83,7 +83,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
 
         vm.startPrank(_socketOwner);
 
-        cc_.transmitManager__.grantRole(
+        cc_.transmitManager__.grantRoleWithSlug(
             "GAS_LIMIT_UPDATER_ROLE",
             remoteChainSlug_,
             _socketOwner
