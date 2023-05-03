@@ -11,21 +11,6 @@ import "./AccessControl.sol";
  */
 contract AccessControlExtended is AccessControl {
     /**
-     * @dev Modifier that restricts access to addresses having roles with the given role name and chain slug.
-     * Throws an error if the caller does not have permit.
-     * @param roleName_ The name of the role.
-     * @param chainSlug_ The chain slug associated with the role.
-     */
-    modifier onlyRoleWithChainSlug(
-        string memory roleName_,
-        uint256 chainSlug_
-    ) {
-        bytes32 role = keccak256(abi.encode(roleName_, chainSlug_));
-        if (!_hasRole(role, msg.sender)) revert NoPermit(role);
-        _;
-    }
-
-    /**
      * @dev Constructor that sets the owner of the contract.
      */
     constructor(address owner_) AccessControl(owner_) {}
@@ -36,12 +21,12 @@ contract AccessControlExtended is AccessControl {
      * @param chainSlug_ The chain slug associated with the role.
      * @param grantee_ The address to be granted the role.
      */
-    function grantRole(
+    function grantRoleWithSlug(
         string memory roleName_,
         uint256 chainSlug_,
         address grantee_
     ) external virtual onlyOwner {
-        _grantRole(roleName_, chainSlug_, grantee_);
+        _grantRoleWithSlug(roleName_, chainSlug_, grantee_);
     }
 
     /**
@@ -49,7 +34,7 @@ contract AccessControlExtended is AccessControl {
      * @param roleNames_ The names of the roles to grant.
      * @param grantees_ The addresses to be granted the roles.
      */
-    function grantBatchRole(
+    function grantBatchRoleWithSlug(
         bytes32[] calldata roleNames_,
         address[] calldata grantees_
     ) external virtual onlyOwner {
@@ -63,7 +48,7 @@ contract AccessControlExtended is AccessControl {
      * @param roleNames_ The names of the roles to revoke.
      * @param grantees_ The addresses to be revoked the roles.
      */
-    function revokeBatchRole(
+    function revokeBatchRoleWithSlug(
         bytes32[] calldata roleNames_,
         address[] calldata grantees_
     ) external virtual onlyOwner {
@@ -72,7 +57,7 @@ contract AccessControlExtended is AccessControl {
             _revokeRole(roleNames_[index], grantees_[index]);
     }
 
-    function _grantRole(
+    function _grantRoleWithSlug(
         string memory roleName_,
         uint256 chainSlug_,
         address grantee_
@@ -87,15 +72,15 @@ contract AccessControlExtended is AccessControl {
      * @param address_ The address to check for the role.
      * @return A boolean indicating whether the address has the specified role.
      */
-    function hasRole(
+    function hasRoleWithSlug(
         string memory roleName_,
         uint256 chainSlug_,
         address address_
     ) external view returns (bool) {
-        return _hasRole(roleName_, chainSlug_, address_);
+        return _hasRoleWithSlug(roleName_, chainSlug_, address_);
     }
 
-    function _hasRole(
+    function _hasRoleWithSlug(
         string memory roleName_,
         uint256 chainSlug_,
         address address_
@@ -109,15 +94,15 @@ contract AccessControlExtended is AccessControl {
      * @param chainSlug_ The chain slug associated with the role.
      * @param grantee_ The addresses to be revoked the roles.
      */
-    function revokeRole(
+    function revokeRoleWithSlug(
         string memory roleName_,
         uint256 chainSlug_,
         address grantee_
     ) external virtual onlyOwner {
-        _revokeRole(roleName_, chainSlug_, grantee_);
+        _revokeRoleWithSlug(roleName_, chainSlug_, grantee_);
     }
 
-    function _revokeRole(
+    function _revokeRoleWithSlug(
         string memory roleName_,
         uint256 chainSlug_,
         address revokee_

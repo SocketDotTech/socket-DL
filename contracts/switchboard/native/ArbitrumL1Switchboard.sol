@@ -114,7 +114,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         address bridge_,
         address outbox_
     )
-        AccessControlExtended(owner_)
+        AccessControl(owner_)
         NativeSwitchboardBase(
             socket_,
             chainSlug_,

@@ -2,26 +2,27 @@
 pragma solidity 0.8.7;
 
 import "../libraries/RescueFundsLib.sol";
-import "../utils/AccessControlExtended.sol";
-import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
+import "../utils/AccessControl.sol";
+
 import {ISocket} from "../interfaces/ISocket.sol";
 import {ITransmitManager} from "../interfaces/ITransmitManager.sol";
-
 import {FastSwitchboard} from "../switchboard/default-switchboards/FastSwitchboard.sol";
 import {INativeRelay} from "../interfaces/INativeRelay.sol";
+
+import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
 /**
  * @title SocketBatcher
  * @notice A contract that facilitates the batching of packets across chains. It manages requests for sealing, proposing, attesting, and executing packets across multiple chains.
  * It also has functions for setting gas limits, execution overhead, and registering switchboards.
- * @dev This contract uses the AccessControlExtended contract for managing role-based access control.
+ * @dev This contract uses the AccessControl contract for managing role-based access control.
  */
-contract SocketBatcher is AccessControlExtended {
+contract SocketBatcher is AccessControl {
     /*
      * @notice Constructs the SocketBatcher contract and grants the RESCUE_ROLE to the contract deployer.
      * @param owner_ The address of the contract deployer, who will be granted the RESCUE_ROLE.
      */
-    constructor(address owner_) AccessControlExtended(owner_) {
+    constructor(address owner_) AccessControl(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
     }
 

@@ -5,7 +5,7 @@ import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IGasPriceOracle.sol";
 import "../../interfaces/ICapacitor.sol";
 
-import "../../utils/AccessControlExtended.sol";
+import "../../utils/AccessControl.sol";
 import "../../libraries/SignatureVerifierLib.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
@@ -20,7 +20,7 @@ It provides the necessary functionalities to allow packets to be sent and receiv
 of fees, gas limits, and packet validation.
 @dev This contract has access-controlled functions and connects to a capacitor contract that holds packets for the native bridge.
 */
-abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
+abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     /**
      * @dev Address of the gas price oracle.
      */

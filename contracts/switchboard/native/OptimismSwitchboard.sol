@@ -55,7 +55,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         IGasPriceOracle gasPriceOracle_,
         address crossDomainMessenger_
     )
-        AccessControlExtended(owner_)
+        AccessControl(owner_)
         NativeSwitchboardBase(
             socket_,
             chainSlug_,
