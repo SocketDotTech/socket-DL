@@ -155,7 +155,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole("WATCHER_ROLE", srcChainSlug_, watcher))
+        if (!_hasRoleWithSlug("WATCHER_ROLE", srcChainSlug_, watcher))
             revert NoPermit("WATCHER_ROLE");
         uint256 nonce = nextNonce[watcher]++;
         if (nonce_ != nonce) revert InvalidNonce();
@@ -254,8 +254,13 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole("GAS_LIMIT_UPDATER_ROLE", dstChainSlug_, gasLimitUpdater))
-            revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
+        if (
+            !_hasRoleWithSlug(
+                "GAS_LIMIT_UPDATER_ROLE",
+                dstChainSlug_,
+                gasLimitUpdater
+            )
+        ) revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 

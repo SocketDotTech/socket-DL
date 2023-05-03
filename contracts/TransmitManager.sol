@@ -96,7 +96,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
         return (
             transmitter,
-            _hasRole("TRANSMITTER_ROLE", siblingSlug_, transmitter)
+            _hasRoleWithSlug("TRANSMITTER_ROLE", siblingSlug_, transmitter)
         );
     }
 
@@ -202,8 +202,13 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole("GAS_LIMIT_UPDATER_ROLE", dstChainSlug_, gasLimitUpdater))
-            revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
+        if (
+            !_hasRoleWithSlug(
+                "GAS_LIMIT_UPDATER_ROLE",
+                dstChainSlug_,
+                gasLimitUpdater
+            )
+        ) revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
 
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
