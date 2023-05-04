@@ -38,7 +38,7 @@ contract FastSwitchboardTest is Setup {
         );
 
         fastSwitchboard.grantRoleWithSlug(
-            "GAS_LIMIT_UPDATER_ROLE",
+            GAS_LIMIT_UPDATER_ROLE,
             remoteChainSlug,
             _socketOwner
         );
@@ -46,7 +46,7 @@ contract FastSwitchboardTest is Setup {
 
         bytes32 digest = keccak256(
             abi.encode(
-                "EXECUTION_OVERHEAD_UPDATE",
+                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
                 nonce,
                 _a.chainSlug,
                 remoteChainSlug,
@@ -69,7 +69,7 @@ contract FastSwitchboardTest is Setup {
 
         digest = keccak256(
             abi.encode(
-                "ATTEST_GAS_LIMIT_UPDATE",
+                ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                 _a.chainSlug,
                 remoteChainSlug,
                 nonce,
@@ -157,7 +157,7 @@ contract FastSwitchboardTest is Setup {
         fastSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
         bytes32 digest = keccak256(
-            abi.encode("TRIP", _a.chainSlug, nonce, true)
+            abi.encode(TRIP_GLOBAL_SIG_IDENTIFIER, _a.chainSlug, nonce, true)
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -174,13 +174,19 @@ contract FastSwitchboardTest is Setup {
 
         uint256 srcChainSlug = uint256(123);
         fastSwitchboard.grantRoleWithSlug(
-            "WATCHER_ROLE",
+            WATCHER_ROLE,
             srcChainSlug,
             _socketOwner
         );
 
         bytes32 digest = keccak256(
-            abi.encode("TRIP_PATH", srcChainSlug, _a.chainSlug, nonce, true)
+            abi.encode(
+                TRIP_PATH_SIG_IDENTIFIER,
+                srcChainSlug,
+                _a.chainSlug,
+                nonce,
+                true
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -195,7 +201,13 @@ contract FastSwitchboardTest is Setup {
     function testNonWatcherToTripPath() external {
         uint256 srcChainSlug = _a.chainSlug;
         bytes32 digest = keccak256(
-            abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, false)
+            abi.encode(
+                TRIP_PATH_SIG_IDENTIFIER,
+                _a.chainSlug,
+                srcChainSlug,
+                nonce,
+                false
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -208,7 +220,7 @@ contract FastSwitchboardTest is Setup {
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRoleWithSlug(
-            "WATCHER_ROLE",
+            WATCHER_ROLE,
             srcChainSlug,
             _socketOwner
         );
@@ -216,7 +228,13 @@ contract FastSwitchboardTest is Setup {
         vm.stopPrank();
 
         bytes32 digest = keccak256(
-            abi.encode("TRIP_PATH", srcChainSlug, _a.chainSlug, nonce, true)
+            abi.encode(
+                TRIP_PATH_SIG_IDENTIFIER,
+                srcChainSlug,
+                _a.chainSlug,
+                nonce,
+                true
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -226,7 +244,13 @@ contract FastSwitchboardTest is Setup {
         assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
 
         digest = keccak256(
-            abi.encode("UNTRIP_PATH", _a.chainSlug, srcChainSlug, nonce, false)
+            abi.encode(
+                UNTRIP_PATH_SIG_IDENTIFIER,
+                _a.chainSlug,
+                srcChainSlug,
+                nonce,
+                false
+            )
         );
         sig = _createSignature(digest, _socketOwnerPrivateKey);
 

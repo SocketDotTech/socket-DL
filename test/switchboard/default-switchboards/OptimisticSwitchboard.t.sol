@@ -34,7 +34,7 @@ contract OptimisticSwitchboardTest is Setup {
         );
 
         optimisticSwitchboard.grantRoleWithSlug(
-            "GAS_LIMIT_UPDATER_ROLE",
+            GAS_LIMIT_UPDATER_ROLE,
             remoteChainSlug,
             _socketOwner
         );
@@ -42,7 +42,7 @@ contract OptimisticSwitchboardTest is Setup {
 
         bytes32 digest = keccak256(
             abi.encode(
-                "EXECUTION_OVERHEAD_UPDATE",
+                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
                 nonce,
                 _a.chainSlug,
                 remoteChainSlug,
@@ -59,17 +59,17 @@ contract OptimisticSwitchboardTest is Setup {
         );
 
         optimisticSwitchboard.grantRoleWithSlug(
-            "WATCHER_ROLE",
+            WATCHER_ROLE,
             remoteChainSlug,
             watcher
         );
         optimisticSwitchboard.grantRoleWithSlug(
-            "WATCHER_ROLE",
+            WATCHER_ROLE,
             _a.chainSlug,
             watcher
         );
         optimisticSwitchboard.grantRoleWithSlug(
-            "WATCHER_ROLE",
+            WATCHER_ROLE,
             remoteChainSlug,
             vm.addr(_altWatcherPrivateKey)
         );
@@ -83,7 +83,7 @@ contract OptimisticSwitchboardTest is Setup {
         optimisticSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
         bytes32 digest = keccak256(
-            abi.encode("TRIP", _a.chainSlug, nonce, true)
+            abi.encode(TRIP_GLOBAL_SIG_IDENTIFIER, _a.chainSlug, nonce, true)
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -98,13 +98,19 @@ contract OptimisticSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
         uint256 srcChainSlug = _a.chainSlug;
         optimisticSwitchboard.grantRoleWithSlug(
-            "WATCHER_ROLE",
+            WATCHER_ROLE,
             srcChainSlug,
             _socketOwner
         );
 
         bytes32 digest = keccak256(
-            abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, true)
+            abi.encode(
+                TRIP_PATH_SIG_IDENTIFIER,
+                _a.chainSlug,
+                srcChainSlug,
+                nonce,
+                true
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -117,7 +123,13 @@ contract OptimisticSwitchboardTest is Setup {
     function testNonWatcherToTripPath() external {
         uint256 srcChainSlug = _a.chainSlug;
         bytes32 digest = keccak256(
-            abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, false)
+            abi.encode(
+                TRIP_PATH_SIG_IDENTIFIER,
+                _a.chainSlug,
+                srcChainSlug,
+                nonce,
+                false
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -130,7 +142,7 @@ contract OptimisticSwitchboardTest is Setup {
 
         vm.startPrank(_socketOwner);
         optimisticSwitchboard.grantRoleWithSlug(
-            "WATCHER_ROLE",
+            WATCHER_ROLE,
             srcChainSlug,
             _socketOwner
         );
@@ -139,7 +151,13 @@ contract OptimisticSwitchboardTest is Setup {
 
         hoax(_socketOwner);
         bytes32 digest = keccak256(
-            abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, true)
+            abi.encode(
+                TRIP_PATH_SIG_IDENTIFIER,
+                _a.chainSlug,
+                srcChainSlug,
+                nonce,
+                true
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -150,7 +168,13 @@ contract OptimisticSwitchboardTest is Setup {
 
         hoax(_socketOwner);
         digest = keccak256(
-            abi.encode("UNTRIP_PATH", _a.chainSlug, srcChainSlug, nonce, false)
+            abi.encode(
+                UNTRIP_PATH_SIG_IDENTIFIER,
+                _a.chainSlug,
+                srcChainSlug,
+                nonce,
+                false
+            )
         );
         sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -193,13 +217,19 @@ contract OptimisticSwitchboardTest is Setup {
 
         uint32 srcChainSlug = _a.chainSlug;
         optimisticSwitchboard.grantRoleWithSlug(
-            "WATCHER_ROLE",
+            WATCHER_ROLE,
             srcChainSlug,
             _socketOwner
         );
 
         bytes32 digest = keccak256(
-            abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, true)
+            abi.encode(
+                TRIP_PATH_SIG_IDENTIFIER,
+                _a.chainSlug,
+                srcChainSlug,
+                nonce,
+                true
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -224,7 +254,7 @@ contract OptimisticSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
 
         optimisticSwitchboard.grantRoleWithSlug(
-            "WATCHER_ROLE",
+            WATCHER_ROLE,
             remoteChainSlug,
             watcher2
         );
@@ -235,7 +265,7 @@ contract OptimisticSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
 
         optimisticSwitchboard.grantRoleWithSlug(
-            "WATCHER_ROLE",
+            WATCHER_ROLE,
             remoteChainSlug,
             vm.addr(_altWatcherPrivateKey)
         );
