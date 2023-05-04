@@ -8,7 +8,7 @@ import "./interfaces/IGasPriceOracle.sol";
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/FeesHelper.sol";
-import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "./utils/AccessRoles.sol";
+import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRANSMITTER_ROLE} from "./utils/AccessRoles.sol";
 
 /**
  * @title TransmitManager
@@ -28,6 +28,11 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
+
+    bytes32 constant SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER =
+        keccak256("SEAL_GAS_LIMIT_UPDATE");
+    bytes32 constant PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER =
+        keccak256("PROPOSE_GAS_LIMIT_UPDATE");
 
     error InsufficientTransmitFees();
     error InvalidNonce();
@@ -96,7 +101,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
         return (
             transmitter,
-            _hasRoleWithSlug("TRANSMITTER_ROLE", siblingSlug_, transmitter)
+            _hasRoleWithSlug(TRANSMITTER_ROLE, siblingSlug_, transmitter)
         );
     }
 
@@ -157,7 +162,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         address gasLimitUpdater = signatureVerifier__.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
-                    "SEAL_GAS_LIMIT_UPDATE",
+                    SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                     chainSlug,
                     nonce_,
                     gasLimit_
@@ -166,8 +171,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
-            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
 
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
@@ -192,7 +196,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         address gasLimitUpdater = signatureVerifier__.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
-                    "PROPOSE_GAS_LIMIT_UPDATE",
+                    PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                     chainSlug,
                     dstChainSlug_,
                     nonce_,
@@ -202,13 +206,11 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
             signature_
         );
 
-        if (
-            !_hasRoleWithSlug(
-                "GAS_LIMIT_UPDATER_ROLE",
-                dstChainSlug_,
-                gasLimitUpdater
-            )
-        ) revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
+        _checkRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
+            dstChainSlug_,
+            gasLimitUpdater
+        );
 
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();

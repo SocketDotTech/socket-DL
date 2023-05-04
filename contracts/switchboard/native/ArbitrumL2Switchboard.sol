@@ -124,7 +124,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
         address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
-                    "L1_RECEIVE_GAS_LIMIT_UPDATE",
+                    L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                     chainSlug,
                     nonce_,
                     confirmGasLimit_
@@ -133,8 +133,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
             signature_
         );
 
-        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
-            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 

@@ -9,7 +9,7 @@ import "../../libraries/SignatureVerifierLib.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
-import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRIP_ROLE, UNTRIP_ROLE} from "../../utils/AccessRoles.sol";
+import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRIP_ROLE, UNTRIP_ROLE, WATCHER_ROLE} from "../../utils/AccessRoles.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
@@ -29,6 +29,15 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
+
+    bytes32 constant TRIP_PATH_SIG_IDENTIFIER = keccak256("TRIP_PATH");
+    bytes32 constant TRIP_GLOBAL_SIG_IDENTIFIER = keccak256("TRIP_GLOBAL");
+
+    bytes32 constant UNTRIP_PATH_SIG_IDENTIFIER = keccak256("UNTRIP_PATH");
+    bytes32 constant UNTRIP_GLOBAL_SIG_IDENTIFIER = keccak256("UNTRIP_GLOBAL");
+
+    bytes32 constant EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER =
+        keccak256("EXECUTION_OVERHEAD_UPDATE");
 
     /**
      * @dev Emitted when a path is tripped
@@ -150,13 +159,18 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         address watcher = SignatureVerifierLib.recoverSignerFromDigest(
             // it includes trip status at the end
             keccak256(
-                abi.encode("TRIP_PATH", srcChainSlug_, chainSlug, nonce_, true)
+                abi.encode(
+                    TRIP_PATH_SIG_IDENTIFIER,
+                    srcChainSlug_,
+                    chainSlug,
+                    nonce_,
+                    true
+                )
             ),
             signature_
         );
 
-        if (!_hasRoleWithSlug("WATCHER_ROLE", srcChainSlug_, watcher))
-            revert NoPermit("WATCHER_ROLE");
+        _checkRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher);
         uint256 nonce = nextNonce[watcher]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -171,11 +185,13 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
         address tripper = SignatureVerifierLib.recoverSignerFromDigest(
             // it includes trip status at the end
-            keccak256(abi.encode("TRIP", chainSlug, nonce_, true)),
+            keccak256(
+                abi.encode(TRIP_GLOBAL_SIG_IDENTIFIER, chainSlug, nonce_, true)
+            ),
             signature_
         );
 
-        if (!_hasRole(TRIP_ROLE, tripper)) revert NoPermit("TRIP_ROLE");
+        _checkRole(TRIP_ROLE, tripper);
         uint256 nonce = nextNonce[tripper]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -195,7 +211,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             // it includes trip status at the end
             keccak256(
                 abi.encode(
-                    "UNTRIP_PATH",
+                    UNTRIP_PATH_SIG_IDENTIFIER,
                     chainSlug,
                     srcChainSlug_,
                     nonce_,
@@ -205,7 +221,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole(UNTRIP_ROLE, untripper)) revert NoPermit("UNTRIP_ROLE");
+        _checkRole(UNTRIP_ROLE, untripper);
         uint256 nonce = nextNonce[untripper]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -219,11 +235,18 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     function untrip(uint256 nonce_, bytes memory signature_) external {
         address untripper = SignatureVerifierLib.recoverSignerFromDigest(
             // it includes trip status at the end
-            keccak256(abi.encode("UNTRIP", chainSlug, nonce_, false)),
+            keccak256(
+                abi.encode(
+                    UNTRIP_GLOBAL_SIG_IDENTIFIER,
+                    chainSlug,
+                    nonce_,
+                    false
+                )
+            ),
             signature_
         );
 
-        if (!_hasRole(UNTRIP_ROLE, untripper)) revert NoPermit("UNTRIP_ROLE");
+        _checkRole(UNTRIP_ROLE, untripper);
         uint256 nonce = nextNonce[untripper]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -244,7 +267,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
-                    "EXECUTION_OVERHEAD_UPDATE",
+                    EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
                     nonce_,
                     chainSlug,
                     dstChainSlug_,
@@ -254,13 +277,11 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        if (
-            !_hasRoleWithSlug(
-                "GAS_LIMIT_UPDATER_ROLE",
-                dstChainSlug_,
-                gasLimitUpdater
-            )
-        ) revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
+        _checkRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
+            dstChainSlug_,
+            gasLimitUpdater
+        );
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
