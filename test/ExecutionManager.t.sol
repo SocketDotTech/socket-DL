@@ -75,12 +75,12 @@ contract ExecutionManagerTest is Setup {
         executionManager.grantRole(WITHDRAW_ROLE, owner);
 
         transmitManager.grantRoleWithSlug(
-            "TRANSMITTER_ROLE",
+            TRANSMITTER_ROLE,
             chainSlug,
             transmitter
         );
         transmitManager.grantRoleWithSlug(
-            "TRANSMITTER_ROLE",
+            TRANSMITTER_ROLE,
             destChainSlug,
             transmitter
         );
@@ -89,14 +89,14 @@ contract ExecutionManagerTest is Setup {
 
         assertTrue(
             transmitManager.hasRoleWithSlug(
-                "TRANSMITTER_ROLE",
+                TRANSMITTER_ROLE,
                 chainSlug,
                 transmitter
             )
         );
         assertTrue(
             transmitManager.hasRoleWithSlug(
-                "TRANSMITTER_ROLE",
+                TRANSMITTER_ROLE,
                 destChainSlug,
                 transmitter
             )
