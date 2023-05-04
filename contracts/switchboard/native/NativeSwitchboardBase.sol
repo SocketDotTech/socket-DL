@@ -21,6 +21,15 @@ of fees, gas limits, and packet validation.
 @dev This contract has access-controlled functions and connects to a capacitor contract that holds packets for the native bridge.
 */
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
+    bytes32 constant TRIP_NATIVE_SIG_IDENTIFIER = keccak256("TRIP_NATIVE");
+    bytes32 constant L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER =
+        keccak256("L1_RECEIVE_GAS_LIMIT_UPDATE");
+    bytes32 constant UNTRIP_NATIVE_SIG_IDENTIFIER = keccak256("UNTRIP_NATIVE");
+    bytes32 constant EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER =
+        keccak256("EXECUTION_OVERHEAD_UPDATE");
+    bytes32 constant INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER =
+        keccak256("INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE");
+
     /**
      * @dev Address of the gas price oracle.
      */
@@ -322,12 +331,13 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
         address watcher = SignatureVerifierLib.recoverSignerFromDigest(
             // it includes trip status at the end
-            keccak256(abi.encode("TRIP", chainSlug, nonce_, true)),
+            keccak256(
+                abi.encode(TRIP_NATIVE_SIG_IDENTIFIER, chainSlug, nonce_, true)
+            ),
             signature_
         );
 
-        if (!_hasRole(TRIP_ROLE, watcher)) revert NoPermit(TRIP_ROLE);
-
+        _checkRole(TRIP_ROLE, watcher);
         uint256 nonce = nextNonce[watcher]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -344,11 +354,18 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     function untrip(uint256 nonce_, bytes memory signature_) external {
         address watcher = SignatureVerifierLib.recoverSignerFromDigest(
             // it includes trip status at the end
-            keccak256(abi.encode("UNTRIP", chainSlug, nonce_, false)),
+            keccak256(
+                abi.encode(
+                    UNTRIP_NATIVE_SIG_IDENTIFIER,
+                    chainSlug,
+                    nonce_,
+                    false
+                )
+            ),
             signature_
         );
 
-        if (!_hasRole(UNTRIP_ROLE, watcher)) revert NoPermit(UNTRIP_ROLE);
+        _checkRole(UNTRIP_ROLE, watcher);
         uint256 nonce = nextNonce[watcher]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -370,7 +387,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
         address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
-                    "EXECUTION_OVERHEAD_UPDATE",
+                    EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
                     nonce_,
                     chainSlug,
                     executionOverhead_
@@ -379,8 +396,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
             signature_
         );
 
-        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
-            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -403,7 +419,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
         address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
-                    "INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE",
+                    INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                     chainSlug,
                     nonce_,
                     gasLimit_
@@ -412,8 +428,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
             signature_
         );
 
-        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
-            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
