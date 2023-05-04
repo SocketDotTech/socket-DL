@@ -10,6 +10,7 @@ import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
 import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRIP_ROLE, UNTRIP_ROLE, WATCHER_ROLE} from "../../utils/AccessRoles.sol";
+import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
@@ -29,15 +30,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
-
-    bytes32 constant TRIP_PATH_SIG_IDENTIFIER = keccak256("TRIP_PATH");
-    bytes32 constant TRIP_GLOBAL_SIG_IDENTIFIER = keccak256("TRIP_GLOBAL");
-
-    bytes32 constant UNTRIP_PATH_SIG_IDENTIFIER = keccak256("UNTRIP_PATH");
-    bytes32 constant UNTRIP_GLOBAL_SIG_IDENTIFIER = keccak256("UNTRIP_GLOBAL");
-
-    bytes32 constant EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER =
-        keccak256("EXECUTION_OVERHEAD_UPDATE");
 
     /**
      * @dev Emitted when a path is tripped

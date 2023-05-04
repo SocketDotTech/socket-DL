@@ -49,10 +49,7 @@ abstract contract AccessControl is Ownable {
      * @param role_ The role to check.
      * @param address_ The address to check.
      */
-    function _checkRole(
-        bytes32 role_,
-        address address_
-    ) internal virtual onlyOwner {
+    function _checkRole(bytes32 role_, address address_) internal virtual {
         if (!_hasRole(role_, address_)) revert NoPermit(role_);
     }
 

@@ -25,7 +25,7 @@ contract AccessControlExtended is AccessControl {
         bytes32 roleName_,
         uint256 chainSlug_,
         address address_
-    ) internal virtual onlyOwner {
+    ) internal virtual {
         bytes32 roleHash = keccak256(abi.encode(roleName_, chainSlug_));
         if (!_hasRole(roleHash, address_)) revert NoPermit(roleHash);
     }

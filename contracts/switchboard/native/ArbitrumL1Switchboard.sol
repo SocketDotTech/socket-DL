@@ -7,6 +7,8 @@ import "openzeppelin-contracts/contracts/vendor/arbitrum/IOutbox.sol";
 
 import "./NativeSwitchboardBase.sol";
 
+import {ARBITRUM_NATIVE_FEE_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+
 /**
  * @title ArbitrumL1Switchboard
  * @dev This contract is a switchboard contract for the Arbitrum chain that handles packet attestation and actions on the L1 to Arbitrum and
@@ -15,9 +17,6 @@ import "./NativeSwitchboardBase.sol";
  * trip and untrip actions, and limit setting functions.
  */
 contract ArbitrumL1Switchboard is NativeSwitchboardBase {
-    bytes32 constant ARBITRUM_NATIVE_FEE_UPDATE_SIG_IDENTIFIER =
-        keccak256("ARBITRUM_NATIVE_FEE_UPDATE");
-
     /**
      * @notice The address to which refunds for remote calls will be sent.
      */

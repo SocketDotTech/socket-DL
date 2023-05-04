@@ -11,6 +11,7 @@ import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
 import {GAS_LIMIT_UPDATER_ROLE, GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE} from "../../utils/AccessRoles.sol";
+import {TRIP_NATIVE_SIG_IDENTIFIER, L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER, INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
 
@@ -21,15 +22,6 @@ of fees, gas limits, and packet validation.
 @dev This contract has access-controlled functions and connects to a capacitor contract that holds packets for the native bridge.
 */
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
-    bytes32 constant TRIP_NATIVE_SIG_IDENTIFIER = keccak256("TRIP_NATIVE");
-    bytes32 constant L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER =
-        keccak256("L1_RECEIVE_GAS_LIMIT_UPDATE");
-    bytes32 constant UNTRIP_NATIVE_SIG_IDENTIFIER = keccak256("UNTRIP_NATIVE");
-    bytes32 constant EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER =
-        keccak256("EXECUTION_OVERHEAD_UPDATE");
-    bytes32 constant INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER =
-        keccak256("INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE");
-
     /**
      * @dev Address of the gas price oracle.
      */
