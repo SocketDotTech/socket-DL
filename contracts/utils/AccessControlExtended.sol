@@ -16,13 +16,28 @@ contract AccessControlExtended is AccessControl {
     constructor(address owner_) AccessControl(owner_) {}
 
     /**
+     * @dev Checks if an address has the role.
+     * @param roleName_ The name of the role.
+     * @param chainSlug_ The chain slug associated with the role.
+     * @param address_ The address to be granted the role.
+     */
+    function _checkRoleWithSlug(
+        bytes32 roleName_,
+        uint256 chainSlug_,
+        address address_
+    ) internal virtual onlyOwner {
+        bytes32 roleHash = keccak256(abi.encode(roleName_, chainSlug_));
+        if (!_hasRole(roleHash, address_)) revert NoPermit(roleHash);
+    }
+
+    /**
      * @dev Grants a role to an address based on the role name and chain slug.
      * @param roleName_ The name of the role.
      * @param chainSlug_ The chain slug associated with the role.
      * @param grantee_ The address to be granted the role.
      */
     function grantRoleWithSlug(
-        string memory roleName_,
+        bytes32 roleName_,
         uint256 chainSlug_,
         address grantee_
     ) external virtual onlyOwner {
@@ -58,7 +73,7 @@ contract AccessControlExtended is AccessControl {
     }
 
     function _grantRoleWithSlug(
-        string memory roleName_,
+        bytes32 roleName_,
         uint256 chainSlug_,
         address grantee_
     ) internal {
@@ -73,7 +88,7 @@ contract AccessControlExtended is AccessControl {
      * @return A boolean indicating whether the address has the specified role.
      */
     function hasRoleWithSlug(
-        string memory roleName_,
+        bytes32 roleName_,
         uint256 chainSlug_,
         address address_
     ) external view returns (bool) {
@@ -81,7 +96,7 @@ contract AccessControlExtended is AccessControl {
     }
 
     function _hasRoleWithSlug(
-        string memory roleName_,
+        bytes32 roleName_,
         uint256 chainSlug_,
         address address_
     ) internal view returns (bool) {
@@ -95,7 +110,7 @@ contract AccessControlExtended is AccessControl {
      * @param grantee_ The addresses to be revoked the roles.
      */
     function revokeRoleWithSlug(
-        string memory roleName_,
+        bytes32 roleName_,
         uint256 chainSlug_,
         address grantee_
     ) external virtual onlyOwner {
@@ -103,7 +118,7 @@ contract AccessControlExtended is AccessControl {
     }
 
     function _revokeRoleWithSlug(
-        string memory roleName_,
+        bytes32 roleName_,
         uint256 chainSlug_,
         address revokee_
     ) internal {
