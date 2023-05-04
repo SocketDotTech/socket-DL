@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import "./SwitchboardBase.sol";
 import "../../libraries/SignatureVerifierLib.sol";
+import {ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
  * @title FastSwitchboard contract
@@ -24,9 +25,6 @@ contract FastSwitchboard is SwitchboardBase {
 
     // packetId => total attestations
     mapping(bytes32 => uint256) public attestations;
-
-    bytes32 constant ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER =
-        keccak256("ATTEST_GAS_LIMIT_UPDATE");
 
     // Event emitted when a new socket is set
     event SocketSet(address newSocket);

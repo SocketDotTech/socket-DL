@@ -9,6 +9,7 @@ import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/FeesHelper.sol";
 import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRANSMITTER_ROLE} from "./utils/AccessRoles.sol";
+import {SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 
 /**
  * @title TransmitManager
@@ -28,11 +29,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
-
-    bytes32 constant SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER =
-        keccak256("SEAL_GAS_LIMIT_UPDATE");
-    bytes32 constant PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER =
-        keccak256("PROPOSE_GAS_LIMIT_UPDATE");
 
     error InsufficientTransmitFees();
     error InvalidNonce();
