@@ -82,7 +82,6 @@
     "Hasher": "0x4F04f8Ae9Fc3A9539d00e5e69c3b262b31220d00",
     "CapacitorFactory": "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
     "GasPriceOracle": "0xf848907549f27cC5424Ee0B0F8FE5238113632AF",
-    "ExecutionManager": "0x1b74Ac5DaCa01D82A3d2E7688ea30E50Fe6Ff35E",
     "TransmitManager": "0x6fEddE12105F47eAcde493Ee294d207bFE68dcE5",
     "Socket": "0xd10cB28719302698d7FA685D73DCCD330b6bf573",
     "integrations": {
@@ -143,7 +142,8 @@
     "FastSwitchboard": "0xcCd5a9bF2250070289a719C153390cb001316C6e",
     "OptimisticSwitchboard": "0x9Ba3fF23c5373A9C7F0Ceb8b6B5f4C98CEC7D922",
     "SocketBatcher": "0xFFB09850fAb52765b5E48eAC1AA3fFAD620C8fcE",
-    "Counter": "0x7e54F4c0aCafec318aF1f5d1dCD373CdACc32622"
+    "Counter": "0x7e54F4c0aCafec318aF1f5d1dCD373CdACc32622",
+    "ExecutionManager": "0x5C9728e9250a2DfA4B20Ba4F6D4AcbE909a97305"
   },
   "56": {
     "SignatureVerifier": "0x3F19417872BC9F5037Bc0D40cE7389D05Cf847Ad",
