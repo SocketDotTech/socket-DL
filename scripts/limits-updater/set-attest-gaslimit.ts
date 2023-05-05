@@ -6,6 +6,7 @@ import * as SocketBatcherABI from "../../artifacts/contracts/socket/SocketBatche
 import { isTransactionSuccessful } from "./utils/transaction-helper";
 import { attestGasLimit } from "../constants";
 import { networkToChainSlug } from "../../src";
+import { ATTEST_GAS_LIMIT_UPDATER_SIG_IDENTIFER } from "../deploy/utils/roles";
 
 export const setAttestGasLimit = async (
   srcChainId: number,
@@ -37,7 +38,7 @@ export const setAttestGasLimit = async (
         defaultAbiCoder.encode(
           ["string", "uint256", "uint256", "uint256", "uint256"],
           [
-            "ATTEST_GAS_LIMIT_UPDATE",
+            ATTEST_GAS_LIMIT_UPDATER_SIG_IDENTIFER,
             srcChainId,
             dstChainIds[index],
             nonce,

@@ -6,6 +6,7 @@ import * as SocketBatcherABI from "../../artifacts/contracts/socket/SocketBatche
 import { isTransactionSuccessful } from "./utils/transaction-helper";
 import { executionOverhead } from "../constants";
 import { networkToChainSlug } from "../../src";
+import { EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER } from "../deploy/utils/roles";
 
 export const setExecutionOverhead = async (
   srcChainId: number,
@@ -36,7 +37,7 @@ export const setExecutionOverhead = async (
         defaultAbiCoder.encode(
           ["string", "uint256", "uint256", "uint256", "uint256"],
           [
-            "EXECUTION_OVERHEAD_UPDATE",
+            EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
             nonce,
             srcChainId,
             dstChainIds[index],
