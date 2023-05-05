@@ -103,7 +103,6 @@ abstract contract AccessControl is Ownable {
         emit RoleRevoked(role_, revokee_);
     }
 
-
     /**
      * @dev Grants multiple roles to multiple addresses in batch.
      * @param roleNames_ The names of the roles to grant.
