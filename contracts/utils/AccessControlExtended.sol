@@ -44,34 +44,6 @@ contract AccessControlExtended is AccessControl {
         _grantRoleWithSlug(roleName_, chainSlug_, grantee_);
     }
 
-    /**
-     * @dev Grants multiple roles to multiple addresses in batch.
-     * @param roleNames_ The names of the roles to grant.
-     * @param grantees_ The addresses to be granted the roles.
-     */
-    function grantBatchRoleWithSlug(
-        bytes32[] calldata roleNames_,
-        address[] calldata grantees_
-    ) external virtual onlyOwner {
-        require(roleNames_.length == grantees_.length);
-        for (uint256 index = 0; index < roleNames_.length; index++)
-            _grantRole(roleNames_[index], grantees_[index]);
-    }
-
-    /**
-     * @dev Revokes multiple roles from multiple addresses in batch.
-     * @param roleNames_ The names of the roles to revoke.
-     * @param grantees_ The addresses to be revoked the roles.
-     */
-    function revokeBatchRoleWithSlug(
-        bytes32[] calldata roleNames_,
-        address[] calldata grantees_
-    ) external virtual onlyOwner {
-        require(roleNames_.length == grantees_.length);
-        for (uint256 index = 0; index < roleNames_.length; index++)
-            _revokeRole(roleNames_[index], grantees_[index]);
-    }
-
     function _grantRoleWithSlug(
         bytes32 roleName_,
         uint256 chainSlug_,
