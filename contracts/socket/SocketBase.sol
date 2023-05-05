@@ -2,9 +2,6 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/IHasher.sol";
-import "../interfaces/ITransmitManager.sol";
-import "../interfaces/IExecutionManager.sol";
-
 import "./SocketConfig.sol";
 
 /**
