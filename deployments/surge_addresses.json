@@ -83,6 +83,7 @@
     "Hasher": "0x4F04f8Ae9Fc3A9539d00e5e69c3b262b31220d00",
     "CapacitorFactory": "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
     "GasPriceOracle": "0xf848907549f27cC5424Ee0B0F8FE5238113632AF",
+    "ExecutionManager": "0x1b74Ac5DaCa01D82A3d2E7688ea30E50Fe6Ff35E",
     "TransmitManager": "0x6fEddE12105F47eAcde493Ee294d207bFE68dcE5",
     "Socket": "0xd10cB28719302698d7FA685D73DCCD330b6bf573",
     "integrations": {
