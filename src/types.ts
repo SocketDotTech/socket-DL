@@ -183,6 +183,7 @@ export enum ROLES {
 export enum CORE_CONTRACTS {
   CapacitorFactory = "CapacitorFactory",
   ExecutionManager = "ExecutionManager",
+  OpenExecutionManager = "OpenExecutionManager",
   Hasher = "Hasher",
   SignatureVerifier = "SignatureVerifier",
   TransmitManager = "TransmitManager",
