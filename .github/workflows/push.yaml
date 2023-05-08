@@ -1,6 +1,6 @@
 name: Tests
 
-on: [push, pull_request]
+on: pull_request
 
 env:
   FOUNDRY_PROFILE: prod
@@ -10,6 +10,7 @@ env:
 
 jobs:
   tests:
+    name: Build and Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,8 +20,25 @@ jobs:
         with:
           version: nightly
 
-      - name: Install dependencies
+      - name: Install forge dependencies
         run: forge install
+
+      - name: Set Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Run yarn install
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install
+
+      - name: Build bundle
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build
+        env:
+          SOCKET_SIGNER_KEY: "562ed26cb2e52dbdf8cfbec91cd5370f236a997e54ebc1c1fb34d3237d4795f8"
 
       - name: Check contract sizes
         run: forge build --sizes
