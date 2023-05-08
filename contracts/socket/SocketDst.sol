@@ -177,6 +177,11 @@ abstract contract SocketDst is SocketBase {
         ) revert InvalidProof();
     }
 
+    /**
+     * This function assumes localPlug_ will have code while executing. As the message
+     * execution failure is not blocking the system, it is not necessary to check if
+     * code exists in the given address.
+     */
     function _execute(
         address executor,
         uint256 executionFee,
