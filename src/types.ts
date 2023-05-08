@@ -162,6 +162,7 @@ export interface ChainSocketAddresses {
   OptimisticSwitchboard: string;
   SocketBatcher: string;
   integrations?: Integrations;
+  OpenExecutionManager?: string;
 }
 
 export type DeploymentAddresses = {
