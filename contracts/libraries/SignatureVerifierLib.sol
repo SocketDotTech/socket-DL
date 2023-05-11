@@ -21,7 +21,7 @@ library SignatureVerifierLib {
      * @return signer The address of the signer
      */
     function recoverSigner(
-        uint256 destChainSlug_,
+        uint32 destChainSlug_,
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_

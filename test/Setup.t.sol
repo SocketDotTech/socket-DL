@@ -50,7 +50,7 @@ contract Setup is Test {
     uint256 gasPriceOracleNonce;
 
     struct SocketConfigContext {
-        uint256 siblingChainSlug;
+        uint32 siblingChainSlug;
         uint256 switchboardNonce;
         ICapacitor capacitor__;
         IDecapacitor decapacitor__;
@@ -111,7 +111,7 @@ contract Setup is Test {
 
     function _deployContractsOnSingleChain(
         ChainContext storage cc_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256[] memory transmitterPrivateKeys_
     ) internal {
         // deploy socket setup
@@ -165,7 +165,7 @@ contract Setup is Test {
 
     function _addOptimisticSwitchboard(
         ChainContext storage cc_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         OptimisticSwitchboard optimisticSwitchboard = new OptimisticSwitchboard(
@@ -222,7 +222,7 @@ contract Setup is Test {
 
     function _addFastSwitchboard(
         ChainContext storage cc_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         FastSwitchboard fastSwitchboard = new FastSwitchboard(
@@ -342,7 +342,7 @@ contract Setup is Test {
         address deployer_,
         address switchBoardAddress_,
         uint256 nonce_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         vm.startPrank(deployer_);
@@ -385,7 +385,7 @@ contract Setup is Test {
     function _addTransmitters(
         uint256[] memory transmitterPrivateKeys_,
         ChainContext memory cc_,
-        uint256 remoteChainSlug_
+        uint32 remoteChainSlug_
     ) internal {
         vm.startPrank(_socketOwner);
 
@@ -411,7 +411,7 @@ contract Setup is Test {
     function _getLatestSignature(
         ChainContext storage src_,
         address capacitor_,
-        uint256 remoteChainSlug_
+        uint32 remoteChainSlug_
     ) internal returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint64 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
@@ -463,7 +463,7 @@ contract Setup is Test {
         address switchboardAddress,
         bytes32 packetId_
     ) internal {
-        uint256 srcSlug = uint256(packetId_) >> 224;
+        uint32 srcSlug = uint32(uint256(packetId_) >> 224);
         bytes32 digest = keccak256(abi.encode(srcSlug, packetId_));
 
         // generate attest-signature
@@ -534,7 +534,7 @@ contract Setup is Test {
     }
 
     function _packMessageId(
-        uint256 srcChainSlug,
+        uint32 srcChainSlug,
         uint256 nonce
     ) internal pure returns (bytes32) {
         return bytes32((srcChainSlug << 224) | nonce);
@@ -542,7 +542,7 @@ contract Setup is Test {
 
     function _getPackedId(
         address capacitorAddr_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 id_
     ) internal pure returns (bytes32) {
         return

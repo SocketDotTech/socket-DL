@@ -57,7 +57,7 @@ contract SocketBatcher is AccessControlExtended {
      */
     struct AttestRequest {
         bytes32 packetId;
-        uint256 srcChainSlug;
+        uint32 srcChainSlug;
         bytes signature;
     }
 
@@ -100,7 +100,7 @@ contract SocketBatcher is AccessControlExtended {
      */
     struct SetProposeGasLimitRequest {
         uint256 nonce;
-        uint256 dstChainId;
+        uint32 dstChainId;
         uint256 proposeGasLimit;
         bytes signature;
     }
@@ -114,7 +114,7 @@ contract SocketBatcher is AccessControlExtended {
      */
     struct SetAttestGasLimitRequest {
         uint256 nonce;
-        uint256 dstChainId;
+        uint32 dstChainId;
         uint256 attestGasLimit;
         bytes signature;
     }
@@ -128,7 +128,7 @@ contract SocketBatcher is AccessControlExtended {
      */
     struct SetExecutionOverheadRequest {
         uint256 nonce;
-        uint256 dstChainId;
+        uint32 dstChainId;
         uint256 executionOverhead;
         bytes signature;
     }

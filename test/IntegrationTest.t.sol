@@ -212,7 +212,7 @@ contract HappyTest is Setup {
         bytes memory payload
     ) internal returns (bytes32 msgId, bytes32 root) {
         uint256 msgGasLimit = _msgGasLimit;
-        uint256 dstSlug = _b.chainSlug;
+        uint32 dstSlug = _b.chainSlug;
 
         hoax(_plugOwner);
         srcCounter__.remoteAddOperation{value: fees}(

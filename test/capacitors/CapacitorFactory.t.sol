@@ -10,7 +10,7 @@ contract CapacitorFactoryTest is Setup {
     address immutable _owner = address(uint160(c++));
 
     uint256 tokenSupply = 10000;
-    uint256 siblingChainSlug = 80001;
+    uint32 siblingChainSlug = 80001;
 
     CapacitorFactory _cf;
     ERC20PresetFixedSupply _token;

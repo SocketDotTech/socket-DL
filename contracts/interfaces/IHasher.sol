@@ -18,9 +18,9 @@ interface IHasher {
      * @param payload the data packed which is used by inbound for execution
      */
     function packMessage(
-        uint256 srcChainSlug,
+        uint32 srcChainSlug,
         address srcPlug,
-        uint256 dstChainSlug,
+        uint32 dstChainSlug,
         address dstPlug,
         bytes32 msgId,
         uint256 msgGasLimit,

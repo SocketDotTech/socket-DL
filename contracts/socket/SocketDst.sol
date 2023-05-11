@@ -115,7 +115,7 @@ abstract contract SocketDst is SocketBase {
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
 
-        uint256 remoteSlug = _decodeSlug(messageDetails_.msgId);
+        uint32 remoteSlug = _decodeSlug(messageDetails_.msgId);
 
         PlugConfig storage plugConfig = _plugConfigs[localPlug_][remoteSlug];
 
@@ -154,7 +154,7 @@ abstract contract SocketDst is SocketBase {
 
     function _verify(
         bytes32 packetId_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         bytes32 packedMessage_,
         PlugConfig storage plugConfig_,
         bytes memory decapacitorProof_
@@ -186,7 +186,7 @@ abstract contract SocketDst is SocketBase {
         address executor,
         uint256 executionFee,
         address localPlug_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes32 msgId_,
         bytes calldata payload_
@@ -230,7 +230,7 @@ abstract contract SocketDst is SocketBase {
      */
     function _decodeSlug(
         bytes32 id_
-    ) internal pure returns (uint256 chainSlug_) {
-        chainSlug_ = uint256(id_) >> 224;
+    ) internal pure returns (uint32 chainSlug_) {
+        chainSlug_ = uint32(uint256(id_) >> 224);
     }
 }

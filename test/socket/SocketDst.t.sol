@@ -45,9 +45,9 @@ contract SocketDstTest is Setup {
     );
 
     event MessageTransmitted(
-        uint256 localChainSlug,
+        uint32 localChainSlug,
         address localPlug,
-        uint256 dstChainSlug,
+        uint32 dstChainSlug,
         address dstPlug,
         bytes32 msgId,
         uint256 msgGasLimit,
@@ -344,7 +344,7 @@ contract SocketDstTest is Setup {
     function getLatestSignature(
         ChainContext memory src_,
         address capacitor_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 transmitterPrivateKey_
     ) public returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint256 id;

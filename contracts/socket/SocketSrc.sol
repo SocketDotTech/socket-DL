@@ -33,14 +33,14 @@ abstract contract SocketSrc is SocketBase {
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable override returns (bytes32 msgId) {
         PlugConfig storage plugConfig = _plugConfigs[msg.sender][
             remoteChainSlug_
         ];
-        uint256 localChainSlug = chainSlug;
+        uint32 localChainSlug = chainSlug;
 
         msgId = _encodeMsgId(localChainSlug);
 
@@ -203,8 +203,8 @@ abstract contract SocketSrc is SocketBase {
     // Packs the local plug, local chain slug, remote chain slug and nonce
     // messageCount++ will take care of msg id overflow as well
     // msgId(256) = localChainSlug(32) | nonce(224)
-    function _encodeMsgId(uint256 slug_) internal returns (bytes32) {
-        return bytes32((uint256(uint32(slug_)) << 224) | messageCount++);
+    function _encodeMsgId(uint32 slug_) internal returns (bytes32) {
+        return bytes32((uint256(slug_) << 224) | messageCount++);
     }
 
     function _encodePacketId(

@@ -12,7 +12,7 @@ import "../libraries/SignatureVerifierLib.sol";
 contract SignatureVerifier is ISignatureVerifier {
     /// @inheritdoc ISignatureVerifier
     function recoverSigner(
-        uint256 destChainSlug_,
+        uint32 destChainSlug_,
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_

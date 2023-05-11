@@ -16,10 +16,7 @@ contract AccessControlExtended is AccessControl {
      * @param roleName_ The name of the role.
      * @param chainSlug_ The chain slug associated with the role.
      */
-    modifier onlyRoleWithChainSlug(
-        string memory roleName_,
-        uint256 chainSlug_
-    ) {
+    modifier onlyRoleWithChainSlug(string memory roleName_, uint32 chainSlug_) {
         bytes32 role = keccak256(abi.encode(roleName_, chainSlug_));
         if (!_hasRole(role, msg.sender)) revert NoPermit(role);
         _;
@@ -38,7 +35,7 @@ contract AccessControlExtended is AccessControl {
      */
     function grantRole(
         string memory roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address grantee_
     ) external virtual onlyOwner {
         _grantRole(roleName_, chainSlug_, grantee_);
@@ -74,7 +71,7 @@ contract AccessControlExtended is AccessControl {
 
     function _grantRole(
         string memory roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address grantee_
     ) internal {
         _grantRole(keccak256(abi.encode(roleName_, chainSlug_)), grantee_);
@@ -89,7 +86,7 @@ contract AccessControlExtended is AccessControl {
      */
     function hasRole(
         string memory roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address address_
     ) external view returns (bool) {
         return _hasRole(roleName_, chainSlug_, address_);
@@ -97,7 +94,7 @@ contract AccessControlExtended is AccessControl {
 
     function _hasRole(
         string memory roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address address_
     ) internal view returns (bool) {
         return _hasRole(keccak256(abi.encode(roleName_, chainSlug_)), address_);
@@ -111,7 +108,7 @@ contract AccessControlExtended is AccessControl {
      */
     function revokeRole(
         string memory roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address grantee_
     ) external virtual onlyOwner {
         _revokeRole(roleName_, chainSlug_, grantee_);
@@ -119,7 +116,7 @@ contract AccessControlExtended is AccessControl {
 
     function _revokeRole(
         string memory roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address revokee_
     ) internal {
         _revokeRole(keccak256(abi.encode(roleName_, chainSlug_)), revokee_);

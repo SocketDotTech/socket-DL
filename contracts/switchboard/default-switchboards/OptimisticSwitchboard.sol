@@ -21,7 +21,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
         address owner_,
         address socket_,
         address gasPriceOracle_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 timeoutInSeconds_
     )
         AccessControlExtended(owner_)
@@ -48,7 +48,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
      * @dev no watcher fees needed hence returns 0
      */
     function _getMinSwitchboardFees(
-        uint256,
+        uint32,
         uint256
     ) internal pure override returns (uint256) {
         return 0;

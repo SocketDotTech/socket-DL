@@ -24,7 +24,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     uint256 public sealGasLimit;
 
     // chain slug => propose gas limit
-    mapping(uint256 => uint256) public proposeGasLimit;
+    mapping(uint32 => uint256) public proposeGasLimit;
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
@@ -47,7 +47,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param dstChainSlug The destination chain slug for which the propose gas limit is updated
      * @param gasLimit The new propose gas limit
      */
-    event ProposeGasLimitSet(uint256 dstChainSlug, uint256 gasLimit);
+    event ProposeGasLimitSet(uint32 dstChainSlug, uint256 gasLimit);
     /**
      * @notice Emitted when a new signature verifier contract is set
      * @param signatureVerifier The address of the new signature verifier contract
@@ -185,7 +185,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      */
     function setProposeGasLimit(
         uint256 nonce_,
-        uint256 dstChainSlug_,
+        uint32 dstChainSlug_,
         uint256 gasLimit_,
         bytes calldata signature_
     ) external override {

@@ -17,7 +17,7 @@ contract GasPriceOracleTest is Setup {
     TransmitManager internal transmitManager;
 
     event RelativeGasPriceUpdated(
-        uint256 dstChainSlug_,
+        uint32 dstChainSlug_,
         uint256 relativeGasPrice_
     );
     event TransmitManagerUpdated(address transmitManager);

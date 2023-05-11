@@ -22,7 +22,7 @@ contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
     /**
      * @notice A mapping that stores the timestamp of the last update for each chain.
      */
-    mapping(uint256 => uint256) public updatedAt;
+    mapping(uint32 => uint256) public updatedAt;
     /**
      * @notice A mapping that stores the relative gas price of each chain.
      */
@@ -51,7 +51,7 @@ contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
      * @param relativeGasPrice The new relative gas price of the destination chain.
      */
     event RelativeGasPriceUpdated(
-        uint256 dstChainSlug,
+        uint32 dstChainSlug,
         uint256 relativeGasPrice
     );
     /**

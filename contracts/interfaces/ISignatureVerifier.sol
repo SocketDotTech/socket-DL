@@ -14,7 +14,7 @@ interface ISignatureVerifier {
      * @param signature_ signature
      */
     function recoverSigner(
-        uint256 dstChainSlug_,
+        uint32 dstChainSlug_,
         uint256 packetId_,
         bytes32 root_,
         bytes calldata signature_

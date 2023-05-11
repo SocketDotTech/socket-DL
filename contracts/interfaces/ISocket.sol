@@ -53,9 +53,9 @@ interface ISocket {
      * @param payload the data which will be used by inbound at remote
      */
     event MessageOutbound(
-        uint256 localChainSlug,
+        uint32 localChainSlug,
         address localPlug,
-        uint256 dstChainSlug,
+        uint32 dstChainSlug,
         address dstPlug,
         bytes32 msgId,
         uint256 msgGasLimit,
@@ -95,7 +95,7 @@ interface ISocket {
      */
     event PlugConnected(
         address plug,
-        uint256 siblingChainSlug,
+        uint32 siblingChainSlug,
         address siblingPlug,
         address inboundSwitchboard,
         address outboundSwitchboard,
@@ -117,7 +117,7 @@ interface ISocket {
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable returns (bytes32 msgId);
@@ -167,7 +167,7 @@ interface ISocket {
      * @param outboundSwitchboard_ the address of switchboard to use for sending messages
      */
     function connect(
-        uint256 siblingChainSlug_,
+        uint32 siblingChainSlug_,
         address siblingPlug_,
         address inboundSwitchboard_,
         address outboundSwitchboard_
