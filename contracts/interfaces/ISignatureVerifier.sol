@@ -15,7 +15,7 @@ interface ISignatureVerifier {
      */
     function recoverSigner(
         uint32 dstChainSlug_,
-        uint256 packetId_,
+        bytes32 packetId_,
         bytes32 root_,
         bytes calldata signature_
     ) external pure returns (address signer);

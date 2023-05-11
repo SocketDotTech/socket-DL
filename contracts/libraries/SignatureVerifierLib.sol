@@ -14,21 +14,19 @@ library SignatureVerifierLib {
 
     /**
      * @notice recovers the signer's address from a message digest and signature
-     * @param destChainSlug_ The destination chain slug of the packet
+     * @param dstChainSlug_ The destination chain slug of the packet
      * @param packetId_ The ID of the packet
      * @param root_ The root hash of the packet data
      * @param signature_ The signature to be verified
      * @return signer The address of the signer
      */
     function recoverSigner(
-        uint32 destChainSlug_,
-        uint256 packetId_,
+        uint32 dstChainSlug_,
+        bytes32 packetId_,
         bytes32 root_,
         bytes calldata signature_
     ) internal pure returns (address signer) {
-        bytes32 digest = keccak256(
-            abi.encode(destChainSlug_, packetId_, root_)
-        );
+        bytes32 digest = keccak256(abi.encode(dstChainSlug_, packetId_, root_));
         signer = recoverSignerFromDigest(digest, signature_);
     }
 
