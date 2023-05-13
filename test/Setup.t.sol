@@ -417,7 +417,7 @@ contract Setup is Test {
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
         bytes32 digest = keccak256(
-            abi.encode(uint32(remoteChainSlug_), packetId, root)
+            abi.encode(remoteChainSlug_, packetId, root)
         );
         sig = _createSignature(digest, _transmitterPrivateKey);
     }
@@ -537,7 +537,7 @@ contract Setup is Test {
         uint32 srcChainSlug,
         uint256 nonce
     ) internal pure returns (bytes32) {
-        return bytes32((srcChainSlug << 224) | nonce);
+        return bytes32((uint256(srcChainSlug) << 224) | nonce);
     }
 
     function _getPackedId(
@@ -547,7 +547,7 @@ contract Setup is Test {
     ) internal pure returns (bytes32) {
         return
             bytes32(
-                (chainSlug_ << 224) |
+                (uint256(chainSlug_) << 224) |
                     (uint256(uint160(capacitorAddr_)) << 64) |
                     id_
             );

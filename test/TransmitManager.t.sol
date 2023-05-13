@@ -150,7 +150,7 @@ contract TransmitManagerTest is Setup {
     }
 
     function testGenerateAndVerifySignature() public {
-        uint256 packetId = 123;
+        bytes32 packetId = bytes32("");
         bytes32 root = bytes32(abi.encode(123));
         bytes32 digest = keccak256(abi.encode(chainSlug, packetId, root));
         bytes memory sig = _createSignature(digest, transmitterPrivateKey);
