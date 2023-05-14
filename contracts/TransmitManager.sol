@@ -123,7 +123,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     function getMinFees(
         uint32 siblingChainSlug_
     ) external view override returns (uint256) {
-        return _calculateMinFees(siblingChainSlug_);
+        return transmissionFees[siblingChainSlug_];
     }
 
     /**

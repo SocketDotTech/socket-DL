@@ -45,6 +45,7 @@ contract Setup is Test {
     uint256 internal _sealGasLimit = 150000;
     uint256 internal _proposeGasLimit = 150000;
     uint256 internal _attestGasLimit = 150000;
+    uint256 internal _transmissionFees = 150000;
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
@@ -143,6 +144,27 @@ contract Setup is Test {
             remoteChainSlug_,
             _proposeGasLimit,
             sig
+        );
+
+        //set TransmissionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                _transmissionFees
+            )
+        );
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+        cc_.transmitManager__.setTransmissionFees(
+            cc_.transmitterNonce++,
+            uint32(remoteChainSlug_),
+            _transmissionFees,
+            feesUpdateSignature
         );
 
         // deploy default configs: fast, slow
