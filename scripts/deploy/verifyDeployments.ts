@@ -16,7 +16,6 @@ import {
   getChainRoleHash,
   getDecapacitorAddress,
   getInstance,
-  getRoleHash,
   getSwitchboardAddress,
 } from "./utils";
 import { assert } from "console";
@@ -28,6 +27,16 @@ import {
   getAllAddresses,
   networkToChainSlug,
 } from "../../src";
+import {
+  GAS_LIMIT_UPDATER_ROLE,
+  GOVERNANCE_ROLE,
+  RESCUE_ROLE,
+  TRANSMITTER_ROLE,
+  TRIP_ROLE,
+  UNTRIP_ROLE,
+  WATCHER_ROLE,
+  WITHDRAW_ROLE,
+} from "./utils/roles";
 
 async function checkNative(
   contractAddr,
@@ -39,7 +48,7 @@ async function checkNative(
   const switchboard = await getInstance(contractName, contractAddr);
 
   let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
+    GAS_LIMIT_UPDATER_ROLE,
     transmitterAddresses[mode]
   );
   assert(
@@ -63,7 +72,7 @@ async function checkFast(contractAddr, localChain, remoteChain) {
   const switchboard = await getInstance("FastSwitchboard", contractAddr);
 
   let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("WATCHER_ROLE", chainKeyToSlug[remoteChain]),
+    getChainRoleHash(WATCHER_ROLE, chainKeyToSlug[remoteChain]),
     watcherAddresses[mode]
   );
   assert(hasRole, `❌ FastSwitchboard has wrong TRIP_ROLE ${remoteChain}`);
@@ -74,19 +83,19 @@ async function checkDefault(contractAddr, localChain, remoteChain) {
 
   // check roles
   let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("TRIP_ROLE", chainKeyToSlug[remoteChain]),
+    getChainRoleHash(TRIP_ROLE, chainKeyToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong TRIP_ROLE ${remoteChain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("UNTRIP_ROLE", chainKeyToSlug[remoteChain]),
+    getChainRoleHash(UNTRIP_ROLE, chainKeyToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong UNTRIP_ROLE ${remoteChain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainKeyToSlug[remoteChain]),
+    getChainRoleHash(GAS_LIMIT_UPDATER_ROLE, chainKeyToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(
@@ -100,31 +109,31 @@ async function checkSwitchboardRoles(chain, contractAddr) {
 
   // check roles
   let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getRoleHash("GOVERNANCE_ROLE"),
+    GOVERNANCE_ROLE,
     socketOwner
   );
   assert(hasRole, `❌ Switchboard has wrong governance address ${chain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getRoleHash("RESCUE_ROLE"),
+    RESCUE_ROLE,
     socketOwner
   );
   assert(hasRole, `❌ Switchboard has wrong rescue address ${chain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getRoleHash("WITHDRAW_ROLE"),
+    WITHDRAW_ROLE,
     socketOwner
   );
   assert(hasRole, `❌ Switchboard has wrong withdraw role address ${chain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getRoleHash("TRIP_ROLE"),
+    TRIP_ROLE,
     socketOwner
   );
   assert(hasRole, `❌ Switchboard has wrong trip role address ${chain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getRoleHash("UNTRIP_ROLE"),
+    UNTRIP_ROLE,
     socketOwner
   );
   assert(hasRole, `❌ Switchboard has wrong untrip role address ${chain}`);
@@ -204,20 +213,20 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
 
   // check roles
   let hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getRoleHash("GOVERNANCE_ROLE"),
+    GOVERNANCE_ROLE,
     socketOwner
   );
   assert(hasRole, `❌ TransmitManager has wrong governance address ${chain}`);
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getRoleHash("RESCUE_ROLE"),
+    RESCUE_ROLE,
     socketOwner
   );
 
   assert(hasRole, `❌ TransmitManager has wrong rescue address ${chain}`);
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getRoleHash("WITHDRAW_ROLE"),
+    WITHDRAW_ROLE,
     socketOwner
   );
 
@@ -227,7 +236,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("TRANSMITTER_ROLE", chainKeyToSlug[chain]),
+    getChainRoleHash(TRANSMITTER_ROLE, chainKeyToSlug[chain]),
     transmitterAddresses[mode]
   );
   assert(
@@ -236,7 +245,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("TRANSMITTER_ROLE", chainKeyToSlug[remoteChain]),
+    getChainRoleHash(TRANSMITTER_ROLE, chainKeyToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(
@@ -245,7 +254,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainKeyToSlug[remoteChain]),
+    getChainRoleHash(GAS_LIMIT_UPDATER_ROLE, chainKeyToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(
@@ -254,7 +263,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
+    GAS_LIMIT_UPDATER_ROLE,
     transmitterAddresses[mode]
   );
   assert(
@@ -271,20 +280,20 @@ async function checkExecutionManager(chain, contractAddr) {
 
   // check roles
   let hasRole = await executionManager["hasRole(bytes32,address)"](
-    getRoleHash("GOVERNANCE_ROLE"),
+    GOVERNANCE_ROLE,
     socketOwner
   );
   assert(hasRole, `❌ ExecutionManager has wrong governance address ${chain}`);
 
   hasRole = await executionManager["hasRole(bytes32,address)"](
-    getRoleHash("RESCUE_ROLE"),
+    RESCUE_ROLE,
     socketOwner
   );
 
   assert(hasRole, `❌ ExecutionManager has wrong rescue address ${chain}`);
 
   hasRole = await executionManager["hasRole(bytes32,address)"](
-    getRoleHash("WITHDRAW_ROLE"),
+    WITHDRAW_ROLE,
     socketOwner
   );
 
@@ -294,7 +303,7 @@ async function checkExecutionManager(chain, contractAddr) {
   );
 
   hasRole = await executionManager["hasRole(bytes32,address)"](
-    getRoleHash("EXECUTOR_ROLE"),
+    EXECUTOR_ROLE,
     executorAddresses[mode]
   );
   assert(hasRole, `❌ ExecutionManager has wrong executor address ${chain}`);
@@ -305,15 +314,12 @@ async function checkSocket(chain, socketAddr) {
 
   // check roles
   let hasRole = await socket["hasRole(bytes32,address)"](
-    getRoleHash("GOVERNANCE_ROLE"),
+    GOVERNANCE_ROLE,
     socketOwner
   );
   assert(hasRole, `❌ Socket has wrong governance address ${chain}`);
 
-  hasRole = await socket["hasRole(bytes32,address)"](
-    getRoleHash("RESCUE_ROLE"),
-    socketOwner
-  );
+  hasRole = await socket["hasRole(bytes32,address)"](RESCUE_ROLE, socketOwner);
 
   assert(hasRole, `❌ Socket has wrong rescue address ${chain}`);
 }
@@ -330,15 +336,12 @@ async function checkOracle(chain, oracleAddr, transmitManagerAddr) {
 
   // check roles
   let hasRole = await oracle["hasRole(bytes32,address)"](
-    getRoleHash("GOVERNANCE_ROLE"),
+    GOVERNANCE_ROLE,
     socketOwner
   );
   assert(hasRole, `❌ GasPriceOracle has wrong governance address ${chain}`);
 
-  hasRole = await oracle["hasRole(bytes32,address)"](
-    getRoleHash("RESCUE_ROLE"),
-    socketOwner
-  );
+  hasRole = await oracle["hasRole(bytes32,address)"](RESCUE_ROLE, socketOwner);
 
   assert(hasRole, `❌ GasPriceOracle has wrong rescue address ${chain}`);
 }

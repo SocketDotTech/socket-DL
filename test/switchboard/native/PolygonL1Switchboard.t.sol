@@ -82,8 +82,8 @@ contract PolygonL1SwitchboardTest is Setup {
 
         vm.startPrank(_socketOwner);
 
-        cc_.transmitManager__.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        cc_.transmitManager__.grantRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
             remoteChainSlug_,
             _socketOwner
         );
@@ -92,7 +92,7 @@ contract PolygonL1SwitchboardTest is Setup {
 
         bytes32 digest = keccak256(
             abi.encode(
-                "PROPOSE_GAS_LIMIT_UPDATE",
+                PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                 cc_.chainSlug,
                 remoteChainSlug_,
                 cc_.transmitterNonce,

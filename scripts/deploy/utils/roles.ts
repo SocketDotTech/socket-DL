@@ -1,0 +1,42 @@
+import { getRoleHash } from "./utils";
+
+export const SEAL_GAS_LIMIT_UPDATER_SIG_IDENTIFER = getRoleHash(
+  "SEAL_GAS_LIMIT_UPDATE"
+);
+export const PROPOSE_GAS_LIMIT_UPDATER_SIG_IDENTIFER = getRoleHash(
+  "PROPOSE_GAS_LIMIT_UPDATE"
+);
+export const ATTEST_GAS_LIMIT_UPDATER_SIG_IDENTIFER = getRoleHash(
+  "ATTEST_GAS_LIMIT_UPDATE"
+);
+export const TRIP_PATH_SIG_IDENTIFIER = getRoleHash("TRIP_PATH");
+export const TRIP_GLOBAL_SIG_IDENTIFIER = getRoleHash("TRIP_GLOBAL");
+
+export const UNTRIP_PATH_SIG_IDENTIFIER = getRoleHash("UNTRIP_PATH");
+export const UNTRIP_GLOBAL_SIG_IDENTIFIER = getRoleHash("UNTRIP_GLOBAL");
+
+export const TRIP_NATIVE_SIG_IDENTIFIER = getRoleHash("TRIP_NATIVE");
+export const UNTRIP_NATIVE_SIG_IDENTIFIER = getRoleHash("UNTRIP_NATIVE");
+
+export const EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER = getRoleHash(
+  "EXECUTION_OVERHEAD_UPDATE"
+);
+export const ARBITRUM_NATIVE_FEE_UPDATE_SIG_IDENTIFIER = getRoleHash(
+  "ARBITRUM_NATIVE_FEE_UPDATE"
+);
+export const L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER = getRoleHash(
+  "L1_RECEIVE_GAS_LIMIT_UPDATE"
+);
+export const INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER = getRoleHash(
+  "INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE"
+);
+
+export const RESCUE_ROLE = getRoleHash("RESCUE_ROLE");
+export const WITHDRAW_ROLE = getRoleHash("WITHDRAW_ROLE");
+export const TRIP_ROLE = getRoleHash("TRIP_ROLE");
+export const UNTRIP_ROLE = getRoleHash("UNTRIP_ROLE");
+export const GOVERNANCE_ROLE = getRoleHash("GOVERNANCE_ROLE");
+export const GAS_LIMIT_UPDATER_ROLE = getRoleHash("GAS_LIMIT_UPDATER_ROLE");
+export const EXECUTOR_ROLE = getRoleHash("EXECUTOR_ROLE");
+export const TRANSMITTER_ROLE = getRoleHash("TRANSMITTER_ROLE");
+export const WATCHER_ROLE = getRoleHash("WATCHER_ROLE");

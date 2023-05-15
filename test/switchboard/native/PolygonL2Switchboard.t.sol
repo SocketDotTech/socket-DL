@@ -20,15 +20,12 @@ contract PolygonL2SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
+        console.log("PolygonL2Switchboard -> setup initiated");
+
         initialise();
+
         _a.chainSlug = uint32(uint256(80001));
         _b.chainSlug = uint32(uint256(5));
-
-        uint256 fork = vm.createFork(
-            vm.envString("POLYGON_MUMBAI_RPC"),
-            32375450
-        );
-        vm.selectFork(fork);
 
         uint256[] memory transmitterPivateKeys = new uint256[](1);
         transmitterPivateKeys[0] = _transmitterPrivateKey;
@@ -80,8 +77,8 @@ contract PolygonL2SwitchboardTest is Setup {
 
         vm.startPrank(_socketOwner);
 
-        cc_.transmitManager__.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        cc_.transmitManager__.grantRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
             remoteChainSlug_,
             _socketOwner
         );
@@ -90,7 +87,7 @@ contract PolygonL2SwitchboardTest is Setup {
 
         bytes32 digest = keccak256(
             abi.encode(
-                "PROPOSE_GAS_LIMIT_UPDATE",
+                PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                 cc_.chainSlug,
                 remoteChainSlug_,
                 cc_.transmitterNonce,

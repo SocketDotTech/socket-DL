@@ -45,6 +45,15 @@ abstract contract AccessControl is Ownable {
     }
 
     /**
+     * @dev Checks and reverts if an address do not have a specific role.
+     * @param role_ The role to check.
+     * @param address_ The address to check.
+     */
+    function _checkRole(bytes32 role_, address address_) internal virtual {
+        if (!_hasRole(role_, address_)) revert NoPermit(role_);
+    }
+
+    /**
      * @dev Grants a role to a given address.
      * @param role_ The role to grant.
      * @param grantee_ The address to grant the role to.
@@ -92,6 +101,34 @@ abstract contract AccessControl is Ownable {
     function _revokeRole(bytes32 role_, address revokee_) internal {
         _permits[role_][revokee_] = false;
         emit RoleRevoked(role_, revokee_);
+    }
+
+    /**
+     * @dev Grants multiple roles to multiple addresses in batch.
+     * @param roleNames_ The names of the roles to grant.
+     * @param grantees_ The addresses to be granted the roles.
+     */
+    function grantBatchRole(
+        bytes32[] calldata roleNames_,
+        address[] calldata grantees_
+    ) external virtual onlyOwner {
+        require(roleNames_.length == grantees_.length);
+        for (uint256 index = 0; index < roleNames_.length; index++)
+            _grantRole(roleNames_[index], grantees_[index]);
+    }
+
+    /**
+     * @dev Revokes multiple roles from multiple addresses in batch.
+     * @param roleNames_ The names of the roles to revoke.
+     * @param grantees_ The addresses to be revoked the roles.
+     */
+    function revokeBatchRole(
+        bytes32[] calldata roleNames_,
+        address[] calldata grantees_
+    ) external virtual onlyOwner {
+        require(roleNames_.length == grantees_.length);
+        for (uint256 index = 0; index < roleNames_.length; index++)
+            _revokeRole(roleNames_[index], grantees_[index]);
     }
 
     /**

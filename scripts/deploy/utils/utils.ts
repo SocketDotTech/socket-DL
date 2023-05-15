@@ -24,7 +24,7 @@ export const getRoleHash = (role: string) =>
 export const getChainRoleHash = (role: string, chainSlug: number) =>
   ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["string", "uint256"],
+      ["bytes32", "uint256"],
       [role, chainSlug]
     )
   );

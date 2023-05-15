@@ -428,7 +428,10 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                       return;
                     let hasRole = await instance.callStatic[
                       "hasRole(bytes32,address)"
-                    ](getChainRoleHash(role, Number(siblingSlug)), userAddress);
+                    ](
+                      getChainRoleHash(getRoleHash(role), Number(siblingSlug)),
+                      userAddress
+                    );
 
                     if (isRoleChanged(hasRole, newRoleStatus))
                       roleStatus[chainId][contractName][siblingSlug][role] =
@@ -466,7 +469,10 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                         contractName as CORE_CONTRACTS,
                         contractAddress!,
                         hasRole,
-                        getChainRoleHash(role, Number(siblingSlug)),
+                        getChainRoleHash(
+                          getRoleHash(role),
+                          Number(siblingSlug)
+                        ),
                         userAddress,
                         newRoleStatus
                       );

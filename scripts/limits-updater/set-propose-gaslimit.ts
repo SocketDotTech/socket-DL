@@ -6,6 +6,7 @@ import * as TransmitManagerABI from "../../artifacts/contracts/TransmitManager.s
 import { isTransactionSuccessful } from "./utils/transaction-helper";
 import { proposeGasLimit } from "../constants";
 import { networkToChainSlug } from "../../src";
+import { PROPOSE_GAS_LIMIT_UPDATER_SIG_IDENTIFER } from "../deploy/utils/roles";
 
 export const setProposeGasLimit = async (
   srcChainId: number,
@@ -38,7 +39,7 @@ export const setProposeGasLimit = async (
         defaultAbiCoder.encode(
           ["string", "uint256", "uint256", "uint256", "uint256"],
           [
-            "PROPOSE_GAS_LIMIT_UPDATE",
+            PROPOSE_GAS_LIMIT_UPDATER_SIG_IDENTIFER,
             srcChainId,
             dstChainIds[index],
             nonce,

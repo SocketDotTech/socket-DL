@@ -14,7 +14,8 @@ import "../contracts/TransmitManager.sol";
 import "../contracts/GasPriceOracle.sol";
 import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
-import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRIP_ROLE, UNTRIP_ROLE} from "../contracts/utils/AccessRoles.sol";
+import "../contracts/utils/AccessRoles.sol";
+import "../contracts/utils/SigIdentifiers.sol";
 
 contract Setup is Test {
     uint256 internal c = 1;
@@ -119,8 +120,8 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
 
-        cc_.transmitManager__.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        cc_.transmitManager__.grantRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
             remoteChainSlug_,
             _socketOwner
         );
@@ -129,7 +130,7 @@ contract Setup is Test {
 
         bytes32 digest = keccak256(
             abi.encode(
-                "PROPOSE_GAS_LIMIT_UPDATE",
+                PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                 cc_.chainSlug,
                 remoteChainSlug_,
                 cc_.transmitterNonce,
@@ -179,15 +180,15 @@ contract Setup is Test {
         uint256 nonce = 0;
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        optimisticSwitchboard.grantRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
             remoteChainSlug_,
             _socketOwner
         );
 
         bytes32 digest = keccak256(
             abi.encode(
-                "EXECUTION_OVERHEAD_UPDATE",
+                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
                 nonce,
                 cc_.chainSlug,
                 remoteChainSlug_,
@@ -202,8 +203,8 @@ contract Setup is Test {
             _executionOverhead,
             sig
         );
-        optimisticSwitchboard.grantRole(
-            "WATCHER_ROLE",
+        optimisticSwitchboard.grantRoleWithSlug(
+            WATCHER_ROLE,
             remoteChainSlug_,
             _watcher
         );
@@ -236,8 +237,8 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-        fastSwitchboard.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        fastSwitchboard.grantRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
             remoteChainSlug_,
             _socketOwner
         );
@@ -247,7 +248,7 @@ contract Setup is Test {
 
         bytes32 digest = keccak256(
             abi.encode(
-                "EXECUTION_OVERHEAD_UPDATE",
+                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
                 nonce,
                 cc_.chainSlug,
                 remoteChainSlug_,
@@ -265,7 +266,7 @@ contract Setup is Test {
 
         digest = keccak256(
             abi.encode(
-                "ATTEST_GAS_LIMIT_UPDATE",
+                ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                 cc_.chainSlug,
                 remoteChainSlug_,
                 nonce,
@@ -317,8 +318,8 @@ contract Setup is Test {
             _sealGasLimit
         );
 
-        cc_.transmitManager__.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        cc_.transmitManager__.grantRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
             cc_.chainSlug,
             deployer_
         );
@@ -398,8 +399,8 @@ contract Setup is Test {
             // deduce transmitter address from private key
             transmitter = vm.addr(transmitterPrivateKeys_[index]);
             // grant transmitter role
-            cc_.transmitManager__.grantRole(
-                "TRANSMITTER_ROLE",
+            cc_.transmitManager__.grantRoleWithSlug(
+                TRANSMITTER_ROLE,
                 remoteChainSlug_,
                 transmitter
             );
