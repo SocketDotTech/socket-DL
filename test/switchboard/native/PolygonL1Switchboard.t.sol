@@ -65,6 +65,11 @@ contract PolygonL1SwitchboardTest is Setup {
         vm.stopPrank();
     }
 
+    function testNonBridgeReceivePacketCall() public {
+        vm.expectRevert("ONLY_FX_CHILD");
+        polygonL1Switchboard.receivePacket(bytes32(0), bytes32(0));
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
