@@ -20,15 +20,12 @@ contract PolygonL2SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
+        console.log("PolygonL2Switchboard -> setup initiated");
+
         initialise();
+
         _a.chainSlug = uint32(uint256(80001));
         _b.chainSlug = uint32(uint256(5));
-
-        uint256 fork = vm.createFork(
-            vm.envString("POLYGON_MUMBAI_RPC"),
-            32375450
-        );
-        vm.selectFork(fork);
 
         uint256[] memory transmitterPivateKeys = new uint256[](1);
         transmitterPivateKeys[0] = _transmitterPrivateKey;
