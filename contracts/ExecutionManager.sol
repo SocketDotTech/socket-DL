@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 import "./interfaces/IExecutionManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
-import "./interfaces/IGasPriceOracle.sol";
 import "./utils/AccessControl.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/SignatureVerifierLib.sol";
@@ -20,8 +19,6 @@ import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
  */
 contract ExecutionManager is IExecutionManager, AccessControlExtended {
     ISignatureVerifier public signatureVerifier__;
-    IGasPriceOracle public gasPriceOracle__;
-    event GasPriceOracleSet(address gasPriceOracle);
 
     /**
      * @notice Emitted when the executionFees is updated
@@ -42,16 +39,13 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
     /**
      * @dev Constructor for ExecutionManager contract
-     * @param gasPriceOracle_ Address of the Gas Price Oracle contract
      * @param owner_ Address of the contract owner
      */
     constructor(
-        IGasPriceOracle gasPriceOracle_,
         address owner_,
         uint32 chainSlug_,
         ISignatureVerifier signatureVerifier_
     ) AccessControlExtended(owner_) {
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         chainSlug = chainSlug_;
         signatureVerifier__ = signatureVerifier_;
     }
@@ -127,33 +121,6 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
         executionFees[dstChainSlug_] = executionFees_;
         emit ExecutionFeesSet(dstChainSlug_, executionFees_);
-    }
-
-    /**
-     * @dev Function for getting the minimum fees required for executing a cross-chain transaction
-     * @param msgGasLimit_ Gas limit for the transaction
-     * @param dstChainSlug_ Destination chain identifier
-     * @return Minimum fees required for executing the transaction
-     */
-    function _getMinExecutionFees(
-        uint256 msgGasLimit_,
-        uint32 dstChainSlug_
-    ) internal view returns (uint256) {
-        uint256 dstRelativeGasPrice = gasPriceOracle__.relativeGasPrice(
-            dstChainSlug_
-        );
-        return msgGasLimit_ * dstRelativeGasPrice;
-    }
-
-    /**
-     * @notice updates gasPriceOracle__
-     * @param gasPriceOracle_ address of Gas Price Oracle
-     */
-    function setGasPriceOracle(
-        address gasPriceOracle_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
-        emit GasPriceOracleSet(gasPriceOracle_);
     }
 
     /**

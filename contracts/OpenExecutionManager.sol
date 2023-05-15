@@ -19,10 +19,6 @@ import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
  * access control.
  */
 contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
-    IGasPriceOracle public gasPriceOracle__;
-
-    event GasPriceOracleSet(address gasPriceOracle);
-
     ISignatureVerifier public signatureVerifier__;
 
     /**
@@ -44,16 +40,13 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
 
     /**
      * @dev Constructor for OpenExecutionManager contract
-     * @param gasPriceOracle_ Address of the Gas Price Oracle contract
      * @param owner_ Address of the contract owner
      */
     constructor(
-        IGasPriceOracle gasPriceOracle_,
         address owner_,
         uint32 chainSlug_,
         ISignatureVerifier signatureVerifier_
     ) AccessControlExtended(owner_) {
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         signatureVerifier__ = signatureVerifier_;
         chainSlug = chainSlug_;
     }
@@ -103,22 +96,6 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
         return executionFees[siblingChainSlug_];
     }
 
-    /**
-     * @dev Function for getting the minimum fees required for executing a cross-chain transaction
-     * @param msgGasLimit_ Gas limit for the transaction
-     * @param dstChainSlug_ Destination chain identifier
-     * @return Minimum fees required for executing the transaction
-     */
-    function _getMinExecutionFees(
-        uint256 msgGasLimit_,
-        uint32 dstChainSlug_
-    ) internal view returns (uint256) {
-        uint256 dstRelativeGasPrice = gasPriceOracle__.relativeGasPrice(
-            dstChainSlug_
-        );
-        return msgGasLimit_ * dstRelativeGasPrice;
-    }
-
     function setExecutionFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
@@ -145,17 +122,6 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
 
         executionFees[dstChainSlug_] = executionFees_;
         emit ExecutionFeesSet(dstChainSlug_, executionFees_);
-    }
-
-    /**
-     * @notice updates gasPriceOracle__
-     * @param gasPriceOracle_ address of Gas Price Oracle
-     */
-    function setGasPriceOracle(
-        address gasPriceOracle_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
-        emit GasPriceOracleSet(gasPriceOracle_);
     }
 
     /**

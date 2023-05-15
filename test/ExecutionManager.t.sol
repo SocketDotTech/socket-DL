@@ -55,7 +55,6 @@ contract ExecutionManagerTest is Setup {
         gasPriceOracle = new GasPriceOracle(owner, chainSlug);
 
         executionManager = new ExecutionManager(
-            gasPriceOracle,
             owner,
             chainSlug,
             signatureVerifier
@@ -69,7 +68,6 @@ contract ExecutionManagerTest is Setup {
         );
 
         executionManager = new ExecutionManager(
-            gasPriceOracle,
             owner,
             chainSlug,
             signatureVerifier
