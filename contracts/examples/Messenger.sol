@@ -3,9 +3,6 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
-import "../interfaces/ITransmitManager.sol";
-import "../interfaces/ISwitchboard.sol";
-import "../interfaces/IExecutionManager.sol";
 import "../utils/Ownable.sol";
 
 contract Messenger is IPlug, Ownable(msg.sender) {
