@@ -6,7 +6,7 @@ import "../../Setup.t.sol";
 contract FastSwitchboardTest is Setup {
     bool isFast = true;
     uint32 immutable remoteChainSlug = uint32(2);
-    bytes32 immutable packetId = bytes32(0);
+    bytes32 immutable packetId = bytes32(uint256(2) << 224);
     address watcher;
     address altWatcher;
     uint256 nonce;
