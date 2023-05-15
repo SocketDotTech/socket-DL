@@ -495,7 +495,6 @@ contract Setup is Test {
 
     function _executePayloadOnDstWithExecutor(
         ChainContext storage dst_,
-        address remotePlug_,
         bytes32 packetId_,
         bytes32 msgId_,
         uint256 msgGasLimit_,
@@ -517,13 +516,12 @@ contract Setup is Test {
             packedMessage_,
             executorPrivateKey_
         );
-        dst_.socket__.execute(packetId_, remotePlug_, msgDetails, sig);
+        dst_.socket__.execute(packetId_, msgDetails, sig);
     }
 
     function _executePayloadOnDst(
         ChainContext storage dst_,
         uint256,
-        address remotePlug_,
         bytes32 packetId_,
         bytes32 msgId_,
         uint256 msgGasLimit_,
@@ -534,7 +532,6 @@ contract Setup is Test {
     ) internal {
         _executePayloadOnDstWithExecutor(
             dst_,
-            remotePlug_,
             packetId_,
             msgId_,
             msgGasLimit_,
@@ -548,9 +545,15 @@ contract Setup is Test {
 
     function _packMessageId(
         uint32 srcChainSlug,
+        address siblingPlug,
         uint256 nonce
     ) internal pure returns (bytes32) {
-        return bytes32((uint256(srcChainSlug) << 224) | nonce);
+        return
+            bytes32(
+                (uint256(srcChainSlug) << 224) |
+                    (uint256(uint160(siblingPlug)) << 64) |
+                    nonce
+            );
     }
 
     function _getPackedId(
