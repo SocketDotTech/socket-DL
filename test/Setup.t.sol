@@ -62,6 +62,7 @@ contract Setup is Test {
     struct ChainContext {
         uint32 chainSlug;
         uint256 transmitterNonce;
+        uint256 executorNonce;
         Socket socket__;
         Hasher hasher__;
         SignatureVerifier sigVerifier__;
@@ -129,6 +130,13 @@ contract Setup is Test {
 
         //grant FeesUpdater Role
         cc_.transmitManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        //grant FeesUpdater Role
+        cc_.executionManager__.grantRoleWithSlug(
             FEES_UPDATER_ROLE,
             remoteChainSlug_,
             _socketOwner
@@ -337,6 +345,13 @@ contract Setup is Test {
             deployer_,
             cc_.chainSlug,
             cc_.sigVerifier__
+        );
+
+        //grant FeesUpdater Role
+        cc_.executionManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            cc_.chainSlug,
+            deployer_
         );
 
         cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
