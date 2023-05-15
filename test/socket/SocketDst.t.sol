@@ -65,7 +65,12 @@ contract SocketDstTest is Setup {
         _configPlugContracts(index);
 
         bytes32 digest = keccak256(
-            abi.encode(_a.chainSlug, gasPriceOracleNonce, sourceGasPrice)
+            abi.encode(
+                address(_a.gasPriceOracle__),
+                _a.chainSlug,
+                gasPriceOracleNonce,
+                sourceGasPrice
+            )
         );
         bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
 
@@ -77,6 +82,7 @@ contract SocketDstTest is Setup {
 
         digest = keccak256(
             abi.encode(
+                address(_a.gasPriceOracle__),
                 _a.chainSlug,
                 _b.chainSlug,
                 gasPriceOracleNonce,
@@ -245,7 +251,11 @@ contract SocketDstTest is Setup {
 
         bytes32 msgId = _packMessageId(_a.chainSlug, 0);
         (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
-        _attestOnDst(address(_b.configs__[index].switchboard__), packetId);
+        _attestOnDst(
+            address(_b.configs__[index].switchboard__),
+            _b.chainSlug,
+            packetId
+        );
 
         vm.expectEmit(true, false, false, false);
         emit ExecutionSuccess(msgId);
@@ -324,7 +334,11 @@ contract SocketDstTest is Setup {
 
         bytes32 msgId = _packMessageId(_a.chainSlug, 0);
         (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
-        _attestOnDst(address(_b.configs__[index].switchboard__), packetId);
+        _attestOnDst(
+            address(_b.configs__[index].switchboard__),
+            _b.chainSlug,
+            packetId
+        );
 
         vm.expectRevert(NotExecutor.selector);
         _executePayloadOnDstWithExecutor(
@@ -351,7 +365,7 @@ contract SocketDstTest is Setup {
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
         bytes32 digest = keccak256(
-            abi.encode(remoteChainSlug_, packetId, root)
+            abi.encode(versionHash, remoteChainSlug_, packetId, root)
         );
 
         sig = _createSignature(digest, transmitterPrivateKey_);

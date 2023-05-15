@@ -41,7 +41,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
      * This modifier is inherited from the NativeSwitchboardBase contract.
      */
     modifier onlyRemoteSwitchboard() override {
-        require(true, "ONLY_FX_CHILD");
+        revert("ONLY_FX_CHILD");
 
         _;
     }
@@ -67,7 +67,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         address socket_,
         IGasPriceOracle gasPriceOracle_
     )
-        AccessControlExtended(owner_)
+        AccessControl(owner_)
         NativeSwitchboardBase(
             socket_,
             chainSlug_,
@@ -150,7 +150,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
      *    This function can only be called by an address with GAS_LIMIT_UPDATER_ROLE.
      *    The function checks that the signature is valid and recovers the signer's address from the signature.
      *    It also checks that the nonce in the signature matches the nonce stored for the signer.
-     *   throws {NoPermit} If the caller does not have GAS_LIMIT_UPDATER_ROLE.
+     *   throws if the caller does not have GAS_LIMIT_UPDATER_ROLE.
      *   throws {InvalidNonce} If the nonce provided in the signature does not match the nonce stored for the signer.
      * @param nonce_ The nonce provided in the signature.
      * @param confirmGasLimit_ The new value of the confirmGasLimit parameter.
@@ -164,7 +164,8 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
-                    "L1_RECEIVE_GAS_LIMIT_UPDATE",
+                    L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                    address(this),
                     chainSlug,
                     nonce_,
                     confirmGasLimit_
@@ -173,8 +174,8 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
             signature_
         );
 
-        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
-            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
+
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 

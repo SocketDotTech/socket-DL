@@ -17,12 +17,15 @@ abstract contract SocketBase is SocketConfig {
     // incrementing nonce, should be handled in next socket version.
     uint224 public messageCount;
 
+    bytes32 public immutable version;
+
     /**
      * @dev Constructs a new Socket contract instance.
      * @param chainSlug_ The chain slug of the contract.
      */
-    constructor(uint32 chainSlug_) {
+    constructor(uint32 chainSlug_, string memory version_) {
         chainSlug = chainSlug_;
+        version = keccak256(abi.encode(version_));
     }
 
     /**

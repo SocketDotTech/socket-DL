@@ -2,7 +2,7 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ICapacitor.sol";
-import "../utils/AccessControlExtended.sol";
+import "../utils/AccessControl.sol";
 import "../libraries/RescueFundsLib.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
@@ -11,7 +11,7 @@ import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
  * @dev Abstract base contract for the Capacitors. Implements shared functionality and provides
  * access control.
  */
-abstract contract BaseCapacitor is ICapacitor, AccessControlExtended {
+abstract contract BaseCapacitor is ICapacitor, AccessControl {
     /// an incrementing count for each new packet created
     uint64 internal _nextPacketCount;
 
@@ -40,7 +40,7 @@ abstract contract BaseCapacitor is ICapacitor, AccessControlExtended {
      * @param socket_ The address of the socket contract.
      * @param owner_ The address of the owner of the capacitor contract.
      */
-    constructor(address socket_, address owner_) AccessControlExtended(owner_) {
+    constructor(address socket_, address owner_) AccessControl(owner_) {
         socket = socket_;
     }
 

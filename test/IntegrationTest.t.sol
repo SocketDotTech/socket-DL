@@ -37,7 +37,12 @@ contract HappyTest is Setup {
         _configPlugContracts(index);
 
         bytes32 digest = keccak256(
-            abi.encode(_a.chainSlug, gasPriceOracleNonce, sourceGasPrice)
+            abi.encode(
+                address(_a.gasPriceOracle__),
+                _a.chainSlug,
+                gasPriceOracleNonce,
+                sourceGasPrice
+            )
         );
         bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
 
@@ -49,6 +54,7 @@ contract HappyTest is Setup {
 
         digest = keccak256(
             abi.encode(
+                address(_a.gasPriceOracle__),
                 _a.chainSlug,
                 _b.chainSlug,
                 gasPriceOracleNonce,
@@ -117,7 +123,11 @@ contract HappyTest is Setup {
 
             _sealOnSrc(_a, capacitor, sig_);
             _proposeOnDst(_b, sig_, packetId, root);
-            _attestOnDst(address(_b.configs__[0].switchboard__), packetId);
+            _attestOnDst(
+                address(_b.configs__[0].switchboard__),
+                _b.chainSlug,
+                packetId
+            );
         }
 
         vm.expectEmit(true, false, false, false);
@@ -185,7 +195,11 @@ contract HappyTest is Setup {
 
         _sealOnSrc(_b, capacitor, sig);
         _proposeOnDst(_a, sig, packetId, root);
-        _attestOnDst(address(_a.configs__[0].switchboard__), packetId);
+        _attestOnDst(
+            address(_a.configs__[0].switchboard__),
+            _a.chainSlug,
+            packetId
+        );
 
         _executePayloadOnDst(
             _a,
@@ -295,6 +309,7 @@ contract HappyTest is Setup {
 
         _attestOnDst(
             address(_b.configs__[_b.configs__.length - 1].switchboard__),
+            _b.chainSlug,
             packetId
         );
 

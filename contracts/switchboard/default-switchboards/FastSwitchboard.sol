@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import "./SwitchboardBase.sol";
 import "../../libraries/SignatureVerifierLib.sol";
+import {ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
  * @title FastSwitchboard contract
@@ -70,12 +71,14 @@ contract FastSwitchboard is SwitchboardBase {
         bytes calldata signature_
     ) external {
         address watcher = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(abi.encode(srcChainSlug_, packetId_)),
+            keccak256(
+                abi.encode(address(this), srcChainSlug_, chainSlug, packetId_)
+            ),
             signature_
         );
 
         if (isAttested[watcher][packetId_]) revert AlreadyAttested();
-        if (!_hasRole("WATCHER_ROLE", srcChainSlug_, watcher))
+        if (!_hasRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher))
             revert WatcherNotFound();
 
         isAttested[watcher][packetId_] = true;
@@ -108,7 +111,7 @@ contract FastSwitchboard is SwitchboardBase {
         uint32 dstChainSlug_,
         uint256 dstRelativeGasPrice_
     ) internal view override returns (uint256) {
-        // assumption: number of watchers are going to be same on all chains for particular chain slug?
+        // assumption: number of watchers are going to be same on all chains for particular chain slug
         return
             totalWatchers[dstChainSlug_] *
             attestGasLimit[dstChainSlug_] *
@@ -129,7 +132,8 @@ contract FastSwitchboard is SwitchboardBase {
         address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
-                    "ATTEST_GAS_LIMIT_UPDATE",
+                    ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                    address(this),
                     chainSlug,
                     dstChainSlug_,
                     nonce_,
@@ -138,9 +142,11 @@ contract FastSwitchboard is SwitchboardBase {
             ),
             signature_
         );
-
-        if (!_hasRole("GAS_LIMIT_UPDATER_ROLE", dstChainSlug_, gasLimitUpdater))
-            revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
+        _checkRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
+            dstChainSlug_,
+            gasLimitUpdater
+        );
 
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
@@ -157,9 +163,9 @@ contract FastSwitchboard is SwitchboardBase {
         uint32 srcChainSlug_,
         address watcher_
     ) external onlyRole(GOVERNANCE_ROLE) {
-        if (_hasRole("WATCHER_ROLE", srcChainSlug_, watcher_))
+        if (_hasRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_))
             revert WatcherFound();
-        _grantRole("WATCHER_ROLE", srcChainSlug_, watcher_);
+        _grantRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_);
 
         totalWatchers[srcChainSlug_]++;
     }
@@ -172,9 +178,9 @@ contract FastSwitchboard is SwitchboardBase {
         uint32 srcChainSlug_,
         address watcher_
     ) external onlyRole(GOVERNANCE_ROLE) {
-        if (!_hasRole("WATCHER_ROLE", srcChainSlug_, watcher_))
+        if (!_hasRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_))
             revert WatcherNotFound();
-        _revokeRole("WATCHER_ROLE", srcChainSlug_, watcher_);
+        _revokeRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_);
 
         totalWatchers[srcChainSlug_]--;
     }
