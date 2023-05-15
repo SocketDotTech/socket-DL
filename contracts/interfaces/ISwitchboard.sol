@@ -15,7 +15,7 @@ interface ISwitchboard {
      * @param maxPacketSize_ The maximum size of the packets that can be sent through this capacitor.
      */
     function registerCapacitor(
-        uint256 siblingChainSlug_,
+        uint32 siblingChainSlug_,
         address capacitor_,
         uint256 maxPacketSize_
     ) external;

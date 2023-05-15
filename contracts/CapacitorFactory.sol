@@ -38,7 +38,7 @@ contract CapacitorFactory is ICapacitorFactory, AccessControlExtended {
      */
     function deploy(
         uint256 capacitorType_,
-        uint256 /** siblingChainSlug */,
+        uint32 /** siblingChainSlug */,
         uint256 /** maxPacketLength */
     ) external override returns (ICapacitor, IDecapacitor) {
         // sets the capacitor factory owner

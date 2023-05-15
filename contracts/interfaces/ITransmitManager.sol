@@ -43,7 +43,7 @@ interface ITransmitManager {
      */
     function setProposeGasLimit(
         uint256 nonce_,
-        uint256 dstChainSlug_,
+        uint32 dstChainSlug_,
         uint256 gasLimit_,
         bytes calldata signature_
     ) external;

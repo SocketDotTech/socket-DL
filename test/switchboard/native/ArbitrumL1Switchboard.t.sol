@@ -86,7 +86,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
 
     function deployContractsOnSingleChain(
         ChainContext storage cc_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256[] memory transmitterPrivateKeys_
     ) internal {
         // deploy socket setup
@@ -179,7 +179,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
 
     function addArbitrumL1Switchboard(
         ChainContext storage cc_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         arbitrumL1Switchboard = new ArbitrumL1Switchboard(
@@ -232,7 +232,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
         ChainContext storage cc_,
         address deployer_,
         address switchBoardAddress_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         vm.startPrank(deployer_);

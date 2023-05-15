@@ -48,7 +48,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
     }
 
     function inbound(
-        uint256,
+        uint32,
         bytes calldata payload_
     ) external payable override {
         require(msg.sender == address(_socket__), "Counter: Invalid Socket");

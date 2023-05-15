@@ -14,10 +14,10 @@ contract FastSwitchboard is SwitchboardBase {
     mapping(bytes32 => bool) public isPacketValid;
 
     // dst chain slug => total watchers registered
-    mapping(uint256 => uint256) public totalWatchers;
+    mapping(uint32 => uint256) public totalWatchers;
 
     // dst chain slug => attest gas limit
-    mapping(uint256 => uint256) public attestGasLimit;
+    mapping(uint32 => uint256) public attestGasLimit;
 
     // attester => packetId => is attested
     mapping(address => mapping(bytes32 => bool)) public isAttested;
@@ -30,7 +30,7 @@ contract FastSwitchboard is SwitchboardBase {
     // Event emitted when a packet is attested
     event PacketAttested(bytes32 packetId, address attester);
     // Event emitted when the attest gas limit is set
-    event AttestGasLimitSet(uint256 dstChainSlug, uint256 attestGasLimit);
+    event AttestGasLimitSet(uint32 dstChainSlug, uint256 attestGasLimit);
 
     // Error emitted when a watcher is found
     error WatcherFound();
@@ -51,7 +51,7 @@ contract FastSwitchboard is SwitchboardBase {
         address owner_,
         address socket_,
         address gasPriceOracle_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 timeoutInSeconds_
     )
         AccessControlExtended(owner_)
@@ -66,7 +66,7 @@ contract FastSwitchboard is SwitchboardBase {
      */
     function attest(
         bytes32 packetId_,
-        uint256 srcChainSlug_,
+        uint32 srcChainSlug_,
         bytes calldata signature_
     ) external {
         address watcher = SignatureVerifierLib.recoverSignerFromDigest(
@@ -105,7 +105,7 @@ contract FastSwitchboard is SwitchboardBase {
     }
 
     function _getMinSwitchboardFees(
-        uint256 dstChainSlug_,
+        uint32 dstChainSlug_,
         uint256 dstRelativeGasPrice_
     ) internal view override returns (uint256) {
         // assumption: number of watchers are going to be same on all chains for particular chain slug?
@@ -122,7 +122,7 @@ contract FastSwitchboard is SwitchboardBase {
      */
     function setAttestGasLimit(
         uint256 nonce_,
-        uint256 dstChainSlug_,
+        uint32 dstChainSlug_,
         uint256 attestGasLimit_,
         bytes calldata signature_
     ) external {
@@ -154,7 +154,7 @@ contract FastSwitchboard is SwitchboardBase {
      * @param watcher_ watcher address
      */
     function grantWatcherRole(
-        uint256 srcChainSlug_,
+        uint32 srcChainSlug_,
         address watcher_
     ) external onlyRole(GOVERNANCE_ROLE) {
         if (_hasRole("WATCHER_ROLE", srcChainSlug_, watcher_))
@@ -169,7 +169,7 @@ contract FastSwitchboard is SwitchboardBase {
      * @param watcher_ watcher address
      */
     function revokeWatcherRole(
-        uint256 srcChainSlug_,
+        uint32 srcChainSlug_,
         address watcher_
     ) external onlyRole(GOVERNANCE_ROLE) {
         if (!_hasRole("WATCHER_ROLE", srcChainSlug_, watcher_))

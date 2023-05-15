@@ -38,7 +38,7 @@ contract Counter is IPlug {
     }
 
     function remoteAddOperation(
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 amount_,
         uint256 msgGasLimit_
     ) external payable {
@@ -47,7 +47,7 @@ contract Counter is IPlug {
     }
 
     function remoteSubOperation(
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 amount_,
         uint256 msgGasLimit_
     ) external payable {
@@ -56,7 +56,7 @@ contract Counter is IPlug {
     }
 
     function inbound(
-        uint256,
+        uint32,
         bytes calldata payload_
     ) external payable override {
         require(msg.sender == socket, "Counter: Invalid Socket");
@@ -75,7 +75,7 @@ contract Counter is IPlug {
     }
 
     function _outbound(
-        uint256 targetChain_,
+        uint32 targetChain_,
         uint256 msgGasLimit_,
         bytes memory payload_
     ) private {
@@ -100,7 +100,7 @@ contract Counter is IPlug {
 
     // settings
     function setSocketConfig(
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         address remotePlug_,
         address switchboard_
     ) external onlyOwner {
