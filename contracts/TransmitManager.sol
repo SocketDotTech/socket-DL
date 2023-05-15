@@ -159,6 +159,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
             keccak256(
                 abi.encode(
                     SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                    address(this),
                     chainSlug,
                     nonce_,
                     gasLimit_
@@ -193,6 +194,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
             keccak256(
                 abi.encode(
                     PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                    address(this),
                     chainSlug,
                     dstChainSlug_,
                     nonce_,

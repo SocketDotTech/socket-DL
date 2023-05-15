@@ -249,6 +249,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
             keccak256(
                 abi.encode(
                     ARBITRUM_NATIVE_FEE_UPDATE_SIG_IDENTIFIER,
+                    address(this),
                     chainSlug,
                     nonce_,
                     arbitrumNativeFee_

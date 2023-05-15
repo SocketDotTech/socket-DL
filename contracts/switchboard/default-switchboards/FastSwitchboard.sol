@@ -133,6 +133,8 @@ contract FastSwitchboard is SwitchboardBase {
             keccak256(
                 abi.encode(
                     ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
                     chainSlug,
                     dstChainSlug_,
                     nonce_,

@@ -90,7 +90,14 @@ contract GasPriceOracle is IGasPriceOracle, AccessControl {
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
                 chainSlug,
-                keccak256(abi.encode(chainSlug, nonce_, sourceGasPrice_)),
+                keccak256(
+                    abi.encode(
+                        address(this),
+                        chainSlug,
+                        nonce_,
+                        sourceGasPrice_
+                    )
+                ),
                 signature_
             );
 
@@ -122,6 +129,7 @@ contract GasPriceOracle is IGasPriceOracle, AccessControl {
                 siblingChainSlug_,
                 keccak256(
                     abi.encode(
+                        address(this),
                         chainSlug,
                         siblingChainSlug_,
                         nonce_,

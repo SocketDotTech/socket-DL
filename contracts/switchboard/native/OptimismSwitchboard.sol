@@ -138,6 +138,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
             keccak256(
                 abi.encode(
                     L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                    address(this),
                     chainSlug,
                     nonce_,
                     confirmGasLimit_

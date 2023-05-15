@@ -380,8 +380,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
             keccak256(
                 abi.encode(
                     EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                    nonce_,
+                    address(this),
                     chainSlug,
+                    nonce_,
                     executionOverhead_
                 )
             ),
@@ -412,6 +413,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
             keccak256(
                 abi.encode(
                     INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                    address(this),
                     chainSlug,
                     nonce_,
                     gasLimit_
