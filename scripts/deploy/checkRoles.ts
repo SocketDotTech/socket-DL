@@ -49,7 +49,7 @@ let roleTxns: {
     [contractName: string]: {
       to: string;
       role: string;
-      slug:number;
+      slug: number;
       grantee: string;
     }[];
   };
@@ -71,7 +71,7 @@ const addTransaction = (
   contractAddress: string,
   hasRole: boolean,
   role: string,
-  slug:number,
+  slug: number,
   userAddress: string,
   newRoleStatus: boolean
 ) => {
@@ -90,7 +90,7 @@ const addTransaction = (
 
 const getRoleTxnData = (
   roles: string[],
-  slugs:number[],
+  slugs: number[],
   userAddresses: string[],
   type: "GRANT" | "REVOKE"
 ) => {
@@ -123,16 +123,18 @@ const executeRoleTransactions = async (
   );
   for (let i = 0; i < contracts.length; i++) {
     let contractSpecificTxns:
-      | { to: string; role: string; slug:number; grantee: string }[]
+      | { to: string; role: string; slug: number; grantee: string }[]
       | undefined =
       roleTxns[chainId as any as keyof typeof roleTxns]![
         contracts[i] as CORE_CONTRACTS
       ];
     if (!contractSpecificTxns?.length) continue;
 
-    let grantRoles: string[] = [], grantSlugs:number[] = [],
+    let grantRoles: string[] = [],
+      grantSlugs: number[] = [],
       grantAddresses: string[] = [];
-    let revokeRoles: string[] = [], revokeSlugs:number[] = [],
+    let revokeRoles: string[] = [],
+      revokeSlugs: number[] = [],
       revokeAddresses: string[] = [];
     let contractAddress: string | undefined;
 
@@ -140,17 +142,22 @@ const executeRoleTransactions = async (
       contractAddress = roleTx.to;
       if (newRoleStatus) {
         grantRoles.push(roleTx.role);
-        grantSlugs.push(roleTx.slug)
+        grantSlugs.push(roleTx.slug);
         grantAddresses.push(roleTx.grantee);
       } else {
         revokeRoles.push(roleTx.role);
-        revokeSlugs.push(roleTx.slug)
+        revokeSlugs.push(roleTx.slug);
         revokeAddresses.push(roleTx.grantee);
       }
     });
 
     if (grantRoles.length) {
-      let data = getRoleTxnData(grantRoles, grantSlugs, grantAddresses, "GRANT");
+      let data = getRoleTxnData(
+        grantRoles,
+        grantSlugs,
+        grantAddresses,
+        "GRANT"
+      );
       let tx = await wallet.sendTransaction({
         to: contractAddress,
         data,
@@ -166,7 +173,12 @@ const executeRoleTransactions = async (
     }
 
     if (revokeRoles.length) {
-      let data = getRoleTxnData(grantRoles, revokeSlugs, grantAddresses, "REVOKE");
+      let data = getRoleTxnData(
+        grantRoles,
+        revokeSlugs,
+        grantAddresses,
+        "REVOKE"
+      );
       let tx = await wallet.sendTransaction({
         to: contractAddress,
         data,

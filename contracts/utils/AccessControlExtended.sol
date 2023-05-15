@@ -56,7 +56,7 @@ contract AccessControlExtended is AccessControl {
     ) external virtual onlyOwner {
         require(roleNames_.length == grantees_.length);
         for (uint256 index = 0; index < roleNames_.length; index++) {
-            if (slugs_[index]>0)
+            if (slugs_[index] > 0)
                 _grantRoleWithSlug(
                     roleNames_[index],
                     slugs_[index],
@@ -78,7 +78,7 @@ contract AccessControlExtended is AccessControl {
     ) external virtual onlyOwner {
         require(roleNames_.length == grantees_.length);
         for (uint256 index = 0; index < roleNames_.length; index++) {
-            if (slugs_[index]>0)
+            if (slugs_[index] > 0)
                 _revokeRoleWithSlug(
                     roleNames_[index],
                     slugs_[index],

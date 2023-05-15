@@ -191,7 +191,6 @@ export const getRelayAPIKEY = async (mode: DeploymentMode) => {
   }
 };
 
-
 export const getAddresses = async (
   chainSlug: ChainSlug,
   mode = DeploymentMode.DEV

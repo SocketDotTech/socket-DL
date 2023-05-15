@@ -255,10 +255,7 @@ contract FastSwitchboardTest is Setup {
         uint32 srcChainSlug = uint32(123);
 
         vm.startPrank(_socketOwner);
-        fastSwitchboard.grantWatcherRole(
-            srcChainSlug,
-            _socketOwner
-        );
+        fastSwitchboard.grantWatcherRole(srcChainSlug, _socketOwner);
         fastSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
         vm.stopPrank();
 

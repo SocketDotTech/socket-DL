@@ -87,10 +87,10 @@ const relayTx = async (params: RequestObj) => {
     let { to, data, chainSlug, gasPrice, value, gasLimit } = params;
     let url = await getRelayUrl(mode);
     let config = {
-      headers:{
-        "x-api-key":getRelayAPIKEY(mode)
-      }
-    }
+      headers: {
+        "x-api-key": getRelayAPIKEY(mode),
+      },
+    };
     // console.log({url})
     let body = {
       to,

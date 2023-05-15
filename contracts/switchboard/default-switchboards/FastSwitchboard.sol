@@ -41,6 +41,7 @@ contract FastSwitchboard is SwitchboardBase {
     error AlreadyAttested();
     // Error emitted when role is invalid
     error InvalidRole();
+
     /**
      * @dev Constructor function for the FastSwitchboard contract
      * @param owner_ Address of the owner of the contract
@@ -182,16 +183,16 @@ contract FastSwitchboard is SwitchboardBase {
         totalWatchers[srcChainSlug_]--;
     }
 
-    function isNonWatcherRole (bytes32 role_) public pure returns (bool) {
+    function isNonWatcherRole(bytes32 role_) public pure returns (bool) {
         if (
             role_ == TRIP_ROLE ||
             role_ == UNTRIP_ROLE ||
             role_ == WITHDRAW_ROLE ||
             role_ == RESCUE_ROLE ||
-            role_ == GOVERNANCE_ROLE || 
+            role_ == GOVERNANCE_ROLE ||
             role_ == GAS_LIMIT_UPDATER_ROLE
         ) return true;
-        
+
         return false;
     }
 
@@ -243,17 +244,16 @@ contract FastSwitchboard is SwitchboardBase {
         require(roleNames_.length == grantees_.length);
         for (uint256 index = 0; index < roleNames_.length; index++) {
             if (isNonWatcherRole(roleNames_[index])) {
-                if (slugs_[index]>0)
-                _grantRoleWithSlug(
-                    roleNames_[index],
-                    slugs_[index],
-                    grantees_[index]
-                );
+                if (slugs_[index] > 0)
+                    _grantRoleWithSlug(
+                        roleNames_[index],
+                        slugs_[index],
+                        grantees_[index]
+                    );
                 else _grantRole(roleNames_[index], grantees_[index]);
             } else {
                 revert InvalidRole();
-            } 
-            
+            }
         }
     }
 
@@ -265,7 +265,7 @@ contract FastSwitchboard is SwitchboardBase {
         require(roleNames_.length == grantees_.length);
         for (uint256 index = 0; index < roleNames_.length; index++) {
             if (isNonWatcherRole(roleNames_[index])) {
-                if (slugs_[index]>0)
+                if (slugs_[index] > 0)
                     _revokeRoleWithSlug(
                         roleNames_[index],
                         slugs_[index],
