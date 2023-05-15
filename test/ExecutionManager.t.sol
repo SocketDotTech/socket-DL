@@ -104,7 +104,7 @@ contract ExecutionManagerTest is Setup {
 
         bytes32 digest = keccak256(
             abi.encode(
-                address(_a.gasPriceOracle__),
+                address(gasPriceOracle),
                 chainSlug,
                 gasPriceOracleNonce,
                 sourceGasPrice
@@ -120,7 +120,7 @@ contract ExecutionManagerTest is Setup {
 
         digest = keccak256(
             abi.encode(
-                address(_a.gasPriceOracle__),
+                address(gasPriceOracle),
                 chainSlug,
                 destChainSlug,
                 gasPriceOracleNonce,
