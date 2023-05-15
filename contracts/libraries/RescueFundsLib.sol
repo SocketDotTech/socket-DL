@@ -30,12 +30,14 @@ library RescueFundsLib {
         require(userAddress_ != address(0));
 
         if (token_ == ETH_ADDRESS) {
-            (bool success, ) = userAddress_.call{value: address(this).balance}(
-                ""
-            );
+            (bool success, ) = userAddress_.call{value: amount_}("");
             require(success);
         } else {
-            IERC20(token_).transfer(userAddress_, amount_);
+            require(
+                token_.code.length > 0,
+                "RescueFundsLib: Invalid token address"
+            );
+            IERC20(token_).safeTransfer(userAddress_, amount_);
         }
     }
 }
