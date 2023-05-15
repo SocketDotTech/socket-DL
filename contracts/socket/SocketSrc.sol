@@ -62,6 +62,11 @@ abstract contract SocketSrc is SocketBase {
         );
 
         plugConfig.capacitor__.addPackedMessage(packedMessage);
+
+        // call to unknown external contract at the end
+        plugConfig.outboundSwitchboard__.payFees{value: fees.switchboardFees}(
+            remoteChainSlug_
+        );
         emit MessageOutbound(
             localChainSlug,
             msg.sender,
@@ -106,9 +111,6 @@ abstract contract SocketSrc is SocketBase {
                 fees.switchboardFees;
 
             transmitManager__.payFees{value: fees.transmissionFees}(
-                remoteChainSlug_
-            );
-            switchboard__.payFees{value: fees.switchboardFees}(
                 remoteChainSlug_
             );
             executionManager__.payFees{value: fees.executionFee}(
