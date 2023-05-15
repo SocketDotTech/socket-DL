@@ -164,7 +164,6 @@ contract Setup is Test {
             )
         );
 
-        console.log("setting TransmissionFees");
         bytes memory feesUpdateSignature = _createSignature(
             feesUpdateDigest,
             _socketOwnerPrivateKey
@@ -175,7 +174,6 @@ contract Setup is Test {
             _transmissionFees,
             feesUpdateSignature
         );
-        console.log("completed setting TransmissionFees");
 
         // deploy default configs: fast, slow
         SocketConfigContext memory scc_ = _addFastSwitchboard(

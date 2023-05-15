@@ -231,7 +231,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         uint256 transmissionFees_,
         bytes calldata signature_
     ) external override {
-        console.log("inside setTransmissionFees");
         address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
@@ -245,11 +244,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
             signature_
         );
 
-        console.log("feesUpdater recovered: ", feesUpdater);
-
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-
-        console.log("role checked with slug: ");
 
         uint256 nonce = nextNonce[feesUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();

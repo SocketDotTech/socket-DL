@@ -131,8 +131,6 @@ contract TransmitManagerTest is Setup {
             sig
         );
 
-        console.log("setting TransmissionFees");
-
         bytes32 feesUpdateDigest = keccak256(
             abi.encode(
                 FEES_UPDATE_SIG_IDENTIFIER,
@@ -143,14 +141,10 @@ contract TransmitManagerTest is Setup {
             )
         );
 
-        console.log("feesUpdateDigest generated");
-
         bytes memory feesUpdateSignature = _createSignature(
             feesUpdateDigest,
             ownerPrivateKey
         );
-
-        console.log("feesUpdateDigest signed");
 
         transmitManager.setTransmissionFees(
             ownerNonce++,
@@ -158,7 +152,6 @@ contract TransmitManagerTest is Setup {
             _transmissionFees,
             feesUpdateSignature
         );
-        console.log("completed setting TransmissionFees");
 
         digest = keccak256(
             abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
@@ -231,9 +224,6 @@ contract TransmitManagerTest is Setup {
             sourceGasPrice +
             proposeGasLimit *
             relativeGasPrice;
-
-        console.log("minFees_Expected is: ", minFees_Expected);
-        console.log("minFees is: ", minFees);
 
         assertEq(minFees, minFees_Expected);
     }
