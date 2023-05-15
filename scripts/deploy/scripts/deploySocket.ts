@@ -1,5 +1,5 @@
 import { Contract, Wallet } from "ethers";
-import { deployContractWithArgs, storeAddresses, getInstance } from "../utils";
+import { DeployParams, getOrDeploy, storeAddresses } from "../utils";
 
 import { sealGasLimit } from "../../constants/config";
 import {
@@ -12,8 +12,12 @@ import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { socketOwner } from "../config";
 
-let verificationDetails: any[] = [];
 let allDeployed = false;
+
+export interface ReturnObj {
+  allDeployed: boolean;
+  deployedAddresses: ChainSocketAddresses;
+}
 
 /**
  * Deploys network-independent socket contracts
@@ -23,8 +27,8 @@ export const deploySocket = async (
   chainSlug: number,
   currentMode: DeploymentMode,
   deployedAddresses: ChainSocketAddresses
-): Promise<any> => {
-  const deployUtils = {
+): Promise<ReturnObj> => {
+  const deployUtils: DeployParams = {
     addresses: deployedAddresses,
     mode: currentMode,
     signer: socketSigner,
@@ -107,17 +111,12 @@ export const deploySocket = async (
     deployUtils.addresses[CORE_CONTRACTS.Socket] = socket.address;
 
     // switchboards deploy
-    const result = await deploySwitchboards(
+    deployUtils.addresses = await deploySwitchboards(
       networkToChainSlug[chainSlug],
       socketSigner,
       deployedAddresses,
-      verificationDetails,
       currentMode
     );
-
-    deployUtils.addresses = result["sourceConfig"];
-
-    verificationDetails = result["verificationDetails"];
 
     const socketBatcher: Contract = await getOrDeploy(
       "SocketBatcher",
@@ -128,12 +127,15 @@ export const deploySocket = async (
     deployUtils.addresses["SocketBatcher"] = socketBatcher.address;
 
     // plug deployments
-    const counter: Contract = await getOrDeploy(
+    let counter: Contract;
+    const results = await getOrDeploy(
       "Counter",
       "contracts/examples/Counter.sol",
       [socket.address],
       deployUtils
     );
+
+    counter = results.contract;
     deployUtils.addresses["Counter"] = counter.address;
 
     allDeployed = true;
@@ -149,38 +151,7 @@ export const deploySocket = async (
     deployUtils.mode
   );
   return {
-    verificationDetails,
     allDeployed,
     deployedAddresses: deployUtils.addresses,
   };
 };
-
-async function getOrDeploy(
-  contractName: string,
-  path: string,
-  args: any[],
-  deployUtils
-): Promise<Contract> {
-  let contract: Contract;
-  if (!deployUtils.addresses[contractName]) {
-    contract = await deployContractWithArgs(
-      contractName,
-      args,
-      deployUtils.signer
-    );
-    verificationDetails.push([contract.address, contractName, path, args]);
-    console.log(
-      `${contractName} deployed on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
-    );
-  } else {
-    contract = await getInstance(
-      contractName,
-      deployUtils.addresses[contractName]
-    );
-    console.log(
-      `${contractName} found on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
-    );
-  }
-
-  return contract;
-}

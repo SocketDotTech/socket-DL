@@ -1,4 +1,8 @@
-import { createObj, deployContractWithArgs } from "../utils";
+import {
+  createObj,
+  deployContractWithArgs,
+  storeVerificationParams,
+} from "../utils";
 import { switchboards } from "../../constants";
 import {
   ChainSocketAddresses,
@@ -14,10 +18,9 @@ export default async function deploySwitchboards(
   network: string,
   signer: SignerWithAddress | Wallet,
   sourceConfig: ChainSocketAddresses,
-  verificationDetails: any[],
   mode: DeploymentMode
-): Promise<Object> {
-  let result: any = { sourceConfig, verificationDetails };
+): Promise<ChainSocketAddresses> {
+  let result: any = { sourceConfig };
 
   if (!sourceConfig.FastSwitchboard)
     result = await deploySwitchboard(
@@ -26,7 +29,6 @@ export default async function deploySwitchboards(
       "",
       signer,
       sourceConfig,
-      verificationDetails,
       mode
     );
 
@@ -37,7 +39,6 @@ export default async function deploySwitchboards(
       "",
       signer,
       result.sourceConfig,
-      result.verificationDetails,
       mode
     );
 
@@ -55,15 +56,11 @@ export default async function deploySwitchboards(
         siblings[index],
         signer,
         result.sourceConfig,
-        result.verificationDetails,
         mode
       );
   }
 
-  return {
-    sourceConfig: result.sourceConfig,
-    verificationDetails: result.verificationDetails,
-  };
+  return result.sourceConfig;
 }
 
 async function deploySwitchboard(
@@ -72,9 +69,8 @@ async function deploySwitchboard(
   remoteChain: string,
   signer: SignerWithAddress | Wallet,
   sourceConfig: ChainSocketAddresses,
-  verificationDetails: any[],
   mode: DeploymentMode
-): Promise<Object> {
+): Promise<ChainSocketAddresses> {
   try {
     const { contractName, args, path } = getSwitchboardDeployData(
       integrationType,
@@ -90,7 +86,11 @@ async function deploySwitchboard(
       args,
       signer
     );
-    verificationDetails.push([switchboard.address, contractName, path, args]);
+    await storeVerificationParams(
+      [switchboard.address, contractName, path, args],
+      chainKeyToSlug[network],
+      mode
+    );
 
     sourceConfig = createObj(
       sourceConfig,
@@ -113,5 +113,5 @@ async function deploySwitchboard(
     console.log("Error in deploying switchboard", error);
     throw error;
   }
-  return { sourceConfig, verificationDetails };
+  return sourceConfig;
 }

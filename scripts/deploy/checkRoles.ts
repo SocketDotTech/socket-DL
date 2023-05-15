@@ -630,6 +630,7 @@ const main = async () => {
       ROLES.TRIP_ROLE,
       ROLES.UNTRIP_ROLE,
       ROLES.GAS_LIMIT_UPDATER_ROLE,
+      ROLES.GOVERNANCE_ROLE,
     ], // all roles
     filterContracts: [CORE_CONTRACTS.OptimisticSwitchboard],
     filterChains,
