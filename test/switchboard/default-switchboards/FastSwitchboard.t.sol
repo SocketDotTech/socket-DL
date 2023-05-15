@@ -5,7 +5,7 @@ import "../../Setup.t.sol";
 
 contract FastSwitchboardTest is Setup {
     bool isFast = true;
-    uint32 immutable remoteChainSlug = uint32(uint256(2));
+    uint32 immutable remoteChainSlug = uint32(2);
     bytes32 immutable packetId = bytes32(0);
     address watcher;
     address altWatcher;
@@ -26,7 +26,7 @@ contract FastSwitchboardTest is Setup {
     function setUp() external {
         initialise();
 
-        _a.chainSlug = uint32(uint256(1));
+        _a.chainSlug = uint32(1);
         vm.startPrank(_socketOwner);
 
         fastSwitchboard = new FastSwitchboard(
@@ -106,7 +106,7 @@ contract FastSwitchboardTest is Setup {
         vm.expectEmit(false, false, false, true);
         emit PacketAttested(packetId, watcher);
 
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
 
         assertTrue(fastSwitchboard.isAttested(watcher, packetId));
     }
@@ -125,12 +125,12 @@ contract FastSwitchboardTest is Setup {
         vm.expectEmit(false, false, false, true);
         emit PacketAttested(packetId, watcher);
 
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
 
         assertTrue(fastSwitchboard.isAttested(watcher, packetId));
 
         vm.expectRevert(AlreadyAttested.selector);
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
     }
 
     function testIsAllowed() external {
@@ -144,7 +144,7 @@ contract FastSwitchboardTest is Setup {
         );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
 
         digest = keccak256(
             abi.encode(
@@ -156,7 +156,7 @@ contract FastSwitchboardTest is Setup {
         );
         sig = _createSignature(digest, _altWatcherPrivateKey);
 
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
 
         uint256 proposeTime = block.timestamp -
             fastSwitchboard.timeoutInSeconds();
@@ -344,6 +344,26 @@ contract FastSwitchboardTest is Setup {
         bytes memory sig = "0x121234323123232323";
 
         vm.expectRevert(InvalidSigLength.selector);
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
+    }
+
+
+    function testAttesterCantAttestAllChains() public {
+
+        // Packet is coming from a chain different from remoteChainSlug
+        bytes32 altPacketId = bytes32(uint256(100)<<224);
+
+        bytes32 digest = keccak256(
+            abi.encode(
+                address(fastSwitchboard),
+                remoteChainSlug,
+                _a.chainSlug,
+                altPacketId
+            )
+        );
+        bytes memory sig = _createSignature(digest, _watcherPrivateKey);
+
+        vm.expectRevert(WatcherNotFound.selector);
+        fastSwitchboard.attest(altPacketId, sig);
     }
 }

@@ -488,7 +488,6 @@ contract Setup is Test {
         // attest with packetId_, srcSlug and signature
         FastSwitchboard(switchboardAddress).attest(
             packetId_,
-            srcSlug,
             attestSignature
         );
     }
