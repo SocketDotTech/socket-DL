@@ -184,7 +184,7 @@ interface ISocket {
         address switchBoardAddress_,
         uint256 maxPacketLength_,
         uint32 siblingChainSlug_,
-        uint32 capacitorType_
+        uint256 capacitorType_
     ) external;
 
     /**
