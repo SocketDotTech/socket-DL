@@ -64,11 +64,7 @@ contract FastSwitchboard is SwitchboardBase {
      * @param packetId_ Packet ID
      * @param signature_ Signature of the packet
      */
-    function attest(
-        bytes32 packetId_,
-        bytes calldata signature_
-    ) external {
-
+    function attest(bytes32 packetId_, bytes calldata signature_) external {
         uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
         address watcher = SignatureVerifierLib.recoverSignerFromDigest(
             keccak256(

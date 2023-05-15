@@ -347,11 +347,9 @@ contract FastSwitchboardTest is Setup {
         fastSwitchboard.attest(packetId, sig);
     }
 
-
     function testAttesterCantAttestAllChains() public {
-
         // Packet is coming from a chain different from remoteChainSlug
-        bytes32 altPacketId = bytes32(uint256(100)<<224);
+        bytes32 altPacketId = bytes32(uint256(100) << 224);
 
         bytes32 digest = keccak256(
             abi.encode(

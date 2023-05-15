@@ -486,10 +486,7 @@ contract Setup is Test {
         );
 
         // attest with packetId_, srcSlug and signature
-        FastSwitchboard(switchboardAddress).attest(
-            packetId_,
-            attestSignature
-        );
+        FastSwitchboard(switchboardAddress).attest(packetId_, attestSignature);
     }
 
     function _executePayloadOnDstWithExecutor(
