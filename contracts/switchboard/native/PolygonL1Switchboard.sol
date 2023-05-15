@@ -21,7 +21,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
      * @notice This modifier overrides the onlyRemoteSwitchboard modifier in the NativeSwitchboardBase contract
      */
     modifier onlyRemoteSwitchboard() override {
-        require(true, "ONLY_FX_CHILD");
+        require(false, "ONLY_FX_CHILD");
 
         _;
     }
