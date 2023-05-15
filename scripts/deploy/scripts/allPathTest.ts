@@ -9,7 +9,7 @@ import {
   isTestnet,
   isMainnet,
 } from "../../../src";
-import { getAddresses, getRelayUrl } from "../utils";
+import { getAddresses, getRelayUrl, getRelayAPIKEY } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
 import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
 import { chains, mode } from "../config";
@@ -86,6 +86,11 @@ const relayTx = async (params: RequestObj) => {
   try {
     let { to, data, chainSlug, gasPrice, value, gasLimit } = params;
     let url = await getRelayUrl(mode);
+    let config = {
+      headers:{
+        "x-api-key":getRelayAPIKEY(mode)
+      }
+    }
     // console.log({url})
     let body = {
       to,
@@ -97,7 +102,7 @@ const relayTx = async (params: RequestObj) => {
       sequential: false,
       source: "LoadTester",
     };
-    let response = await axiosPost(url, body);
+    let response = await axiosPost(url, body, config);
     if (response?.success) return response?.data;
     else return { hash: "" };
   } catch (error) {

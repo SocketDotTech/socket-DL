@@ -24,8 +24,8 @@ export const getRoleHash = (role: string) =>
 export const getChainRoleHash = (role: string, chainSlug: number) =>
   ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["string", "uint256"],
-      [role, chainSlug]
+      ["bytes32", "uint32"],
+      [getRoleHash(role), chainSlug]
     )
   );
 
@@ -179,6 +179,18 @@ export const getRelayUrl = async (mode: DeploymentMode) => {
       return process.env.RELAYER_URL_DEV;
   }
 };
+
+export const getRelayAPIKEY = async (mode: DeploymentMode) => {
+  switch (mode) {
+    case DeploymentMode.SURGE:
+      return process.env.RELAYER_API_KEY_SURGE;
+    case DeploymentMode.PROD:
+      return process.env.RELAYER_API_KEY_PROD;
+    default:
+      return process.env.RELAYER_API_KEY_DEV;
+  }
+};
+
 
 export const getAddresses = async (
   chainSlug: ChainSlug,

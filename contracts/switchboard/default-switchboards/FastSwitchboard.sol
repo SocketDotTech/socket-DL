@@ -39,7 +39,8 @@ contract FastSwitchboard is SwitchboardBase {
     error WatcherNotFound();
     // Error emitted when a packet is already attested
     error AlreadyAttested();
-
+    // Error emitted when role is invalid
+    error InvalidRole();
     /**
      * @dev Constructor function for the FastSwitchboard contract
      * @param owner_ Address of the owner of the contract
@@ -179,5 +180,101 @@ contract FastSwitchboard is SwitchboardBase {
         _revokeRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_);
 
         totalWatchers[srcChainSlug_]--;
+    }
+
+    function isNonWatcherRole (bytes32 role_) public pure returns (bool) {
+        if (
+            role_ == TRIP_ROLE ||
+            role_ == UNTRIP_ROLE ||
+            role_ == WITHDRAW_ROLE ||
+            role_ == RESCUE_ROLE ||
+            role_ == GOVERNANCE_ROLE || 
+            role_ == GAS_LIMIT_UPDATER_ROLE
+        ) return true;
+        
+        return false;
+    }
+
+    function grantRole(
+        bytes32 role_,
+        address grantee_
+    ) external override onlyOwner {
+        if (isNonWatcherRole(role_)) {
+            _grantRole(role_, grantee_);
+        } else {
+            revert InvalidRole();
+        }
+    }
+
+    function grantRoleWithSlug(
+        bytes32 roleName_,
+        uint32 chainSlug_,
+        address grantee_
+    ) external override onlyOwner {
+        if (roleName_ != GAS_LIMIT_UPDATER_ROLE) revert InvalidRole();
+        _grantRoleWithSlug(roleName_, chainSlug_, grantee_);
+    }
+
+    function revokeRole(
+        bytes32 role_,
+        address grantee_
+    ) external override onlyOwner {
+        if (isNonWatcherRole(role_)) {
+            _revokeRole(role_, grantee_);
+        } else {
+            revert InvalidRole();
+        }
+    }
+
+    function revokeRoleWithSlug(
+        bytes32 roleName_,
+        uint32 chainSlug_,
+        address grantee_
+    ) external override onlyOwner {
+        if (roleName_ != GAS_LIMIT_UPDATER_ROLE) revert InvalidRole();
+        _revokeRoleWithSlug(roleName_, chainSlug_, grantee_);
+    }
+
+    function grantBatchRole(
+        bytes32[] calldata roleNames_,
+        uint32[] calldata slugs_,
+        address[] calldata grantees_
+    ) external override onlyOwner {
+        require(roleNames_.length == grantees_.length);
+        for (uint256 index = 0; index < roleNames_.length; index++) {
+            if (isNonWatcherRole(roleNames_[index])) {
+                if (slugs_[index]>0)
+                _grantRoleWithSlug(
+                    roleNames_[index],
+                    slugs_[index],
+                    grantees_[index]
+                );
+                else _grantRole(roleNames_[index], grantees_[index]);
+            } else {
+                revert InvalidRole();
+            } 
+            
+        }
+    }
+
+    function revokeBatchRole(
+        bytes32[] calldata roleNames_,
+        uint32[] calldata slugs_,
+        address[] calldata grantees_
+    ) external override onlyOwner {
+        require(roleNames_.length == grantees_.length);
+        for (uint256 index = 0; index < roleNames_.length; index++) {
+            if (isNonWatcherRole(roleNames_[index])) {
+                if (slugs_[index]>0)
+                    _revokeRoleWithSlug(
+                        roleNames_[index],
+                        slugs_[index],
+                        grantees_[index]
+                    );
+                else _revokeRole(roleNames_[index], grantees_[index]);
+            } else {
+                revert InvalidRole();
+            }
+        }
     }
 }

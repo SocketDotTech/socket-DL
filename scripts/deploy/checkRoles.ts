@@ -49,6 +49,7 @@ let roleTxns: {
     [contractName: string]: {
       to: string;
       role: string;
+      slug:number;
       grantee: string;
     }[];
   };
@@ -70,6 +71,7 @@ const addTransaction = (
   contractAddress: string,
   hasRole: boolean,
   role: string,
+  slug:number,
   userAddress: string,
   newRoleStatus: boolean
 ) => {
@@ -80,6 +82,7 @@ const addTransaction = (
     roleTxns[chainId]![contractName]?.push({
       to: contractAddress,
       role,
+      slug,
       grantee: userAddress,
     });
   }
@@ -87,6 +90,7 @@ const addTransaction = (
 
 const getRoleTxnData = (
   roles: string[],
+  slugs:number[],
   userAddresses: string[],
   type: "GRANT" | "REVOKE"
 ) => {
@@ -95,13 +99,13 @@ const getRoleTxnData = (
   );
   if (type === "GRANT") {
     return accessControlInterface.encodeFunctionData(
-      "grantBatchRole(bytes32[],address[])",
-      [roles, userAddresses]
+      "grantBatchRole(bytes32[],uint32[],address[])",
+      [roles, slugs, userAddresses]
     );
   } else if (type === "REVOKE") {
     return accessControlInterface.encodeFunctionData(
-      "revokeBatchRole(bytes32[],address[])",
-      [roles, userAddresses]
+      "revokeBatchRole(bytes32[],uint32[],address[])",
+      [roles, slugs, userAddresses]
     );
   } else {
     throw Error("Invalid grant type");
@@ -119,16 +123,16 @@ const executeRoleTransactions = async (
   );
   for (let i = 0; i < contracts.length; i++) {
     let contractSpecificTxns:
-      | { to: string; role: string; grantee: string }[]
+      | { to: string; role: string; slug:number; grantee: string }[]
       | undefined =
       roleTxns[chainId as any as keyof typeof roleTxns]![
         contracts[i] as CORE_CONTRACTS
       ];
     if (!contractSpecificTxns?.length) continue;
 
-    let grantRoles: string[] = [],
+    let grantRoles: string[] = [], grantSlugs:number[] = [],
       grantAddresses: string[] = [];
-    let revokeRoles: string[] = [],
+    let revokeRoles: string[] = [], revokeSlugs:number[] = [],
       revokeAddresses: string[] = [];
     let contractAddress: string | undefined;
 
@@ -136,15 +140,17 @@ const executeRoleTransactions = async (
       contractAddress = roleTx.to;
       if (newRoleStatus) {
         grantRoles.push(roleTx.role);
+        grantSlugs.push(roleTx.slug)
         grantAddresses.push(roleTx.grantee);
       } else {
         revokeRoles.push(roleTx.role);
+        revokeSlugs.push(roleTx.slug)
         revokeAddresses.push(roleTx.grantee);
       }
     });
 
     if (grantRoles.length) {
-      let data = getRoleTxnData(grantRoles, grantAddresses, "GRANT");
+      let data = getRoleTxnData(grantRoles, grantSlugs, grantAddresses, "GRANT");
       let tx = await wallet.sendTransaction({
         to: contractAddress,
         data,
@@ -160,7 +166,7 @@ const executeRoleTransactions = async (
     }
 
     if (revokeRoles.length) {
-      let data = getRoleTxnData(grantRoles, grantAddresses, "REVOKE");
+      let data = getRoleTxnData(grantRoles, revokeSlugs, grantAddresses, "REVOKE");
       let tx = await wallet.sendTransaction({
         to: contractAddress,
         data,
@@ -283,6 +289,7 @@ export const checkNativeSwitchboardRoles = async ({
             contractAddress!,
             hasRole,
             getRoleHash(role),
+            0,
             userAddress,
             newRoleStatus
           );
@@ -394,6 +401,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                   contractAddress!,
                   hasRole,
                   getRoleHash(role),
+                  0, // keep slug as 0 for non-chain specific roles
                   userAddress,
                   newRoleStatus
                 );
@@ -466,7 +474,8 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                         contractName as CORE_CONTRACTS,
                         contractAddress!,
                         hasRole,
-                        getChainRoleHash(role, Number(siblingSlug)),
+                        getRoleHash(role),
+                        Number(siblingSlug),
                         userAddress,
                         newRoleStatus
                       );
