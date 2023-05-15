@@ -41,7 +41,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
      * This modifier is inherited from the NativeSwitchboardBase contract.
      */
     modifier onlyRemoteSwitchboard() override {
-        require(false, "ONLY_FX_CHILD");
+        revert("ONLY_FX_CHILD");
 
         _;
     }
