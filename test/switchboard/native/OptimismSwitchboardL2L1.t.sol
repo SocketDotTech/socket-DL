@@ -68,6 +68,29 @@ contract OptimismSwitchboardL2L1Test is Setup {
         vm.stopPrank();
     }
 
+    function testReceivePacket() public {
+        bytes32 packetId = bytes32(uint256(100));
+        bytes32 root = bytes32(uint256(200));
+
+        vm.expectRevert(NativeSwitchboardBase.InvalidSender.selector);
+        optimismSwitchboard.receivePacket(packetId, root);
+
+        vm.mockCall(
+            crossDomainManagerAddress_,
+            abi.encodeWithSelector(
+                optimismSwitchboard
+                    .crossDomainMessenger__()
+                    .xDomainMessageSender
+                    .selector
+            ),
+            abi.encode(optimismSwitchboard.remoteNativeSwitchboard())
+        );
+
+        vm.startPrank(crossDomainManagerAddress_);
+        optimismSwitchboard.receivePacket(packetId, root);
+        vm.stopPrank();
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
