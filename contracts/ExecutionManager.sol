@@ -3,7 +3,7 @@ pragma solidity 0.8.7;
 
 import "./interfaces/IExecutionManager.sol";
 import "./interfaces/IGasPriceOracle.sol";
-import "./utils/AccessControlExtended.sol";
+import "./utils/AccessControl.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/SignatureVerifierLib.sol";
 import "./libraries/FeesHelper.sol";
@@ -12,10 +12,10 @@ import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE} from "./util
 /**
  * @title ExecutionManager
  * @dev Implementation of the IExecutionManager interface, providing functions for executing cross-chain transactions and
- * managing execution fees. This contract also implements the AccessControlExtended interface, allowing for role-based
+ * managing execution fees. This contract also implements the AccessControl interface, allowing for role-based
  * access control.
  */
-contract ExecutionManager is IExecutionManager, AccessControlExtended {
+contract ExecutionManager is IExecutionManager, AccessControl {
     IGasPriceOracle public gasPriceOracle__;
     event GasPriceOracleSet(address gasPriceOracle);
 
@@ -27,7 +27,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     constructor(
         IGasPriceOracle gasPriceOracle_,
         address owner_
-    ) AccessControlExtended(owner_) {
+    ) AccessControl(owner_) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
     }
 

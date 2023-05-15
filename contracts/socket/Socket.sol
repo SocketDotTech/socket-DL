@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import {SocketSrc} from "./SocketSrc.sol";
 import "./SocketDst.sol";
 import "../libraries/RescueFundsLib.sol";
+
+import {SocketSrc} from "./SocketSrc.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
 /**
@@ -29,7 +30,7 @@ contract Socket is SocketSrc, SocketDst {
         address capacitorFactory_,
         address owner_,
         string memory version_
-    ) AccessControlExtended(owner_) SocketBase(chainSlug_, version_) {
+    ) AccessControl(owner_) SocketBase(chainSlug_, version_) {
         hasher__ = IHasher(hasher_);
         transmitManager__ = ITransmitManager(transmitManager_);
         executionManager__ = IExecutionManager(executionManager_);

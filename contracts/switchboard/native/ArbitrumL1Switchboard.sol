@@ -7,12 +7,14 @@ import "openzeppelin-contracts/contracts/vendor/arbitrum/IOutbox.sol";
 
 import "./NativeSwitchboardBase.sol";
 
+import {ARBITRUM_NATIVE_FEE_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+
 /**
  * @title ArbitrumL1Switchboard
  * @dev This contract is a switchboard contract for the Arbitrum chain that handles packet attestation and actions on the L1 to Arbitrum and
- *     Arbitrum to L1 path.
- *      This contract inherits base functions from NativeSwitchboardBase, including fee calculation,
- *      trip and untrip actions, and limit setting functions.
+ * Arbitrum to L1 path.
+ * This contract inherits base functions from NativeSwitchboardBase, including fee calculation,
+ * trip and untrip actions, and limit setting functions.
  */
 contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     /**
@@ -114,7 +116,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         address bridge_,
         address outbox_
     )
-        AccessControlExtended(owner_)
+        AccessControl(owner_)
         NativeSwitchboardBase(
             socket_,
             chainSlug_,
@@ -232,11 +234,11 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
      * @param arbitrumNativeFee_ A uint256 value representing the new value for arbitrumNativeFee.
      * @param signature_ A bytes array representing the signature of the caller.
      * @dev arbitrumNativeFees is used to calculate the minimum switchboard fees for
-     *          initiating a native confirmation. The new value for arbitrumNativeFee
-     *          is passed as an argument along with a nonce and a signature.
-     *          The signature is used to verify the identity of the caller.
-     *          Once the caller's identity is verified, the new value for
-     *          arbitrumNativeFee is set and an event is emitted.
+     * initiating a native confirmation. The new value for arbitrumNativeFee
+     * is passed as an argument along with a nonce and a signature.
+     * The signature is used to verify the identity of the caller.
+     * Once the caller's identity is verified, the new value for
+     * arbitrumNativeFee is set and an event is emitted.
      */
     function updateArbitrumNativeFee(
         uint256 nonce_,
@@ -246,7 +248,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
-                    "ARBITRUM_NATIVE_FEE_UPDATE",
+                    ARBITRUM_NATIVE_FEE_UPDATE_SIG_IDENTIFIER,
                     chainSlug,
                     nonce_,
                     arbitrumNativeFee_
@@ -255,8 +257,8 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
             signature_
         );
 
-        if (!_hasRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater))
-            revert NoPermit(GAS_LIMIT_UPDATER_ROLE);
+        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
+
         uint256 nonce = nextNonce[gasLimitUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
