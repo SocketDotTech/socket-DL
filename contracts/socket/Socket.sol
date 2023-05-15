@@ -27,8 +27,9 @@ contract Socket is SocketSrc, SocketDst {
         address transmitManager_,
         address executionManager_,
         address capacitorFactory_,
-        address owner_
-    ) AccessControlExtended(owner_) SocketBase(chainSlug_) {
+        address owner_,
+        string memory version_
+    ) AccessControlExtended(owner_) SocketBase(chainSlug_, version_) {
         hasher__ = IHasher(hasher_);
         transmitManager__ = ITransmitManager(transmitManager_);
         executionManager__ = IExecutionManager(executionManager_);
