@@ -133,6 +133,7 @@ contract Setup is Test {
         bytes32 digest = keccak256(
             abi.encode(
                 PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                address(cc_.transmitManager__),
                 cc_.chainSlug,
                 remoteChainSlug_,
                 cc_.transmitterNonce,
@@ -191,9 +192,10 @@ contract Setup is Test {
         bytes32 digest = keccak256(
             abi.encode(
                 EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                nonce,
+                address(optimisticSwitchboard),
                 cc_.chainSlug,
                 remoteChainSlug_,
+                nonce,
                 _executionOverhead
             )
         );
@@ -251,9 +253,10 @@ contract Setup is Test {
         bytes32 digest = keccak256(
             abi.encode(
                 EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                nonce,
+                address(fastSwitchboard),
                 cc_.chainSlug,
                 remoteChainSlug_,
+                nonce,
                 _executionOverhead
             )
         );
@@ -269,6 +272,7 @@ contract Setup is Test {
         digest = keccak256(
             abi.encode(
                 ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                address(fastSwitchboard),
                 cc_.chainSlug,
                 remoteChainSlug_,
                 nonce,
@@ -421,7 +425,7 @@ contract Setup is Test {
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
         bytes32 digest = keccak256(
-            abi.encode(remoteChainSlug_, packetId, root)
+            abi.encode(version, remoteChainSlug_, packetId, root)
         );
         sig = _createSignature(digest, _transmitterPrivateKey);
     }
@@ -465,10 +469,13 @@ contract Setup is Test {
 
     function _attestOnDst(
         address switchboardAddress,
+        uint32 dstSlug,
         bytes32 packetId_
     ) internal {
         uint32 srcSlug = uint32(uint256(packetId_) >> 224);
-        bytes32 digest = keccak256(abi.encode(srcSlug, packetId_));
+        bytes32 digest = keccak256(
+            abi.encode(switchboardAddress, srcSlug, dstSlug, packetId_)
+        );
 
         // generate attest-signature
         bytes memory attestSignature = _createSignature(

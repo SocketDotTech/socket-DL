@@ -92,6 +92,7 @@ contract TransmitManagerTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                address(transmitManager),
                 chainSlug,
                 ownerNonce,
                 sealGasLimit
@@ -106,6 +107,7 @@ contract TransmitManagerTest is Setup {
         digest = keccak256(
             abi.encode(
                 PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                address(transmitManager),
                 chainSlug,
                 destChainSlug,
                 ownerNonce,
@@ -124,7 +126,12 @@ contract TransmitManagerTest is Setup {
         );
 
         digest = keccak256(
-            abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
+            abi.encode(
+                address(gasPriceOracle),
+                chainSlug,
+                gasPriceOracleNonce,
+                sourceGasPrice
+            )
         );
         sig = _createSignature(digest, transmitterPrivateKey);
 
@@ -136,6 +143,7 @@ contract TransmitManagerTest is Setup {
 
         digest = keccak256(
             abi.encode(
+                address(gasPriceOracle),
                 chainSlug,
                 destChainSlug,
                 gasPriceOracleNonce,

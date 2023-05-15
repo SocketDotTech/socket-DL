@@ -47,9 +47,10 @@ contract FastSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                nonce,
+                address(fastSwitchboard),
                 _a.chainSlug,
                 remoteChainSlug,
+                nonce,
                 _executionOverhead
             )
         );
@@ -70,6 +71,7 @@ contract FastSwitchboardTest is Setup {
         digest = keccak256(
             abi.encode(
                 ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                address(fastSwitchboard),
                 _a.chainSlug,
                 remoteChainSlug,
                 nonce,
@@ -91,7 +93,14 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testAttest() external {
-        bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
+        bytes32 digest = keccak256(
+            abi.encode(
+                address(fastSwitchboard),
+                _a.chainSlug,
+                remoteChainSlug,
+                packetId
+            )
+        );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
         vm.expectEmit(false, false, false, true);
@@ -103,7 +112,14 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testDuplicateAttestation() external {
-        bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
+        bytes32 digest = keccak256(
+            abi.encode(
+                address(fastSwitchboard),
+                _a.chainSlug,
+                remoteChainSlug,
+                packetId
+            )
+        );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
         vm.expectEmit(false, false, false, true);
@@ -118,12 +134,26 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testIsAllowed() external {
-        bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
+        bytes32 digest = keccak256(
+            abi.encode(
+                address(fastSwitchboard),
+                _a.chainSlug,
+                remoteChainSlug,
+                packetId
+            )
+        );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
         fastSwitchboard.attest(packetId, remoteChainSlug, sig);
 
-        digest = keccak256(abi.encode(remoteChainSlug, packetId));
+        digest = keccak256(
+            abi.encode(
+                address(fastSwitchboard),
+                _a.chainSlug,
+                remoteChainSlug,
+                packetId
+            )
+        );
         sig = _createSignature(digest, _altWatcherPrivateKey);
 
         fastSwitchboard.attest(packetId, remoteChainSlug, sig);
@@ -157,7 +187,13 @@ contract FastSwitchboardTest is Setup {
         fastSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
         bytes32 digest = keccak256(
-            abi.encode(TRIP_GLOBAL_SIG_IDENTIFIER, _a.chainSlug, nonce, true)
+            abi.encode(
+                TRIP_GLOBAL_SIG_IDENTIFIER,
+                address(fastSwitchboard),
+                _a.chainSlug,
+                nonce,
+                true
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -182,6 +218,7 @@ contract FastSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
+                address(fastSwitchboard),
                 srcChainSlug,
                 _a.chainSlug,
                 nonce,
@@ -203,6 +240,7 @@ contract FastSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
+                address(fastSwitchboard),
                 _a.chainSlug,
                 srcChainSlug,
                 nonce,
@@ -230,6 +268,7 @@ contract FastSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
+                address(fastSwitchboard),
                 srcChainSlug,
                 _a.chainSlug,
                 nonce,
@@ -246,6 +285,7 @@ contract FastSwitchboardTest is Setup {
         digest = keccak256(
             abi.encode(
                 UNTRIP_PATH_SIG_IDENTIFIER,
+                address(fastSwitchboard),
                 _a.chainSlug,
                 srcChainSlug,
                 nonce,

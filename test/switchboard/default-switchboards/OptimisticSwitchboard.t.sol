@@ -43,9 +43,10 @@ contract OptimisticSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                nonce,
+                address(optimisticSwitchboard),
                 _a.chainSlug,
                 remoteChainSlug,
+                nonce,
                 _executionOverhead
             )
         );
@@ -83,7 +84,13 @@ contract OptimisticSwitchboardTest is Setup {
         optimisticSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
         bytes32 digest = keccak256(
-            abi.encode(TRIP_GLOBAL_SIG_IDENTIFIER, _a.chainSlug, nonce, true)
+            abi.encode(
+                TRIP_GLOBAL_SIG_IDENTIFIER,
+                address(optimisticSwitchboard),
+                _a.chainSlug,
+                nonce,
+                true
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -106,6 +113,7 @@ contract OptimisticSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
+                address(optimisticSwitchboard),
                 _a.chainSlug,
                 srcChainSlug,
                 nonce,
@@ -125,6 +133,7 @@ contract OptimisticSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
+                address(optimisticSwitchboard),
                 _a.chainSlug,
                 srcChainSlug,
                 nonce,
@@ -153,6 +162,7 @@ contract OptimisticSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
+                address(optimisticSwitchboard),
                 _a.chainSlug,
                 srcChainSlug,
                 nonce,
@@ -170,6 +180,7 @@ contract OptimisticSwitchboardTest is Setup {
         digest = keccak256(
             abi.encode(
                 UNTRIP_PATH_SIG_IDENTIFIER,
+                address(optimisticSwitchboard),
                 _a.chainSlug,
                 srcChainSlug,
                 nonce,
@@ -225,6 +236,7 @@ contract OptimisticSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
+                address(optimisticSwitchboard),
                 _a.chainSlug,
                 srcChainSlug,
                 nonce,

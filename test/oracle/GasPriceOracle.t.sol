@@ -61,7 +61,12 @@ contract GasPriceOracleTest is Setup {
         emit SourceGasPriceUpdated(sourceGasPrice);
 
         bytes32 digest = keccak256(
-            abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
+            abi.encode(
+                address(gasPriceOracle),
+                chainSlug,
+                gasPriceOracleNonce,
+                sourceGasPrice
+            )
         );
         bytes memory sig = _createSignature(digest, transmitterPrivateKey);
 
@@ -81,6 +86,7 @@ contract GasPriceOracleTest is Setup {
 
         bytes32 digest = keccak256(
             abi.encode(
+                address(gasPriceOracle),
                 chainSlug,
                 destChainSlug,
                 gasPriceOracleNonce,
@@ -106,7 +112,12 @@ contract GasPriceOracleTest is Setup {
         uint256 relativeGasPrice = 1100000;
 
         bytes32 digest = keccak256(
-            abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
+            abi.encode(
+                address(gasPriceOracle),
+                chainSlug,
+                gasPriceOracleNonce,
+                sourceGasPrice
+            )
         );
         bytes memory sig = _createSignature(digest, transmitterPrivateKey);
 
@@ -118,6 +129,7 @@ contract GasPriceOracleTest is Setup {
 
         digest = keccak256(
             abi.encode(
+                address(gasPriceOracle),
                 chainSlug,
                 destChainSlug,
                 gasPriceOracleNonce,
@@ -148,6 +160,7 @@ contract GasPriceOracleTest is Setup {
         vm.expectRevert(TransmitterNotFound.selector);
         bytes32 digest = keccak256(
             abi.encode(
+                address(gasPriceOracle),
                 chainSlug,
                 destChainSlug,
                 gasPriceOracleNonce,
@@ -169,7 +182,12 @@ contract GasPriceOracleTest is Setup {
 
         vm.expectRevert(TransmitterNotFound.selector);
         bytes32 digest = keccak256(
-            abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
+            abi.encode(
+                address(gasPriceOracle),
+                chainSlug,
+                gasPriceOracleNonce,
+                sourceGasPrice
+            )
         );
         bytes memory sig = _createSignature(digest, _altTransmitterPrivateKey);
 

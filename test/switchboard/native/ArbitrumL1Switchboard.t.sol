@@ -116,8 +116,9 @@ contract ArbitrumL1SwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                nonce,
+                address(arbitrumL1Switchboard),
                 cc_.chainSlug,
+                nonce,
                 _executionOverhead
             )
         );
