@@ -103,7 +103,12 @@ contract ExecutionManagerTest is Setup {
         );
 
         bytes32 digest = keccak256(
-            abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
+            abi.encode(
+                address(_a.gasPriceOracle__),
+                chainSlug,
+                gasPriceOracleNonce,
+                sourceGasPrice
+            )
         );
         bytes memory sig = _createSignature(digest, transmitterPrivateKey);
 
@@ -115,6 +120,7 @@ contract ExecutionManagerTest is Setup {
 
         digest = keccak256(
             abi.encode(
+                address(_a.gasPriceOracle__),
                 chainSlug,
                 destChainSlug,
                 gasPriceOracleNonce,

@@ -24,6 +24,8 @@ contract Setup is Test {
 
     string version = "TEST_NET";
 
+    bytes32 versionHash = keccak256(abi.encode(version));
+
     uint256 immutable executorPrivateKey = c++;
     uint256 immutable _socketOwnerPrivateKey = c++;
 
@@ -425,7 +427,7 @@ contract Setup is Test {
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
         bytes32 digest = keccak256(
-            abi.encode(version, remoteChainSlug_, packetId, root)
+            abi.encode(versionHash, remoteChainSlug_, packetId, root)
         );
         sig = _createSignature(digest, _transmitterPrivateKey);
     }

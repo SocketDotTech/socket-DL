@@ -135,7 +135,6 @@ contract FastSwitchboard is SwitchboardBase {
                     ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                     address(this),
                     chainSlug,
-                    chainSlug,
                     dstChainSlug_,
                     nonce_,
                     attestGasLimit_

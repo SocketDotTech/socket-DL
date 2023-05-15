@@ -263,7 +263,7 @@ contract SocketSrcTest is Setup {
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
         bytes32 digest = keccak256(
-            abi.encode(version, remoteChainSlug_, packetId, root)
+            abi.encode(versionHash, remoteChainSlug_, packetId, root)
         );
 
         sig = _createSignature(digest, transmitterPrivateKey_);

@@ -96,8 +96,8 @@ contract FastSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 address(fastSwitchboard),
-                _a.chainSlug,
                 remoteChainSlug,
+                _a.chainSlug,
                 packetId
             )
         );
@@ -115,8 +115,8 @@ contract FastSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 address(fastSwitchboard),
-                _a.chainSlug,
                 remoteChainSlug,
+                _a.chainSlug,
                 packetId
             )
         );
@@ -137,8 +137,8 @@ contract FastSwitchboardTest is Setup {
         bytes32 digest = keccak256(
             abi.encode(
                 address(fastSwitchboard),
-                _a.chainSlug,
                 remoteChainSlug,
+                _a.chainSlug,
                 packetId
             )
         );
@@ -149,8 +149,8 @@ contract FastSwitchboardTest is Setup {
         digest = keccak256(
             abi.encode(
                 address(fastSwitchboard),
-                _a.chainSlug,
                 remoteChainSlug,
+                _a.chainSlug,
                 packetId
             )
         );
