@@ -2,7 +2,6 @@
 pragma solidity 0.8.7;
 
 import "./AccessControl.sol";
-import "forge-std/console.sol";
 
 /**
  * @title AccessControlExtended

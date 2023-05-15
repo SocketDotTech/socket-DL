@@ -10,7 +10,6 @@ import "./libraries/RescueFundsLib.sol";
 import "./libraries/FeesHelper.sol";
 import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRANSMITTER_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
 import {SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
-import "forge-std/console.sol";
 
 /**
  * @title TransmitManager
@@ -31,6 +30,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
 
+    // remoteChainSlug => transmissionFees
     mapping(uint32 => uint256) public transmissionFees;
 
     error InsufficientTransmitFees();

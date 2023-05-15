@@ -165,7 +165,6 @@ abstract contract SocketSrc is SocketBase {
             remoteChainSlug_
         );
         uint256 msgExecutionFee = executionManager__.getMinFees(
-            msgGasLimit_,
             remoteChainSlug_
         );
 

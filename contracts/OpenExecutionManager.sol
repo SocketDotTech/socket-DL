@@ -3,11 +3,15 @@ pragma solidity 0.8.7;
 
 import "./interfaces/IExecutionManager.sol";
 import "./interfaces/IGasPriceOracle.sol";
+import "./interfaces/ISignatureVerifier.sol";
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/SignatureVerifierLib.sol";
 import "./libraries/FeesHelper.sol";
-import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE} from "./utils/AccessRoles.sol";
+import "./libraries/SignatureVerifierLib.sol";
+
+import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
+import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 
 /**
  * @title OpenExecutionManager
@@ -17,7 +21,27 @@ import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE} from "./util
  */
 contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
+
     event GasPriceOracleSet(address gasPriceOracle);
+
+    ISignatureVerifier public signatureVerifier__;
+
+    /**
+     * @notice Emitted when the executionFees is updated
+     * @param dstChainSlug The destination chain slug for which the executionFees is updated
+     * @param executionFees The new executionFees
+     */
+    event ExecutionFeesSet(uint256 dstChainSlug, uint256 executionFees);
+
+    uint32 public immutable chainSlug;
+
+    // transmitter => nextNonce
+    mapping(address => uint256) public nextNonce;
+
+    // remoteChainSlug => executionFees
+    mapping(uint32 => uint256) public executionFees;
+
+    error InvalidNonce();
 
     /**
      * @dev Constructor for OpenExecutionManager contract
@@ -26,9 +50,13 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
      */
     constructor(
         IGasPriceOracle gasPriceOracle_,
-        address owner_
+        address owner_,
+        uint32 chainSlug_,
+        ISignatureVerifier signatureVerifier_
     ) AccessControlExtended(owner_) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
+        signatureVerifier__ = signatureVerifier_;
+        chainSlug = chainSlug_;
     }
 
     /**
@@ -67,15 +95,13 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
     /**
      * @notice Function for getting the minimum fees required for executing a cross-chain transaction
      * @dev This function is called at source to calculate the execution cost.
-     * @param msgGasLimit_ Gas limit for the transaction
      * @param siblingChainSlug_ Sibling chain identifier
      * @return Minimum fees required for executing the transaction
      */
     function getMinFees(
-        uint256 msgGasLimit_,
         uint32 siblingChainSlug_
     ) external view override returns (uint256) {
-        return _getMinExecutionFees(msgGasLimit_, siblingChainSlug_);
+        return executionFees[siblingChainSlug_];
     }
 
     /**
@@ -92,6 +118,34 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
             dstChainSlug_
         );
         return msgGasLimit_ * dstRelativeGasPrice;
+    }
+
+    function setExecutionFees(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 executionFees_,
+        bytes calldata signature_
+    ) external override {
+        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    FEES_UPDATE_SIG_IDENTIFIER,
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    executionFees_
+                )
+            ),
+            signature_
+        );
+
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        uint256 nonce = nextNonce[feesUpdater]++;
+        if (nonce_ != nonce) revert InvalidNonce();
+
+        executionFees[dstChainSlug_] = executionFees_;
+        emit ExecutionFeesSet(dstChainSlug_, executionFees_);
     }
 
     /**

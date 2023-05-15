@@ -20,8 +20,6 @@ contract PolygonL2SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        console.log("PolygonL2Switchboard -> setup initiated");
-
         initialise();
 
         _a.chainSlug = uint32(uint256(80001));
@@ -130,7 +128,9 @@ contract PolygonL2SwitchboardTest is Setup {
         );
         cc_.executionManager__ = new ExecutionManager(
             cc_.gasPriceOracle__,
-            deployer_
+            deployer_,
+            cc_.chainSlug,
+            cc_.sigVerifier__
         );
 
         cc_.transmitManager__ = new TransmitManager(

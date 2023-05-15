@@ -334,7 +334,9 @@ contract Setup is Test {
         cc_.gasPriceOracle__ = new GasPriceOracle(deployer_, cc_.chainSlug);
         cc_.executionManager__ = new ExecutionManager(
             cc_.gasPriceOracle__,
-            deployer_
+            deployer_,
+            cc_.chainSlug,
+            cc_.sigVerifier__
         );
 
         cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);

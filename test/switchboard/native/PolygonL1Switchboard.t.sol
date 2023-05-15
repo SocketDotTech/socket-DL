@@ -134,7 +134,9 @@ contract PolygonL1SwitchboardTest is Setup {
         );
         cc_.executionManager__ = new ExecutionManager(
             cc_.gasPriceOracle__,
-            deployer_
+            deployer_,
+            cc_.chainSlug,
+            cc_.sigVerifier__
         );
 
         cc_.transmitManager__ = new TransmitManager(

@@ -54,7 +54,12 @@ contract ExecutionManagerTest is Setup {
         _executor = vm.addr(executorPrivateKey);
 
         gasPriceOracle = new GasPriceOracle(owner, chainSlug);
-        executionManager = new ExecutionManager(gasPriceOracle, owner);
+        executionManager = new ExecutionManager(
+            gasPriceOracle,
+            owner,
+            chainSlug,
+            signatureVerifier
+        );
 
         signatureVerifier = new SignatureVerifier();
         transmitManager = new TransmitManager(
@@ -143,10 +148,7 @@ contract ExecutionManagerTest is Setup {
 
     function testGetMinFees() public {
         uint256 msgGasLimit = 100000;
-        uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
-            destChainSlug
-        );
+        uint256 minFees = executionManager.getMinFees(destChainSlug);
 
         //compute expected Data
         uint256 dstRelativeGasPrice = gasPriceOracle.relativeGasPrice(
@@ -160,10 +162,7 @@ contract ExecutionManagerTest is Setup {
 
     function testPayFees() public {
         uint256 msgGasLimit = 100000;
-        uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
-            destChainSlug
-        );
+        uint256 minFees = executionManager.getMinFees(destChainSlug);
         deal(feesPayer, minFees);
 
         assertEq(address(executionManager).balance, 0);
@@ -179,10 +178,7 @@ contract ExecutionManagerTest is Setup {
 
     function testWithdrawFees() public {
         uint256 msgGasLimit = 100000;
-        uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
-            destChainSlug
-        );
+        uint256 minFees = executionManager.getMinFees(destChainSlug);
         deal(feesPayer, minFees);
 
         assertEq(address(executionManager).balance, 0);
