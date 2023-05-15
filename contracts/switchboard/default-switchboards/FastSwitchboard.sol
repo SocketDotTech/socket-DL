@@ -62,29 +62,25 @@ contract FastSwitchboard is SwitchboardBase {
     /**
      * @dev Function to attest a packet
      * @param packetId_ Packet ID
-     * @param srcChainSlug_ Chain slug of the source chain
      * @param signature_ Signature of the packet
      */
-    function attest(
-        bytes32 packetId_,
-        uint32 srcChainSlug_,
-        bytes calldata signature_
-    ) external {
+    function attest(bytes32 packetId_, bytes calldata signature_) external {
+        uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
         address watcher = SignatureVerifierLib.recoverSignerFromDigest(
             keccak256(
-                abi.encode(address(this), srcChainSlug_, chainSlug, packetId_)
+                abi.encode(address(this), srcChainSlug, chainSlug, packetId_)
             ),
             signature_
         );
 
         if (isAttested[watcher][packetId_]) revert AlreadyAttested();
-        if (!_hasRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher))
+        if (!_hasRoleWithSlug(WATCHER_ROLE, srcChainSlug, watcher))
             revert WatcherNotFound();
 
         isAttested[watcher][packetId_] = true;
         attestations[packetId_]++;
 
-        if (attestations[packetId_] >= totalWatchers[srcChainSlug_])
+        if (attestations[packetId_] >= totalWatchers[srcChainSlug])
             isPacketValid[packetId_] = true;
 
         emit PacketAttested(packetId_, watcher);
