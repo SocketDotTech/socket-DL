@@ -2,6 +2,7 @@
 pragma solidity 0.8.7;
 
 import "./AccessControl.sol";
+import "forge-std/console.sol";
 
 /**
  * @title AccessControlExtended
@@ -27,6 +28,7 @@ contract AccessControlExtended is AccessControl {
         address address_
     ) internal virtual {
         bytes32 roleHash = keccak256(abi.encode(roleName_, chainSlug_));
+        console.log("_checkRoleWithSlug for :", address_);
         if (!_hasRole(roleHash, address_)) revert NoPermit(roleHash);
     }
 

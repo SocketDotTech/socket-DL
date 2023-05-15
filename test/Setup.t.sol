@@ -45,7 +45,7 @@ contract Setup is Test {
     uint256 internal _sealGasLimit = 150000;
     uint256 internal _proposeGasLimit = 150000;
     uint256 internal _attestGasLimit = 150000;
-    uint256 internal _transmissionFees = 150000;
+    uint256 internal _transmissionFees = 350000000000;
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
@@ -127,6 +127,13 @@ contract Setup is Test {
             _socketOwner
         );
 
+        //grant FeesUpdater Role
+        cc_.transmitManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
         vm.stopPrank();
 
         bytes32 digest = keccak256(
@@ -156,6 +163,8 @@ contract Setup is Test {
                 _transmissionFees
             )
         );
+
+        console.log("setting TransmissionFees");
         bytes memory feesUpdateSignature = _createSignature(
             feesUpdateDigest,
             _socketOwnerPrivateKey
@@ -166,6 +175,7 @@ contract Setup is Test {
             _transmissionFees,
             feesUpdateSignature
         );
+        console.log("completed setting TransmissionFees");
 
         // deploy default configs: fast, slow
         SocketConfigContext memory scc_ = _addFastSwitchboard(
@@ -342,6 +352,13 @@ contract Setup is Test {
 
         cc_.transmitManager__.grantRoleWithSlug(
             GAS_LIMIT_UPDATER_ROLE,
+            cc_.chainSlug,
+            deployer_
+        );
+
+        //grant FeesUpdater Role
+        cc_.transmitManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
             cc_.chainSlug,
             deployer_
         );
