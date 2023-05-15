@@ -38,7 +38,7 @@ contract ExecutionManagerTest is Setup {
     TransmitManager internal transmitManager;
 
     event SealGasLimitSet(uint256 gasLimit_);
-    event ProposeGasLimitSet(uint256 dstChainSlug_, uint256 gasLimit_);
+    event ProposeGasLimitSet(uint32 dstChainSlug_, uint256 gasLimit_);
     event TransmitManagerUpdated(address transmitManager);
     error TransmitterNotFound();
     error InsufficientExecutionFees();

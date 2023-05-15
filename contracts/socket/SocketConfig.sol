@@ -37,17 +37,17 @@ abstract contract SocketConfig is ISocket, AccessControl {
     mapping(address => uint32) public capacitorToSlug;
 
     // switchboard => siblingChainSlug => ICapacitor
-    mapping(address => mapping(uint256 => ICapacitor)) public capacitors__;
+    mapping(address => mapping(uint32 => ICapacitor)) public capacitors__;
     // switchboard => siblingChainSlug => IDecapacitor
-    mapping(address => mapping(uint256 => IDecapacitor)) public decapacitors__;
+    mapping(address => mapping(uint32 => IDecapacitor)) public decapacitors__;
 
     // plug => remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
-    mapping(address => mapping(uint256 => PlugConfig)) internal _plugConfigs;
+    mapping(address => mapping(uint32 => PlugConfig)) internal _plugConfigs;
 
     // Event triggered when a new switchboard is added
     event SwitchboardAdded(
         address switchboard,
-        uint256 siblingChainSlug,
+        uint32 siblingChainSlug,
         address capacitor,
         address decapacitor,
         uint256 maxPacketLength,
@@ -129,7 +129,7 @@ abstract contract SocketConfig is ISocket, AccessControl {
      * @param outboundSwitchboard_ the address of switchboard to use for sending messages
      */
     function connect(
-        uint256 siblingChainSlug_,
+        uint32 siblingChainSlug_,
         address siblingPlug_,
         address inboundSwitchboard_,
         address outboundSwitchboard_
@@ -173,7 +173,7 @@ abstract contract SocketConfig is ISocket, AccessControl {
      */
     function getPlugConfig(
         address plugAddress_,
-        uint256 siblingChainSlug_
+        uint32 siblingChainSlug_
     )
         external
         view

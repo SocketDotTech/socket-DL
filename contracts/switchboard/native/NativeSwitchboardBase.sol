@@ -63,7 +63,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     address public remoteNativeSwitchboard;
     address public socket;
 
-    uint256 public immutable chainSlug;
+    uint32 public immutable chainSlug;
 
     /**
      * @dev Stores the roots received from native bridge.
@@ -179,7 +179,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
      */
     constructor(
         address socket_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         IGasPriceOracle gasPriceOracle_
@@ -286,7 +286,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     }
 
     function _getMinSwitchboardFees(
-        uint256 dstChainSlug_,
+        uint32 dstChainSlug_,
         uint256 dstRelativeGasPrice_,
         uint256 sourceGasPrice_
     ) internal view virtual returns (uint256);
@@ -297,7 +297,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
      * @param maxPacketSize_ max messages allowed in one packet
      */
     function registerCapacitor(
-        uint256,
+        uint32,
         address capacitor_,
         uint256 maxPacketSize_
     ) external override {

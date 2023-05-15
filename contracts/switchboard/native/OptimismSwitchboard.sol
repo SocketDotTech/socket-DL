@@ -45,7 +45,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
      * @param crossDomainMessenger_ The address of the CrossDomainMessenger contract that will be used to send and receive messages between L1 and L2 networks in the Optimism solution.
      */
     constructor(
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 receiveGasLimit_,
         uint256 confirmGasLimit_,
         uint256 initiateGasLimit_,
@@ -108,7 +108,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
      *       If the confirmGasLimit is 0, it is not included in the calculation.
      */
     function _getMinSwitchboardFees(
-        uint256,
+        uint32,
         uint256 dstRelativeGasPrice_,
         uint256 sourceGasPrice_
     ) internal view override returns (uint256) {

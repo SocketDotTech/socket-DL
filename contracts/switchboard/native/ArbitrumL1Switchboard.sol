@@ -105,7 +105,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
      * @param outbox_ The address of the Arbitrum Outbox contract
      */
     constructor(
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 arbitrumNativeFee_,
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
@@ -199,7 +199,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     the minimum amount of arbitrum native currency that should be paid for a switchboard transaction to be processed.
     */
     function _getMinSwitchboardFees(
-        uint256,
+        uint32,
         uint256,
         uint256 sourceGasPrice_
     ) internal view override returns (uint256) {

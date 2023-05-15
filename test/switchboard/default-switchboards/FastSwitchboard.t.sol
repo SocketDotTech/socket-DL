@@ -5,16 +5,16 @@ import "../../Setup.t.sol";
 
 contract FastSwitchboardTest is Setup {
     bool isFast = true;
-    uint256 immutable remoteChainSlug = uint32(uint256(2));
+    uint32 immutable remoteChainSlug = uint32(uint256(2));
     bytes32 immutable packetId = bytes32(0);
     address watcher;
     address altWatcher;
     uint256 nonce;
 
-    event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
+    event AttestGasLimitSet(uint32 dstChainSlug_, uint256 attestGasLimit_);
     event PacketAttested(bytes32 packetId, address attester);
     event SwitchboardTripped(bool tripGlobalFuse_);
-    event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
+    event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
 
     error WatcherFound();
     error WatcherNotFound();
@@ -172,7 +172,7 @@ contract FastSwitchboardTest is Setup {
     function testTripPath() external {
         vm.startPrank(_socketOwner);
 
-        uint256 srcChainSlug = uint256(123);
+        uint32 srcChainSlug = uint32(123);
         fastSwitchboard.grantRoleWithSlug(
             WATCHER_ROLE,
             srcChainSlug,
@@ -199,7 +199,7 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testNonWatcherToTripPath() external {
-        uint256 srcChainSlug = _a.chainSlug;
+        uint32 srcChainSlug = _a.chainSlug;
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
@@ -216,7 +216,7 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testUnTripAfterTripSingle() external {
-        uint256 srcChainSlug = uint256(123);
+        uint32 srcChainSlug = uint32(123);
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRoleWithSlug(

@@ -29,6 +29,49 @@ export const getChainRoleHash = (role: string, chainSlug: number) =>
     )
   );
 
+export interface DeployParams {
+  addresses: ChainSocketAddresses;
+  mode: DeploymentMode;
+  signer: SignerWithAddress | Wallet;
+  currentChainSlug: number;
+}
+
+export const getOrDeploy = async (
+  contractName: string,
+  path: string,
+  args: any[],
+  deployUtils: DeployParams
+): Promise<Contract> => {
+  let contract: Contract;
+  if (!deployUtils.addresses[contractName]) {
+    contract = await deployContractWithArgs(
+      contractName,
+      args,
+      deployUtils.signer
+    );
+
+    console.log(
+      `${contractName} deployed on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
+    );
+
+    await storeVerificationParams(
+      [contract.address, contractName, path, args],
+      deployUtils.currentChainSlug,
+      deployUtils.mode
+    );
+  } else {
+    contract = await getInstance(
+      contractName,
+      deployUtils.addresses[contractName]
+    );
+    console.log(
+      `${contractName} found on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
+    );
+  }
+
+  return contract;
+};
+
 export async function deployContractWithArgs(
   contractName: string,
   args: Array<any>,
@@ -141,8 +184,8 @@ export const storeVerificationParams = async (
 
   if (!verificationDetails[chainSlug]) verificationDetails[chainSlug] = [];
   verificationDetails[chainSlug] = [
+    verificationDetail,
     ...verificationDetails[chainSlug],
-    ...verificationDetail,
   ];
 
   fs.writeFileSync(

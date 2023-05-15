@@ -12,14 +12,14 @@ import "../libraries/SignatureVerifierLib.sol";
 contract SignatureVerifier is ISignatureVerifier {
     /// @inheritdoc ISignatureVerifier
     function recoverSigner(
-        uint256 destChainSlug_,
-        uint256 packetId_,
+        uint32 dstChainSlug_,
+        bytes32 packetId_,
         bytes32 root_,
         bytes calldata signature_
     ) external pure override returns (address signer) {
         return
             SignatureVerifierLib.recoverSigner(
-                destChainSlug_,
+                dstChainSlug_,
                 packetId_,
                 root_,
                 signature_

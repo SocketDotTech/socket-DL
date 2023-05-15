@@ -38,7 +38,7 @@ contract AccessControlExtended is AccessControl {
      */
     function grantRoleWithSlug(
         bytes32 roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address grantee_
     ) external virtual onlyOwner {
         _grantRoleWithSlug(roleName_, chainSlug_, grantee_);
@@ -46,7 +46,7 @@ contract AccessControlExtended is AccessControl {
 
     function _grantRoleWithSlug(
         bytes32 roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address grantee_
     ) internal {
         _grantRole(keccak256(abi.encode(roleName_, chainSlug_)), grantee_);
@@ -61,7 +61,7 @@ contract AccessControlExtended is AccessControl {
      */
     function hasRoleWithSlug(
         bytes32 roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address address_
     ) external view returns (bool) {
         return _hasRoleWithSlug(roleName_, chainSlug_, address_);
@@ -69,7 +69,7 @@ contract AccessControlExtended is AccessControl {
 
     function _hasRoleWithSlug(
         bytes32 roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address address_
     ) internal view returns (bool) {
         return _hasRole(keccak256(abi.encode(roleName_, chainSlug_)), address_);
@@ -83,7 +83,7 @@ contract AccessControlExtended is AccessControl {
      */
     function revokeRoleWithSlug(
         bytes32 roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address grantee_
     ) external virtual onlyOwner {
         _revokeRoleWithSlug(roleName_, chainSlug_, grantee_);
@@ -91,7 +91,7 @@ contract AccessControlExtended is AccessControl {
 
     function _revokeRoleWithSlug(
         bytes32 roleName_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         address revokee_
     ) internal {
         _revokeRole(keccak256(abi.encode(roleName_, chainSlug_)), revokee_);

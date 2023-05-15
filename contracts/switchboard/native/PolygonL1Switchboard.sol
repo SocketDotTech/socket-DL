@@ -39,7 +39,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
      * @param gasPriceOracle_ is the address of the gas price oracle contract.
      */
     constructor(
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
         address checkpointManager_,
@@ -101,7 +101,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
      * @return minFees minimum fees required in native token
      */
     function _getMinSwitchboardFees(
-        uint256,
+        uint32,
         uint256,
         uint256 sourceGasPrice_
     ) internal view override returns (uint256) {

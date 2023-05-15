@@ -75,7 +75,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
 
     function deployContractsOnSingleChain(
         ChainContext storage cc_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256[] memory transmitterPrivateKeys_
     ) internal {
         // deploy socket setup
@@ -166,7 +166,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
 
     function addOptimismSwitchboard(
         ChainContext storage cc_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         optimismSwitchboard = new OptimismSwitchboard(
@@ -199,7 +199,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
         ChainContext storage cc_,
         address deployer_,
         address switchBoardAddress_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         vm.startPrank(deployer_);

@@ -5,13 +5,13 @@ import "../../Setup.t.sol";
 
 contract OptimisticSwitchboardTest is Setup {
     bool isFast = true;
-    uint256 immutable remoteChainSlug = uint32(uint256(2));
+    uint32 immutable remoteChainSlug = uint32(uint256(2));
     uint256 immutable packetId = 1;
     address watcher;
     uint256 nonce;
 
     event SwitchboardTripped(bool tripGlobalFuse_);
-    event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
+    event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
 
     error WatcherFound();
     error WatcherNotFound();
@@ -96,7 +96,7 @@ contract OptimisticSwitchboardTest is Setup {
 
     function testTripPath() external {
         vm.startPrank(_socketOwner);
-        uint256 srcChainSlug = _a.chainSlug;
+        uint32 srcChainSlug = _a.chainSlug;
         optimisticSwitchboard.grantRoleWithSlug(
             WATCHER_ROLE,
             srcChainSlug,
@@ -121,7 +121,7 @@ contract OptimisticSwitchboardTest is Setup {
     }
 
     function testNonWatcherToTripPath() external {
-        uint256 srcChainSlug = _a.chainSlug;
+        uint32 srcChainSlug = _a.chainSlug;
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
@@ -138,7 +138,7 @@ contract OptimisticSwitchboardTest is Setup {
     }
 
     function testUnTripAfterTripSingle() external {
-        uint256 srcChainSlug = _a.chainSlug;
+        uint32 srcChainSlug = _a.chainSlug;
 
         vm.startPrank(_socketOwner);
         optimisticSwitchboard.grantRoleWithSlug(

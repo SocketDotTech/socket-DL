@@ -33,7 +33,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
 
     /**
      * @dev Constructor function that sets initial values for the confirmGasLimit, arbsys__, and the NativeSwitchboardBase parent contract.
-     * @param chainSlug_ A uint256 representing the ID of the L2 network.
+     * @param chainSlug_ A uint32 representing the ID of the L2 network.
      * @param confirmGasLimit_ A uint256 representing the amount of gas that will be needed to confirm the execution of a transaction on the L2 network.
      * @param initiateGasLimit_ A uint256 representing the amount of gas that will be needed to initiate a transaction on the L2 network.
      * @param executionOverhead_ A uint256 representing the amount of gas that is needed for a transaction execution overhead on the L2 network.
@@ -42,7 +42,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
      * @param gasPriceOracle_ An IGasPriceOracle contract used to calculate gas prices for transactions.
      */
     constructor(
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 confirmGasLimit_,
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
@@ -98,7 +98,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
                                  to the user for executing a cross-chain transaction.
     */
     function _getMinSwitchboardFees(
-        uint256,
+        uint32,
         uint256 dstRelativeGasPrice_,
         uint256 sourceGasPrice_
     ) internal view override returns (uint256) {

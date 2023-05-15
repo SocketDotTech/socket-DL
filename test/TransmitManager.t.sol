@@ -39,7 +39,7 @@ contract TransmitManagerTest is Setup {
     TransmitManager internal transmitManager;
 
     event SealGasLimitSet(uint256 gasLimit_);
-    event ProposeGasLimitSet(uint256 dstChainSlug_, uint256 gasLimit_);
+    event ProposeGasLimitSet(uint32 dstChainSlug_, uint256 gasLimit_);
     event TransmitManagerUpdated(address transmitManager);
     error TransmitterNotFound();
     error InsufficientTransmitFees();
@@ -154,7 +154,7 @@ contract TransmitManagerTest is Setup {
     }
 
     function testGenerateAndVerifySignature() public {
-        uint256 packetId = 123;
+        bytes32 packetId = bytes32("");
         bytes32 root = bytes32(abi.encode(123));
         bytes32 digest = keccak256(abi.encode(chainSlug, packetId, root));
         bytes memory sig = _createSignature(digest, transmitterPrivateKey);

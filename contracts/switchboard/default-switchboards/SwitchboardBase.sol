@@ -17,16 +17,16 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     bool public tripGlobalFuse;
     address public socket;
-    uint256 public immutable chainSlug;
+    uint32 public immutable chainSlug;
     uint256 public immutable timeoutInSeconds;
 
-    mapping(uint256 => bool) public isInitialised;
-    mapping(uint256 => uint256) public maxPacketSize;
+    mapping(uint32 => bool) public isInitialised;
+    mapping(uint32 => uint256) public maxPacketSize;
 
-    mapping(uint256 => uint256) public executionOverhead;
+    mapping(uint32 => uint256) public executionOverhead;
 
     // sourceChain => isPaused
-    mapping(uint256 => bool) public tripSinglePath;
+    mapping(uint32 => bool) public tripSinglePath;
 
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
@@ -36,7 +36,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param srcChainSlug Chain slug of the source chain
      * @param tripSinglePath New trip status of the path
      */
-    event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
+    event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
     /**
      * @dev Emitted when Switchboard contract is tripped globally
      * @param tripGlobalFuse New trip status of the contract
@@ -47,7 +47,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param dstChainSlug Chain slug of the destination chain
      * @param executionOverhead New execution overhead
      */
-    event ExecutionOverheadSet(uint256 dstChainSlug, uint256 executionOverhead);
+    event ExecutionOverheadSet(uint32 dstChainSlug, uint256 executionOverhead);
     /**
      * @dev Emitted when gas price oracle is set
      * @param gasPriceOracle New gas price oracle address
@@ -60,7 +60,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param maxPacketSize Maximum number of messages in one packet
      */
     event CapacitorRegistered(
-        uint256 siblingChainSlug,
+        uint32 siblingChainSlug,
         address capacitor,
         uint256 maxPacketSize
     );
@@ -79,7 +79,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     constructor(
         address gasPriceOracle_,
         address socket_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 timeoutInSeconds_
     ) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
@@ -118,7 +118,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     function _getMinSwitchboardFees(
-        uint256 dstChainSlug_,
+        uint32 dstChainSlug_,
         uint256 dstRelativeGasPrice_
     ) internal view virtual returns (uint256);
 
@@ -128,7 +128,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param maxPacketSize_ max messages allowed in one packet
      */
     function registerCapacitor(
-        uint256 siblingChainSlug_,
+        uint32 siblingChainSlug_,
         address capacitor_,
         uint256 maxPacketSize_
     ) external override {
@@ -145,7 +145,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     function tripPath(
         uint256 nonce_,
-        uint256 srcChainSlug_,
+        uint32 srcChainSlug_,
         bytes memory signature_
     ) external {
         address watcher = SignatureVerifierLib.recoverSignerFromDigest(
@@ -196,7 +196,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     function untripPath(
         uint256 nonce_,
-        uint256 srcChainSlug_,
+        uint32 srcChainSlug_,
         bytes memory signature_
     ) external {
         address untripper = SignatureVerifierLib.recoverSignerFromDigest(
@@ -252,7 +252,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     function setExecutionOverhead(
         uint256 nonce_,
-        uint256 dstChainSlug_,
+        uint32 dstChainSlug_,
         uint256 executionOverhead_,
         bytes memory signature_
     ) external {
