@@ -89,10 +89,7 @@ contract HappyTest is Setup {
                 .getMinFees(_b.chainSlug);
 
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                _b.chainSlug
-            );
+            executionFee = _a.executionManager__.getMinFees(_b.chainSlug);
 
             uint256 value = switchboardFees +
                 socketFees +
@@ -283,10 +280,7 @@ contract HappyTest is Setup {
                 .getMinFees(_b.chainSlug);
 
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                _b.chainSlug
-            );
+            executionFee = _a.executionManager__.getMinFees(_b.chainSlug);
 
             uint256 fees = switchboardFees +
                 executionOverhead +

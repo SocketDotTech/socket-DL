@@ -49,6 +49,7 @@ contract Setup is Test {
     uint256 internal _sealGasLimit = 150000;
     uint256 internal _proposeGasLimit = 150000;
     uint256 internal _attestGasLimit = 150000;
+    uint256 internal _transmissionFees = 350000000000;
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
@@ -65,6 +66,7 @@ contract Setup is Test {
     struct ChainContext {
         uint32 chainSlug;
         uint256 transmitterNonce;
+        uint256 executorNonce;
         Socket socket__;
         Hasher hasher__;
         SignatureVerifier sigVerifier__;
@@ -130,6 +132,20 @@ contract Setup is Test {
             _socketOwner
         );
 
+        //grant FeesUpdater Role
+        cc_.transmitManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        //grant FeesUpdater Role
+        cc_.executionManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
         vm.stopPrank();
 
         bytes32 digest = keccak256(
@@ -148,6 +164,28 @@ contract Setup is Test {
             remoteChainSlug_,
             _proposeGasLimit,
             sig
+        );
+
+        //set TransmissionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                _transmissionFees
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+        cc_.transmitManager__.setTransmissionFees(
+            cc_.transmitterNonce++,
+            uint32(remoteChainSlug_),
+            _transmissionFees,
+            feesUpdateSignature
         );
 
         // deploy default configs: fast, slow
@@ -312,6 +350,15 @@ contract Setup is Test {
         cc_.gasPriceOracle__ = new GasPriceOracle(deployer_, cc_.chainSlug);
         cc_.executionManager__ = new ExecutionManager(
             cc_.gasPriceOracle__,
+            deployer_,
+            cc_.chainSlug,
+            cc_.sigVerifier__
+        );
+
+        //grant FeesUpdater Role
+        cc_.executionManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            cc_.chainSlug,
             deployer_
         );
 
@@ -328,6 +375,13 @@ contract Setup is Test {
 
         cc_.transmitManager__.grantRoleWithSlug(
             GAS_LIMIT_UPDATER_ROLE,
+            cc_.chainSlug,
+            deployer_
+        );
+
+        //grant FeesUpdater Role
+        cc_.transmitManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
             cc_.chainSlug,
             deployer_
         );

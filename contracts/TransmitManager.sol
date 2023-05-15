@@ -8,8 +8,8 @@ import "./interfaces/IGasPriceOracle.sol";
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/FeesHelper.sol";
-import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRANSMITTER_ROLE} from "./utils/AccessRoles.sol";
-import {SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
+import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRANSMITTER_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
+import {SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 
 /**
  * @title TransmitManager
@@ -29,6 +29,9 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
+
+    // remoteChainSlug => transmissionFees
+    mapping(uint32 => uint256) public transmissionFees;
 
     error InsufficientTransmitFees();
     error InvalidNonce();
@@ -54,6 +57,13 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param signatureVerifier The address of the new signature verifier contract
      */
     event SignatureVerifierSet(address signatureVerifier);
+
+    /**
+     * @notice Emitted when the transmissionFees is updated
+     * @param dstChainSlug The destination chain slug for which the transmissionFees is updated
+     * @param transmissionFees The new transmissionFees
+     */
+    event TransmissionFeesSet(uint256 dstChainSlug, uint256 transmissionFees);
 
     /**
      * @notice Initializes the TransmitManager contract
@@ -114,7 +124,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     function getMinFees(
         uint32 siblingChainSlug_
     ) external view override returns (uint256) {
-        return _calculateMinFees(siblingChainSlug_);
+        return transmissionFees[siblingChainSlug_];
     }
 
     /**
@@ -134,6 +144,34 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
             sourceGasPrice +
             proposeGasLimit[siblingChainSlug_] *
             siblingRelativeGasPrice;
+    }
+
+    function setTransmissionFees(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 transmissionFees_,
+        bytes calldata signature_
+    ) external override {
+        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    FEES_UPDATE_SIG_IDENTIFIER,
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    transmissionFees_
+                )
+            ),
+            signature_
+        );
+
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        uint256 nonce = nextNonce[feesUpdater]++;
+        if (nonce_ != nonce) revert InvalidNonce();
+
+        transmissionFees[dstChainSlug_] = transmissionFees_;
+        emit TransmissionFeesSet(dstChainSlug_, transmissionFees_);
     }
 
     /**

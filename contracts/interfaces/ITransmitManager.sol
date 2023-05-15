@@ -47,4 +47,11 @@ interface ITransmitManager {
         uint256 gasLimit_,
         bytes calldata signature_
     ) external;
+
+    function setTransmissionFees(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 transmissionFees_,
+        bytes calldata signature_
+    ) external;
 }

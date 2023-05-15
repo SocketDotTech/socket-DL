@@ -84,6 +84,14 @@ contract TransmitManagerTest is Setup {
             owner
         );
 
+        //grant FeesUpdater Role
+        transmitManager.grantRole(FEES_UPDATER_ROLE, owner);
+        transmitManager.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            destChainSlug,
+            owner
+        );
+
         transmitManager.grantRole(RESCUE_ROLE, owner);
         transmitManager.grantRole(WITHDRAW_ROLE, owner);
         transmitManager.grantRole(GOVERNANCE_ROLE, owner);
@@ -123,6 +131,28 @@ contract TransmitManagerTest is Setup {
             destChainSlug,
             proposeGasLimit,
             sig
+        );
+
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                chainSlug,
+                destChainSlug,
+                ownerNonce,
+                _transmissionFees
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            ownerPrivateKey
+        );
+
+        transmitManager.setTransmissionFees(
+            ownerNonce++,
+            uint32(destChainSlug),
+            _transmissionFees,
+            feesUpdateSignature
         );
 
         digest = keccak256(

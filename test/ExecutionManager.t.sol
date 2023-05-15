@@ -12,6 +12,8 @@ contract ExecutionManagerTest is Setup {
     uint32 chainSlug = uint32(uint256(0x2013AA263));
     uint32 destChainSlug = uint32(uint256(0x2013AA264));
     uint32 chainSlug2 = uint32(uint256(0x2113AA263));
+    uint256 _executionFees = 110000000000;
+    uint256 executorNonce = 0;
 
     uint256 immutable transmitterPrivateKey = c++;
     address transmitter;
@@ -54,7 +56,13 @@ contract ExecutionManagerTest is Setup {
         _executor = vm.addr(executorPrivateKey);
 
         gasPriceOracle = new GasPriceOracle(owner, chainSlug);
-        executionManager = new ExecutionManager(gasPriceOracle, owner);
+
+        executionManager = new ExecutionManager(
+            gasPriceOracle,
+            owner,
+            chainSlug,
+            signatureVerifier
+        );
 
         signatureVerifier = new SignatureVerifier();
         transmitManager = new TransmitManager(
@@ -63,6 +71,13 @@ contract ExecutionManagerTest is Setup {
             owner,
             chainSlug,
             sealGasLimit
+        );
+
+        executionManager = new ExecutionManager(
+            gasPriceOracle,
+            owner,
+            chainSlug,
+            signatureVerifier
         );
 
         vm.startPrank(owner);
@@ -74,16 +89,51 @@ contract ExecutionManagerTest is Setup {
         executionManager.grantRole(RESCUE_ROLE, owner);
         executionManager.grantRole(WITHDRAW_ROLE, owner);
 
+        //grant FeesUpdater Role
+        executionManager.grantRoleWithSlug(FEES_UPDATER_ROLE, chainSlug, owner);
+
         transmitManager.grantRoleWithSlug(
             TRANSMITTER_ROLE,
             chainSlug,
             transmitter
         );
+
         transmitManager.grantRoleWithSlug(
             TRANSMITTER_ROLE,
             destChainSlug,
             transmitter
         );
+
+        //grant FeesUpdater Role
+        executionManager.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            destChainSlug,
+            owner
+        );
+
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                chainSlug,
+                destChainSlug,
+                executorNonce,
+                _executionFees
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            ownerPrivateKey
+        );
+
+        executionManager.setExecutionFees(
+            executorNonce++,
+            uint32(destChainSlug),
+            _executionFees,
+            feesUpdateSignature
+        );
+
         gasPriceOracle.setTransmitManager(transmitManager);
         vm.stopPrank();
 
@@ -149,10 +199,7 @@ contract ExecutionManagerTest is Setup {
 
     function testGetMinFees() public {
         uint256 msgGasLimit = 100000;
-        uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
-            destChainSlug
-        );
+        uint256 minFees = executionManager.getMinFees(destChainSlug);
 
         //compute expected Data
         uint256 dstRelativeGasPrice = gasPriceOracle.relativeGasPrice(
@@ -166,10 +213,7 @@ contract ExecutionManagerTest is Setup {
 
     function testPayFees() public {
         uint256 msgGasLimit = 100000;
-        uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
-            destChainSlug
-        );
+        uint256 minFees = executionManager.getMinFees(destChainSlug);
         deal(feesPayer, minFees);
 
         assertEq(address(executionManager).balance, 0);
@@ -185,10 +229,7 @@ contract ExecutionManagerTest is Setup {
 
     function testWithdrawFees() public {
         uint256 msgGasLimit = 100000;
-        uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
-            destChainSlug
-        );
+        uint256 minFees = executionManager.getMinFees(destChainSlug);
         deal(feesPayer, minFees);
 
         assertEq(address(executionManager).balance, 0);
