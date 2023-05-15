@@ -192,7 +192,9 @@ abstract contract SocketSrc is SocketBase {
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
                 siblingChainSlug,
-                keccak256(abi.encode(siblingChainSlug, packetId, root)),
+                keccak256(
+                    abi.encode(version, siblingChainSlug, packetId, root)
+                ),
                 signature_
             );
 

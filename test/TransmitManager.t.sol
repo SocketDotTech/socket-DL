@@ -67,15 +67,19 @@ contract TransmitManagerTest is Setup {
         gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
         gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
         gasPriceOracle.setTransmitManager(transmitManager);
-        transmitManager.grantRole("TRANSMITTER_ROLE", chainSlug, transmitter);
-        transmitManager.grantRole(
-            "TRANSMITTER_ROLE",
+        transmitManager.grantRoleWithSlug(
+            TRANSMITTER_ROLE,
+            chainSlug,
+            transmitter
+        );
+        transmitManager.grantRoleWithSlug(
+            TRANSMITTER_ROLE,
             destChainSlug,
             transmitter
         );
         transmitManager.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
-        transmitManager.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        transmitManager.grantRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
             destChainSlug,
             owner
         );
@@ -87,7 +91,8 @@ contract TransmitManagerTest is Setup {
 
         bytes32 digest = keccak256(
             abi.encode(
-                "SEAL_GAS_LIMIT_UPDATE",
+                SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                address(transmitManager),
                 chainSlug,
                 ownerNonce,
                 sealGasLimit
@@ -101,7 +106,8 @@ contract TransmitManagerTest is Setup {
 
         digest = keccak256(
             abi.encode(
-                "PROPOSE_GAS_LIMIT_UPDATE",
+                PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                address(transmitManager),
                 chainSlug,
                 destChainSlug,
                 ownerNonce,
@@ -120,7 +126,12 @@ contract TransmitManagerTest is Setup {
         );
 
         digest = keccak256(
-            abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
+            abi.encode(
+                address(gasPriceOracle),
+                chainSlug,
+                gasPriceOracleNonce,
+                sourceGasPrice
+            )
         );
         sig = _createSignature(digest, transmitterPrivateKey);
 
@@ -132,6 +143,7 @@ contract TransmitManagerTest is Setup {
 
         digest = keccak256(
             abi.encode(
+                address(gasPriceOracle),
                 chainSlug,
                 destChainSlug,
                 gasPriceOracleNonce,
@@ -230,24 +242,24 @@ contract TransmitManagerTest is Setup {
 
     function testGrantTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRole(
-                "TRANSMITTER_ROLE",
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
                 chainSlug2,
                 nonTransmitter
             )
         );
 
         vm.startPrank(owner);
-        transmitManager.grantRole(
-            "TRANSMITTER_ROLE",
+        transmitManager.grantRoleWithSlug(
+            TRANSMITTER_ROLE,
             chainSlug2,
             nonTransmitter
         );
         vm.stopPrank();
 
         assertTrue(
-            transmitManager.hasRole(
-                "TRANSMITTER_ROLE",
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
                 chainSlug2,
                 nonTransmitter
             )
@@ -256,40 +268,40 @@ contract TransmitManagerTest is Setup {
 
     function testRevokeTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRole(
-                "TRANSMITTER_ROLE",
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
                 chainSlug2,
                 nonTransmitter
             )
         );
 
         vm.startPrank(owner);
-        transmitManager.grantRole(
-            "TRANSMITTER_ROLE",
+        transmitManager.grantRoleWithSlug(
+            TRANSMITTER_ROLE,
             chainSlug2,
             nonTransmitter
         );
         vm.stopPrank();
 
         assertTrue(
-            transmitManager.hasRole(
-                "TRANSMITTER_ROLE",
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
                 chainSlug2,
                 nonTransmitter
             )
         );
 
         vm.startPrank(owner);
-        transmitManager.revokeRole(
-            "TRANSMITTER_ROLE",
+        transmitManager.revokeRoleWithSlug(
+            TRANSMITTER_ROLE,
             chainSlug2,
             nonTransmitter
         );
         vm.stopPrank();
 
         assertFalse(
-            transmitManager.hasRole(
-                "TRANSMITTER_ROLE",
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
                 chainSlug2,
                 nonTransmitter
             )

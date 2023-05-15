@@ -51,7 +51,12 @@ contract SocketSrcTest is Setup {
         _configPlugContracts(index);
 
         bytes32 digest = keccak256(
-            abi.encode(_a.chainSlug, gasPriceOracleNonce, sourceGasPrice)
+            abi.encode(
+                address(_a.gasPriceOracle__),
+                _a.chainSlug,
+                gasPriceOracleNonce,
+                sourceGasPrice
+            )
         );
         bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
 
@@ -63,6 +68,7 @@ contract SocketSrcTest is Setup {
 
         digest = keccak256(
             abi.encode(
+                address(_a.gasPriceOracle__),
                 _a.chainSlug,
                 _b.chainSlug,
                 gasPriceOracleNonce,
@@ -257,7 +263,7 @@ contract SocketSrcTest is Setup {
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
         bytes32 digest = keccak256(
-            abi.encode(remoteChainSlug_, packetId, root)
+            abi.encode(versionHash, remoteChainSlug_, packetId, root)
         );
 
         sig = _createSignature(digest, transmitterPrivateKey_);

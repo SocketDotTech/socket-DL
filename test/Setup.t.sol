@@ -14,12 +14,17 @@ import "../contracts/TransmitManager.sol";
 import "../contracts/GasPriceOracle.sol";
 import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
-import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRIP_ROLE, UNTRIP_ROLE} from "../contracts/utils/AccessRoles.sol";
+import "../contracts/utils/AccessRoles.sol";
+import "../contracts/utils/SigIdentifiers.sol";
 
 contract Setup is Test {
     uint256 internal c = 1;
     address immutable _plugOwner = address(uint160(c++));
     address immutable _raju = address(uint160(c++));
+
+    string version = "TEST_NET";
+
+    bytes32 versionHash = keccak256(abi.encode(version));
 
     uint256 immutable executorPrivateKey = c++;
     uint256 immutable _socketOwnerPrivateKey = c++;
@@ -119,8 +124,8 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
 
-        cc_.transmitManager__.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        cc_.transmitManager__.grantRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
             remoteChainSlug_,
             _socketOwner
         );
@@ -129,7 +134,8 @@ contract Setup is Test {
 
         bytes32 digest = keccak256(
             abi.encode(
-                "PROPOSE_GAS_LIMIT_UPDATE",
+                PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                address(cc_.transmitManager__),
                 cc_.chainSlug,
                 remoteChainSlug_,
                 cc_.transmitterNonce,
@@ -179,18 +185,19 @@ contract Setup is Test {
         uint256 nonce = 0;
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        optimisticSwitchboard.grantRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
             remoteChainSlug_,
             _socketOwner
         );
 
         bytes32 digest = keccak256(
             abi.encode(
-                "EXECUTION_OVERHEAD_UPDATE",
-                nonce,
+                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
+                address(optimisticSwitchboard),
                 cc_.chainSlug,
                 remoteChainSlug_,
+                nonce,
                 _executionOverhead
             )
         );
@@ -202,8 +209,8 @@ contract Setup is Test {
             _executionOverhead,
             sig
         );
-        optimisticSwitchboard.grantRole(
-            "WATCHER_ROLE",
+        optimisticSwitchboard.grantRoleWithSlug(
+            WATCHER_ROLE,
             remoteChainSlug_,
             _watcher
         );
@@ -236,8 +243,8 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-        fastSwitchboard.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        fastSwitchboard.grantRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
             remoteChainSlug_,
             _socketOwner
         );
@@ -247,10 +254,11 @@ contract Setup is Test {
 
         bytes32 digest = keccak256(
             abi.encode(
-                "EXECUTION_OVERHEAD_UPDATE",
-                nonce,
+                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
+                address(fastSwitchboard),
                 cc_.chainSlug,
                 remoteChainSlug_,
+                nonce,
                 _executionOverhead
             )
         );
@@ -265,7 +273,8 @@ contract Setup is Test {
 
         digest = keccak256(
             abi.encode(
-                "ATTEST_GAS_LIMIT_UPDATE",
+                ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                address(fastSwitchboard),
                 cc_.chainSlug,
                 remoteChainSlug_,
                 nonce,
@@ -317,8 +326,8 @@ contract Setup is Test {
             _sealGasLimit
         );
 
-        cc_.transmitManager__.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        cc_.transmitManager__.grantRoleWithSlug(
+            GAS_LIMIT_UPDATER_ROLE,
             cc_.chainSlug,
             deployer_
         );
@@ -331,7 +340,8 @@ contract Setup is Test {
             address(cc_.transmitManager__),
             address(cc_.executionManager__),
             address(cc_.capacitorFactory__),
-            deployer_
+            deployer_,
+            version
         );
 
         vm.stopPrank();
@@ -398,8 +408,8 @@ contract Setup is Test {
             // deduce transmitter address from private key
             transmitter = vm.addr(transmitterPrivateKeys_[index]);
             // grant transmitter role
-            cc_.transmitManager__.grantRole(
-                "TRANSMITTER_ROLE",
+            cc_.transmitManager__.grantRoleWithSlug(
+                TRANSMITTER_ROLE,
                 remoteChainSlug_,
                 transmitter
             );
@@ -417,7 +427,7 @@ contract Setup is Test {
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
         bytes32 digest = keccak256(
-            abi.encode(remoteChainSlug_, packetId, root)
+            abi.encode(versionHash, remoteChainSlug_, packetId, root)
         );
         sig = _createSignature(digest, _transmitterPrivateKey);
     }
@@ -461,10 +471,13 @@ contract Setup is Test {
 
     function _attestOnDst(
         address switchboardAddress,
+        uint32 dstSlug,
         bytes32 packetId_
     ) internal {
         uint32 srcSlug = uint32(uint256(packetId_) >> 224);
-        bytes32 digest = keccak256(abi.encode(srcSlug, packetId_));
+        bytes32 digest = keccak256(
+            abi.encode(switchboardAddress, srcSlug, dstSlug, packetId_)
+        );
 
         // generate attest-signature
         bytes memory attestSignature = _createSignature(

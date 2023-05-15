@@ -3,7 +3,7 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IDecapacitor.sol";
 import "../libraries/RescueFundsLib.sol";
-import "../utils/AccessControlExtended.sol";
+import "../utils/AccessControl.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
 /**
@@ -12,12 +12,12 @@ import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
  * @dev This contract inherits from the `IDecapacitor` interface, which
  * defines the functions for verifying message inclusion.
  */
-contract SingleDecapacitor is IDecapacitor, AccessControlExtended {
+contract SingleDecapacitor is IDecapacitor, AccessControl {
     /**
      * @notice Initializes the SingleDecapacitor contract with an owner address.
      * @param owner_ The address of the contract owner
      */
-    constructor(address owner_) AccessControlExtended(owner_) {
+    constructor(address owner_) AccessControl(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
     }
 

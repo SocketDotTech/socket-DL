@@ -69,101 +69,18 @@ contract OptimismSwitchboardL2L1Test is Setup {
     }
 
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
-        _watcher = vm.addr(_watcherPrivateKey);
-        _transmitter = vm.addr(_transmitterPrivateKey);
-
-        deployContractsOnSingleChain(_a, _b.chainSlug, transmitterPrivateKeys_);
-    }
-
-    function deployContractsOnSingleChain(
-        ChainContext storage cc_,
-        uint32 remoteChainSlug_,
-        uint256[] memory transmitterPrivateKeys_
-    ) internal {
-        // deploy socket setup
-        deploySocket(cc_, _socketOwner);
-
-        vm.startPrank(_socketOwner);
-
-        cc_.transmitManager__.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
-            remoteChainSlug_,
-            _socketOwner
-        );
-
-        vm.stopPrank();
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                "PROPOSE_GAS_LIMIT_UPDATE",
-                cc_.chainSlug,
-                remoteChainSlug_,
-                cc_.transmitterNonce,
-                _proposeGasLimit
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-        cc_.transmitManager__.setProposeGasLimit(
-            cc_.transmitterNonce++,
-            remoteChainSlug_,
-            _proposeGasLimit,
-            sig
+        _deployContractsOnSingleChain(
+            _a,
+            _b.chainSlug,
+            transmitterPrivateKeys_
         );
 
         SocketConfigContext memory scc_ = addOptimismSwitchboard(
-            cc_,
-            remoteChainSlug_,
+            _a,
+            _b.chainSlug,
             _capacitorType
         );
-        cc_.configs__.push(scc_);
-
-        // add roles
-        hoax(_socketOwner);
-        cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
-        _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
-    }
-
-    function deploySocket(
-        ChainContext storage cc_,
-        address deployer_
-    ) internal {
-        vm.startPrank(deployer_);
-
-        cc_.hasher__ = new Hasher();
-        cc_.sigVerifier__ = new SignatureVerifier();
-        cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
-        cc_.gasPriceOracle__ = new GasPriceOracle(
-            deployer_,
-            uint32(cc_.chainSlug)
-        );
-        cc_.executionManager__ = new ExecutionManager(
-            cc_.gasPriceOracle__,
-            deployer_
-        );
-
-        cc_.transmitManager__ = new TransmitManager(
-            cc_.sigVerifier__,
-            cc_.gasPriceOracle__,
-            deployer_,
-            cc_.chainSlug,
-            _sealGasLimit
-        );
-
-        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
-        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
-
-        cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
-
-        cc_.socket__ = new Socket(
-            uint32(cc_.chainSlug),
-            address(cc_.hasher__),
-            address(cc_.transmitManager__),
-            address(cc_.executionManager__),
-            address(cc_.capacitorFactory__),
-            deployer_
-        );
-
-        vm.stopPrank();
+        _a.configs__.push(scc_);
     }
 
     function addOptimismSwitchboard(

@@ -3,18 +3,18 @@ pragma solidity 0.8.7;
 
 import "./interfaces/IGasPriceOracle.sol";
 import "./interfaces/ITransmitManager.sol";
-import "./utils/AccessControlExtended.sol";
+import "./utils/AccessControl.sol";
 import "./libraries/RescueFundsLib.sol";
 import {GOVERNANCE_ROLE, RESCUE_ROLE} from "./utils/AccessRoles.sol";
 
 /**
  * @title GasPriceOracle
  * @notice A contract to maintain and update gas prices across multiple chains.
- * It implements the IGasPriceOracle interface and uses AccessControlExtended to define roles and access permissions.
+ * It implements the IGasPriceOracle interface and uses AccessControl to define roles and access permissions.
  * It also imports other contracts and libraries, including ITransmitManager for transmitting transactions across chains,
  * and RescueFundsLib for rescuing funds from contracts that have lost access to them.
  */
-contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
+contract GasPriceOracle is IGasPriceOracle, AccessControl {
     /**
      * @notice The ITransmitManager contract instance that is used to transmit transactions across chains.
      */
@@ -74,10 +74,7 @@ contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
      * @param owner_ The address of the owner of the contract.
      * @param chainSlug_ The chain slug of the contract.
      */
-    constructor(
-        address owner_,
-        uint32 chainSlug_
-    ) AccessControlExtended(owner_) {
+    constructor(address owner_, uint32 chainSlug_) AccessControl(owner_) {
         chainSlug = chainSlug_;
     }
 
@@ -93,7 +90,14 @@ contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
                 chainSlug,
-                keccak256(abi.encode(chainSlug, nonce_, sourceGasPrice_)),
+                keccak256(
+                    abi.encode(
+                        address(this),
+                        chainSlug,
+                        nonce_,
+                        sourceGasPrice_
+                    )
+                ),
                 signature_
             );
 
@@ -125,6 +129,7 @@ contract GasPriceOracle is IGasPriceOracle, AccessControlExtended {
                 siblingChainSlug_,
                 keccak256(
                     abi.encode(
+                        address(this),
                         chainSlug,
                         siblingChainSlug_,
                         nonce_,

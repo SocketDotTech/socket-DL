@@ -87,7 +87,7 @@ abstract contract SocketDst is SocketBase {
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
                 uint32(_decodeSlug(packetId_)),
-                keccak256(abi.encode(chainSlug, packetId_, root_)),
+                keccak256(abi.encode(version, chainSlug, packetId_, root_)),
                 signature_
             );
 

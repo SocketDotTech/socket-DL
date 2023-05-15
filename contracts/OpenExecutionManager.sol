@@ -41,7 +41,7 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
     function isExecutor(
         bytes32 packedMessage,
         bytes memory sig
-    ) external view override returns (address executor, bool isValidExecutor) {
+    ) external pure override returns (address executor, bool isValidExecutor) {
         executor = SignatureVerifierLib.recoverSignerFromDigest(
             packedMessage,
             sig

@@ -45,6 +45,15 @@ abstract contract AccessControl is Ownable {
     }
 
     /**
+     * @dev Checks and reverts if an address do not have a specific role.
+     * @param role_ The role to check.
+     * @param address_ The address to check.
+     */
+    function _checkRole(bytes32 role_, address address_) internal virtual {
+        if (!_hasRole(role_, address_)) revert NoPermit(role_);
+    }
+
+    /**
      * @dev Grants a role to a given address.
      * @param role_ The role to grant.
      * @param grantee_ The address to grant the role to.
