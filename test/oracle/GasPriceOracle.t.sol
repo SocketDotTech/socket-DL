@@ -29,10 +29,8 @@ contract GasPriceOracleTest is Setup {
         signatureVerifier = new SignatureVerifier();
         transmitManager = new TransmitManager(
             signatureVerifier,
-            gasPriceOracle,
             owner,
-            chainSlug,
-            gasLimit
+            chainSlug
         );
         vm.startPrank(owner);
         transmitManager.grantRoleWithSlug(

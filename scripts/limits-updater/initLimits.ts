@@ -1,11 +1,7 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import {
-  attestGasLimit,
-  executionOverhead,
-  proposeGasLimit,
-} from "../constants";
+import { attestGasLimit, executionOverhead } from "../constants";
 import {
   ChainAddresses,
   ChainSocketAddresses,
@@ -16,7 +12,6 @@ import {
 import { getAddresses } from "../deploy/utils";
 import { setAttestGasLimit } from "./set-attest-gaslimit";
 import { setExecutionOverhead } from "./set-execution-overhead";
-import { setProposeGasLimit } from "./set-propose-gaslimit";
 import { mode } from "../deploy/config";
 
 export const setLimitsForAChainSlug = async (
@@ -59,26 +54,6 @@ export const setLimitsForAChainSlug = async (
 
         const chainSlugCode = "optimism-goerli";
         // networkToChainSlug[dstChainId]
-
-        //lookup for proposeGasLimit for the chainSlugCode
-        const proposeGasLimitValue = proposeGasLimit[chainSlugCode];
-
-        const isProposeUpdateSuccessful = await setProposeGasLimit(
-          chainId,
-          dstChainId,
-          transmitManagerAddress,
-          proposeGasLimitValue
-        );
-
-        if (isProposeUpdateSuccessful) {
-          console.log(
-            `TransmitManager - Successfully updated proposeLimit: ${proposeGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
-          );
-        } else {
-          throw new Error(
-            `TransmitManager - Failed to update proposeLimit: ${proposeGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
-          );
-        }
 
         if (chainAddresses.FAST) {
           const config: Configs = chainAddresses.FAST as Configs;

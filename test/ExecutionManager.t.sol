@@ -31,7 +31,6 @@ contract ExecutionManagerTest is Setup {
     address feesWithdrawer;
 
     uint256 sealGasLimit = 200000;
-    uint256 proposeGasLimit = 100000;
     uint256 sourceGasPrice = 1200000;
     uint256 relativeGasPrice = 1100000;
 
@@ -39,8 +38,6 @@ contract ExecutionManagerTest is Setup {
     SignatureVerifier internal signatureVerifier;
     TransmitManager internal transmitManager;
 
-    event SealGasLimitSet(uint256 gasLimit_);
-    event ProposeGasLimitSet(uint32 dstChainSlug_, uint256 gasLimit_);
     event TransmitManagerUpdated(address transmitManager);
     error TransmitterNotFound();
     error InsufficientExecutionFees();
@@ -67,10 +64,8 @@ contract ExecutionManagerTest is Setup {
         signatureVerifier = new SignatureVerifier();
         transmitManager = new TransmitManager(
             signatureVerifier,
-            gasPriceOracle,
             owner,
-            chainSlug,
-            sealGasLimit
+            chainSlug
         );
 
         executionManager = new ExecutionManager(

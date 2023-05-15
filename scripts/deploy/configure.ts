@@ -20,7 +20,6 @@ import {
   networkToChainSlug,
 } from "../../src";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
-import { setProposeGasLimit } from "../limits-updater/set-propose-gaslimit";
 import { setAttestGasLimit } from "../limits-updater/set-attest-gaslimit";
 import { setExecutionOverhead } from "../limits-updater/set-execution-overhead";
 import {
@@ -134,14 +133,6 @@ export const main = async () => {
       }
 
       if (setGasLimits) {
-        await setProposeGasLimit(
-          chain,
-          siblingSlugs,
-          addr["TransmitManager"],
-          addr["SocketBatcher"],
-          socketSigner
-        );
-
         await setAttestGasLimit(
           chain,
           siblingSlugs,

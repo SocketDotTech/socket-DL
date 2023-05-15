@@ -92,20 +92,6 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
-     * @notice A struct representing a request to set the propose gas limit for a chain.
-     * @param nonce The nonce of the request.
-     * @param dstChainId The ID of the destination chain.
-     * @param proposeGasLimit The propose gas limit.
-     * @param signature The signature of the request.
-     */
-    struct SetProposeGasLimitRequest {
-        uint256 nonce;
-        uint32 dstChainId;
-        uint256 proposeGasLimit;
-        bytes signature;
-    }
-
-    /**
      * @notice A struct representing a request to set the attest gas limit for a chain.
      * @param nonce The nonce of the request.
      * @param dstChainId The ID of the destination chain.
@@ -172,29 +158,6 @@ contract SocketBatcher is AccessControl {
                 registerSwitchboardsRequests_[index].maxPacketLength,
                 registerSwitchboardsRequests_[index].siblingChainSlug,
                 registerSwitchboardsRequests_[index].capacitorType
-            );
-            unchecked {
-                ++index;
-            }
-        }
-    }
-
-    /**
-     * @notice set propose gas limit for a list of siblings
-     * @param transmitManagerAddress_ address of transmit manager
-     * @param setProposeGasLimitRequests_ the list of requests with gas limit details
-     */
-    function setProposeGasLimits(
-        address transmitManagerAddress_,
-        SetProposeGasLimitRequest[] calldata setProposeGasLimitRequests_
-    ) external {
-        uint256 setProposeGasLimitLength = setProposeGasLimitRequests_.length;
-        for (uint256 index = 0; index < setProposeGasLimitLength; ) {
-            ITransmitManager(transmitManagerAddress_).setProposeGasLimit(
-                setProposeGasLimitRequests_[index].nonce,
-                setProposeGasLimitRequests_[index].dstChainId,
-                setProposeGasLimitRequests_[index].proposeGasLimit,
-                setProposeGasLimitRequests_[index].signature
             );
             unchecked {
                 ++index;

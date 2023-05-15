@@ -47,7 +47,6 @@ contract Setup is Test {
     uint256 internal _slowCapacitorWaitTime = 300;
     uint256 internal _msgGasLimit = 30548;
     uint256 internal _sealGasLimit = 150000;
-    uint256 internal _proposeGasLimit = 150000;
     uint256 internal _attestGasLimit = 150000;
     uint256 internal _transmissionFees = 350000000000;
     uint256 internal _executionOverhead = 50000;
@@ -147,24 +146,6 @@ contract Setup is Test {
         );
 
         vm.stopPrank();
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                address(cc_.transmitManager__),
-                cc_.chainSlug,
-                remoteChainSlug_,
-                cc_.transmitterNonce,
-                _proposeGasLimit
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-        cc_.transmitManager__.setProposeGasLimit(
-            cc_.transmitterNonce++,
-            remoteChainSlug_,
-            _proposeGasLimit,
-            sig
-        );
 
         //set TransmissionFees for remoteChainSlug
         bytes32 feesUpdateDigest = keccak256(
@@ -367,10 +348,8 @@ contract Setup is Test {
 
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
-            cc_.gasPriceOracle__,
             deployer_,
-            cc_.chainSlug,
-            _sealGasLimit
+            cc_.chainSlug
         );
 
         cc_.transmitManager__.grantRoleWithSlug(

@@ -33,21 +33,6 @@ interface ITransmitManager {
      */
     function getMinFees(uint32 dstSlug) external view returns (uint256);
 
-    /**
-     * @notice Sets the propose gas limit for a given nonce and destination chain.
-     * @dev The propose gas limit is used to determine the maximum amount of gas
-     * @param nonce_ The nonce for the packet.
-     * @param dstChainSlug_ The unique identifier for the destination chain of the packet.
-     * @param gasLimit_ The propose gas limit for the packet.
-     * @param signature_ The signature of the message being signed.
-     */
-    function setProposeGasLimit(
-        uint256 nonce_,
-        uint32 dstChainSlug_,
-        uint256 gasLimit_,
-        bytes calldata signature_
-    ) external;
-
     function setTransmissionFees(
         uint256 nonce_,
         uint32 dstChainSlug_,

@@ -38,8 +38,6 @@ contract TransmitManagerTest is Setup {
     SignatureVerifier internal signatureVerifier;
     TransmitManager internal transmitManager;
 
-    event SealGasLimitSet(uint256 gasLimit_);
-    event ProposeGasLimitSet(uint32 dstChainSlug_, uint256 gasLimit_);
     event TransmitManagerUpdated(address transmitManager);
     error TransmitterNotFound();
     error InsufficientTransmitFees();
@@ -57,10 +55,8 @@ contract TransmitManagerTest is Setup {
         signatureVerifier = new SignatureVerifier();
         transmitManager = new TransmitManager(
             signatureVerifier,
-            gasPriceOracle,
             owner,
-            chainSlug,
-            sealGasLimit
+            chainSlug
         );
 
         vm.startPrank(owner);
@@ -97,42 +93,6 @@ contract TransmitManagerTest is Setup {
         transmitManager.grantRole(GOVERNANCE_ROLE, owner);
         vm.stopPrank();
 
-        bytes32 digest = keccak256(
-            abi.encode(
-                SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                address(transmitManager),
-                chainSlug,
-                ownerNonce,
-                sealGasLimit
-            )
-        );
-        bytes memory sig = _createSignature(digest, ownerPrivateKey);
-
-        vm.expectEmit(false, false, false, true);
-        emit SealGasLimitSet(sealGasLimit);
-        transmitManager.setSealGasLimit(ownerNonce++, sealGasLimit, sig);
-
-        digest = keccak256(
-            abi.encode(
-                PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                address(transmitManager),
-                chainSlug,
-                destChainSlug,
-                ownerNonce,
-                proposeGasLimit
-            )
-        );
-        sig = _createSignature(digest, ownerPrivateKey);
-
-        vm.expectEmit(false, false, false, true);
-        emit ProposeGasLimitSet(destChainSlug, proposeGasLimit);
-        transmitManager.setProposeGasLimit(
-            ownerNonce++,
-            destChainSlug,
-            proposeGasLimit,
-            sig
-        );
-
         bytes32 feesUpdateDigest = keccak256(
             abi.encode(
                 FEES_UPDATE_SIG_IDENTIFIER,
@@ -155,7 +115,7 @@ contract TransmitManagerTest is Setup {
             feesUpdateSignature
         );
 
-        digest = keccak256(
+        bytes32 digest = keccak256(
             abi.encode(
                 address(gasPriceOracle),
                 chainSlug,
@@ -163,7 +123,8 @@ contract TransmitManagerTest is Setup {
                 sourceGasPrice
             )
         );
-        sig = _createSignature(digest, transmitterPrivateKey);
+
+        bytes memory sig = _createSignature(digest, transmitterPrivateKey);
 
         gasPriceOracle.setSourceGasPrice(
             gasPriceOracleNonce++,

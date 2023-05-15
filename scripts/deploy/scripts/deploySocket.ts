@@ -1,7 +1,6 @@
 import { Contract, Wallet } from "ethers";
 import { DeployParams, getOrDeploy, storeAddresses } from "../utils";
 
-import { sealGasLimit } from "../../constants/config";
 import {
   CORE_CONTRACTS,
   ChainSocketAddresses,
@@ -88,7 +87,6 @@ export const deploySocket = async (
         gasPriceOracle.address,
         socketOwner,
         chainSlug,
-        sealGasLimit[networkToChainSlug[chainSlug]],
       ],
       deployUtils
     );
