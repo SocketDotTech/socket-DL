@@ -130,7 +130,7 @@ abstract contract SocketDst is SocketBase {
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
 
-        if (packetId_==bytes32(0)) revert InvalidPacketId();
+        if (packetId_ == bytes32(0)) revert InvalidPacketId();
         if (packetIdRoots[packetId_] == bytes32(0)) revert PacketNotProposed();
 
         uint32 remoteSlug = _decodeSlug(messageDetails_.msgId);
