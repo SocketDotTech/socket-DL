@@ -23,13 +23,17 @@ contract SocketDstTest is Setup {
     bytes32[] roots;
 
     error AlreadyAttested();
-    error InvalidAttester();
+    error InvalidTransmitter();
     error InsufficientFees();
     error InvalidProof();
     error NotExecutor();
     event ExecutionSuccess(bytes32 msgId);
     event ExecutionFailed(bytes32 msgId, string result);
     event ExecutionFailedBytes(bytes32 msgId, bytes result);
+    error AlreadyProposed();
+    error PacketNotProposed();
+    error InvalidPacketRoot();
+    error InvalidPacketId();
 
     event PacketVerifiedAndSealed(
         address indexed transmitter,
@@ -146,7 +150,7 @@ contract SocketDstTest is Setup {
         assertTrue(_b.socket__.isPacketProposed(packetId_));
     }
 
-    function testProposeAPacketByInvalidAttester() external {
+    function testProposeAPacketByInvalidTransmitter() external {
         address capacitor = address(_a.configs__[index].capacitor__);
 
         sendOutboundMessage();
@@ -162,7 +166,7 @@ contract SocketDstTest is Setup {
                 _altTransmitterPrivateKey
             );
 
-        vm.expectRevert(InvalidAttester.selector);
+        vm.expectRevert(InvalidTransmitter.selector);
 
         _proposeOnDst(_b, sig_, packetId_, root_);
     }
@@ -179,7 +183,7 @@ contract SocketDstTest is Setup {
         );
         (bytes32 packetId_, bytes32 root_) = sealAndPropose(capacitor);
 
-        vm.expectRevert(AlreadyAttested.selector);
+        vm.expectRevert(AlreadyProposed.selector);
         _proposeOnDst(_b, sig_, packetId_, root_);
     }
 

@@ -30,11 +30,10 @@ abstract contract SocketBase is SocketConfig {
         chainSlug = chainSlug_;
         version = keccak256(abi.encode(version_));
     }
-
     /**
-     * @dev An error that is thrown when an invalid signer tries to attest.
+     * @dev An error that is thrown when an invalid signer tries to seal or propose.
      */
-    error InvalidAttester();
+    error InvalidTransmitter();
 
     /**
      * @notice An event that is emitted when the hasher is updated.

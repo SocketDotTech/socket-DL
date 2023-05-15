@@ -17,9 +17,23 @@ import "./SocketBase.sol";
  */
 abstract contract SocketDst is SocketBase {
     /*
-     * @dev Error emitted when a message has already been attested
+     * @dev Error emitted when a packet has already been proposed
      */
-    error AlreadyAttested();
+    error AlreadyProposed();
+
+    /*
+     * @dev Error emitted when a packet has not been proposed
+     */
+    error PacketNotProposed();
+    /*
+     * @dev Error emitted when a packet root is invalid
+     */
+    error InvalidPacketRoot();
+    /*
+     * @dev Error emitted when a packet id is invalid
+     */
+    error InvalidPacketId();
+
     /**
      * @dev Error emitted when proof is invalid
      */
@@ -82,7 +96,8 @@ abstract contract SocketDst is SocketBase {
         bytes32 root_,
         bytes calldata signature_
     ) external override {
-        if (packetIdRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
+        if (packetId_ == bytes32(0)) revert InvalidPacketId();
+        if (packetIdRoots[packetId_] != bytes32(0)) revert AlreadyProposed();
 
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
@@ -91,7 +106,7 @@ abstract contract SocketDst is SocketBase {
                 signature_
             );
 
-        if (!isTransmitter) revert InvalidAttester();
+        if (!isTransmitter) revert InvalidTransmitter();
 
         packetIdRoots[packetId_] = root_;
         rootProposedAt[packetId_] = block.timestamp;
@@ -114,6 +129,9 @@ abstract contract SocketDst is SocketBase {
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
+
+        if (packetId_==bytes32(0)) revert InvalidPacketId();
+        if (packetIdRoots[packetId_] == bytes32(0)) revert PacketNotProposed();
 
         uint32 remoteSlug = _decodeSlug(messageDetails_.msgId);
 

@@ -198,7 +198,7 @@ abstract contract SocketSrc is SocketBase {
                 signature_
             );
 
-        if (!isTransmitter) revert InvalidAttester();
+        if (!isTransmitter) revert InvalidTransmitter();
         emit PacketVerifiedAndSealed(transmitter, packetId, root, signature_);
     }
 
