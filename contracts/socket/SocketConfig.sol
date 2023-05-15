@@ -51,7 +51,7 @@ abstract contract SocketConfig is ISocket, AccessControl {
         address capacitor,
         address decapacitor,
         uint256 maxPacketLength,
-        uint32 capacitorType
+        uint256 capacitorType
     );
     // Event triggered when the capacitor factory is set
     event CapacitorFactorySet(address capacitorFactory);
@@ -84,7 +84,7 @@ abstract contract SocketConfig is ISocket, AccessControl {
         address switchBoardAddress_,
         uint256 maxPacketLength_,
         uint32 siblingChainSlug_,
-        uint32 capacitorType_
+        uint256 capacitorType_
     ) external override {
         // only capacitor checked, decapacitor assumed will exist if capacitor does
         if (
