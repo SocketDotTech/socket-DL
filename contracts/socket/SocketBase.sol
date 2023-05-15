@@ -18,7 +18,7 @@ abstract contract SocketBase is SocketConfig {
 
     uint32 public immutable chainSlug;
     // incrementing nonce, should be handled in next socket version.
-    uint224 public messageCount;
+    uint64 public messageCount;
 
     bytes32 public immutable version;
 
