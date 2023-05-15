@@ -5,8 +5,8 @@ import "../../Setup.t.sol";
 
 contract FastSwitchboardTest is Setup {
     bool isFast = true;
-    uint32 immutable remoteChainSlug = uint32(2);
-    bytes32 immutable packetId = bytes32(uint256(2) << 224);
+    uint32 remoteChainSlug;
+    bytes32 packetId;
     address watcher;
     address altWatcher;
     uint256 nonce;
@@ -26,7 +26,9 @@ contract FastSwitchboardTest is Setup {
     function setUp() external {
         initialise();
 
-        _a.chainSlug = uint32(1);
+        _a.chainSlug = uint32(c++);
+        remoteChainSlug = uint32(c++);
+        packetId = bytes32(uint256(remoteChainSlug) << 224);
         vm.startPrank(_socketOwner);
 
         fastSwitchboard = new FastSwitchboard(
