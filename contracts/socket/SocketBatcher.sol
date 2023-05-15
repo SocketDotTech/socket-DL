@@ -71,7 +71,6 @@ contract SocketBatcher is AccessControl {
      */
     struct ExecuteRequest {
         bytes32 packetId;
-        address localPlug;
         ISocket.MessageDetails messageDetails;
         bytes signature;
     }
@@ -328,7 +327,6 @@ contract SocketBatcher is AccessControl {
         for (uint256 index = 0; index < executeRequestslength; ) {
             ISocket(socketAddress_).execute(
                 executeRequests_[index].packetId,
-                executeRequests_[index].localPlug,
                 executeRequests_[index].messageDetails,
                 executeRequests_[index].signature
             );
