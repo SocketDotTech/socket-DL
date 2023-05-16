@@ -115,34 +115,16 @@
       []
     ],
     [
-      "0xD5a83a40F262E2247e6566171f9ADc76b745F5cD",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
-    ],
-    [
       "0x4972F3ef9191c1C0D99dE1e4ec6D346aeDE91878",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
-      "0xdeCa2aff30DCBE7671d0EE8d611DC0e407279013",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 56]
-    ],
-    [
       "0x8456C9F6b202eceBf4f7925603AD930ecF32342b",
       "Hasher",
       "contracts/utils/Hasher.sol",
       []
-    ],
-    [
-      "0x1156bAFb7c72bfFC963038E5C65E8531F15a4a21",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 421613]
     ],
     [
       "0x8B57c3285a2ACC9aF1b813fa21Ff99264943ff00",
@@ -155,12 +137,6 @@
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
-    ],
-    [
-      "0x203eb6cE243Fb32242436F01b17631E9b25a27e2",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 80001]
     ],
     [
       "0x64b3149a51795e4Bd85505087c2AAB3d9B50D957",
@@ -191,12 +167,6 @@
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
       []
-    ],
-    [
-      "0xC53D91C6D595b4259fa5649d77e1e31E648202A3",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 420]
     ],
     [
       "0xFA3ff93563759625b630FD10d05843b8384d0150",
@@ -389,22 +359,10 @@
       ]
     ],
     [
-      "0x4fD5e06E33e3d602DA1B5F8FE19a02Be2f1f0Dd2",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 5]
-    ],
-    [
       "0x4954DBC82bAc36D63f8ea795ae67da6a3539Ad7c",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
-    ],
-    [
-      "0xCFf802cCA1D506b3C4ac1eeb61233062a1B9f568",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0xDE007c8A9a7Fa8676F9A751b7BC1EF38af76757f",
@@ -589,12 +547,6 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
-      "0xf848907549f27cC5424Ee0B0F8FE5238113632AF",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
-    ],
-    [
       "0x213bE4D6C81db7Da841Fe93c3e19E941fb8D1413",
       "OptimisticSwitchboard",
       "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
@@ -702,12 +654,6 @@
       "Counter",
       "contracts/examples/Counter.sol",
       ["0xBc080A2e2593045FFFC1B8C3CAfC67732F8306A7"]
-    ],
-    [
-      "0xB0E7FDB68d67Bf8dD753B562c793185A7E019D2E",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0x483D7e9dDBbbE0d376986168Ac4d94E35c485C69",
@@ -1091,34 +1037,16 @@
       []
     ],
     [
-      "0xD5a83a40F262E2247e6566171f9ADc76b745F5cD",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
-    ],
-    [
       "0x4972F3ef9191c1C0D99dE1e4ec6D346aeDE91878",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
-      "0xdeCa2aff30DCBE7671d0EE8d611DC0e407279013",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 56]
-    ],
-    [
       "0x8456C9F6b202eceBf4f7925603AD930ecF32342b",
       "Hasher",
       "contracts/utils/Hasher.sol",
       []
-    ],
-    [
-      "0x1156bAFb7c72bfFC963038E5C65E8531F15a4a21",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 421613]
     ],
     [
       "0x8B57c3285a2ACC9aF1b813fa21Ff99264943ff00",
@@ -1131,12 +1059,6 @@
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
-    ],
-    [
-      "0x203eb6cE243Fb32242436F01b17631E9b25a27e2",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 80001]
     ],
     [
       "0x64b3149a51795e4Bd85505087c2AAB3d9B50D957",
@@ -7452,12 +7374,6 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
-      "0xCFf802cCA1D506b3C4ac1eeb61233062a1B9f568",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
-    ],
-    [
       "0xDE007c8A9a7Fa8676F9A751b7BC1EF38af76757f",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
@@ -7586,12 +7502,6 @@
         "0xf848907549f27cC5424Ee0B0F8FE5238113632AF",
         "0x4200000000000000000000000000000000000007"
       ]
-    ],
-    [
-      "0x4FE1aDdCb348BF191164FB10605C8Beec8D42aBd",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 421613]
     ],
     [
       "0x5333982087C2Db4f85d0Ed2CdE22b22ABC0fdae3",
