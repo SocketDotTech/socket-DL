@@ -4,7 +4,7 @@ pragma solidity 0.8.7;
 import "../interfaces/ISocket.sol";
 import "../interfaces/ICapacitorFactory.sol";
 import "../interfaces/ISwitchboard.sol";
-import "../utils/AccessControl.sol";
+import "../utils/AccessControlExtended.sol";
 
 import {GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
 
@@ -13,7 +13,7 @@ import {GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
  * @notice An abstract contract for configuring socket connections between different chains
  * @dev This contract is meant to be inherited by other contracts that require socket configuration functionality
  */
-abstract contract SocketConfig is ISocket, AccessControl {
+abstract contract SocketConfig is ISocket, AccessControlExtended {
     /**
      * @dev Struct to hold the configuration for a plug connection
      */

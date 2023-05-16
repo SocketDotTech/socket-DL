@@ -4,11 +4,10 @@ pragma solidity 0.8.7;
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/ICapacitor.sol";
 import "../../interfaces/ISignatureVerifier.sol";
-import "../../utils/AccessControl.sol";
-import "../../libraries/SignatureVerifierLib.sol";
+
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
-import "../../utils/AccessControl.sol";
+import "../../utils/AccessControlExtended.sol";
 
 import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 import {TRIP_NATIVE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
@@ -20,7 +19,7 @@ It provides the necessary functionalities to allow packets to be sent and receiv
 of fees, gas limits, and packet validation.
 @dev This contract has access-controlled functions and connects to a capacitor contract that holds packets for the native bridge.
 */
-abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
+abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     ISignatureVerifier public signatureVerifier__;
 
     /**
@@ -291,7 +290,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
      * @param signature_ The signature of the message "TRIP" + chainSlug + nonce_ + true.
      */
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
-        address watcher = SignatureVerifierLib.recoverSignerFromDigest(
+        address watcher = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end
             keccak256(
                 abi.encode(TRIP_NATIVE_SIG_IDENTIFIER, chainSlug, nonce_, true)
@@ -314,7 +313,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
      * @param signature_ The signature created by the watcher.
      */
     function untrip(uint256 nonce_, bytes memory signature_) external {
-        address watcher = SignatureVerifierLib.recoverSignerFromDigest(
+        address watcher = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
