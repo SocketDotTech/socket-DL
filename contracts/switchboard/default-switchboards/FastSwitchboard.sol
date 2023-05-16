@@ -58,7 +58,13 @@ contract FastSwitchboard is SwitchboardBase {
         ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
-        SwitchboardBase(gasPriceOracle_, socket_, chainSlug_, timeoutInSeconds_, signatureVerifier_)
+        SwitchboardBase(
+            gasPriceOracle_,
+            socket_,
+            chainSlug_,
+            timeoutInSeconds_,
+            signatureVerifier_
+        )
     {}
 
     /**

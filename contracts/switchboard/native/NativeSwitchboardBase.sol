@@ -24,7 +24,6 @@ of fees, gas limits, and packet validation.
 @dev This contract has access-controlled functions and connects to a capacitor contract that holds packets for the native bridge.
 */
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
-
     struct Fees {
         uint256 switchboardFees;
         uint256 verificationFees;
@@ -152,7 +151,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
 
-
     /**
      * @dev Error thrown when the fees provided are not enough to execute the transaction.
      */
@@ -278,7 +276,10 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         override
         returns (uint256 switchboardFee_, uint256 verificationFee_)
     {
-        return _calculateMinFees(dstChainSlug_);
+        return (
+            fees[dstChainSlug_].switchboardFees,
+            fees[dstChainSlug_].verificationFees
+        );
     }
 
     /**
@@ -313,7 +314,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 dstRelativeGasPrice_,
         uint256 sourceGasPrice_
     ) internal view virtual returns (uint256);
-
 
     function setFees(
         uint256 nonce_,

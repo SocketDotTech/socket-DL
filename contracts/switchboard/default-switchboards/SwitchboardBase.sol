@@ -310,7 +310,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
     }
 
-
     function setFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
