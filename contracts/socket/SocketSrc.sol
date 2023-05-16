@@ -37,14 +37,14 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgGasLimit_,
         bytes calldata payload_
     ) external payable override returns (bytes32 msgId) {
-        PlugConfig storage plugConfig = _plugConfigs[msg.sender][
+        PlugConfig memory plugConfig = _plugConfigs[msg.sender][
             remoteChainSlug_
         ];
         uint32 localChainSlug = chainSlug;
 
         msgId = _encodeMsgId(localChainSlug);
 
-        ISocket.Fees memory fees = _deductFees(
+        ISocket.Fees memory fees = _validateAndGetFees(
             msgGasLimit_,
             uint32(remoteChainSlug_),
             plugConfig.outboundSwitchboard__
@@ -62,6 +62,14 @@ abstract contract SocketSrc is SocketBase {
         );
 
         plugConfig.capacitor__.addPackedMessage(packedMessage);
+
+        _deductFees(
+            msgGasLimit_,
+            uint32(remoteChainSlug_),
+            plugConfig.outboundSwitchboard__,
+            fees
+        );
+
         emit MessageOutbound(
             localChainSlug,
             msg.sender,
@@ -75,13 +83,13 @@ abstract contract SocketSrc is SocketBase {
     }
 
     /**
-     * @dev Deducts the fees needed for message transmission and execution
+     * @dev Calculates fees needed for message transmission and execution and checks if msg value is enough
      * @param msgGasLimit_ The gas limit needed to execute the payload on the remote chain
      * @param remoteChainSlug_ The slug of the remote chain
      * @param switchboard__ The address of the switchboard contract
      * @return fees The fees object
      */
-    function _deductFees(
+    function _validateAndGetFees(
         uint256 msgGasLimit_,
         uint32 remoteChainSlug_,
         ISwitchboard switchboard__
@@ -104,18 +112,32 @@ abstract contract SocketSrc is SocketBase {
                 msg.value -
                 fees.transmissionFees -
                 fees.switchboardFees;
-
-            transmitManager__.payFees{value: fees.transmissionFees}(
-                remoteChainSlug_
-            );
-            switchboard__.payFees{value: fees.switchboardFees}(
-                remoteChainSlug_
-            );
-            executionManager__.payFees{value: fees.executionFee}(
-                msgGasLimit_,
-                remoteChainSlug_
-            );
         }
+    }
+
+    /**
+     * @dev Deducts the fees needed for message transmission and execution
+     * @param msgGasLimit_ The gas limit needed to execute the payload on the remote chain
+     * @param remoteChainSlug_ The slug of the remote chain
+     * @param switchboard__ The address of the switchboard contract
+     * @param fees_ The fees object
+     */
+    function _deductFees(
+        uint256 msgGasLimit_,
+        uint32 remoteChainSlug_,
+        ISwitchboard switchboard__,
+        Fees memory fees_
+    ) internal {
+        transmitManager__.payFees{value: fees_.transmissionFees}(
+            remoteChainSlug_
+        );
+        executionManager__.payFees{value: fees_.executionFee}(
+            msgGasLimit_,
+            remoteChainSlug_
+        );
+
+        // call to unknown external contract at the end
+        switchboard__.payFees{value: fees_.switchboardFees}(remoteChainSlug_);
     }
 
     /**
