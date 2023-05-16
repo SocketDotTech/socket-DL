@@ -86,12 +86,11 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
     /**
      * @notice Function for getting the minimum fees required for executing a cross-chain transaction
      * @dev This function is called at source to calculate the execution cost.
-     * @param msgGasLimit_ msgGasLimit
      * @param siblingChainSlug_ Sibling chain identifier
      * @return Minimum fees required for executing the transaction
      */
     function getMinFees(
-        uint256 msgGasLimit_,
+        uint256,
         uint32 siblingChainSlug_
     ) external view override returns (uint256) {
         return executionFees[siblingChainSlug_];

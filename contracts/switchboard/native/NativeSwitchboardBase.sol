@@ -215,12 +215,11 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
 
     /**
      * @dev Get the minimum fees for a cross-chain transaction.
-     * @param dstChainSlug_ The destination chain's slug.
      * @return switchboardFee_ The fee charged by the switchboard for the transaction.
      * @return verificationFee_ The fee charged by the verifier for the transaction.
      */
     function getMinFees(
-        uint32 dstChainSlug_
+        uint32
     )
         external
         view
