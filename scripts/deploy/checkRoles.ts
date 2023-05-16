@@ -117,81 +117,68 @@ const executeRoleTransactions = async (
   newRoleStatus: boolean,
   wallet: Wallet
 ) => {
-  if (!roleTxns[chainId as any as keyof typeof roleTxns]) return;
+  if (!roleTxns[chainId]) return;
   let contracts = Object.keys(
-    roleTxns[chainId as any as keyof typeof roleTxns]!
+    roleTxns[chainId]!
   );
   for (let i = 0; i < contracts.length; i++) {
     let contractSpecificTxns:
       | { to: string; role: string; slug: number; grantee: string }[]
       | undefined =
-      roleTxns[chainId as any as keyof typeof roleTxns]![
+      roleTxns[chainId]![
         contracts[i] as CORE_CONTRACTS
       ];
     if (!contractSpecificTxns?.length) continue;
 
-    let grantRoles: string[] = [],
-      grantSlugs: number[] = [],
-      grantAddresses: string[] = [];
-    let revokeRoles: string[] = [],
-      revokeSlugs: number[] = [],
-      revokeAddresses: string[] = [];
+    let roles: string[] = [],
+      slugs: number[] = [],
+      addresses: string[] = [];
+
     let contractAddress: string | undefined;
 
     contractSpecificTxns!.forEach((roleTx) => {
       contractAddress = roleTx.to;
       if (newRoleStatus) {
-        grantRoles.push(roleTx.role);
-        grantSlugs.push(roleTx.slug);
-        grantAddresses.push(roleTx.grantee);
+        roles.push(roleTx.role);
+        slugs.push(roleTx.slug);
+        addresses.push(roleTx.grantee);
       } else {
-        revokeRoles.push(roleTx.role);
-        revokeSlugs.push(roleTx.slug);
-        revokeAddresses.push(roleTx.grantee);
+        roles.push(roleTx.role);
+        slugs.push(roleTx.slug);
+        addresses.push(roleTx.grantee);
       }
     });
 
-    if (grantRoles.length) {
-      let data = getRoleTxnData(
-        grantRoles,
-        grantSlugs,
-        grantAddresses,
+    if (!roles.length) continue;
+    let data:string;
+    if (newRoleStatus) {
+      data = getRoleTxnData(
+        roles,
+        slugs,
+        addresses,
         "GRANT"
       );
-      let tx = await wallet.sendTransaction({
-        to: contractAddress,
-        data,
-      });
-      console.log(
-        `chain: ${chainId}`,
-        "Grant, contract:",
-        contractAddress,
-        "hash: ",
-        tx.hash
-      );
-      await tx.wait();
-    }
-
-    if (revokeRoles.length) {
-      let data = getRoleTxnData(
-        grantRoles,
-        revokeSlugs,
-        grantAddresses,
+    } else {
+      data = getRoleTxnData(
+        roles,
+        slugs,
+        addresses,
         "REVOKE"
       );
-      let tx = await wallet.sendTransaction({
-        to: contractAddress,
-        data,
-      });
-      console.log(
-        `chain: ${chainId}`,
-        "revoke, contract:",
-        contractAddress,
-        "hash: ",
-        tx.hash
-      );
-      await tx.wait();
     }
+    let tx = await wallet.sendTransaction({
+      to: contractAddress,
+      data,
+    });
+    console.log(
+      `chain: ${chainId}`,
+      " contract:",
+      contractAddress,
+      {newRoleStatus},
+      "hash: ",
+      tx.hash
+    );
+    await tx.wait();
   }
 };
 
@@ -344,7 +331,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
         //   networkToChainSlug[chainId],
         //   "================="
         // );
-        let addresses;
+        let addresses:ChainSocketAddresses | undefined;
         try {
           addresses = await getAddresses(chainId, mode);
         } catch (error) {
