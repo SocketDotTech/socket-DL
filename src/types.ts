@@ -15,6 +15,7 @@ export enum ChainSlug {
   GOERLI = 5,
   POLYGON_MAINNET = 137,
   POLYGON_MUMBAI = 80001,
+  HARDHAT = 31337,
 }
 
 export enum ChainKey {
