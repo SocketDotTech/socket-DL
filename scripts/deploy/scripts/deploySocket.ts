@@ -39,7 +39,7 @@ export const deploySocket = async (
     const signatureVerifier: Contract = await getOrDeploy(
       CORE_CONTRACTS.SignatureVerifier,
       "contracts/utils/SignatureVerifier.sol",
-      [],
+      [socketOwner],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.SignatureVerifier] =
@@ -48,7 +48,7 @@ export const deploySocket = async (
     const hasher: Contract = await getOrDeploy(
       CORE_CONTRACTS.Hasher,
       "contracts/utils/Hasher.sol",
-      [],
+      [socketOwner],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.Hasher] = hasher.address;

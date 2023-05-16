@@ -56,7 +56,7 @@ contract ExecutionManagerTest is Setup {
             signatureVerifier
         );
 
-        signatureVerifier = new SignatureVerifier();
+        signatureVerifier = new SignatureVerifier(owner);
         transmitManager = new TransmitManager(
             signatureVerifier,
             owner,

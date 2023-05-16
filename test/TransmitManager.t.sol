@@ -49,7 +49,7 @@ contract TransmitManagerTest is Setup {
         feesPayer = vm.addr(feesPayerPrivateKey);
         feesWithdrawer = vm.addr(feesWithdrawerPrivateKey);
 
-        signatureVerifier = new SignatureVerifier();
+        signatureVerifier = new SignatureVerifier(owner);
         transmitManager = new TransmitManager(
             signatureVerifier,
             owner,
@@ -253,7 +253,7 @@ contract TransmitManagerTest is Setup {
     }
 
     function testSetSignatureVerifier() public {
-        SignatureVerifier signatureVerifierNew = new SignatureVerifier();
+        SignatureVerifier signatureVerifierNew = new SignatureVerifier(owner);
 
         hoax(owner);
         vm.expectEmit(false, false, false, true);

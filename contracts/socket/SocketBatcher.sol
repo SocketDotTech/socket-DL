@@ -101,7 +101,7 @@ contract SocketBatcher is AccessControl {
         address switchBoardAddress;
         uint256 maxPacketLength;
         uint32 siblingChainSlug;
-        uint32 capacitorType;
+        uint256 capacitorType;
     }
 
     /**
@@ -272,6 +272,9 @@ contract SocketBatcher is AccessControl {
                 ++index;
             }
         }
+
+        if (address(this).balance > 0)
+            msg.sender.call{value: address(this).balance}("");
     }
 
     /**
