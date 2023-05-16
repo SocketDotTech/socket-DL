@@ -1,7 +1,6 @@
 import { bridgeConsts } from "../../constants";
 import { chainKeyToSlug } from "../../../src";
 
-const executionOverhead = 300000;
 const initiateGasLimit = 300000;
 const arbitrumNativeFee = 300000;
 
@@ -17,7 +16,6 @@ export const arbitrumL1Switchboard = (
       chainKeyToSlug[network],
       arbitrumNativeFee,
       initiateGasLimit,
-      executionOverhead,
       bridgeConsts.inbox[network],
       signerAddress,
       socketAddress,

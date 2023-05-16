@@ -1,6 +1,5 @@
 import { chainKeyToSlug } from "../../../src";
 
-const executionOverhead = 300000;
 const initiateGasLimit = 300000;
 const confirmGasLimit = 300000;
 
@@ -16,7 +15,6 @@ export const arbitrumL2Switchboard = (
       chainKeyToSlug[network],
       confirmGasLimit,
       initiateGasLimit,
-      executionOverhead,
       signerAddress,
       socketAddress,
       oracleAddress,
