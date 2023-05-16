@@ -106,7 +106,8 @@ contract ArbitrumL1SwitchboardTest is Setup {
             address(cc_.socket__),
             cc_.gasPriceOracle__,
             bridge_,
-            outbox_
+            outbox_,
+            cc_.sigVerifier__
         );
 
         vm.startPrank(_socketOwner);

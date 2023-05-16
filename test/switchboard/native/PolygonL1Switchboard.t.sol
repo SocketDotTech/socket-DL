@@ -97,7 +97,8 @@ contract PolygonL1SwitchboardTest is Setup {
             fxRoot_,
             _socketOwner,
             address(cc_.socket__),
-            cc_.gasPriceOracle__
+            cc_.gasPriceOracle__,
+            cc_.sigVerifier__
         );
 
         scc_ = registerSwitchbaord(

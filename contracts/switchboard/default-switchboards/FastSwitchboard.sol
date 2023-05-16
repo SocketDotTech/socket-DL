@@ -47,16 +47,18 @@ contract FastSwitchboard is SwitchboardBase {
      * @param gasPriceOracle_ Address of the gas price oracle contract
      * @param chainSlug_ Chain slug of the chain where the contract is deployed
      * @param timeoutInSeconds_ Timeout in seconds for the packets
+     * @param signatureVerifier_ The address of the signature verifier contract
      */
     constructor(
         address owner_,
         address socket_,
         address gasPriceOracle_,
         uint32 chainSlug_,
-        uint256 timeoutInSeconds_
+        uint256 timeoutInSeconds_,
+        ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
-        SwitchboardBase(gasPriceOracle_, socket_, chainSlug_, timeoutInSeconds_)
+        SwitchboardBase(gasPriceOracle_, socket_, chainSlug_, timeoutInSeconds_, signatureVerifier_)
     {}
 
     /**

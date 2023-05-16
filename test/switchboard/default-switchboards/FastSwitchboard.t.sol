@@ -36,7 +36,8 @@ contract FastSwitchboardTest is Setup {
             address(uint160(c++)),
             address(uint160(c++)),
             _a.chainSlug,
-            1
+            1,
+            _a.sigVerifier__
         );
 
         fastSwitchboard.grantRoleWithSlug(

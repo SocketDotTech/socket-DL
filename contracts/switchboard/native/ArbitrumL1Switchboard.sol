@@ -114,15 +114,17 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         address socket_,
         IGasPriceOracle gasPriceOracle_,
         address bridge_,
-        address outbox_
+        address outbox_,
+        ISignatureVerifier signatureVerifier_
     )
-        AccessControl(owner_)
+        AccessControlExtended(owner_)
         NativeSwitchboardBase(
             socket_,
             chainSlug_,
             initiateGasLimit_,
             executionOverhead_,
-            gasPriceOracle_
+            gasPriceOracle_,
+            signatureVerifier_
         )
     {
         inbox__ = IInbox(inbox_);

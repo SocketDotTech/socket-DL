@@ -4,14 +4,16 @@ pragma solidity 0.8.7;
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IGasPriceOracle.sol";
 import "../../interfaces/ICapacitor.sol";
+import "../../interfaces/ISignatureVerifier.sol";
 
 import "../../utils/AccessControl.sol";
 import "../../libraries/SignatureVerifierLib.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
+import "../../utils/AccessControlExtended.sol";
 
-import {GAS_LIMIT_UPDATER_ROLE, GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE} from "../../utils/AccessRoles.sol";
-import {TRIP_NATIVE_SIG_IDENTIFIER, L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER, INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+import {GAS_LIMIT_UPDATER_ROLE, GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {TRIP_NATIVE_SIG_IDENTIFIER, L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER, INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
 
@@ -21,7 +23,15 @@ It provides the necessary functionalities to allow packets to be sent and receiv
 of fees, gas limits, and packet validation.
 @dev This contract has access-controlled functions and connects to a capacitor contract that holds packets for the native bridge.
 */
-abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
+abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
+
+    struct Fees {
+        uint256 switchboardFees;
+        uint256 verificationFees;
+    }
+
+    ISignatureVerifier public signatureVerifier__;
+
     /**
      * @dev Address of the gas price oracle.
      */
@@ -74,6 +84,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
      * @dev Transmitter to next nonce.
      */
     mapping(address => uint256) public nextNonce;
+
+    // destinationChainSlug => fees-struct with verificationFees and switchboardFees
+    mapping(uint32 => Fees) public fees;
 
     /**
      * @dev Event emitted when the switchboard is tripped.
@@ -133,6 +146,14 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     event RootReceived(bytes32 packetId, bytes32 root);
 
     /**
+     * @dev Emitted when a fees is set for switchboard
+     * @param siblingChainSlug Chain slug of the sibling chain
+     * @param fees fees struct with verificationFees and switchboardFees
+     */
+    event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
+
+
+    /**
      * @dev Error thrown when the fees provided are not enough to execute the transaction.
      */
     error FeesNotEnough();
@@ -182,13 +203,15 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
         uint32 chainSlug_,
         uint256 initiateGasLimit_,
         uint256 executionOverhead_,
-        IGasPriceOracle gasPriceOracle_
+        IGasPriceOracle gasPriceOracle_,
+        ISignatureVerifier signatureVerifier_
     ) {
         socket = socket_;
         chainSlug = chainSlug_;
         initiateGasLimit = initiateGasLimit_;
         executionOverhead = executionOverhead_;
         gasPriceOracle__ = gasPriceOracle_;
+        signatureVerifier__ = signatureVerifier_;
     }
 
     /**
@@ -290,6 +313,43 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
         uint256 dstRelativeGasPrice_,
         uint256 sourceGasPrice_
     ) internal view virtual returns (uint256);
+
+
+    function setFees(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 switchboardFees_,
+        uint256 verificationFees_,
+        bytes calldata signature_
+    ) external override {
+        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    FEES_UPDATE_SIG_IDENTIFIER,
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    switchboardFees_,
+                    verificationFees_
+                )
+            ),
+            signature_
+        );
+
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        uint256 nonce = nextNonce[feesUpdater]++;
+        if (nonce_ != nonce) revert InvalidNonce();
+
+        Fees memory feesObject = Fees({
+            switchboardFees: switchboardFees_,
+            verificationFees: verificationFees_
+        });
+
+        fees[dstChainSlug_] = feesObject;
+
+        emit SwitchboardFeesSet(dstChainSlug_, feesObject);
+    }
 
     /**
      * @notice set capacitor address and packet size

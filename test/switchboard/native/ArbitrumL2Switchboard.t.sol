@@ -100,7 +100,8 @@ contract ArbitrumL2SwitchboardTest is Setup {
             executionOverhead_,
             _socketOwner,
             address(cc_.socket__),
-            cc_.gasPriceOracle__
+            cc_.gasPriceOracle__,
+            cc_.sigVerifier__
         );
 
         vm.startPrank(_socketOwner);

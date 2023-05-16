@@ -3,22 +3,29 @@ pragma solidity 0.8.7;
 
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/IGasPriceOracle.sol";
+import "../../interfaces/ISignatureVerifier.sol";
 import "../../utils/AccessControlExtended.sol";
 
 import "../../libraries/SignatureVerifierLib.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
-import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRIP_ROLE, UNTRIP_ROLE, WATCHER_ROLE} from "../../utils/AccessRoles.sol";
-import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRIP_ROLE, UNTRIP_ROLE, WATCHER_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     IGasPriceOracle public gasPriceOracle__;
+    ISignatureVerifier public signatureVerifier__;
 
     bool public tripGlobalFuse;
     address public socket;
     uint32 public immutable chainSlug;
     uint256 public immutable timeoutInSeconds;
+
+    struct Fees {
+        uint256 switchboardFees;
+        uint256 verificationFees;
+    }
 
     mapping(uint32 => bool) public isInitialised;
     mapping(uint32 => uint256) public maxPacketSize;
@@ -30,6 +37,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
+
+    // destinationChainSlug => fees-struct with verificationFees and switchboardFees
+    mapping(uint32 => Fees) public fees;
 
     /**
      * @dev Emitted when a path is tripped
@@ -65,6 +75,13 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 maxPacketSize
     );
 
+    /**
+     * @dev Emitted when a fees is set for switchboard
+     * @param siblingChainSlug Chain slug of the sibling chain
+     * @param fees fees struct with verificationFees and switchboardFees
+     */
+    event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
+
     error AlreadyInitialised();
     error InvalidNonce();
     error OnlySocket();
@@ -80,12 +97,14 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         address gasPriceOracle_,
         address socket_,
         uint32 chainSlug_,
-        uint256 timeoutInSeconds_
+        uint256 timeoutInSeconds_,
+        ISignatureVerifier signatureVerifier_
     ) {
         gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         socket = socket_;
         chainSlug = chainSlug_;
         timeoutInSeconds = timeoutInSeconds_;
+        signatureVerifier__ = signatureVerifier_;
     }
 
     /**
@@ -289,6 +308,43 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
         executionOverhead[dstChainSlug_] = executionOverhead_;
         emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
+    }
+
+
+    function setFees(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 switchboardFees_,
+        uint256 verificationFees_,
+        bytes calldata signature_
+    ) external override {
+        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    FEES_UPDATE_SIG_IDENTIFIER,
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    switchboardFees_,
+                    verificationFees_
+                )
+            ),
+            signature_
+        );
+
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        uint256 nonce = nextNonce[feesUpdater]++;
+        if (nonce_ != nonce) revert InvalidNonce();
+
+        Fees memory feesObject = Fees({
+            switchboardFees: switchboardFees_,
+            verificationFees: verificationFees_
+        });
+
+        fees[dstChainSlug_] = feesObject;
+
+        emit SwitchboardFeesSet(dstChainSlug_, feesObject);
     }
 
     /**

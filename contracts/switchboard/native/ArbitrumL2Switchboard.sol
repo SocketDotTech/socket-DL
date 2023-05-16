@@ -48,15 +48,17 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
         uint256 executionOverhead_,
         address owner_,
         address socket_,
-        IGasPriceOracle gasPriceOracle_
+        IGasPriceOracle gasPriceOracle_,
+        ISignatureVerifier signatureVerifier_
     )
-        AccessControl(owner_)
+        AccessControlExtended(owner_)
         NativeSwitchboardBase(
             socket_,
             chainSlug_,
             initiateGasLimit_,
             executionOverhead_,
-            gasPriceOracle_
+            gasPriceOracle_,
+            signatureVerifier_
         )
     {
         confirmGasLimit = confirmGasLimit_;

@@ -198,7 +198,8 @@ contract Setup is Test {
             address(cc_.socket__),
             address(cc_.gasPriceOracle__),
             cc_.chainSlug,
-            _timeoutInSeconds
+            _timeoutInSeconds,
+            cc_.sigVerifier__
         );
 
         uint256 nonce = 0;
@@ -256,7 +257,8 @@ contract Setup is Test {
             address(cc_.socket__),
             address(cc_.gasPriceOracle__),
             cc_.chainSlug,
-            _timeoutInSeconds
+            _timeoutInSeconds,
+            cc_.sigVerifier__
         );
         uint256 nonce = 0;
 

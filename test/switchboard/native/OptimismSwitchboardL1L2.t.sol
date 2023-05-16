@@ -94,7 +94,8 @@ contract OptimismSwitchboardL1L2Test is Setup {
             _socketOwner,
             address(cc_.socket__),
             cc_.gasPriceOracle__,
-            crossDomainManagerAddress_
+            crossDomainManagerAddress_,
+            cc_.sigVerifier__
         );
 
         scc_ = registerSwitchbaord(
