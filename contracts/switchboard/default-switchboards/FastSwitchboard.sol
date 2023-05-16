@@ -17,9 +17,6 @@ contract FastSwitchboard is SwitchboardBase {
     // dst chain slug => total watchers registered
     mapping(uint32 => uint256) public totalWatchers;
 
-    // dst chain slug => attest gas limit
-    mapping(uint32 => uint256) public attestGasLimit;
-
     // attester => packetId => is attested
     mapping(address => mapping(bytes32 => bool)) public isAttested;
 
@@ -30,8 +27,6 @@ contract FastSwitchboard is SwitchboardBase {
     event SocketSet(address newSocket);
     // Event emitted when a packet is attested
     event PacketAttested(bytes32 packetId, address attester);
-    // Event emitted when the attest gas limit is set
-    event AttestGasLimitSet(uint32 dstChainSlug, uint256 attestGasLimit);
 
     // Error emitted when a watcher is found
     error WatcherFound();
@@ -109,43 +104,6 @@ contract FastSwitchboard is SwitchboardBase {
         if (isPacketValid[packetId_]) return true;
         if (block.timestamp - proposeTime_ > timeoutInSeconds) return true;
         return false;
-    }
-
-    /**
-     * @notice updates attest gas limit for given chain slug
-     * @param dstChainSlug_ destination chain
-     * @param attestGasLimit_ average gas limit needed for attest function call
-     */
-    function setAttestGasLimit(
-        uint256 nonce_,
-        uint32 dstChainSlug_,
-        uint256 attestGasLimit_,
-        bytes calldata signature_
-    ) external {
-        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    dstChainSlug_,
-                    nonce_,
-                    attestGasLimit_
-                )
-            ),
-            signature_
-        );
-        _checkRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            dstChainSlug_,
-            gasLimitUpdater
-        );
-
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        attestGasLimit[dstChainSlug_] = attestGasLimit_;
-        emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
     }
 
     /**

@@ -1,7 +1,6 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import { attestGasLimit } from "../constants";
 import {
   ChainAddresses,
   ChainSocketAddresses,
@@ -10,7 +9,6 @@ import {
   chainKeyToSlug,
 } from "../../src/types";
 import { getAddresses } from "../deploy/utils";
-import { setAttestGasLimit } from "./set-attest-gaslimit";
 import { mode } from "../deploy/config";
 
 export const setLimitsForAChainSlug = async (
@@ -53,26 +51,6 @@ export const setLimitsForAChainSlug = async (
 
         const chainSlugCode = "optimism-goerli";
         // networkToChainSlug[dstChainId]
-
-        if (chainAddresses.FAST) {
-          const config: Configs = chainAddresses.FAST as Configs;
-          const switchboardAddress = config.switchboard as string;
-          console.log(`FAST Switchboard address is: ${config.switchboard}`);
-
-          //lookup for AttestGasLimit for the chainSlugCode
-          const attestGasLimitValue = attestGasLimit[chainSlugCode];
-
-          const isAttestUpdateSuccessful = await setAttestGasLimit(
-            chainId,
-            dstChainId,
-            switchboardAddress,
-            attestGasLimitValue
-          );
-
-          console.log(
-            `FAST-Switchboard Successfully updated attestGasLimit: ${attestGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
-          );
-        }
       }
 
       console.log(`-------------------------------------\n\n`);

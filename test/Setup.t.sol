@@ -47,7 +47,6 @@ contract Setup is Test {
     uint256 internal _slowCapacitorWaitTime = 300;
     uint256 internal _msgGasLimit = 30548;
     uint256 internal _sealGasLimit = 150000;
-    uint256 internal _attestGasLimit = 150000;
     uint256 internal _transmissionFees = 350000000000;
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
@@ -267,25 +266,6 @@ contract Setup is Test {
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
 
         vm.stopPrank();
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                address(fastSwitchboard),
-                cc_.chainSlug,
-                remoteChainSlug_,
-                nonce,
-                _attestGasLimit
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        fastSwitchboard.setAttestGasLimit(
-            nonce++,
-            remoteChainSlug_,
-            _attestGasLimit,
-            sig
-        );
 
         scc_ = _registerSwitchbaord(
             cc_,

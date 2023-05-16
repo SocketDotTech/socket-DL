@@ -20,7 +20,6 @@ import {
   networkToChainSlug,
 } from "../../src";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
-import { setAttestGasLimit } from "../limits-updater/set-attest-gaslimit";
 import {
   capacitorType,
   chains,
@@ -129,16 +128,6 @@ export const main = async () => {
         );
 
         await storeAddresses(updatedDeploymentAddresses, chain, mode);
-      }
-
-      if (setGasLimits) {
-        await setAttestGasLimit(
-          chain,
-          siblingSlugs,
-          addr["FastSwitchboard"],
-          addr["SocketBatcher"],
-          socketSigner
-        );
       }
     }
 

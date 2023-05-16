@@ -92,20 +92,6 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
-     * @notice A struct representing a request to set the attest gas limit for a chain.
-     * @param nonce The nonce of the request.
-     * @param dstChainId The ID of the destination chain.
-     * @param attestGasLimit The propose gas limit.
-     * @param signature The signature of the request.
-     */
-    struct SetAttestGasLimitRequest {
-        uint256 nonce;
-        uint32 dstChainId;
-        uint256 attestGasLimit;
-        bytes signature;
-    }
-
-    /**
      * @notice A struct representing a request to register switchboard for a chain.
      * @param switchBoardAddress The switchboard address.
      * @param maxPacketLength The max packet length
@@ -144,29 +130,6 @@ contract SocketBatcher is AccessControl {
                 registerSwitchboardsRequests_[index].maxPacketLength,
                 registerSwitchboardsRequests_[index].siblingChainSlug,
                 registerSwitchboardsRequests_[index].capacitorType
-            );
-            unchecked {
-                ++index;
-            }
-        }
-    }
-
-    /**
-     * @notice set attest gas limit for a list of siblings
-     * @param fastSwitchboardAddress_ address of fast switchboard
-     * @param setAttestGasLimitRequests_ the list of requests with gas limit details
-     */
-    function setAttestGasLimits(
-        address fastSwitchboardAddress_,
-        SetAttestGasLimitRequest[] calldata setAttestGasLimitRequests_
-    ) external {
-        uint256 setAttestGasLimitLength = setAttestGasLimitRequests_.length;
-        for (uint256 index = 0; index < setAttestGasLimitLength; ) {
-            FastSwitchboard(fastSwitchboardAddress_).setAttestGasLimit(
-                setAttestGasLimitRequests_[index].nonce,
-                setAttestGasLimitRequests_[index].dstChainId,
-                setAttestGasLimitRequests_[index].attestGasLimit,
-                setAttestGasLimitRequests_[index].signature
             );
             unchecked {
                 ++index;

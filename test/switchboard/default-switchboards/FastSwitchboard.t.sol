@@ -11,7 +11,6 @@ contract FastSwitchboardTest is Setup {
     address altWatcher;
     uint256 nonce;
 
-    event AttestGasLimitSet(uint32 dstChainSlug_, uint256 attestGasLimit_);
     event PacketAttested(bytes32 packetId, address attester);
     event SwitchboardTripped(bool tripGlobalFuse_);
     event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
@@ -52,27 +51,6 @@ contract FastSwitchboardTest is Setup {
 
         fastSwitchboard.grantWatcherRole(remoteChainSlug, watcher);
         fastSwitchboard.grantWatcherRole(remoteChainSlug, altWatcher);
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                address(fastSwitchboard),
-                _a.chainSlug,
-                remoteChainSlug,
-                nonce,
-                _attestGasLimit
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        vm.expectEmit(false, false, false, true);
-        emit AttestGasLimitSet(remoteChainSlug, _attestGasLimit);
-        fastSwitchboard.setAttestGasLimit(
-            nonce++,
-            remoteChainSlug,
-            _attestGasLimit,
-            sig
-        );
 
         vm.stopPrank();
     }
