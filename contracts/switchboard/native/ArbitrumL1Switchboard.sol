@@ -26,11 +26,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     address public callValueRefundAddress;
 
     /**
-     * @notice The fee charged in Arbitrum native currency for executing transactions.
-     */
-    uint256 public arbitrumNativeFee;
-
-    /**
      * @notice An interface for receiving incoming messages from the Arbitrum chain.
      */
     IInbox public inbox__;
@@ -62,12 +57,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     );
 
     /**
-     * @notice Event emitted when the Arbitrum native fee is updated.
-     * @param arbitrumNativeFee The new Arbitrum native fee.
-     */
-    event UpdatedArbitrumNativeFee(uint256 arbitrumNativeFee);
-
-    /**
      * @notice Event emitted when the bridge address is updated.
      * @param bridgeAddress The new bridge address.
      */
@@ -92,7 +81,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     /**
      * @dev Constructor function for initializing the NativeBridge contract
      * @param chainSlug_ The identifier of the current chain in the system
-     * @param arbitrumNativeFee_ The fee charged by the system for processing messages
      * @param inbox_ The address of the Arbitrum Inbox contract
      * @param owner_ The address of the owner of the NativeBridge contract
      * @param socket_ The address of the socket contract
@@ -101,7 +89,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
      */
     constructor(
         uint32 chainSlug_,
-        uint256 arbitrumNativeFee_,
         address inbox_,
         address owner_,
         address socket_,
@@ -113,7 +100,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
     {
         inbox__ = IInbox(inbox_);
-        arbitrumNativeFee = arbitrumNativeFee_;
 
         bridge__ = IBridge(bridge_);
         outbox__ = IOutbox(outbox_);
