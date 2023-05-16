@@ -1,5 +1,5 @@
 import fs from "fs";
-import { Contract, Wallet, constants } from "ethers";
+import { Wallet, constants } from "ethers";
 import { getProviderFromChainName, switchboards } from "../constants";
 import {
   deployedAddressPath,
@@ -20,13 +20,7 @@ import {
   networkToChainSlug,
 } from "../../src";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
-import {
-  capacitorType,
-  chains,
-  maxPacketLength,
-  mode,
-  setGasLimits,
-} from "./config";
+import { capacitorType, chains, maxPacketLength, mode } from "./config";
 
 export const main = async () => {
   try {
@@ -81,7 +75,7 @@ export const main = async () => {
       // register fast
       for (let sibling of siblingSlugs) {
         updatedDeploymentAddresses = await registerSwitchBoard(
-          addr["FastSwitchboard"],
+          addr[CORE_CONTRACTS.FastSwitchboard],
           sibling,
           capacitorType,
           maxPacketLength,
@@ -97,7 +91,7 @@ export const main = async () => {
       for (let sibling of siblingSlugs) {
         let updatedDeploymentAddresses = addr;
         updatedDeploymentAddresses = await registerSwitchBoard(
-          addr["OptimisticSwitchboard"],
+          addr[CORE_CONTRACTS.OptimisticSwitchboard],
           sibling,
           capacitorType,
           maxPacketLength,

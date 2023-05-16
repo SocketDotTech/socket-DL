@@ -593,7 +593,7 @@ const main = async () => {
     newRoleStatus,
   });
 
-  // // Setup Fast Switchboard roles except WATCHER - TODO : setup for watcher
+  // Setup Fast Switchboard roles except WATCHER
   await checkAndUpdateRoles({
     userAddress: ownerAddress,
     filterRoles: [
