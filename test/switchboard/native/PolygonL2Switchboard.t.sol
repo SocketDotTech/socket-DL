@@ -85,7 +85,6 @@ contract PolygonL2SwitchboardTest is Setup {
             cc_.chainSlug,
             confirmGasLimit_,
             initiateGasLimit_,
-            executionOverhead_,
             fxChild_,
             _socketOwner,
             address(cc_.socket__),

@@ -51,14 +51,4 @@ contract OptimisticSwitchboard is SwitchboardBase {
         if (block.timestamp - proposeTime_ < timeoutInSeconds) return false;
         return true;
     }
-
-    /**
-     * @dev no watcher fees needed hence returns 0
-     */
-    function _getMinSwitchboardFees(
-        uint32,
-        uint256
-    ) internal pure override returns (uint256) {
-        return 0;
-    }
 }

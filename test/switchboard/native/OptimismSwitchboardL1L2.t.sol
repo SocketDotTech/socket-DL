@@ -90,7 +90,6 @@ contract OptimismSwitchboardL1L2Test is Setup {
             receiveGasLimit_,
             confirmGasLimit_,
             initiateGasLimit_,
-            executionOverhead_,
             _socketOwner,
             address(cc_.socket__),
             cc_.gasPriceOracle__,

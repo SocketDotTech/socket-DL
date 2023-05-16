@@ -97,7 +97,6 @@ contract ArbitrumL2SwitchboardTest is Setup {
             cc_.chainSlug,
             confirmGasLimit_,
             initiateGasLimit_,
-            executionOverhead_,
             _socketOwner,
             address(cc_.socket__),
             cc_.gasPriceOracle__,
@@ -108,22 +107,6 @@ contract ArbitrumL2SwitchboardTest is Setup {
         arbitrumL2Switchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         arbitrumL2Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
-        bytes32 digest = keccak256(
-            abi.encode(
-                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                address(arbitrumL2Switchboard),
-                cc_.chainSlug,
-                nonce,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        arbitrumL2Switchboard.setExecutionOverhead(
-            nonce++,
-            _executionOverhead,
-            sig
-        );
         arbitrumL2Switchboard.updateRemoteNativeSwitchboard(
             remoteNativeSwitchboard_
         );

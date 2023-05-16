@@ -30,8 +30,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     mapping(uint32 => bool) public isInitialised;
     mapping(uint32 => uint256) public maxPacketSize;
 
-    mapping(uint32 => uint256) public executionOverhead;
-
     // sourceChain => isPaused
     mapping(uint32 => bool) public tripSinglePath;
 
@@ -118,28 +116,11 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     function getMinFees(
         uint32 dstChainSlug_
     ) external view override returns (uint256, uint256) {
-        return _calculateMinFees(dstChainSlug_);
-    }
-
-    function _calculateMinFees(
-        uint32 dstChainSlug_
-    ) internal view returns (uint256 switchboardFee, uint256 verificationFee) {
-        uint256 dstRelativeGasPrice = gasPriceOracle__.relativeGasPrice(
-            dstChainSlug_
+        return (
+            fees[dstChainSlug_].switchboardFees,
+            fees[dstChainSlug_].verificationFees
         );
-
-        switchboardFee =
-            _getMinSwitchboardFees(dstChainSlug_, dstRelativeGasPrice) /
-            maxPacketSize[dstChainSlug_];
-        verificationFee =
-            executionOverhead[dstChainSlug_] *
-            dstRelativeGasPrice;
     }
-
-    function _getMinSwitchboardFees(
-        uint32 dstChainSlug_,
-        uint256 dstRelativeGasPrice_
-    ) internal view virtual returns (uint256);
 
     /**
      * @notice set capacitor address and packet size
@@ -272,42 +253,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
-    }
-
-    /**
-     * @notice updates execution overhead
-     * @param executionOverhead_ new execution overhead cost
-     */
-    function setExecutionOverhead(
-        uint256 nonce_,
-        uint32 dstChainSlug_,
-        uint256 executionOverhead_,
-        bytes memory signature_
-    ) external {
-        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    dstChainSlug_,
-                    nonce_,
-                    executionOverhead_
-                )
-            ),
-            signature_
-        );
-
-        _checkRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            dstChainSlug_,
-            gasLimitUpdater
-        );
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        executionOverhead[dstChainSlug_] = executionOverhead_;
-        emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
     }
 
     function setFees(

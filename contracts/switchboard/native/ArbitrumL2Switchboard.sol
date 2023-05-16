@@ -36,7 +36,6 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
      * @param chainSlug_ A uint32 representing the ID of the L2 network.
      * @param confirmGasLimit_ A uint256 representing the amount of gas that will be needed to confirm the execution of a transaction on the L2 network.
      * @param initiateGasLimit_ A uint256 representing the amount of gas that will be needed to initiate a transaction on the L2 network.
-     * @param executionOverhead_ A uint256 representing the amount of gas that is needed for a transaction execution overhead on the L2 network.
      * @param owner_ The address that will have the default admin role in the AccessControl parent contract.
      * @param socket_ The address of the Ethereum mainnet Native Meta-Transaction Executor contract.
      * @param gasPriceOracle_ An IGasPriceOracle contract used to calculate gas prices for transactions.
@@ -45,7 +44,6 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
         uint32 chainSlug_,
         uint256 confirmGasLimit_,
         uint256 initiateGasLimit_,
-        uint256 executionOverhead_,
         address owner_,
         address socket_,
         IGasPriceOracle gasPriceOracle_,
@@ -56,7 +54,6 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
             socket_,
             chainSlug_,
             initiateGasLimit_,
-            executionOverhead_,
             gasPriceOracle_,
             signatureVerifier_
         )
@@ -89,26 +86,6 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
             packetId_,
             _getRoot(packetId_)
         );
-    }
-
-    /**
-    * @dev Calculates the minimum switchboard fees that should be charged to the user for executing
-    *    a cross-chain transaction based on the destination relative gas price and source gas price.
-    * @param dstRelativeGasPrice_ The relative gas price of the destination chain.
-    * @param sourceGasPrice_ The gas price of the source chain.
-    * @return minSwitchboardFees The minimum switchboard fees in wei that should be charged 
-                                 to the user for executing a cross-chain transaction.
-    */
-    function _getMinSwitchboardFees(
-        uint32,
-        uint256 dstRelativeGasPrice_,
-        uint256 sourceGasPrice_
-    ) internal view override returns (uint256) {
-        return
-            initiateGasLimit *
-            sourceGasPrice_ +
-            confirmGasLimit *
-            dstRelativeGasPrice_;
     }
 
     /**

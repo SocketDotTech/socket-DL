@@ -47,31 +47,13 @@ contract FastSwitchboardTest is Setup {
         );
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
-        bytes32 digest = keccak256(
-            abi.encode(
-                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                address(fastSwitchboard),
-                _a.chainSlug,
-                remoteChainSlug,
-                nonce,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-        fastSwitchboard.setExecutionOverhead(
-            nonce++,
-            remoteChainSlug,
-            _executionOverhead,
-            sig
-        );
-
         watcher = vm.addr(_watcherPrivateKey);
         altWatcher = vm.addr(_altWatcherPrivateKey);
 
         fastSwitchboard.grantWatcherRole(remoteChainSlug, watcher);
         fastSwitchboard.grantWatcherRole(remoteChainSlug, altWatcher);
 
-        digest = keccak256(
+        bytes32 digest = keccak256(
             abi.encode(
                 ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                 address(fastSwitchboard),
@@ -81,7 +63,7 @@ contract FastSwitchboardTest is Setup {
                 _attestGasLimit
             )
         );
-        sig = _createSignature(digest, _socketOwnerPrivateKey);
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         vm.expectEmit(false, false, false, true);
         emit AttestGasLimitSet(remoteChainSlug, _attestGasLimit);

@@ -51,7 +51,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
      * @param chainSlug_ The chainSlug for the contract.
      * @param confirmGasLimit_ The confirmGasLimit for the contract.
      * @param initiateGasLimit_ The initiateGasLimit for the contract.
-     * @param executionOverhead_ The executionOverhead for the contract.
      * @param fxChild_ The address of the fxChildTunnel contract.
      * @param owner_ The owner of the contract.
      * @param socket_ The socket address.
@@ -61,7 +60,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         uint32 chainSlug_,
         uint256 confirmGasLimit_,
         uint256 initiateGasLimit_,
-        uint256 executionOverhead_,
         address fxChild_,
         address owner_,
         address socket_,
@@ -73,7 +71,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
             socket_,
             chainSlug_,
             initiateGasLimit_,
-            executionOverhead_,
             gasPriceOracle_,
             signatureVerifier_
         )
@@ -122,29 +119,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         );
         packetIdToRoot[packetId] = root;
         emit RootReceived(packetId, root);
-    }
-
-    /**
-     * @notice This function calculates the minimum fees required to forward a message from the child to the parent chain.
-     *  @dev takes as input the dstRelativeGasPrice_ which is the gas price on the destination chain (L1 in this case)
-     *       relative to the source chain (L2) and the sourceGasPrice_ which is the gas price
-     *       on the source chain (L2 in this case).
-     *       function returns the sum of the fees required to initiate the message on the child chain and the
-     *       fees required to confirm the message on the parent chain.
-     * @param dstRelativeGasPrice_ relativeGasPrice with respect to destintionChain
-     * @param sourceGasPrice_ gasPrice on the sourceChainSlug
-     * @return minSwitchboardFees minFees
-     */
-    function _getMinSwitchboardFees(
-        uint32,
-        uint256 dstRelativeGasPrice_,
-        uint256 sourceGasPrice_
-    ) internal view override returns (uint256) {
-        return
-            initiateGasLimit *
-            sourceGasPrice_ +
-            confirmGasLimit *
-            dstRelativeGasPrice_;
     }
 
     /**

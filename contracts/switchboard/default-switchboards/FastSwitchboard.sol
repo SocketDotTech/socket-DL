@@ -111,17 +111,6 @@ contract FastSwitchboard is SwitchboardBase {
         return false;
     }
 
-    function _getMinSwitchboardFees(
-        uint32 dstChainSlug_,
-        uint256 dstRelativeGasPrice_
-    ) internal view override returns (uint256) {
-        // assumption: number of watchers are going to be same on all chains for particular chain slug
-        return
-            totalWatchers[dstChainSlug_] *
-            attestGasLimit[dstChainSlug_] *
-            dstRelativeGasPrice_;
-    }
-
     /**
      * @notice updates attest gas limit for given chain slug
      * @param dstChainSlug_ destination chain

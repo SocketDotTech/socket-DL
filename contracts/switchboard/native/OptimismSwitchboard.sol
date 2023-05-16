@@ -38,7 +38,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
      * @param receiveGasLimit_ The gas limit to be used when receiving messages from the remote switchboard contract.
      * @param confirmGasLimit_ The gas limit to be used when confirming messages from the remote switchboard contract.
      * @param initiateGasLimit_ The gas limit to be used when initiating messages to the remote switchboard contract.
-     * @param executionOverhead_ The estimated execution overhead cost in gas for executing a transaction.
      * @param owner_ The address of the owner of the contract who has access to the administrative functions.
      * @param socket_ The address of the socket contract that will be used to communicate with the chain.
      * @param gasPriceOracle_ The address of the gas price oracle contract that will be used to determine the gas price.
@@ -49,7 +48,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         uint256 receiveGasLimit_,
         uint256 confirmGasLimit_,
         uint256 initiateGasLimit_,
-        uint256 executionOverhead_,
         address owner_,
         address socket_,
         IGasPriceOracle gasPriceOracle_,
@@ -61,7 +59,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
             socket_,
             chainSlug_,
             initiateGasLimit_,
-            executionOverhead_,
             gasPriceOracle_,
             signatureVerifier_
         )
@@ -99,27 +96,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
             packetId_,
             _getRoot(packetId_)
         );
-    }
-
-    /**
-     * @dev Encodes the arguments for the receivePacket function to be called on the remote switchboard contract, and returns the encoded data.
-     * @param dstRelativeGasPrice_  the relative gas price on the destination chain.
-     * @return sourceGasPrice_   the gas price on the source chain.
-     * @dev required to relay the transaction. The fee is calculated as the product of the
-     *       initiateGasLimit and sourceGasPrice_, plus the product of the confirmGasLimit and dstRelativeGasPrice_.
-     *       If the confirmGasLimit is 0, it is not included in the calculation.
-     */
-    function _getMinSwitchboardFees(
-        uint32,
-        uint256 dstRelativeGasPrice_,
-        uint256 sourceGasPrice_
-    ) internal view override returns (uint256) {
-        // confirmGasLimit will be 0 when switchboard is deployed on L1
-        return
-            initiateGasLimit *
-            sourceGasPrice_ +
-            confirmGasLimit *
-            dstRelativeGasPrice_;
     }
 
     /**

@@ -31,7 +31,6 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
      *        initializes the contract with the provided parameters.
      * @param chainSlug_ is the identifier of the chain.
      * @param initiateGasLimit_ is the gas limit for initiating the switchboard.
-     * @param executionOverhead_ is the overhead for executing the switchboard.
      * @param checkpointManager_ is the address of the checkpoint manager contract.
      * @param fxRoot_ is the address of the root contract.
      * @param owner_ is the address of the contract owner.
@@ -41,7 +40,6 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
     constructor(
         uint32 chainSlug_,
         uint256 initiateGasLimit_,
-        uint256 executionOverhead_,
         address checkpointManager_,
         address fxRoot_,
         address owner_,
@@ -54,7 +52,6 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
             socket_,
             chainSlug_,
             initiateGasLimit_,
-            executionOverhead_,
             gasPriceOracle_,
             signatureVerifier_
         )
@@ -95,19 +92,6 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         );
         packetIdToRoot[packetId] = root;
         emit RootReceived(packetId, root);
-    }
-
-    /**
-     * @dev Calculates the minimum fees required for the switchboard to process a request.
-     * @param sourceGasPrice_ the gas price for the source chain transaction
-     * @return minFees minimum fees required in native token
-     */
-    function _getMinSwitchboardFees(
-        uint32,
-        uint256,
-        uint256 sourceGasPrice_
-    ) internal view override returns (uint256) {
-        return initiateGasLimit * sourceGasPrice_;
     }
 
     /**

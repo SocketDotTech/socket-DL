@@ -96,7 +96,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
      * @param chainSlug_ The identifier of the current chain in the system
      * @param arbitrumNativeFee_ The fee charged by the system for processing messages
      * @param initiateGasLimit_ The maximum gas limit that can be used for initiating a message
-     * @param executionOverhead_ The additional gas used for executing a message
      * @param inbox_ The address of the Arbitrum Inbox contract
      * @param owner_ The address of the owner of the NativeBridge contract
      * @param socket_ The address of the socket contract
@@ -108,7 +107,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         uint32 chainSlug_,
         uint256 arbitrumNativeFee_,
         uint256 initiateGasLimit_,
-        uint256 executionOverhead_,
         address inbox_,
         address owner_,
         address socket_,
@@ -122,7 +120,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
             socket_,
             chainSlug_,
             initiateGasLimit_,
-            executionOverhead_,
             gasPriceOracle_,
             signatureVerifier_
         )
@@ -188,26 +185,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
             packetId_,
             _getRoot(packetId_)
         );
-    }
-
-    /**
-    * @dev Calculates the minimum fees required for a switchboard transaction to be processed.
-    * @param sourceGasPrice_ The gas price on the source chain.
-    * @return The minimum fees required for the transaction.
-    * @notice This function is internal and is only meant to be called by the contract itself.
-    * @notice The fees are calculated as the product of the initiate gas limit and the source gas price,
-              plus the arbitrum native fee.
-    * @notice The arbitrum native fee is a constant value set by the contract's constructor, and it represents
-    the minimum amount of arbitrum native currency that should be paid for a switchboard transaction to be processed.
-    */
-    function _getMinSwitchboardFees(
-        uint32,
-        uint256,
-        uint256 sourceGasPrice_
-    ) internal view override returns (uint256) {
-        // TODO: check if dynamic fees can be divided into more constants
-        // arbitrum: check src contract
-        return initiateGasLimit * sourceGasPrice_ + arbitrumNativeFee;
     }
 
     /**

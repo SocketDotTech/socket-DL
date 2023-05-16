@@ -223,12 +223,6 @@ contract Setup is Test {
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
-        optimisticSwitchboard.setExecutionOverhead(
-            nonce++,
-            remoteChainSlug_,
-            _executionOverhead,
-            sig
-        );
         optimisticSwitchboard.grantRoleWithSlug(
             WATCHER_ROLE,
             remoteChainSlug_,
@@ -275,25 +269,6 @@ contract Setup is Test {
 
         bytes32 digest = keccak256(
             abi.encode(
-                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                address(fastSwitchboard),
-                cc_.chainSlug,
-                remoteChainSlug_,
-                nonce,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        fastSwitchboard.setExecutionOverhead(
-            nonce++,
-            remoteChainSlug_,
-            _executionOverhead,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(
                 ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
                 address(fastSwitchboard),
                 cc_.chainSlug,
@@ -302,7 +277,7 @@ contract Setup is Test {
                 _attestGasLimit
             )
         );
-        sig = _createSignature(digest, _socketOwnerPrivateKey);
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         fastSwitchboard.setAttestGasLimit(
             nonce++,

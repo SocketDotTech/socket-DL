@@ -41,25 +41,6 @@ contract OptimisticSwitchboardTest is Setup {
         );
         optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
-        bytes32 digest = keccak256(
-            abi.encode(
-                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                address(optimisticSwitchboard),
-                _a.chainSlug,
-                remoteChainSlug,
-                nonce,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        optimisticSwitchboard.setExecutionOverhead(
-            nonce++,
-            remoteChainSlug,
-            _executionOverhead,
-            sig
-        );
-
         optimisticSwitchboard.grantRoleWithSlug(
             WATCHER_ROLE,
             remoteChainSlug,

@@ -57,11 +57,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     uint256 public maxPacketSize;
 
     /**
-     * @dev The execution overhead for executing the receiver function.
-     */
-    uint256 public executionOverhead;
-
-    /**
      * @dev The gas limit to be used for packet initiation.
      */
     uint256 public initiateGasLimit;
@@ -91,12 +86,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev Event emitted when the switchboard is tripped.
      */
     event SwitchboardTripped(bool tripGlobalFuse);
-
-    /**
-     * @dev Event emitted when the execution overhead is set.
-     * @param executionOverhead The new execution overhead value.
-     */
-    event ExecutionOverheadSet(uint256 executionOverhead);
 
     /**
      * @dev Event emitted when the initiate gas limit is set.
@@ -193,21 +182,18 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param socket_ The address of the remote switchboard.
      * @param chainSlug_ The identifier of the chain the contract is deployed on.
      * @param initiateGasLimit_ The gas limit for executing transactions.
-     * @param executionOverhead_ The overhead for executing transactions.
      * @param gasPriceOracle_ The address of the gas price oracle.
      */
     constructor(
         address socket_,
         uint32 chainSlug_,
         uint256 initiateGasLimit_,
-        uint256 executionOverhead_,
         IGasPriceOracle gasPriceOracle_,
         ISignatureVerifier signatureVerifier_
     ) {
         socket = socket_;
         chainSlug = chainSlug_;
         initiateGasLimit = initiateGasLimit_;
-        executionOverhead = executionOverhead_;
         gasPriceOracle__ = gasPriceOracle_;
         signatureVerifier__ = signatureVerifier_;
     }
@@ -281,39 +267,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             fees[dstChainSlug_].verificationFees
         );
     }
-
-    /**
-     * @notice Calculates the minimum switchboard and verification fees required to relay a packet to the destination chain.
-     * @param dstChainSlug_ representing the destination chain identifier.
-     * @return switchboardFee_ representing the minimum switchboard fee required to relay the packet.
-     * @return verificationFee_ representing the minimum verification fee required to relay the packet.
-     */
-    function _calculateMinFees(
-        uint32 dstChainSlug_
-    )
-        internal
-        view
-        returns (uint256 switchboardFee_, uint256 verificationFee_)
-    {
-        (uint256 sourceGasPrice, uint256 dstRelativeGasPrice) = gasPriceOracle__
-            .getGasPrices(dstChainSlug_);
-
-        switchboardFee_ =
-            _getMinSwitchboardFees(
-                dstChainSlug_,
-                dstRelativeGasPrice,
-                sourceGasPrice
-            ) /
-            maxPacketSize;
-
-        verificationFee_ = executionOverhead * dstRelativeGasPrice;
-    }
-
-    function _getMinSwitchboardFees(
-        uint32 dstChainSlug_,
-        uint256 dstRelativeGasPrice_,
-        uint256 sourceGasPrice_
-    ) internal view virtual returns (uint256);
 
     function setFees(
         uint256 nonce_,
@@ -423,38 +376,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
 
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
-    }
-
-    /**
-     * @notice Allows updating the value of the gas execution overhead by authorized parties.
-     * @param nonce_ Nonce associated with the update, prevents replay attacks.
-     * @param executionOverhead_ New value for the execution overhead.
-     * @param signature_ Signature authorizing the update.
-     */
-    function setExecutionOverhead(
-        uint256 nonce_,
-        uint256 executionOverhead_,
-        bytes memory signature_
-    ) external {
-        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    nonce_,
-                    executionOverhead_
-                )
-            ),
-            signature_
-        );
-
-        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        executionOverhead = executionOverhead_;
-        emit ExecutionOverheadSet(executionOverhead_);
     }
 
     /**

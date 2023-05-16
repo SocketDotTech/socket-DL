@@ -92,7 +92,6 @@ contract PolygonL1SwitchboardTest is Setup {
         polygonL1Switchboard = new PolygonL1Switchboard(
             cc_.chainSlug,
             initiateGasLimit_,
-            executionOverhead_,
             checkpointManager_,
             fxRoot_,
             _socketOwner,
