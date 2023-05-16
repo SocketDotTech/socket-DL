@@ -118,16 +118,11 @@ const executeRoleTransactions = async (
   wallet: Wallet
 ) => {
   if (!roleTxns[chainId]) return;
-  let contracts = Object.keys(
-    roleTxns[chainId]!
-  );
+  let contracts = Object.keys(roleTxns[chainId]!);
   for (let i = 0; i < contracts.length; i++) {
     let contractSpecificTxns:
       | { to: string; role: string; slug: number; grantee: string }[]
-      | undefined =
-      roleTxns[chainId]![
-        contracts[i] as CORE_CONTRACTS
-      ];
+      | undefined = roleTxns[chainId]![contracts[i] as CORE_CONTRACTS];
     if (!contractSpecificTxns?.length) continue;
 
     let roles: string[] = [],
@@ -150,21 +145,11 @@ const executeRoleTransactions = async (
     });
 
     if (!roles.length) continue;
-    let data:string;
+    let data: string;
     if (newRoleStatus) {
-      data = getRoleTxnData(
-        roles,
-        slugs,
-        addresses,
-        "GRANT"
-      );
+      data = getRoleTxnData(roles, slugs, addresses, "GRANT");
     } else {
-      data = getRoleTxnData(
-        roles,
-        slugs,
-        addresses,
-        "REVOKE"
-      );
+      data = getRoleTxnData(roles, slugs, addresses, "REVOKE");
     }
     let tx = await wallet.sendTransaction({
       to: contractAddress,
@@ -174,7 +159,7 @@ const executeRoleTransactions = async (
       `chain: ${chainId}`,
       " contract:",
       contractAddress,
-      {newRoleStatus},
+      { newRoleStatus },
       "hash: ",
       tx.hash
     );
@@ -331,7 +316,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
         //   networkToChainSlug[chainId],
         //   "================="
         // );
-        let addresses:ChainSocketAddresses | undefined;
+        let addresses: ChainSocketAddresses | undefined;
         try {
           addresses = await getAddresses(chainId, mode);
         } catch (error) {

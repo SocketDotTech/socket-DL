@@ -15,7 +15,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
-export const deployedAddressPath = (mode:DeploymentMode) =>
+export const deployedAddressPath = (mode: DeploymentMode) =>
   deploymentsPath + `${mode}_addresses.json`;
 
 export const getRoleHash = (role: string) =>

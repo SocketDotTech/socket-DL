@@ -24,7 +24,9 @@ interface RequestObj {
   gasLimit: number | undefined;
 }
 
-const values :{[chainSlug in ChainSlug]?:{[siblingSlug in ChainSlug]?:string}} = {
+const values: {
+  [chainSlug in ChainSlug]?: { [siblingSlug in ChainSlug]?: string };
+} = {
   [ChainSlug.ARBITRUM]: {
     [ChainSlug.OPTIMISM]: parseUnits("0.003", "ether").toHexString(),
     [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
@@ -82,12 +84,11 @@ const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
   return [];
 };
 
-const axiosPost = async (url:string, data:object, config = {}) => {
+const axiosPost = async (url: string, data: object, config = {}) => {
   try {
     let response = await axios.post(url, data, config);
     // console.log("txStatus : ", response.status, response.data);
     return { success: true, ...response?.data };
-
   } catch (error) {
     //@ts-ignore
     console.log("status : ", error?.response?.status);
@@ -97,9 +98,9 @@ const axiosPost = async (url:string, data:object, config = {}) => {
       "data : ",
       data,
       "\n error : ",
-    //@ts-ignore
+      //@ts-ignore
       error?.message,
-    //@ts-ignore
+      //@ts-ignore
       error?.response.data
     );
     //@ts-ignore
