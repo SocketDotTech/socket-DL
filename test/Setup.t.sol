@@ -544,15 +544,15 @@ contract Setup is Test {
     }
 
     function _packMessageId(
-        uint32 srcChainSlug,
-        address siblingPlug,
-        uint256 nonce
+        uint32 srcChainSlug_,
+        address siblingPlug_,
+        uint256 messageCount_
     ) internal pure returns (bytes32) {
         return
             bytes32(
-                (uint256(srcChainSlug) << 224) |
-                    (uint256(uint160(siblingPlug)) << 64) |
-                    nonce
+                (uint256(srcChainSlug_) << 224) |
+                    (uint256(uint160(siblingPlug_)) << 64) |
+                    messageCount_
             );
     }
 
