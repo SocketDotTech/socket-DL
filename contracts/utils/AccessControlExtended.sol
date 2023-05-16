@@ -47,6 +47,7 @@ contract AccessControlExtended is AccessControl {
     /**
      * @dev Grants multiple roles to multiple addresses in batch.
      * @param roleNames_ The names of the roles to grant.
+     * @param slugs_ The slugs for chain specific roles. For roles which are not chain-specific, we can use slug = 0
      * @param grantees_ The addresses to be granted the roles.
      */
     function grantBatchRole(
@@ -69,6 +70,7 @@ contract AccessControlExtended is AccessControl {
     /**
      * @dev Revokes multiple roles from multiple addresses in batch.
      * @param roleNames_ The names of the roles to revoke.
+     * @param slugs_ The slugs for chain specific roles. For roles which are not chain-specific, we can use slug = 0
      * @param grantees_ The addresses to be revoked the roles.
      */
     function revokeBatchRole(

@@ -183,6 +183,8 @@ contract FastSwitchboard is SwitchboardBase {
         totalWatchers[srcChainSlug_]--;
     }
 
+    
+
     function isNonWatcherRole(bytes32 role_) public pure returns (bool) {
         if (
             role_ == TRIP_ROLE ||
@@ -196,6 +198,11 @@ contract FastSwitchboard is SwitchboardBase {
         return false;
     }
 
+
+    /**
+     * @dev Overriding this function from AccessControl to make sure owner can't grant Watcher Role directly, and should
+     * only use grantWatcherRole function instead. This is to make sure watcher count remains correct
+     */
     function grantRole(
         bytes32 role_,
         address grantee_
@@ -207,6 +214,10 @@ contract FastSwitchboard is SwitchboardBase {
         }
     }
 
+    /**
+     * @dev Overriding this function from AccessControlExtended to make sure owner can't grant Watcher Role directly, and should
+     * only use grantWatcherRole function instead. This is to make sure watcher count remains correct
+     */
     function grantRoleWithSlug(
         bytes32 roleName_,
         uint32 chainSlug_,
@@ -216,6 +227,10 @@ contract FastSwitchboard is SwitchboardBase {
         _grantRoleWithSlug(roleName_, chainSlug_, grantee_);
     }
 
+    /**
+     * @dev Overriding this function from AccessControl to make sure owner can't revoke Watcher Role directly, and should
+     * only use revokeWatcherRole function instead. This is to make sure watcher count remains correct
+     */
     function revokeRole(
         bytes32 role_,
         address grantee_
@@ -227,6 +242,10 @@ contract FastSwitchboard is SwitchboardBase {
         }
     }
 
+    /**
+     * @dev Overriding this function from AccessControlExtended to make sure owner can't revoke Watcher Role directly, and should
+     * only use revokeWatcherRole function instead. This is to make sure watcher count remains correct
+     */
     function revokeRoleWithSlug(
         bytes32 roleName_,
         uint32 chainSlug_,
@@ -236,6 +255,10 @@ contract FastSwitchboard is SwitchboardBase {
         _revokeRoleWithSlug(roleName_, chainSlug_, grantee_);
     }
 
+    /**
+     * @dev Overriding this function from AccessControlExtended to make sure owner can't grant Watcher Role directly, and should
+     * only use grantWatcherRole function instead. This is to make sure watcher count remains correct
+     */
     function grantBatchRole(
         bytes32[] calldata roleNames_,
         uint32[] calldata slugs_,
@@ -257,6 +280,10 @@ contract FastSwitchboard is SwitchboardBase {
         }
     }
 
+    /**
+     * @dev Overriding this function from AccessControlExtended to make sure owner can't revoke Watcher Role directly, and should
+     * only use revokeWatcherRole function instead. This is to make sure watcher count remains correct
+     */
     function revokeBatchRole(
         bytes32[] calldata roleNames_,
         uint32[] calldata slugs_,
