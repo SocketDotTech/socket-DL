@@ -77,7 +77,6 @@ async function deploySwitchboard(
       network,
       remoteChain,
       sourceConfig["Socket"],
-      sourceConfig["GasPriceOracle"],
       signer.address
     );
 

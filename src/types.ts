@@ -153,7 +153,6 @@ export interface ChainSocketAddresses {
   Counter: string;
   CapacitorFactory: string;
   ExecutionManager: string;
-  GasPriceOracle: string;
   Hasher: string;
   SignatureVerifier: string;
   Socket: string;
@@ -187,7 +186,6 @@ export enum CORE_CONTRACTS {
   Hasher = "Hasher",
   SignatureVerifier = "SignatureVerifier",
   TransmitManager = "TransmitManager",
-  GasPriceOracle = "GasPriceOracle",
   Socket = "Socket",
   FastSwitchboard = "FastSwitchboard",
   OptimisticSwitchboard = "OptimisticSwitchboard",
@@ -207,7 +205,6 @@ export const REQUIRED_ROLES = {
     ROLES.WITHDRAW_ROLE,
     ROLES.RESCUE_ROLE,
   ],
-  GasPriceOracle: [ROLES.GOVERNANCE_ROLE, ROLES.RESCUE_ROLE],
   Socket: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
   FastSwitchboard: [
     ROLES.TRIP_ROLE,

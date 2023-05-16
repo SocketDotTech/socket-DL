@@ -501,16 +501,6 @@ const main = async () => {
   let transmitterAddress = transmitterAddresses[mode];
   let watcherAddress = watcherAddresses[mode];
 
-  // // Grant rescue and governance role for GasPriceOracle
-  await checkAndUpdateRoles({
-    userAddress: ownerAddress,
-    filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
-    filterContracts: [CORE_CONTRACTS.GasPriceOracle],
-    filterChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
   // // Grant rescue,withdraw and governance role for Execution Manager to owner
   await checkAndUpdateRoles({
     userAddress: ownerAddress,

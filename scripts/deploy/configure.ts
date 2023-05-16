@@ -62,27 +62,6 @@ export const main = async () => {
       console.log(`Configuring for ${chain}`);
       let updatedDeploymentAddresses = addr;
 
-      const gasPriceOracle: Contract = (
-        await getInstance(
-          CORE_CONTRACTS.GasPriceOracle,
-          addr[CORE_CONTRACTS.GasPriceOracle]
-        )
-      ).connect(socketSigner);
-
-      const tmAddress: string = await gasPriceOracle.transmitManager__();
-      console.log(tmAddress);
-      if (
-        tmAddress.toLowerCase() !==
-        addr[CORE_CONTRACTS.TransmitManager].toLowerCase()
-      ) {
-        const transmitManagerAddr = addr[CORE_CONTRACTS.TransmitManager];
-        const tx = await gasPriceOracle
-          .connect(socketSigner)
-          .setTransmitManager(transmitManagerAddr);
-        console.log(`Setting transmit manager in oracle: ${tx.hash}`);
-        await tx.wait();
-      }
-
       for (let sibling of integrationList) {
         const config = integrations[sibling][IntegrationTypes.native];
         if (!config) continue;

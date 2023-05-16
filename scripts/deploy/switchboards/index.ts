@@ -16,7 +16,6 @@ export const getSwitchboardDeployData = (
   localChain,
   remoteChain,
   socketAddress,
-  oracleAddress,
   signerAddress
 ) => {
   if (integrationType === IntegrationTypes.fast) {
