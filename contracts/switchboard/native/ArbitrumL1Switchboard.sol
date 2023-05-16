@@ -7,8 +7,6 @@ import "openzeppelin-contracts/contracts/vendor/arbitrum/IOutbox.sol";
 import "../../utils/AccessControl.sol";
 import "./NativeSwitchboardBase.sol";
 
-import {ARBITRUM_NATIVE_FEE_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
-
 /**
  * @title ArbitrumL1Switchboard
  * @dev This contract is a switchboard contract for the Arbitrum chain that handles packet attestation and actions on the L1 to Arbitrum and

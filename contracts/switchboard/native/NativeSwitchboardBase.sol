@@ -11,7 +11,7 @@ import "../../libraries/FeesHelper.sol";
 import "../../utils/AccessControl.sol";
 
 import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
-import {TRIP_NATIVE_SIG_IDENTIFIER, L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+import {TRIP_NATIVE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
 @title Native Switchboard Base Contract
@@ -151,6 +151,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
      * @dev Constructor function for the CrossChainReceiver contract.
      * @param socket_ The address of the remote switchboard.
      * @param chainSlug_ The identifier of the chain the contract is deployed on.
+     * @param signatureVerifier_ signatureVerifier instance
      */
     constructor(
         address socket_,
