@@ -244,8 +244,8 @@ contract Setup is Test {
     ) internal {
         vm.startPrank(deployer_);
 
-        cc_.hasher__ = new Hasher();
-        cc_.sigVerifier__ = new SignatureVerifier();
+        cc_.hasher__ = new Hasher(deployer_);
+        cc_.sigVerifier__ = new SignatureVerifier(deployer_);
         cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
         cc_.executionManager__ = new ExecutionManager(
             deployer_,
