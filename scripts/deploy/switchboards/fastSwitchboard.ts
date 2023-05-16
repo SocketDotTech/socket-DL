@@ -4,7 +4,7 @@ import { CORE_CONTRACTS, chainKeyToSlug } from "../../../src";
 export const fastSwitchboard = (
   network: string,
   socketAddress: string,
-  oracleAddress: string,
+  sigVerifierAddress: string,
   signerAddress: string
 ) => {
   return {
@@ -12,9 +12,9 @@ export const fastSwitchboard = (
     args: [
       signerAddress,
       socketAddress,
-      oracleAddress,
       chainKeyToSlug[network],
       timeout[network],
+      sigVerifierAddress,
     ],
     path: "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
   };

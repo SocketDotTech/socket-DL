@@ -6,6 +6,7 @@ import {
   ChainSocketAddresses,
   DeploymentMode,
   networkToChainSlug,
+  version,
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -64,7 +65,7 @@ export const deploySocket = async (
     const executionManager: Contract = await getOrDeploy(
       CORE_CONTRACTS.ExecutionManager,
       "contracts/ExecutionManager.sol",
-      [socketOwner],
+      [socketOwner, chainSlug, signatureVerifier.address],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.ExecutionManager] =
@@ -89,6 +90,7 @@ export const deploySocket = async (
         executionManager.address,
         capacitorFactory.address,
         socketOwner,
+        version,
       ],
       deployUtils
     );
@@ -111,15 +113,13 @@ export const deploySocket = async (
     deployUtils.addresses["SocketBatcher"] = socketBatcher.address;
 
     // plug deployments
-    let counter: Contract;
-    const results = await getOrDeploy(
+    const counter: Contract = await getOrDeploy(
       "Counter",
       "contracts/examples/Counter.sol",
       [socket.address],
       deployUtils
     );
 
-    counter = results.contract;
     deployUtils.addresses["Counter"] = counter.address;
 
     allDeployed = true;
