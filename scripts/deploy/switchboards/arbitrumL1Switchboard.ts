@@ -1,26 +1,22 @@
 import { bridgeConsts } from "../../constants";
 import { chainKeyToSlug } from "../../../src";
 
-const initiateGasLimit = 300000;
-const arbitrumNativeFee = 300000;
-
 export const arbitrumL1Switchboard = (
   network: string,
   socketAddress: string,
-  oracleAddress: string,
+  sigVerifierAddress: string,
   signerAddress: string
 ) => {
   return {
     contractName: "ArbitrumL1Switchboard",
     args: [
       chainKeyToSlug[network],
-      arbitrumNativeFee,
       bridgeConsts.inbox[network],
       signerAddress,
       socketAddress,
-      oracleAddress,
       bridgeConsts.bridge[network],
       bridgeConsts.outbox[network],
+      sigVerifierAddress,
     ],
     path: "contracts/switchboard/native/ArbitrumL1Switchboard.sol",
   };

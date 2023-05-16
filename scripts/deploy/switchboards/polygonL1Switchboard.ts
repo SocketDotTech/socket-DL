@@ -1,12 +1,10 @@
 import { chainKeyToSlug } from "../../../src";
 import { bridgeConsts } from "../../constants";
 
-const initiateGasLimit = 300000;
-
 export const polygonL1Switchboard = (
   network: string,
   socketAddress: string,
-  oracleAddress: string,
+  sigVerifierAddress: string,
   signerAddress: string
 ) => {
   return {
@@ -17,7 +15,7 @@ export const polygonL1Switchboard = (
       bridgeConsts.fxRoot[network],
       signerAddress,
       socketAddress,
-      oracleAddress,
+      sigVerifierAddress,
     ],
     path: "contracts/switchboard/native/PolygonL1Switchboard.sol",
   };

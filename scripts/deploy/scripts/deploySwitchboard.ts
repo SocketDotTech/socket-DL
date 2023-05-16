@@ -5,6 +5,7 @@ import {
 } from "../utils";
 import { switchboards } from "../../constants";
 import {
+  CORE_CONTRACTS,
   ChainSocketAddresses,
   DeploymentMode,
   IntegrationTypes,
@@ -76,7 +77,8 @@ async function deploySwitchboard(
       integrationType,
       network,
       remoteChain,
-      sourceConfig["Socket"],
+      sourceConfig[CORE_CONTRACTS.Socket],
+      sourceConfig[CORE_CONTRACTS.SignatureVerifier],
       signer.address
     );
 
@@ -103,10 +105,10 @@ async function deploySwitchboard(
     );
 
     if (integrationType === IntegrationTypes.optimistic) {
-      sourceConfig["OptimisticSwitchboard"] = switchboard.address;
+      sourceConfig[CORE_CONTRACTS.OptimisticSwitchboard] = switchboard.address;
     }
     if (integrationType === IntegrationTypes.fast) {
-      sourceConfig["FastSwitchboard"] = switchboard.address;
+      sourceConfig[CORE_CONTRACTS.FastSwitchboard] = switchboard.address;
     }
   } catch (error) {
     console.log("Error in deploying switchboard", error);

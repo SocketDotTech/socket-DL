@@ -16,20 +16,21 @@ export const getSwitchboardDeployData = (
   localChain,
   remoteChain,
   socketAddress,
+  sigVerifierAddress,
   signerAddress
 ) => {
   if (integrationType === IntegrationTypes.fast) {
     return fastSwitchboard(
       localChain,
       socketAddress,
-      oracleAddress,
+      sigVerifierAddress,
       signerAddress
     );
   } else if (integrationType === IntegrationTypes.optimistic) {
     return optimisticSwitchboard(
       localChain,
       socketAddress,
-      oracleAddress,
+      sigVerifierAddress,
       signerAddress
     );
   } else if (integrationType === IntegrationTypes.native) {
@@ -39,35 +40,35 @@ export const getSwitchboardDeployData = (
       return arbitrumL1Switchboard(
         localChain,
         socketAddress,
-        oracleAddress,
+        sigVerifierAddress,
         signerAddress
       );
     } else if (switchboardType === NativeSwitchboard.ARBITRUM_L2) {
       return arbitrumL2Switchboard(
         localChain,
         socketAddress,
-        oracleAddress,
+        sigVerifierAddress,
         signerAddress
       );
     } else if (switchboardType === NativeSwitchboard.OPTIMISM) {
       return optimismSwitchboard(
         localChain,
         socketAddress,
-        oracleAddress,
+        sigVerifierAddress,
         signerAddress
       );
     } else if (switchboardType === NativeSwitchboard.POLYGON_L1) {
       return polygonL1Switchboard(
         localChain,
         socketAddress,
-        oracleAddress,
+        sigVerifierAddress,
         signerAddress
       );
     } else if (switchboardType === NativeSwitchboard.POLYGON_L2) {
       return polygonL2Switchboard(
         localChain,
         socketAddress,
-        oracleAddress,
+        sigVerifierAddress,
         signerAddress
       );
     } else {
