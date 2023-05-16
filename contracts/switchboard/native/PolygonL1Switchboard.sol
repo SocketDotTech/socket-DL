@@ -35,7 +35,6 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
      * @param fxRoot_ is the address of the root contract.
      * @param owner_ is the address of the contract owner.
      * @param socket_ is the address of the Socket contract.
-     * @param gasPriceOracle_ is the address of the gas price oracle contract.
      */
     constructor(
         uint32 chainSlug_,
@@ -44,7 +43,6 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         address fxRoot_,
         address owner_,
         address socket_,
-        IGasPriceOracle gasPriceOracle_,
         ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
@@ -52,7 +50,6 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
             socket_,
             chainSlug_,
             initiateGasLimit_,
-            gasPriceOracle_,
             signatureVerifier_
         )
         FxBaseRootTunnel(checkpointManager_, fxRoot_)

@@ -42,7 +42,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
      * @param fxChild_ The address of the fxChildTunnel contract.
      * @param owner_ The owner of the contract.
      * @param socket_ The socket address.
-     * @param gasPriceOracle_ The gas price oracle address.
      */
     constructor(
         uint32 chainSlug_,
@@ -50,7 +49,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         address fxChild_,
         address owner_,
         address socket_,
-        IGasPriceOracle gasPriceOracle_,
         ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
@@ -58,7 +56,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
             socket_,
             chainSlug_,
             initiateGasLimit_,
-            gasPriceOracle_,
             signatureVerifier_
         )
         FxBaseChildTunnel(fxChild_)

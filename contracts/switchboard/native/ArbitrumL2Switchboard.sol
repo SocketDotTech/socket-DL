@@ -35,14 +35,12 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
      * @param initiateGasLimit_ A uint256 representing the amount of gas that will be needed to initiate a transaction on the L2 network.
      * @param owner_ The address that will have the default admin role in the AccessControl parent contract.
      * @param socket_ The address of the Ethereum mainnet Native Meta-Transaction Executor contract.
-     * @param gasPriceOracle_ An IGasPriceOracle contract used to calculate gas prices for transactions.
      */
     constructor(
         uint32 chainSlug_,
         uint256 initiateGasLimit_,
         address owner_,
         address socket_,
-        IGasPriceOracle gasPriceOracle_,
         ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
@@ -50,7 +48,6 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
             socket_,
             chainSlug_,
             initiateGasLimit_,
-            gasPriceOracle_,
             signatureVerifier_
         )
     {}

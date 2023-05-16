@@ -37,7 +37,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
      * @param initiateGasLimit_ The gas limit to be used when initiating messages to the remote switchboard contract.
      * @param owner_ The address of the owner of the contract who has access to the administrative functions.
      * @param socket_ The address of the socket contract that will be used to communicate with the chain.
-     * @param gasPriceOracle_ The address of the gas price oracle contract that will be used to determine the gas price.
      * @param crossDomainMessenger_ The address of the CrossDomainMessenger contract that will be used to send and receive messages between L1 and L2 networks in the Optimism solution.
      */
     constructor(
@@ -46,7 +45,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         uint256 initiateGasLimit_,
         address owner_,
         address socket_,
-        IGasPriceOracle gasPriceOracle_,
         address crossDomainMessenger_,
         ISignatureVerifier signatureVerifier_
     )
@@ -55,7 +53,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
             socket_,
             chainSlug_,
             initiateGasLimit_,
-            gasPriceOracle_,
             signatureVerifier_
         )
     {

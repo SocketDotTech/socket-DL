@@ -28,7 +28,6 @@ contract OptimisticSwitchboardTest is Setup {
         optimisticSwitchboard = new OptimisticSwitchboard(
             _socketOwner,
             address(uint160(c++)),
-            address(uint160(c++)),
             _a.chainSlug,
             1,
             _a.sigVerifier__

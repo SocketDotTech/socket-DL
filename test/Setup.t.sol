@@ -11,7 +11,6 @@ import "../contracts/switchboard/default-switchboards/FastSwitchboard.sol";
 import "../contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol";
 
 import "../contracts/TransmitManager.sol";
-import "../contracts/GasPriceOracle.sol";
 import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
 import "../contracts/utils/AccessRoles.sol";
@@ -51,7 +50,6 @@ contract Setup is Test {
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
-    uint256 gasPriceOracleNonce;
 
     struct SocketConfigContext {
         uint32 siblingChainSlug;
@@ -70,7 +68,6 @@ contract Setup is Test {
         SignatureVerifier sigVerifier__;
         CapacitorFactory capacitorFactory__;
         TransmitManager transmitManager__;
-        GasPriceOracle gasPriceOracle__;
         ExecutionManager executionManager__;
         SocketConfigContext[] configs__;
     }
@@ -190,7 +187,6 @@ contract Setup is Test {
         OptimisticSwitchboard optimisticSwitchboard = new OptimisticSwitchboard(
             _socketOwner,
             address(cc_.socket__),
-            address(cc_.gasPriceOracle__),
             cc_.chainSlug,
             _timeoutInSeconds,
             cc_.sigVerifier__
@@ -237,7 +233,6 @@ contract Setup is Test {
         FastSwitchboard fastSwitchboard = new FastSwitchboard(
             _socketOwner,
             address(cc_.socket__),
-            address(cc_.gasPriceOracle__),
             cc_.chainSlug,
             _timeoutInSeconds,
             cc_.sigVerifier__
@@ -270,7 +265,6 @@ contract Setup is Test {
         cc_.hasher__ = new Hasher();
         cc_.sigVerifier__ = new SignatureVerifier();
         cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
-        cc_.gasPriceOracle__ = new GasPriceOracle(deployer_, cc_.chainSlug);
         cc_.executionManager__ = new ExecutionManager(
             deployer_,
             cc_.chainSlug,
@@ -284,8 +278,6 @@ contract Setup is Test {
             deployer_
         );
 
-        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
-
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
             deployer_,
@@ -298,8 +290,6 @@ contract Setup is Test {
             cc_.chainSlug,
             deployer_
         );
-
-        cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
 
         cc_.socket__ = new Socket(
             uint32(cc_.chainSlug),

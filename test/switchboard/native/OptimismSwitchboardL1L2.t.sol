@@ -19,7 +19,6 @@ contract OptimismSwitchboardL1L2Test is Setup {
         0x2D468C4d7e355a4ADe099802A61Ba536220fb3Cb;
     address crossDomainManagerAddress_ =
         0x5086d1eEF304eb5284A0f6720f79403b4e9bE294;
-    IGasPriceOracle gasPriceOracle_;
 
     OptimismSwitchboard optimismSwitchboard;
     ICapacitor singleCapacitor;
@@ -91,7 +90,6 @@ contract OptimismSwitchboardL1L2Test is Setup {
             initiateGasLimit_,
             _socketOwner,
             address(cc_.socket__),
-            cc_.gasPriceOracle__,
             crossDomainManagerAddress_,
             cc_.sigVerifier__
         );

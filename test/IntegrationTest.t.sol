@@ -35,40 +35,6 @@ contract HappyTest is Setup {
         _deployPlugContracts();
 
         _configPlugContracts(index);
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                address(_a.gasPriceOracle__),
-                _a.chainSlug,
-                gasPriceOracleNonce,
-                sourceGasPrice
-            )
-        );
-        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
-
-        _a.gasPriceOracle__.setSourceGasPrice(
-            gasPriceOracleNonce++,
-            sourceGasPrice,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(
-                address(_a.gasPriceOracle__),
-                _a.chainSlug,
-                _b.chainSlug,
-                gasPriceOracleNonce,
-                relativeGasPrice
-            )
-        );
-        sig = _createSignature(digest, _transmitterPrivateKey);
-
-        _a.gasPriceOracle__.setRelativeGasPrice(
-            _b.chainSlug,
-            gasPriceOracleNonce++,
-            relativeGasPrice,
-            sig
-        );
     }
 
     function testRemoteAddFromAtoB1() external {

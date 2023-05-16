@@ -5,7 +5,6 @@ import "../../Setup.t.sol";
 import "forge-std/Test.sol";
 import "../../../contracts/switchboard/native/ArbitrumL2Switchboard.sol";
 import "../../../contracts/TransmitManager.sol";
-import "../../../contracts/GasPriceOracle.sol";
 import "../../../contracts/ExecutionManager.sol";
 import "../../../contracts/CapacitorFactory.sol";
 import "../../../contracts/interfaces/ICapacitor.sol";
@@ -19,7 +18,6 @@ contract ArbitrumL2SwitchboardTest is Setup {
     uint256 executionOverhead_ = 100;
     address remoteNativeSwitchboard_ =
         0x3f0121d91B5c04B716Ea960790a89b173da7929c;
-    IGasPriceOracle gasPriceOracle_;
 
     ArbitrumL2Switchboard arbitrumL2Switchboard;
     ICapacitor singleCapacitor;
@@ -97,7 +95,6 @@ contract ArbitrumL2SwitchboardTest is Setup {
             initiateGasLimit_,
             _socketOwner,
             address(cc_.socket__),
-            cc_.gasPriceOracle__,
             cc_.sigVerifier__
         );
 

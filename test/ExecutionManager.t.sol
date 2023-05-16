@@ -4,8 +4,6 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 
 contract ExecutionManagerTest is Setup {
-    GasPriceOracle internal gasPriceOracle;
-
     address public constant NATIVE_TOKEN_ADDRESS =
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
@@ -52,8 +50,6 @@ contract ExecutionManagerTest is Setup {
 
         _executor = vm.addr(executorPrivateKey);
 
-        gasPriceOracle = new GasPriceOracle(owner, chainSlug);
-
         executionManager = new ExecutionManager(
             owner,
             chainSlug,
@@ -74,8 +70,6 @@ contract ExecutionManagerTest is Setup {
         );
 
         vm.startPrank(owner);
-        gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
-        gasPriceOracle.setTransmitManager(transmitManager);
 
         executionManager.grantRole(EXECUTOR_ROLE, _executor);
         executionManager.grantRole(RESCUE_ROLE, owner);
@@ -127,7 +121,6 @@ contract ExecutionManagerTest is Setup {
             feesUpdateSignature
         );
 
-        gasPriceOracle.setTransmitManager(transmitManager);
         vm.stopPrank();
 
         assertTrue(
@@ -143,40 +136,6 @@ contract ExecutionManagerTest is Setup {
                 destChainSlug,
                 transmitter
             )
-        );
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                address(gasPriceOracle),
-                chainSlug,
-                gasPriceOracleNonce,
-                sourceGasPrice
-            )
-        );
-        bytes memory sig = _createSignature(digest, transmitterPrivateKey);
-
-        gasPriceOracle.setSourceGasPrice(
-            gasPriceOracleNonce++,
-            sourceGasPrice,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(
-                address(gasPriceOracle),
-                chainSlug,
-                destChainSlug,
-                gasPriceOracleNonce,
-                relativeGasPrice
-            )
-        );
-        sig = _createSignature(digest, transmitterPrivateKey);
-
-        gasPriceOracle.setRelativeGasPrice(
-            destChainSlug,
-            gasPriceOracleNonce++,
-            relativeGasPrice,
-            sig
         );
     }
 
@@ -195,10 +154,7 @@ contract ExecutionManagerTest is Setup {
         uint256 minFees = executionManager.getMinFees(destChainSlug);
 
         //compute expected Data
-        uint256 dstRelativeGasPrice = gasPriceOracle.relativeGasPrice(
-            destChainSlug
-        );
-        uint256 expectedMinFees = msgGasLimit * dstRelativeGasPrice;
+        uint256 expectedMinFees = msgGasLimit * relativeGasPrice;
 
         //assert actual and expected data
         assertEq(minFees, expectedMinFees);

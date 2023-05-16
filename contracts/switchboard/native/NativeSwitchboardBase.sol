@@ -2,7 +2,6 @@
 pragma solidity 0.8.7;
 
 import "../../interfaces/ISwitchboard.sol";
-import "../../interfaces/IGasPriceOracle.sol";
 import "../../interfaces/ICapacitor.sol";
 import "../../interfaces/ISignatureVerifier.sol";
 
@@ -30,11 +29,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     ISignatureVerifier public signatureVerifier__;
-
-    /**
-     * @dev Address of the gas price oracle.
-     */
-    IGasPriceOracle public gasPriceOracle__;
 
     /**
      * @dev Flag that indicates if the global fuse is tripped, meaning no more packets can be sent.
@@ -98,12 +92,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param capacitor The new capacitor address.
      */
     event CapacitorSet(address capacitor);
-
-    /**
-     * @dev Event emitted when the gas price oracle address is set.
-     * @param gasPriceOracle The new gas price oracle address.
-     */
-    event GasPriceOracleSet(address gasPriceOracle);
 
     /**
      * @dev Event emitted when a native confirmation is initiated.
@@ -182,19 +170,16 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param socket_ The address of the remote switchboard.
      * @param chainSlug_ The identifier of the chain the contract is deployed on.
      * @param initiateGasLimit_ The gas limit for executing transactions.
-     * @param gasPriceOracle_ The address of the gas price oracle.
      */
     constructor(
         address socket_,
         uint32 chainSlug_,
         uint256 initiateGasLimit_,
-        IGasPriceOracle gasPriceOracle_,
         ISignatureVerifier signatureVerifier_
     ) {
         socket = socket_;
         chainSlug = chainSlug_;
         initiateGasLimit = initiateGasLimit_;
-        gasPriceOracle__ = gasPriceOracle_;
         signatureVerifier__ = signatureVerifier_;
     }
 
@@ -377,18 +362,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
 
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
-    }
-
-    /**
-     * @notice Sets the address of the gas price oracle contract. 
-               This function can only be called by an address with the GOVERNANCE_ROLE role.
-     * @param gasPriceOracle_ new gasPriceOracle_
-     */
-    function setGasPriceOracle(
-        address gasPriceOracle_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
-        emit GasPriceOracleSet(gasPriceOracle_);
     }
 
     /**

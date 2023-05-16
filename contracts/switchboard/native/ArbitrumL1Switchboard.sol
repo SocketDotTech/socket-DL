@@ -99,7 +99,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
      * @param inbox_ The address of the Arbitrum Inbox contract
      * @param owner_ The address of the owner of the NativeBridge contract
      * @param socket_ The address of the socket contract
-     * @param gasPriceOracle_ The address of the gas price oracle contract
      * @param bridge_ The address of the bridge contract
      * @param outbox_ The address of the Arbitrum Outbox contract
      */
@@ -110,7 +109,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         address inbox_,
         address owner_,
         address socket_,
-        IGasPriceOracle gasPriceOracle_,
         address bridge_,
         address outbox_,
         ISignatureVerifier signatureVerifier_
@@ -120,7 +118,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
             socket_,
             chainSlug_,
             initiateGasLimit_,
-            gasPriceOracle_,
             signatureVerifier_
         )
     {

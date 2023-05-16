@@ -2,7 +2,6 @@
 pragma solidity 0.8.7;
 
 import "../../interfaces/ISwitchboard.sol";
-import "../../interfaces/IGasPriceOracle.sol";
 import "../../interfaces/ISignatureVerifier.sol";
 import "../../utils/AccessControlExtended.sol";
 
@@ -14,7 +13,6 @@ import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UNTRIP_ROLE, WAT
 import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
-    IGasPriceOracle public gasPriceOracle__;
     ISignatureVerifier public signatureVerifier__;
 
     bool public tripGlobalFuse;
@@ -56,11 +54,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param executionOverhead New execution overhead
      */
     event ExecutionOverheadSet(uint32 dstChainSlug, uint256 executionOverhead);
-    /**
-     * @dev Emitted when gas price oracle is set
-     * @param gasPriceOracle New gas price oracle address
-     */
-    event GasPriceOracleSet(address gasPriceOracle);
+
     /**
      * @dev Emitted when a capacitor is registered
      * @param siblingChainSlug Chain slug of the sibling chain
@@ -86,19 +80,16 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     /**
      * @dev Constructor of SwitchboardBase
-     * @param gasPriceOracle_ Address of the gas price oracle
      * @param socket_ Address of the socket contract
      * @param chainSlug_ Chain slug of the contract
      * @param timeoutInSeconds_ Timeout duration of the transactions
      */
     constructor(
-        address gasPriceOracle_,
         address socket_,
         uint32 chainSlug_,
         uint256 timeoutInSeconds_,
         ISignatureVerifier signatureVerifier_
     ) {
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
         socket = socket_;
         chainSlug = chainSlug_;
         timeoutInSeconds = timeoutInSeconds_;
@@ -290,17 +281,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         fees[dstChainSlug_] = feesObject;
 
         emit SwitchboardFeesSet(dstChainSlug_, feesObject);
-    }
-
-    /**
-     * @notice updates gasPriceOracle_ address
-     * @param gasPriceOracle_ new gasPriceOracle_
-     */
-    function setGasPriceOracle(
-        address gasPriceOracle_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
-        emit GasPriceOracleSet(gasPriceOracle_);
     }
 
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {

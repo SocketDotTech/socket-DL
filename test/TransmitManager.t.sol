@@ -4,8 +4,6 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 
 contract TransmitManagerTest is Setup {
-    GasPriceOracle internal gasPriceOracle;
-
     address public constant NATIVE_TOKEN_ADDRESS =
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
@@ -51,7 +49,6 @@ contract TransmitManagerTest is Setup {
         feesPayer = vm.addr(feesPayerPrivateKey);
         feesWithdrawer = vm.addr(feesWithdrawerPrivateKey);
 
-        gasPriceOracle = new GasPriceOracle(owner, chainSlug);
         signatureVerifier = new SignatureVerifier();
         transmitManager = new TransmitManager(
             signatureVerifier,
@@ -60,8 +57,6 @@ contract TransmitManagerTest is Setup {
         );
 
         vm.startPrank(owner);
-        gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
-        gasPriceOracle.setTransmitManager(transmitManager);
         transmitManager.grantRoleWithSlug(
             TRANSMITTER_ROLE,
             chainSlug,
@@ -107,42 +102,6 @@ contract TransmitManagerTest is Setup {
             uint32(destChainSlug),
             _transmissionFees,
             feesUpdateSignature
-        );
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                address(gasPriceOracle),
-                chainSlug,
-                gasPriceOracleNonce,
-                sourceGasPrice
-            )
-        );
-
-        bytes memory sig = _createSignature(digest, transmitterPrivateKey);
-
-        gasPriceOracle.setSourceGasPrice(
-            gasPriceOracleNonce++,
-            sourceGasPrice,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(
-                address(gasPriceOracle),
-                chainSlug,
-                destChainSlug,
-                gasPriceOracleNonce,
-                relativeGasPrice
-            )
-        );
-
-        sig = _createSignature(digest, transmitterPrivateKey);
-
-        gasPriceOracle.setRelativeGasPrice(
-            destChainSlug,
-            gasPriceOracleNonce++,
-            relativeGasPrice,
-            sig
         );
     }
 

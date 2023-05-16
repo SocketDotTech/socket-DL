@@ -2,7 +2,6 @@
 pragma solidity 0.8.7;
 
 import "./interfaces/IExecutionManager.sol";
-import "./interfaces/IGasPriceOracle.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
