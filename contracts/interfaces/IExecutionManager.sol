@@ -27,10 +27,14 @@ interface IExecutionManager {
 
     /**
      * @notice Returns the minimum fees required for executing a transaction on the external chain
-     * @param dstSlug The destination slug
+     * @param msgGasLimit_ msgGasLimit_
+     * @param siblingChainSlug_ The destination slug
      * @return The minimum fees required for executing the transaction
      */
-    function getMinFees(uint32 dstSlug) external view returns (uint256);
+    function getMinFees(
+        uint256 msgGasLimit_,
+        uint32 siblingChainSlug_
+    ) external view returns (uint256);
 
     /**
      * @notice Updates the execution fees for an executor and message ID
