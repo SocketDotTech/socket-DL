@@ -1,7 +1,7 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import { attestGasLimit, executionOverhead } from "../constants";
+import { attestGasLimit } from "../constants";
 import {
   ChainAddresses,
   ChainSocketAddresses,
@@ -11,7 +11,6 @@ import {
 } from "../../src/types";
 import { getAddresses } from "../deploy/utils";
 import { setAttestGasLimit } from "./set-attest-gaslimit";
-import { setExecutionOverhead } from "./set-execution-overhead";
 import { mode } from "../deploy/config";
 
 export const setLimitsForAChainSlug = async (
@@ -72,42 +71,6 @@ export const setLimitsForAChainSlug = async (
 
           console.log(
             `FAST-Switchboard Successfully updated attestGasLimit: ${attestGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
-          );
-
-          //lookup for executionOverhead for the chainSlugCode
-          const executionOverheadValue = executionOverhead[chainSlugCode];
-
-          await setExecutionOverhead(
-            chainId,
-            dstChainId,
-            switchboardAddress,
-            executionOverheadValue
-          );
-
-          console.log(
-            `FAST-Switchboard Successfully updated executionOverhead: ${executionOverheadValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
-          );
-        }
-
-        if (chainAddresses.OPTIMISTIC) {
-          const config: Configs = chainAddresses.OPTIMISTIC as Configs;
-          const switchboardAddress = config.switchboard as string;
-          console.log(
-            `Optimistic Switchboard address is: ${config.switchboard}`
-          );
-
-          //lookup for executionOverhead for the chainSlugCode
-          const executionOverheadValue = executionOverhead[chainSlugCode];
-
-          await setExecutionOverhead(
-            chainId,
-            dstChainId,
-            switchboardAddress,
-            executionOverheadValue
-          );
-
-          console.log(
-            `OPTIMISTIC-Switchboard Successfully updated executionOverhead: ${executionOverheadValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
           );
         }
       }

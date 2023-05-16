@@ -96,6 +96,7 @@ contract TransmitManagerTest is Setup {
         bytes32 feesUpdateDigest = keccak256(
             abi.encode(
                 FEES_UPDATE_SIG_IDENTIFIER,
+                address(transmitManager),
                 chainSlug,
                 destChainSlug,
                 ownerNonce,

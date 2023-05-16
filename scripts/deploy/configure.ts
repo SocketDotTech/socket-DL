@@ -21,7 +21,6 @@ import {
 } from "../../src";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { setAttestGasLimit } from "../limits-updater/set-attest-gaslimit";
-import { setExecutionOverhead } from "../limits-updater/set-execution-overhead";
 import {
   capacitorType,
   chains,
@@ -137,22 +136,6 @@ export const main = async () => {
           chain,
           siblingSlugs,
           addr["FastSwitchboard"],
-          addr["SocketBatcher"],
-          socketSigner
-        );
-
-        await setExecutionOverhead(
-          chain,
-          siblingSlugs,
-          addr["FastSwitchboard"],
-          addr["SocketBatcher"],
-          socketSigner
-        );
-
-        await setExecutionOverhead(
-          chain,
-          siblingSlugs,
-          addr["OptimisticSwitchboard"],
           addr["SocketBatcher"],
           socketSigner
         );

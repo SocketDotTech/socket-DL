@@ -151,6 +151,7 @@ contract Setup is Test {
         bytes32 feesUpdateDigest = keccak256(
             abi.encode(
                 FEES_UPDATE_SIG_IDENTIFIER,
+                address(cc_.transmitManager__),
                 cc_.chainSlug,
                 remoteChainSlug_,
                 cc_.transmitterNonce,

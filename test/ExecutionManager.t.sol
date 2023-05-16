@@ -108,6 +108,7 @@ contract ExecutionManagerTest is Setup {
         bytes32 feesUpdateDigest = keccak256(
             abi.encode(
                 FEES_UPDATE_SIG_IDENTIFIER,
+                address(executionManager),
                 chainSlug,
                 destChainSlug,
                 executorNonce,

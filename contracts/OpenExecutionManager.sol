@@ -106,6 +106,7 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
             keccak256(
                 abi.encode(
                     FEES_UPDATE_SIG_IDENTIFIER,
+                    address(this),
                     chainSlug,
                     dstChainSlug_,
                     nonce_,
