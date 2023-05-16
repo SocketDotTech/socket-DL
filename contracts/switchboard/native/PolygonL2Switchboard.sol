@@ -12,11 +12,6 @@ import "./NativeSwitchboardBase.sol";
  */
 contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     /**
-     * @dev The confirmGasLimit for the contract.
-     */
-    uint256 public confirmGasLimit;
-
-    /**
      * @dev Event emitted when the fxChildTunnel address is updated.
      * @param oldFxChild The old fxChildTunnel address.
      * @param newFxChild The new fxChildTunnel address.
@@ -31,12 +26,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     event FxRootTunnelSet(address fxRootTunnel, address newFxRootTunnel);
 
     /**
-     * @dev Event emitted when the confirmGasLimit is updated.
-     * @param confirmGasLimit The new confirmGasLimit value.
-     */
-    event UpdatedConfirmGasLimit(uint256 confirmGasLimit);
-
-    /**
      * @dev Modifier that restricts access to the onlyRemoteSwitchboard.
      * This modifier is inherited from the NativeSwitchboardBase contract.
      */
@@ -49,7 +38,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     /**
      * @dev Constructor for the PolygonL2Switchboard contract.
      * @param chainSlug_ The chainSlug for the contract.
-     * @param confirmGasLimit_ The confirmGasLimit for the contract.
      * @param initiateGasLimit_ The initiateGasLimit for the contract.
      * @param fxChild_ The address of the fxChildTunnel contract.
      * @param owner_ The owner of the contract.
@@ -58,7 +46,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
      */
     constructor(
         uint32 chainSlug_,
-        uint256 confirmGasLimit_,
         uint256 initiateGasLimit_,
         address fxChild_,
         address owner_,
@@ -75,9 +62,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
             signatureVerifier_
         )
         FxBaseChildTunnel(fxChild_)
-    {
-        confirmGasLimit = confirmGasLimit_;
-    }
+    {}
 
     /**
      * @dev Sends a message to the root chain to initiate a native confirmation with the given packet ID.
@@ -119,44 +104,6 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         );
         packetIdToRoot[packetId] = root;
         emit RootReceived(packetId, root);
-    }
-
-    /**
-     * @dev Updates the confirmGasLimit parameter of the contract.
-     *    This function can only be called by an address with GAS_LIMIT_UPDATER_ROLE.
-     *    The function checks that the signature is valid and recovers the signer's address from the signature.
-     *    It also checks that the nonce in the signature matches the nonce stored for the signer.
-     *   throws if the caller does not have GAS_LIMIT_UPDATER_ROLE.
-     *   throws {InvalidNonce} If the nonce provided in the signature does not match the nonce stored for the signer.
-     * @param nonce_ The nonce provided in the signature.
-     * @param confirmGasLimit_ The new value of the confirmGasLimit parameter.
-     * @param signature_ The signature used to authenticate the transaction.
-     */
-    function updateConfirmGasLimit(
-        uint256 nonce_,
-        uint256 confirmGasLimit_,
-        bytes memory signature_
-    ) external {
-        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    nonce_,
-                    confirmGasLimit_
-                )
-            ),
-            signature_
-        );
-
-        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
-
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        confirmGasLimit = confirmGasLimit_;
-        emit UpdatedConfirmGasLimit(confirmGasLimit_);
     }
 
     /**

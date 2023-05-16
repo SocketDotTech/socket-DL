@@ -12,12 +12,10 @@ import "./NativeSwitchboardBase.sol";
  */
 contract OptimismSwitchboard is NativeSwitchboardBase {
     uint256 public receiveGasLimit;
-    uint256 public confirmGasLimit;
 
     ICrossDomainMessenger public immutable crossDomainMessenger__;
 
     event UpdatedReceiveGasLimit(uint256 receiveGasLimit);
-    event UpdatedConfirmGasLimit(uint256 confirmGasLimit);
 
     /**
      * @dev Modifier that checks if the sender of the function is the CrossDomainMessenger contract or the remoteNativeSwitchboard address.
@@ -36,7 +34,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
      * @dev Constructor function that initializes the OptimismSwitchboard contract with the required parameters.
      * @param chainSlug_ The unique identifier for the chain on which this contract is deployed.
      * @param receiveGasLimit_ The gas limit to be used when receiving messages from the remote switchboard contract.
-     * @param confirmGasLimit_ The gas limit to be used when confirming messages from the remote switchboard contract.
      * @param initiateGasLimit_ The gas limit to be used when initiating messages to the remote switchboard contract.
      * @param owner_ The address of the owner of the contract who has access to the administrative functions.
      * @param socket_ The address of the socket contract that will be used to communicate with the chain.
@@ -46,7 +43,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
     constructor(
         uint32 chainSlug_,
         uint256 receiveGasLimit_,
-        uint256 confirmGasLimit_,
         uint256 initiateGasLimit_,
         address owner_,
         address socket_,
@@ -64,7 +60,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         )
     {
         receiveGasLimit = receiveGasLimit_;
-        confirmGasLimit = confirmGasLimit_;
         crossDomainMessenger__ = ICrossDomainMessenger(crossDomainMessenger_);
     }
 
@@ -96,41 +91,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
             packetId_,
             _getRoot(packetId_)
         );
-    }
-
-    /**
-     * @dev Updates the confirmation gas limit for native transactions initiated by the switchboard.
-     *       This function can only be called by an address with GAS_LIMIT_UPDATER_ROLE role.
-     *       The nonce_ argument is used to prevent replay attacks.
-     *       The signature_ argument is used to authenticate the request.
-     * @param nonce_ The nonce to be used in the signature verification.
-     * @param confirmGasLimit_ The new confirmation gas limit to be set.
-     * @param signature_ The signature used to authenticate the request.
-     */
-    function updateConfirmGasLimit(
-        uint256 nonce_,
-        uint256 confirmGasLimit_,
-        bytes memory signature_
-    ) external {
-        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    nonce_,
-                    confirmGasLimit_
-                )
-            ),
-            signature_
-        );
-
-        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        confirmGasLimit = confirmGasLimit_;
-        emit UpdatedConfirmGasLimit(confirmGasLimit_);
     }
 
     /**

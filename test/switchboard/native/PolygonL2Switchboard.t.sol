@@ -83,7 +83,6 @@ contract PolygonL2SwitchboardTest is Setup {
     ) internal returns (SocketConfigContext memory scc_) {
         polygonL2Switchboard = new PolygonL2Switchboard(
             cc_.chainSlug,
-            confirmGasLimit_,
             initiateGasLimit_,
             fxChild_,
             _socketOwner,

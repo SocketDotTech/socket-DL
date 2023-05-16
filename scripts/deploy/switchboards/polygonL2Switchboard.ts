@@ -14,7 +14,6 @@ export const polygonL2Switchboard = (
     contractName: "PolygonL2Switchboard",
     args: [
       chainKeyToSlug[network],
-      confirmGasLimit,
       initiateGasLimit,
       bridgeConsts.fxChild[network],
       signerAddress,

@@ -15,9 +15,7 @@ import "./NativeSwitchboardBase.sol";
      other Layer 1 networks.
 */
 contract ArbitrumL2Switchboard is NativeSwitchboardBase {
-    uint256 public confirmGasLimit;
     IArbSys public immutable arbsys__ = IArbSys(address(100));
-    event UpdatedConfirmGasLimit(uint256 confirmGasLimit);
 
     /**
      * @dev Modifier that checks if the sender of the transaction is the remote native switchboard on the L1 network.
@@ -32,9 +30,8 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
     }
 
     /**
-     * @dev Constructor function that sets initial values for the confirmGasLimit, arbsys__, and the NativeSwitchboardBase parent contract.
+     * @dev Constructor function that sets initial values for the arbsys__, and the NativeSwitchboardBase parent contract.
      * @param chainSlug_ A uint32 representing the ID of the L2 network.
-     * @param confirmGasLimit_ A uint256 representing the amount of gas that will be needed to confirm the execution of a transaction on the L2 network.
      * @param initiateGasLimit_ A uint256 representing the amount of gas that will be needed to initiate a transaction on the L2 network.
      * @param owner_ The address that will have the default admin role in the AccessControl parent contract.
      * @param socket_ The address of the Ethereum mainnet Native Meta-Transaction Executor contract.
@@ -42,7 +39,6 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
      */
     constructor(
         uint32 chainSlug_,
-        uint256 confirmGasLimit_,
         uint256 initiateGasLimit_,
         address owner_,
         address socket_,
@@ -57,9 +53,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
             gasPriceOracle_,
             signatureVerifier_
         )
-    {
-        confirmGasLimit = confirmGasLimit_;
-    }
+    {}
 
     /**
      * @dev Sends a message to the L1 network requesting a confirmation for the packet with the specified packet ID.
@@ -86,38 +80,5 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
             packetId_,
             _getRoot(packetId_)
         );
-    }
-
-    /**
-     * @notice Updates the confirm gas limit for a given nonce and signature.
-     * @dev This function can only be called by the contract owner.
-     * @param nonce_ The nonce for which to update the confirm gas limit.
-     * @param confirmGasLimit_ The new confirm gas limit to set.
-     * @param signature_ The signature that authorizes the update.
-     */
-    function updateConfirmGasLimit(
-        uint256 nonce_,
-        uint256 confirmGasLimit_,
-        bytes memory signature_
-    ) external {
-        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    nonce_,
-                    confirmGasLimit_
-                )
-            ),
-            signature_
-        );
-
-        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        confirmGasLimit = confirmGasLimit_;
-        emit UpdatedConfirmGasLimit(confirmGasLimit_);
     }
 }
