@@ -195,24 +195,6 @@ contract Setup is Test {
         uint256 nonce = 0;
         vm.startPrank(_socketOwner);
 
-        bytes32 digest = keccak256(
-            abi.encode(
-                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                address(optimisticSwitchboard),
-                cc_.chainSlug,
-                remoteChainSlug_,
-                nonce,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        optimisticSwitchboard.grantRoleWithSlug(
-            WATCHER_ROLE,
-            remoteChainSlug_,
-            _watcher
-        );
-
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
