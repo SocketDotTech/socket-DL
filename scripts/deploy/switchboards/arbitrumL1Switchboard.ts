@@ -15,7 +15,6 @@ export const arbitrumL1Switchboard = (
     args: [
       chainKeyToSlug[network],
       arbitrumNativeFee,
-      initiateGasLimit,
       bridgeConsts.inbox[network],
       signerAddress,
       socketAddress,

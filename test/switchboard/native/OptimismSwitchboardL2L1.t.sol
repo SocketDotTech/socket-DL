@@ -131,7 +131,6 @@ contract OptimismSwitchboardL2L1Test is Setup {
         optimismSwitchboard = new OptimismSwitchboard(
             cc_.chainSlug,
             receiveGasLimit_,
-            initiateGasLimit_,
             _socketOwner,
             address(cc_.socket__),
             crossDomainManagerAddress_,

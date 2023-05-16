@@ -92,7 +92,6 @@ contract ArbitrumL2SwitchboardTest is Setup {
     ) internal returns (SocketConfigContext memory scc_) {
         arbitrumL2Switchboard = new ArbitrumL2Switchboard(
             cc_.chainSlug,
-            initiateGasLimit_,
             _socketOwner,
             address(cc_.socket__),
             cc_.sigVerifier__

@@ -95,7 +95,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
      * @dev Constructor function for initializing the NativeBridge contract
      * @param chainSlug_ The identifier of the current chain in the system
      * @param arbitrumNativeFee_ The fee charged by the system for processing messages
-     * @param initiateGasLimit_ The maximum gas limit that can be used for initiating a message
      * @param inbox_ The address of the Arbitrum Inbox contract
      * @param owner_ The address of the owner of the NativeBridge contract
      * @param socket_ The address of the socket contract
@@ -105,7 +104,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     constructor(
         uint32 chainSlug_,
         uint256 arbitrumNativeFee_,
-        uint256 initiateGasLimit_,
         address inbox_,
         address owner_,
         address socket_,
@@ -114,12 +112,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
-        NativeSwitchboardBase(
-            socket_,
-            chainSlug_,
-            initiateGasLimit_,
-            signatureVerifier_
-        )
+        NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
     {
         inbox__ = IInbox(inbox_);
         arbitrumNativeFee = arbitrumNativeFee_;

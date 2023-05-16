@@ -13,7 +13,6 @@ export const arbitrumL2Switchboard = (
     contractName: "ArbitrumL2Switchboard",
     args: [
       chainKeyToSlug[network],
-      initiateGasLimit,
       signerAddress,
       socketAddress,
       oracleAddress,

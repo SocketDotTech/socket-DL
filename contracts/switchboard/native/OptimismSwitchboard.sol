@@ -34,7 +34,6 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
      * @dev Constructor function that initializes the OptimismSwitchboard contract with the required parameters.
      * @param chainSlug_ The unique identifier for the chain on which this contract is deployed.
      * @param receiveGasLimit_ The gas limit to be used when receiving messages from the remote switchboard contract.
-     * @param initiateGasLimit_ The gas limit to be used when initiating messages to the remote switchboard contract.
      * @param owner_ The address of the owner of the contract who has access to the administrative functions.
      * @param socket_ The address of the socket contract that will be used to communicate with the chain.
      * @param crossDomainMessenger_ The address of the CrossDomainMessenger contract that will be used to send and receive messages between L1 and L2 networks in the Optimism solution.
@@ -42,19 +41,13 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
     constructor(
         uint32 chainSlug_,
         uint256 receiveGasLimit_,
-        uint256 initiateGasLimit_,
         address owner_,
         address socket_,
         address crossDomainMessenger_,
         ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
-        NativeSwitchboardBase(
-            socket_,
-            chainSlug_,
-            initiateGasLimit_,
-            signatureVerifier_
-        )
+        NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
     {
         receiveGasLimit = receiveGasLimit_;
         crossDomainMessenger__ = ICrossDomainMessenger(crossDomainMessenger_);

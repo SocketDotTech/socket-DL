@@ -23,7 +23,6 @@ export const optimismSwitchboard = (
     args: [
       chainKeyToSlug[network],
       receiveGasLimit,
-      initiateGasLimit,
       signerAddress,
       socketAddress,
       oracleAddress,

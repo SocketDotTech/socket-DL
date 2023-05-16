@@ -51,11 +51,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     uint256 public maxPacketSize;
 
     /**
-     * @dev The gas limit to be used for packet initiation.
-     */
-    uint256 public initiateGasLimit;
-
-    /**
      * @dev Address of the remote native switchboard.
      */
     address public remoteNativeSwitchboard;
@@ -80,12 +75,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev Event emitted when the switchboard is tripped.
      */
     event SwitchboardTripped(bool tripGlobalFuse);
-
-    /**
-     * @dev Event emitted when the initiate gas limit is set.
-     * @param gasLimit The new initiate gas limit value.
-     */
-    event InitiateGasLimitSet(uint256 gasLimit);
 
     /**
      * @dev Event emitted when the capacitor address is set.
@@ -169,17 +158,14 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev Constructor function for the CrossChainReceiver contract.
      * @param socket_ The address of the remote switchboard.
      * @param chainSlug_ The identifier of the chain the contract is deployed on.
-     * @param initiateGasLimit_ The gas limit for executing transactions.
      */
     constructor(
         address socket_,
         uint32 chainSlug_,
-        uint256 initiateGasLimit_,
         ISignatureVerifier signatureVerifier_
     ) {
         socket = socket_;
         chainSlug = chainSlug_;
-        initiateGasLimit = initiateGasLimit_;
         signatureVerifier__ = signatureVerifier_;
     }
 

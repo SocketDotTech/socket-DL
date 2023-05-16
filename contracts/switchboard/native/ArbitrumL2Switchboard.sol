@@ -32,24 +32,17 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
     /**
      * @dev Constructor function that sets initial values for the arbsys__, and the NativeSwitchboardBase parent contract.
      * @param chainSlug_ A uint32 representing the ID of the L2 network.
-     * @param initiateGasLimit_ A uint256 representing the amount of gas that will be needed to initiate a transaction on the L2 network.
      * @param owner_ The address that will have the default admin role in the AccessControl parent contract.
      * @param socket_ The address of the Ethereum mainnet Native Meta-Transaction Executor contract.
      */
     constructor(
         uint32 chainSlug_,
-        uint256 initiateGasLimit_,
         address owner_,
         address socket_,
         ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
-        NativeSwitchboardBase(
-            socket_,
-            chainSlug_,
-            initiateGasLimit_,
-            signatureVerifier_
-        )
+        NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
     {}
 
     /**

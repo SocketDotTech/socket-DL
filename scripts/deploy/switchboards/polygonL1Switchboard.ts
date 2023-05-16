@@ -13,7 +13,6 @@ export const polygonL1Switchboard = (
     contractName: "PolygonL1Switchboard",
     args: [
       chainKeyToSlug[network],
-      initiateGasLimit,
       bridgeConsts.checkpointManager[network],
       bridgeConsts.fxRoot[network],
       signerAddress,

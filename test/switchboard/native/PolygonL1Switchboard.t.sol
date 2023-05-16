@@ -89,7 +89,6 @@ contract PolygonL1SwitchboardTest is Setup {
     ) internal returns (SocketConfigContext memory scc_) {
         polygonL1Switchboard = new PolygonL1Switchboard(
             cc_.chainSlug,
-            initiateGasLimit_,
             checkpointManager_,
             fxRoot_,
             _socketOwner,

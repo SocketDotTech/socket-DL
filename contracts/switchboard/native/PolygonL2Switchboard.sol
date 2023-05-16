@@ -38,26 +38,19 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
     /**
      * @dev Constructor for the PolygonL2Switchboard contract.
      * @param chainSlug_ The chainSlug for the contract.
-     * @param initiateGasLimit_ The initiateGasLimit for the contract.
      * @param fxChild_ The address of the fxChildTunnel contract.
      * @param owner_ The owner of the contract.
      * @param socket_ The socket address.
      */
     constructor(
         uint32 chainSlug_,
-        uint256 initiateGasLimit_,
         address fxChild_,
         address owner_,
         address socket_,
         ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
-        NativeSwitchboardBase(
-            socket_,
-            chainSlug_,
-            initiateGasLimit_,
-            signatureVerifier_
-        )
+        NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
         FxBaseChildTunnel(fxChild_)
     {}
 

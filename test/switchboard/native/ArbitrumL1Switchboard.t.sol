@@ -98,7 +98,6 @@ contract ArbitrumL1SwitchboardTest is Setup {
         arbitrumL1Switchboard = new ArbitrumL1Switchboard(
             cc_.chainSlug,
             dynamicFees_,
-            initiateGasLimit_,
             inbox_,
             _socketOwner,
             address(cc_.socket__),

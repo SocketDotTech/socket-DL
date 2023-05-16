@@ -30,7 +30,6 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
      * @notice This is the constructor function of the PolygonL1Switchboard contract.
      *        initializes the contract with the provided parameters.
      * @param chainSlug_ is the identifier of the chain.
-     * @param initiateGasLimit_ is the gas limit for initiating the switchboard.
      * @param checkpointManager_ is the address of the checkpoint manager contract.
      * @param fxRoot_ is the address of the root contract.
      * @param owner_ is the address of the contract owner.
@@ -38,7 +37,6 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
      */
     constructor(
         uint32 chainSlug_,
-        uint256 initiateGasLimit_,
         address checkpointManager_,
         address fxRoot_,
         address owner_,
@@ -46,12 +44,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
-        NativeSwitchboardBase(
-            socket_,
-            chainSlug_,
-            initiateGasLimit_,
-            signatureVerifier_
-        )
+        NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
         FxBaseRootTunnel(checkpointManager_, fxRoot_)
     {}
 
