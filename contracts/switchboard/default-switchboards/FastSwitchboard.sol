@@ -183,8 +183,6 @@ contract FastSwitchboard is SwitchboardBase {
         totalWatchers[srcChainSlug_]--;
     }
 
-    
-
     function isNonWatcherRole(bytes32 role_) public pure returns (bool) {
         if (
             role_ == TRIP_ROLE ||
@@ -197,7 +195,6 @@ contract FastSwitchboard is SwitchboardBase {
 
         return false;
     }
-
 
     /**
      * @dev Overriding this function from AccessControl to make sure owner can't grant Watcher Role directly, and should
