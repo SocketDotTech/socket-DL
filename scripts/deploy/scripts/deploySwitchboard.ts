@@ -87,6 +87,10 @@ async function deploySwitchboard(
       args,
       signer
     );
+
+    console.log(
+      `${contractName} Switchboard deployed at ${switchboard.address}`
+    );
     await storeVerificationParams(
       [switchboard.address, contractName, path, args],
       chainKeyToSlug[network],
