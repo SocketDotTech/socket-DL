@@ -508,8 +508,41 @@ const main = async () => {
       ROLES.RESCUE_ROLE,
       ROLES.GOVERNANCE_ROLE,
       ROLES.WITHDRAW_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
     ],
     filterContracts: [CORE_CONTRACTS.ExecutionManager],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.FEES_UPDATER_ROLE],
+    filterContracts: [CORE_CONTRACTS.ExecutionManager],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: ownerAddress,
+    filterRoles: [
+      ROLES.RESCUE_ROLE,
+      ROLES.GOVERNANCE_ROLE,
+      ROLES.WITHDRAW_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
+    ],
+    filterContracts: [CORE_CONTRACTS.OpenExecutionManager],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.FEES_UPDATER_ROLE],
+    filterContracts: [CORE_CONTRACTS.OpenExecutionManager],
     filterChains,
     sendTransaction,
     newRoleStatus,
@@ -532,6 +565,7 @@ const main = async () => {
       ROLES.RESCUE_ROLE,
       ROLES.GOVERNANCE_ROLE,
       ROLES.WITHDRAW_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
     ],
     filterContracts: [CORE_CONTRACTS.TransmitManager],
     filterChains,
@@ -542,7 +576,7 @@ const main = async () => {
   // // Grant roles to transmitterAddress on TransmitManager
   await checkAndUpdateRoles({
     userAddress: transmitterAddress,
-    filterRoles: [ROLES.TRANSMITTER_ROLE],
+    filterRoles: [ROLES.TRANSMITTER_ROLE, ROLES.FEES_UPDATER_ROLE],
     filterContracts: [CORE_CONTRACTS.TransmitManager],
     filterChains,
     sendTransaction,
@@ -568,7 +602,17 @@ const main = async () => {
       ROLES.TRIP_ROLE,
       ROLES.UNTRIP_ROLE,
       ROLES.WITHDRAW_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
     ],
+    filterContracts: [CORE_CONTRACTS.FastSwitchboard],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.FEES_UPDATER_ROLE],
     filterContracts: [CORE_CONTRACTS.FastSwitchboard],
     filterChains,
     sendTransaction,
@@ -598,7 +642,21 @@ const main = async () => {
   // setup roles for optimistic switchboard
   await checkAndUpdateRoles({
     userAddress: ownerAddress,
-    filterRoles: [ROLES.TRIP_ROLE, ROLES.UNTRIP_ROLE, ROLES.GOVERNANCE_ROLE], // all roles
+    filterRoles: [
+      ROLES.TRIP_ROLE,
+      ROLES.UNTRIP_ROLE,
+      ROLES.GOVERNANCE_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
+    ], // all roles
+    filterContracts: [CORE_CONTRACTS.OptimisticSwitchboard],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.FEES_UPDATER_ROLE], // all roles
     filterContracts: [CORE_CONTRACTS.OptimisticSwitchboard],
     filterChains,
     sendTransaction,
@@ -614,7 +672,17 @@ const main = async () => {
       ROLES.GOVERNANCE_ROLE,
       ROLES.WITHDRAW_ROLE,
       ROLES.RESCUE_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
     ], // all roles
+    filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.FEES_UPDATER_ROLE], // all roles
     filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
     filterChains,
     sendTransaction,
