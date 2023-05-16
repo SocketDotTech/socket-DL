@@ -23,7 +23,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
      */
     modifier onlyRemoteSwitchboard() override {
         if (
-            msg.sender != address(crossDomainMessenger__) &&
+            msg.sender != address(crossDomainMessenger__) ||
             crossDomainMessenger__.xDomainMessageSender() !=
             remoteNativeSwitchboard
         ) revert InvalidSender();

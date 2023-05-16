@@ -128,13 +128,14 @@ contract HappyTest is Setup {
         }
 
         vm.expectEmit(true, false, false, false);
-        emit ExecutionSuccess(_packMessageId(_a.chainSlug, 0));
+        emit ExecutionSuccess(
+            _packMessageId(_a.chainSlug, address(dstCounter__), 0)
+        );
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
-            address(dstCounter__),
             packetId,
-            _packMessageId(_a.chainSlug, 0),
+            _packMessageId(_a.chainSlug, address(dstCounter__), 0),
             _msgGasLimit,
             executionFee,
             root,
@@ -145,16 +146,17 @@ contract HappyTest is Setup {
         assertEq(dstCounter__.counter(), amount);
         assertEq(srcCounter__.counter(), 0);
         assertTrue(
-            _b.socket__.messageExecuted(_packMessageId(_a.chainSlug, 0))
+            _b.socket__.messageExecuted(
+                _packMessageId(_a.chainSlug, address(dstCounter__), 0)
+            )
         );
 
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
-            address(dstCounter__),
             packetId,
-            _packMessageId(_a.chainSlug, 0),
+            _packMessageId(_a.chainSlug, address(dstCounter__), 0),
             _msgGasLimit,
             executionFee,
             root,
@@ -201,9 +203,8 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _a,
             _b.chainSlug,
-            address(srcCounter__),
             packetId,
-            _packMessageId(_b.chainSlug, 0),
+            _packMessageId(_b.chainSlug, address(srcCounter__), 0),
             _msgGasLimit,
             0,
             root,
@@ -232,7 +233,7 @@ contract HappyTest is Setup {
             msgGasLimit
         );
 
-        msgId = _packMessageId(_a.chainSlug, count);
+        msgId = _packMessageId(_a.chainSlug, address(dstCounter__), count);
         root = _a.hasher__.packMessage(
             _a.chainSlug,
             address(srcCounter__),
@@ -314,7 +315,6 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
-            address(dstCounter__),
             packetId,
             msgId1,
             _msgGasLimit,
@@ -334,7 +334,6 @@ contract HappyTest is Setup {
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
-            address(dstCounter__),
             packetId,
             msgId2,
             _msgGasLimit,

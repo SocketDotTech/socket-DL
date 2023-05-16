@@ -243,7 +243,7 @@ contract SocketDstTest is Setup {
             );
         }
 
-        bytes32 msgId = _packMessageId(_a.chainSlug, 0);
+        bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
         (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
@@ -257,7 +257,6 @@ contract SocketDstTest is Setup {
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
-            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -275,7 +274,6 @@ contract SocketDstTest is Setup {
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
-            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,
@@ -323,7 +321,7 @@ contract SocketDstTest is Setup {
             );
         }
 
-        bytes32 msgId = _packMessageId(_a.chainSlug, 0);
+        bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
         (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
@@ -334,7 +332,6 @@ contract SocketDstTest is Setup {
         vm.expectRevert(NotExecutor.selector);
         _executePayloadOnDstWithExecutor(
             _b,
-            address(dstCounter__),
             packetId,
             msgId,
             _msgGasLimit,

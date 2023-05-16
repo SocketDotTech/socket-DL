@@ -125,12 +125,10 @@ interface ISocket {
     /**
      * @notice executes a message
      * @param packetId packet id
-     * @param localPlug local plug address
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
         bytes32 packetId,
-        address localPlug,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature
     ) external;
