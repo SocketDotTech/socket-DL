@@ -28,17 +28,17 @@ export const main = async () => {
         let allDeployed = false;
         const network = networkToChainSlug[chain];
 
+        const providerInstance = getProviderFromChainName(network);
+        const signer: Wallet = new ethers.Wallet(
+          process.env.SOCKET_SIGNER_KEY as string,
+          providerInstance
+        );
+
+        let chainAddresses: ChainSocketAddresses = addresses[chain]
+          ? (addresses[chain] as ChainSocketAddresses)
+          : ({} as ChainSocketAddresses);
+
         while (!allDeployed) {
-          const providerInstance = getProviderFromChainName(network);
-          const signer: Wallet = new ethers.Wallet(
-            process.env.SOCKET_SIGNER_KEY as string,
-            providerInstance
-          );
-
-          const chainAddresses: ChainSocketAddresses = addresses[chain]
-            ? (addresses[chain] as ChainSocketAddresses)
-            : ({} as ChainSocketAddresses);
-
           const results: ReturnObj = await deploySocket(
             signer,
             chain,
@@ -47,7 +47,7 @@ export const main = async () => {
           );
 
           allDeployed = results.allDeployed;
-          addresses[network] = results.deployedAddresses;
+          chainAddresses = results.deployedAddresses;
         }
       })
     );

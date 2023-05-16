@@ -21,47 +21,47 @@ export default async function deploySwitchboards(
   sourceConfig: ChainSocketAddresses,
   mode: DeploymentMode
 ): Promise<ChainSocketAddresses> {
-  let result: any = { sourceConfig };
-
+  let updatedConfig: any = sourceConfig;
   if (!sourceConfig.FastSwitchboard)
-    result = await deploySwitchboard(
+    updatedConfig = await deploySwitchboard(
       IntegrationTypes.fast,
       network,
       "",
       signer,
-      sourceConfig,
+      updatedConfig,
       mode
     );
 
   if (!sourceConfig.OptimisticSwitchboard)
-    result = await deploySwitchboard(
+    updatedConfig = await deploySwitchboard(
       IntegrationTypes.optimistic,
       network,
       "",
       signer,
-      result.sourceConfig,
+      updatedConfig,
       mode
     );
 
-  if (!switchboards[network]) return result;
+  if (!switchboards[network]) return updatedConfig;
   const siblings = Object.keys(switchboards[network]);
   for (let index = 0; index < siblings.length; index++) {
     if (
-      !sourceConfig?.integrations?.[chainKeyToSlug[siblings[index]]]?.[
+      !updatedConfig?.integrations?.[chainKeyToSlug[siblings[index]]]?.[
         IntegrationTypes.native
       ]?.["switchboard"]
-    )
-      result = await deploySwitchboard(
+    ) {
+      updatedConfig = await deploySwitchboard(
         IntegrationTypes.native,
         network,
         siblings[index],
         signer,
-        result.sourceConfig,
+        updatedConfig,
         mode
       );
+    }
   }
 
-  return result.sourceConfig;
+  return updatedConfig;
 }
 
 async function deploySwitchboard(

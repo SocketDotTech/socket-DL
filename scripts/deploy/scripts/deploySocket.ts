@@ -100,7 +100,7 @@ export const deploySocket = async (
     deployUtils.addresses = await deploySwitchboards(
       networkToChainSlug[chainSlug],
       socketSigner,
-      deployedAddresses,
+      deployUtils.addresses,
       currentMode
     );
 
@@ -119,7 +119,6 @@ export const deploySocket = async (
       [socket.address],
       deployUtils
     );
-
     deployUtils.addresses["Counter"] = counter.address;
 
     allDeployed = true;
