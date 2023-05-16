@@ -73,11 +73,7 @@ export const deploySocket = async (
     const transmitManager: Contract = await getOrDeploy(
       CORE_CONTRACTS.TransmitManager,
       "contracts/TransmitManager.sol",
-      [
-        signatureVerifier.address,
-        socketOwner,
-        chainSlug,
-      ],
+      [signatureVerifier.address, socketOwner, chainSlug],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.TransmitManager] =
