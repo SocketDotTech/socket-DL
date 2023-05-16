@@ -4,30 +4,23 @@ pragma solidity 0.8.7;
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/ICapacitor.sol";
 import "../../interfaces/ISignatureVerifier.sol";
-
 import "../../utils/AccessControl.sol";
 import "../../libraries/SignatureVerifierLib.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
-import "../../utils/AccessControlExtended.sol";
+import "../../utils/AccessControl.sol";
 
 import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 import {TRIP_NATIVE_SIG_IDENTIFIER, L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
-
 @title Native Switchboard Base Contract
 @notice This contract serves as the base for the implementation of a switchboard for native cross-chain communication.
 It provides the necessary functionalities to allow packets to be sent and received between chains and ensures proper handling
 of fees, gas limits, and packet validation.
 @dev This contract has access-controlled functions and connects to a capacitor contract that holds packets for the native bridge.
 */
-abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
-    struct Fees {
-        uint256 switchboardFees;
-        uint256 verificationFees;
-    }
-
+abstract contract NativeSwitchboardBase is ISwitchboard, AccessControl {
     ISignatureVerifier public signatureVerifier__;
 
     /**
@@ -68,8 +61,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     mapping(address => uint256) public nextNonce;
 
-    // destinationChainSlug => fees-struct with verificationFees and switchboardFees
-    mapping(uint32 => Fees) public fees;
+    uint256 public switchboardFees;
+    uint256 public verificationFees;
 
     /**
      * @dev Event emitted when the switchboard is tripped.
@@ -112,10 +105,10 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
 
     /**
      * @dev Emitted when a fees is set for switchboard
-     * @param siblingChainSlug Chain slug of the sibling chain
-     * @param fees fees struct with verificationFees and switchboardFees
+     * @param switchboardFees switchboardFees
+     * @param verificationFees verificationFees
      */
-    event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
+    event SwitchboardFeesSet(uint256 switchboardFees, uint256 verificationFees);
 
     /**
      * @dev Error thrown when the fees provided are not enough to execute the transaction.
@@ -233,15 +226,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         override
         returns (uint256 switchboardFee_, uint256 verificationFee_)
     {
-        return (
-            fees[dstChainSlug_].switchboardFees,
-            fees[dstChainSlug_].verificationFees
-        );
+        return (switchboardFees, verificationFees);
     }
 
     function setFees(
         uint256 nonce_,
-        uint32 dstChainSlug_,
+        uint32,
         uint256 switchboardFees_,
         uint256 verificationFees_,
         bytes calldata signature_
@@ -252,7 +242,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
                     FEES_UPDATE_SIG_IDENTIFIER,
                     address(this),
                     chainSlug,
-                    dstChainSlug_,
                     nonce_,
                     switchboardFees_,
                     verificationFees_
@@ -261,19 +250,15 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+        _checkRole(FEES_UPDATER_ROLE, feesUpdater);
 
         uint256 nonce = nextNonce[feesUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
-        Fees memory feesObject = Fees({
-            switchboardFees: switchboardFees_,
-            verificationFees: verificationFees_
-        });
+        switchboardFees = switchboardFees_;
+        verificationFees = verificationFees_;
 
-        fees[dstChainSlug_] = feesObject;
-
-        emit SwitchboardFeesSet(dstChainSlug_, feesObject);
+        emit SwitchboardFeesSet(switchboardFees, verificationFees);
     }
 
     /**

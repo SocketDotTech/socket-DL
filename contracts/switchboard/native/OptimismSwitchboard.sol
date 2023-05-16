@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import "openzeppelin-contracts/contracts/vendor/optimism/ICrossDomainMessenger.sol";
 import "./NativeSwitchboardBase.sol";
+import "../../utils/AccessControl.sol";
 
 /**
  * @title OptimismSwitchboard
@@ -46,7 +47,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
         address crossDomainMessenger_,
         ISignatureVerifier signatureVerifier_
     )
-        AccessControlExtended(owner_)
+        AccessControl(owner_)
         NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
     {
         receiveGasLimit = receiveGasLimit_;

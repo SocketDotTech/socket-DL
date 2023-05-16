@@ -2,7 +2,7 @@
 pragma solidity 0.8.7;
 
 import "openzeppelin-contracts/contracts/vendor/arbitrum/IArbSys.sol";
-
+import "../../utils/AccessControl.sol";
 import "../../libraries/AddressAliasHelper.sol";
 import "./NativeSwitchboardBase.sol";
 
@@ -41,7 +41,7 @@ contract ArbitrumL2Switchboard is NativeSwitchboardBase {
         address socket_,
         ISignatureVerifier signatureVerifier_
     )
-        AccessControlExtended(owner_)
+        AccessControl(owner_)
         NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
     {}
 

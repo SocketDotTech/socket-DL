@@ -4,7 +4,7 @@ pragma solidity 0.8.7;
 import "openzeppelin-contracts/contracts/vendor/arbitrum/IBridge.sol";
 import "openzeppelin-contracts/contracts/vendor/arbitrum/IInbox.sol";
 import "openzeppelin-contracts/contracts/vendor/arbitrum/IOutbox.sol";
-
+import "../../utils/AccessControl.sol";
 import "./NativeSwitchboardBase.sol";
 
 import {ARBITRUM_NATIVE_FEE_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
@@ -111,7 +111,7 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         address outbox_,
         ISignatureVerifier signatureVerifier_
     )
-        AccessControlExtended(owner_)
+        AccessControl(owner_)
         NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
     {
         inbox__ = IInbox(inbox_);

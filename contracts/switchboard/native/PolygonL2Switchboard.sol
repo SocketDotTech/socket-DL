@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import "fx-portal/tunnel/FxBaseChildTunnel.sol";
 import "./NativeSwitchboardBase.sol";
+import "../../utils/AccessControl.sol";
 
 /**
  * @title Polygon L2 Switchboard
@@ -49,7 +50,7 @@ contract PolygonL2Switchboard is NativeSwitchboardBase, FxBaseChildTunnel {
         address socket_,
         ISignatureVerifier signatureVerifier_
     )
-        AccessControlExtended(owner_)
+        AccessControl(owner_)
         NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
         FxBaseChildTunnel(fxChild_)
     {}

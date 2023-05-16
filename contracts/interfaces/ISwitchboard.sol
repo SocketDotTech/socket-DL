@@ -56,7 +56,7 @@ interface ISwitchboard {
         uint256 nonce_,
         uint32 dstChainSlug_,
         uint256 verificationFees_,
-        uint256 SwitchboardFees_,
+        uint256 switchboardFees_,
         bytes calldata signature_
     ) external;
 }
