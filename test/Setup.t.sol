@@ -124,12 +124,6 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
 
-        cc_.transmitManager__.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            remoteChainSlug_,
-            _socketOwner
-        );
-
         //grant FeesUpdater Role
         cc_.transmitManager__.grantRoleWithSlug(
             FEES_UPDATER_ROLE,
@@ -205,12 +199,6 @@ contract Setup is Test {
         uint256 nonce = 0;
         vm.startPrank(_socketOwner);
 
-        optimisticSwitchboard.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            remoteChainSlug_,
-            _socketOwner
-        );
-
         bytes32 digest = keccak256(
             abi.encode(
                 EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
@@ -258,11 +246,7 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-        fastSwitchboard.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            remoteChainSlug_,
-            _socketOwner
-        );
+
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
 
         vm.stopPrank();
@@ -301,18 +285,11 @@ contract Setup is Test {
         );
 
         cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
-        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
 
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
             deployer_,
             cc_.chainSlug
-        );
-
-        cc_.transmitManager__.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            cc_.chainSlug,
-            deployer_
         );
 
         //grant FeesUpdater Role

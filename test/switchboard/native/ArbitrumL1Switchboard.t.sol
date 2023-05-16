@@ -110,7 +110,6 @@ contract ArbitrumL1SwitchboardTest is Setup {
         );
 
         vm.startPrank(_socketOwner);
-        arbitrumL1Switchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         arbitrumL1Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
         arbitrumL1Switchboard.updateRemoteNativeSwitchboard(

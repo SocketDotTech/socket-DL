@@ -38,15 +38,6 @@ async function checkNative(
   const contractName = switchboards[localChain][remoteChain];
   const switchboard = await getInstance(contractName, contractAddr);
 
-  let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
-    transmitterAddresses[mode]
-  );
-  assert(
-    hasRole,
-    `❌ NativeSwitchboard has wrong GAS_LIMIT_UPDATER_ROLE ${remoteChain}`
-  );
-
   if (contractName === NativeSwitchboard.POLYGON_L1) {
     const remoteSb = await switchboard.fxChildTunnel();
     assert(remoteSb === remoteSwitchboard, "❌ wrong fxChildTunnel set");
@@ -84,15 +75,6 @@ async function checkDefault(contractAddr, localChain, remoteChain) {
     transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong UNTRIP_ROLE ${remoteChain}`);
-
-  hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainKeyToSlug[remoteChain]),
-    transmitterAddresses[mode]
-  );
-  assert(
-    hasRole,
-    `❌ Switchboard has wrong GAS_LIMIT_UPDATER_ROLE ${remoteChain}`
-  );
 }
 
 async function checkSwitchboardRoles(chain, contractAddr) {
@@ -242,24 +224,6 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   assert(
     hasRole,
     `❌ TransmitManager has wrong transmitter address for ${remoteChain}`
-  );
-
-  hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainKeyToSlug[remoteChain]),
-    transmitterAddresses[mode]
-  );
-  assert(
-    hasRole,
-    `❌ TransmitManager has wrong GAS_LIMIT_UPDATER_ROLE for ${remoteChain}`
-  );
-
-  hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
-    transmitterAddresses[mode]
-  );
-  assert(
-    hasRole,
-    `❌ TransmitManager has wrong GAS_LIMIT_UPDATER_ROLE for ${chain}`
   );
 }
 

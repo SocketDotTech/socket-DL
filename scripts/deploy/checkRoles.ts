@@ -549,7 +549,6 @@ const main = async () => {
       ROLES.RESCUE_ROLE,
       ROLES.GOVERNANCE_ROLE,
       ROLES.WITHDRAW_ROLE,
-      ROLES.GAS_LIMIT_UPDATER_ROLE,
     ],
     filterContracts: [CORE_CONTRACTS.TransmitManager],
     filterChains,
@@ -561,15 +560,6 @@ const main = async () => {
   await checkAndUpdateRoles({
     userAddress: transmitterAddress,
     filterRoles: [ROLES.TRANSMITTER_ROLE],
-    filterContracts: [CORE_CONTRACTS.TransmitManager],
-    filterChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
-  await checkAndUpdateRoles({
-    userAddress: transmitterAddress,
-    filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE],
     filterContracts: [CORE_CONTRACTS.TransmitManager],
     filterChains,
     sendTransaction,
@@ -594,7 +584,6 @@ const main = async () => {
       ROLES.GOVERNANCE_ROLE,
       ROLES.TRIP_ROLE,
       ROLES.UNTRIP_ROLE,
-      ROLES.GAS_LIMIT_UPDATER_ROLE,
       ROLES.WITHDRAW_ROLE,
     ],
     filterContracts: [CORE_CONTRACTS.FastSwitchboard],
@@ -626,12 +615,7 @@ const main = async () => {
   // setup roles for optimistic switchboard
   await checkAndUpdateRoles({
     userAddress: ownerAddress,
-    filterRoles: [
-      ROLES.TRIP_ROLE,
-      ROLES.UNTRIP_ROLE,
-      ROLES.GAS_LIMIT_UPDATER_ROLE,
-      ROLES.GOVERNANCE_ROLE,
-    ], // all roles
+    filterRoles: [ROLES.TRIP_ROLE, ROLES.UNTRIP_ROLE, ROLES.GOVERNANCE_ROLE], // all roles
     filterContracts: [CORE_CONTRACTS.OptimisticSwitchboard],
     filterChains,
     sendTransaction,
@@ -647,18 +631,7 @@ const main = async () => {
       ROLES.GOVERNANCE_ROLE,
       ROLES.WITHDRAW_ROLE,
       ROLES.RESCUE_ROLE,
-      ROLES.GAS_LIMIT_UPDATER_ROLE,
     ], // all roles
-    filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
-    filterChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
-  // Grant transmitter roles in NativeSwitchboard. just one role - GAS_LIMIT_UPDATER_ROLE
-  await checkAndUpdateRoles({
-    userAddress: transmitterAddress,
-    filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE], // all roles
     filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
     filterChains,
     sendTransaction,

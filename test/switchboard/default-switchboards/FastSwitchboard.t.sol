@@ -39,11 +39,6 @@ contract FastSwitchboardTest is Setup {
             _a.sigVerifier__
         );
 
-        fastSwitchboard.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            remoteChainSlug,
-            _socketOwner
-        );
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
         watcher = vm.addr(_watcherPrivateKey);

@@ -61,7 +61,6 @@ contract TransmitManagerTest is Setup {
 
         vm.startPrank(owner);
         gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
-        gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
         gasPriceOracle.setTransmitManager(transmitManager);
         transmitManager.grantRoleWithSlug(
             TRANSMITTER_ROLE,
@@ -72,12 +71,6 @@ contract TransmitManagerTest is Setup {
             TRANSMITTER_ROLE,
             destChainSlug,
             transmitter
-        );
-        transmitManager.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
-        transmitManager.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            destChainSlug,
-            owner
         );
 
         //grant FeesUpdater Role

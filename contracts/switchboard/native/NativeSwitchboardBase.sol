@@ -12,7 +12,7 @@ import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 import "../../utils/AccessControlExtended.sol";
 
-import {GAS_LIMIT_UPDATER_ROLE, GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 import {TRIP_NATIVE_SIG_IDENTIFIER, L1_RECEIVE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER, INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
@@ -377,39 +377,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
 
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
-    }
-
-    /**
-     * @dev Sets the gas limit for the initial confirmation transaction initiated by switchboard.
-     *      This function can only be called by an address with GAS_LIMIT_UPDATER_ROLE role.
-     * @param nonce_ Nonce to ensure the integrity of the function call.
-     * @param gasLimit_ New gas limit for the initial confirmation transaction initiated by switchboard.
-     * @param signature_ Signature of the address with GAS_LIMIT_UPDATER_ROLE role to authorize the function call.
-     */
-    function setInitiateGasLimit(
-        uint256 nonce_,
-        uint256 gasLimit_,
-        bytes memory signature_
-    ) external {
-        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    INITIAL_CONFIRMATION_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    nonce_,
-                    gasLimit_
-                )
-            ),
-            signature_
-        );
-
-        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        initiateGasLimit = gasLimit_;
-        emit InitiateGasLimitSet(gasLimit_);
     }
 
     /**

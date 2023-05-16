@@ -208,45 +208,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     }
 
     /**
-     * @notice This function is used to update the arbitrumNativeFee parameter
-     * @param nonce_ A uint256 value representing the nonce for this update.
-     * @param arbitrumNativeFee_ A uint256 value representing the new value for arbitrumNativeFee.
-     * @param signature_ A bytes array representing the signature of the caller.
-     * @dev arbitrumNativeFees is used to calculate the minimum switchboard fees for
-     * initiating a native confirmation. The new value for arbitrumNativeFee
-     * is passed as an argument along with a nonce and a signature.
-     * The signature is used to verify the identity of the caller.
-     * Once the caller's identity is verified, the new value for
-     * arbitrumNativeFee is set and an event is emitted.
-     */
-    function updateArbitrumNativeFee(
-        uint256 nonce_,
-        uint256 arbitrumNativeFee_,
-        bytes calldata signature_
-    ) external {
-        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    ARBITRUM_NATIVE_FEE_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    nonce_,
-                    arbitrumNativeFee_
-                )
-            ),
-            signature_
-        );
-
-        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
-
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        arbitrumNativeFee = arbitrumNativeFee_;
-        emit UpdatedArbitrumNativeFee(arbitrumNativeFee_);
-    }
-
-    /**
      * @notice updates the address of the inbox contract that is used to communicate with the Arbitrum Rollup.
      * @dev This function can only be called by a user with the GOVERNANCE_ROLE.
      * @param inbox_ address of new inbox to be updated

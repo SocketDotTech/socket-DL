@@ -34,11 +34,6 @@ contract OptimisticSwitchboardTest is Setup {
             _a.sigVerifier__
         );
 
-        optimisticSwitchboard.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            remoteChainSlug,
-            _socketOwner
-        );
         optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
         optimisticSwitchboard.grantRoleWithSlug(
