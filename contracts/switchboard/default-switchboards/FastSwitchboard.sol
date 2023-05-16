@@ -141,8 +141,7 @@ contract FastSwitchboard is SwitchboardBase {
             role_ == UNTRIP_ROLE ||
             role_ == WITHDRAW_ROLE ||
             role_ == RESCUE_ROLE ||
-            role_ == GOVERNANCE_ROLE ||
-            role_ == GAS_LIMIT_UPDATER_ROLE
+            role_ == GOVERNANCE_ROLE
         ) return true;
 
         return false;
@@ -172,7 +171,6 @@ contract FastSwitchboard is SwitchboardBase {
         uint32 chainSlug_,
         address grantee_
     ) external override onlyOwner {
-        if (roleName_ != GAS_LIMIT_UPDATER_ROLE) revert InvalidRole();
         _grantRoleWithSlug(roleName_, chainSlug_, grantee_);
     }
 
@@ -200,7 +198,6 @@ contract FastSwitchboard is SwitchboardBase {
         uint32 chainSlug_,
         address grantee_
     ) external override onlyOwner {
-        if (roleName_ != GAS_LIMIT_UPDATER_ROLE) revert InvalidRole();
         _revokeRoleWithSlug(roleName_, chainSlug_, grantee_);
     }
 
