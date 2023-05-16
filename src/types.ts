@@ -177,6 +177,7 @@ export enum ROLES {
   TRIP_ROLE = "TRIP_ROLE",
   UNTRIP_ROLE = "UNTRIP_ROLE",
   WATCHER_ROLE = "WATCHER_ROLE",
+  FEES_UPDATER_ROLE = "FEES_UPDATER_ROLE",
 }
 
 export enum CORE_CONTRACTS {
@@ -195,6 +196,12 @@ export enum CORE_CONTRACTS {
 export const REQUIRED_ROLES = {
   CapacitorFactory: [ROLES.RESCUE_ROLE],
   ExecutionManager: [
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.EXECUTOR_ROLE,
+  ],
+  OpenExecutionManager: [
     ROLES.WITHDRAW_ROLE,
     ROLES.RESCUE_ROLE,
     ROLES.GOVERNANCE_ROLE,
@@ -221,6 +228,7 @@ export const REQUIRED_ROLES = {
     ROLES.RESCUE_ROLE,
   ],
   NativeSwitchboard: [
+    ROLES.FEES_UPDATER_ROLE,
     ROLES.TRIP_ROLE,
     ROLES.UNTRIP_ROLE,
     ROLES.GOVERNANCE_ROLE,
@@ -230,7 +238,9 @@ export const REQUIRED_ROLES = {
 };
 
 export const REQUIRED_CHAIN_ROLES = {
-  TransmitManager: [ROLES.TRANSMITTER_ROLE],
-  FastSwitchboard: [ROLES.WATCHER_ROLE],
-  OptimisticSwitchboard: [ROLES.WATCHER_ROLE],
+  TransmitManager: [ROLES.TRANSMITTER_ROLE, ROLES.FEES_UPDATER_ROLE],
+  [CORE_CONTRACTS.ExecutionManager]: [ROLES.FEES_UPDATER_ROLE],
+  [CORE_CONTRACTS.OpenExecutionManager]: [ROLES.FEES_UPDATER_ROLE],
+  FastSwitchboard: [ROLES.WATCHER_ROLE, ROLES.FEES_UPDATER_ROLE],
+  OptimisticSwitchboard: [ROLES.WATCHER_ROLE, ROLES.FEES_UPDATER_ROLE],
 };
