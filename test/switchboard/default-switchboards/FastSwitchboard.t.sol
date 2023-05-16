@@ -211,11 +211,7 @@ contract FastSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
 
         uint32 srcChainSlug = uint32(123);
-        fastSwitchboard.grantRoleWithSlug(
-            WATCHER_ROLE,
-            srcChainSlug,
-            _socketOwner
-        );
+        fastSwitchboard.grantWatcherRole(srcChainSlug, _socketOwner);
 
         bytes32 digest = keccak256(
             abi.encode(
@@ -259,11 +255,7 @@ contract FastSwitchboardTest is Setup {
         uint32 srcChainSlug = uint32(123);
 
         vm.startPrank(_socketOwner);
-        fastSwitchboard.grantRoleWithSlug(
-            WATCHER_ROLE,
-            srcChainSlug,
-            _socketOwner
-        );
+        fastSwitchboard.grantWatcherRole(srcChainSlug, _socketOwner);
         fastSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
         vm.stopPrank();
 

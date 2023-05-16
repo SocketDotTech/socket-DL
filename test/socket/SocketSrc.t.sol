@@ -19,7 +19,7 @@ contract SocketSrcTest is Setup {
     bool isFast = true;
     bytes32[] roots;
 
-    error InvalidAttester();
+    error InvalidTransmitter();
     error InsufficientFees();
     event PacketVerifiedAndSealed(
         address indexed transmitter,
@@ -236,7 +236,7 @@ contract SocketSrcTest is Setup {
                 fakeTransmitterKey
             );
 
-            vm.expectRevert(InvalidAttester.selector);
+            vm.expectRevert(InvalidTransmitter.selector);
             _sealOnSrc(_a, capacitor, sig_);
         }
     }

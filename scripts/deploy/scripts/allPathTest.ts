@@ -9,7 +9,7 @@ import {
   isTestnet,
   isMainnet,
 } from "../../../src";
-import { getAddresses, getRelayUrl } from "../utils";
+import { getAddresses, getRelayUrl, getRelayAPIKEY } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
 import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
 import { chains, mode } from "../config";
@@ -24,7 +24,9 @@ interface RequestObj {
   gasLimit: number | undefined;
 }
 
-const values = {
+const values: {
+  [chainSlug in ChainSlug]?: { [siblingSlug in ChainSlug]?: string };
+} = {
   [ChainSlug.ARBITRUM]: {
     [ChainSlug.OPTIMISM]: parseUnits("0.003", "ether").toHexString(),
     [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
@@ -45,6 +47,28 @@ const values = {
     [ChainSlug.OPTIMISM]: parseUnits("0.003", "ether").toHexString(),
     [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
   },
+
+  // Testnets
+  [ChainSlug.ARBITRUM_GOERLI]: {
+    [ChainSlug.OPTIMISM_GOERLI]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.POLYGON_MUMBAI]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.BSC_TESTNET]: parseUnits("0.003", "ether").toHexString(),
+  },
+  [ChainSlug.OPTIMISM_GOERLI]: {
+    [ChainSlug.ARBITRUM_GOERLI]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.POLYGON_MUMBAI]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.BSC_TESTNET]: parseUnits("0.003", "ether").toHexString(),
+  },
+  [ChainSlug.POLYGON_MUMBAI]: {
+    [ChainSlug.ARBITRUM_GOERLI]: parseUnits("1", "ether").toHexString(),
+    [ChainSlug.OPTIMISM_GOERLI]: parseUnits("1", "ether").toHexString(),
+    [ChainSlug.BSC_TESTNET]: parseUnits("1", "ether").toHexString(),
+  },
+  [ChainSlug.BSC_TESTNET]: {
+    [ChainSlug.ARBITRUM_GOERLI]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.OPTIMISM_GOERLI]: parseUnits("0.003", "ether").toHexString(),
+    [ChainSlug.POLYGON_MUMBAI]: parseUnits("0.003", "ether").toHexString(),
+  },
 };
 
 const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
@@ -60,25 +84,27 @@ const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
   return [];
 };
 
-const axiosPost = async (url, data, config = {}) => {
+const axiosPost = async (url: string, data: object, config = {}) => {
   try {
     let response = await axios.post(url, data, config);
     // console.log("txStatus : ", response.status, response.data);
-    return { success: true, ...response.data };
-
-    //@ts-ignore
+    return { success: true, ...response?.data };
   } catch (error) {
-    console.log("status : ", error.response.status);
+    //@ts-ignore
+    console.log("status : ", error?.response?.status);
     console.log(
       "error occurred, url : ",
       url,
       "data : ",
       data,
       "\n error : ",
-      error.message,
-      error.response.data
+      //@ts-ignore
+      error?.message,
+      //@ts-ignore
+      error?.response.data
     );
-    return { success: false, ...error.response.data };
+    //@ts-ignore
+    return { success: false, ...error?.response?.data };
   }
 };
 
@@ -86,6 +112,11 @@ const relayTx = async (params: RequestObj) => {
   try {
     let { to, data, chainSlug, gasPrice, value, gasLimit } = params;
     let url = await getRelayUrl(mode);
+    let config = {
+      headers: {
+        "x-api-key": getRelayAPIKEY(mode),
+      },
+    };
     // console.log({url})
     let body = {
       to,
@@ -97,7 +128,7 @@ const relayTx = async (params: RequestObj) => {
       sequential: false,
       source: "LoadTester",
     };
-    let response = await axiosPost(url, body);
+    let response = await axiosPost(url!, body, config);
     if (response?.success) return response?.data;
     else return { hash: "" };
   } catch (error) {
@@ -192,7 +223,7 @@ export const sendMessagesToAllPaths = async (params: {
 const main = async () => {
   let senderChains = chains;
   let receiverChains = chains;
-  await sendMessagesToAllPaths({ senderChains, receiverChains });
+  // await sendMessagesToAllPaths({ senderChains, receiverChains });
 };
 
 main()

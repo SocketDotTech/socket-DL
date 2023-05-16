@@ -47,29 +47,47 @@ contract AccessControlExtended is AccessControl {
     /**
      * @dev Grants multiple roles to multiple addresses in batch.
      * @param roleNames_ The names of the roles to grant.
+     * @param slugs_ The slugs for chain specific roles. For roles which are not chain-specific, we can use slug = 0
      * @param grantees_ The addresses to be granted the roles.
      */
-    function grantBatchRoleWithSlug(
+    function grantBatchRole(
         bytes32[] calldata roleNames_,
+        uint32[] calldata slugs_,
         address[] calldata grantees_
     ) external virtual onlyOwner {
         require(roleNames_.length == grantees_.length);
-        for (uint256 index = 0; index < roleNames_.length; index++)
-            _grantRole(roleNames_[index], grantees_[index]);
+        for (uint256 index = 0; index < roleNames_.length; index++) {
+            if (slugs_[index] > 0)
+                _grantRoleWithSlug(
+                    roleNames_[index],
+                    slugs_[index],
+                    grantees_[index]
+                );
+            else _grantRole(roleNames_[index], grantees_[index]);
+        }
     }
 
     /**
      * @dev Revokes multiple roles from multiple addresses in batch.
      * @param roleNames_ The names of the roles to revoke.
+     * @param slugs_ The slugs for chain specific roles. For roles which are not chain-specific, we can use slug = 0
      * @param grantees_ The addresses to be revoked the roles.
      */
-    function revokeBatchRoleWithSlug(
+    function revokeBatchRole(
         bytes32[] calldata roleNames_,
+        uint32[] calldata slugs_,
         address[] calldata grantees_
     ) external virtual onlyOwner {
         require(roleNames_.length == grantees_.length);
-        for (uint256 index = 0; index < roleNames_.length; index++)
-            _revokeRole(roleNames_[index], grantees_[index]);
+        for (uint256 index = 0; index < roleNames_.length; index++) {
+            if (slugs_[index] > 0)
+                _revokeRoleWithSlug(
+                    roleNames_[index],
+                    slugs_[index],
+                    grantees_[index]
+                );
+            else _revokeRole(roleNames_[index], grantees_[index]);
+        }
     }
 
     function _grantRoleWithSlug(
