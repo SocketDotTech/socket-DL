@@ -153,7 +153,6 @@ export interface ChainSocketAddresses {
   Counter: string;
   CapacitorFactory: string;
   ExecutionManager: string;
-  GasPriceOracle: string;
   Hasher: string;
   SignatureVerifier: string;
   Socket: string;
@@ -171,7 +170,6 @@ export type DeploymentAddresses = {
 
 export enum ROLES {
   TRANSMITTER_ROLE = "TRANSMITTER_ROLE",
-  GAS_LIMIT_UPDATER_ROLE = "GAS_LIMIT_UPDATER_ROLE",
   RESCUE_ROLE = "RESCUE_ROLE",
   WITHDRAW_ROLE = "WITHDRAW_ROLE",
   GOVERNANCE_ROLE = "GOVERNANCE_ROLE",
@@ -188,7 +186,6 @@ export enum CORE_CONTRACTS {
   Hasher = "Hasher",
   SignatureVerifier = "SignatureVerifier",
   TransmitManager = "TransmitManager",
-  GasPriceOracle = "GasPriceOracle",
   Socket = "Socket",
   FastSwitchboard = "FastSwitchboard",
   OptimisticSwitchboard = "OptimisticSwitchboard",
@@ -207,9 +204,7 @@ export const REQUIRED_ROLES = {
     ROLES.GOVERNANCE_ROLE,
     ROLES.WITHDRAW_ROLE,
     ROLES.RESCUE_ROLE,
-    ROLES.GAS_LIMIT_UPDATER_ROLE,
   ],
-  GasPriceOracle: [ROLES.GOVERNANCE_ROLE, ROLES.RESCUE_ROLE],
   Socket: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
   FastSwitchboard: [
     ROLES.TRIP_ROLE,
@@ -226,7 +221,6 @@ export const REQUIRED_ROLES = {
     ROLES.RESCUE_ROLE,
   ],
   NativeSwitchboard: [
-    ROLES.GAS_LIMIT_UPDATER_ROLE,
     ROLES.TRIP_ROLE,
     ROLES.UNTRIP_ROLE,
     ROLES.GOVERNANCE_ROLE,
@@ -236,7 +230,7 @@ export const REQUIRED_ROLES = {
 };
 
 export const REQUIRED_CHAIN_ROLES = {
-  TransmitManager: [ROLES.TRANSMITTER_ROLE, ROLES.GAS_LIMIT_UPDATER_ROLE],
-  FastSwitchboard: [ROLES.WATCHER_ROLE, ROLES.GAS_LIMIT_UPDATER_ROLE],
-  OptimisticSwitchboard: [ROLES.WATCHER_ROLE, ROLES.GAS_LIMIT_UPDATER_ROLE],
+  TransmitManager: [ROLES.TRANSMITTER_ROLE],
+  FastSwitchboard: [ROLES.WATCHER_ROLE],
+  OptimisticSwitchboard: [ROLES.WATCHER_ROLE],
 };

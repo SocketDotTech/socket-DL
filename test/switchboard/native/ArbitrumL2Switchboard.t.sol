@@ -5,7 +5,6 @@ import "../../Setup.t.sol";
 import "forge-std/Test.sol";
 import "../../../contracts/switchboard/native/ArbitrumL2Switchboard.sol";
 import "../../../contracts/TransmitManager.sol";
-import "../../../contracts/GasPriceOracle.sol";
 import "../../../contracts/ExecutionManager.sol";
 import "../../../contracts/CapacitorFactory.sol";
 import "../../../contracts/interfaces/ICapacitor.sol";
@@ -15,12 +14,10 @@ contract ArbitrumL2SwitchboardTest is Setup {
     bytes32[] roots;
     uint256 nonce;
 
-    uint256 confirmGasLimit_ = 100;
     uint256 initiateGasLimit_ = 100;
     uint256 executionOverhead_ = 100;
     address remoteNativeSwitchboard_ =
         0x3f0121d91B5c04B716Ea960790a89b173da7929c;
-    IGasPriceOracle gasPriceOracle_;
 
     ArbitrumL2Switchboard arbitrumL2Switchboard;
     ICapacitor singleCapacitor;
@@ -95,34 +92,14 @@ contract ArbitrumL2SwitchboardTest is Setup {
     ) internal returns (SocketConfigContext memory scc_) {
         arbitrumL2Switchboard = new ArbitrumL2Switchboard(
             cc_.chainSlug,
-            confirmGasLimit_,
-            initiateGasLimit_,
-            executionOverhead_,
             _socketOwner,
             address(cc_.socket__),
-            cc_.gasPriceOracle__
+            cc_.sigVerifier__
         );
 
         vm.startPrank(_socketOwner);
-        arbitrumL2Switchboard.grantRole(GAS_LIMIT_UPDATER_ROLE, _socketOwner);
         arbitrumL2Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
-        bytes32 digest = keccak256(
-            abi.encode(
-                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                address(arbitrumL2Switchboard),
-                cc_.chainSlug,
-                nonce,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        arbitrumL2Switchboard.setExecutionOverhead(
-            nonce++,
-            _executionOverhead,
-            sig
-        );
         arbitrumL2Switchboard.updateRemoteNativeSwitchboard(
             remoteNativeSwitchboard_
         );

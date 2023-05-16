@@ -1,7 +1,6 @@
 import { chainKeyToSlug } from "../../../src";
 import { bridgeConsts } from "../../constants";
 
-const executionOverhead = 300000;
 const initiateGasLimit = 300000;
 const confirmGasLimit = 300000;
 
@@ -15,9 +14,6 @@ export const polygonL2Switchboard = (
     contractName: "PolygonL2Switchboard",
     args: [
       chainKeyToSlug[network],
-      confirmGasLimit,
-      initiateGasLimit,
-      executionOverhead,
       bridgeConsts.fxChild[network],
       signerAddress,
       socketAddress,

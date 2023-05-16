@@ -13,19 +13,24 @@ contract OptimisticSwitchboard is SwitchboardBase {
      * @notice Creates an OptimisticSwitchboard instance with the specified parameters.
      * @param owner_ The address of the contract owner.
      * @param socket_ The address of the socket contract.
-     * @param gasPriceOracle_ The address of the gas price oracle contract.
      * @param chainSlug_ The chain slug.
      * @param timeoutInSeconds_ The timeout period in seconds.
+     * @param signatureVerifier_ The address of the signature verifier contract
      */
     constructor(
         address owner_,
         address socket_,
-        address gasPriceOracle_,
         uint32 chainSlug_,
-        uint256 timeoutInSeconds_
+        uint256 timeoutInSeconds_,
+        ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
-        SwitchboardBase(gasPriceOracle_, socket_, chainSlug_, timeoutInSeconds_)
+        SwitchboardBase(
+            socket_,
+            chainSlug_,
+            timeoutInSeconds_,
+            signatureVerifier_
+        )
     {}
 
     /**
@@ -42,15 +47,5 @@ contract OptimisticSwitchboard is SwitchboardBase {
         if (tripGlobalFuse || tripSinglePath[srcChainSlug_]) return false;
         if (block.timestamp - proposeTime_ < timeoutInSeconds) return false;
         return true;
-    }
-
-    /**
-     * @dev no watcher fees needed hence returns 0
-     */
-    function _getMinSwitchboardFees(
-        uint32,
-        uint256
-    ) internal pure override returns (uint256) {
-        return 0;
     }
 }

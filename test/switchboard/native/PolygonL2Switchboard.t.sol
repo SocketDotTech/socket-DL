@@ -14,8 +14,6 @@ contract PolygonL2SwitchboardTest is Setup {
     uint256 executionOverhead_ = 300000;
     address fxChild_ = 0xCf73231F28B7331BBe3124B907840A94851f9f11;
 
-    IGasPriceOracle gasPriceOracle_;
-
     PolygonL2Switchboard polygonL2Switchboard;
     ICapacitor singleCapacitor;
 
@@ -23,12 +21,6 @@ contract PolygonL2SwitchboardTest is Setup {
         initialise();
         _a.chainSlug = uint32(uint256(80001));
         _b.chainSlug = uint32(uint256(5));
-
-        uint256 fork = vm.createFork(
-            vm.envString("POLYGON_MUMBAI_RPC"),
-            32375450
-        );
-        vm.selectFork(fork);
 
         uint256[] memory transmitterPivateKeys = new uint256[](1);
         transmitterPivateKeys[0] = _transmitterPrivateKey;
@@ -89,13 +81,10 @@ contract PolygonL2SwitchboardTest is Setup {
     ) internal returns (SocketConfigContext memory scc_) {
         polygonL2Switchboard = new PolygonL2Switchboard(
             cc_.chainSlug,
-            confirmGasLimit_,
-            initiateGasLimit_,
-            executionOverhead_,
             fxChild_,
             _socketOwner,
             address(cc_.socket__),
-            cc_.gasPriceOracle__
+            cc_.sigVerifier__
         );
 
         scc_ = registerSwitchbaord(

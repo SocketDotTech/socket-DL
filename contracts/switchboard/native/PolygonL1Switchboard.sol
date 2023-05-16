@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import "fx-portal/tunnel/FxBaseRootTunnel.sol";
 import "./NativeSwitchboardBase.sol";
+import "../../utils/AccessControl.sol";
 
 /**
  * @title PolygonL1Switchboard
@@ -30,32 +31,21 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
      * @notice This is the constructor function of the PolygonL1Switchboard contract.
      *        initializes the contract with the provided parameters.
      * @param chainSlug_ is the identifier of the chain.
-     * @param initiateGasLimit_ is the gas limit for initiating the switchboard.
-     * @param executionOverhead_ is the overhead for executing the switchboard.
      * @param checkpointManager_ is the address of the checkpoint manager contract.
      * @param fxRoot_ is the address of the root contract.
      * @param owner_ is the address of the contract owner.
      * @param socket_ is the address of the Socket contract.
-     * @param gasPriceOracle_ is the address of the gas price oracle contract.
      */
     constructor(
         uint32 chainSlug_,
-        uint256 initiateGasLimit_,
-        uint256 executionOverhead_,
         address checkpointManager_,
         address fxRoot_,
         address owner_,
         address socket_,
-        IGasPriceOracle gasPriceOracle_
+        ISignatureVerifier signatureVerifier_
     )
         AccessControl(owner_)
-        NativeSwitchboardBase(
-            socket_,
-            chainSlug_,
-            initiateGasLimit_,
-            executionOverhead_,
-            gasPriceOracle_
-        )
+        NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
         FxBaseRootTunnel(checkpointManager_, fxRoot_)
     {}
 
@@ -93,19 +83,6 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         );
         packetIdToRoot[packetId] = root;
         emit RootReceived(packetId, root);
-    }
-
-    /**
-     * @dev Calculates the minimum fees required for the switchboard to process a request.
-     * @param sourceGasPrice_ the gas price for the source chain transaction
-     * @return minFees minimum fees required in native token
-     */
-    function _getMinSwitchboardFees(
-        uint32,
-        uint256,
-        uint256 sourceGasPrice_
-    ) internal view override returns (uint256) {
-        return initiateGasLimit * sourceGasPrice_;
     }
 
     /**

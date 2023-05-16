@@ -4,8 +4,6 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 
 contract TransmitManagerTest is Setup {
-    GasPriceOracle internal gasPriceOracle;
-
     address public constant NATIVE_TOKEN_ADDRESS =
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
@@ -38,8 +36,6 @@ contract TransmitManagerTest is Setup {
     SignatureVerifier internal signatureVerifier;
     TransmitManager internal transmitManager;
 
-    event SealGasLimitSet(uint256 gasLimit_);
-    event ProposeGasLimitSet(uint32 dstChainSlug_, uint256 gasLimit_);
     event TransmitManagerUpdated(address transmitManager);
     error TransmitterNotFound();
     error InsufficientTransmitFees();
@@ -53,20 +49,14 @@ contract TransmitManagerTest is Setup {
         feesPayer = vm.addr(feesPayerPrivateKey);
         feesWithdrawer = vm.addr(feesWithdrawerPrivateKey);
 
-        gasPriceOracle = new GasPriceOracle(owner, chainSlug);
         signatureVerifier = new SignatureVerifier();
         transmitManager = new TransmitManager(
             signatureVerifier,
-            gasPriceOracle,
             owner,
-            chainSlug,
-            sealGasLimit
+            chainSlug
         );
 
         vm.startPrank(owner);
-        gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
-        gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
-        gasPriceOracle.setTransmitManager(transmitManager);
         transmitManager.grantRoleWithSlug(
             TRANSMITTER_ROLE,
             chainSlug,
@@ -77,9 +67,11 @@ contract TransmitManagerTest is Setup {
             destChainSlug,
             transmitter
         );
-        transmitManager.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
+
+        //grant FeesUpdater Role
+        transmitManager.grantRole(FEES_UPDATER_ROLE, owner);
         transmitManager.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
+            FEES_UPDATER_ROLE,
             destChainSlug,
             owner
         );
@@ -89,75 +81,27 @@ contract TransmitManagerTest is Setup {
         transmitManager.grantRole(GOVERNANCE_ROLE, owner);
         vm.stopPrank();
 
-        bytes32 digest = keccak256(
+        bytes32 feesUpdateDigest = keccak256(
             abi.encode(
-                SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                address(transmitManager),
-                chainSlug,
-                ownerNonce,
-                sealGasLimit
-            )
-        );
-        bytes memory sig = _createSignature(digest, ownerPrivateKey);
-
-        vm.expectEmit(false, false, false, true);
-        emit SealGasLimitSet(sealGasLimit);
-        transmitManager.setSealGasLimit(ownerNonce++, sealGasLimit, sig);
-
-        digest = keccak256(
-            abi.encode(
-                PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                FEES_UPDATE_SIG_IDENTIFIER,
                 address(transmitManager),
                 chainSlug,
                 destChainSlug,
                 ownerNonce,
-                proposeGasLimit
+                _transmissionFees
             )
         );
-        sig = _createSignature(digest, ownerPrivateKey);
 
-        vm.expectEmit(false, false, false, true);
-        emit ProposeGasLimitSet(destChainSlug, proposeGasLimit);
-        transmitManager.setProposeGasLimit(
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            ownerPrivateKey
+        );
+
+        transmitManager.setTransmissionFees(
             ownerNonce++,
-            destChainSlug,
-            proposeGasLimit,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(
-                address(gasPriceOracle),
-                chainSlug,
-                gasPriceOracleNonce,
-                sourceGasPrice
-            )
-        );
-        sig = _createSignature(digest, transmitterPrivateKey);
-
-        gasPriceOracle.setSourceGasPrice(
-            gasPriceOracleNonce++,
-            sourceGasPrice,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(
-                address(gasPriceOracle),
-                chainSlug,
-                destChainSlug,
-                gasPriceOracleNonce,
-                relativeGasPrice
-            )
-        );
-
-        sig = _createSignature(digest, transmitterPrivateKey);
-
-        gasPriceOracle.setRelativeGasPrice(
-            destChainSlug,
-            gasPriceOracleNonce++,
-            relativeGasPrice,
-            sig
+            uint32(destChainSlug),
+            _transmissionFees,
+            feesUpdateSignature
         );
     }
 

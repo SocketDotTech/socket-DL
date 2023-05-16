@@ -11,7 +11,6 @@ import "../contracts/switchboard/default-switchboards/FastSwitchboard.sol";
 import "../contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol";
 
 import "../contracts/TransmitManager.sol";
-import "../contracts/GasPriceOracle.sol";
 import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
 import "../contracts/utils/AccessRoles.sol";
@@ -47,12 +46,10 @@ contract Setup is Test {
     uint256 internal _slowCapacitorWaitTime = 300;
     uint256 internal _msgGasLimit = 30548;
     uint256 internal _sealGasLimit = 150000;
-    uint256 internal _proposeGasLimit = 150000;
-    uint256 internal _attestGasLimit = 150000;
+    uint256 internal _transmissionFees = 350000000000;
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
-    uint256 gasPriceOracleNonce;
 
     struct SocketConfigContext {
         uint32 siblingChainSlug;
@@ -65,12 +62,12 @@ contract Setup is Test {
     struct ChainContext {
         uint32 chainSlug;
         uint256 transmitterNonce;
+        uint256 executorNonce;
         Socket socket__;
         Hasher hasher__;
         SignatureVerifier sigVerifier__;
         CapacitorFactory capacitorFactory__;
         TransmitManager transmitManager__;
-        GasPriceOracle gasPriceOracle__;
         ExecutionManager executionManager__;
         SocketConfigContext[] configs__;
     }
@@ -124,30 +121,43 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
 
+        //grant FeesUpdater Role
         cc_.transmitManager__.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
+            FEES_UPDATER_ROLE,
+            remoteChainSlug_,
+            _socketOwner
+        );
+
+        //grant FeesUpdater Role
+        cc_.executionManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
             remoteChainSlug_,
             _socketOwner
         );
 
         vm.stopPrank();
 
-        bytes32 digest = keccak256(
+        //set TransmissionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
             abi.encode(
-                PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
+                FEES_UPDATE_SIG_IDENTIFIER,
                 address(cc_.transmitManager__),
                 cc_.chainSlug,
                 remoteChainSlug_,
                 cc_.transmitterNonce,
-                _proposeGasLimit
+                _transmissionFees
             )
         );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-        cc_.transmitManager__.setProposeGasLimit(
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+        cc_.transmitManager__.setTransmissionFees(
             cc_.transmitterNonce++,
-            remoteChainSlug_,
-            _proposeGasLimit,
-            sig
+            uint32(remoteChainSlug_),
+            _transmissionFees,
+            feesUpdateSignature
         );
 
         // deploy default configs: fast, slow
@@ -177,43 +187,13 @@ contract Setup is Test {
         OptimisticSwitchboard optimisticSwitchboard = new OptimisticSwitchboard(
             _socketOwner,
             address(cc_.socket__),
-            address(cc_.gasPriceOracle__),
             cc_.chainSlug,
-            _timeoutInSeconds
+            _timeoutInSeconds,
+            cc_.sigVerifier__
         );
 
         uint256 nonce = 0;
         vm.startPrank(_socketOwner);
-
-        optimisticSwitchboard.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            remoteChainSlug_,
-            _socketOwner
-        );
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                address(optimisticSwitchboard),
-                cc_.chainSlug,
-                remoteChainSlug_,
-                nonce,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        optimisticSwitchboard.setExecutionOverhead(
-            nonce++,
-            remoteChainSlug_,
-            _executionOverhead,
-            sig
-        );
-        optimisticSwitchboard.grantRoleWithSlug(
-            WATCHER_ROLE,
-            remoteChainSlug_,
-            _watcher
-        );
 
         vm.stopPrank();
 
@@ -235,60 +215,18 @@ contract Setup is Test {
         FastSwitchboard fastSwitchboard = new FastSwitchboard(
             _socketOwner,
             address(cc_.socket__),
-            address(cc_.gasPriceOracle__),
             cc_.chainSlug,
-            _timeoutInSeconds
+            _timeoutInSeconds,
+            cc_.sigVerifier__
         );
         uint256 nonce = 0;
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-        fastSwitchboard.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            remoteChainSlug_,
-            _socketOwner
-        );
+
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
 
         vm.stopPrank();
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                address(fastSwitchboard),
-                cc_.chainSlug,
-                remoteChainSlug_,
-                nonce,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        fastSwitchboard.setExecutionOverhead(
-            nonce++,
-            remoteChainSlug_,
-            _executionOverhead,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(
-                ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                address(fastSwitchboard),
-                cc_.chainSlug,
-                remoteChainSlug_,
-                nonce,
-                _attestGasLimit
-            )
-        );
-        sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        fastSwitchboard.setAttestGasLimit(
-            nonce++,
-            remoteChainSlug_,
-            _attestGasLimit,
-            sig
-        );
 
         scc_ = _registerSwitchbaord(
             cc_,
@@ -309,30 +247,31 @@ contract Setup is Test {
         cc_.hasher__ = new Hasher();
         cc_.sigVerifier__ = new SignatureVerifier();
         cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
-        cc_.gasPriceOracle__ = new GasPriceOracle(deployer_, cc_.chainSlug);
         cc_.executionManager__ = new ExecutionManager(
-            cc_.gasPriceOracle__,
-            deployer_
+            deployer_,
+            cc_.chainSlug,
+            cc_.sigVerifier__
         );
 
-        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
-        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
+        //grant FeesUpdater Role
+        cc_.executionManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            cc_.chainSlug,
+            deployer_
+        );
 
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
-            cc_.gasPriceOracle__,
             deployer_,
-            cc_.chainSlug,
-            _sealGasLimit
+            cc_.chainSlug
         );
 
+        //grant FeesUpdater Role
         cc_.transmitManager__.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
+            FEES_UPDATER_ROLE,
             cc_.chainSlug,
             deployer_
         );
-
-        cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
 
         cc_.socket__ = new Socket(
             uint32(cc_.chainSlug),

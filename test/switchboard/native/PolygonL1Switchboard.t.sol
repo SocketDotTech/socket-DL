@@ -18,8 +18,6 @@ contract PolygonL1SwitchboardTest is Setup {
     address remoteNativeSwitchboard_ =
         0x029ce68B3A6B3B3713CaC23a39c9096f279c8Ad2;
 
-    IGasPriceOracle gasPriceOracle_;
-
     PolygonL1Switchboard polygonL1Switchboard;
     ICapacitor singleCapacitor;
 
@@ -91,13 +89,11 @@ contract PolygonL1SwitchboardTest is Setup {
     ) internal returns (SocketConfigContext memory scc_) {
         polygonL1Switchboard = new PolygonL1Switchboard(
             cc_.chainSlug,
-            initiateGasLimit_,
-            executionOverhead_,
             checkpointManager_,
             fxRoot_,
             _socketOwner,
             address(cc_.socket__),
-            cc_.gasPriceOracle__
+            cc_.sigVerifier__
         );
 
         scc_ = registerSwitchbaord(

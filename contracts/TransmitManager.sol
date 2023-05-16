@@ -3,13 +3,12 @@ pragma solidity 0.8.7;
 
 import "./interfaces/ITransmitManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
-import "./interfaces/IGasPriceOracle.sol";
 
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/FeesHelper.sol";
-import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRANSMITTER_ROLE} from "./utils/AccessRoles.sol";
-import {SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
+import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRANSMITTER_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
+import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 
 /**
  * @title TransmitManager
@@ -19,36 +18,18 @@ import {SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER, PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENT
  */
 contract TransmitManager is ITransmitManager, AccessControlExtended {
     ISignatureVerifier public signatureVerifier__;
-    IGasPriceOracle public gasPriceOracle__;
 
     uint32 public immutable chainSlug;
-    uint256 public sealGasLimit;
-
-    // chain slug => propose gas limit
-    mapping(uint32 => uint256) public proposeGasLimit;
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
 
+    // remoteChainSlug => transmissionFees
+    mapping(uint32 => uint256) public transmissionFees;
+
     error InsufficientTransmitFees();
     error InvalidNonce();
 
-    /**
-     * @notice Emitted when a new gas price oracle contract is set
-     * @param gasPriceOracle The address of the new gas price oracle contract
-     */
-    event GasPriceOracleSet(address gasPriceOracle);
-    /**
-     * @notice Emitted when the seal gas limit is updated
-     * @param gasLimit The new seal gas limit
-     */
-    event SealGasLimitSet(uint256 gasLimit);
-    /**
-     * @notice Emitted when the propose gas limit is updated
-     * @param dstChainSlug The destination chain slug for which the propose gas limit is updated
-     * @param gasLimit The new propose gas limit
-     */
-    event ProposeGasLimitSet(uint32 dstChainSlug, uint256 gasLimit);
     /**
      * @notice Emitted when a new signature verifier contract is set
      * @param signatureVerifier The address of the new signature verifier contract
@@ -56,24 +37,25 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     event SignatureVerifierSet(address signatureVerifier);
 
     /**
+     * @notice Emitted when the transmissionFees is updated
+     * @param dstChainSlug The destination chain slug for which the transmissionFees is updated
+     * @param transmissionFees The new transmissionFees
+     */
+    event TransmissionFeesSet(uint256 dstChainSlug, uint256 transmissionFees);
+
+    /**
      * @notice Initializes the TransmitManager contract
      * @param signatureVerifier_ The address of the signature verifier contract
-     * @param gasPriceOracle_ The address of the gas price oracle contract
      * @param owner_ The owner of the contract with GOVERNANCE_ROLE
      * @param chainSlug_ The chain slug of the current contract
-     * @param sealGasLimit_ The gas limit for seal transactions
      */
     constructor(
         ISignatureVerifier signatureVerifier_,
-        IGasPriceOracle gasPriceOracle_,
         address owner_,
-        uint32 chainSlug_,
-        uint256 sealGasLimit_
+        uint32 chainSlug_
     ) AccessControlExtended(owner_) {
         chainSlug = chainSlug_;
-        sealGasLimit = sealGasLimit_;
         signatureVerifier__ = signatureVerifier_;
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
     }
 
     /**
@@ -114,26 +96,36 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     function getMinFees(
         uint32 siblingChainSlug_
     ) external view override returns (uint256) {
-        return _calculateMinFees(siblingChainSlug_);
+        return transmissionFees[siblingChainSlug_];
     }
 
-    /**
-     * @notice calculates fees for the given sibling slug
-     * @param siblingChainSlug_ sibling id
-     */
-    function _calculateMinFees(
-        uint32 siblingChainSlug_
-    ) internal view returns (uint256 minTransmissionFees) {
-        (
-            uint256 sourceGasPrice,
-            uint256 siblingRelativeGasPrice
-        ) = gasPriceOracle__.getGasPrices(siblingChainSlug_);
+    function setTransmissionFees(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 transmissionFees_,
+        bytes calldata signature_
+    ) external override {
+        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    FEES_UPDATE_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    transmissionFees_
+                )
+            ),
+            signature_
+        );
 
-        minTransmissionFees =
-            sealGasLimit *
-            sourceGasPrice +
-            proposeGasLimit[siblingChainSlug_] *
-            siblingRelativeGasPrice;
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        uint256 nonce = nextNonce[feesUpdater]++;
+        if (nonce_ != nonce) revert InvalidNonce();
+
+        transmissionFees[dstChainSlug_] = transmissionFees_;
+        emit TransmissionFeesSet(dstChainSlug_, transmissionFees_);
     }
 
     /**
@@ -142,90 +134,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         FeesHelper.withdrawFees(account_);
-    }
-
-    /**
-     * @notice updates seal gas limit
-     * @param nonce_ nonce of transmitter
-     * @param gasLimit_ new seal gas limit
-     * @param signature_ signature
-     */
-    function setSealGasLimit(
-        uint256 nonce_,
-        uint256 gasLimit_,
-        bytes calldata signature_
-    ) external {
-        address gasLimitUpdater = signatureVerifier__.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    SEAL_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    nonce_,
-                    gasLimit_
-                )
-            ),
-            signature_
-        );
-
-        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
-
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        sealGasLimit = gasLimit_;
-        emit SealGasLimitSet(gasLimit_);
-    }
-
-    /**
-     * @notice updates propose gas limit for `dstChainSlug_`
-     * @param nonce_ nonce of transmitter
-     * @param dstChainSlug_ dest slug
-     * @param gasLimit_ new propose gas limit
-     * @param signature_ signature
-     */
-    function setProposeGasLimit(
-        uint256 nonce_,
-        uint32 dstChainSlug_,
-        uint256 gasLimit_,
-        bytes calldata signature_
-    ) external override {
-        address gasLimitUpdater = signatureVerifier__.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    PROPOSE_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    dstChainSlug_,
-                    nonce_,
-                    gasLimit_
-                )
-            ),
-            signature_
-        );
-
-        _checkRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            dstChainSlug_,
-            gasLimitUpdater
-        );
-
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        proposeGasLimit[dstChainSlug_] = gasLimit_;
-        emit ProposeGasLimitSet(dstChainSlug_, gasLimit_);
-    }
-
-    /**
-     * @notice updates gasPriceOracle__
-     * @param gasPriceOracle_ address of Gas Price Oracle
-     */
-    function setGasPriceOracle(
-        address gasPriceOracle_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
-        emit GasPriceOracleSet(gasPriceOracle_);
     }
 
     /**

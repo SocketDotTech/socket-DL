@@ -4,10 +4,8 @@ pragma solidity 0.8.7;
 import "openzeppelin-contracts/contracts/vendor/arbitrum/IBridge.sol";
 import "openzeppelin-contracts/contracts/vendor/arbitrum/IInbox.sol";
 import "openzeppelin-contracts/contracts/vendor/arbitrum/IOutbox.sol";
-
+import "../../utils/AccessControl.sol";
 import "./NativeSwitchboardBase.sol";
-
-import {ARBITRUM_NATIVE_FEE_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
  * @title ArbitrumL1Switchboard
@@ -26,11 +24,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
      * @notice The address to which refunds for call value will be sent.
      */
     address public callValueRefundAddress;
-
-    /**
-     * @notice The fee charged in Arbitrum native currency for executing transactions.
-     */
-    uint256 public arbitrumNativeFee;
 
     /**
      * @notice An interface for receiving incoming messages from the Arbitrum chain.
@@ -64,12 +57,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     );
 
     /**
-     * @notice Event emitted when the Arbitrum native fee is updated.
-     * @param arbitrumNativeFee The new Arbitrum native fee.
-     */
-    event UpdatedArbitrumNativeFee(uint256 arbitrumNativeFee);
-
-    /**
      * @notice Event emitted when the bridge address is updated.
      * @param bridgeAddress The new bridge address.
      */
@@ -94,39 +81,25 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     /**
      * @dev Constructor function for initializing the NativeBridge contract
      * @param chainSlug_ The identifier of the current chain in the system
-     * @param arbitrumNativeFee_ The fee charged by the system for processing messages
-     * @param initiateGasLimit_ The maximum gas limit that can be used for initiating a message
-     * @param executionOverhead_ The additional gas used for executing a message
      * @param inbox_ The address of the Arbitrum Inbox contract
      * @param owner_ The address of the owner of the NativeBridge contract
      * @param socket_ The address of the socket contract
-     * @param gasPriceOracle_ The address of the gas price oracle contract
      * @param bridge_ The address of the bridge contract
      * @param outbox_ The address of the Arbitrum Outbox contract
      */
     constructor(
         uint32 chainSlug_,
-        uint256 arbitrumNativeFee_,
-        uint256 initiateGasLimit_,
-        uint256 executionOverhead_,
         address inbox_,
         address owner_,
         address socket_,
-        IGasPriceOracle gasPriceOracle_,
         address bridge_,
-        address outbox_
+        address outbox_,
+        ISignatureVerifier signatureVerifier_
     )
         AccessControl(owner_)
-        NativeSwitchboardBase(
-            socket_,
-            chainSlug_,
-            initiateGasLimit_,
-            executionOverhead_,
-            gasPriceOracle_
-        )
+        NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
     {
         inbox__ = IInbox(inbox_);
-        arbitrumNativeFee = arbitrumNativeFee_;
 
         bridge__ = IBridge(bridge_);
         outbox__ = IOutbox(outbox_);
@@ -189,26 +162,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     }
 
     /**
-    * @dev Calculates the minimum fees required for a switchboard transaction to be processed.
-    * @param sourceGasPrice_ The gas price on the source chain.
-    * @return The minimum fees required for the transaction.
-    * @notice This function is internal and is only meant to be called by the contract itself.
-    * @notice The fees are calculated as the product of the initiate gas limit and the source gas price,
-              plus the arbitrum native fee.
-    * @notice The arbitrum native fee is a constant value set by the contract's constructor, and it represents
-    the minimum amount of arbitrum native currency that should be paid for a switchboard transaction to be processed.
-    */
-    function _getMinSwitchboardFees(
-        uint32,
-        uint256,
-        uint256 sourceGasPrice_
-    ) internal view override returns (uint256) {
-        // TODO: check if dynamic fees can be divided into more constants
-        // arbitrum: check src contract
-        return initiateGasLimit * sourceGasPrice_ + arbitrumNativeFee;
-    }
-
-    /**
      * @notice This function updates the remote and call value refund addresses for the contract.
      *         Only users with the GOVERNANCE_ROLE can call this function.
      * @param remoteRefundAddress_  (address): The new address that will be used to refund remote tokens.
@@ -226,45 +179,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
             remoteRefundAddress_,
             callValueRefundAddress_
         );
-    }
-
-    /**
-     * @notice This function is used to update the arbitrumNativeFee parameter
-     * @param nonce_ A uint256 value representing the nonce for this update.
-     * @param arbitrumNativeFee_ A uint256 value representing the new value for arbitrumNativeFee.
-     * @param signature_ A bytes array representing the signature of the caller.
-     * @dev arbitrumNativeFees is used to calculate the minimum switchboard fees for
-     * initiating a native confirmation. The new value for arbitrumNativeFee
-     * is passed as an argument along with a nonce and a signature.
-     * The signature is used to verify the identity of the caller.
-     * Once the caller's identity is verified, the new value for
-     * arbitrumNativeFee is set and an event is emitted.
-     */
-    function updateArbitrumNativeFee(
-        uint256 nonce_,
-        uint256 arbitrumNativeFee_,
-        bytes calldata signature_
-    ) external {
-        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    ARBITRUM_NATIVE_FEE_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    nonce_,
-                    arbitrumNativeFee_
-                )
-            ),
-            signature_
-        );
-
-        _checkRole(GAS_LIMIT_UPDATER_ROLE, gasLimitUpdater);
-
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        arbitrumNativeFee = arbitrumNativeFee_;
-        emit UpdatedArbitrumNativeFee(arbitrumNativeFee_);
     }
 
     /**

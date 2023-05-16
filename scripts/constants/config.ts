@@ -16,38 +16,6 @@ export const timeout: {
   [ChainKey.MAINNET]: 7200,
 };
 
-export const sealGasLimit: {
-  [key: string]: number;
-} = {
-  [ChainKey.BSC_TESTNET]: 300000,
-  [ChainKey.POLYGON_MAINNET]: 300000,
-  [ChainKey.BSC]: 300000,
-  [ChainKey.POLYGON_MUMBAI]: 300000,
-  [ChainKey.ARBITRUM_GOERLI]: 300000,
-  [ChainKey.OPTIMISM_GOERLI]: 300000,
-  [ChainKey.GOERLI]: 300000,
-  [ChainKey.HARDHAT]: 300000,
-  [ChainKey.ARBITRUM]: 300000,
-  [ChainKey.OPTIMISM]: 300000,
-  [ChainKey.MAINNET]: 300000,
-};
-
-export const proposeGasLimit: {
-  [key: string]: number;
-} = {
-  [ChainKey.BSC_TESTNET]: 80000,
-  [ChainKey.POLYGON_MAINNET]: 80000,
-  [ChainKey.BSC]: 80000,
-  [ChainKey.POLYGON_MUMBAI]: 80000,
-  [ChainKey.ARBITRUM_GOERLI]: 1000000,
-  [ChainKey.OPTIMISM_GOERLI]: 80000,
-  [ChainKey.GOERLI]: 80000,
-  [ChainKey.HARDHAT]: 80000,
-  [ChainKey.ARBITRUM]: 1000000,
-  [ChainKey.OPTIMISM]: 80000,
-  [ChainKey.MAINNET]: 80000,
-};
-
 export const attestGasLimit: {
   [key: string]: number;
 } = {

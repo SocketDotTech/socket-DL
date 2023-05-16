@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 import "./SwitchboardBase.sol";
 import "../../libraries/SignatureVerifierLib.sol";
-import {ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
  * @title FastSwitchboard contract
@@ -17,9 +16,6 @@ contract FastSwitchboard is SwitchboardBase {
     // dst chain slug => total watchers registered
     mapping(uint32 => uint256) public totalWatchers;
 
-    // dst chain slug => attest gas limit
-    mapping(uint32 => uint256) public attestGasLimit;
-
     // attester => packetId => is attested
     mapping(address => mapping(bytes32 => bool)) public isAttested;
 
@@ -30,8 +26,6 @@ contract FastSwitchboard is SwitchboardBase {
     event SocketSet(address newSocket);
     // Event emitted when a packet is attested
     event PacketAttested(bytes32 packetId, address attester);
-    // Event emitted when the attest gas limit is set
-    event AttestGasLimitSet(uint32 dstChainSlug, uint256 attestGasLimit);
 
     // Error emitted when a watcher is found
     error WatcherFound();
@@ -46,19 +40,24 @@ contract FastSwitchboard is SwitchboardBase {
      * @dev Constructor function for the FastSwitchboard contract
      * @param owner_ Address of the owner of the contract
      * @param socket_ Address of the socket contract
-     * @param gasPriceOracle_ Address of the gas price oracle contract
      * @param chainSlug_ Chain slug of the chain where the contract is deployed
      * @param timeoutInSeconds_ Timeout in seconds for the packets
+     * @param signatureVerifier_ The address of the signature verifier contract
      */
     constructor(
         address owner_,
         address socket_,
-        address gasPriceOracle_,
         uint32 chainSlug_,
-        uint256 timeoutInSeconds_
+        uint256 timeoutInSeconds_,
+        ISignatureVerifier signatureVerifier_
     )
         AccessControlExtended(owner_)
-        SwitchboardBase(gasPriceOracle_, socket_, chainSlug_, timeoutInSeconds_)
+        SwitchboardBase(
+            socket_,
+            chainSlug_,
+            timeoutInSeconds_,
+            signatureVerifier_
+        )
     {}
 
     /**
@@ -105,54 +104,6 @@ contract FastSwitchboard is SwitchboardBase {
         return false;
     }
 
-    function _getMinSwitchboardFees(
-        uint32 dstChainSlug_,
-        uint256 dstRelativeGasPrice_
-    ) internal view override returns (uint256) {
-        // assumption: number of watchers are going to be same on all chains for particular chain slug
-        return
-            totalWatchers[dstChainSlug_] *
-            attestGasLimit[dstChainSlug_] *
-            dstRelativeGasPrice_;
-    }
-
-    /**
-     * @notice updates attest gas limit for given chain slug
-     * @param dstChainSlug_ destination chain
-     * @param attestGasLimit_ average gas limit needed for attest function call
-     */
-    function setAttestGasLimit(
-        uint256 nonce_,
-        uint32 dstChainSlug_,
-        uint256 attestGasLimit_,
-        bytes calldata signature_
-    ) external {
-        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(
-                    ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    dstChainSlug_,
-                    nonce_,
-                    attestGasLimit_
-                )
-            ),
-            signature_
-        );
-        _checkRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            dstChainSlug_,
-            gasLimitUpdater
-        );
-
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        attestGasLimit[dstChainSlug_] = attestGasLimit_;
-        emit AttestGasLimitSet(dstChainSlug_, attestGasLimit_);
-    }
-
     /**
      * @notice adds a watcher for `srcChainSlug_` chain
      * @param watcher_ watcher address
@@ -190,7 +141,7 @@ contract FastSwitchboard is SwitchboardBase {
             role_ == WITHDRAW_ROLE ||
             role_ == RESCUE_ROLE ||
             role_ == GOVERNANCE_ROLE ||
-            role_ == GAS_LIMIT_UPDATER_ROLE
+            role_ == FEES_UPDATER_ROLE
         ) return true;
 
         return false;
@@ -220,7 +171,7 @@ contract FastSwitchboard is SwitchboardBase {
         uint32 chainSlug_,
         address grantee_
     ) external override onlyOwner {
-        if (roleName_ != GAS_LIMIT_UPDATER_ROLE) revert InvalidRole();
+        if (roleName_ != FEES_UPDATER_ROLE) revert InvalidRole();
         _grantRoleWithSlug(roleName_, chainSlug_, grantee_);
     }
 
@@ -248,7 +199,7 @@ contract FastSwitchboard is SwitchboardBase {
         uint32 chainSlug_,
         address grantee_
     ) external override onlyOwner {
-        if (roleName_ != GAS_LIMIT_UPDATER_ROLE) revert InvalidRole();
+        if (roleName_ != FEES_UPDATER_ROLE) revert InvalidRole();
         _revokeRoleWithSlug(roleName_, chainSlug_, grantee_);
     }
 

@@ -28,36 +28,12 @@ contract OptimisticSwitchboardTest is Setup {
         optimisticSwitchboard = new OptimisticSwitchboard(
             _socketOwner,
             address(uint160(c++)),
-            address(uint160(c++)),
             _a.chainSlug,
-            1
+            1,
+            _a.sigVerifier__
         );
 
-        optimisticSwitchboard.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            remoteChainSlug,
-            _socketOwner
-        );
         optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                address(optimisticSwitchboard),
-                _a.chainSlug,
-                remoteChainSlug,
-                nonce,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        optimisticSwitchboard.setExecutionOverhead(
-            nonce++,
-            remoteChainSlug,
-            _executionOverhead,
-            sig
-        );
 
         optimisticSwitchboard.grantRoleWithSlug(
             WATCHER_ROLE,

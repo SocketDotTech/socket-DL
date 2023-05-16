@@ -4,14 +4,14 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 
 contract ExecutionManagerTest is Setup {
-    GasPriceOracle internal gasPriceOracle;
-
     address public constant NATIVE_TOKEN_ADDRESS =
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     uint32 chainSlug = uint32(uint256(0x2013AA263));
     uint32 destChainSlug = uint32(uint256(0x2013AA264));
     uint32 chainSlug2 = uint32(uint256(0x2113AA263));
+    uint256 _executionFees = 110000000000;
+    uint256 executorNonce = 0;
 
     uint256 immutable transmitterPrivateKey = c++;
     address transmitter;
@@ -29,7 +29,6 @@ contract ExecutionManagerTest is Setup {
     address feesWithdrawer;
 
     uint256 sealGasLimit = 200000;
-    uint256 proposeGasLimit = 100000;
     uint256 sourceGasPrice = 1200000;
     uint256 relativeGasPrice = 1100000;
 
@@ -37,8 +36,6 @@ contract ExecutionManagerTest is Setup {
     SignatureVerifier internal signatureVerifier;
     TransmitManager internal transmitManager;
 
-    event SealGasLimitSet(uint256 gasLimit_);
-    event ProposeGasLimitSet(uint32 dstChainSlug_, uint256 gasLimit_);
     event TransmitManagerUpdated(address transmitManager);
     error TransmitterNotFound();
     error InsufficientExecutionFees();
@@ -53,38 +50,77 @@ contract ExecutionManagerTest is Setup {
 
         _executor = vm.addr(executorPrivateKey);
 
-        gasPriceOracle = new GasPriceOracle(owner, chainSlug);
-        executionManager = new ExecutionManager(gasPriceOracle, owner);
+        executionManager = new ExecutionManager(
+            owner,
+            chainSlug,
+            signatureVerifier
+        );
 
         signatureVerifier = new SignatureVerifier();
         transmitManager = new TransmitManager(
             signatureVerifier,
-            gasPriceOracle,
+            owner,
+            chainSlug
+        );
+
+        executionManager = new ExecutionManager(
             owner,
             chainSlug,
-            sealGasLimit
+            signatureVerifier
         );
 
         vm.startPrank(owner);
-        gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
-        gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
-        gasPriceOracle.setTransmitManager(transmitManager);
 
         executionManager.grantRole(EXECUTOR_ROLE, _executor);
         executionManager.grantRole(RESCUE_ROLE, owner);
         executionManager.grantRole(WITHDRAW_ROLE, owner);
 
+        //grant FeesUpdater Role
+        executionManager.grantRoleWithSlug(FEES_UPDATER_ROLE, chainSlug, owner);
+
         transmitManager.grantRoleWithSlug(
             TRANSMITTER_ROLE,
             chainSlug,
             transmitter
         );
+
         transmitManager.grantRoleWithSlug(
             TRANSMITTER_ROLE,
             destChainSlug,
             transmitter
         );
-        gasPriceOracle.setTransmitManager(transmitManager);
+
+        //grant FeesUpdater Role
+        executionManager.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            destChainSlug,
+            owner
+        );
+
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                address(executionManager),
+                chainSlug,
+                destChainSlug,
+                executorNonce,
+                _executionFees
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            ownerPrivateKey
+        );
+
+        executionManager.setExecutionFees(
+            executorNonce++,
+            uint32(destChainSlug),
+            _executionFees,
+            feesUpdateSignature
+        );
+
         vm.stopPrank();
 
         assertTrue(
@@ -100,40 +136,6 @@ contract ExecutionManagerTest is Setup {
                 destChainSlug,
                 transmitter
             )
-        );
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                address(gasPriceOracle),
-                chainSlug,
-                gasPriceOracleNonce,
-                sourceGasPrice
-            )
-        );
-        bytes memory sig = _createSignature(digest, transmitterPrivateKey);
-
-        gasPriceOracle.setSourceGasPrice(
-            gasPriceOracleNonce++,
-            sourceGasPrice,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(
-                address(gasPriceOracle),
-                chainSlug,
-                destChainSlug,
-                gasPriceOracleNonce,
-                relativeGasPrice
-            )
-        );
-        sig = _createSignature(digest, transmitterPrivateKey);
-
-        gasPriceOracle.setRelativeGasPrice(
-            destChainSlug,
-            gasPriceOracleNonce++,
-            relativeGasPrice,
-            sig
         );
     }
 
@@ -155,10 +157,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         //compute expected Data
-        uint256 dstRelativeGasPrice = gasPriceOracle.relativeGasPrice(
-            destChainSlug
-        );
-        uint256 expectedMinFees = msgGasLimit * dstRelativeGasPrice;
+        uint256 expectedMinFees = msgGasLimit * relativeGasPrice;
 
         //assert actual and expected data
         assertEq(minFees, expectedMinFees);

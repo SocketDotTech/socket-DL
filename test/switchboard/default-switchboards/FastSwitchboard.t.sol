@@ -11,7 +11,6 @@ contract FastSwitchboardTest is Setup {
     address altWatcher;
     uint256 nonce;
 
-    event AttestGasLimitSet(uint32 dstChainSlug_, uint256 attestGasLimit_);
     event PacketAttested(bytes32 packetId, address attester);
     event SwitchboardTripped(bool tripGlobalFuse_);
     event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
@@ -34,62 +33,18 @@ contract FastSwitchboardTest is Setup {
         fastSwitchboard = new FastSwitchboard(
             _socketOwner,
             address(uint160(c++)),
-            address(uint160(c++)),
             _a.chainSlug,
-            1
+            1,
+            _a.sigVerifier__
         );
 
-        fastSwitchboard.grantRoleWithSlug(
-            GAS_LIMIT_UPDATER_ROLE,
-            remoteChainSlug,
-            _socketOwner
-        );
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                EXECUTION_OVERHEAD_UPDATE_SIG_IDENTIFIER,
-                address(fastSwitchboard),
-                _a.chainSlug,
-                remoteChainSlug,
-                nonce,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-        fastSwitchboard.setExecutionOverhead(
-            nonce++,
-            remoteChainSlug,
-            _executionOverhead,
-            sig
-        );
 
         watcher = vm.addr(_watcherPrivateKey);
         altWatcher = vm.addr(_altWatcherPrivateKey);
 
         fastSwitchboard.grantWatcherRole(remoteChainSlug, watcher);
         fastSwitchboard.grantWatcherRole(remoteChainSlug, altWatcher);
-
-        digest = keccak256(
-            abi.encode(
-                ATTEST_GAS_LIMIT_UPDATE_SIG_IDENTIFIER,
-                address(fastSwitchboard),
-                _a.chainSlug,
-                remoteChainSlug,
-                nonce,
-                _attestGasLimit
-            )
-        );
-        sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        vm.expectEmit(false, false, false, true);
-        emit AttestGasLimitSet(remoteChainSlug, _attestGasLimit);
-        fastSwitchboard.setAttestGasLimit(
-            nonce++,
-            remoteChainSlug,
-            _attestGasLimit,
-            sig
-        );
 
         vm.stopPrank();
     }

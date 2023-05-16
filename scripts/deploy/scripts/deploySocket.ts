@@ -1,7 +1,6 @@
 import { Contract, Wallet } from "ethers";
 import { DeployParams, getOrDeploy, storeAddresses } from "../utils";
 
-import { sealGasLimit } from "../../constants/config";
 import {
   CORE_CONTRACTS,
   ChainSocketAddresses,
@@ -62,19 +61,10 @@ export const deploySocket = async (
     deployUtils.addresses[CORE_CONTRACTS.CapacitorFactory] =
       capacitorFactory.address;
 
-    const gasPriceOracle: Contract = await getOrDeploy(
-      CORE_CONTRACTS.GasPriceOracle,
-      "contracts/GasPriceOracle.sol",
-      [socketOwner, chainSlug],
-      deployUtils
-    );
-    deployUtils.addresses[CORE_CONTRACTS.GasPriceOracle] =
-      gasPriceOracle.address;
-
     const executionManager: Contract = await getOrDeploy(
       CORE_CONTRACTS.ExecutionManager,
       "contracts/ExecutionManager.sol",
-      [gasPriceOracle.address, socketOwner],
+      [socketOwner],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.ExecutionManager] =
@@ -83,13 +73,7 @@ export const deploySocket = async (
     const transmitManager: Contract = await getOrDeploy(
       CORE_CONTRACTS.TransmitManager,
       "contracts/TransmitManager.sol",
-      [
-        signatureVerifier.address,
-        gasPriceOracle.address,
-        socketOwner,
-        chainSlug,
-        sealGasLimit[networkToChainSlug[chainSlug]],
-      ],
+      [signatureVerifier.address, socketOwner, chainSlug],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.TransmitManager] =
