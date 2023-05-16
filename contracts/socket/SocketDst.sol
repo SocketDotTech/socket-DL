@@ -102,12 +102,10 @@ abstract contract SocketDst is SocketBase {
     /**
      * @notice executes a message, fees will go to recovered executor address
      * @param packetId_ packet id
-     * @param localPlug_ remote plug address
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
         bytes32 packetId_,
-        address localPlug_,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature_
     ) external override {
@@ -116,14 +114,15 @@ abstract contract SocketDst is SocketBase {
         messageExecuted[messageDetails_.msgId] = true;
 
         uint32 remoteSlug = _decodeSlug(messageDetails_.msgId);
+        address localPlug = _decodePlug(messageDetails_.msgId);
 
-        PlugConfig storage plugConfig = _plugConfigs[localPlug_][remoteSlug];
+        PlugConfig storage plugConfig = _plugConfigs[localPlug][remoteSlug];
 
         bytes32 packedMessage = hasher__.packMessage(
             remoteSlug,
             plugConfig.siblingPlug,
             chainSlug,
-            localPlug_,
+            localPlug,
             messageDetails_.msgId,
             messageDetails_.msgGasLimit,
             messageDetails_.executionFee,
@@ -144,7 +143,7 @@ abstract contract SocketDst is SocketBase {
         _execute(
             executor,
             messageDetails_.executionFee,
-            localPlug_,
+            localPlug,
             remoteSlug,
             messageDetails_.msgGasLimit,
             messageDetails_.msgId,
@@ -224,9 +223,18 @@ abstract contract SocketDst is SocketBase {
     }
 
     /**
-     * @dev Decodes the chain ID from a given packet ID.
-     * @param id_ The ID of the packet to decode the chain ID from.
-     * @return chainSlug_ The chain ID decoded from the packet ID.
+     * @dev Decodes the plug address from a given message id.
+     * @param id_ The ID of the msg to decode the plug from.
+     * @return plug_ The address of sibling plug decoded from the message ID.
+     */
+    function _decodePlug(bytes32 id_) internal pure returns (address plug_) {
+        plug_ = address(uint160(uint256(id_) >> 64));
+    }
+
+    /**
+     * @dev Decodes the chain ID from a given packet/message ID.
+     * @param id_ The ID of the packet/msg to decode the chain slug from.
+     * @return chainSlug_ The chain slug decoded from the packet/message ID.
      */
     function _decodeSlug(
         bytes32 id_

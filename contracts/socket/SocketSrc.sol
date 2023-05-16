@@ -42,7 +42,7 @@ abstract contract SocketSrc is SocketBase {
         ];
         uint32 localChainSlug = chainSlug;
 
-        msgId = _encodeMsgId(localChainSlug);
+        msgId = _encodeMsgId(localChainSlug, plugConfig.siblingPlug);
 
         ISocket.Fees memory fees = _validateAndGetFees(
             msgGasLimit_,
@@ -226,9 +226,17 @@ abstract contract SocketSrc is SocketBase {
 
     // Packs the local plug, local chain slug, remote chain slug and nonce
     // messageCount++ will take care of msg id overflow as well
-    // msgId(256) = localChainSlug(32) | nonce(224)
-    function _encodeMsgId(uint32 slug_) internal returns (bytes32) {
-        return bytes32((uint256(slug_) << 224) | messageCount++);
+    // msgId(256) = localChainSlug(32) | siblingPlug_(160) | nonce(64)
+    function _encodeMsgId(
+        uint32 slug_,
+        address siblingPlug_
+    ) internal returns (bytes32) {
+        return
+            bytes32(
+                (uint256(slug_) << 224) |
+                    (uint256(uint160(siblingPlug_)) << 64) |
+                    messageCount++
+            );
     }
 
     function _encodePacketId(
