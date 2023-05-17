@@ -16,8 +16,8 @@ export const getABI = {
   Decapacitor: Decapacitor.abi,
   Capacitor: Capacitor.abi,
   Socket: Socket.abi,
-  FastSwitchboard:FastSwitchboard.abi,
-  OptimisticSwitchboard:OptimisticSwitchboard.abi,
-  NativeSwitchboard:NativeSwitchboard.abi,
-  AccessControlExtended:AccessControlExtended.abi,
+  FastSwitchboard: FastSwitchboard.abi,
+  OptimisticSwitchboard: OptimisticSwitchboard.abi,
+  NativeSwitchboard: NativeSwitchboard.abi,
+  AccessControlExtended: AccessControlExtended.abi,
 };
