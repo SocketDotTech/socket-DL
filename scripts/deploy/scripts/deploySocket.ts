@@ -63,12 +63,12 @@ export const deploySocket = async (
       capacitorFactory.address;
 
     const executionManager: Contract = await getOrDeploy(
-      CORE_CONTRACTS.ExecutionManager,
-      "contracts/ExecutionManager.sol",
+      CORE_CONTRACTS.OpenExecutionManager,
+      "contracts/OpenExecutionManager.sol",
       [socketOwner, chainSlug, signatureVerifier.address],
       deployUtils
     );
-    deployUtils.addresses[CORE_CONTRACTS.ExecutionManager] =
+    deployUtils.addresses[CORE_CONTRACTS.OpenExecutionManager] =
       executionManager.address;
 
     const transmitManager: Contract = await getOrDeploy(
@@ -100,7 +100,7 @@ export const deploySocket = async (
     deployUtils.addresses = await deploySwitchboards(
       networkToChainSlug[chainSlug],
       socketSigner,
-      deployedAddresses,
+      deployUtils.addresses,
       currentMode
     );
 
@@ -119,7 +119,6 @@ export const deploySocket = async (
       [socket.address],
       deployUtils
     );
-
     deployUtils.addresses["Counter"] = counter.address;
 
     allDeployed = true;

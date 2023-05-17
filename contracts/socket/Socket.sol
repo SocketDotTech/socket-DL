@@ -30,7 +30,7 @@ contract Socket is SocketSrc, SocketDst {
         address capacitorFactory_,
         address owner_,
         string memory version_
-    ) AccessControl(owner_) SocketBase(chainSlug_, version_) {
+    ) AccessControlExtended(owner_) SocketBase(chainSlug_, version_) {
         hasher__ = IHasher(hasher_);
         transmitManager__ = ITransmitManager(transmitManager_);
         executionManager__ = IExecutionManager(executionManager_);

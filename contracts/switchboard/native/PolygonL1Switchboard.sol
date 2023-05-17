@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 import "fx-portal/tunnel/FxBaseRootTunnel.sol";
 import "./NativeSwitchboardBase.sol";
-import "../../utils/AccessControl.sol";
 
 /**
  * @title PolygonL1Switchboard
@@ -44,7 +43,7 @@ contract PolygonL1Switchboard is NativeSwitchboardBase, FxBaseRootTunnel {
         address socket_,
         ISignatureVerifier signatureVerifier_
     )
-        AccessControl(owner_)
+        AccessControlExtended(owner_)
         NativeSwitchboardBase(socket_, chainSlug_, signatureVerifier_)
         FxBaseRootTunnel(checkpointManager_, fxRoot_)
     {}

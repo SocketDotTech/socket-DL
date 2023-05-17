@@ -42,6 +42,9 @@ export const getOrDeploy = async (
   args: any[],
   deployUtils: DeployParams
 ): Promise<Contract> => {
+  if (!deployUtils || !deployUtils.addresses)
+    throw new Error("No addresses found");
+
   let contract: Contract;
   if (!deployUtils.addresses[contractName]) {
     contract = await deployContractWithArgs(
