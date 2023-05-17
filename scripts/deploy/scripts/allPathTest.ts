@@ -11,7 +11,7 @@ import {
 } from "../../../src";
 import { getAddresses, getRelayUrl, getRelayAPIKEY } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
-import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
+import Counter from "../../../out/Counter.sol/Counter.json";
 import { chains, mode } from "../config";
 import { parseUnits } from "ethers/lib/utils";
 
@@ -97,6 +97,7 @@ const axiosPost = async (url: string, data: object, config = {}) => {
       url,
       "data : ",
       data,
+      config,
       "\n error : ",
       //@ts-ignore
       error?.message,
@@ -175,7 +176,7 @@ export const sendMessagesToAllPaths = async (params: {
 
         const counter: Contract = new ethers.Contract(
           counterAddress,
-          CounterABI
+          Counter.abi
         );
 
         await Promise.all(
