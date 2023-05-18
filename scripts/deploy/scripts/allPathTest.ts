@@ -224,7 +224,7 @@ export const sendMessagesToAllPaths = async (params: {
 const main = async () => {
   let senderChains = chains;
   let receiverChains = chains;
-  // await sendMessagesToAllPaths({ senderChains, receiverChains });
+  await sendMessagesToAllPaths({ senderChains, receiverChains });
 };
 
 main()
