@@ -31,7 +31,7 @@ import {
   transmitterAddresses,
   watcherAddresses,
 } from "./config";
-import { overrides } from "./tx-overrides";
+import { overrides } from "./config";
 
 let roleStatus: any = {};
 

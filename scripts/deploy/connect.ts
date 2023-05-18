@@ -17,7 +17,7 @@ import {
 import { mode } from "./config";
 import { Contract, Wallet } from "ethers";
 import { getSwitchboardAddress } from "../../src";
-import { overrides } from "./tx-overrides";
+import { overrides } from "./config";
 
 const chains = [...TestnetIds, ...MainnetIds];
 

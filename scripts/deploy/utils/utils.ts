@@ -12,7 +12,7 @@ import {
   DeploymentMode,
 } from "../../../src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { overrides } from "../tx-overrides";
+import { overrides } from "../config";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 

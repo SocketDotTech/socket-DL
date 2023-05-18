@@ -59,3 +59,66 @@ export const executorAddresses = {
   [DeploymentMode.SURGE]: "0x3051Aa7F267bF425A4e8bF766750D60391F014B4",
   [DeploymentMode.PROD]: "0x557E729E55d49E767c11982d026a63aBFD930Ac9",
 };
+
+export const overrides = {
+  [ChainSlug.ARBITRUM]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.ARBITRUM_GOERLI]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.OPTIMISM]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.OPTIMISM_GOERLI]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.BSC]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.BSC_TESTNET]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.MAINNET]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.GOERLI]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.POLYGON_MAINNET]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.POLYGON_MUMBAI]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+};

@@ -21,7 +21,7 @@ import {
 } from "../../src";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { capacitorType, chains, maxPacketLength, mode } from "./config";
-import { overrides } from "./tx-overrides";
+import { overrides } from "./config";
 
 export const main = async () => {
   try {
