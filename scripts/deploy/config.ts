@@ -37,6 +37,11 @@ export const filterChains: number[] = chains;
 export const capacitorType = 1;
 export const maxPacketLength = 1;
 
+export const gasLimit = 30_000_000;
+export const type = 0;
+export const gasMultiplier = 1;
+export const gasPrice = "auto";
+
 export const transmitterAddresses = {
   [DeploymentMode.DEV]: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
   [DeploymentMode.SURGE]: "0x22883bEF8302d50Ac76c6F6e048965Cd4413EBb7",
