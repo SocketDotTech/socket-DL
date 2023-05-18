@@ -226,7 +226,7 @@ export const getRelayUrl = async (mode: DeploymentMode) => {
   }
 };
 
-export const getRelayAPIKEY = async (mode: DeploymentMode) => {
+export const getRelayAPIKEY = (mode: DeploymentMode) => {
   switch (mode) {
     case DeploymentMode.SURGE:
       return process.env.RELAYER_API_KEY_SURGE;
