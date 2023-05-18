@@ -21,6 +21,7 @@ import {
 } from "../../src";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { capacitorType, chains, maxPacketLength, mode } from "./config";
+import { overrides } from "./config";
 
 export const main = async () => {
   try {
@@ -185,7 +186,9 @@ const setRemoteSwitchboards = async (addresses) => {
 
           const tx = await sbContract
             .connect(socketSigner)
-            [functionName](dstSwitchboardAddress);
+            [functionName](dstSwitchboardAddress, {
+              ...overrides[await socketSigner.getChainId()],
+            });
           console.log(tx.hash);
           await tx.wait();
         }

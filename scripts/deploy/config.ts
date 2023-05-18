@@ -37,6 +37,11 @@ export const filterChains: number[] = chains;
 export const capacitorType = 1;
 export const maxPacketLength = 1;
 
+export const gasLimit = 30_000_000;
+export const type = 0;
+export const gasMultiplier = 1;
+export const gasPrice = "auto";
+
 export const transmitterAddresses = {
   [DeploymentMode.DEV]: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
   [DeploymentMode.SURGE]: "0x22883bEF8302d50Ac76c6F6e048965Cd4413EBb7",
@@ -53,4 +58,67 @@ export const executorAddresses = {
   [DeploymentMode.DEV]: "0x8e90345042b2720F33138CC437f8f897AC84A095",
   [DeploymentMode.SURGE]: "0x3051Aa7F267bF425A4e8bF766750D60391F014B4",
   [DeploymentMode.PROD]: "0x557E729E55d49E767c11982d026a63aBFD930Ac9",
+};
+
+export const overrides = {
+  [ChainSlug.ARBITRUM]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.ARBITRUM_GOERLI]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.OPTIMISM]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.OPTIMISM_GOERLI]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.BSC]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.BSC_TESTNET]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.MAINNET]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.GOERLI]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.POLYGON_MAINNET]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
+  [ChainSlug.POLYGON_MUMBAI]: {
+    type,
+    gasPrice,
+    gasLimit,
+    gasMultiplier,
+  },
 };

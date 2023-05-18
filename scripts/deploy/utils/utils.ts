@@ -12,6 +12,7 @@ import {
   DeploymentMode,
 } from "../../../src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { overrides } from "../config";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
@@ -84,8 +85,9 @@ export async function deployContractWithArgs(
     const Contract: ContractFactory = await ethers.getContractFactory(
       contractName
     );
-
-    const contract: Contract = await Contract.connect(signer).deploy(...args);
+    const contract: Contract = await Contract.connect(signer).deploy(...args, {
+      ...overrides[await signer.getChainId()],
+    });
     await contract.deployed();
     return contract;
   } catch (error) {

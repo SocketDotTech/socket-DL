@@ -6,23 +6,6 @@ import { ChainKey, networkToChainSlug } from "../../src";
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
-export const gasPrice: {
-  [chainKEY in ChainKey]?: number | "auto" | undefined;
-} = {
-  [ChainKey.ARBITRUM]: "auto",
-  [ChainKey.ARBITRUM_GOERLI]: "auto",
-  [ChainKey.OPTIMISM]: "auto",
-  [ChainKey.OPTIMISM_GOERLI]: "auto",
-  [ChainKey.AVALANCHE]: "auto",
-  [ChainKey.BSC]: "auto",
-  [ChainKey.BSC_TESTNET]: "auto",
-  [ChainKey.MAINNET]: "auto",
-  [ChainKey.GOERLI]: "auto",
-  [ChainKey.POLYGON_MAINNET]: "auto",
-  [ChainKey.POLYGON_MUMBAI]: "auto",
-  [ChainKey.HARDHAT]: "auto",
-};
-
 export const chainSlugKeys: string[] = Object.values(networkToChainSlug);
 
 export function getJsonRpcUrl(chain: ChainKey): string {

@@ -31,6 +31,7 @@ import {
   transmitterAddresses,
   watcherAddresses,
 } from "./config";
+import { overrides } from "./config";
 
 let roleStatus: any = {};
 
@@ -154,6 +155,7 @@ const executeRoleTransactions = async (
     let tx = await wallet.sendTransaction({
       to: contractAddress,
       data,
+      ...overrides[chainId],
     });
     console.log(
       `chain: ${chainId}`,
