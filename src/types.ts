@@ -153,7 +153,7 @@ export type Configs = {
 export interface ChainSocketAddresses {
   Counter: string;
   CapacitorFactory: string;
-  ExecutionManager: string;
+  ExecutionManager?: string;
   Hasher: string;
   SignatureVerifier: string;
   Socket: string;

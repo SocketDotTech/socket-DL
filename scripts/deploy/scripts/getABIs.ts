@@ -13,6 +13,7 @@ export const getABI = {
   TransmitManager: TransmitManager.abi,
   CapacitorFactory: CapacitorFactory.abi,
   ExecutionManager: ExecutionManager.abi,
+  OpenExecutionManager: ExecutionManager.abi,
   Decapacitor: Decapacitor.abi,
   Capacitor: Capacitor.abi,
   Socket: Socket.abi,
