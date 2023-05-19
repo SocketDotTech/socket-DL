@@ -1,9 +1,7 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import { ChainSlug, DeploymentMode, TestnetIds } from "../../src";
-import { ChainKey } from "@socket.tech/dl-core";
-
+import { ChainKey, ChainSlug, DeploymentMode, TestnetIds } from "../../src";
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
