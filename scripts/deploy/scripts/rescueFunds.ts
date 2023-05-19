@@ -9,7 +9,7 @@ import {
   networkToChainSlug,
 } from "../../../src";
 import { Contract, Wallet, ethers } from "ethers";
-import { mode } from "../config";
+import { mode, overrides } from "../config";
 import { getProviderFromChainName } from "../../constants";
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -119,7 +119,8 @@ export const main = async () => {
           const tx = await contractInstance.rescueFunds(
             ETH_ADDRESS,
             signer.address,
-            amount
+            amount,
+            { ...overrides[chainSlug] }
           );
 
           console.log(
