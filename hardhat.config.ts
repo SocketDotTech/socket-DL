@@ -18,6 +18,8 @@ import fs from "fs";
 
 import "./tasks/accounts";
 import { getJsonRpcUrl } from "./scripts/constants/networks";
+import { gasMultiplier, gasPrice } from "./scripts/deploy/config";
+
 import { ChainKey, chainKeyToSlug } from "./src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
@@ -33,6 +35,8 @@ function getChainConfig(chain: keyof typeof chainKeyToSlug): NetworkUserConfig {
   return {
     accounts: [`0x${privateKey}`],
     chainId: chainKeyToSlug[chain],
+    gasPrice: gasPrice[chain] ? gasPrice[chain] : "auto",
+    gasMultiplier: gasMultiplier[chain] ? gasMultiplier[chain] : 1,
     url: getJsonRpcUrl(chain),
   };
 }
