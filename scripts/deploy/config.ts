@@ -36,7 +36,8 @@ export const filterChains: number[] = chains;
 export const capacitorType = 1;
 export const maxPacketLength = 1;
 
-export const gasLimit = 30_000_000;
+export const gasLimit = undefined;
+export const gasPrice = undefined;
 export const type = 2;
 
 export const transmitterAddresses = {
@@ -57,79 +58,55 @@ export const executorAddresses = {
   [DeploymentMode.PROD]: "0x557E729E55d49E767c11982d026a63aBFD930Ac9",
 };
 
-export const gasPrice: {
-  [chainKEY in ChainKey]?: number | "auto" | undefined;
-} = {
-  [ChainKey.ARBITRUM]: "auto",
-  [ChainKey.ARBITRUM_GOERLI]: "auto",
-  [ChainKey.OPTIMISM]: "auto",
-  [ChainKey.OPTIMISM_GOERLI]: "auto",
-  [ChainKey.AVALANCHE]: "auto",
-  [ChainKey.BSC]: "auto",
-  [ChainKey.BSC_TESTNET]: "auto",
-  [ChainKey.MAINNET]: "auto",
-  [ChainKey.GOERLI]: "auto",
-  [ChainKey.POLYGON_MAINNET]: "auto",
-  [ChainKey.POLYGON_MUMBAI]: "auto",
-  [ChainKey.HARDHAT]: "auto",
-};
-
-export const gasMultiplier: {
-  [chainKEY in ChainKey]?: number;
-} = {
-  [ChainKey.ARBITRUM]: 1,
-  [ChainKey.ARBITRUM_GOERLI]: 1,
-  [ChainKey.OPTIMISM]: 1,
-  [ChainKey.OPTIMISM_GOERLI]: 1,
-  [ChainKey.AVALANCHE]: 1,
-  [ChainKey.BSC]: 1,
-  [ChainKey.BSC_TESTNET]: 1,
-  [ChainKey.MAINNET]: 1,
-  [ChainKey.GOERLI]: 1,
-  [ChainKey.POLYGON_MAINNET]: 1,
-  [ChainKey.POLYGON_MUMBAI]: 1,
-  [ChainKey.HARDHAT]: 1,
-};
-
 export const overrides = {
   [ChainSlug.ARBITRUM]: {
     type,
     gasLimit,
+    gasPrice,
   },
   [ChainSlug.ARBITRUM_GOERLI]: {
     type,
     gasLimit,
+    gasPrice,
   },
   [ChainSlug.OPTIMISM]: {
     type,
     gasLimit,
+    gasPrice,
   },
   [ChainSlug.OPTIMISM_GOERLI]: {
     type,
     gasLimit,
+    gasPrice,
   },
   [ChainSlug.BSC]: {
     type,
     gasLimit,
+    gasPrice,
   },
   [ChainSlug.BSC_TESTNET]: {
     type,
     gasLimit,
+    gasPrice,
   },
   [ChainSlug.MAINNET]: {
     type,
     gasLimit,
+    gasPrice,
   },
   [ChainSlug.GOERLI]: {
     type,
     gasLimit,
+    gasPrice,
   },
   [ChainSlug.POLYGON_MAINNET]: {
     type,
     gasLimit,
+    gasPrice,
   },
   [ChainSlug.POLYGON_MUMBAI]: {
     type,
     gasLimit,
+    gasPrice,
   },
 };
