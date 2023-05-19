@@ -6,7 +6,7 @@ import {
   DeploymentAddresses,
   IntegrationTypes,
   getAllAddresses,
-  networkToChainSlug
+  networkToChainSlug,
 } from "../../../src";
 import { Contract, Wallet, ethers } from "ethers";
 import { mode } from "../config";
@@ -15,66 +15,70 @@ import { getProviderFromChainName } from "../../constants";
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const rescueFundsABI = [
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "address",
-        "name": "token_",
-        "type": "address"
+        internalType: "address",
+        name: "token_",
+        type: "address",
       },
       {
-        "internalType": "address",
-        "name": "userAddress_",
-        "type": "address"
+        internalType: "address",
+        name: "userAddress_",
+        type: "address",
       },
       {
-        "internalType": "uint256",
-        "name": "amount_",
-        "type": "uint256"
-      }
+        internalType: "uint256",
+        name: "amount_",
+        type: "uint256",
+      },
     ],
-    "name": "rescueFunds",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    name: "rescueFunds",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
   },
 ];
 
-const createContractAddrArray = (chainAddresses: ChainSocketAddresses): string[] => {
+const createContractAddrArray = (
+  chainAddresses: ChainSocketAddresses
+): string[] => {
   let addresses: string[] = [];
 
-  addresses.push(chainAddresses.CapacitorFactory)
+  addresses.push(chainAddresses.CapacitorFactory);
 
   // not in fingerroot version
   // addresses.push(chainAddresses.Hasher)
   // addresses.push(chainAddresses.SignatureVerifier)
 
-  addresses.push(chainAddresses.Socket)
-  addresses.push(chainAddresses.TransmitManager)
-  addresses.push(chainAddresses.FastSwitchboard)
-  addresses.push(chainAddresses.OptimisticSwitchboard)
-  addresses.push(chainAddresses.SocketBatcher)
+  addresses.push(chainAddresses.Socket);
+  addresses.push(chainAddresses.TransmitManager);
+  addresses.push(chainAddresses.FastSwitchboard);
+  addresses.push(chainAddresses.OptimisticSwitchboard);
+  addresses.push(chainAddresses.SocketBatcher);
 
-  if (chainAddresses.ExecutionManager) addresses.push(chainAddresses.ExecutionManager)
-  if (chainAddresses.OpenExecutionManager) addresses.push(chainAddresses.OpenExecutionManager)
+  if (chainAddresses.ExecutionManager)
+    addresses.push(chainAddresses.ExecutionManager);
+  if (chainAddresses.OpenExecutionManager)
+    addresses.push(chainAddresses.OpenExecutionManager);
   if (!chainAddresses.integrations) return addresses;
 
   const siblings = Object.keys(chainAddresses.integrations);
   if (!siblings) return addresses;
 
-  siblings.map(sibling => {
-    const integrations = Object.keys(chainAddresses.integrations?.[sibling])
+  siblings.map((sibling) => {
+    const integrations = Object.keys(chainAddresses.integrations?.[sibling]);
 
-    integrations.map(integration => {
-      const addr = chainAddresses.integrations?.[sibling]?.[integration]
-      if (addr["capacitor"]) addresses.push(addr["capacitor"])
-      if (addr["decapacitor"]) addresses.push(addr["decapacitor"])
+    integrations.map((integration) => {
+      const addr = chainAddresses.integrations?.[sibling]?.[integration];
+      if (addr["capacitor"]) addresses.push(addr["capacitor"]);
+      if (addr["decapacitor"]) addresses.push(addr["decapacitor"]);
 
       if (integration === IntegrationTypes.native)
-        if (addr["switchboard"]) addresses.push(addr["switchboard"])
-    })
-  })
+        if (addr["switchboard"]) addresses.push(addr["switchboard"]);
+    });
+  });
   return addresses;
-}
+};
 
 export const main = async () => {
   try {
@@ -84,13 +88,15 @@ export const main = async () => {
     // parallelize chains
     await Promise.all(
       activeChainSlugs.map(async (chainSlug) => {
-        let chainAddresses: ChainSocketAddresses = addresses[chainSlug]
+        let chainAddresses: ChainSocketAddresses = addresses[chainSlug];
         if (!chainAddresses) {
           console.log("addresses not found for ", chainSlug, chainAddresses);
           return;
         }
 
-        const providerInstance = getProviderFromChainName(networkToChainSlug[chainSlug]);
+        const providerInstance = getProviderFromChainName(
+          networkToChainSlug[chainSlug]
+        );
         const signer: Wallet = new ethers.Wallet(
           process.env.SOCKET_SIGNER_KEY as string,
           providerInstance
@@ -114,9 +120,11 @@ export const main = async () => {
             ETH_ADDRESS,
             signer.address,
             amount
-          )
+          );
 
-          console.log(`Rescuing funds ${amount} from ${contractAddr[index]} on chain ${chainSlug}: ${tx.hash}`);
+          console.log(
+            `Rescuing funds ${amount} from ${contractAddr[index]} on chain ${chainSlug}: ${tx.hash}`
+          );
           await tx.wait();
         }
       })
