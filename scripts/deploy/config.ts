@@ -1,8 +1,7 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import { ChainSlug, DeploymentMode, TestnetIds } from "../../src";
-
+import { ChainKey, ChainSlug, DeploymentMode, TestnetIds } from "../../src";
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
@@ -37,10 +36,9 @@ export const filterChains: number[] = chains;
 export const capacitorType = 1;
 export const maxPacketLength = 1;
 
-export const gasLimit = 30_000_000;
-export const type = 0;
-export const gasMultiplier = 1;
-export const gasPrice = "auto";
+export const gasLimit = undefined;
+export const gasPrice = undefined;
+export const type = 2;
 
 export const transmitterAddresses = {
   [DeploymentMode.DEV]: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
@@ -63,62 +61,52 @@ export const executorAddresses = {
 export const overrides = {
   [ChainSlug.ARBITRUM]: {
     type,
-    gasPrice,
     gasLimit,
-    gasMultiplier,
+    gasPrice,
   },
   [ChainSlug.ARBITRUM_GOERLI]: {
     type,
-    gasPrice,
     gasLimit,
-    gasMultiplier,
+    gasPrice,
   },
   [ChainSlug.OPTIMISM]: {
     type,
-    gasPrice,
     gasLimit,
-    gasMultiplier,
+    gasPrice,
   },
   [ChainSlug.OPTIMISM_GOERLI]: {
     type,
-    gasPrice,
     gasLimit,
-    gasMultiplier,
+    gasPrice,
   },
   [ChainSlug.BSC]: {
     type,
-    gasPrice,
     gasLimit,
-    gasMultiplier,
+    gasPrice,
   },
   [ChainSlug.BSC_TESTNET]: {
     type,
-    gasPrice,
     gasLimit,
-    gasMultiplier,
+    gasPrice,
   },
   [ChainSlug.MAINNET]: {
     type,
-    gasPrice,
     gasLimit,
-    gasMultiplier,
+    gasPrice,
   },
   [ChainSlug.GOERLI]: {
     type,
-    gasPrice,
     gasLimit,
-    gasMultiplier,
+    gasPrice,
   },
   [ChainSlug.POLYGON_MAINNET]: {
     type,
-    gasPrice,
     gasLimit,
-    gasMultiplier,
+    gasPrice,
   },
   [ChainSlug.POLYGON_MUMBAI]: {
     type,
-    gasPrice,
     gasLimit,
-    gasMultiplier,
+    gasPrice,
   },
 };
