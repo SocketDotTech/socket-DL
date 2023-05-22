@@ -18,8 +18,8 @@ export const bridgeConsts = {
   },
   outbox: {
     [ChainKey.HARDHAT]: ethers.constants.AddressZero,
-    [ChainKey.MAINNET]: ethers.constants.AddressZero,
-    [ChainKey.GOERLI]: ethers.constants.AddressZero,
+    [ChainKey.MAINNET]: "0x0B9857ae2D4A3DBe74ffE1d7DF045bb7F96E4840",
+    [ChainKey.GOERLI]: "0x45Af9Ed1D03703e480CE7d328fB684bb67DA5049",
     [ChainKey.ARBITRUM]: ethers.constants.AddressZero,
     [ChainKey.ARBITRUM_GOERLI]: ethers.constants.AddressZero,
   },
