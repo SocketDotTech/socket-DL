@@ -36,9 +36,7 @@ interface ISocket {
         uint256 executionFee;
         // The maximum amount of gas that can be used to execute the message.
         uint256 msgGasLimit;
-
         uint256 msgValue;
-
         bytes32 extraParams;
         // The payload data to be executed in the message.
         bytes payload;
@@ -139,7 +137,7 @@ interface ISocket {
         bytes32 packetId,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature
-    ) payable external;
+    ) external payable;
 
     /**
      * @notice seals data in capacitor for specific batchSizr

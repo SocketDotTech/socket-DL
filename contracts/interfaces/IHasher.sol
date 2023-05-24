@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 import "./ISocket.sol";
 
-
 /**
  * @title IHasher
  * @notice Interface for hasher contract that calculates the packed message

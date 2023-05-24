@@ -158,12 +158,7 @@ abstract contract SocketDst is SocketBase {
             plugConfig,
             messageDetails_.decapacitorProof
         );
-        _execute(
-            executor,
-            localPlug,
-            remoteSlug,
-            messageDetails_
-        );
+        _execute(executor, localPlug, remoteSlug, messageDetails_);
     }
 
     function _verify(
@@ -202,13 +197,12 @@ abstract contract SocketDst is SocketBase {
         uint32 remoteChainSlug_,
         ISocket.MessageDetails memory messageDetails_
     ) internal {
-
-        if (msg.value<messageDetails_.msgValue) revert InsufficientMsgValue();
+        if (msg.value < messageDetails_.msgValue) revert InsufficientMsgValue();
         try
-            IPlug(localPlug_).inbound{gas: messageDetails_.msgGasLimit, value:messageDetails_.msgValue}(
-                remoteChainSlug_,
-                messageDetails_.payload
-            )
+            IPlug(localPlug_).inbound{
+                gas: messageDetails_.msgGasLimit,
+                value: messageDetails_.msgValue
+            }(remoteChainSlug_, messageDetails_.payload)
         {
             executionManager__.updateExecutionFees(
                 executor_,

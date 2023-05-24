@@ -124,9 +124,7 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
         bytes32 extraParams_,
         uint32 siblingChainSlug_
     ) external view override returns (uint256) {
-        if (msgValue_ == 0) 
-            return executionFees[siblingChainSlug_];
-        
+        if (msgValue_ == 0) return executionFees[siblingChainSlug_];
 
         if (msgValue_ < msgValueMinThreshold[chainSlug][siblingChainSlug_])
             revert MsgValueTooLow();
@@ -135,7 +133,7 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
 
         uint256 msgValueRequiredOnSrcChain = (relativeNativeTokenPrice[
             chainSlug
-        ][siblingChainSlug_] * msgValue_) / 10^ 18;
+        ][siblingChainSlug_] * msgValue_) / (10 ** 18);
         return msgValueRequiredOnSrcChain + executionFees[siblingChainSlug_];
     }
 
@@ -227,13 +225,8 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 nonce = nextNonce[feesUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
-        msgValueMinThreshold[chainSlug][
-            dstChainSlug_
-        ] = msgValueMinThreshold_;
-        emit MsgValueMinThresholdSet(
-            dstChainSlug_,
-            msgValueMinThreshold_
-        );
+        msgValueMinThreshold[chainSlug][dstChainSlug_] = msgValueMinThreshold_;
+        emit MsgValueMinThresholdSet(dstChainSlug_, msgValueMinThreshold_);
     }
 
     function setMsgValueMaxThreshold(
@@ -261,13 +254,8 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 nonce = nextNonce[feesUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
-        msgValueMaxThreshold[chainSlug][
-            dstChainSlug_
-        ] = msgValueMaxThreshold_;
-        emit MsgValueMaxThresholdSet(
-            dstChainSlug_,
-            msgValueMaxThreshold_
-        );
+        msgValueMaxThreshold[chainSlug][dstChainSlug_] = msgValueMaxThreshold_;
+        emit MsgValueMaxThresholdSet(dstChainSlug_, msgValueMaxThreshold_);
     }
 
     /**

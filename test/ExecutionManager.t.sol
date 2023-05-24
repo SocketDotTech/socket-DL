@@ -157,7 +157,7 @@ contract ExecutionManagerTest is Setup {
 
         uint256 minFees = executionManager.getMinFees(
             msgGasLimit,
-            msgValue, 
+            msgValue,
             payloadSize,
             extraParams,
             destChainSlug
@@ -178,8 +178,8 @@ contract ExecutionManagerTest is Setup {
 
         uint256 minFees = executionManager.getMinFees(
             msgGasLimit,
-            msgValue, 
-            payloadSize, 
+            msgValue,
+            payloadSize,
             extraParams,
             destChainSlug
         );
