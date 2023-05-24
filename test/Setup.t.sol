@@ -23,7 +23,7 @@ contract Setup is Test {
 
     string version = "TEST_NET";
 
-    bytes32 versionHash = keccak256(abi.encode(version));
+    bytes32 versionHash = keccak256(bytes(version));
 
     uint256 immutable executorPrivateKey = c++;
     uint256 immutable _socketOwnerPrivateKey = c++;
