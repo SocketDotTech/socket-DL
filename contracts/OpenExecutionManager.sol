@@ -6,24 +6,19 @@ import "./libraries/RescueFundsLib.sol";
 import "./libraries/SignatureVerifierLib.sol";
 import "./ExecutionManager.sol";
 
-
 /**
- * @title ExecutionManager
- * @dev Implementation of the IExecutionManager interface, providing functions for executing cross-chain transactions and
- * managing execution fees. This contract also implements the AccessControl interface, allowing for role-based
- * access control.
+ * @title OpenExecutionManager
+ * @dev ExecutionManager contract along with open execution
  */
 contract OpenExecutionManager is ExecutionManager {
-
     constructor(
         address owner_,
         uint32 chainSlug_,
         ISignatureVerifier signatureVerifier_
-    ) ExecutionManager(owner_, chainSlug_, signatureVerifier_)
-    {}
+    ) ExecutionManager(owner_, chainSlug_, signatureVerifier_) {}
 
     /**
-     * @notice This function allows all executors 
+     * @notice This function allows all executors
      * @param packedMessage Packed message to be executed
      * @param sig Signature of the message
      * @return executor Address of the executor
@@ -39,5 +34,4 @@ contract OpenExecutionManager is ExecutionManager {
         );
         isValidExecutor = true;
     }
-
 }

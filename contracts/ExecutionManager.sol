@@ -89,7 +89,13 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     function isExecutor(
         bytes32 packedMessage,
         bytes memory sig
-    ) external view virtual override returns (address executor, bool isValidExecutor) {
+    )
+        external
+        view
+        virtual
+        override
+        returns (address executor, bool isValidExecutor)
+    {
         executor = SignatureVerifierLib.recoverSignerFromDigest(
             packedMessage,
             sig
@@ -124,8 +130,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         bytes32 extraParams_,
         uint32 siblingChainSlug_
     ) external view override returns (uint256) {
-
-        if (payloadSize_>3000) revert PayloadTooLarge();
+        if (payloadSize_ > 3000) revert PayloadTooLarge();
 
         // 1st byte - type, next 31 bytes - value
         // if type = 0, no extra param. type = 1, use next 31 bytes as msgValue
@@ -134,31 +139,31 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
         if (paramType == 0) return executionFees[siblingChainSlug_];
 
-        uint256 msgValue = uint256(uint224(params)); 
+        uint256 msgValue = uint256(uint224(params));
 
         if (msgValue < msgValueMinThreshold[siblingChainSlug_])
             revert MsgValueTooLow();
         if (msgValue > msgValueMaxThreshold[siblingChainSlug_])
             revert MsgValueTooHigh();
 
-        uint256 msgValueRequiredOnSrcChain = (relativeNativeTokenPrice[siblingChainSlug_] * msgValue) / 1e18;
+        uint256 msgValueRequiredOnSrcChain = (relativeNativeTokenPrice[
+            siblingChainSlug_
+        ] * msgValue) / 1e18;
         return msgValueRequiredOnSrcChain + executionFees[siblingChainSlug_];
     }
 
     function verifyParams(
         bytes32 extraParams_,
         uint256 msgValue_
-    ) external pure override  {
-
+    ) external pure override {
         uint256 params = uint256(extraParams_);
         uint8 paramType = uint8(params >> 224);
 
         if (paramType == 0) return;
 
-        uint256 expectedMsgValue = uint256(uint224(params)); 
+        uint256 expectedMsgValue = uint256(uint224(params));
 
-        if (msgValue_<expectedMsgValue) revert InsufficientMsgValue();
-
+        if (msgValue_ < expectedMsgValue) revert InsufficientMsgValue();
     }
 
     function setExecutionFees(
@@ -215,9 +220,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 nonce = nextNonce[feesUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
-        relativeNativeTokenPrice[
-            dstChainSlug_
-        ] = relativeNativeTokenPrice_;
+        relativeNativeTokenPrice[dstChainSlug_] = relativeNativeTokenPrice_;
         emit RelativeNativeTokenPriceSet(
             dstChainSlug_,
             relativeNativeTokenPrice_

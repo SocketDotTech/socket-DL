@@ -212,13 +212,12 @@ contract SocketBatcher is AccessControl {
     ) external payable {
         uint256 executeRequestslength = executeRequests_.length;
         for (uint256 index = 0; index < executeRequestslength; ) {
+            bytes32 extraParams = executeRequests_[index]
+                .messageDetails
+                .extraParams;
+            uint256 msgValue = uint256(uint224(uint256(extraParams)));
 
-            bytes32 extraParams = executeRequests_[index].messageDetails.extraParams;
-            uint256 msgValue = uint256(uint224(uint256(extraParams))); 
-
-            ISocket(socketAddress_).execute{
-                value: msgValue
-            }(
+            ISocket(socketAddress_).execute{value: msgValue}(
                 executeRequests_[index].packetId,
                 executeRequests_[index].messageDetails,
                 executeRequests_[index].signature

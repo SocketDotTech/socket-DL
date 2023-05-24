@@ -189,10 +189,7 @@ abstract contract SocketDst is SocketBase {
             )
         ) revert InvalidProof();
 
-        executionManager__.verifyParams(
-            extraParams_, 
-            msg.value
-        );
+        executionManager__.verifyParams(extraParams_, msg.value);
     }
 
     /**
@@ -206,7 +203,6 @@ abstract contract SocketDst is SocketBase {
         uint32 remoteChainSlug_,
         ISocket.MessageDetails memory messageDetails_
     ) internal {
-
         try
             IPlug(localPlug_).inbound{
                 gas: messageDetails_.msgGasLimit,
