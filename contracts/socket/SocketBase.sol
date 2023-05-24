@@ -25,7 +25,7 @@ abstract contract SocketBase is SocketConfig {
      */
     constructor(uint32 chainSlug_, string memory version_) {
         chainSlug = chainSlug_;
-        version = keccak256(abi.encode(version_));
+        version = keccak256(bytes(version_));
     }
 
     /**
