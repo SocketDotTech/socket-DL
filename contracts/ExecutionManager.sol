@@ -49,7 +49,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     // remoteChainSlug => executionFees
     mapping(uint32 => uint256) public executionFees;
 
-    // srcSlug => destSlug => relativeNativePrice (stores (destnativeTokenPriceUSD*10^18/srcNativeTokenPriceUSD))
+    // srcSlug => destSlug => relativeNativePrice (stores (destnativeTokenPriceUSD*(10**18)/srcNativeTokenPriceUSD))
     mapping(uint32 => mapping(uint32 => uint256))
         public relativeNativeTokenPrice;
 
@@ -88,7 +88,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     function isExecutor(
         bytes32 packedMessage,
         bytes memory sig
-    ) external view override returns (address executor, bool isValidExecutor) {
+    ) external view virtual override returns (address executor, bool isValidExecutor) {
         executor = SignatureVerifierLib.recoverSignerFromDigest(
             packedMessage,
             sig

@@ -209,7 +209,7 @@ contract SocketBatcher is AccessControl {
     function executeBatch(
         address socketAddress_,
         ExecuteRequest[] calldata executeRequests_
-    ) external {
+    ) external payable {
         uint256 executeRequestslength = executeRequests_.length;
         for (uint256 index = 0; index < executeRequestslength; ) {
             ISocket(socketAddress_).execute(
