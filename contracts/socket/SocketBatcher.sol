@@ -93,20 +93,6 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
-     * @notice A struct representing a request to register switchboard for a chain.
-     * @param switchBoardAddress The switchboard address.
-     * @param maxPacketLength The max packet length
-     * @param siblingChainSlug The sibling chain slug
-     * @param capacitorType The capacitor type
-     */
-    struct RegisterSwitchboardRequest {
-        address switchBoardAddress;
-        uint256 maxPacketLength;
-        uint32 siblingChainSlug;
-        uint256 capacitorType;
-    }
-
-    /**
      * @notice A struct representing a request to send proof to polygon root
      * @param proof proof to submit on root tunnel
      */
@@ -207,30 +193,6 @@ contract SocketBatcher is AccessControl {
                 setFeesRequests_[index].dstChainSlug,
                 setFeesRequests_[index].fees,
                 setFeesRequests_[index].signature
-            );
-            unchecked {
-                ++index;
-            }
-        }
-    }
-
-    /**
-     * @notice set propose gas limit for a list of siblings
-     * @param socketAddress_ address of socket
-     * @param registerSwitchboardsRequests_ the list of requests with gas limit details
-     */
-    function registerSwitchboards(
-        address socketAddress_,
-        RegisterSwitchboardRequest[] calldata registerSwitchboardsRequests_
-    ) external {
-        uint256 registerSwitchboardsLength = registerSwitchboardsRequests_
-            .length;
-        for (uint256 index = 0; index < registerSwitchboardsLength; ) {
-            ISocket(socketAddress_).registerSwitchBoard(
-                registerSwitchboardsRequests_[index].switchBoardAddress,
-                registerSwitchboardsRequests_[index].maxPacketLength,
-                registerSwitchboardsRequests_[index].siblingChainSlug,
-                registerSwitchboardsRequests_[index].capacitorType
             );
             unchecked {
                 ++index;
