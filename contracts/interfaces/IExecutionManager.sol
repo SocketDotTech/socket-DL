@@ -33,6 +33,9 @@ interface IExecutionManager {
      */
     function getMinFees(
         uint256 msgGasLimit_,
+        uint256 msgValue_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
         uint32 siblingChainSlug_
     ) external view returns (uint256);
 

@@ -3,18 +3,18 @@ pragma solidity 0.8.7;
 
 import "./interfaces/IExecutionManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
-import "./utils/AccessControlExtended.sol";
+
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/SignatureVerifierLib.sol";
 import "./libraries/FeesHelper.sol";
-import "./libraries/SignatureVerifierLib.sol";
+import "./utils/AccessControlExtended.sol";
 import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
-import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
+import {FEES_UPDATE_SIG_IDENTIFIER, RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENTIFIER, MSG_VALUE_MAX_THRESHOLD_SIG_IDENTIFIER, MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 
 /**
- * @title OpenExecutionManager
+ * @title ExecutionManager
  * @dev Implementation of the IExecutionManager interface, providing functions for executing cross-chain transactions and
- * managing execution fees. This contract also implements the AccessControlExtended interface, allowing for role-based
+ * managing execution fees. This contract also implements the AccessControl interface, allowing for role-based
  * access control.
  */
 contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
@@ -27,6 +27,20 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
      */
     event ExecutionFeesSet(uint256 dstChainSlug, uint256 executionFees);
 
+    event RelativeNativeTokenPriceSet(
+        uint256 dstChainSlug,
+        uint256 relativeNativeTokenPrice
+    );
+
+    event MsgValueMaxThresholdSet(
+        uint256 dstChainSlug,
+        uint256 msgValueMaxThresholdSet
+    );
+    event MsgValueMinThresholdSet(
+        uint256 dstChainSlug,
+        uint256 msgValueMinThresholdSet
+    );
+
     uint32 public immutable chainSlug;
 
     // transmitter => nextNonce
@@ -35,10 +49,24 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
     // remoteChainSlug => executionFees
     mapping(uint32 => uint256) public executionFees;
 
+    // srcSlug => destSlug => relativeNativePrice (stores (destnativeTokenPriceUSD*10^18/srcNativeTokenPriceUSD))
+    mapping(uint32 => mapping(uint32 => uint256))
+        public relativeNativeTokenPrice;
+
+    // mapping(uint32 => uint256) public baseGasUsed;
+
+    mapping(uint32 => mapping(uint32 => uint256)) public msgValueMinThreshold;
+
+    mapping(uint32 => mapping(uint32 => uint256)) public msgValueMaxThreshold;
+
+    // msg.value*scrNativePrice >= relativeNativeTokenPrice[srcSlug][destinationSlug] * destMsgValue /10^18
+
     error InvalidNonce();
+    error MsgValueTooLow();
+    error MsgValueTooHigh();
 
     /**
-     * @dev Constructor for OpenExecutionManager contract
+     * @dev Constructor for ExecutionManager contract
      * @param owner_ Address of the contract owner
      */
     constructor(
@@ -46,12 +74,12 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
         uint32 chainSlug_,
         ISignatureVerifier signatureVerifier_
     ) AccessControlExtended(owner_) {
-        signatureVerifier__ = signatureVerifier_;
         chainSlug = chainSlug_;
+        signatureVerifier__ = signatureVerifier_;
     }
 
     /**
-     * @notice this function is open for execution
+     * @notice Checks whether the provided signer address is an executor for the given packed message and signature
      * @param packedMessage Packed message to be executed
      * @param sig Signature of the message
      * @return executor Address of the executor
@@ -60,12 +88,12 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
     function isExecutor(
         bytes32 packedMessage,
         bytes memory sig
-    ) external pure override returns (address executor, bool isValidExecutor) {
+    ) external view override returns (address executor, bool isValidExecutor) {
         executor = SignatureVerifierLib.recoverSignerFromDigest(
             packedMessage,
             sig
         );
-        isValidExecutor = true; //_hasRole(EXECUTOR_ROLE, executor);
+        isValidExecutor = true;
     }
 
     /**
@@ -90,10 +118,25 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
      * @return Minimum fees required for executing the transaction
      */
     function getMinFees(
-        uint256,
+        uint256 gasLimit_,
+        uint256 msgValue_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
         uint32 siblingChainSlug_
     ) external view override returns (uint256) {
-        return executionFees[siblingChainSlug_];
+        if (msgValue_ == 0) 
+            return executionFees[siblingChainSlug_];
+        
+
+        if (msgValue_ < msgValueMinThreshold[chainSlug][siblingChainSlug_])
+            revert MsgValueTooLow();
+        if (msgValue_ > msgValueMaxThreshold[chainSlug][siblingChainSlug_])
+            revert MsgValueTooHigh();
+
+        uint256 msgValueRequiredOnSrcChain = (relativeNativeTokenPrice[
+            chainSlug
+        ][siblingChainSlug_] * msgValue_) / 10^ 18;
+        return msgValueRequiredOnSrcChain + executionFees[siblingChainSlug_];
     }
 
     function setExecutionFees(
@@ -123,6 +166,108 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
 
         executionFees[dstChainSlug_] = executionFees_;
         emit ExecutionFeesSet(dstChainSlug_, executionFees_);
+    }
+
+    function setRelativeNativeTokenPrice(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 relativeNativeTokenPrice_,
+        bytes calldata signature_
+    ) external {
+        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    relativeNativeTokenPrice_
+                )
+            ),
+            signature_
+        );
+
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        uint256 nonce = nextNonce[feesUpdater]++;
+        if (nonce_ != nonce) revert InvalidNonce();
+
+        relativeNativeTokenPrice[chainSlug][
+            dstChainSlug_
+        ] = relativeNativeTokenPrice_;
+        emit RelativeNativeTokenPriceSet(
+            dstChainSlug_,
+            relativeNativeTokenPrice_
+        );
+    }
+
+    function setMsgValueMinThreshold(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 msgValueMinThreshold_,
+        bytes calldata signature_
+    ) external {
+        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    msgValueMinThreshold_
+                )
+            ),
+            signature_
+        );
+
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        uint256 nonce = nextNonce[feesUpdater]++;
+        if (nonce_ != nonce) revert InvalidNonce();
+
+        msgValueMinThreshold[chainSlug][
+            dstChainSlug_
+        ] = msgValueMinThreshold_;
+        emit MsgValueMinThresholdSet(
+            dstChainSlug_,
+            msgValueMinThreshold_
+        );
+    }
+
+    function setMsgValueMaxThreshold(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 msgValueMaxThreshold_,
+        bytes calldata signature_
+    ) external {
+        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(
+                abi.encode(
+                    MSG_VALUE_MAX_THRESHOLD_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    msgValueMaxThreshold_
+                )
+            ),
+            signature_
+        );
+
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        uint256 nonce = nextNonce[feesUpdater]++;
+        if (nonce_ != nonce) revert InvalidNonce();
+
+        msgValueMaxThreshold[chainSlug][
+            dstChainSlug_
+        ] = msgValueMaxThreshold_;
+        emit MsgValueMaxThresholdSet(
+            dstChainSlug_,
+            msgValueMaxThreshold_
+        );
     }
 
     /**

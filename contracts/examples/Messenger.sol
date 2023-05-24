@@ -91,10 +91,13 @@ contract Messenger is IPlug, Ownable(msg.sender) {
     function _outbound(uint32 targetChain_, bytes memory payload_) private {
         uint256 fee = _socket__.getMinFees(
             _msgGasLimit,
+            0, 
+            uint256(payload_.length),
+            bytes32(0),
             targetChain_,
             address(this)
         );
         if (!(address(this).balance >= fee)) revert NoSocketFee();
-        _socket__.outbound{value: fee}(targetChain_, _msgGasLimit, payload_);
+        _socket__.outbound{value: fee}(targetChain_, _msgGasLimit, 0, bytes32(0), payload_);
     }
 }

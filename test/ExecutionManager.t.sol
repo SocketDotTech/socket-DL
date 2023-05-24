@@ -151,8 +151,15 @@ contract ExecutionManagerTest is Setup {
 
     function testGetMinFees() public {
         uint256 msgGasLimit = 100000;
+        uint256 msgValue = 0;
+        uint256 payloadSize = 1000;
+        bytes32 extraParams = bytes32(0);
+
         uint256 minFees = executionManager.getMinFees(
             msgGasLimit,
+            msgValue, 
+            payloadSize,
+            extraParams,
             destChainSlug
         );
 
@@ -165,8 +172,15 @@ contract ExecutionManagerTest is Setup {
 
     function testPayFees() public {
         uint256 msgGasLimit = 100000;
+        uint256 msgValue = 0;
+        uint256 payloadSize = 1000;
+        bytes32 extraParams = bytes32(0);
+
         uint256 minFees = executionManager.getMinFees(
             msgGasLimit,
+            msgValue, 
+            payloadSize, 
+            extraParams,
             destChainSlug
         );
         deal(feesPayer, minFees);
@@ -184,8 +198,15 @@ contract ExecutionManagerTest is Setup {
 
     function testWithdrawFees() public {
         uint256 msgGasLimit = 100000;
+        uint256 msgValue = 0;
+        uint256 payloadSize = 1000;
+        bytes32 extraParams = bytes32(0);
+
         uint256 minFees = executionManager.getMinFees(
             msgGasLimit,
+            msgValue,
+            payloadSize,
+            extraParams,
             destChainSlug
         );
         deal(feesPayer, minFees);

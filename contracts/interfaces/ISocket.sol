@@ -36,6 +36,10 @@ interface ISocket {
         uint256 executionFee;
         // The maximum amount of gas that can be used to execute the message.
         uint256 msgGasLimit;
+
+        uint256 msgValue;
+
+        bytes32 extraParams;
         // The payload data to be executed in the message.
         bytes payload;
         // The proof data required by the Decapacitor contract to verify the message's authenticity.
@@ -59,6 +63,8 @@ interface ISocket {
         address dstPlug,
         bytes32 msgId,
         uint256 msgGasLimit,
+        uint256 msgValue,
+        bytes32 extraParams,
         bytes payload,
         Fees fees
     );
@@ -119,6 +125,8 @@ interface ISocket {
     function outbound(
         uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
+        uint256 msgValue_,
+        bytes32 extraParams_,
         bytes calldata payload_
     ) external payable returns (bytes32 msgId);
 
@@ -131,7 +139,7 @@ interface ISocket {
         bytes32 packetId,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature
-    ) external;
+    ) payable external;
 
     /**
      * @notice seals data in capacitor for specific batchSizr
@@ -201,6 +209,9 @@ interface ISocket {
      */
     function getMinFees(
         uint256 msgGasLimit_,
+        uint256 msgValue_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view returns (uint256 totalFees);

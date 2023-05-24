@@ -42,6 +42,9 @@ abstract contract SocketDst is SocketBase {
      * @dev Error emitted when a retry is invalid
      */
     error InvalidRetry();
+
+    error InsufficientMsgValue();
+
     /**
      * @dev Error emitted when a message has already been executed
      */
@@ -123,7 +126,7 @@ abstract contract SocketDst is SocketBase {
         bytes32 packetId_,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature_
-    ) external override {
+    ) external payable override {
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
@@ -141,10 +144,7 @@ abstract contract SocketDst is SocketBase {
             plugConfig.siblingPlug,
             chainSlug,
             localPlug,
-            messageDetails_.msgId,
-            messageDetails_.msgGasLimit,
-            messageDetails_.executionFee,
-            messageDetails_.payload
+            messageDetails_
         );
 
         (address executor, bool isValidExecutor) = executionManager__
@@ -160,12 +160,9 @@ abstract contract SocketDst is SocketBase {
         );
         _execute(
             executor,
-            messageDetails_.executionFee,
             localPlug,
             remoteSlug,
-            messageDetails_.msgGasLimit,
-            messageDetails_.msgId,
-            messageDetails_.payload
+            messageDetails_
         );
     }
 
@@ -200,34 +197,33 @@ abstract contract SocketDst is SocketBase {
      * code exists in the given address.
      */
     function _execute(
-        address executor,
-        uint256 executionFee,
+        address executor_,
         address localPlug_,
         uint32 remoteChainSlug_,
-        uint256 msgGasLimit_,
-        bytes32 msgId_,
-        bytes calldata payload_
+        ISocket.MessageDetails memory messageDetails_
     ) internal {
+
+        if (msg.value<messageDetails_.msgValue) revert InsufficientMsgValue();
         try
-            IPlug(localPlug_).inbound{gas: msgGasLimit_}(
+            IPlug(localPlug_).inbound{gas: messageDetails_.msgGasLimit, value:messageDetails_.msgValue}(
                 remoteChainSlug_,
-                payload_
+                messageDetails_.payload
             )
         {
             executionManager__.updateExecutionFees(
-                executor,
-                executionFee,
-                msgId_
+                executor_,
+                messageDetails_.executionFee,
+                messageDetails_.msgId
             );
-            emit ExecutionSuccess(msgId_);
+            emit ExecutionSuccess(messageDetails_.msgId);
         } catch Error(string memory reason) {
             // catch failing revert() and require()
-            messageExecuted[msgId_] = false;
-            emit ExecutionFailed(msgId_, reason);
+            messageExecuted[messageDetails_.msgId] = false;
+            emit ExecutionFailed(messageDetails_.msgId, reason);
         } catch (bytes memory reason) {
             // catch failing assert()
-            messageExecuted[msgId_] = false;
-            emit ExecutionFailedBytes(msgId_, reason);
+            messageExecuted[messageDetails_.msgId] = false;
+            emit ExecutionFailedBytes(messageDetails_.msgId, reason);
         }
     }
 
