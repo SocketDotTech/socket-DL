@@ -1,6 +1,12 @@
 {
   "5": [
     [
+      "0xB4eB7D8e8d9f54fcd473468b6429A36c63be17A7",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
       "0x2dc464B4f5Fd55ea19f0bdF71A8dc3584eeb64d7",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -324,6 +330,12 @@
   ],
   "137": [
     [
+      "0xF76dE619235CEcb88f3DbCA6dD7D000e50217657",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
       "0xF28fCc9080B4B09114b5A5B65763E7b37CAECA69",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -425,6 +437,12 @@
     ]
   ],
   "420": [
+    [
+      "0x18Be28Aaa28b20639a26c605088c462B027f7BCe",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
     [
       "0xa4E98b9724473A7371A437f7Ec076bC692219b7a",
       "Counter",
@@ -630,6 +648,12 @@
   ],
   "80001": [
     [
+      "0x28f26c101e3F694f1d03D477b4f34F8835141611",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
       "0x0a3451e8546458Dfd60D81f90d2E495398E58F87",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -731,6 +755,12 @@
     ]
   ],
   "421613": [
+    [
+      "0xd11519aE2cB258ffe820B5d6bB052cbb03C9C635",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
     [
       "0x07fDB2852F58AAc0184592111704A87976D5F073",
       "Counter",
