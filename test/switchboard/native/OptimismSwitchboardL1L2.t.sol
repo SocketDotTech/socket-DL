@@ -57,8 +57,8 @@ contract OptimismSwitchboardL1L2Test is Setup {
         singleCapacitor.addPackedMessage(packedMessage);
 
         (, bytes32 packetId, ) = _getLatestSignature(
-            _a,
             address(singleCapacitor),
+            _a.chainSlug,
             _b.chainSlug
         );
         optimismSwitchboard.initiateNativeConfirmation(packetId);

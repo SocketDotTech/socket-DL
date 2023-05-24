@@ -322,8 +322,8 @@ contract Setup is Test {
     ) internal returns (bytes32 packetId_, bytes32 root_) {
         bytes memory sig_;
         (root_, packetId_, sig_) = _getLatestSignature(
-            _a,
             capacitor,
+            _a.chainSlug,
             _b.chainSlug
         );
 
@@ -358,13 +358,13 @@ contract Setup is Test {
     }
 
     function _getLatestSignature(
-        ChainContext storage src_,
         address capacitor_,
+        uint32 srcChainSlug_,
         uint32 remoteChainSlug_
     ) internal returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint64 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
-        packetId = _getPackedId(capacitor_, src_.chainSlug, id);
+        packetId = _getPackedId(capacitor_, srcChainSlug_, id);
         bytes32 digest = keccak256(
             abi.encode(versionHash, remoteChainSlug_, packetId, root)
         );
