@@ -63,7 +63,7 @@ abstract contract SocketSrc is SocketBase {
 
         plugConfig.capacitor__.addPackedMessage(packedMessage);
 
-        _deductFees(
+        _sendFees(
             msgGasLimit_,
             uint32(remoteChainSlug_),
             plugConfig.outboundSwitchboard__,
@@ -122,7 +122,7 @@ abstract contract SocketSrc is SocketBase {
      * @param switchboard__ The address of the switchboard contract
      * @param fees_ The fees object
      */
-    function _deductFees(
+    function _sendFees(
         uint256 msgGasLimit_,
         uint32 remoteChainSlug_,
         ISwitchboard switchboard__,
