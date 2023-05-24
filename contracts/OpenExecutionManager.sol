@@ -5,9 +5,7 @@ import "./interfaces/IExecutionManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
-import "./libraries/SignatureVerifierLib.sol";
 import "./libraries/FeesHelper.sol";
-import "./libraries/SignatureVerifierLib.sol";
 import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
 import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 
@@ -60,8 +58,8 @@ contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
     function isExecutor(
         bytes32 packedMessage,
         bytes memory sig
-    ) external pure override returns (address executor, bool isValidExecutor) {
-        executor = SignatureVerifierLib.recoverSignerFromDigest(
+    ) external view override returns (address executor, bool isValidExecutor) {
+        executor = signatureVerifier__.recoverSignerFromDigest(
             packedMessage,
             sig
         );

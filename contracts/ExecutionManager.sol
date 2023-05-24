@@ -5,7 +5,6 @@ import "./interfaces/IExecutionManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
 
 import "./libraries/RescueFundsLib.sol";
-import "./libraries/SignatureVerifierLib.sol";
 import "./libraries/FeesHelper.sol";
 import "./utils/AccessControlExtended.sol";
 import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
@@ -61,7 +60,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         bytes32 packedMessage,
         bytes memory sig
     ) external view override returns (address executor, bool isValidExecutor) {
-        executor = SignatureVerifierLib.recoverSignerFromDigest(
+        executor = signatureVerifier__.recoverSignerFromDigest(
             packedMessage,
             sig
         );
