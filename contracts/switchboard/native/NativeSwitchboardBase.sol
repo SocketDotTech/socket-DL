@@ -20,7 +20,7 @@ of fees, gas limits, and packet validation.
 @dev This contract has access-controlled functions and connects to a capacitor contract that holds packets for the native bridge.
 */
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
-    ISignatureVerifier public signatureVerifier__;
+    ISignatureVerifier public immutable signatureVerifier__;
 
     /**
      * @dev Flag that indicates if the global fuse is tripped, meaning no more packets can be sent.
@@ -46,7 +46,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev Address of the remote native switchboard.
      */
     address public remoteNativeSwitchboard;
-    address public socket;
+    address public immutable socket;
 
     uint32 public immutable chainSlug;
 

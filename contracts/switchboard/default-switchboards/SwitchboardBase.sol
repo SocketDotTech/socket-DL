@@ -13,10 +13,10 @@ import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UNTRIP_ROLE, WAT
 import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
-    ISignatureVerifier public signatureVerifier__;
+    ISignatureVerifier public immutable signatureVerifier__;
 
     bool public tripGlobalFuse;
-    address public socket;
+    address public immutable socket;
     uint32 public immutable chainSlug;
     uint256 public immutable timeoutInSeconds;
 

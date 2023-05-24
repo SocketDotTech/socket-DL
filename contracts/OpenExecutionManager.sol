@@ -18,7 +18,7 @@ import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
  * access control.
  */
 contract OpenExecutionManager is IExecutionManager, AccessControlExtended {
-    ISignatureVerifier public signatureVerifier__;
+    ISignatureVerifier public immutable signatureVerifier__;
 
     /**
      * @notice Emitted when the executionFees is updated
