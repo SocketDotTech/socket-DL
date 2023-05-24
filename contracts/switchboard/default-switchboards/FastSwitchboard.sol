@@ -211,7 +211,10 @@ contract FastSwitchboard is SwitchboardBase {
         uint32[] calldata slugs_,
         address[] calldata grantees_
     ) external override onlyOwner {
-        require(roleNames_.length == grantees_.length);
+        if (
+            roleNames_.length != grantees_.length ||
+            roleNames_.length != slugs_.length
+        ) revert UnequalArrayLengths();
         for (uint256 index = 0; index < roleNames_.length; index++) {
             if (isNonWatcherRole(roleNames_[index])) {
                 if (slugs_[index] > 0)
@@ -236,7 +239,10 @@ contract FastSwitchboard is SwitchboardBase {
         uint32[] calldata slugs_,
         address[] calldata grantees_
     ) external override onlyOwner {
-        require(roleNames_.length == grantees_.length);
+        if (
+            roleNames_.length != grantees_.length ||
+            roleNames_.length != slugs_.length
+        ) revert UnequalArrayLengths();
         for (uint256 index = 0; index < roleNames_.length; index++) {
             if (isNonWatcherRole(roleNames_[index])) {
                 if (slugs_[index] > 0)
