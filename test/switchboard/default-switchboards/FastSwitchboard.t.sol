@@ -26,8 +26,10 @@ contract FastSwitchboardTest is Setup {
         initialise();
 
         _a.chainSlug = uint32(c++);
+        _a.sigVerifier__ = new SignatureVerifier(_socketOwner);
         remoteChainSlug = uint32(c++);
         packetId = bytes32(uint256(remoteChainSlug) << 224);
+
         vm.startPrank(_socketOwner);
 
         fastSwitchboard = new FastSwitchboard(
