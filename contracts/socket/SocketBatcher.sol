@@ -352,6 +352,8 @@ contract SocketBatcher is AccessControl {
      */
     function initiateArbitrumNativeBatch(
         address switchboardAddress_,
+        address callValueRefundAddress_,
+        address remoteRefundAddress_,
         ArbitrumNativeInitiatorRequest[]
             calldata arbitrumNativeInitiatorRequests_
     ) external payable {
@@ -368,7 +370,9 @@ contract SocketBatcher is AccessControl {
                 arbitrumNativeInitiatorRequests_[index].packetId,
                 arbitrumNativeInitiatorRequests_[index].maxSubmissionCost,
                 arbitrumNativeInitiatorRequests_[index].maxGas,
-                arbitrumNativeInitiatorRequests_[index].gasPriceBid
+                arbitrumNativeInitiatorRequests_[index].gasPriceBid,
+                callValueRefundAddress_,
+                remoteRefundAddress_
             );
             unchecked {
                 ++index;
@@ -376,7 +380,7 @@ contract SocketBatcher is AccessControl {
         }
 
         if (address(this).balance > 0)
-            msg.sender.call{value: address(this).balance}("");
+            callValueRefundAddress_.call{value: address(this).balance}("");
     }
 
     /**

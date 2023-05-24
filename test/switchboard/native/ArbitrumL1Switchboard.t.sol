@@ -68,7 +68,9 @@ contract ArbitrumL1SwitchboardTest is Setup {
             packetId,
             10000,
             10000,
-            1e16
+            1e16,
+            _socketOwner,
+            _socketOwner
         );
         vm.stopPrank();
     }
