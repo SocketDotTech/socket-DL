@@ -293,7 +293,13 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         address watcher = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end
             keccak256(
-                abi.encode(TRIP_NATIVE_SIG_IDENTIFIER, chainSlug, nonce_, true)
+                abi.encode(
+                    TRIP_NATIVE_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
+                    nonce_,
+                    true
+                )
             ),
             signature_
         );
@@ -318,6 +324,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             keccak256(
                 abi.encode(
                     UNTRIP_NATIVE_SIG_IDENTIFIER,
+                    address(this),
                     chainSlug,
                     nonce_,
                     false
