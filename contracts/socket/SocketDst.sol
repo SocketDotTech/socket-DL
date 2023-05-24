@@ -35,7 +35,6 @@ abstract contract SocketDst is SocketBase {
      */
     error InvalidPacketId();
 
-    error InvalidParams();
     /**
      * @dev Error emitted when proof is invalid
      */
@@ -44,8 +43,6 @@ abstract contract SocketDst is SocketBase {
      * @dev Error emitted when a retry is invalid
      */
     error InvalidRetry();
-
-    error InsufficientMsgValue();
 
     /**
      * @dev Error emitted when a message has already been executed
