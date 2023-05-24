@@ -1,7 +1,7 @@
 import { config as dotenvConfig } from "dotenv";
 import { ethers } from "ethers";
 import { resolve } from "path";
-import { ChainKey, networkToChainSlug } from "../../src";
+import { ChainKey, ChainSlug, networkToChainSlug } from "../../src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -66,7 +66,11 @@ export function getJsonRpcUrl(chain: ChainKey): string {
   return jsonRpcUrl;
 }
 
-export const getProviderFromChainName = (chainSlug: ChainKey) => {
-  const jsonRpcUrl = getJsonRpcUrl(chainSlug);
-  return new ethers.providers.JsonRpcProvider(jsonRpcUrl);
+export const getProviderFromChainName = (chainKey: ChainKey) => {
+  const jsonRpcUrl = getJsonRpcUrl(chainKey);
+  return new ethers.providers.StaticJsonRpcProvider(jsonRpcUrl);
+};
+
+export const getProviderFromChainSlug = (chainSlug: ChainSlug) => {
+  return getProviderFromChainName(networkToChainSlug[chainSlug]);
 };
