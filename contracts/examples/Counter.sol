@@ -82,7 +82,6 @@ contract Counter is IPlug {
         ISocket(socket).outbound{value: msg.value}(
             targetChain_,
             msgGasLimit_,
-            0,
             bytes32(0),
             payload_
         );

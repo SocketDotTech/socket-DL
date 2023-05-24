@@ -36,7 +36,6 @@ interface ISocket {
         uint256 executionFee;
         // The maximum amount of gas that can be used to execute the message.
         uint256 msgGasLimit;
-        uint256 msgValue;
         bytes32 extraParams;
         // The payload data to be executed in the message.
         bytes payload;
@@ -61,7 +60,6 @@ interface ISocket {
         address dstPlug,
         bytes32 msgId,
         uint256 msgGasLimit,
-        uint256 msgValue,
         bytes32 extraParams,
         bytes payload,
         Fees fees
@@ -123,7 +121,6 @@ interface ISocket {
     function outbound(
         uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
-        uint256 msgValue_,
         bytes32 extraParams_,
         bytes calldata payload_
     ) external payable returns (bytes32 msgId);
@@ -207,7 +204,6 @@ interface ISocket {
      */
     function getMinFees(
         uint256 msgGasLimit_,
-        uint256 msgValue_,
         uint256 payloadSize_,
         bytes32 extraParams_,
         uint32 remoteChainSlug_,

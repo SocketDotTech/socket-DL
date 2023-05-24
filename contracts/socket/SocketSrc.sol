@@ -35,7 +35,6 @@ abstract contract SocketSrc is SocketBase {
     function outbound(
         uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
-        uint256 msgValue_,
         bytes32 extraParams_,
         bytes calldata payload_
     ) external payable override returns (bytes32 msgId) {
@@ -47,7 +46,6 @@ abstract contract SocketSrc is SocketBase {
 
         ISocket.Fees memory fees = _validateAndGetFees(
             msgGasLimit_,
-            msgValue_,
             uint256(payload_.length),
             extraParams_,
             uint32(remoteChainSlug_),
@@ -57,7 +55,6 @@ abstract contract SocketSrc is SocketBase {
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = msgId;
         messageDetails.msgGasLimit = msgGasLimit_;
-        messageDetails.msgValue = msgValue_;
         messageDetails.extraParams = extraParams_;
         messageDetails.payload = payload_;
         messageDetails.executionFee = fees.executionFee;
@@ -86,7 +83,6 @@ abstract contract SocketSrc is SocketBase {
             plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
-            msgValue_,
             extraParams_,
             payload_,
             fees
@@ -102,7 +98,6 @@ abstract contract SocketSrc is SocketBase {
      */
     function _validateAndGetFees(
         uint256 msgGasLimit_,
-        uint256 msgValue_,
         uint256 payloadSize_,
         bytes32 extraParams_,
         uint32 remoteChainSlug_,
@@ -115,7 +110,6 @@ abstract contract SocketSrc is SocketBase {
             minExecutionFees
         ) = _getMinFees(
             msgGasLimit_,
-            msgValue_,
             payloadSize_,
             extraParams_,
             remoteChainSlug_,
@@ -170,7 +164,6 @@ abstract contract SocketSrc is SocketBase {
      */
     function getMinFees(
         uint256 msgGasLimit_,
-        uint256 msgValue_,
         uint256 payloadSize_,
         bytes32 extraParams_,
         uint32 remoteChainSlug_,
@@ -184,7 +177,6 @@ abstract contract SocketSrc is SocketBase {
             uint256 executionFee
         ) = _getMinFees(
                 msgGasLimit_,
-                msgValue_,
                 payloadSize_,
                 extraParams_,
                 remoteChainSlug_,
@@ -196,7 +188,6 @@ abstract contract SocketSrc is SocketBase {
 
     function _getMinFees(
         uint256 msgGasLimit_,
-        uint256 msgValue_,
         uint256 payloadSize_,
         bytes32 extraParams_,
         uint32 remoteChainSlug_,
@@ -218,7 +209,6 @@ abstract contract SocketSrc is SocketBase {
         );
         uint256 msgExecutionFee = executionManager__.getMinFees(
             msgGasLimit_,
-            msgValue_,
             payloadSize_,
             extraParams_,
             remoteChainSlug_

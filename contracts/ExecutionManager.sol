@@ -49,21 +49,22 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     // remoteChainSlug => executionFees
     mapping(uint32 => uint256) public executionFees;
 
-    // srcSlug => destSlug => relativeNativePrice (stores (destnativeTokenPriceUSD*(10**18)/srcNativeTokenPriceUSD))
-    mapping(uint32 => mapping(uint32 => uint256))
-        public relativeNativeTokenPrice;
+    // destSlug => relativeNativePrice (stores (destnativeTokenPriceUSD*(1e18)/srcNativeTokenPriceUSD))
+    mapping(uint32 => uint256) public relativeNativeTokenPrice;
 
     // mapping(uint32 => uint256) public baseGasUsed;
 
-    mapping(uint32 => mapping(uint32 => uint256)) public msgValueMinThreshold;
+    mapping(uint32 => uint256) public msgValueMinThreshold;
 
-    mapping(uint32 => mapping(uint32 => uint256)) public msgValueMaxThreshold;
+    mapping(uint32 => uint256) public msgValueMaxThreshold;
 
     // msg.value*scrNativePrice >= relativeNativeTokenPrice[srcSlug][destinationSlug] * destMsgValue /10^18
 
     error InvalidNonce();
     error MsgValueTooLow();
     error MsgValueTooHigh();
+    error PayloadTooLarge();
+    error InsufficientMsgValue();
 
     /**
      * @dev Constructor for ExecutionManager contract
@@ -119,22 +120,45 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
      */
     function getMinFees(
         uint256 gasLimit_,
-        uint256 msgValue_,
         uint256 payloadSize_,
         bytes32 extraParams_,
         uint32 siblingChainSlug_
     ) external view override returns (uint256) {
-        if (msgValue_ == 0) return executionFees[siblingChainSlug_];
 
-        if (msgValue_ < msgValueMinThreshold[chainSlug][siblingChainSlug_])
+        if (payloadSize_>3000) revert PayloadTooLarge();
+
+        // 1st byte - type, next 31 bytes - value
+        // if type = 0, no extra param. type = 1, use next 31 bytes as msgValue
+        uint256 params = uint256(extraParams_);
+        uint8 paramType = uint8(params >> 224);
+
+        if (paramType == 0) return executionFees[siblingChainSlug_];
+
+        uint256 msgValue = uint256(uint224(params)); 
+
+        if (msgValue < msgValueMinThreshold[siblingChainSlug_])
             revert MsgValueTooLow();
-        if (msgValue_ > msgValueMaxThreshold[chainSlug][siblingChainSlug_])
+        if (msgValue > msgValueMaxThreshold[siblingChainSlug_])
             revert MsgValueTooHigh();
 
-        uint256 msgValueRequiredOnSrcChain = (relativeNativeTokenPrice[
-            chainSlug
-        ][siblingChainSlug_] * msgValue_) / (10 ** 18);
+        uint256 msgValueRequiredOnSrcChain = (relativeNativeTokenPrice[siblingChainSlug_] * msgValue) / 1e18;
         return msgValueRequiredOnSrcChain + executionFees[siblingChainSlug_];
+    }
+
+    function verifyParams(
+        bytes32 extraParams_,
+        uint256 msgValue_
+    ) external pure override  {
+
+        uint256 params = uint256(extraParams_);
+        uint8 paramType = uint8(params >> 224);
+
+        if (paramType == 0) return;
+
+        uint256 expectedMsgValue = uint256(uint224(params)); 
+
+        if (msgValue_<expectedMsgValue) revert InsufficientMsgValue();
+
     }
 
     function setExecutionFees(
@@ -191,7 +215,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 nonce = nextNonce[feesUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
-        relativeNativeTokenPrice[chainSlug][
+        relativeNativeTokenPrice[
             dstChainSlug_
         ] = relativeNativeTokenPrice_;
         emit RelativeNativeTokenPriceSet(
@@ -225,7 +249,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 nonce = nextNonce[feesUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
-        msgValueMinThreshold[chainSlug][dstChainSlug_] = msgValueMinThreshold_;
+        msgValueMinThreshold[dstChainSlug_] = msgValueMinThreshold_;
         emit MsgValueMinThresholdSet(dstChainSlug_, msgValueMinThreshold_);
     }
 
@@ -254,7 +278,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 nonce = nextNonce[feesUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
-        msgValueMaxThreshold[chainSlug][dstChainSlug_] = msgValueMaxThreshold_;
+        msgValueMaxThreshold[dstChainSlug_] = msgValueMaxThreshold_;
         emit MsgValueMaxThresholdSet(dstChainSlug_, msgValueMaxThreshold_);
     }
 

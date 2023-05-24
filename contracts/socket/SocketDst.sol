@@ -2,6 +2,7 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/IDecapacitor.sol";
+import "../interfaces/IExecutionManager.sol";
 import "../interfaces/IPlug.sol";
 
 import "./SocketBase.sol";
@@ -34,6 +35,7 @@ abstract contract SocketDst is SocketBase {
      */
     error InvalidPacketId();
 
+    error InvalidParams();
     /**
      * @dev Error emitted when proof is invalid
      */
@@ -156,7 +158,8 @@ abstract contract SocketDst is SocketBase {
             remoteSlug,
             packedMessage,
             plugConfig,
-            messageDetails_.decapacitorProof
+            messageDetails_.decapacitorProof,
+            messageDetails_.extraParams
         );
         _execute(executor, localPlug, remoteSlug, messageDetails_);
     }
@@ -166,7 +169,8 @@ abstract contract SocketDst is SocketBase {
         uint32 remoteChainSlug_,
         bytes32 packedMessage_,
         PlugConfig storage plugConfig_,
-        bytes memory decapacitorProof_
+        bytes memory decapacitorProof_,
+        bytes32 extraParams_
     ) internal view {
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
@@ -184,6 +188,11 @@ abstract contract SocketDst is SocketBase {
                 decapacitorProof_
             )
         ) revert InvalidProof();
+
+        executionManager__.verifyParams(
+            extraParams_, 
+            msg.value
+        );
     }
 
     /**
@@ -197,11 +206,11 @@ abstract contract SocketDst is SocketBase {
         uint32 remoteChainSlug_,
         ISocket.MessageDetails memory messageDetails_
     ) internal {
-        if (msg.value < messageDetails_.msgValue) revert InsufficientMsgValue();
+
         try
             IPlug(localPlug_).inbound{
                 gas: messageDetails_.msgGasLimit,
-                value: messageDetails_.msgValue
+                value: msg.value
             }(remoteChainSlug_, messageDetails_.payload)
         {
             executionManager__.updateExecutionFees(

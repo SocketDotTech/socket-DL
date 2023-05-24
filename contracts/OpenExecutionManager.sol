@@ -1,15 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./interfaces/IExecutionManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
-
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/SignatureVerifierLib.sol";
-import "./libraries/FeesHelper.sol";
-import "./utils/AccessControlExtended.sol";
-import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
-import {FEES_UPDATE_SIG_IDENTIFIER, RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENTIFIER, MSG_VALUE_MAX_THRESHOLD_SIG_IDENTIFIER, MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 import "./ExecutionManager.sol";
 
 
@@ -29,7 +23,7 @@ contract OpenExecutionManager is ExecutionManager {
     {}
 
     /**
-     * @notice Checks whether the provided signer address is an executor for the given packed message and signature
+     * @notice This function allows all executors 
      * @param packedMessage Packed message to be executed
      * @param sig Signature of the message
      * @return executor Address of the executor

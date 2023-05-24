@@ -91,7 +91,6 @@ contract Messenger is IPlug, Ownable(msg.sender) {
     function _outbound(uint32 targetChain_, bytes memory payload_) private {
         uint256 fee = _socket__.getMinFees(
             _msgGasLimit,
-            0,
             uint256(payload_.length),
             bytes32(0),
             targetChain_,
@@ -101,7 +100,6 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         _socket__.outbound{value: fee}(
             targetChain_,
             _msgGasLimit,
-            0,
             bytes32(0),
             payload_
         );
