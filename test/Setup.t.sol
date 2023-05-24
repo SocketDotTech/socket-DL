@@ -193,9 +193,8 @@ contract Setup is Test {
         );
 
         uint256 nonce = 0;
-        vm.startPrank(_socketOwner);
-
-        vm.stopPrank();
+        hoax(_socketOwner);
+        optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
         scc_ = _registerSwitchbaord(
             cc_,
@@ -223,9 +222,7 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
-
         vm.stopPrank();
 
         scc_ = _registerSwitchbaord(
@@ -288,17 +285,18 @@ contract Setup is Test {
 
     function _registerSwitchbaord(
         ChainContext storage cc_,
-        address deployer_,
+        address governance_,
         address switchBoardAddress_,
         uint256 nonce_,
         uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
-        vm.startPrank(deployer_);
-        cc_.socket__.registerSwitchBoard(
-            switchBoardAddress_,
-            DEFAULT_BATCH_LENGTH,
+        scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
+
+        hoax(governance_);
+        scc_.switchboard__.registerSiblingSlug(
             uint32(remoteChainSlug_),
+            DEFAULT_BATCH_LENGTH,
             capacitorType_
         );
 
@@ -312,9 +310,6 @@ contract Setup is Test {
             switchBoardAddress_,
             remoteChainSlug_
         );
-        scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
-
-        vm.stopPrank();
     }
 
     function sealAndPropose(
