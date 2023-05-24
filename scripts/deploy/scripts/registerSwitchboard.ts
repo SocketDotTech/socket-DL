@@ -18,21 +18,23 @@ export default async function registerSwitchBoard(
     const socket = (await getInstance("Socket", config["Socket"])).connect(
       signer
     );
+
+    // used fast switchboard here as all have same function signature
+    const switchboard = (
+      await getInstance("FastSwitchboard", switchBoardAddress)
+    ).connect(signer);
+
     let capacitor = await socket.capacitors__(
       switchBoardAddress,
       remoteChainSlug
     );
 
     if (capacitor === constants.AddressZero) {
-      const registerTx = await socket
+      const registerTx = await switchboard
         .connect(signer)
-        .registerSwitchBoard(
-          switchBoardAddress,
-          maxPacketLength,
-          remoteChainSlug,
-          capacitorType,
-          { ...overrides[await signer.getChainId()] }
-        );
+        .registerSiblingSlug(remoteChainSlug, maxPacketLength, capacitorType, {
+          ...overrides[await signer.getChainId()],
+        });
       console.log(
         `Registering Switchboard ${switchBoardAddress}: ${registerTx.hash}`
       );
