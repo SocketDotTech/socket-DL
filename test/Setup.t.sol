@@ -23,7 +23,7 @@ contract Setup is Test {
 
     string version = "TEST_NET";
 
-    bytes32 versionHash = keccak256(abi.encode(version));
+    bytes32 versionHash = keccak256(bytes(version));
 
     uint256 immutable executorPrivateKey = c++;
     uint256 immutable _socketOwnerPrivateKey = c++;
@@ -413,9 +413,8 @@ contract Setup is Test {
         uint32 dstSlug,
         bytes32 packetId_
     ) internal {
-        uint32 srcSlug = uint32(uint256(packetId_) >> 224);
         bytes32 digest = keccak256(
-            abi.encode(switchboardAddress, srcSlug, dstSlug, packetId_)
+            abi.encode(switchboardAddress, dstSlug, packetId_)
         );
 
         // generate attest-signature

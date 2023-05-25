@@ -26,8 +26,10 @@ contract FastSwitchboardTest is Setup {
         initialise();
 
         _a.chainSlug = uint32(c++);
+        _a.sigVerifier__ = new SignatureVerifier(_socketOwner);
         remoteChainSlug = uint32(c++);
         packetId = bytes32(uint256(remoteChainSlug) << 224);
+
         vm.startPrank(_socketOwner);
 
         fastSwitchboard = new FastSwitchboard(
@@ -51,12 +53,7 @@ contract FastSwitchboardTest is Setup {
 
     function testAttest() external {
         bytes32 digest = keccak256(
-            abi.encode(
-                address(fastSwitchboard),
-                remoteChainSlug,
-                _a.chainSlug,
-                packetId
-            )
+            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId)
         );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
@@ -70,12 +67,7 @@ contract FastSwitchboardTest is Setup {
 
     function testDuplicateAttestation() external {
         bytes32 digest = keccak256(
-            abi.encode(
-                address(fastSwitchboard),
-                remoteChainSlug,
-                _a.chainSlug,
-                packetId
-            )
+            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId)
         );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
@@ -92,24 +84,14 @@ contract FastSwitchboardTest is Setup {
 
     function testIsAllowed() external {
         bytes32 digest = keccak256(
-            abi.encode(
-                address(fastSwitchboard),
-                remoteChainSlug,
-                _a.chainSlug,
-                packetId
-            )
+            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId)
         );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
         fastSwitchboard.attest(packetId, sig);
 
         digest = keccak256(
-            abi.encode(
-                address(fastSwitchboard),
-                remoteChainSlug,
-                _a.chainSlug,
-                packetId
-            )
+            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId)
         );
         sig = _createSignature(digest, _altWatcherPrivateKey);
 
@@ -301,12 +283,7 @@ contract FastSwitchboardTest is Setup {
         bytes32 altPacketId = bytes32(uint256(100) << 224);
 
         bytes32 digest = keccak256(
-            abi.encode(
-                address(fastSwitchboard),
-                remoteChainSlug,
-                _a.chainSlug,
-                altPacketId
-            )
+            abi.encode(address(fastSwitchboard), _a.chainSlug, altPacketId)
         );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 

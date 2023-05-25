@@ -5,7 +5,6 @@ import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/ISignatureVerifier.sol";
 import "../../utils/AccessControlExtended.sol";
 
-import "../../libraries/SignatureVerifierLib.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
@@ -13,10 +12,10 @@ import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UNTRIP_ROLE, WAT
 import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
-    ISignatureVerifier public signatureVerifier__;
+    ISignatureVerifier public immutable signatureVerifier__;
 
     bool public tripGlobalFuse;
-    address public socket;
+    address public immutable socket;
     uint32 public immutable chainSlug;
     uint256 public immutable timeoutInSeconds;
 
@@ -139,7 +138,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32 srcChainSlug_,
         bytes memory signature_
     ) external {
-        address watcher = SignatureVerifierLib.recoverSignerFromDigest(
+        address watcher = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
@@ -167,7 +166,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @notice pause execution
      */
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
-        address tripper = SignatureVerifierLib.recoverSignerFromDigest(
+        address tripper = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
@@ -197,7 +196,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32 srcChainSlug_,
         bytes memory signature_
     ) external {
-        address untripper = SignatureVerifierLib.recoverSignerFromDigest(
+        address untripper = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
@@ -224,7 +223,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @notice unpause execution
      */
     function untrip(uint256 nonce_, bytes memory signature_) external {
-        address untripper = SignatureVerifierLib.recoverSignerFromDigest(
+        address untripper = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end
             keccak256(
                 abi.encode(

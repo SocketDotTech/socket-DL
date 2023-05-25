@@ -2,7 +2,6 @@
 pragma solidity 0.8.7;
 
 import "./SwitchboardBase.sol";
-import "../../libraries/SignatureVerifierLib.sol";
 
 /**
  * @title FastSwitchboard contract
@@ -67,10 +66,8 @@ contract FastSwitchboard is SwitchboardBase {
      */
     function attest(bytes32 packetId_, bytes calldata signature_) external {
         uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
-        address watcher = SignatureVerifierLib.recoverSignerFromDigest(
-            keccak256(
-                abi.encode(address(this), srcChainSlug, chainSlug, packetId_)
-            ),
+        address watcher = signatureVerifier__.recoverSignerFromDigest(
+            keccak256(abi.encode(address(this), chainSlug, packetId_)),
             signature_
         );
 
@@ -212,7 +209,10 @@ contract FastSwitchboard is SwitchboardBase {
         uint32[] calldata slugs_,
         address[] calldata grantees_
     ) external override onlyOwner {
-        require(roleNames_.length == grantees_.length);
+        if (
+            roleNames_.length != grantees_.length ||
+            roleNames_.length != slugs_.length
+        ) revert UnequalArrayLengths();
         for (uint256 index = 0; index < roleNames_.length; index++) {
             if (isNonWatcherRole(roleNames_[index])) {
                 if (slugs_[index] > 0)
@@ -237,7 +237,10 @@ contract FastSwitchboard is SwitchboardBase {
         uint32[] calldata slugs_,
         address[] calldata grantees_
     ) external override onlyOwner {
-        require(roleNames_.length == grantees_.length);
+        if (
+            roleNames_.length != grantees_.length ||
+            roleNames_.length != slugs_.length
+        ) revert UnequalArrayLengths();
         for (uint256 index = 0; index < roleNames_.length; index++) {
             if (isNonWatcherRole(roleNames_[index])) {
                 if (slugs_[index] > 0)

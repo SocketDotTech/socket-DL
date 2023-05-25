@@ -21,6 +21,8 @@ contract OptimisticSwitchboardTest is Setup {
     function setUp() external {
         initialise();
         _a.chainSlug = uint32(uint256(1));
+        _a.sigVerifier__ = new SignatureVerifier(_socketOwner);
+
         watcher = vm.addr(_watcherPrivateKey);
 
         vm.startPrank(_socketOwner);
