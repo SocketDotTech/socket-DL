@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
+import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/ICapacitor.sol";
 import "../../interfaces/ISignatureVerifier.sol";
@@ -21,6 +22,7 @@ of fees, gas limits, and packet validation.
 */
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     ISignatureVerifier public immutable signatureVerifier__;
+    ISocket public immutable socket__;
 
     /**
      * @dev Flag that indicates if the global fuse is tripped, meaning no more packets can be sent.
@@ -40,13 +42,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev The maximum packet size.
      */
-    uint256 public maxPacketSize;
+    uint256 public maxPacketLength;
 
     /**
      * @dev Address of the remote native switchboard.
      */
     address public remoteNativeSwitchboard;
-    address public immutable socket;
 
     uint32 public immutable chainSlug;
 
@@ -83,10 +84,15 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev This event is emitted when a new capacitor is registered.
      *     It includes the address of the capacitor and the maximum size of the packet allowed.
+     * @param siblingChainSlug Chain slug of the sibling chain
      * @param capacitor address of capacitor registered to switchboard
-     * @param maxPacketSize maximum packets that can be set to capacitor
+     * @param maxPacketLength maximum packets that can be set to capacitor
      */
-    event CapacitorRegistered(address capacitor, uint256 maxPacketSize);
+    event SwitchBoardRegistered(
+        uint32 siblingChainSlug,
+        address capacitor,
+        uint256 maxPacketLength
+    );
 
     /**
      * @dev This event is emitted when a new capacitor is registered.
@@ -157,7 +163,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32 chainSlug_,
         ISignatureVerifier signatureVerifier_
     ) {
-        socket = socket_;
+        socket__ = ISocket(socket_);
         chainSlug = chainSlug_;
         signatureVerifier__ = signatureVerifier_;
     }
@@ -260,24 +266,29 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         emit SwitchboardFeesSet(switchboardFees, verificationFees);
     }
 
-    /**
-     * @notice set capacitor address and packet size
-     * @param capacitor_ capacitor address
-     * @param maxPacketSize_ max messages allowed in one packet
-     */
-    function registerCapacitor(
-        uint32,
-        address capacitor_,
-        uint256 maxPacketSize_
-    ) external override {
-        if (msg.sender != socket) revert OnlySocket();
+    /// @inheritdoc ISwitchboard
+    function registerSiblingSlug(
+        uint32 siblingChainSlug_,
+        uint256 maxPacketLength_,
+        uint256 capacitorType_
+    ) external override onlyRole(GOVERNANCE_ROLE) {
         if (isInitialised) revert AlreadyInitialised();
 
-        isInitialised = true;
-        maxPacketSize = maxPacketSize_;
-        capacitor__ = ICapacitor(capacitor_);
+        address capacitor = socket__.registerSwitchBoard(
+            siblingChainSlug_,
+            maxPacketLength_,
+            capacitorType_
+        );
 
-        emit CapacitorRegistered(capacitor_, maxPacketSize_);
+        isInitialised = true;
+        maxPacketLength = maxPacketLength_;
+        capacitor__ = ICapacitor(capacitor);
+
+        emit SwitchBoardRegistered(
+            siblingChainSlug_,
+            capacitor,
+            maxPacketLength_
+        );
     }
 
     /**
