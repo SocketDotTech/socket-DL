@@ -197,7 +197,7 @@ contract Setup is Test {
 
         vm.stopPrank();
 
-        scc_ = _registerSwitchbaord(
+        scc_ = _registerSwitchboard(
             cc_,
             _socketOwner,
             address(optimisticSwitchboard),
@@ -228,7 +228,7 @@ contract Setup is Test {
 
         vm.stopPrank();
 
-        scc_ = _registerSwitchbaord(
+        scc_ = _registerSwitchboard(
             cc_,
             _socketOwner,
             address(fastSwitchboard),
@@ -286,7 +286,7 @@ contract Setup is Test {
         vm.stopPrank();
     }
 
-    function _registerSwitchbaord(
+    function _registerSwitchboard(
         ChainContext storage cc_,
         address deployer_,
         address switchBoardAddress_,
@@ -433,7 +433,6 @@ contract Setup is Test {
         bytes32 packetId_,
         bytes32 msgId_,
         uint256 msgGasLimit_,
-        uint256 msgValue_,
         bytes32 extraParams_,
         uint256 executionFee_,
         bytes32 packedMessage_,
@@ -445,7 +444,6 @@ contract Setup is Test {
             msgId_,
             executionFee_,
             msgGasLimit_,
-            msgValue_,
             extraParams_,
             payload_,
             proof_
@@ -464,7 +462,6 @@ contract Setup is Test {
         bytes32 packetId_,
         bytes32 msgId_,
         uint256 msgGasLimit_,
-        uint256 msgValue_,
         bytes32 extraParams_,
         uint256 executionFee_,
         bytes32 packedMessage_,
@@ -476,7 +473,6 @@ contract Setup is Test {
             packetId_,
             msgId_,
             msgGasLimit_,
-            msgValue_,
             extraParams_,
             executionFee_,
             packedMessage_,

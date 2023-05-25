@@ -57,6 +57,8 @@ contract HappyTest is Setup {
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
             executionFee = _a.executionManager__.getMinFees(
                 _msgGasLimit,
+                100,
+                bytes32(0),
                 _b.chainSlug
             );
 
@@ -106,6 +108,7 @@ contract HappyTest is Setup {
             packetId,
             _packMessageId(_a.chainSlug, address(dstCounter__), 0),
             _msgGasLimit,
+            bytes32(0),
             executionFee,
             root,
             payload,
@@ -127,6 +130,7 @@ contract HappyTest is Setup {
             packetId,
             _packMessageId(_a.chainSlug, address(dstCounter__), 0),
             _msgGasLimit,
+            bytes32(0),
             executionFee,
             root,
             payload,
@@ -175,6 +179,7 @@ contract HappyTest is Setup {
             packetId,
             _packMessageId(_b.chainSlug, address(srcCounter__), 0),
             _msgGasLimit,
+            bytes32(0),
             0,
             root,
             payload,
@@ -203,15 +208,18 @@ contract HappyTest is Setup {
         );
 
         msgId = _packMessageId(_a.chainSlug, address(dstCounter__), count);
+        ISocket.MessageDetails memory messageDetails;
+        messageDetails.msgId = msgId;
+        messageDetails.msgGasLimit = msgGasLimit;
+        messageDetails.executionFee = executionFees;
+        messageDetails.payload = payload;
+
         root = _a.hasher__.packMessage(
             _a.chainSlug,
             address(srcCounter__),
             dstSlug,
             address(dstCounter__),
-            msgId,
-            msgGasLimit,
-            executionFees,
-            payload
+            messageDetails
         );
     }
 
@@ -252,6 +260,8 @@ contract HappyTest is Setup {
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
             executionFee = _a.executionManager__.getMinFees(
                 _msgGasLimit,
+                100,
+                bytes32(0),
                 _b.chainSlug
             );
 
@@ -290,6 +300,7 @@ contract HappyTest is Setup {
             packetId,
             msgId1,
             _msgGasLimit,
+            bytes32(0),
             executionFee,
             root1,
             payload,
@@ -309,6 +320,7 @@ contract HappyTest is Setup {
             packetId,
             msgId2,
             _msgGasLimit,
+            bytes32(0),
             executionFee,
             root2,
             payload,

@@ -45,15 +45,18 @@ contract OptimismSwitchboardL2L1Test is Setup {
 
         vm.startPrank(socketAddress);
 
+        ISocket.MessageDetails memory messageDetails;
+        messageDetails.msgId = 0;
+        messageDetails.msgGasLimit = 1000000;
+        messageDetails.executionFee = 100;
+        messageDetails.payload = abi.encode(msg.sender);
+
         bytes32 packedMessage = _a.hasher__.packMessage(
             _a.chainSlug,
             msg.sender,
             _b.chainSlug,
             0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1,
-            0,
-            1000000,
-            100,
-            abi.encode(msg.sender)
+            messageDetails
         );
 
         singleCapacitor.addPackedMessage(packedMessage);
