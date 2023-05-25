@@ -271,8 +271,9 @@ contract SocketDstTest is Setup {
         uint256 amount = 100;
         uint256 msgValue = 100;
         uint paramType = 1;
-        bytes32 extraParams = bytes32(uint256((uint256(paramType) << 224) | uint224(msgValue)));
-
+        bytes32 extraParams = bytes32(
+            uint256((uint256(paramType) << 224) | uint224(msgValue))
+        );
 
         bytes memory payload = abi.encode(
             keccak256("OP_ADD"),
@@ -401,6 +402,7 @@ contract SocketDstTest is Setup {
             proof
         );
     }
+
     function getLatestSignature(
         ChainContext memory src_,
         address capacitor_,

@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 import "forge-std/console.sol";
 
-
 contract ExecutionManagerTest is Setup {
     address public constant NATIVE_TOKEN_ADDRESS =
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
@@ -33,7 +32,7 @@ contract ExecutionManagerTest is Setup {
     uint256 sealGasLimit = 200000;
     uint256 sourceGasPrice = 1200000;
     uint256 relativeGasPrice = 1100000;
-    uint256 relativeNativeTokenPrice = 1000*1e18; // destNativeTokenPrice/srcNativeTokenPrice
+    uint256 relativeNativeTokenPrice = 1000 * 1e18; // destNativeTokenPrice/srcNativeTokenPrice
     ExecutionManager internal executionManager;
     SignatureVerifier internal signatureVerifier;
     TransmitManager internal transmitManager;
@@ -133,8 +132,7 @@ contract ExecutionManagerTest is Setup {
         );
     }
 
-    function setExecutionFees () public {
-
+    function setExecutionFees() public {
         //set ExecutionFees for remoteChainSlug
         bytes32 feesUpdateDigest = keccak256(
             abi.encode(
@@ -158,11 +156,9 @@ contract ExecutionManagerTest is Setup {
             _executionFees,
             feesUpdateSignature
         );
-
     }
 
-    function setMsgValueMaxThreshold (uint256 threshold) public {
-
+    function setMsgValueMaxThreshold(uint256 threshold) public {
         //set ExecutionFees for remoteChainSlug
         bytes32 feesUpdateDigest = keccak256(
             abi.encode(
@@ -186,11 +182,9 @@ contract ExecutionManagerTest is Setup {
             threshold,
             feesUpdateSignature
         );
-
     }
 
-    function setMsgValueMinThreshold (uint256 threshold) public {
-
+    function setMsgValueMinThreshold(uint256 threshold) public {
         //set ExecutionFees for remoteChainSlug
         bytes32 feesUpdateDigest = keccak256(
             abi.encode(
@@ -214,11 +208,9 @@ contract ExecutionManagerTest is Setup {
             threshold,
             feesUpdateSignature
         );
-
     }
 
-    function setRelativeNativeTokenPrice (uint256 relativePrice) public {
-
+    function setRelativeNativeTokenPrice(uint256 relativePrice) public {
         //set ExecutionFees for remoteChainSlug
         bytes32 feesUpdateDigest = keccak256(
             abi.encode(
@@ -242,7 +234,6 @@ contract ExecutionManagerTest is Setup {
             relativePrice,
             feesUpdateSignature
         );
-
     }
 
     function testIsExecutor() public {
@@ -276,7 +267,9 @@ contract ExecutionManagerTest is Setup {
         uint256 payloadSize = 1000;
         uint256 msgValue = 1000000;
         uint paramType = 1;
-        bytes32 extraParams = bytes32(uint256((uint256(paramType) << 224) | uint224(msgValue)));
+        bytes32 extraParams = bytes32(
+            uint256((uint256(paramType) << 224) | uint224(msgValue))
+        );
 
         vm.expectRevert(MsgValueTooHigh.selector);
         executionManager.getMinFees(
@@ -285,15 +278,16 @@ contract ExecutionManagerTest is Setup {
             extraParams,
             destChainSlug
         );
-
     }
 
-        function testGetMinFeesWithMsgValueTooLow() public {
+    function testGetMinFeesWithMsgValueTooLow() public {
         uint256 msgGasLimit = 100000;
         uint256 payloadSize = 1000;
         uint256 msgValue = 1;
         uint paramType = 1;
-        bytes32 extraParams = bytes32(uint256((uint256(paramType) << 224) | uint224(msgValue)));
+        bytes32 extraParams = bytes32(
+            uint256((uint256(paramType) << 224) | uint224(msgValue))
+        );
 
         vm.expectRevert(MsgValueTooLow.selector);
         executionManager.getMinFees(
@@ -309,8 +303,9 @@ contract ExecutionManagerTest is Setup {
         uint256 payloadSize = 1000;
         uint256 msgValue = 100;
         uint paramType = 1;
-        bytes32 extraParams = bytes32(uint256((uint256(paramType) << 224) | uint224(msgValue)));
-
+        bytes32 extraParams = bytes32(
+            uint256((uint256(paramType) << 224) | uint224(msgValue))
+        );
 
         uint256 minFees = executionManager.getMinFees(
             msgGasLimit,
@@ -319,13 +314,18 @@ contract ExecutionManagerTest is Setup {
             destChainSlug
         );
 
-        assertEq(minFees, _executionFees + msgValue*relativeNativeTokenPrice/1e18);
+        assertEq(
+            minFees,
+            _executionFees + (msgValue * relativeNativeTokenPrice) / 1e18
+        );
     }
 
     function testGetMinFeesWithPayloadTooLong() public {
         uint256 msgGasLimit = 100000;
         uint256 payloadSize = 10000;
-        bytes32 extraParams = bytes32(uint256((uint256(1) << 224) | uint224(100)));
+        bytes32 extraParams = bytes32(
+            uint256((uint256(1) << 224) | uint224(100))
+        );
 
         vm.expectRevert(PayloadTooLarge.selector);
         executionManager.getMinFees(
@@ -335,8 +335,6 @@ contract ExecutionManagerTest is Setup {
             destChainSlug
         );
     }
-
-
 
     function testPayFees() public {
         uint256 msgGasLimit = 100000;
@@ -409,7 +407,4 @@ contract ExecutionManagerTest is Setup {
         assertEq(feesWithdrawer.balance, amount);
         assertEq(address(executionManager).balance, 0);
     }
-
-
-    
 }
