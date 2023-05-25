@@ -56,6 +56,10 @@ abstract contract SocketDst is SocketBase {
      * @dev Error emitted when verification fails
      */
     error VerificationFailed();
+    /**
+     * @dev Error emitted when source slugs deduced from packet id and msg id don't match
+     */
+    error ErrInSourceValidation();
 
     /**
      * @dev msgId => message status mapping
@@ -134,6 +138,9 @@ abstract contract SocketDst is SocketBase {
         if (packetIdRoots[packetId_] == bytes32(0)) revert PacketNotProposed();
 
         uint32 remoteSlug = _decodeSlug(messageDetails_.msgId);
+        if (_decodeSlug(packetId_) != remoteSlug)
+            revert ErrInSourceValidation();
+
         address localPlug = _decodePlug(messageDetails_.msgId);
 
         PlugConfig storage plugConfig = _plugConfigs[localPlug][remoteSlug];

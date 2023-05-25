@@ -38,7 +38,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
         _chainSetup(transmitterPivateKeys);
     }
 
-    function testInitateNativeConfirmation1() public {
+    function testInitateNativeConfirmation() public {
         address socketAddress = address(_a.socket__);
 
         vm.startPrank(socketAddress);
@@ -60,8 +60,8 @@ contract OptimismSwitchboardL1L2Test is Setup {
         singleCapacitor.addPackedMessage(packedMessage);
 
         (, bytes32 packetId, ) = _getLatestSignature(
-            _a,
             address(singleCapacitor),
+            _a.chainSlug,
             _b.chainSlug
         );
         optimismSwitchboard.initiateNativeConfirmation(packetId);
@@ -87,6 +87,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
         uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
+        vm.startPrank(_socketOwner);
         optimismSwitchboard = new OptimismSwitchboard(
             cc_.chainSlug,
             receiveGasLimit_,
@@ -96,49 +97,22 @@ contract OptimismSwitchboardL1L2Test is Setup {
             cc_.sigVerifier__
         );
 
-        scc_ = registerSwitchbaord(
+        optimismSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+        vm.stopPrank();
+
+        scc_ = _registerSwitchboard(
             cc_,
             _socketOwner,
             address(optimismSwitchboard),
+            0,
             remoteChainSlug_,
             capacitorType_
         );
 
+        singleCapacitor = scc_.capacitor__;
         hoax(_socketOwner);
         optimismSwitchboard.updateRemoteNativeSwitchboard(
             remoteNativeSwitchboard_
         );
-    }
-
-    function registerSwitchbaord(
-        ChainContext storage cc_,
-        address deployer_,
-        address switchBoardAddress_,
-        uint32 remoteChainSlug_,
-        uint256 capacitorType_
-    ) internal returns (SocketConfigContext memory scc_) {
-        vm.startPrank(deployer_);
-        cc_.socket__.registerSwitchBoard(
-            switchBoardAddress_,
-            DEFAULT_BATCH_LENGTH,
-            uint32(remoteChainSlug_),
-            capacitorType_
-        );
-
-        scc_.siblingChainSlug = remoteChainSlug_;
-        scc_.capacitor__ = cc_.socket__.capacitors__(
-            switchBoardAddress_,
-            remoteChainSlug_
-        );
-        singleCapacitor = scc_.capacitor__;
-
-        scc_.decapacitor__ = cc_.socket__.decapacitors__(
-            switchBoardAddress_,
-            remoteChainSlug_
-        );
-        scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
-
-        optimismSwitchboard.grantRole(GOVERNANCE_ROLE, deployer_);
-        vm.stopPrank();
     }
 }

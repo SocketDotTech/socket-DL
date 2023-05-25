@@ -23,7 +23,7 @@ contract Setup is Test {
 
     string version = "TEST_NET";
 
-    bytes32 versionHash = keccak256(abi.encode(version));
+    bytes32 versionHash = keccak256(bytes(version));
 
     uint256 immutable executorPrivateKey = c++;
     uint256 immutable _socketOwnerPrivateKey = c++;
@@ -193,9 +193,8 @@ contract Setup is Test {
         );
 
         uint256 nonce = 0;
-        vm.startPrank(_socketOwner);
-
-        vm.stopPrank();
+        hoax(_socketOwner);
+        optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
         scc_ = _registerSwitchboard(
             cc_,
@@ -223,9 +222,7 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
-
         vm.stopPrank();
 
         scc_ = _registerSwitchboard(
@@ -288,17 +285,18 @@ contract Setup is Test {
 
     function _registerSwitchboard(
         ChainContext storage cc_,
-        address deployer_,
+        address governance_,
         address switchBoardAddress_,
         uint256 nonce_,
         uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
-        vm.startPrank(deployer_);
-        cc_.socket__.registerSwitchBoard(
-            switchBoardAddress_,
-            DEFAULT_BATCH_LENGTH,
+        scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
+
+        hoax(governance_);
+        scc_.switchboard__.registerSiblingSlug(
             uint32(remoteChainSlug_),
+            DEFAULT_BATCH_LENGTH,
             capacitorType_
         );
 
@@ -312,9 +310,6 @@ contract Setup is Test {
             switchBoardAddress_,
             remoteChainSlug_
         );
-        scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
-
-        vm.stopPrank();
     }
 
     function sealAndPropose(
@@ -322,8 +317,8 @@ contract Setup is Test {
     ) internal returns (bytes32 packetId_, bytes32 root_) {
         bytes memory sig_;
         (root_, packetId_, sig_) = _getLatestSignature(
-            _a,
             capacitor,
+            _a.chainSlug,
             _b.chainSlug
         );
 
@@ -358,13 +353,13 @@ contract Setup is Test {
     }
 
     function _getLatestSignature(
-        ChainContext storage src_,
         address capacitor_,
+        uint32 srcChainSlug_,
         uint32 remoteChainSlug_
     ) internal returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint64 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
-        packetId = _getPackedId(capacitor_, src_.chainSlug, id);
+        packetId = _getPackedId(capacitor_, srcChainSlug_, id);
         bytes32 digest = keccak256(
             abi.encode(versionHash, remoteChainSlug_, packetId, root)
         );
@@ -413,9 +408,8 @@ contract Setup is Test {
         uint32 dstSlug,
         bytes32 packetId_
     ) internal {
-        uint32 srcSlug = uint32(uint256(packetId_) >> 224);
         bytes32 digest = keccak256(
-            abi.encode(switchboardAddress, srcSlug, dstSlug, packetId_)
+            abi.encode(switchboardAddress, dstSlug, packetId_)
         );
 
         // generate attest-signature

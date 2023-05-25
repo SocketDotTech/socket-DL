@@ -175,18 +175,16 @@ interface ISocket {
     ) external;
 
     /**
-     * @notice Registers a switchboard with a specified address, max packet length, sibling chain slug, and capacitor type.
-     * @param switchBoardAddress_ The address of the switchboard to be registered.
-     * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
+     * @notice Registers a switchboard with a specified max packet length, sibling chain slug, and capacitor type.
      * @param siblingChainSlug_ The slug of the sibling chain that the switchboard is registered with.
+     * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
      * @param capacitorType_ The type of capacitor that the switchboard uses.
      */
     function registerSwitchBoard(
-        address switchBoardAddress_,
-        uint256 maxPacketLength_,
         uint32 siblingChainSlug_,
+        uint256 maxPacketLength_,
         uint256 capacitorType_
-    ) external;
+    ) external returns (address capacitor);
 
     /**
      * @notice Retrieves the packet id roots for a specified packet id.

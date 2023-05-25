@@ -84,8 +84,8 @@ contract HappyTest is Setup {
         {
             bytes memory sig_;
             (root, packetId, sig_) = _getLatestSignature(
-                _a,
                 capacitor,
+                _a.chainSlug,
                 _b.chainSlug
             );
 
@@ -163,7 +163,7 @@ contract HappyTest is Setup {
             bytes32 root,
             bytes32 packetId,
             bytes memory sig
-        ) = _getLatestSignature(_b, capacitor, _a.chainSlug);
+        ) = _getLatestSignature(capacitor, _b.chainSlug, _a.chainSlug);
 
         _sealOnSrc(_b, capacitor, sig);
         _proposeOnDst(_a, sig, packetId, root);

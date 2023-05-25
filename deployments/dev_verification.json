@@ -1,6 +1,22 @@
 {
   "5": [
     [
+      "0x2069cc361e9d5d81CFF8d5e5092386d043bC2A5a",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0xe1911a407F7625C352CDD676306c986F588dE0A2",
+      "OpenExecutionManager",
+      "contracts/OpenExecutionManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        5,
+        "0xDf55cAC1bf6095a5cCdE94fd77F5C8Ed8Bf51139"
+      ]
+    ],
+    [
       "0xD51997F21065a49bDcd2b9B85b03A5A218c7200f",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -131,6 +147,22 @@
   ],
   "420": [
     [
+      "0x7308fc163bACa5774A38F72055d5baC9FA7dB6Fc",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0xC46947C6d5FC7f3179A1e97cEB8dEb6DeEFd224A",
+      "OpenExecutionManager",
+      "contracts/OpenExecutionManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        420,
+        "0x6a961B2Cbdd334196F82fdf73BECB21D7E75E382"
+      ]
+    ],
+    [
       "0x1982466637352b51d93CAF99b8e6a334ee78Cc01",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -234,6 +266,22 @@
   ],
   "80001": [
     [
+      "0x0c8855525418eaD999F7C8911a1aa729c89C28Ca",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0x1feb979731512310ECd2796ADAa5dc28d95d7FEf",
+      "OpenExecutionManager",
+      "contracts/OpenExecutionManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        80001,
+        "0xd59d596B7C7cB4593F61bbE4A82C1E943C64558D"
+      ]
+    ],
+    [
       "0xA308b13aE7Eaa63D5c0869a34E5D8e51e21551D9",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -335,6 +383,22 @@
     ]
   ],
   "421613": [
+    [
+      "0xE955F7A4B7dFC387498873873a13becD189D7C5C",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0xC7aa45caf5069FC3D13eF397583EF07441f3Bd95",
+      "OpenExecutionManager",
+      "contracts/OpenExecutionManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        421613,
+        "0x25077A746A20d212700195BcDFcbA14CE2B2f10b"
+      ]
+    ],
     [
       "0xe175563775d0431cDAED3574912e5822Bc99aaAC",
       "Counter",

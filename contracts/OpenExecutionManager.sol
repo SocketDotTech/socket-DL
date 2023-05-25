@@ -1,9 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
-
-import "./interfaces/ISignatureVerifier.sol";
-import "./libraries/RescueFundsLib.sol";
-import "./libraries/SignatureVerifierLib.sol";
 import "./ExecutionManager.sol";
 
 /**
@@ -28,7 +24,7 @@ contract OpenExecutionManager is ExecutionManager {
         bytes32 packedMessage,
         bytes memory sig
     ) external view override returns (address executor, bool isValidExecutor) {
-        executor = SignatureVerifierLib.recoverSignerFromDigest(
+        executor = signatureVerifier__.recoverSignerFromDigest(
             packedMessage,
             sig
         );

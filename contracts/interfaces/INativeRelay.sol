@@ -22,12 +22,16 @@ interface INativeRelay {
      * @param maxSubmissionCost The maximum submission cost of the transaction.
      * @param maxGas The maximum gas limit of the transaction.
      * @param gasPriceBid The gas price bid for the transaction.
+     * @param callValueRefundAddress l2Callvalue gets credited here on L2 if retryable txn times out or gets cancelled
+     * @param remoteRefundAddress gasLimit x maxFeePerGas - execution cost gets credited here on L2 balance
      */
     function initiateNativeConfirmation(
         bytes32 packetId,
         uint256 maxSubmissionCost,
         uint256 maxGas,
-        uint256 gasPriceBid
+        uint256 gasPriceBid,
+        address callValueRefundAddress,
+        address remoteRefundAddress
     ) external payable;
 
     /**

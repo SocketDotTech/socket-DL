@@ -15,16 +15,6 @@ import "./NativeSwitchboardBase.sol";
  */
 contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     /**
-     * @notice The address to which refunds for remote calls will be sent.
-     */
-    address public remoteRefundAddress;
-
-    /**
-     * @notice The address to which refunds for call value will be sent.
-     */
-    address public callValueRefundAddress;
-
-    /**
      * @notice An interface for receiving incoming messages from the Arbitrum chain.
      */
     IInbox public inbox__;
@@ -44,16 +34,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
      * @param inbox The new inbox address.
      */
     event UpdatedInboxAddress(address inbox);
-
-    /**
-     * @notice Event emitted when the remote and call value refund addresses are updated.
-     * @param remoteRefundAddress The new remote refund address.
-     * @param callValueRefundAddress The new call value refund address.
-     */
-    event UpdatedRefundAddresses(
-        address remoteRefundAddress,
-        address callValueRefundAddress
-    );
 
     /**
      * @notice Event emitted when the bridge address is updated.
@@ -102,9 +82,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
 
         bridge__ = IBridge(bridge_);
         outbox__ = IOutbox(outbox_);
-
-        remoteRefundAddress = msg.sender;
-        callValueRefundAddress = msg.sender;
     }
 
     /**
@@ -122,20 +99,18 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
         bytes32 packetId_,
         uint256 maxSubmissionCost_,
         uint256 maxGas_,
-        uint256 gasPriceBid_
+        uint256 gasPriceBid_,
+        address callValueRefundAddress_,
+        address remoteRefundAddress_
     ) external payable {
         bytes memory data = _encodeRemoteCall(packetId_);
-
-        // to avoid stack too deep
-        address callValueRefund = callValueRefundAddress;
-        address remoteRefund = remoteRefundAddress;
 
         inbox__.createRetryableTicket{value: msg.value}(
             remoteNativeSwitchboard,
             0, // no value needed for receivePacket
             maxSubmissionCost_,
-            remoteRefund,
-            callValueRefund,
+            remoteRefundAddress_,
+            callValueRefundAddress_,
             maxGas_,
             gasPriceBid_,
             data
@@ -157,26 +132,6 @@ contract ArbitrumL1Switchboard is NativeSwitchboardBase {
             this.receivePacket.selector,
             packetId_,
             _getRoot(packetId_)
-        );
-    }
-
-    /**
-     * @notice This function updates the remote and call value refund addresses for the contract.
-     *         Only users with the GOVERNANCE_ROLE can call this function.
-     * @param remoteRefundAddress_  (address): The new address that will be used to refund remote tokens.
-     * @param callValueRefundAddress_ (address): The new address that will be used to refund call values.
-     * @dev  Ensures that only users with the GOVERNANCE_ROLE can call this function.
-     */
-    function updateRefundAddresses(
-        address remoteRefundAddress_,
-        address callValueRefundAddress_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        remoteRefundAddress = remoteRefundAddress_;
-        callValueRefundAddress = callValueRefundAddress_;
-
-        emit UpdatedRefundAddresses(
-            remoteRefundAddress_,
-            callValueRefundAddress_
         );
     }
 

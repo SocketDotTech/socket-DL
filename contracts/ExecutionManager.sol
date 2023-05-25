@@ -3,9 +3,7 @@ pragma solidity 0.8.7;
 
 import "./interfaces/IExecutionManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
-
 import "./libraries/RescueFundsLib.sol";
-import "./libraries/SignatureVerifierLib.sol";
 import "./libraries/FeesHelper.sol";
 import "./utils/AccessControlExtended.sol";
 import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
@@ -18,7 +16,7 @@ import {FEES_UPDATE_SIG_IDENTIFIER, RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENT
  * access control.
  */
 contract ExecutionManager is IExecutionManager, AccessControlExtended {
-    ISignatureVerifier public signatureVerifier__;
+    ISignatureVerifier public immutable signatureVerifier__;
 
     /**
      * @notice Emitted when the executionFees is updated
@@ -89,14 +87,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     function isExecutor(
         bytes32 packedMessage,
         bytes memory sig
-    )
-        external
-        view
-        virtual
-        override
-        returns (address executor, bool isValidExecutor)
-    {
-        executor = SignatureVerifierLib.recoverSignerFromDigest(
+    ) external view virtual override returns (address executor, bool isValidExecutor) {
+        executor = signatureVerifier__.recoverSignerFromDigest(
             packedMessage,
             sig
         );

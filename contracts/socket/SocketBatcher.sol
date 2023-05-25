@@ -6,6 +6,8 @@ import "../utils/AccessControl.sol";
 
 import {ISocket} from "../interfaces/ISocket.sol";
 import {ITransmitManager} from "../interfaces/ITransmitManager.sol";
+import {IExecutionManager} from "../interfaces/IExecutionManager.sol";
+
 import {FastSwitchboard} from "../switchboard/default-switchboards/FastSwitchboard.sol";
 import {INativeRelay} from "../interfaces/INativeRelay.sol";
 
@@ -91,20 +93,6 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
-     * @notice A struct representing a request to register switchboard for a chain.
-     * @param switchBoardAddress The switchboard address.
-     * @param maxPacketLength The max packet length
-     * @param siblingChainSlug The sibling chain slug
-     * @param capacitorType The capacitor type
-     */
-    struct RegisterSwitchboardRequest {
-        address switchBoardAddress;
-        uint256 maxPacketLength;
-        uint32 siblingChainSlug;
-        uint256 capacitorType;
-    }
-
-    /**
      * @notice A struct representing a request to send proof to polygon root
      * @param proof proof to submit on root tunnel
      */
@@ -113,22 +101,98 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
-     * @notice set propose gas limit for a list of siblings
-     * @param socketAddress_ address of socket
-     * @param registerSwitchboardsRequests_ the list of requests with gas limit details
+     * @notice A struct representing a request set fees in switchboard
+     * @param nonce The nonce of fee setter address
+     * @param dstChainSlug The sibling chain identifier
+     * @param switchboardFees The fees needed by switchboard
+     * @param verificationFees The fees needed for calling allowPacket while executing
+     * @param signature The signature of the packet data.
      */
-    function registerSwitchboards(
-        address socketAddress_,
-        RegisterSwitchboardRequest[] calldata registerSwitchboardsRequests_
+    struct SwitchboardSetFeesRequest {
+        uint256 nonce;
+        uint32 dstChainSlug;
+        uint256 switchboardFees;
+        uint256 verificationFees;
+        bytes signature;
+    }
+
+    /**
+     * @notice A struct representing a request to set fees in execution manager and transmit manager
+     * @param nonce The nonce of fee setter address
+     * @param dstChainSlug The sibling chain identifier
+     * @param fees The total fees needed
+     * @param signature The signature of the packet data.
+     */
+    struct SetFeesRequest {
+        uint256 nonce;
+        uint32 dstChainSlug;
+        uint256 fees;
+        bytes signature;
+    }
+
+    /**
+     * @notice sets fees in batch for switchboards
+     * @param contractAddress_ address of contract to set fees
+     * @param switchboardSetFeesRequest_ the list of requests
+     */
+    function setFeesBatch(
+        address contractAddress_,
+        SwitchboardSetFeesRequest[] calldata switchboardSetFeesRequest_
     ) external {
-        uint256 registerSwitchboardsLength = registerSwitchboardsRequests_
-            .length;
-        for (uint256 index = 0; index < registerSwitchboardsLength; ) {
-            ISocket(socketAddress_).registerSwitchBoard(
-                registerSwitchboardsRequests_[index].switchBoardAddress,
-                registerSwitchboardsRequests_[index].maxPacketLength,
-                registerSwitchboardsRequests_[index].siblingChainSlug,
-                registerSwitchboardsRequests_[index].capacitorType
+        uint256 executeRequestslength = switchboardSetFeesRequest_.length;
+        for (uint256 index = 0; index < executeRequestslength; ) {
+            FastSwitchboard(contractAddress_).setFees(
+                switchboardSetFeesRequest_[index].nonce,
+                switchboardSetFeesRequest_[index].dstChainSlug,
+                switchboardSetFeesRequest_[index].switchboardFees,
+                switchboardSetFeesRequest_[index].verificationFees,
+                switchboardSetFeesRequest_[index].signature
+            );
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    /**
+     * @notice sets fees in batch for transmit manager
+     * @param contractAddress_ address of contract to set fees
+     * @param setFeesRequests_ the list of requests
+     */
+    function setTransmissionFeesBatch(
+        address contractAddress_,
+        SetFeesRequest[] calldata setFeesRequests_
+    ) external {
+        uint256 executeRequestslength = setFeesRequests_.length;
+        for (uint256 index = 0; index < executeRequestslength; ) {
+            ITransmitManager(contractAddress_).setTransmissionFees(
+                setFeesRequests_[index].nonce,
+                setFeesRequests_[index].dstChainSlug,
+                setFeesRequests_[index].fees,
+                setFeesRequests_[index].signature
+            );
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    /**
+     * @notice sets fees in batch for execution manager
+     * @param contractAddress_ address of contract to set fees
+     * @param setFeesRequests_ the list of requests
+     */
+    function setExecutionFeesBatch(
+        address contractAddress_,
+        SetFeesRequest[] calldata setFeesRequests_
+    ) external {
+        uint256 executeRequestslength = setFeesRequests_.length;
+        for (uint256 index = 0; index < executeRequestslength; ) {
+            IExecutionManager(contractAddress_).setExecutionFees(
+                setFeesRequests_[index].nonce,
+                setFeesRequests_[index].dstChainSlug,
+                setFeesRequests_[index].fees,
+                setFeesRequests_[index].signature
             );
             unchecked {
                 ++index;
@@ -255,6 +319,8 @@ contract SocketBatcher is AccessControl {
      */
     function initiateArbitrumNativeBatch(
         address switchboardAddress_,
+        address callValueRefundAddress_,
+        address remoteRefundAddress_,
         ArbitrumNativeInitiatorRequest[]
             calldata arbitrumNativeInitiatorRequests_
     ) external payable {
@@ -271,7 +337,9 @@ contract SocketBatcher is AccessControl {
                 arbitrumNativeInitiatorRequests_[index].packetId,
                 arbitrumNativeInitiatorRequests_[index].maxSubmissionCost,
                 arbitrumNativeInitiatorRequests_[index].maxGas,
-                arbitrumNativeInitiatorRequests_[index].gasPriceBid
+                arbitrumNativeInitiatorRequests_[index].gasPriceBid,
+                callValueRefundAddress_,
+                remoteRefundAddress_
             );
             unchecked {
                 ++index;
@@ -279,7 +347,7 @@ contract SocketBatcher is AccessControl {
         }
 
         if (address(this).balance > 0)
-            msg.sender.call{value: address(this).balance}("");
+            callValueRefundAddress_.call{value: address(this).balance}("");
     }
 
     /**

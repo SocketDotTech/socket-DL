@@ -8,12 +8,16 @@ import {
   MainnetIds,
   isTestnet,
   isMainnet,
+  CORE_CONTRACTS,
+  networkToChainSlug,
 } from "../../../src";
 import { getAddresses, getRelayUrl, getRelayAPIKEY } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
 import Counter from "../../../out/Counter.sol/Counter.json";
+import Socket from "../../../out/Socket.sol/Socket.json";
+
 import { chains, mode } from "../config";
-import { parseUnits } from "ethers/lib/utils";
+import { getProviderFromChainName } from "../../constants/networks";
 
 interface RequestObj {
   to: string;
@@ -23,53 +27,6 @@ interface RequestObj {
   gasPrice?: string | BigNumber;
   gasLimit: number | undefined;
 }
-
-const values: {
-  [chainSlug in ChainSlug]?: { [siblingSlug in ChainSlug]?: string };
-} = {
-  [ChainSlug.ARBITRUM]: {
-    [ChainSlug.OPTIMISM]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.BSC]: parseUnits("0.003", "ether").toHexString(),
-  },
-  [ChainSlug.OPTIMISM]: {
-    [ChainSlug.ARBITRUM]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.BSC]: parseUnits("0.003", "ether").toHexString(),
-  },
-  [ChainSlug.POLYGON_MAINNET]: {
-    [ChainSlug.ARBITRUM]: parseUnits("1", "ether").toHexString(),
-    [ChainSlug.OPTIMISM]: parseUnits("1", "ether").toHexString(),
-    [ChainSlug.BSC]: parseUnits("1", "ether").toHexString(),
-  },
-  [ChainSlug.BSC]: {
-    [ChainSlug.ARBITRUM]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.OPTIMISM]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
-  },
-
-  // Testnets
-  [ChainSlug.ARBITRUM_GOERLI]: {
-    [ChainSlug.OPTIMISM_GOERLI]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.POLYGON_MUMBAI]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.BSC_TESTNET]: parseUnits("0.003", "ether").toHexString(),
-  },
-  [ChainSlug.OPTIMISM_GOERLI]: {
-    [ChainSlug.ARBITRUM_GOERLI]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.POLYGON_MUMBAI]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.BSC_TESTNET]: parseUnits("0.003", "ether").toHexString(),
-  },
-  [ChainSlug.POLYGON_MUMBAI]: {
-    [ChainSlug.ARBITRUM_GOERLI]: parseUnits("1", "ether").toHexString(),
-    [ChainSlug.OPTIMISM_GOERLI]: parseUnits("1", "ether").toHexString(),
-    [ChainSlug.BSC_TESTNET]: parseUnits("1", "ether").toHexString(),
-  },
-  [ChainSlug.BSC_TESTNET]: {
-    [ChainSlug.ARBITRUM_GOERLI]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.OPTIMISM_GOERLI]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.POLYGON_MUMBAI]: parseUnits("0.003", "ether").toHexString(),
-  },
-};
 
 const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
   console.log(chainSlug, isMainnet(chainSlug));
@@ -155,8 +112,8 @@ export const sendMessagesToAllPaths = async (params: {
     // parallelize chains
     await Promise.all(
       activeChainSlugs.map(async (chainSlug) => {
-        let siblingSlugs = getSiblingSlugs(chainSlug);
-        let addresses = await getAddresses(chainSlug, mode);
+        const siblingSlugs = getSiblingSlugs(chainSlug);
+        const addresses = await getAddresses(chainSlug, mode);
 
         console.log({ chainSlug, siblingSlugs });
 
@@ -173,6 +130,15 @@ export const sendMessagesToAllPaths = async (params: {
           return;
         }
         // console.log(" 3 ");
+
+        const provider = await getProviderFromChainName(
+          networkToChainSlug[chainSlug]
+        );
+        const socket: Contract = new ethers.Contract(
+          addresses[CORE_CONTRACTS.Socket],
+          Socket.abi,
+          provider
+        );
 
         const counter: Contract = new ethers.Contract(
           counterAddress,
@@ -192,9 +158,10 @@ export const sendMessagesToAllPaths = async (params: {
               [siblingSlug, amount, msgGasLimit]
             );
             let to = counter.address;
-            let value =
-              values[chainSlug]?.[siblingSlug] ||
-              ethers.utils.parseUnits("3000000", "gwei").toHexString();
+            let value = await socket.getMinFees(msgGasLimit, siblingSlug, to);
+
+            console.log(`fees is ${value}`);
+
             gasLimit =
               chainSlug === ChainSlug.ARBITRUM ||
               chainSlug === ChainSlug.ARBITRUM_GOERLI
@@ -216,8 +183,7 @@ export const sendMessagesToAllPaths = async (params: {
       })
     );
   } catch (error) {
-    console.log("Error while checking roles", error);
-    throw error;
+    console.log("Error while sending outbound tx", error);
   }
 };
 
