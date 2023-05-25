@@ -93,6 +93,64 @@ contract SocketDstTest is Setup {
         assertEq(_b.socket__.rootProposedAt(packetId_), block.timestamp);
     }
 
+    function testInvalidPacketPropose() external {
+        uint32 msgIdSrcSlug = uint32(uint256(0x12345));
+        uint32 packetIdSrcSlug = uint32(uint256(0x12346));
+        uint32 dstSlug = _b.chainSlug;
+
+        uint64 packetCount = 0;
+        bytes32 root = bytes32("ROOT");
+
+        bytes32 msgId = _packMessageId(msgIdSrcSlug, address(dstCounter__), 0);
+
+        address capacitor = address(uint160(c++));
+        uint256 executionFee = 10000;
+        bytes memory payload = abi.encode(keccak256("OP_ADD"), 100, _plugOwner);
+        bytes memory proof = abi.encode(0);
+
+        bytes32 packetId = _getPackedId(
+            capacitor,
+            packetIdSrcSlug,
+            packetCount
+        );
+        bytes32 digest = keccak256(
+            abi.encode(versionHash, dstSlug, packetId, root)
+        );
+        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
+
+        hoax(_socketOwner);
+        _b.transmitManager__.grantRoleWithSlug(
+            TRANSMITTER_ROLE,
+            packetIdSrcSlug,
+            vm.addr(_transmitterPrivateKey)
+        );
+
+        _proposeOnDst(_b, sig, packetId, root);
+
+        hoax(_socketOwner);
+        FastSwitchboard(address(_b.configs__[index].switchboard__))
+            .grantWatcherRole(packetIdSrcSlug, _watcher);
+
+        _attestOnDst(
+            address(_b.configs__[index].switchboard__),
+            _b.chainSlug,
+            packetId
+        );
+
+        vm.expectRevert(SocketDst.ErrInSourceValidation.selector);
+        _executePayloadOnDst(
+            _b,
+            _a.chainSlug,
+            packetId,
+            msgId,
+            _msgGasLimit,
+            executionFee,
+            root,
+            payload,
+            proof
+        );
+    }
+
     function testIsPacketProposed() external {
         address capacitor = address(_a.configs__[index].capacitor__);
         sendOutboundMessage();
