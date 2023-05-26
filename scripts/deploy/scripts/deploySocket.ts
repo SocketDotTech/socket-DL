@@ -10,7 +10,7 @@ import {
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { socketOwner, executionManagerVersion } from "../config";
+import { socketOwner, executionManagerVersion, mode } from "../config";
 
 let allDeployed = false;
 
@@ -89,7 +89,7 @@ export const deploySocket = async (
         executionManager.address,
         capacitorFactory.address,
         socketOwner,
-        version,
+        version[deployUtils.mode],
       ],
       deployUtils
     );
