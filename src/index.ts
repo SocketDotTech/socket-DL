@@ -1,4 +1,4 @@
 export * from "./types";
 export * from "./addresses";
 
-export const version = "GARAM_MASALA";
+export const version = "HING";
