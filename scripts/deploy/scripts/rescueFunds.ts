@@ -54,8 +54,9 @@ const createContractAddrArray = (
   addresses.push(chainAddresses.TransmitManager);
   addresses.push(chainAddresses.FastSwitchboard);
   addresses.push(chainAddresses.OptimisticSwitchboard);
-  addresses.push(chainAddresses.SocketBatcher);
 
+  if (chainAddresses.SocketBatcher)
+    addresses.push(chainAddresses.SocketBatcher);
   if (chainAddresses.ExecutionManager)
     addresses.push(chainAddresses.ExecutionManager);
   if (chainAddresses.OpenExecutionManager)
@@ -81,41 +82,42 @@ const createContractAddrArray = (
 };
 
 export const main = async () => {
-  try {
-    const addresses: DeploymentAddresses = await getAllAddresses(mode);
-    const activeChainSlugs = Object.keys(addresses);
+  const addresses: DeploymentAddresses = await getAllAddresses(mode);
+  const activeChainSlugs = Object.keys(addresses);
 
-    // parallelize chains
-    await Promise.all(
-      activeChainSlugs.map(async (chainSlug) => {
-        let chainAddresses: ChainSocketAddresses = addresses[chainSlug];
-        if (!chainAddresses) {
-          console.log("addresses not found for ", chainSlug, chainAddresses);
-          return;
-        }
+  // parallelize chains
+  await Promise.all(
+    activeChainSlugs.map(async (chainSlug) => {
+      let chainAddresses: ChainSocketAddresses = addresses[chainSlug];
+      if (!chainAddresses) {
+        console.log("addresses not found for ", chainSlug, chainAddresses);
+        return;
+      }
 
-        const providerInstance = getProviderFromChainName(
-          networkToChainSlug[chainSlug]
+      const providerInstance = getProviderFromChainName(
+        networkToChainSlug[chainSlug]
+      );
+      const signer: Wallet = new ethers.Wallet(
+        process.env.SOCKET_SIGNER_KEY as string,
+        providerInstance
+      );
+
+      const contractAddr = createContractAddrArray(chainAddresses);
+      for (let index = 0; index < contractAddr.length; index++) {
+        const amount = await providerInstance.getBalance(contractAddr[index]);
+        console.log(
+          `balance of ${contractAddr[index]} on ${chainSlug} : ${amount}`
         );
-        const signer: Wallet = new ethers.Wallet(
-          process.env.SOCKET_SIGNER_KEY as string,
-          providerInstance
+
+        if (amount.toString() === "0") continue;
+
+        const contractInstance: Contract = new ethers.Contract(
+          contractAddr[index],
+          rescueFundsABI,
+          signer
         );
 
-        const contractAddr = createContractAddrArray(chainAddresses);
-
-        for (let index = 0; index < contractAddr.length; index++) {
-          const amount = await providerInstance.getBalance(contractAddr[index]);
-          console.log(`balance of ${contractAddr[index]} : ${amount}`);
-
-          if (amount.toString() === "0") continue;
-
-          const contractInstance: Contract = new ethers.Contract(
-            contractAddr[index],
-            rescueFundsABI,
-            signer
-          );
-
+        try {
           const tx = await contractInstance.rescueFunds(
             ETH_ADDRESS,
             signer.address,
@@ -124,16 +126,17 @@ export const main = async () => {
           );
 
           console.log(
-            `Rescuing funds ${amount} from ${contractAddr[index]} on chain ${chainSlug}: ${tx.hash}`
+            `Rescuing ${amount} from ${contractAddr[index]} on ${chainSlug}: ${tx.hash}`
           );
           await tx.wait();
+        } catch (e) {
+          console.log(
+            `Error while rescuing ${amount} from ${contractAddr[index]} on ${chainSlug}`
+          );
         }
-      })
-    );
-  } catch (error) {
-    console.log("Error while rescuing funds", error);
-    throw error;
-  }
+      }
+    })
+  );
 };
 
 main()
