@@ -132,7 +132,7 @@ contract Counter is IPlug {
         address token_,
         address userAddress_,
         uint256 amount_
-    ) external onlyOwner{
+    ) external onlyOwner {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

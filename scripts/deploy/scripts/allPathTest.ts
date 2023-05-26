@@ -163,7 +163,7 @@ export const sendMessagesToAllPaths = async (params: {
                 amount,
                 msgGasLimit,
                 // extraParams,
-                ethers.constants.HashZero
+                ethers.constants.HashZero,
               ]
             );
             let to = counter.address;
