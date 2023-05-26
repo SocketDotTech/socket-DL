@@ -8,7 +8,7 @@ export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
 
-export const socketOwner = "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa";
+export const socketOwner = "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34";
 
 console.log("========================================================");
 console.log("Deployment started for MODE", mode);
@@ -23,16 +23,16 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.POLYGON_MUMBAI,
-  // ChainSlug.BSC_TESTNET,
-  // ChainSlug.MAINNET,
-  // ChainSlug.ARBITRUM,
-  // ChainSlug.OPTIMISM,
-  // ChainSlug.BSC,
-  // ChainSlug.POLYGON_MAINNET,
+  ChainSlug.BSC_TESTNET,
+  ChainSlug.MAINNET,
+  ChainSlug.ARBITRUM,
+  ChainSlug.OPTIMISM,
+  ChainSlug.BSC,
+  ChainSlug.POLYGON_MAINNET,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.OpenExecutionManager;
-export const sendTransaction = true;
+export const sendTransaction = false;
 export const newRoleStatus = true;
 export const filterChains: number[] = chains;
 
