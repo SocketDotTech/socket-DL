@@ -1,5 +1,6 @@
 import fs from "fs";
-import { Wallet, constants } from "ethers";
+import { Wallet, constants, ethers } from "ethers";
+
 import { getProviderFromChainName, switchboards } from "../constants";
 import {
   deployedAddressPath,
@@ -20,8 +21,10 @@ import {
   networkToChainSlug,
 } from "../../src";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
+import { arrayify, defaultAbiCoder, keccak256, id } from "ethers/lib/utils";
 import { capacitorType, chains, maxPacketLength, mode } from "./config";
 import { overrides } from "./config";
+import { getABI } from "./scripts/getABIs";
 
 export const main = async () => {
   try {
@@ -43,16 +46,18 @@ export const main = async () => {
         process.env.SOCKET_SIGNER_KEY as string,
         providerInstance
       );
-      const addr: ChainSocketAddresses = addresses[chain]!;
-      if (!addr["integrations"]) continue;
 
-      const integrations = addr["integrations"] ?? {};
-      const integrationList = Object.keys(integrations);
+      const addr: ChainSocketAddresses = addresses[chain]!;
 
       const list = isTestnet(chain) ? TestnetIds : MainnetIds;
       const siblingSlugs: ChainSlug[] = list.filter(
         (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
       );
+
+      if (!addr["integrations"]) continue;
+
+      const integrations = addr["integrations"] ?? {};
+      const integrationList = Object.keys(integrations);
 
       console.log(`Configuring for ${chain}`);
       let updatedDeploymentAddresses = addr;
@@ -111,6 +116,81 @@ export const main = async () => {
   }
 };
 
+const msgValueMaxThreshold = {
+  [ChainSlug.ARBITRUM_GOERLI]: ethers.utils.parseEther("0.001"),
+  [ChainSlug.OPTIMISM_GOERLI]: ethers.utils.parseEther("0.001"),
+  [ChainSlug.POLYGON_MUMBAI]: ethers.utils.parseEther("0.1"),
+  [ChainSlug.BSC_TESTNET]: ethers.utils.parseEther("0.001"),
+  [ChainSlug.GOERLI]: ethers.utils.parseEther("0.001"),
+};
+
+const configureExecutionManager = async (
+  addresses,
+  chain: ChainSlug,
+  socketSigner: Wallet
+) => {
+  try {
+    const addr: ChainSocketAddresses = addresses[chain]!;
+
+    const list = isTestnet(chain) ? TestnetIds : MainnetIds;
+    const siblingSlugs: ChainSlug[] = list.filter(
+      (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
+    );
+
+    let functionName, executionManagerContract, socketBatcherContract;
+
+    executionManagerContract = (
+      await getInstance("ExecutionManager", addr.ExecutionManager!)
+    ).connect(socketSigner);
+
+    let nextNonce = await executionManagerContract.nextNonce(
+      socketSigner.address
+    );
+    console.log({ nextNonce });
+
+    let requests: any = [];
+
+    siblingSlugs.map(async (siblingSlug) => {
+      const digest = keccak256(
+        defaultAbiCoder.encode(
+          ["bytes32", "address", "uint32", "uint32", "uint256", "uint256"],
+          [
+            id("MSG_VALUE_MAX_THRESHOLD_UPDATE"),
+            addr.ExecutionManager!,
+            chain,
+            siblingSlug,
+            nextNonce,
+            msgValueMaxThreshold[siblingSlug],
+          ]
+        )
+      );
+
+      const signature = await socketSigner.signMessage(arrayify(digest));
+
+      let request = {
+        signature,
+        dstChainSlug: siblingSlug,
+        nonce: nextNonce++,
+        fees: msgValueMaxThreshold[siblingSlug],
+        functionSelector: "0xa1885700", // setMsgValueMaxThreshold
+      };
+      requests.push(request);
+    });
+
+    socketBatcherContract = (
+      await getInstance("SocketBatcher", addr.SocketBatcher!)
+    ).connect(socketSigner);
+
+    let tx = await socketBatcherContract.setExecutionFeesBatch(
+      addr.ExecutionManager!,
+      requests,
+      { ...overrides[chain] }
+    );
+    console.log(tx.hash);
+  } catch (error) {
+    console.log("error while configuring execution manager: ", error);
+  }
+};
 const setRemoteSwitchboards = async (addresses) => {
   try {
     for (let srcChain in addresses) {

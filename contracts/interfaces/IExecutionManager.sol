@@ -57,6 +57,27 @@ interface IExecutionManager {
         bytes calldata signature_
     ) external;
 
+    function setMsgValueMinThreshold(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 msgValueMinThreshold_,
+        bytes calldata signature_
+    ) external;
+
+    function setMsgValueMaxThreshold(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 msgValueMaxThreshold_,
+        bytes calldata signature_
+    ) external;
+
+    function setRelativeNativeTokenPrice(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 relativeNativeTokenPrice_,
+        bytes calldata signature_
+    ) external;
+
     function verifyParams(
         bytes32 extraParams_,
         uint256 msgValue_

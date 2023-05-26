@@ -120,6 +120,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
      * @notice Function for getting the minimum fees required for executing a cross-chain transaction
      * @dev This function is called at source to calculate the execution cost.
      * @param siblingChainSlug_ Sibling chain identifier
+     * @param payloadSize_ byte length of payload. Currently only used to check max length, later on will be used for fees calculation.
+     * @param extraParams_ Can be used for providing extra information. Currently used for msgValue
      * @return Minimum fees required for executing the transaction
      */
     function getMinFees(
@@ -130,8 +132,6 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     ) external view override returns (uint256) {
         if (payloadSize_ > 3000) revert PayloadTooLarge();
 
-        // 1st byte - type, next 31 bytes - value
-        // if type = 0, no extra param. type = 1, use next 31 bytes as msgValue
         uint256 params = uint256(extraParams_);
         uint8 paramType = uint8(params >> 224);
 
@@ -198,7 +198,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint32 dstChainSlug_,
         uint256 relativeNativeTokenPrice_,
         bytes calldata signature_
-    ) external {
+    ) external override {
         address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
@@ -230,7 +230,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint32 dstChainSlug_,
         uint256 msgValueMinThreshold_,
         bytes calldata signature_
-    ) external {
+    ) external override {
         address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
@@ -259,7 +259,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint32 dstChainSlug_,
         uint256 msgValueMaxThreshold_,
         bytes calldata signature_
-    ) external {
+    ) external override {
         address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
             keccak256(
                 abi.encode(

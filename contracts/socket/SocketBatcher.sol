@@ -128,6 +128,7 @@ contract SocketBatcher is AccessControl {
         uint32 dstChainSlug;
         uint256 fees;
         bytes signature;
+        bytes4 functionSelector;
     }
 
     /**
@@ -188,12 +189,50 @@ contract SocketBatcher is AccessControl {
     ) external {
         uint256 executeRequestslength = setFeesRequests_.length;
         for (uint256 index = 0; index < executeRequestslength; ) {
-            IExecutionManager(contractAddress_).setExecutionFees(
-                setFeesRequests_[index].nonce,
-                setFeesRequests_[index].dstChainSlug,
-                setFeesRequests_[index].fees,
-                setFeesRequests_[index].signature
-            );
+            if (
+                setFeesRequests_[index].functionSelector ==
+                IExecutionManager.setExecutionFees.selector
+            )
+                IExecutionManager(contractAddress_).setExecutionFees(
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    setFeesRequests_[index].fees,
+                    setFeesRequests_[index].signature
+                );
+
+            if (
+                setFeesRequests_[index].functionSelector ==
+                IExecutionManager.setRelativeNativeTokenPrice.selector
+            )
+                IExecutionManager(contractAddress_).setRelativeNativeTokenPrice(
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    setFeesRequests_[index].fees,
+                    setFeesRequests_[index].signature
+                );
+
+            if (
+                setFeesRequests_[index].functionSelector ==
+                IExecutionManager.setMsgValueMaxThreshold.selector
+            )
+                IExecutionManager(contractAddress_).setMsgValueMaxThreshold(
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    setFeesRequests_[index].fees,
+                    setFeesRequests_[index].signature
+                );
+
+            if (
+                setFeesRequests_[index].functionSelector ==
+                IExecutionManager.setMsgValueMinThreshold.selector
+            )
+                IExecutionManager(contractAddress_).setMsgValueMinThreshold(
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    setFeesRequests_[index].fees,
+                    setFeesRequests_[index].signature
+                );
+
             unchecked {
                 ++index;
             }
