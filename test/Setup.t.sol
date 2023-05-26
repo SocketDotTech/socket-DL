@@ -49,7 +49,7 @@ contract Setup is Test {
     uint256 internal _transmissionFees = 350000000000;
     uint256 internal _executionFees = 110000000000;
     uint256 internal _msgValueMaxThreshold = 1000;
-    uint256 internal _relativeNativeTokenPrice = 1000*1e18;
+    uint256 internal _relativeNativeTokenPrice = 1000 * 1e18;
 
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
@@ -142,7 +142,11 @@ contract Setup is Test {
         _setTransmissionFees(cc_, remoteChainSlug_, _transmissionFees);
         _setExecutionFees(cc_, remoteChainSlug_, _executionFees);
         _setMsgValueMaxThreshold(cc_, remoteChainSlug_, _msgValueMaxThreshold);
-        _setRelativeNativeTokenPrice(cc_, remoteChainSlug_, _relativeNativeTokenPrice);
+        _setRelativeNativeTokenPrice(
+            cc_,
+            remoteChainSlug_,
+            _relativeNativeTokenPrice
+        );
         vm.stopPrank();
 
         // deploy default configs: fast, slow
@@ -568,11 +572,16 @@ contract Setup is Test {
             executorPrivateKey_
         );
 
-        (uint8 paramType, uint224 paramValue) = _decodeExtraParams(extraParams_);
-        if (paramType==1)
-            dst_.socket__.execute{value:paramValue}(packetId_, msgDetails, sig);
-        else 
-            dst_.socket__.execute(packetId_, msgDetails, sig);
+        (uint8 paramType, uint224 paramValue) = _decodeExtraParams(
+            extraParams_
+        );
+        if (paramType == 1)
+            dst_.socket__.execute{value: paramValue}(
+                packetId_,
+                msgDetails,
+                sig
+            );
+        else dst_.socket__.execute(packetId_, msgDetails, sig);
     }
 
     function _executePayloadOnDst(
@@ -627,13 +636,14 @@ contract Setup is Test {
             );
     }
 
-    function _decodeExtraParams(bytes32 extraParams_) pure internal returns (uint8, uint224) {
-
+    function _decodeExtraParams(
+        bytes32 extraParams_
+    ) internal pure returns (uint8, uint224) {
         uint8 paramType = uint8(uint256(extraParams_) >> 224);
         uint224 paramValue = uint224(uint256(extraParams_));
         return (paramType, paramValue);
-
     }
+
     // to ignore this file from coverage
     function test() external {
         assertTrue(true);

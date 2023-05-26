@@ -200,8 +200,7 @@ contract SocketSrcTest is Setup {
                     socketFees +
                     verificationFee +
                     executionFee
-            }(_b.chainSlug, amount, _msgGasLimit,
-            bytes32(0));
+            }(_b.chainSlug, amount, _msgGasLimit, bytes32(0));
         }
 
         uint256 fakeTransmitterKey = c++;

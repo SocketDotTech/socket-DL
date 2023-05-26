@@ -4,7 +4,7 @@ dotenvConfig();
 import fs from "fs";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import {utils, constants} from "ethers";
+import { utils, constants } from "ethers";
 import { getInstance, getChainSlug, deployedAddressPath } from "../utils";
 import { Contract } from "ethers";
 import { mode } from "../config";
@@ -32,10 +32,16 @@ export const main = async () => {
     );
     await counter
       .connect(signer)
-      .remoteAddOperation(remoteChainSlug, amount, msgGasLimit, constants.HashZero, {
-        gasLimit,
-        value: fees,
-      });
+      .remoteAddOperation(
+        remoteChainSlug,
+        amount,
+        msgGasLimit,
+        constants.HashZero,
+        {
+          gasLimit,
+          value: fees,
+        }
+      );
 
     console.log(
       `Sent remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}`
