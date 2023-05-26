@@ -11,7 +11,6 @@ contract ExecutionManagerTest is Setup {
     uint32 chainSlug = uint32(uint256(0x2013AA263));
     uint32 destChainSlug = uint32(uint256(0x2013AA264));
     uint32 chainSlug2 = uint32(uint256(0x2113AA263));
-    uint256 _executionFees = 110000000000;
     uint256 executorNonce = 0;
 
     uint256 immutable transmitterPrivateKey = c++;
@@ -75,7 +74,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         vm.startPrank(owner);
-        console.log("owner", owner);
+        // console.log("owner", owner);
         executionManager.grantRole(EXECUTOR_ROLE, _executor);
         executionManager.grantRole(RESCUE_ROLE, owner);
         executionManager.grantRole(WITHDRAW_ROLE, owner);

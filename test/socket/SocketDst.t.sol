@@ -236,7 +236,7 @@ contract SocketDstTest is Setup {
                     socketFees +
                     verificationFee +
                     executionFee
-            }(_b.chainSlug, amount, _msgGasLimit);
+            }(_b.chainSlug, amount, _msgGasLimit, bytes32(0));
         }
     }
 
@@ -278,7 +278,8 @@ contract SocketDstTest is Setup {
             srcCounter__.remoteAddOperation{value: value}(
                 _b.chainSlug,
                 amount,
-                _msgGasLimit
+                _msgGasLimit,
+                bytes32(0)
             );
         }
 
@@ -369,7 +370,8 @@ contract SocketDstTest is Setup {
             srcCounter__.remoteAddOperation{value: value}(
                 _b.chainSlug,
                 amount,
-                _msgGasLimit
+                _msgGasLimit,
+                extraParams
             );
         }
 
@@ -381,14 +383,13 @@ contract SocketDstTest is Setup {
             packetId
         );
 
-        vm.expectRevert(NotExecutor.selector);
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
             packetId,
             msgId,
             _msgGasLimit,
-            bytes32(0),
+            extraParams,
             executionFee,
             root,
             payload,
@@ -434,7 +435,8 @@ contract SocketDstTest is Setup {
             srcCounter__.remoteAddOperation{value: value}(
                 _b.chainSlug,
                 amount,
-                _msgGasLimit
+                _msgGasLimit,
+                bytes32(0)
             );
         }
 

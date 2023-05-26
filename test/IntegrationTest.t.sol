@@ -75,7 +75,8 @@ contract HappyTest is Setup {
             srcCounter__.remoteAddOperation{value: value}(
                 _b.chainSlug,
                 amount,
-                _msgGasLimit
+                _msgGasLimit,
+                bytes32(0)
             );
         }
 
@@ -150,15 +151,37 @@ contract HappyTest is Setup {
             ? address(_b.configs__[0].capacitor__)
             : address(_b.configs__[1].capacitor__);
 
-        uint256 minFees = _b.transmitManager__.getMinFees(_a.chainSlug);
+        uint256 executionFee;
+        {
+            (uint256 switchboardFees, uint256 verificationFee) = _b
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_a.chainSlug);
 
-        hoax(_plugOwner);
-        dstCounter__.remoteAddOperation{value: minFees}(
-            _a.chainSlug,
-            amount,
-            _msgGasLimit
-        );
+            uint256 socketFees = _b.transmitManager__.getMinFees(_a.chainSlug);
+            executionFee = _b.executionManager__.getMinFees(
+                _msgGasLimit,
+                100,
+                bytes32(0),
+                _a.chainSlug
+            );
 
+            uint256 value = switchboardFees +
+                socketFees +
+                verificationFee +
+                executionFee;
+
+            // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+            // verificationFees also should go to Executor, hence we do the additional computation below
+            executionFee = verificationFee + executionFee;
+            hoax(_plugOwner);
+            dstCounter__.remoteAddOperation{value: value}(
+                _a.chainSlug,
+                amount,
+                _msgGasLimit,
+                bytes32(0)
+            );
+        }
         (
             bytes32 root,
             bytes32 packetId,
@@ -180,7 +203,7 @@ contract HappyTest is Setup {
             _packMessageId(_b.chainSlug, address(srcCounter__), 0),
             _msgGasLimit,
             bytes32(0),
-            0,
+            executionFee,
             root,
             payload,
             proof
@@ -204,7 +227,8 @@ contract HappyTest is Setup {
         srcCounter__.remoteAddOperation{value: fees}(
             dstSlug,
             amount,
-            msgGasLimit
+            msgGasLimit,
+            bytes32(0)
         );
 
         msgId = _packMessageId(_a.chainSlug, address(dstCounter__), count);

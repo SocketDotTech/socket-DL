@@ -47,6 +47,10 @@ contract Setup is Test {
     uint256 internal _msgGasLimit = 30548;
     uint256 internal _sealGasLimit = 150000;
     uint256 internal _transmissionFees = 350000000000;
+    uint256 internal _executionFees = 110000000000;
+    uint256 internal _msgValueMaxThreshold = 1000;
+    uint256 internal _relativeNativeTokenPrice = 1000*1e18;
+
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
@@ -135,30 +139,11 @@ contract Setup is Test {
             _socketOwner
         );
 
+        _setTransmissionFees(cc_, remoteChainSlug_, _transmissionFees);
+        _setExecutionFees(cc_, remoteChainSlug_, _executionFees);
+        _setMsgValueMaxThreshold(cc_, remoteChainSlug_, _msgValueMaxThreshold);
+        _setRelativeNativeTokenPrice(cc_, remoteChainSlug_, _relativeNativeTokenPrice);
         vm.stopPrank();
-
-        //set TransmissionFees for remoteChainSlug
-        bytes32 feesUpdateDigest = keccak256(
-            abi.encode(
-                FEES_UPDATE_SIG_IDENTIFIER,
-                address(cc_.transmitManager__),
-                cc_.chainSlug,
-                remoteChainSlug_,
-                cc_.transmitterNonce,
-                _transmissionFees
-            )
-        );
-
-        bytes memory feesUpdateSignature = _createSignature(
-            feesUpdateDigest,
-            _socketOwnerPrivateKey
-        );
-        cc_.transmitManager__.setTransmissionFees(
-            cc_.transmitterNonce++,
-            uint32(remoteChainSlug_),
-            _transmissionFees,
-            feesUpdateSignature
-        );
 
         // deploy default configs: fast, slow
         SocketConfigContext memory scc_ = _addFastSwitchboard(
@@ -177,6 +162,155 @@ contract Setup is Test {
 
         _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
         _addTransmitters(transmitterPrivateKeys_, cc_, cc_.chainSlug);
+    }
+
+    function _setTransmissionFees(
+        ChainContext storage cc_,
+        uint32 remoteChainSlug_,
+        uint256 transmissionFees_
+    ) internal {
+        //set TransmissionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                address(cc_.transmitManager__),
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                transmissionFees_
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+        cc_.transmitManager__.setTransmissionFees(
+            cc_.transmitterNonce++,
+            uint32(remoteChainSlug_),
+            transmissionFees_,
+            feesUpdateSignature
+        );
+    }
+
+    function _setExecutionFees(
+        ChainContext storage cc_,
+        uint32 remoteChainSlug_,
+        uint256 executionFees_
+    ) internal {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                address(cc_.executionManager__),
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.executorNonce,
+                executionFees_
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        cc_.executionManager__.setExecutionFees(
+            cc_.executorNonce++,
+            uint32(remoteChainSlug_),
+            executionFees_,
+            feesUpdateSignature
+        );
+    }
+
+    function _setMsgValueMaxThreshold(
+        ChainContext storage cc_,
+        uint32 remoteChainSlug_,
+        uint256 threshold
+    ) internal {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                MSG_VALUE_MAX_THRESHOLD_SIG_IDENTIFIER,
+                address(cc_.executionManager__),
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.executorNonce,
+                threshold
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        cc_.executionManager__.setMsgValueMaxThreshold(
+            cc_.executorNonce++,
+            uint32(remoteChainSlug_),
+            threshold,
+            feesUpdateSignature
+        );
+    }
+
+    function _setMsgValueMinThreshold(
+        ChainContext storage cc_,
+        uint32 remoteChainSlug_,
+        uint256 threshold
+    ) internal {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER,
+                address(cc_.executionManager__),
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.executorNonce,
+                threshold
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        cc_.executionManager__.setMsgValueMinThreshold(
+            cc_.executorNonce++,
+            uint32(remoteChainSlug_),
+            threshold,
+            feesUpdateSignature
+        );
+    }
+
+    function _setRelativeNativeTokenPrice(
+        ChainContext storage cc_,
+        uint32 remoteChainSlug_,
+        uint256 relativePrice
+    ) internal {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENTIFIER,
+                address(cc_.executionManager__),
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.executorNonce,
+                relativePrice
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        cc_.executionManager__.setRelativeNativeTokenPrice(
+            cc_.executorNonce++,
+            uint32(remoteChainSlug_),
+            relativePrice,
+            feesUpdateSignature
+        );
     }
 
     function _addOptimisticSwitchboard(
@@ -250,24 +384,10 @@ contract Setup is Test {
             cc_.sigVerifier__
         );
 
-        //grant FeesUpdater Role
-        cc_.executionManager__.grantRoleWithSlug(
-            FEES_UPDATER_ROLE,
-            cc_.chainSlug,
-            deployer_
-        );
-
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
             deployer_,
             cc_.chainSlug
-        );
-
-        //grant FeesUpdater Role
-        cc_.transmitManager__.grantRoleWithSlug(
-            FEES_UPDATER_ROLE,
-            cc_.chainSlug,
-            deployer_
         );
 
         cc_.socket__ = new Socket(
@@ -447,7 +567,12 @@ contract Setup is Test {
             packedMessage_,
             executorPrivateKey_
         );
-        dst_.socket__.execute(packetId_, msgDetails, sig);
+
+        (uint8 paramType, uint224 paramValue) = _decodeExtraParams(extraParams_);
+        if (paramType==1)
+            dst_.socket__.execute{value:paramValue}(packetId_, msgDetails, sig);
+        else 
+            dst_.socket__.execute(packetId_, msgDetails, sig);
     }
 
     function _executePayloadOnDst(
@@ -502,6 +627,13 @@ contract Setup is Test {
             );
     }
 
+    function _decodeExtraParams(bytes32 extraParams_) pure internal returns (uint8, uint224) {
+
+        uint8 paramType = uint8(uint256(extraParams_) >> 224);
+        uint224 paramValue = uint224(uint256(extraParams_));
+        return (paramType, paramValue);
+
+    }
     // to ignore this file from coverage
     function test() external {
         assertTrue(true);

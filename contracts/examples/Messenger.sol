@@ -41,10 +41,11 @@ contract Messenger is IPlug, Ownable(msg.sender) {
 
     function sendRemoteMessage(
         uint32 remoteChainSlug_,
+        bytes32 extraParams_,
         bytes32 message_
     ) external payable {
         bytes memory payload = abi.encode(_localChainSlug, message_);
-        _outbound(remoteChainSlug_, payload);
+        _outbound(remoteChainSlug_, extraParams_, payload);
     }
 
     function inbound(
@@ -63,7 +64,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
             _localChainSlug,
             msgDecoded == _PING ? _PONG : _PING
         );
-        _outbound(remoteChainSlug, newPayload);
+        _outbound(remoteChainSlug, bytes32(0), newPayload);
     }
 
     // settings
@@ -88,11 +89,11 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         _message = message_;
     }
 
-    function _outbound(uint32 targetChain_, bytes memory payload_) private {
+    function _outbound(uint32 targetChain_, bytes32 extraParams_, bytes memory payload_) private {
         uint256 fee = _socket__.getMinFees(
             _msgGasLimit,
             uint256(payload_.length),
-            bytes32(0),
+            extraParams_,
             targetChain_,
             address(this)
         );
@@ -100,7 +101,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         _socket__.outbound{value: fee}(
             targetChain_,
             _msgGasLimit,
-            bytes32(0),
+            extraParams_,
             payload_
         );
     }

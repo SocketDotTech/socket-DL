@@ -151,7 +151,7 @@ contract SocketSrcTest is Setup {
                     socketFees +
                     verificationFee +
                     executionFee
-            }(_b.chainSlug, amount, _msgGasLimit);
+            }(_b.chainSlug, amount, _msgGasLimit, bytes32(0));
         }
 
         {
@@ -200,7 +200,8 @@ contract SocketSrcTest is Setup {
                     socketFees +
                     verificationFee +
                     executionFee
-            }(_b.chainSlug, amount, _msgGasLimit);
+            }(_b.chainSlug, amount, _msgGasLimit,
+            bytes32(0));
         }
 
         uint256 fakeTransmitterKey = c++;
@@ -225,7 +226,8 @@ contract SocketSrcTest is Setup {
         srcCounter__.remoteAddOperation{value: 0}(
             _b.chainSlug,
             amount,
-            _msgGasLimit
+            _msgGasLimit,
+            bytes32(0)
         );
     }
 
