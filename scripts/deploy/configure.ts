@@ -1,5 +1,5 @@
 import fs from "fs";
-import { Wallet, constants, ethers } from "ethers";
+import { BigNumberish, Wallet, constants, ethers } from "ethers";
 
 import { getProviderFromChainName, switchboards } from "../constants";
 import {
@@ -46,6 +46,8 @@ export const main = async () => {
         process.env.SOCKET_SIGNER_KEY as string,
         providerInstance
       );
+
+      await configureExecutionManager(addresses, chain, socketSigner);
 
       const addr: ChainSocketAddresses = addresses[chain]!;
 
@@ -116,12 +118,17 @@ export const main = async () => {
   }
 };
 
-const msgValueMaxThreshold = {
+const msgValueMaxThreshold : {[chain in ChainSlug]?:BigNumberish} = {
   [ChainSlug.ARBITRUM_GOERLI]: ethers.utils.parseEther("0.001"),
   [ChainSlug.OPTIMISM_GOERLI]: ethers.utils.parseEther("0.001"),
   [ChainSlug.POLYGON_MUMBAI]: ethers.utils.parseEther("0.1"),
   [ChainSlug.BSC_TESTNET]: ethers.utils.parseEther("0.001"),
   [ChainSlug.GOERLI]: ethers.utils.parseEther("0.001"),
+  [ChainSlug.ARBITRUM]: ethers.utils.parseEther("0.001"),
+  [ChainSlug.OPTIMISM]: ethers.utils.parseEther("0.001"),
+  [ChainSlug.POLYGON_MAINNET]: ethers.utils.parseEther("0.1"),
+  [ChainSlug.BSC]: ethers.utils.parseEther("0.001"),
+  [ChainSlug.MAINNET]: ethers.utils.parseEther("0.001"),
 };
 
 const configureExecutionManager = async (
@@ -130,6 +137,7 @@ const configureExecutionManager = async (
   socketSigner: Wallet
 ) => {
   try {
+    console.log("configuring execution manager for ", chain);
     const addr: ChainSocketAddresses = addresses[chain]!;
 
     const list = isTestnet(chain) ? TestnetIds : MainnetIds;
@@ -137,15 +145,15 @@ const configureExecutionManager = async (
       (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
     );
 
-    let functionName, executionManagerContract, socketBatcherContract;
+    let executionManagerContract, socketBatcherContract;
 
     executionManagerContract = (
       await getInstance("ExecutionManager", addr.ExecutionManager!)
     ).connect(socketSigner);
 
-    let nextNonce = await executionManagerContract.nextNonce(
+    let nextNonce = (await executionManagerContract.nextNonce(
       socketSigner.address
-    );
+    )).toNumber();
     console.log({ nextNonce });
 
     let requests: any = [];
@@ -187,10 +195,14 @@ const configureExecutionManager = async (
       { ...overrides[chain] }
     );
     console.log(tx.hash);
+    await tx.wait();
+
   } catch (error) {
     console.log("error while configuring execution manager: ", error);
   }
 };
+
+
 const setRemoteSwitchboards = async (addresses) => {
   try {
     for (let srcChain in addresses) {
