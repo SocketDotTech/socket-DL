@@ -2,6 +2,7 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/IDecapacitor.sol";
+import "../interfaces/IExecutionManager.sol";
 import "../interfaces/IPlug.sol";
 
 import "./SocketBase.sol";
@@ -42,6 +43,7 @@ abstract contract SocketDst is SocketBase {
      * @dev Error emitted when a retry is invalid
      */
     error InvalidRetry();
+
     /**
      * @dev Error emitted when a message has already been executed
      */
@@ -127,7 +129,7 @@ abstract contract SocketDst is SocketBase {
         bytes32 packetId_,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature_
-    ) external override {
+    ) external payable override {
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
@@ -148,10 +150,7 @@ abstract contract SocketDst is SocketBase {
             plugConfig.siblingPlug,
             chainSlug,
             localPlug,
-            messageDetails_.msgId,
-            messageDetails_.msgGasLimit,
-            messageDetails_.executionFee,
-            messageDetails_.payload
+            messageDetails_
         );
 
         (address executor, bool isValidExecutor) = executionManager__
@@ -163,17 +162,10 @@ abstract contract SocketDst is SocketBase {
             remoteSlug,
             packedMessage,
             plugConfig,
-            messageDetails_.decapacitorProof
+            messageDetails_.decapacitorProof,
+            messageDetails_.extraParams
         );
-        _execute(
-            executor,
-            messageDetails_.executionFee,
-            localPlug,
-            remoteSlug,
-            messageDetails_.msgGasLimit,
-            messageDetails_.msgId,
-            messageDetails_.payload
-        );
+        _execute(executor, localPlug, remoteSlug, messageDetails_);
     }
 
     function _verify(
@@ -181,7 +173,8 @@ abstract contract SocketDst is SocketBase {
         uint32 remoteChainSlug_,
         bytes32 packedMessage_,
         PlugConfig storage plugConfig_,
-        bytes memory decapacitorProof_
+        bytes memory decapacitorProof_,
+        bytes32 extraParams_
     ) internal view {
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
@@ -199,42 +192,42 @@ abstract contract SocketDst is SocketBase {
                 decapacitorProof_
             )
         ) revert InvalidProof();
+
+        executionManager__.verifyParams(extraParams_, msg.value);
     }
 
     /**
      * This function assumes localPlug_ will have code while executing. As the message
      * execution failure is not blocking the system, it is not necessary to check if
      * code exists in the given address.
+     * @dev distribution of msg.value in case of inbound failure is to be decided.
      */
     function _execute(
-        address executor,
-        uint256 executionFee,
+        address executor_,
         address localPlug_,
         uint32 remoteChainSlug_,
-        uint256 msgGasLimit_,
-        bytes32 msgId_,
-        bytes calldata payload_
+        ISocket.MessageDetails memory messageDetails_
     ) internal {
         try
-            IPlug(localPlug_).inbound{gas: msgGasLimit_}(
-                remoteChainSlug_,
-                payload_
-            )
+            IPlug(localPlug_).inbound{
+                gas: messageDetails_.msgGasLimit,
+                value: msg.value
+            }(remoteChainSlug_, messageDetails_.payload)
         {
             executionManager__.updateExecutionFees(
-                executor,
-                executionFee,
-                msgId_
+                executor_,
+                messageDetails_.executionFee,
+                messageDetails_.msgId
             );
-            emit ExecutionSuccess(msgId_);
+            emit ExecutionSuccess(messageDetails_.msgId);
         } catch Error(string memory reason) {
             // catch failing revert() and require()
-            messageExecuted[msgId_] = false;
-            emit ExecutionFailed(msgId_, reason);
+            messageExecuted[messageDetails_.msgId] = false;
+            emit ExecutionFailed(messageDetails_.msgId, reason);
         } catch (bytes memory reason) {
             // catch failing assert()
-            messageExecuted[msgId_] = false;
-            emit ExecutionFailedBytes(msgId_, reason);
+            messageExecuted[messageDetails_.msgId] = false;
+            emit ExecutionFailedBytes(messageDetails_.msgId, reason);
         }
     }
 

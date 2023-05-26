@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "../Setup.t.sol";
 import "../../contracts/examples/Counter.sol";
+import "../ExecutionManager.t.sol";
 
 contract SocketDstTest is Setup {
     Counter srcCounter__;
@@ -106,7 +107,6 @@ contract SocketDstTest is Setup {
         address capacitor = address(uint160(c++));
         uint256 executionFee = 10000;
         bytes memory payload = abi.encode(keccak256("OP_ADD"), 100, _plugOwner);
-        bytes memory proof = abi.encode(0);
 
         bytes32 packetId = _getPackedId(
             capacitor,
@@ -144,10 +144,11 @@ contract SocketDstTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            bytes32(0),
             executionFee,
             root,
             payload,
-            proof
+            abi.encode(0)
         );
     }
 
@@ -224,6 +225,8 @@ contract SocketDstTest is Setup {
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
             executionFee = _a.executionManager__.getMinFees(
                 _msgGasLimit,
+                100,
+                bytes32(0),
                 _b.chainSlug
             );
 
@@ -233,7 +236,7 @@ contract SocketDstTest is Setup {
                     socketFees +
                     verificationFee +
                     executionFee
-            }(_b.chainSlug, amount, _msgGasLimit);
+            }(_b.chainSlug, amount, _msgGasLimit, bytes32(0));
         }
     }
 
@@ -257,6 +260,8 @@ contract SocketDstTest is Setup {
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
             executionFee = _a.executionManager__.getMinFees(
                 _msgGasLimit,
+                100,
+                bytes32(0),
                 _b.chainSlug
             );
 
@@ -273,7 +278,8 @@ contract SocketDstTest is Setup {
             srcCounter__.remoteAddOperation{value: value}(
                 _b.chainSlug,
                 amount,
-                _msgGasLimit
+                _msgGasLimit,
+                bytes32(0)
             );
         }
 
@@ -294,6 +300,7 @@ contract SocketDstTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            bytes32(0),
             executionFee,
             root,
             payload,
@@ -311,6 +318,78 @@ contract SocketDstTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            bytes32(0),
+            executionFee,
+            root,
+            payload,
+            proof
+        );
+    }
+
+    function testExecuteMessageWithValue() external {
+        uint256 amount = 100;
+        uint256 msgValue = 100;
+        uint paramType = 1;
+        bytes32 extraParams = bytes32(
+            uint256((uint256(paramType) << 224) | uint224(msgValue))
+        );
+
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+        bytes memory proof = abi.encode(0);
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        uint256 executionFee;
+        {
+            (uint256 switchboardFees, uint256 verificationFee) = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_b.chainSlug);
+
+            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
+            executionFee = _a.executionManager__.getMinFees(
+                _msgGasLimit,
+                100,
+                extraParams,
+                _b.chainSlug
+            );
+
+            uint256 value = switchboardFees +
+                socketFees +
+                verificationFee +
+                executionFee;
+
+            // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+            // verificationFees also should go to Executor, hence we do the additional computation below
+            executionFee = verificationFee + executionFee;
+
+            hoax(_plugOwner);
+            srcCounter__.remoteAddOperation{value: value}(
+                _b.chainSlug,
+                amount,
+                _msgGasLimit,
+                extraParams
+            );
+        }
+
+        bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
+        (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        _attestOnDst(
+            address(_b.configs__[index].switchboard__),
+            _b.chainSlug,
+            packetId
+        );
+
+        _executePayloadOnDst(
+            _b,
+            _a.chainSlug,
+            packetId,
+            msgId,
+            _msgGasLimit,
+            extraParams,
             executionFee,
             root,
             payload,
@@ -338,6 +417,8 @@ contract SocketDstTest is Setup {
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
             executionFee = _a.executionManager__.getMinFees(
                 _msgGasLimit,
+                100,
+                bytes32(0),
                 _b.chainSlug
             );
 
@@ -354,7 +435,8 @@ contract SocketDstTest is Setup {
             srcCounter__.remoteAddOperation{value: value}(
                 _b.chainSlug,
                 amount,
-                _msgGasLimit
+                _msgGasLimit,
+                bytes32(0)
             );
         }
 
@@ -372,6 +454,7 @@ contract SocketDstTest is Setup {
             packetId,
             msgId,
             _msgGasLimit,
+            bytes32(0),
             executionFee,
             root,
             uint256(1),

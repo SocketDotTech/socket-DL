@@ -37,15 +37,18 @@ contract ArbitrumL1SwitchboardTest is Setup {
 
         deal(socketAddress, 2e18);
 
+        ISocket.MessageDetails memory messageDetails;
+        messageDetails.msgId = 0;
+        messageDetails.msgGasLimit = 1000000;
+        messageDetails.executionFee = 100;
+        messageDetails.payload = abi.encode(msg.sender);
+
         bytes32 packedMessage = _a.hasher__.packMessage(
             _a.chainSlug,
             msg.sender,
             _b.chainSlug,
             inbox_,
-            0,
-            1000000,
-            100,
-            abi.encode(msg.sender)
+            messageDetails
         );
 
         singleCapacitor.addPackedMessage(packedMessage);
@@ -113,7 +116,7 @@ contract ArbitrumL1SwitchboardTest is Setup {
         );
         vm.stopPrank();
 
-        scc_ = _registerSwitchbaord(
+        scc_ = _registerSwitchboard(
             cc_,
             _socketOwner,
             address(arbitrumL1Switchboard),

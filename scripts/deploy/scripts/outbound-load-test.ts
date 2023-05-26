@@ -1,5 +1,6 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
+import { utils, constants } from "ethers";
 
 import fs from "fs";
 import { ethers } from "ethers";
@@ -90,10 +91,16 @@ export const main = async () => {
     for (let i = 0; i < numOfRequests; i++) {
       const tx = await counter
         .connect(signer)
-        .remoteAddOperation(remoteChainSlug, amount, msgGasLimit, {
-          gasLimit,
-          value: ethers.utils.parseUnits("30000", "gwei").toNumber(),
-        });
+        .remoteAddOperation(
+          remoteChainSlug,
+          amount,
+          msgGasLimit,
+          constants.HashZero,
+          {
+            gasLimit,
+            value: ethers.utils.parseUnits("30000", "gwei").toNumber(),
+          }
+        );
 
       console.log();
 

@@ -155,7 +155,7 @@ export const sendMessagesToAllPaths = async (params: {
 
             let data = counter.interface.encodeFunctionData(
               "remoteAddOperation",
-              [siblingSlug, amount, msgGasLimit]
+              [siblingSlug, amount, msgGasLimit, ethers.constants.HashZero]
             );
             let to = counter.address;
             let value = await socket.getMinFees(msgGasLimit, siblingSlug, to);

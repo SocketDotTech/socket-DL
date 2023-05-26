@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Setup.t.sol";
+import "forge-std/console.sol";
 
 contract ExecutionManagerTest is Setup {
     address public constant NATIVE_TOKEN_ADDRESS =
@@ -10,7 +11,6 @@ contract ExecutionManagerTest is Setup {
     uint32 chainSlug = uint32(uint256(0x2013AA263));
     uint32 destChainSlug = uint32(uint256(0x2013AA264));
     uint32 chainSlug2 = uint32(uint256(0x2113AA263));
-    uint256 _executionFees = 110000000000;
     uint256 executorNonce = 0;
 
     uint256 immutable transmitterPrivateKey = c++;
@@ -31,7 +31,7 @@ contract ExecutionManagerTest is Setup {
     uint256 sealGasLimit = 200000;
     uint256 sourceGasPrice = 1200000;
     uint256 relativeGasPrice = 1100000;
-
+    uint256 relativeNativeTokenPrice = 1000 * 1e18; // destNativeTokenPrice/srcNativeTokenPrice
     ExecutionManager internal executionManager;
     SignatureVerifier internal signatureVerifier;
     TransmitManager internal transmitManager;
@@ -40,6 +40,10 @@ contract ExecutionManagerTest is Setup {
     error TransmitterNotFound();
     error InsufficientExecutionFees();
     event FeesWithdrawn(address account_, uint256 value_);
+    error MsgValueTooLow();
+    error MsgValueTooHigh();
+    error PayloadTooLarge();
+    error InsufficientMsgValue();
 
     function setUp() public {
         owner = vm.addr(ownerPrivateKey);
@@ -70,7 +74,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         vm.startPrank(owner);
-
+        // console.log("owner", owner);
         executionManager.grantRole(EXECUTOR_ROLE, _executor);
         executionManager.grantRole(RESCUE_ROLE, owner);
         executionManager.grantRole(WITHDRAW_ROLE, owner);
@@ -97,6 +101,37 @@ contract ExecutionManagerTest is Setup {
             owner
         );
 
+        setExecutionFees();
+        setMsgValueMaxThreshold(1000);
+        setMsgValueMinThreshold(10);
+        setRelativeNativeTokenPrice(relativeNativeTokenPrice);
+        vm.stopPrank();
+
+        assertTrue(
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
+                chainSlug,
+                transmitter
+            )
+        );
+        assertTrue(
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
+                destChainSlug,
+                transmitter
+            )
+        );
+
+        assertTrue(
+            executionManager.hasRoleWithSlug(
+                FEES_UPDATER_ROLE,
+                destChainSlug,
+                owner
+            )
+        );
+    }
+
+    function setExecutionFees() public {
         //set ExecutionFees for remoteChainSlug
         bytes32 feesUpdateDigest = keccak256(
             abi.encode(
@@ -120,22 +155,83 @@ contract ExecutionManagerTest is Setup {
             _executionFees,
             feesUpdateSignature
         );
+    }
 
-        vm.stopPrank();
-
-        assertTrue(
-            transmitManager.hasRoleWithSlug(
-                TRANSMITTER_ROLE,
+    function setMsgValueMaxThreshold(uint256 threshold) public {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                MSG_VALUE_MAX_THRESHOLD_SIG_IDENTIFIER,
+                address(executionManager),
                 chainSlug,
-                transmitter
+                destChainSlug,
+                executorNonce,
+                threshold
             )
         );
-        assertTrue(
-            transmitManager.hasRoleWithSlug(
-                TRANSMITTER_ROLE,
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            ownerPrivateKey
+        );
+
+        executionManager.setMsgValueMaxThreshold(
+            executorNonce++,
+            uint32(destChainSlug),
+            threshold,
+            feesUpdateSignature
+        );
+    }
+
+    function setMsgValueMinThreshold(uint256 threshold) public {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER,
+                address(executionManager),
+                chainSlug,
                 destChainSlug,
-                transmitter
+                executorNonce,
+                threshold
             )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            ownerPrivateKey
+        );
+
+        executionManager.setMsgValueMinThreshold(
+            executorNonce++,
+            uint32(destChainSlug),
+            threshold,
+            feesUpdateSignature
+        );
+    }
+
+    function setRelativeNativeTokenPrice(uint256 relativePrice) public {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENTIFIER,
+                address(executionManager),
+                chainSlug,
+                destChainSlug,
+                executorNonce,
+                relativePrice
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            ownerPrivateKey
+        );
+
+        executionManager.setRelativeNativeTokenPrice(
+            executorNonce++,
+            uint32(destChainSlug),
+            relativePrice,
+            feesUpdateSignature
         );
     }
 
@@ -151,22 +247,103 @@ contract ExecutionManagerTest is Setup {
 
     function testGetMinFees() public {
         uint256 msgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        bytes32 extraParams = bytes32(0);
+
         uint256 minFees = executionManager.getMinFees(
             msgGasLimit,
+            payloadSize,
+            extraParams,
             destChainSlug
         );
 
-        //compute expected Data
-        uint256 expectedMinFees = msgGasLimit * relativeGasPrice;
-
         //assert actual and expected data
-        assertEq(minFees, expectedMinFees);
+        assertEq(minFees, _executionFees);
+    }
+
+    function testGetMinFeesWithMsgValueTooHigh() public {
+        uint256 msgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        uint256 msgValue = 1000000;
+        uint paramType = 1;
+        bytes32 extraParams = bytes32(
+            uint256((uint256(paramType) << 224) | uint224(msgValue))
+        );
+
+        vm.expectRevert(MsgValueTooHigh.selector);
+        executionManager.getMinFees(
+            msgGasLimit,
+            payloadSize,
+            extraParams,
+            destChainSlug
+        );
+    }
+
+    function testGetMinFeesWithMsgValueTooLow() public {
+        uint256 msgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        uint256 msgValue = 1;
+        uint paramType = 1;
+        bytes32 extraParams = bytes32(
+            uint256((uint256(paramType) << 224) | uint224(msgValue))
+        );
+
+        vm.expectRevert(MsgValueTooLow.selector);
+        executionManager.getMinFees(
+            msgGasLimit,
+            payloadSize,
+            extraParams,
+            destChainSlug
+        );
+    }
+
+    function testGetMinFeesWithMsgValue() public {
+        uint256 msgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        uint256 msgValue = 100;
+        uint paramType = 1;
+        bytes32 extraParams = bytes32(
+            uint256((uint256(paramType) << 224) | uint224(msgValue))
+        );
+
+        uint256 minFees = executionManager.getMinFees(
+            msgGasLimit,
+            payloadSize,
+            extraParams,
+            destChainSlug
+        );
+
+        assertEq(
+            minFees,
+            _executionFees + (msgValue * relativeNativeTokenPrice) / 1e18
+        );
+    }
+
+    function testGetMinFeesWithPayloadTooLong() public {
+        uint256 msgGasLimit = 100000;
+        uint256 payloadSize = 10000;
+        bytes32 extraParams = bytes32(
+            uint256((uint256(1) << 224) | uint224(100))
+        );
+
+        vm.expectRevert(PayloadTooLarge.selector);
+        executionManager.getMinFees(
+            msgGasLimit,
+            payloadSize,
+            extraParams,
+            destChainSlug
+        );
     }
 
     function testPayFees() public {
         uint256 msgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        bytes32 extraParams = bytes32(0);
+
         uint256 minFees = executionManager.getMinFees(
             msgGasLimit,
+            payloadSize,
+            extraParams,
             destChainSlug
         );
         deal(feesPayer, minFees);
@@ -184,8 +361,13 @@ contract ExecutionManagerTest is Setup {
 
     function testWithdrawFees() public {
         uint256 msgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        bytes32 extraParams = bytes32(0);
+
         uint256 minFees = executionManager.getMinFees(
             msgGasLimit,
+            payloadSize,
+            extraParams,
             destChainSlug
         );
         deal(feesPayer, minFees);
