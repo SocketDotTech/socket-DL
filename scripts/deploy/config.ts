@@ -41,7 +41,7 @@ export const maxPacketLength = 1;
 
 export const gasLimit = undefined;
 export const gasPrice = undefined;
-export const type = 2;
+export const type = 0;
 
 export const msgValueMaxThreshold: { [chain in ChainSlug]?: BigNumberish } = {
   [ChainSlug.ARBITRUM_GOERLI]: utils.parseEther("0.001"),
@@ -83,17 +83,17 @@ export const overrides: {
 } = {
   [ChainSlug.ARBITRUM]: {
     type,
-    gasLimit,
+    gasLimit: 20_000_000,
     gasPrice,
   },
   [ChainSlug.ARBITRUM_GOERLI]: {
     type,
-    gasLimit,
+    gasLimit: 20_000_000,
     gasPrice,
   },
   [ChainSlug.OPTIMISM]: {
     type,
-    gasLimit,
+    gasLimit: 2_000_000,
     gasPrice,
   },
   [ChainSlug.OPTIMISM_GOERLI]: {
@@ -124,7 +124,7 @@ export const overrides: {
   [ChainSlug.POLYGON_MAINNET]: {
     type,
     gasLimit,
-    gasPrice,
+    gasPrice: 250_000_000_000,
   },
   [ChainSlug.POLYGON_MUMBAI]: {
     type: 0,
