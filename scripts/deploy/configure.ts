@@ -6,7 +6,7 @@ import {
   deployedAddressPath,
   getInstance,
   getSwitchboardAddress,
-  storeAddresses,
+  storeAllAddresses,
 } from "./utils";
 import {
   CORE_CONTRACTS,
@@ -22,9 +22,15 @@ import {
 } from "../../src";
 import registerSwitchBoard from "./scripts/registerSwitchboard";
 import { arrayify, defaultAbiCoder, keccak256, id } from "ethers/lib/utils";
-import { capacitorType, chains, maxPacketLength, mode } from "./config";
-import { overrides } from "./config";
-import { getABI } from "./scripts/getABIs";
+import {
+  capacitorType,
+  chains,
+  maxPacketLength,
+  mode,
+  executionManagerVersion,
+  overrides,
+  msgValueMaxThreshold,
+} from "./config";
 
 export const main = async () => {
   try {
@@ -36,81 +42,86 @@ export const main = async () => {
     );
     let chain: ChainSlug;
 
-    for (chain of chains) {
-      if (!addresses[chain]) continue;
+    await Promise.all(
+      chains.map(async (chain) => {
+        if (!addresses[chain]) return;
 
-      const providerInstance = getProviderFromChainName(
-        networkToChainSlug[chain]
-      );
-      const socketSigner: Wallet = new Wallet(
-        process.env.SOCKET_SIGNER_KEY as string,
-        providerInstance
-      );
-
-      await configureExecutionManager(addresses, chain, socketSigner);
-
-      const addr: ChainSocketAddresses = addresses[chain]!;
-
-      const list = isTestnet(chain) ? TestnetIds : MainnetIds;
-      const siblingSlugs: ChainSlug[] = list.filter(
-        (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
-      );
-
-      if (!addr["integrations"]) continue;
-
-      const integrations = addr["integrations"] ?? {};
-      const integrationList = Object.keys(integrations);
-
-      console.log(`Configuring for ${chain}`);
-      let updatedDeploymentAddresses = addr;
-
-      for (let sibling of integrationList) {
-        const config = integrations[sibling][IntegrationTypes.native];
-        if (!config) continue;
-        updatedDeploymentAddresses = await registerSwitchBoard(
-          config["switchboard"],
-          sibling,
-          capacitorType,
-          maxPacketLength,
-          socketSigner,
-          IntegrationTypes.native,
-          updatedDeploymentAddresses
+        const providerInstance = getProviderFromChainName(
+          networkToChainSlug[chain]
+        );
+        const socketSigner: Wallet = new Wallet(
+          process.env.SOCKET_SIGNER_KEY as string,
+          providerInstance
         );
 
-        await storeAddresses(updatedDeploymentAddresses, chain, mode);
-      }
+        let addr: ChainSocketAddresses = addresses[chain]!;
 
-      // register fast
-      for (let sibling of siblingSlugs) {
-        updatedDeploymentAddresses = await registerSwitchBoard(
-          addr[CORE_CONTRACTS.FastSwitchboard],
-          sibling,
-          capacitorType,
-          maxPacketLength,
-          socketSigner,
-          IntegrationTypes.fast,
-          updatedDeploymentAddresses
+        const list = isTestnet(chain) ? TestnetIds : MainnetIds;
+        const siblingSlugs: ChainSlug[] = list.filter(
+          (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
         );
 
-        await storeAddresses(updatedDeploymentAddresses, chain, mode);
-      }
-
-      // register optimistic
-      for (let sibling of siblingSlugs) {
-        let updatedDeploymentAddresses = addr;
-        updatedDeploymentAddresses = await registerSwitchBoard(
-          addr[CORE_CONTRACTS.OptimisticSwitchboard],
-          sibling,
-          capacitorType,
-          maxPacketLength,
-          socketSigner,
-          IntegrationTypes.optimistic,
-          updatedDeploymentAddresses
+        await configureExecutionManager(
+          addr,
+          executionManagerVersion,
+          chain,
+          siblingSlugs,
+          socketSigner
         );
 
-        await storeAddresses(updatedDeploymentAddresses, chain, mode);
-      }
-    }
+        if (!addr["integrations"]) return;
+
+        const integrations = addr["integrations"] ?? {};
+        const integrationList = Object.keys(integrations);
+
+        console.log(`Configuring for ${chain}`);
+
+        for (let sibling of integrationList) {
+          const config = integrations[sibling][IntegrationTypes.native];
+          if (!config) continue;
+          addr = await registerSwitchBoard(
+            config["switchboard"],
+            sibling,
+            capacitorType,
+            maxPacketLength,
+            socketSigner,
+            IntegrationTypes.native,
+            addr
+          );
+        }
+
+        // register fast
+        for (let sibling of siblingSlugs) {
+          addr = await registerSwitchBoard(
+            addr[CORE_CONTRACTS.FastSwitchboard],
+            sibling,
+            capacitorType,
+            maxPacketLength,
+            socketSigner,
+            IntegrationTypes.fast,
+            addr
+          );
+        }
+        // register optimistic
+        for (let sibling of siblingSlugs) {
+          addr = await registerSwitchBoard(
+            addr[CORE_CONTRACTS.OptimisticSwitchboard],
+            sibling,
+            capacitorType,
+            maxPacketLength,
+            socketSigner,
+            IntegrationTypes.optimistic,
+            addr
+          );
+        }
+
+        addresses[chain] = addr;
+
+        console.log(`Configuring for ${chain} - COMPLETED`);
+      })
+    );
+
+    await storeAllAddresses(addresses, mode);
 
     await setRemoteSwitchboards(addresses);
   } catch (error) {
@@ -118,37 +129,23 @@ export const main = async () => {
   }
 };
 
-const msgValueMaxThreshold: { [chain in ChainSlug]?: BigNumberish } = {
-  [ChainSlug.ARBITRUM_GOERLI]: ethers.utils.parseEther("0.001"),
-  [ChainSlug.OPTIMISM_GOERLI]: ethers.utils.parseEther("0.001"),
-  [ChainSlug.POLYGON_MUMBAI]: ethers.utils.parseEther("0.1"),
-  [ChainSlug.BSC_TESTNET]: ethers.utils.parseEther("0.001"),
-  [ChainSlug.GOERLI]: ethers.utils.parseEther("0.001"),
-  [ChainSlug.ARBITRUM]: ethers.utils.parseEther("0.001"),
-  [ChainSlug.OPTIMISM]: ethers.utils.parseEther("0.001"),
-  [ChainSlug.POLYGON_MAINNET]: ethers.utils.parseEther("0.1"),
-  [ChainSlug.BSC]: ethers.utils.parseEther("0.001"),
-  [ChainSlug.MAINNET]: ethers.utils.parseEther("0.001"),
-};
-
 const configureExecutionManager = async (
-  addresses,
+  addr: ChainSocketAddresses,
+  contractName: string,
   chain: ChainSlug,
+  siblingSlugs: ChainSlug[],
   socketSigner: Wallet
 ) => {
   try {
-    console.log("configuring execution manager for ", chain);
-    const addr: ChainSocketAddresses = addresses[chain]!;
-
-    const list = isTestnet(chain) ? TestnetIds : MainnetIds;
-    const siblingSlugs: ChainSlug[] = list.filter(
-      (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
+    console.log(
+      "configuring execution manager for ",
+      chain,
+      addr[contractName]
     );
 
     let executionManagerContract, socketBatcherContract;
-
     executionManagerContract = (
-      await getInstance("ExecutionManager", addr.ExecutionManager!)
+      await getInstance(contractName, addr[contractName]!)
     ).connect(socketSigner);
 
     let nextNonce = (
@@ -158,43 +155,58 @@ const configureExecutionManager = async (
 
     let requests: any = [];
 
-    siblingSlugs.map(async (siblingSlug) => {
-      const digest = keccak256(
-        defaultAbiCoder.encode(
-          ["bytes32", "address", "uint32", "uint32", "uint256", "uint256"],
-          [
-            id("MSG_VALUE_MAX_THRESHOLD_UPDATE"),
-            addr.ExecutionManager!,
-            chain,
-            siblingSlug,
-            nextNonce,
-            msgValueMaxThreshold[siblingSlug],
-          ]
-        )
-      );
+    await Promise.all(
+      siblingSlugs.map(async (siblingSlug) => {
+        let currentValue = await executionManagerContract.msgValueMaxThreshold(
+          siblingSlug
+        );
 
-      const signature = await socketSigner.signMessage(arrayify(digest));
+        if (
+          currentValue.toString() ==
+          msgValueMaxThreshold[siblingSlug]?.toString()
+        ) {
+          console.log("already set, returning ", { currentValue });
+          return;
+        }
 
-      let request = {
-        signature,
-        dstChainSlug: siblingSlug,
-        nonce: nextNonce++,
-        fees: msgValueMaxThreshold[siblingSlug],
-        functionSelector: "0xa1885700", // setMsgValueMaxThreshold
-      };
-      requests.push(request);
-    });
+        const digest = keccak256(
+          defaultAbiCoder.encode(
+            ["bytes32", "address", "uint32", "uint32", "uint256", "uint256"],
+            [
+              id("MSG_VALUE_MAX_THRESHOLD_UPDATE"),
+              addr[contractName]!,
+              chain,
+              siblingSlug,
+              nextNonce,
+              msgValueMaxThreshold[siblingSlug],
+            ]
+          )
+        );
 
+        const signature = await socketSigner.signMessage(arrayify(digest));
+
+        let request = {
+          signature,
+          dstChainSlug: siblingSlug,
+          nonce: nextNonce++,
+          fees: msgValueMaxThreshold[siblingSlug],
+          functionSelector: "0xa1885700", // setMsgValueMaxThreshold
+        };
+        requests.push(request);
+      })
+    );
+
+    if (requests.length === 0) return;
     socketBatcherContract = (
-      await getInstance("SocketBatcher", addr.SocketBatcher!)
+      await getInstance("SocketBatcher", addr[CORE_CONTRACTS.SocketBatcher]!)
     ).connect(socketSigner);
 
     let tx = await socketBatcherContract.setExecutionFeesBatch(
-      addr.ExecutionManager!,
+      addr[contractName]!,
       requests,
       { ...overrides[chain] }
     );
-    console.log(tx.hash);
+    console.log(chain, tx.hash);
     await tx.wait();
   } catch (error) {
     console.log("error while configuring execution manager: ", error);
@@ -203,87 +215,99 @@ const configureExecutionManager = async (
 
 const setRemoteSwitchboards = async (addresses) => {
   try {
-    for (let srcChain in addresses) {
-      const providerInstance = getProviderFromChainName(
-        networkToChainSlug[srcChain]
-      );
-      const socketSigner: Wallet = new Wallet(
-        process.env.SOCKET_SIGNER_KEY as string,
-        providerInstance
-      );
+    let srcChains = Object.keys(addresses);
+    await Promise.all(
+      srcChains.map(async (srcChain) => {
+        console.log(`Configuring remote switchboards for ${srcChain}`);
 
-      for (let dstChain in addresses[srcChain]?.["integrations"]) {
-        const dstConfig = addresses[srcChain]["integrations"][dstChain];
+        const providerInstance = getProviderFromChainName(
+          networkToChainSlug[srcChain]
+        );
+        const socketSigner: Wallet = new Wallet(
+          process.env.SOCKET_SIGNER_KEY as string,
+          providerInstance
+        );
 
-        if (dstConfig?.[IntegrationTypes.native]) {
-          const srcSwitchboardType =
-            switchboards[networkToChainSlug[srcChain]]?.[
-              networkToChainSlug[dstChain]
-            ]?.["switchboard"];
-          const dstSwitchboardAddress = getSwitchboardAddress(
-            srcChain,
-            IntegrationTypes.native,
-            addresses?.[dstChain]
-          );
-          if (!dstSwitchboardAddress) continue;
+        for (let dstChain in addresses[srcChain]?.["integrations"]) {
+          const dstConfig = addresses[srcChain]["integrations"][dstChain];
 
-          const srcSwitchboardAddress =
-            dstConfig?.[IntegrationTypes.native]["switchboard"];
-
-          let functionName, sbContract;
-          if (srcSwitchboardType === NativeSwitchboard.POLYGON_L1) {
-            sbContract = (
-              await getInstance("PolygonL1Switchboard", srcSwitchboardAddress)
-            ).connect(socketSigner);
-
-            const fxChild = await sbContract.fxChildTunnel();
-            if (fxChild !== constants.AddressZero) continue;
-
-            functionName = "setFxChildTunnel";
-            console.log(
-              `Setting ${dstSwitchboardAddress} fx child tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
+          if (dstConfig?.[IntegrationTypes.native]) {
+            const srcSwitchboardType =
+              switchboards[networkToChainSlug[srcChain]]?.[
+                networkToChainSlug[dstChain]
+              ]?.["switchboard"];
+            const dstSwitchboardAddress = getSwitchboardAddress(
+              srcChain,
+              IntegrationTypes.native,
+              addresses?.[dstChain]
             );
-          } else if (srcSwitchboardType === NativeSwitchboard.POLYGON_L2) {
-            sbContract = (
-              await getInstance("PolygonL2Switchboard", srcSwitchboardAddress)
-            ).connect(socketSigner);
+            if (!dstSwitchboardAddress) continue;
 
-            const fxRoot = await sbContract.fxRootTunnel();
-            if (fxRoot !== constants.AddressZero) continue;
+            const srcSwitchboardAddress =
+              dstConfig?.[IntegrationTypes.native]["switchboard"];
 
-            functionName = "setFxRootTunnel";
-            console.log(
-              `Setting ${dstSwitchboardAddress} fx root tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
-            );
-          } else {
-            sbContract = (
-              await getInstance("ArbitrumL1Switchboard", srcSwitchboardAddress)
-            ).connect(socketSigner);
+            let functionName, sbContract;
+            if (srcSwitchboardType === NativeSwitchboard.POLYGON_L1) {
+              sbContract = (
+                await getInstance("PolygonL1Switchboard", srcSwitchboardAddress)
+              ).connect(socketSigner);
 
-            const remoteNativeSwitchboard =
-              await sbContract.remoteNativeSwitchboard();
-            if (
-              remoteNativeSwitchboard.toLowerCase() ===
-              dstSwitchboardAddress.toLowerCase()
-            )
-              continue;
+              const fxChild = await sbContract.fxChildTunnel();
+              if (fxChild !== constants.AddressZero) continue;
 
-            functionName = "updateRemoteNativeSwitchboard";
-            console.log(
-              `Setting ${dstSwitchboardAddress} remote switchboard in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
-            );
+              functionName = "setFxChildTunnel";
+              console.log(
+                `Setting ${dstSwitchboardAddress} fx child tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
+              );
+            } else if (srcSwitchboardType === NativeSwitchboard.POLYGON_L2) {
+              sbContract = (
+                await getInstance("PolygonL2Switchboard", srcSwitchboardAddress)
+              ).connect(socketSigner);
+
+              const fxRoot = await sbContract.fxRootTunnel();
+              if (fxRoot !== constants.AddressZero) continue;
+
+              functionName = "setFxRootTunnel";
+              console.log(
+                `Setting ${dstSwitchboardAddress} fx root tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
+              );
+            } else {
+              sbContract = (
+                await getInstance(
+                  "ArbitrumL1Switchboard",
+                  srcSwitchboardAddress
+                )
+              ).connect(socketSigner);
+
+              const remoteNativeSwitchboard =
+                await sbContract.remoteNativeSwitchboard();
+              if (
+                remoteNativeSwitchboard.toLowerCase() ===
+                dstSwitchboardAddress.toLowerCase()
+              )
+                continue;
+
+              functionName = "updateRemoteNativeSwitchboard";
+              console.log(
+                `Setting ${dstSwitchboardAddress} remote switchboard in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
+              );
+            }
+
+            const tx = await sbContract
+              .connect(socketSigner)
+              [functionName](dstSwitchboardAddress, {
+                ...overrides[await socketSigner.getChainId()],
+              });
+            console.log(srcChain, tx.hash);
+            await tx.wait();
           }
-
-          const tx = await sbContract
-            .connect(socketSigner)
-            [functionName](dstSwitchboardAddress, {
-              ...overrides[await socketSigner.getChainId()],
-            });
-          console.log(tx.hash);
-          await tx.wait();
         }
-      }
-    }
+
+        console.log(
+          `Configuring remote switchboards for ${srcChain} - COMPLETED`
+        );
+      })
+    );
   } catch (error) {
     console.error(error);
   }

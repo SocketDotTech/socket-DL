@@ -2,7 +2,8 @@ import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
 import { ChainKey, ChainSlug, DeploymentMode, TestnetIds } from "../../src";
-import { BigNumberish } from "ethers";
+import { BigNumberish, utils } from "ethers";
+import { CORE_CONTRACTS } from "@socket.tech/dl-core";
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
@@ -30,6 +31,7 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.POLYGON_MAINNET,
 ];
 
+export const executionManagerVersion = CORE_CONTRACTS.OpenExecutionManager;
 export const sendTransaction = false;
 export const newRoleStatus = true;
 export const filterChains: number[] = chains;
@@ -39,7 +41,20 @@ export const maxPacketLength = 1;
 
 export const gasLimit = undefined;
 export const gasPrice = undefined;
-export const type = 2;
+export const type = 0;
+
+export const msgValueMaxThreshold: { [chain in ChainSlug]?: BigNumberish } = {
+  [ChainSlug.ARBITRUM_GOERLI]: utils.parseEther("0.001"),
+  [ChainSlug.OPTIMISM_GOERLI]: utils.parseEther("0.001"),
+  [ChainSlug.POLYGON_MUMBAI]: utils.parseEther("0.1"),
+  [ChainSlug.BSC_TESTNET]: utils.parseEther("0.001"),
+  [ChainSlug.GOERLI]: utils.parseEther("0.001"),
+  [ChainSlug.ARBITRUM]: utils.parseEther("0.001"),
+  [ChainSlug.OPTIMISM]: utils.parseEther("0.001"),
+  [ChainSlug.POLYGON_MAINNET]: utils.parseEther("0.1"),
+  [ChainSlug.BSC]: utils.parseEther("0.001"),
+  [ChainSlug.MAINNET]: utils.parseEther("0.001"),
+};
 
 export const transmitterAddresses = {
   [DeploymentMode.DEV]: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
@@ -61,29 +76,29 @@ export const executorAddresses = {
 
 export const overrides: {
   [chain in ChainSlug | number]?: {
-    type: BigNumberish | undefined;
-    gasLimit: BigNumberish | undefined;
+    type: number | undefined;
+    gasLimit?: BigNumberish | undefined;
     gasPrice: BigNumberish | undefined;
   };
 } = {
   [ChainSlug.ARBITRUM]: {
     type,
-    gasLimit,
+    gasLimit: 20_000_000,
     gasPrice,
   },
   [ChainSlug.ARBITRUM_GOERLI]: {
     type,
-    gasLimit,
+    gasLimit: 20_000_000,
     gasPrice,
   },
   [ChainSlug.OPTIMISM]: {
     type,
-    gasLimit,
+    gasLimit: 2_000_000,
     gasPrice,
   },
   [ChainSlug.OPTIMISM_GOERLI]: {
     type,
-    gasLimit,
+    gasLimit: 2_000_000,
     gasPrice,
   },
   [ChainSlug.BSC]: {
@@ -103,17 +118,17 @@ export const overrides: {
   },
   [ChainSlug.GOERLI]: {
     type,
-    gasLimit,
+    gasLimit: 3_000_000,
     gasPrice,
   },
   [ChainSlug.POLYGON_MAINNET]: {
     type,
     gasLimit,
-    gasPrice,
+    gasPrice: 250_000_000_000,
   },
   [ChainSlug.POLYGON_MUMBAI]: {
-    type,
-    gasLimit,
+    type: 0,
+    gasLimit: 2_000_000,
     gasPrice,
   },
 };

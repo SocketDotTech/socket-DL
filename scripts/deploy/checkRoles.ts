@@ -178,6 +178,7 @@ const executeOtherTransactions = async (chainId: ChainSlug, wallet: Wallet) => {
     let tx = await wallet.sendTransaction({
       to,
       data,
+      ...overrides[chainId],
     });
     console.log(`to: ${to}, txHash: ${tx?.hash}`);
     await tx.wait();

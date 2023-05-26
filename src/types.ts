@@ -189,6 +189,7 @@ export enum CORE_CONTRACTS {
   SignatureVerifier = "SignatureVerifier",
   TransmitManager = "TransmitManager",
   Socket = "Socket",
+  SocketBatcher = "SocketBatcher",
   FastSwitchboard = "FastSwitchboard",
   OptimisticSwitchboard = "OptimisticSwitchboard",
   NativeSwitchboard = "NativeSwitchboard",

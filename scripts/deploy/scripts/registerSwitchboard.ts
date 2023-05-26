@@ -36,7 +36,7 @@ export default async function registerSwitchBoard(
           ...overrides[await signer.getChainId()],
         });
       console.log(
-        `Registering Switchboard ${switchBoardAddress}: ${registerTx.hash}`
+        `Registering Switchboard remoteChainSlug - ${remoteChainSlug} ${switchBoardAddress}: ${registerTx.hash}`
       );
       await registerTx.wait();
     }
