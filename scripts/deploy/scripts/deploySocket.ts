@@ -10,7 +10,7 @@ import {
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { socketOwner } from "../config";
+import { socketOwner, executionManagerVersion } from "../config";
 
 let allDeployed = false;
 
@@ -63,13 +63,12 @@ export const deploySocket = async (
       capacitorFactory.address;
 
     const executionManager: Contract = await getOrDeploy(
-      CORE_CONTRACTS.OpenExecutionManager,
-      "contracts/OpenExecutionManager.sol",
+      executionManagerVersion,
+      `contracts/${executionManagerVersion}.sol`,
       [socketOwner, chainSlug, signatureVerifier.address],
       deployUtils
     );
-    deployUtils.addresses[CORE_CONTRACTS.OpenExecutionManager] =
-      executionManager.address;
+    deployUtils.addresses[executionManagerVersion] = executionManager.address;
 
     const transmitManager: Contract = await getOrDeploy(
       CORE_CONTRACTS.TransmitManager,
