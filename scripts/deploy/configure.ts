@@ -118,7 +118,7 @@ export const main = async () => {
   }
 };
 
-const msgValueMaxThreshold : {[chain in ChainSlug]?:BigNumberish} = {
+const msgValueMaxThreshold: { [chain in ChainSlug]?: BigNumberish } = {
   [ChainSlug.ARBITRUM_GOERLI]: ethers.utils.parseEther("0.001"),
   [ChainSlug.OPTIMISM_GOERLI]: ethers.utils.parseEther("0.001"),
   [ChainSlug.POLYGON_MUMBAI]: ethers.utils.parseEther("0.1"),
@@ -151,9 +151,9 @@ const configureExecutionManager = async (
       await getInstance("ExecutionManager", addr.ExecutionManager!)
     ).connect(socketSigner);
 
-    let nextNonce = (await executionManagerContract.nextNonce(
-      socketSigner.address
-    )).toNumber();
+    let nextNonce = (
+      await executionManagerContract.nextNonce(socketSigner.address)
+    ).toNumber();
     console.log({ nextNonce });
 
     let requests: any = [];
@@ -196,12 +196,10 @@ const configureExecutionManager = async (
     );
     console.log(tx.hash);
     await tx.wait();
-
   } catch (error) {
     console.log("error while configuring execution manager: ", error);
   }
 };
-
 
 const setRemoteSwitchboards = async (addresses) => {
   try {

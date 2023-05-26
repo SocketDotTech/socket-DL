@@ -200,7 +200,7 @@ abstract contract SocketDst is SocketBase {
      * This function assumes localPlug_ will have code while executing. As the message
      * execution failure is not blocking the system, it is not necessary to check if
      * code exists in the given address.
-     * @dev distribution of msg.value in case of inbound failure is to be decided. 
+     * @dev distribution of msg.value in case of inbound failure is to be decided.
      */
     function _execute(
         address executor_,
