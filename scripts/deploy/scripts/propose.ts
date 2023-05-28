@@ -4,21 +4,17 @@ dotenvConfig();
 import { arrayify } from "@ethersproject/bytes";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { Contract, Wallet, utils } from "ethers";
-import { version } from "../../../src/index";
+import { version, getAddresses } from "../../../src/index";
 import { getProviderFromChainName } from "../../constants/networks";
 
-import {
-  CORE_CONTRACTS,
-  ChainKey,
-  getAddresses,
-  networkToChainSlug,
-} from "@socket.tech/dl-core";
+import { CORE_CONTRACTS, ChainKey, chainKeyToSlug } from "@socket.tech/dl-core";
 import { getInstance } from "../utils";
 import { mode } from "../config";
 
 export const VERSION_HASH = utils.id(version[mode]);
 
 const chain: ChainKey = ChainKey.OPTIMISM_GOERLI;
+const chainSlug = chainKeyToSlug[chain];
 const packetId =
   "0x000138815c83e326c0b4380127dccf01c3b69ff4dd5c16ae0000000000000001";
 const root =
@@ -43,7 +39,7 @@ export const main = async () => {
     const proposeDigest = keccak256(
       defaultAbiCoder.encode(
         ["bytes32", "uint32", "bytes32", "bytes32"],
-        [VERSION_HASH, networkToChainSlug[chain], packetId, root]
+        [VERSION_HASH, chainSlug, packetId, root]
       )
     );
     const signature = await transmitterSigner.signMessage(
@@ -52,13 +48,10 @@ export const main = async () => {
 
     console.log(`${signature} here`);
 
+    const socketAddr = (await getAddresses(chainSlug, mode)).Socket;
+
     const socket: Contract = (
-      await getInstance(
-        CORE_CONTRACTS.Socket,
-        (
-          await getAddresses(networkToChainSlug[chain], mode)
-        ).Socket
-      )
+      await getInstance(CORE_CONTRACTS.Socket, socketAddr)
     ).connect(signer);
 
     const tx = await socket.propose(packetId, root, signature);
