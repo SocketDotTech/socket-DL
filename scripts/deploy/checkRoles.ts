@@ -31,6 +31,7 @@ import {
   transmitterAddresses,
   watcherAddresses,
 } from "./config";
+import { overrides } from "./config";
 
 let roleStatus: any = {};
 
@@ -49,6 +50,7 @@ let roleTxns: {
     [contractName: string]: {
       to: string;
       role: string;
+      slug: number;
       grantee: string;
     }[];
   };
@@ -70,6 +72,7 @@ const addTransaction = (
   contractAddress: string,
   hasRole: boolean,
   role: string,
+  slug: number,
   userAddress: string,
   newRoleStatus: boolean
 ) => {
@@ -80,6 +83,7 @@ const addTransaction = (
     roleTxns[chainId]![contractName]?.push({
       to: contractAddress,
       role,
+      slug,
       grantee: userAddress,
     });
   }
@@ -87,6 +91,7 @@ const addTransaction = (
 
 const getRoleTxnData = (
   roles: string[],
+  slugs: number[],
   userAddresses: string[],
   type: "GRANT" | "REVOKE"
 ) => {
@@ -95,13 +100,13 @@ const getRoleTxnData = (
   );
   if (type === "GRANT") {
     return accessControlInterface.encodeFunctionData(
-      "grantBatchRole(bytes32[],address[])",
-      [roles, userAddresses]
+      "grantBatchRole(bytes32[],uint32[],address[])",
+      [roles, slugs, userAddresses]
     );
   } else if (type === "REVOKE") {
     return accessControlInterface.encodeFunctionData(
-      "revokeBatchRole(bytes32[],address[])",
-      [roles, userAddresses]
+      "revokeBatchRole(bytes32[],uint32[],address[])",
+      [roles, slugs, userAddresses]
     );
   } else {
     throw Error("Invalid grant type");
@@ -113,67 +118,54 @@ const executeRoleTransactions = async (
   newRoleStatus: boolean,
   wallet: Wallet
 ) => {
-  if (!roleTxns[chainId as any as keyof typeof roleTxns]) return;
-  let contracts = Object.keys(
-    roleTxns[chainId as any as keyof typeof roleTxns]!
-  );
+  if (!roleTxns[chainId]) return;
+  let contracts = Object.keys(roleTxns[chainId]!);
   for (let i = 0; i < contracts.length; i++) {
     let contractSpecificTxns:
-      | { to: string; role: string; grantee: string }[]
-      | undefined =
-      roleTxns[chainId as any as keyof typeof roleTxns]![
-        contracts[i] as CORE_CONTRACTS
-      ];
+      | { to: string; role: string; slug: number; grantee: string }[]
+      | undefined = roleTxns[chainId]![contracts[i] as CORE_CONTRACTS];
     if (!contractSpecificTxns?.length) continue;
 
-    let grantRoles: string[] = [],
-      grantAddresses: string[] = [];
-    let revokeRoles: string[] = [],
-      revokeAddresses: string[] = [];
+    let roles: string[] = [],
+      slugs: number[] = [],
+      addresses: string[] = [];
+
     let contractAddress: string | undefined;
 
     contractSpecificTxns!.forEach((roleTx) => {
       contractAddress = roleTx.to;
       if (newRoleStatus) {
-        grantRoles.push(roleTx.role);
-        grantAddresses.push(roleTx.grantee);
+        roles.push(roleTx.role);
+        slugs.push(roleTx.slug);
+        addresses.push(roleTx.grantee);
       } else {
-        revokeRoles.push(roleTx.role);
-        revokeAddresses.push(roleTx.grantee);
+        roles.push(roleTx.role);
+        slugs.push(roleTx.slug);
+        addresses.push(roleTx.grantee);
       }
     });
 
-    if (grantRoles.length) {
-      let data = getRoleTxnData(grantRoles, grantAddresses, "GRANT");
-      let tx = await wallet.sendTransaction({
-        to: contractAddress,
-        data,
-      });
-      console.log(
-        `chain: ${chainId}`,
-        "Grant, contract:",
-        contractAddress,
-        "hash: ",
-        tx.hash
-      );
-      await tx.wait();
+    if (!roles.length) continue;
+    let data: string;
+    if (newRoleStatus) {
+      data = getRoleTxnData(roles, slugs, addresses, "GRANT");
+    } else {
+      data = getRoleTxnData(roles, slugs, addresses, "REVOKE");
     }
-
-    if (revokeRoles.length) {
-      let data = getRoleTxnData(grantRoles, grantAddresses, "REVOKE");
-      let tx = await wallet.sendTransaction({
-        to: contractAddress,
-        data,
-      });
-      console.log(
-        `chain: ${chainId}`,
-        "revoke, contract:",
-        contractAddress,
-        "hash: ",
-        tx.hash
-      );
-      await tx.wait();
-    }
+    let tx = await wallet.sendTransaction({
+      to: contractAddress,
+      data,
+      ...overrides[chainId],
+    });
+    console.log(
+      `chain: ${chainId}`,
+      " contract:",
+      contractAddress,
+      { newRoleStatus },
+      "hash: ",
+      tx.hash
+    );
+    await tx.wait();
   }
 };
 
@@ -186,6 +178,7 @@ const executeOtherTransactions = async (chainId: ChainSlug, wallet: Wallet) => {
     let tx = await wallet.sendTransaction({
       to,
       data,
+      ...overrides[chainId],
     });
     console.log(`to: ${to}, txHash: ${tx?.hash}`);
     await tx.wait();
@@ -283,6 +276,7 @@ export const checkNativeSwitchboardRoles = async ({
             contractAddress!,
             hasRole,
             getRoleHash(role),
+            0,
             userAddress,
             newRoleStatus
           );
@@ -325,7 +319,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
         //   networkToChainSlug[chainId],
         //   "================="
         // );
-        let addresses;
+        let addresses: ChainSocketAddresses | undefined;
         try {
           addresses = await getAddresses(chainId, mode);
         } catch (error) {
@@ -394,6 +388,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                   contractAddress!,
                   hasRole,
                   getRoleHash(role),
+                  0, // keep slug as 0 for non-chain specific roles
                   userAddress,
                   newRoleStatus
                 );
@@ -466,7 +461,8 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                         contractName as CORE_CONTRACTS,
                         contractAddress!,
                         hasRole,
-                        getChainRoleHash(role, Number(siblingSlug)),
+                        getRoleHash(role),
+                        Number(siblingSlug),
                         userAddress,
                         newRoleStatus
                       );
@@ -508,16 +504,6 @@ const main = async () => {
   let transmitterAddress = transmitterAddresses[mode];
   let watcherAddress = watcherAddresses[mode];
 
-  // // Grant rescue and governance role for GasPriceOracle
-  await checkAndUpdateRoles({
-    userAddress: ownerAddress,
-    filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
-    filterContracts: [CORE_CONTRACTS.GasPriceOracle],
-    filterChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
   // // Grant rescue,withdraw and governance role for Execution Manager to owner
   await checkAndUpdateRoles({
     userAddress: ownerAddress,
@@ -525,8 +511,41 @@ const main = async () => {
       ROLES.RESCUE_ROLE,
       ROLES.GOVERNANCE_ROLE,
       ROLES.WITHDRAW_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
     ],
     filterContracts: [CORE_CONTRACTS.ExecutionManager],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.FEES_UPDATER_ROLE],
+    filterContracts: [CORE_CONTRACTS.ExecutionManager],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: ownerAddress,
+    filterRoles: [
+      ROLES.RESCUE_ROLE,
+      ROLES.GOVERNANCE_ROLE,
+      ROLES.WITHDRAW_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
+    ],
+    filterContracts: [CORE_CONTRACTS.OpenExecutionManager],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.FEES_UPDATER_ROLE],
+    filterContracts: [CORE_CONTRACTS.OpenExecutionManager],
     filterChains,
     sendTransaction,
     newRoleStatus,
@@ -549,7 +568,7 @@ const main = async () => {
       ROLES.RESCUE_ROLE,
       ROLES.GOVERNANCE_ROLE,
       ROLES.WITHDRAW_ROLE,
-      ROLES.GAS_LIMIT_UPDATER_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
     ],
     filterContracts: [CORE_CONTRACTS.TransmitManager],
     filterChains,
@@ -560,16 +579,7 @@ const main = async () => {
   // // Grant roles to transmitterAddress on TransmitManager
   await checkAndUpdateRoles({
     userAddress: transmitterAddress,
-    filterRoles: [ROLES.TRANSMITTER_ROLE],
-    filterContracts: [CORE_CONTRACTS.TransmitManager],
-    filterChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
-  await checkAndUpdateRoles({
-    userAddress: transmitterAddress,
-    filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE],
+    filterRoles: [ROLES.TRANSMITTER_ROLE, ROLES.FEES_UPDATER_ROLE],
     filterContracts: [CORE_CONTRACTS.TransmitManager],
     filterChains,
     sendTransaction,
@@ -586,7 +596,7 @@ const main = async () => {
     newRoleStatus,
   });
 
-  // // Setup Fast Switchboard roles except WATCHER - TODO : setup for watcher
+  // Setup Fast Switchboard roles except WATCHER
   await checkAndUpdateRoles({
     userAddress: ownerAddress,
     filterRoles: [
@@ -594,9 +604,18 @@ const main = async () => {
       ROLES.GOVERNANCE_ROLE,
       ROLES.TRIP_ROLE,
       ROLES.UNTRIP_ROLE,
-      ROLES.GAS_LIMIT_UPDATER_ROLE,
       ROLES.WITHDRAW_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
     ],
+    filterContracts: [CORE_CONTRACTS.FastSwitchboard],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.FEES_UPDATER_ROLE],
     filterContracts: [CORE_CONTRACTS.FastSwitchboard],
     filterChains,
     sendTransaction,
@@ -629,8 +648,18 @@ const main = async () => {
     filterRoles: [
       ROLES.TRIP_ROLE,
       ROLES.UNTRIP_ROLE,
-      ROLES.GAS_LIMIT_UPDATER_ROLE,
+      ROLES.GOVERNANCE_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
     ], // all roles
+    filterContracts: [CORE_CONTRACTS.OptimisticSwitchboard],
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  await checkAndUpdateRoles({
+    userAddress: transmitterAddress,
+    filterRoles: [ROLES.FEES_UPDATER_ROLE], // all roles
     filterContracts: [CORE_CONTRACTS.OptimisticSwitchboard],
     filterChains,
     sendTransaction,
@@ -646,7 +675,7 @@ const main = async () => {
       ROLES.GOVERNANCE_ROLE,
       ROLES.WITHDRAW_ROLE,
       ROLES.RESCUE_ROLE,
-      ROLES.GAS_LIMIT_UPDATER_ROLE,
+      ROLES.FEES_UPDATER_ROLE,
     ], // all roles
     filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
     filterChains,
@@ -654,10 +683,9 @@ const main = async () => {
     newRoleStatus,
   });
 
-  // Grant transmitter roles in NativeSwitchboard. just one role - GAS_LIMIT_UPDATER_ROLE
   await checkAndUpdateRoles({
     userAddress: transmitterAddress,
-    filterRoles: [ROLES.GAS_LIMIT_UPDATER_ROLE], // all roles
+    filterRoles: [ROLES.FEES_UPDATER_ROLE], // all roles
     filterContracts: [CORE_CONTRACTS.NativeSwitchboard],
     filterChains,
     sendTransaction,

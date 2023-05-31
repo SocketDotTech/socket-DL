@@ -36,6 +36,7 @@ interface ISocket {
         uint256 executionFee;
         // The maximum amount of gas that can be used to execute the message.
         uint256 msgGasLimit;
+        bytes32 extraParams;
         // The payload data to be executed in the message.
         bytes payload;
         // The proof data required by the Decapacitor contract to verify the message's authenticity.
@@ -53,12 +54,13 @@ interface ISocket {
      * @param payload the data which will be used by inbound at remote
      */
     event MessageOutbound(
-        uint256 localChainSlug,
+        uint32 localChainSlug,
         address localPlug,
-        uint256 dstChainSlug,
+        uint32 dstChainSlug,
         address dstPlug,
         bytes32 msgId,
         uint256 msgGasLimit,
+        bytes32 extraParams,
         bytes payload,
         Fees fees
     );
@@ -95,7 +97,7 @@ interface ISocket {
      */
     event PlugConnected(
         address plug,
-        uint256 siblingChainSlug,
+        uint32 siblingChainSlug,
         address siblingPlug,
         address inboundSwitchboard,
         address outboundSwitchboard,
@@ -117,23 +119,22 @@ interface ISocket {
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
+        bytes32 extraParams_,
         bytes calldata payload_
     ) external payable returns (bytes32 msgId);
 
     /**
      * @notice executes a message
      * @param packetId packet id
-     * @param localPlug local plug address
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
         bytes32 packetId,
-        address localPlug,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature
-    ) external;
+    ) external payable;
 
     /**
      * @notice seals data in capacitor for specific batchSizr
@@ -167,25 +168,23 @@ interface ISocket {
      * @param outboundSwitchboard_ the address of switchboard to use for sending messages
      */
     function connect(
-        uint256 siblingChainSlug_,
+        uint32 siblingChainSlug_,
         address siblingPlug_,
         address inboundSwitchboard_,
         address outboundSwitchboard_
     ) external;
 
     /**
-     * @notice Registers a switchboard with a specified address, max packet length, sibling chain slug, and capacitor type.
-     * @param switchBoardAddress_ The address of the switchboard to be registered.
-     * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
+     * @notice Registers a switchboard with a specified max packet length, sibling chain slug, and capacitor type.
      * @param siblingChainSlug_ The slug of the sibling chain that the switchboard is registered with.
+     * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
      * @param capacitorType_ The type of capacitor that the switchboard uses.
      */
     function registerSwitchBoard(
-        address switchBoardAddress_,
-        uint256 maxPacketLength_,
         uint32 siblingChainSlug_,
-        uint32 capacitorType_
-    ) external;
+        uint256 maxPacketLength_,
+        uint256 capacitorType_
+    ) external returns (address capacitor);
 
     /**
      * @notice Retrieves the packet id roots for a specified packet id.
@@ -203,6 +202,8 @@ interface ISocket {
      */
     function getMinFees(
         uint256 msgGasLimit_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view returns (uint256 totalFees);

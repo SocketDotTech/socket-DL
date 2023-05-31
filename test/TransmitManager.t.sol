@@ -4,8 +4,6 @@ pragma solidity ^0.8.0;
 import "./Setup.t.sol";
 
 contract TransmitManagerTest is Setup {
-    GasPriceOracle internal gasPriceOracle;
-
     address public constant NATIVE_TOKEN_ADDRESS =
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
@@ -38,8 +36,6 @@ contract TransmitManagerTest is Setup {
     SignatureVerifier internal signatureVerifier;
     TransmitManager internal transmitManager;
 
-    event SealGasLimitSet(uint256 gasLimit_);
-    event ProposeGasLimitSet(uint256 dstChainSlug_, uint256 gasLimit_);
     event TransmitManagerUpdated(address transmitManager);
     error TransmitterNotFound();
     error InsufficientTransmitFees();
@@ -53,29 +49,29 @@ contract TransmitManagerTest is Setup {
         feesPayer = vm.addr(feesPayerPrivateKey);
         feesWithdrawer = vm.addr(feesWithdrawerPrivateKey);
 
-        gasPriceOracle = new GasPriceOracle(owner, chainSlug);
-        signatureVerifier = new SignatureVerifier();
+        signatureVerifier = new SignatureVerifier(owner);
         transmitManager = new TransmitManager(
             signatureVerifier,
-            gasPriceOracle,
             owner,
-            chainSlug,
-            sealGasLimit
+            chainSlug
         );
 
         vm.startPrank(owner);
-        gasPriceOracle.grantRole(GOVERNANCE_ROLE, owner);
-        gasPriceOracle.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
-        gasPriceOracle.setTransmitManager(transmitManager);
-        transmitManager.grantRole("TRANSMITTER_ROLE", chainSlug, transmitter);
-        transmitManager.grantRole(
-            "TRANSMITTER_ROLE",
+        transmitManager.grantRoleWithSlug(
+            TRANSMITTER_ROLE,
+            chainSlug,
+            transmitter
+        );
+        transmitManager.grantRoleWithSlug(
+            TRANSMITTER_ROLE,
             destChainSlug,
             transmitter
         );
-        transmitManager.grantRole(GAS_LIMIT_UPDATER_ROLE, owner);
-        transmitManager.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+
+        //grant FeesUpdater Role
+        transmitManager.grantRole(FEES_UPDATER_ROLE, owner);
+        transmitManager.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
             destChainSlug,
             owner
         );
@@ -85,72 +81,32 @@ contract TransmitManagerTest is Setup {
         transmitManager.grantRole(GOVERNANCE_ROLE, owner);
         vm.stopPrank();
 
-        bytes32 digest = keccak256(
+        bytes32 feesUpdateDigest = keccak256(
             abi.encode(
-                "SEAL_GAS_LIMIT_UPDATE",
-                chainSlug,
-                ownerNonce,
-                sealGasLimit
-            )
-        );
-        bytes memory sig = _createSignature(digest, ownerPrivateKey);
-
-        vm.expectEmit(false, false, false, true);
-        emit SealGasLimitSet(sealGasLimit);
-        transmitManager.setSealGasLimit(ownerNonce++, sealGasLimit, sig);
-
-        digest = keccak256(
-            abi.encode(
-                "PROPOSE_GAS_LIMIT_UPDATE",
+                FEES_UPDATE_SIG_IDENTIFIER,
+                address(transmitManager),
                 chainSlug,
                 destChainSlug,
                 ownerNonce,
-                proposeGasLimit
+                _transmissionFees
             )
         );
-        sig = _createSignature(digest, ownerPrivateKey);
 
-        vm.expectEmit(false, false, false, true);
-        emit ProposeGasLimitSet(destChainSlug, proposeGasLimit);
-        transmitManager.setProposeGasLimit(
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            ownerPrivateKey
+        );
+
+        transmitManager.setTransmissionFees(
             ownerNonce++,
-            destChainSlug,
-            proposeGasLimit,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(chainSlug, gasPriceOracleNonce, sourceGasPrice)
-        );
-        sig = _createSignature(digest, transmitterPrivateKey);
-
-        gasPriceOracle.setSourceGasPrice(
-            gasPriceOracleNonce++,
-            sourceGasPrice,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(
-                chainSlug,
-                destChainSlug,
-                gasPriceOracleNonce,
-                relativeGasPrice
-            )
-        );
-
-        sig = _createSignature(digest, transmitterPrivateKey);
-
-        gasPriceOracle.setRelativeGasPrice(
-            destChainSlug,
-            gasPriceOracleNonce++,
-            relativeGasPrice,
-            sig
+            uint32(destChainSlug),
+            _transmissionFees,
+            feesUpdateSignature
         );
     }
 
     function testGenerateAndVerifySignature() public {
-        uint256 packetId = 123;
+        bytes32 packetId = bytes32("");
         bytes32 root = bytes32(abi.encode(123));
         bytes32 digest = keccak256(abi.encode(chainSlug, packetId, root));
         bytes memory sig = _createSignature(digest, transmitterPrivateKey);
@@ -230,24 +186,24 @@ contract TransmitManagerTest is Setup {
 
     function testGrantTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRole(
-                "TRANSMITTER_ROLE",
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
                 chainSlug2,
                 nonTransmitter
             )
         );
 
         vm.startPrank(owner);
-        transmitManager.grantRole(
-            "TRANSMITTER_ROLE",
+        transmitManager.grantRoleWithSlug(
+            TRANSMITTER_ROLE,
             chainSlug2,
             nonTransmitter
         );
         vm.stopPrank();
 
         assertTrue(
-            transmitManager.hasRole(
-                "TRANSMITTER_ROLE",
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
                 chainSlug2,
                 nonTransmitter
             )
@@ -256,40 +212,40 @@ contract TransmitManagerTest is Setup {
 
     function testRevokeTransmitterRole() public {
         assertFalse(
-            transmitManager.hasRole(
-                "TRANSMITTER_ROLE",
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
                 chainSlug2,
                 nonTransmitter
             )
         );
 
         vm.startPrank(owner);
-        transmitManager.grantRole(
-            "TRANSMITTER_ROLE",
+        transmitManager.grantRoleWithSlug(
+            TRANSMITTER_ROLE,
             chainSlug2,
             nonTransmitter
         );
         vm.stopPrank();
 
         assertTrue(
-            transmitManager.hasRole(
-                "TRANSMITTER_ROLE",
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
                 chainSlug2,
                 nonTransmitter
             )
         );
 
         vm.startPrank(owner);
-        transmitManager.revokeRole(
-            "TRANSMITTER_ROLE",
+        transmitManager.revokeRoleWithSlug(
+            TRANSMITTER_ROLE,
             chainSlug2,
             nonTransmitter
         );
         vm.stopPrank();
 
         assertFalse(
-            transmitManager.hasRole(
-                "TRANSMITTER_ROLE",
+            transmitManager.hasRoleWithSlug(
+                TRANSMITTER_ROLE,
                 chainSlug2,
                 nonTransmitter
             )
@@ -297,7 +253,7 @@ contract TransmitManagerTest is Setup {
     }
 
     function testSetSignatureVerifier() public {
-        SignatureVerifier signatureVerifierNew = new SignatureVerifier();
+        SignatureVerifier signatureVerifierNew = new SignatureVerifier(owner);
 
         hoax(owner);
         vm.expectEmit(false, false, false, true);

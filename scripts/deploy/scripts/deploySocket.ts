@@ -1,19 +1,23 @@
 import { Contract, Wallet } from "ethers";
-import { deployContractWithArgs, storeAddresses, getInstance } from "../utils";
+import { DeployParams, getOrDeploy, storeAddresses } from "../utils";
 
-import { sealGasLimit } from "../../constants/config";
 import {
   CORE_CONTRACTS,
   ChainSocketAddresses,
   DeploymentMode,
   networkToChainSlug,
+  version,
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { socketOwner } from "../config";
+import { socketOwner, executionManagerVersion, mode } from "../config";
 
-let verificationDetails: any[] = [];
 let allDeployed = false;
+
+export interface ReturnObj {
+  allDeployed: boolean;
+  deployedAddresses: ChainSocketAddresses;
+}
 
 /**
  * Deploys network-independent socket contracts
@@ -23,8 +27,8 @@ export const deploySocket = async (
   chainSlug: number,
   currentMode: DeploymentMode,
   deployedAddresses: ChainSocketAddresses
-): Promise<any> => {
-  const deployUtils = {
+): Promise<ReturnObj> => {
+  const deployUtils: DeployParams = {
     addresses: deployedAddresses,
     mode: currentMode,
     signer: socketSigner,
@@ -35,7 +39,7 @@ export const deploySocket = async (
     const signatureVerifier: Contract = await getOrDeploy(
       CORE_CONTRACTS.SignatureVerifier,
       "contracts/utils/SignatureVerifier.sol",
-      [],
+      [socketOwner],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.SignatureVerifier] =
@@ -44,7 +48,7 @@ export const deploySocket = async (
     const hasher: Contract = await getOrDeploy(
       CORE_CONTRACTS.Hasher,
       "contracts/utils/Hasher.sol",
-      [],
+      [socketOwner],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.Hasher] = hasher.address;
@@ -58,34 +62,18 @@ export const deploySocket = async (
     deployUtils.addresses[CORE_CONTRACTS.CapacitorFactory] =
       capacitorFactory.address;
 
-    const gasPriceOracle: Contract = await getOrDeploy(
-      CORE_CONTRACTS.GasPriceOracle,
-      "contracts/GasPriceOracle.sol",
-      [socketOwner, chainSlug],
-      deployUtils
-    );
-    deployUtils.addresses[CORE_CONTRACTS.GasPriceOracle] =
-      gasPriceOracle.address;
-
     const executionManager: Contract = await getOrDeploy(
-      CORE_CONTRACTS.ExecutionManager,
-      "contracts/ExecutionManager.sol",
-      [gasPriceOracle.address, socketOwner],
+      executionManagerVersion,
+      `contracts/${executionManagerVersion}.sol`,
+      [socketOwner, chainSlug, signatureVerifier.address],
       deployUtils
     );
-    deployUtils.addresses[CORE_CONTRACTS.ExecutionManager] =
-      executionManager.address;
+    deployUtils.addresses[executionManagerVersion] = executionManager.address;
 
     const transmitManager: Contract = await getOrDeploy(
       CORE_CONTRACTS.TransmitManager,
       "contracts/TransmitManager.sol",
-      [
-        signatureVerifier.address,
-        gasPriceOracle.address,
-        socketOwner,
-        chainSlug,
-        sealGasLimit[networkToChainSlug[chainSlug]],
-      ],
+      [signatureVerifier.address, socketOwner, chainSlug],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.TransmitManager] =
@@ -101,23 +89,19 @@ export const deploySocket = async (
         executionManager.address,
         capacitorFactory.address,
         socketOwner,
+        version[deployUtils.mode],
       ],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.Socket] = socket.address;
 
     // switchboards deploy
-    const result = await deploySwitchboards(
+    deployUtils.addresses = await deploySwitchboards(
       networkToChainSlug[chainSlug],
       socketSigner,
-      deployedAddresses,
-      verificationDetails,
+      deployUtils.addresses,
       currentMode
     );
-
-    deployUtils.addresses = result["sourceConfig"];
-
-    verificationDetails = result["verificationDetails"];
 
     const socketBatcher: Contract = await getOrDeploy(
       "SocketBatcher",
@@ -149,38 +133,7 @@ export const deploySocket = async (
     deployUtils.mode
   );
   return {
-    verificationDetails,
     allDeployed,
     deployedAddresses: deployUtils.addresses,
   };
 };
-
-async function getOrDeploy(
-  contractName: string,
-  path: string,
-  args: any[],
-  deployUtils
-): Promise<Contract> {
-  let contract: Contract;
-  if (!deployUtils.addresses[contractName]) {
-    contract = await deployContractWithArgs(
-      contractName,
-      args,
-      deployUtils.signer
-    );
-    verificationDetails.push([contract.address, contractName, path, args]);
-    console.log(
-      `${contractName} deployed on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
-    );
-  } else {
-    contract = await getInstance(
-      contractName,
-      deployUtils.addresses[contractName]
-    );
-    console.log(
-      `${contractName} found on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
-    );
-  }
-
-  return contract;
-}

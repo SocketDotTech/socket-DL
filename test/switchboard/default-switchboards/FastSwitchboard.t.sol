@@ -5,16 +5,15 @@ import "../../Setup.t.sol";
 
 contract FastSwitchboardTest is Setup {
     bool isFast = true;
-    uint256 immutable remoteChainSlug = uint32(uint256(2));
-    bytes32 immutable packetId = bytes32(0);
+    uint32 remoteChainSlug;
+    bytes32 packetId;
     address watcher;
     address altWatcher;
     uint256 nonce;
 
-    event AttestGasLimitSet(uint256 dstChainSlug_, uint256 attestGasLimit_);
     event PacketAttested(bytes32 packetId, address attester);
     event SwitchboardTripped(bool tripGlobalFuse_);
-    event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
+    event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
 
     error WatcherFound();
     error WatcherNotFound();
@@ -26,40 +25,22 @@ contract FastSwitchboardTest is Setup {
     function setUp() external {
         initialise();
 
-        _a.chainSlug = uint32(uint256(1));
+        _a.chainSlug = uint32(c++);
+        _a.sigVerifier__ = new SignatureVerifier(_socketOwner);
+        remoteChainSlug = uint32(c++);
+        packetId = bytes32(uint256(remoteChainSlug) << 224);
+
         vm.startPrank(_socketOwner);
 
         fastSwitchboard = new FastSwitchboard(
             _socketOwner,
             address(uint160(c++)),
-            address(uint160(c++)),
             _a.chainSlug,
-            1
+            1,
+            _a.sigVerifier__
         );
 
-        fastSwitchboard.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
-            remoteChainSlug,
-            _socketOwner
-        );
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                "EXECUTION_OVERHEAD_UPDATE",
-                nonce,
-                _a.chainSlug,
-                remoteChainSlug,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-        fastSwitchboard.setExecutionOverhead(
-            nonce++,
-            remoteChainSlug,
-            _executionOverhead,
-            sig
-        );
 
         watcher = vm.addr(_watcherPrivateKey);
         altWatcher = vm.addr(_altWatcherPrivateKey);
@@ -67,66 +48,54 @@ contract FastSwitchboardTest is Setup {
         fastSwitchboard.grantWatcherRole(remoteChainSlug, watcher);
         fastSwitchboard.grantWatcherRole(remoteChainSlug, altWatcher);
 
-        digest = keccak256(
-            abi.encode(
-                "ATTEST_GAS_LIMIT_UPDATE",
-                _a.chainSlug,
-                remoteChainSlug,
-                nonce,
-                _attestGasLimit
-            )
-        );
-        sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        vm.expectEmit(false, false, false, true);
-        emit AttestGasLimitSet(remoteChainSlug, _attestGasLimit);
-        fastSwitchboard.setAttestGasLimit(
-            nonce++,
-            remoteChainSlug,
-            _attestGasLimit,
-            sig
-        );
-
         vm.stopPrank();
     }
 
     function testAttest() external {
-        bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
+        bytes32 digest = keccak256(
+            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId)
+        );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
         vm.expectEmit(false, false, false, true);
         emit PacketAttested(packetId, watcher);
 
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
 
         assertTrue(fastSwitchboard.isAttested(watcher, packetId));
     }
 
     function testDuplicateAttestation() external {
-        bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
+        bytes32 digest = keccak256(
+            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId)
+        );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
         vm.expectEmit(false, false, false, true);
         emit PacketAttested(packetId, watcher);
 
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
 
         assertTrue(fastSwitchboard.isAttested(watcher, packetId));
 
         vm.expectRevert(AlreadyAttested.selector);
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
     }
 
     function testIsAllowed() external {
-        bytes32 digest = keccak256(abi.encode(remoteChainSlug, packetId));
+        bytes32 digest = keccak256(
+            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId)
+        );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
 
-        digest = keccak256(abi.encode(remoteChainSlug, packetId));
+        digest = keccak256(
+            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId)
+        );
         sig = _createSignature(digest, _altWatcherPrivateKey);
 
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
 
         uint256 proposeTime = block.timestamp -
             fastSwitchboard.timeoutInSeconds();
@@ -154,10 +123,16 @@ contract FastSwitchboardTest is Setup {
 
     function testTripGlobal() external {
         vm.startPrank(_socketOwner);
-        fastSwitchboard.grantRole("TRIP_ROLE", _socketOwner);
+        fastSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
         bytes32 digest = keccak256(
-            abi.encode("TRIP", _a.chainSlug, nonce, true)
+            abi.encode(
+                TRIP_GLOBAL_SIG_IDENTIFIER,
+                address(fastSwitchboard),
+                _a.chainSlug,
+                nonce,
+                true
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -172,11 +147,18 @@ contract FastSwitchboardTest is Setup {
     function testTripPath() external {
         vm.startPrank(_socketOwner);
 
-        uint256 srcChainSlug = uint256(123);
-        fastSwitchboard.grantRole("WATCHER_ROLE", srcChainSlug, _socketOwner);
+        uint32 srcChainSlug = uint32(123);
+        fastSwitchboard.grantWatcherRole(srcChainSlug, _socketOwner);
 
         bytes32 digest = keccak256(
-            abi.encode("TRIP_PATH", srcChainSlug, _a.chainSlug, nonce, true)
+            abi.encode(
+                TRIP_PATH_SIG_IDENTIFIER,
+                address(fastSwitchboard),
+                srcChainSlug,
+                _a.chainSlug,
+                nonce,
+                true
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -189,9 +171,16 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testNonWatcherToTripPath() external {
-        uint256 srcChainSlug = _a.chainSlug;
+        uint32 srcChainSlug = _a.chainSlug;
         bytes32 digest = keccak256(
-            abi.encode("TRIP_PATH", _a.chainSlug, srcChainSlug, nonce, false)
+            abi.encode(
+                TRIP_PATH_SIG_IDENTIFIER,
+                address(fastSwitchboard),
+                _a.chainSlug,
+                srcChainSlug,
+                nonce,
+                false
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -200,15 +189,22 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testUnTripAfterTripSingle() external {
-        uint256 srcChainSlug = uint256(123);
+        uint32 srcChainSlug = uint32(123);
 
         vm.startPrank(_socketOwner);
-        fastSwitchboard.grantRole("WATCHER_ROLE", srcChainSlug, _socketOwner);
-        fastSwitchboard.grantRole("UNTRIP_ROLE", _socketOwner);
+        fastSwitchboard.grantWatcherRole(srcChainSlug, _socketOwner);
+        fastSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
         vm.stopPrank();
 
         bytes32 digest = keccak256(
-            abi.encode("TRIP_PATH", srcChainSlug, _a.chainSlug, nonce, true)
+            abi.encode(
+                TRIP_PATH_SIG_IDENTIFIER,
+                address(fastSwitchboard),
+                srcChainSlug,
+                _a.chainSlug,
+                nonce,
+                true
+            )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -218,7 +214,14 @@ contract FastSwitchboardTest is Setup {
         assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
 
         digest = keccak256(
-            abi.encode("UNTRIP_PATH", _a.chainSlug, srcChainSlug, nonce, false)
+            abi.encode(
+                UNTRIP_PATH_SIG_IDENTIFIER,
+                address(fastSwitchboard),
+                _a.chainSlug,
+                srcChainSlug,
+                nonce,
+                false
+            )
         );
         sig = _createSignature(digest, _socketOwnerPrivateKey);
 
@@ -272,6 +275,19 @@ contract FastSwitchboardTest is Setup {
         bytes memory sig = "0x121234323123232323";
 
         vm.expectRevert(InvalidSigLength.selector);
-        fastSwitchboard.attest(packetId, remoteChainSlug, sig);
+        fastSwitchboard.attest(packetId, sig);
+    }
+
+    function testAttesterCantAttestAllChains() public {
+        // Packet is coming from a chain different from remoteChainSlug
+        bytes32 altPacketId = bytes32(uint256(100) << 224);
+
+        bytes32 digest = keccak256(
+            abi.encode(address(fastSwitchboard), _a.chainSlug, altPacketId)
+        );
+        bytes memory sig = _createSignature(digest, _watcherPrivateKey);
+
+        vm.expectRevert(WatcherNotFound.selector);
+        fastSwitchboard.attest(altPacketId, sig);
     }
 }

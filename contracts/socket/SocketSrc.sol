@@ -33,56 +33,73 @@ abstract contract SocketSrc is SocketBase {
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
+        bytes32 extraParams_,
         bytes calldata payload_
     ) external payable override returns (bytes32 msgId) {
-        PlugConfig storage plugConfig = _plugConfigs[msg.sender][
+        PlugConfig memory plugConfig = _plugConfigs[msg.sender][
             remoteChainSlug_
         ];
-        uint256 localChainSlug = chainSlug;
 
-        msgId = _encodeMsgId(localChainSlug);
+        msgId = _encodeMsgId(chainSlug, plugConfig.siblingPlug);
 
-        ISocket.Fees memory fees = _deductFees(
+        ISocket.Fees memory fees = _validateAndGetFees(
             msgGasLimit_,
+            uint256(payload_.length),
+            extraParams_,
             uint32(remoteChainSlug_),
             plugConfig.outboundSwitchboard__
         );
 
+        ISocket.MessageDetails memory messageDetails;
+        messageDetails.msgId = msgId;
+        messageDetails.msgGasLimit = msgGasLimit_;
+        messageDetails.extraParams = extraParams_;
+        messageDetails.payload = payload_;
+        messageDetails.executionFee = fees.executionFee;
+
         bytes32 packedMessage = hasher__.packMessage(
-            localChainSlug,
+            chainSlug,
             msg.sender,
             remoteChainSlug_,
             plugConfig.siblingPlug,
-            msgId,
-            msgGasLimit_,
-            fees.executionFee,
-            payload_
+            messageDetails
         );
 
         plugConfig.capacitor__.addPackedMessage(packedMessage);
+
+        _sendFees(
+            msgGasLimit_,
+            uint32(remoteChainSlug_),
+            plugConfig.outboundSwitchboard__,
+            fees
+        );
+
         emit MessageOutbound(
-            localChainSlug,
+            chainSlug,
             msg.sender,
             remoteChainSlug_,
             plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
+            extraParams_,
             payload_,
             fees
         );
     }
 
     /**
-     * @dev Deducts the fees needed for message transmission and execution
+     * @dev Calculates fees needed for message transmission and execution and checks if msg value is enough
      * @param msgGasLimit_ The gas limit needed to execute the payload on the remote chain
      * @param remoteChainSlug_ The slug of the remote chain
      * @param switchboard__ The address of the switchboard contract
      * @return fees The fees object
      */
-    function _deductFees(
+    function _validateAndGetFees(
         uint256 msgGasLimit_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
         uint32 remoteChainSlug_,
         ISwitchboard switchboard__
     ) internal returns (Fees memory fees) {
@@ -91,7 +108,13 @@ abstract contract SocketSrc is SocketBase {
             fees.transmissionFees,
             fees.switchboardFees,
             minExecutionFees
-        ) = _getMinFees(msgGasLimit_, remoteChainSlug_, switchboard__);
+        ) = _getMinFees(
+            msgGasLimit_,
+            payloadSize_,
+            extraParams_,
+            remoteChainSlug_,
+            switchboard__
+        );
 
         if (
             msg.value <
@@ -104,18 +127,32 @@ abstract contract SocketSrc is SocketBase {
                 msg.value -
                 fees.transmissionFees -
                 fees.switchboardFees;
-
-            transmitManager__.payFees{value: fees.transmissionFees}(
-                remoteChainSlug_
-            );
-            switchboard__.payFees{value: fees.switchboardFees}(
-                remoteChainSlug_
-            );
-            executionManager__.payFees{value: fees.executionFee}(
-                msgGasLimit_,
-                remoteChainSlug_
-            );
         }
+    }
+
+    /**
+     * @dev Deducts the fees needed for message transmission and execution
+     * @param msgGasLimit_ The gas limit needed to execute the payload on the remote chain
+     * @param remoteChainSlug_ The slug of the remote chain
+     * @param switchboard__ The address of the switchboard contract
+     * @param fees_ The fees object
+     */
+    function _sendFees(
+        uint256 msgGasLimit_,
+        uint32 remoteChainSlug_,
+        ISwitchboard switchboard__,
+        Fees memory fees_
+    ) internal {
+        transmitManager__.payFees{value: fees_.transmissionFees}(
+            remoteChainSlug_
+        );
+        executionManager__.payFees{value: fees_.executionFee}(
+            msgGasLimit_,
+            remoteChainSlug_
+        );
+
+        // call to unknown external contract at the end
+        switchboard__.payFees{value: fees_.switchboardFees}(remoteChainSlug_);
     }
 
     /**
@@ -127,6 +164,8 @@ abstract contract SocketSrc is SocketBase {
      */
     function getMinFees(
         uint256 msgGasLimit_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view override returns (uint256 totalFees) {
@@ -138,6 +177,8 @@ abstract contract SocketSrc is SocketBase {
             uint256 executionFee
         ) = _getMinFees(
                 msgGasLimit_,
+                payloadSize_,
+                extraParams_,
                 remoteChainSlug_,
                 plugConfig.outboundSwitchboard__
             );
@@ -147,6 +188,8 @@ abstract contract SocketSrc is SocketBase {
 
     function _getMinFees(
         uint256 msgGasLimit_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
         uint32 remoteChainSlug_,
         ISwitchboard switchboard__
     )
@@ -166,6 +209,8 @@ abstract contract SocketSrc is SocketBase {
         );
         uint256 msgExecutionFee = executionManager__.getMinFees(
             msgGasLimit_,
+            payloadSize_,
+            extraParams_,
             remoteChainSlug_
         );
 
@@ -192,19 +237,29 @@ abstract contract SocketSrc is SocketBase {
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
                 siblingChainSlug,
-                keccak256(abi.encode(siblingChainSlug, packetId, root)),
+                keccak256(
+                    abi.encode(version, siblingChainSlug, packetId, root)
+                ),
                 signature_
             );
 
-        if (!isTransmitter) revert InvalidAttester();
+        if (!isTransmitter) revert InvalidTransmitter();
         emit PacketVerifiedAndSealed(transmitter, packetId, root, signature_);
     }
 
     // Packs the local plug, local chain slug, remote chain slug and nonce
     // messageCount++ will take care of msg id overflow as well
-    // msgId(256) = localChainSlug(32) | nonce(224)
-    function _encodeMsgId(uint256 slug_) internal returns (bytes32) {
-        return bytes32((uint256(uint32(slug_)) << 224) | messageCount++);
+    // msgId(256) = localChainSlug(32) | siblingPlug_(160) | nonce(64)
+    function _encodeMsgId(
+        uint32 slug_,
+        address siblingPlug_
+    ) internal returns (bytes32) {
+        return
+            bytes32(
+                (uint256(slug_) << 224) |
+                    (uint256(uint160(siblingPlug_)) << 64) |
+                    messageCount++
+            );
     }
 
     function _encodePacketId(

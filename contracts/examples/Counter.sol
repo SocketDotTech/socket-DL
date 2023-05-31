@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
+import "../libraries/RescueFundsLib.sol";
 
 contract Counter is IPlug {
     // immutables
@@ -38,25 +39,28 @@ contract Counter is IPlug {
     }
 
     function remoteAddOperation(
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 amount_,
-        uint256 msgGasLimit_
+        uint256 msgGasLimit_,
+        bytes32 extraParams_
     ) external payable {
         bytes memory payload = abi.encode(OP_ADD, amount_, msg.sender);
-        _outbound(chainSlug_, msgGasLimit_, payload);
+
+        _outbound(chainSlug_, msgGasLimit_, extraParams_, payload);
     }
 
     function remoteSubOperation(
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 amount_,
-        uint256 msgGasLimit_
+        uint256 msgGasLimit_,
+        bytes32 extraParams_
     ) external payable {
         bytes memory payload = abi.encode(OP_SUB, amount_, msg.sender);
-        _outbound(chainSlug_, msgGasLimit_, payload);
+        _outbound(chainSlug_, msgGasLimit_, extraParams_, payload);
     }
 
     function inbound(
-        uint256,
+        uint32,
         bytes calldata payload_
     ) external payable override {
         require(msg.sender == socket, "Counter: Invalid Socket");
@@ -75,13 +79,15 @@ contract Counter is IPlug {
     }
 
     function _outbound(
-        uint256 targetChain_,
+        uint32 targetChain_,
         uint256 msgGasLimit_,
+        bytes32 extraParams_,
         bytes memory payload_
     ) private {
         ISocket(socket).outbound{value: msg.value}(
             targetChain_,
             msgGasLimit_,
+            extraParams_,
             payload_
         );
     }
@@ -100,7 +106,7 @@ contract Counter is IPlug {
 
     // settings
     function setSocketConfig(
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         address remotePlug_,
         address switchboard_
     ) external onlyOwner {
@@ -114,5 +120,19 @@ contract Counter is IPlug {
 
     function setupComplete() external {
         owner = address(0);
+    }
+
+    /**
+     * @notice Rescues funds from a contract that has lost access to them.
+     * @param token_ The address of the token contract.
+     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param amount_ The amount of tokens to be rescued.
+     */
+    function rescueFunds(
+        address token_,
+        address userAddress_,
+        uint256 amount_
+    ) external onlyOwner {
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

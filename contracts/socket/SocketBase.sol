@@ -2,9 +2,6 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/IHasher.sol";
-import "../interfaces/ITransmitManager.sol";
-import "../interfaces/IExecutionManager.sol";
-
 import "./SocketConfig.sol";
 
 /**
@@ -18,20 +15,23 @@ abstract contract SocketBase is SocketConfig {
 
     uint32 public immutable chainSlug;
     // incrementing nonce, should be handled in next socket version.
-    uint224 public messageCount;
+    uint64 public messageCount;
+
+    bytes32 public immutable version;
 
     /**
      * @dev Constructs a new Socket contract instance.
      * @param chainSlug_ The chain slug of the contract.
      */
-    constructor(uint32 chainSlug_) {
+    constructor(uint32 chainSlug_, string memory version_) {
         chainSlug = chainSlug_;
+        version = keccak256(bytes(version_));
     }
 
     /**
-     * @dev An error that is thrown when an invalid signer tries to attest.
+     * @dev An error that is thrown when an invalid signer tries to seal or propose.
      */
-    error InvalidAttester();
+    error InvalidTransmitter();
 
     /**
      * @notice An event that is emitted when the hasher is updated.

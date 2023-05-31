@@ -1,25 +1,24 @@
-import SocketABI from "@socket.tech/dl-core/artifacts/abi/Socket.json";
-import TransmitManagerABI from "@socket.tech/dl-core/artifacts/abi/TransmitManager.json";
-import CapacitorFactoryABI from "@socket.tech/dl-core/artifacts/abi/CapacitorFactory.json";
-import ExecutionManagerABI from "@socket.tech/dl-core/artifacts/abi/ExecutionManager.json";
-import GasPriceOracleABI from "@socket.tech/dl-core/artifacts/abi/GasPriceOracle.json";
-import DecapacitorABI from "@socket.tech/dl-core/artifacts/abi/IDecapacitor.json";
-import CapacitorABI from "@socket.tech/dl-core/artifacts/abi/ICapacitor.json";
-import FastSwitchboard from "@socket.tech/dl-core/artifacts/abi/FastSwitchboard.json";
-import OptimisticSwitchboard from "@socket.tech/dl-core/artifacts/abi/OptimisticSwitchboard.json";
-import NativeSwitchboard from "@socket.tech/dl-core/artifacts/abi/ArbitrumL1Switchboard.json";
-import AccessControlExtended from "@socket.tech/dl-core/artifacts/abi/AccessControlExtended.json";
+import Socket from "../../../out/Socket.sol/Socket.json";
+import TransmitManager from "../../../out/TransmitManager.sol/TransmitManager.json";
+import CapacitorFactory from "../../../out/CapacitorFactory.sol/CapacitorFactory.json";
+import ExecutionManager from "../../../out/ExecutionManager.sol/ExecutionManager.json";
+import Decapacitor from "../../../out/IDecapacitor.sol/IDecapacitor.json";
+import Capacitor from "../../../out/ICapacitor.sol/ICapacitor.json";
+import FastSwitchboard from "../../../out/FastSwitchboard.sol/FastSwitchboard.json";
+import OptimisticSwitchboard from "../../../out/OptimisticSwitchboard.sol/OptimisticSwitchboard.json";
+import NativeSwitchboard from "../../../out/ArbitrumL1Switchboard.sol/ArbitrumL1Switchboard.json";
+import AccessControlExtended from "../../../out/AccessControlExtended.sol/AccessControlExtended.json";
 
 export const getABI = {
-  TransmitManager: TransmitManagerABI,
-  CapacitorFactory: CapacitorFactoryABI,
-  ExecutionManager: ExecutionManagerABI,
-  GasPriceOracle: GasPriceOracleABI,
-  Decapacitor: DecapacitorABI,
-  Capacitor: CapacitorABI,
-  Socket: SocketABI,
-  FastSwitchboard,
-  OptimisticSwitchboard,
-  NativeSwitchboard,
-  AccessControlExtended,
+  TransmitManager: TransmitManager.abi,
+  CapacitorFactory: CapacitorFactory.abi,
+  ExecutionManager: ExecutionManager.abi,
+  OpenExecutionManager: ExecutionManager.abi,
+  Decapacitor: Decapacitor.abi,
+  Capacitor: Capacitor.abi,
+  Socket: Socket.abi,
+  FastSwitchboard: FastSwitchboard.abi,
+  OptimisticSwitchboard: OptimisticSwitchboard.abi,
+  NativeSwitchboard: NativeSwitchboard.abi,
+  AccessControlExtended: AccessControlExtended.abi,
 };

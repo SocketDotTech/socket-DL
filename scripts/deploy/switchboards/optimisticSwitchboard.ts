@@ -4,7 +4,7 @@ import { timeout } from "../../constants";
 export const optimisticSwitchboard = (
   network: string,
   socketAddress: string,
-  oracleAddress: string,
+  sigVerifierAddress: string,
   signerAddress: string
 ) => {
   return {
@@ -12,9 +12,9 @@ export const optimisticSwitchboard = (
     args: [
       signerAddress,
       socketAddress,
-      oracleAddress,
       chainKeyToSlug[network],
       timeout[network],
+      sigVerifierAddress,
     ],
     path: "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
   };

@@ -11,15 +11,19 @@ import "../contracts/switchboard/default-switchboards/FastSwitchboard.sol";
 import "../contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol";
 
 import "../contracts/TransmitManager.sol";
-import "../contracts/GasPriceOracle.sol";
 import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
-import {GOVERNANCE_ROLE, GAS_LIMIT_UPDATER_ROLE, TRIP_ROLE, UNTRIP_ROLE} from "../contracts/utils/AccessRoles.sol";
+import "../contracts/utils/AccessRoles.sol";
+import "../contracts/utils/SigIdentifiers.sol";
 
 contract Setup is Test {
     uint256 internal c = 1;
     address immutable _plugOwner = address(uint160(c++));
     address immutable _raju = address(uint160(c++));
+
+    string version = "TEST_NET";
+
+    bytes32 versionHash = keccak256(bytes(version));
 
     uint256 immutable executorPrivateKey = c++;
     uint256 immutable _socketOwnerPrivateKey = c++;
@@ -42,15 +46,17 @@ contract Setup is Test {
     uint256 internal _slowCapacitorWaitTime = 300;
     uint256 internal _msgGasLimit = 30548;
     uint256 internal _sealGasLimit = 150000;
-    uint256 internal _proposeGasLimit = 150000;
-    uint256 internal _attestGasLimit = 150000;
+    uint256 internal _transmissionFees = 350000000000;
+    uint256 internal _executionFees = 110000000000;
+    uint256 internal _msgValueMaxThreshold = 1000;
+    uint256 internal _relativeNativeTokenPrice = 1000 * 1e18;
+
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
-    uint256 gasPriceOracleNonce;
 
     struct SocketConfigContext {
-        uint256 siblingChainSlug;
+        uint32 siblingChainSlug;
         uint256 switchboardNonce;
         ICapacitor capacitor__;
         IDecapacitor decapacitor__;
@@ -60,12 +66,12 @@ contract Setup is Test {
     struct ChainContext {
         uint32 chainSlug;
         uint256 transmitterNonce;
+        uint256 executorNonce;
         Socket socket__;
         Hasher hasher__;
         SignatureVerifier sigVerifier__;
         CapacitorFactory capacitorFactory__;
         TransmitManager transmitManager__;
-        GasPriceOracle gasPriceOracle__;
         ExecutionManager executionManager__;
         SocketConfigContext[] configs__;
     }
@@ -111,7 +117,7 @@ contract Setup is Test {
 
     function _deployContractsOnSingleChain(
         ChainContext storage cc_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256[] memory transmitterPrivateKeys_
     ) internal {
         // deploy socket setup
@@ -119,30 +125,29 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
 
-        cc_.transmitManager__.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
+        //grant FeesUpdater Role
+        cc_.transmitManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
             remoteChainSlug_,
             _socketOwner
         );
 
-        vm.stopPrank();
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                "PROPOSE_GAS_LIMIT_UPDATE",
-                cc_.chainSlug,
-                remoteChainSlug_,
-                cc_.transmitterNonce,
-                _proposeGasLimit
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-        cc_.transmitManager__.setProposeGasLimit(
-            cc_.transmitterNonce++,
+        //grant FeesUpdater Role
+        cc_.executionManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
             remoteChainSlug_,
-            _proposeGasLimit,
-            sig
+            _socketOwner
         );
+
+        _setTransmissionFees(cc_, remoteChainSlug_, _transmissionFees);
+        _setExecutionFees(cc_, remoteChainSlug_, _executionFees);
+        _setMsgValueMaxThreshold(cc_, remoteChainSlug_, _msgValueMaxThreshold);
+        _setRelativeNativeTokenPrice(
+            cc_,
+            remoteChainSlug_,
+            _relativeNativeTokenPrice
+        );
+        vm.stopPrank();
 
         // deploy default configs: fast, slow
         SocketConfigContext memory scc_ = _addFastSwitchboard(
@@ -163,54 +168,173 @@ contract Setup is Test {
         _addTransmitters(transmitterPrivateKeys_, cc_, cc_.chainSlug);
     }
 
+    function _setTransmissionFees(
+        ChainContext storage cc_,
+        uint32 remoteChainSlug_,
+        uint256 transmissionFees_
+    ) internal {
+        //set TransmissionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                address(cc_.transmitManager__),
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.transmitterNonce,
+                transmissionFees_
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+        cc_.transmitManager__.setTransmissionFees(
+            cc_.transmitterNonce++,
+            uint32(remoteChainSlug_),
+            transmissionFees_,
+            feesUpdateSignature
+        );
+    }
+
+    function _setExecutionFees(
+        ChainContext storage cc_,
+        uint32 remoteChainSlug_,
+        uint256 executionFees_
+    ) internal {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                address(cc_.executionManager__),
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.executorNonce,
+                executionFees_
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        cc_.executionManager__.setExecutionFees(
+            cc_.executorNonce++,
+            uint32(remoteChainSlug_),
+            executionFees_,
+            feesUpdateSignature
+        );
+    }
+
+    function _setMsgValueMaxThreshold(
+        ChainContext storage cc_,
+        uint32 remoteChainSlug_,
+        uint256 threshold
+    ) internal {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                MSG_VALUE_MAX_THRESHOLD_SIG_IDENTIFIER,
+                address(cc_.executionManager__),
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.executorNonce,
+                threshold
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        cc_.executionManager__.setMsgValueMaxThreshold(
+            cc_.executorNonce++,
+            uint32(remoteChainSlug_),
+            threshold,
+            feesUpdateSignature
+        );
+    }
+
+    function _setMsgValueMinThreshold(
+        ChainContext storage cc_,
+        uint32 remoteChainSlug_,
+        uint256 threshold
+    ) internal {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER,
+                address(cc_.executionManager__),
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.executorNonce,
+                threshold
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        cc_.executionManager__.setMsgValueMinThreshold(
+            cc_.executorNonce++,
+            uint32(remoteChainSlug_),
+            threshold,
+            feesUpdateSignature
+        );
+    }
+
+    function _setRelativeNativeTokenPrice(
+        ChainContext storage cc_,
+        uint32 remoteChainSlug_,
+        uint256 relativePrice
+    ) internal {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENTIFIER,
+                address(cc_.executionManager__),
+                cc_.chainSlug,
+                remoteChainSlug_,
+                cc_.executorNonce,
+                relativePrice
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        cc_.executionManager__.setRelativeNativeTokenPrice(
+            cc_.executorNonce++,
+            uint32(remoteChainSlug_),
+            relativePrice,
+            feesUpdateSignature
+        );
+    }
+
     function _addOptimisticSwitchboard(
         ChainContext storage cc_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         OptimisticSwitchboard optimisticSwitchboard = new OptimisticSwitchboard(
             _socketOwner,
             address(cc_.socket__),
-            address(cc_.gasPriceOracle__),
             cc_.chainSlug,
-            _timeoutInSeconds
+            _timeoutInSeconds,
+            cc_.sigVerifier__
         );
 
         uint256 nonce = 0;
-        vm.startPrank(_socketOwner);
+        hoax(_socketOwner);
+        optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
-        optimisticSwitchboard.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
-            remoteChainSlug_,
-            _socketOwner
-        );
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                "EXECUTION_OVERHEAD_UPDATE",
-                nonce,
-                cc_.chainSlug,
-                remoteChainSlug_,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        optimisticSwitchboard.setExecutionOverhead(
-            nonce++,
-            remoteChainSlug_,
-            _executionOverhead,
-            sig
-        );
-        optimisticSwitchboard.grantRole(
-            "WATCHER_ROLE",
-            remoteChainSlug_,
-            _watcher
-        );
-
-        vm.stopPrank();
-
-        scc_ = _registerSwitchbaord(
+        scc_ = _registerSwitchboard(
             cc_,
             _socketOwner,
             address(optimisticSwitchboard),
@@ -222,66 +346,24 @@ contract Setup is Test {
 
     function _addFastSwitchboard(
         ChainContext storage cc_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         FastSwitchboard fastSwitchboard = new FastSwitchboard(
             _socketOwner,
             address(cc_.socket__),
-            address(cc_.gasPriceOracle__),
             cc_.chainSlug,
-            _timeoutInSeconds
+            _timeoutInSeconds,
+            cc_.sigVerifier__
         );
         uint256 nonce = 0;
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-        fastSwitchboard.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
-            remoteChainSlug_,
-            _socketOwner
-        );
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
-
         vm.stopPrank();
 
-        bytes32 digest = keccak256(
-            abi.encode(
-                "EXECUTION_OVERHEAD_UPDATE",
-                nonce,
-                cc_.chainSlug,
-                remoteChainSlug_,
-                _executionOverhead
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        fastSwitchboard.setExecutionOverhead(
-            nonce++,
-            remoteChainSlug_,
-            _executionOverhead,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(
-                "ATTEST_GAS_LIMIT_UPDATE",
-                cc_.chainSlug,
-                remoteChainSlug_,
-                nonce,
-                _attestGasLimit
-            )
-        );
-        sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        fastSwitchboard.setAttestGasLimit(
-            nonce++,
-            remoteChainSlug_,
-            _attestGasLimit,
-            sig
-        );
-
-        scc_ = _registerSwitchbaord(
+        scc_ = _registerSwitchboard(
             cc_,
             _socketOwner,
             address(fastSwitchboard),
@@ -297,33 +379,20 @@ contract Setup is Test {
     ) internal {
         vm.startPrank(deployer_);
 
-        cc_.hasher__ = new Hasher();
-        cc_.sigVerifier__ = new SignatureVerifier();
+        cc_.hasher__ = new Hasher(deployer_);
+        cc_.sigVerifier__ = new SignatureVerifier(deployer_);
         cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
-        cc_.gasPriceOracle__ = new GasPriceOracle(deployer_, cc_.chainSlug);
         cc_.executionManager__ = new ExecutionManager(
-            cc_.gasPriceOracle__,
-            deployer_
+            deployer_,
+            cc_.chainSlug,
+            cc_.sigVerifier__
         );
-
-        cc_.gasPriceOracle__.grantRole(GOVERNANCE_ROLE, deployer_);
-        cc_.gasPriceOracle__.grantRole(GAS_LIMIT_UPDATER_ROLE, deployer_);
 
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
-            cc_.gasPriceOracle__,
             deployer_,
-            cc_.chainSlug,
-            _sealGasLimit
+            cc_.chainSlug
         );
-
-        cc_.transmitManager__.grantRole(
-            "GAS_LIMIT_UPDATER_ROLE",
-            cc_.chainSlug,
-            deployer_
-        );
-
-        cc_.gasPriceOracle__.setTransmitManager(cc_.transmitManager__);
 
         cc_.socket__ = new Socket(
             uint32(cc_.chainSlug),
@@ -331,26 +400,28 @@ contract Setup is Test {
             address(cc_.transmitManager__),
             address(cc_.executionManager__),
             address(cc_.capacitorFactory__),
-            deployer_
+            deployer_,
+            version
         );
 
         vm.stopPrank();
     }
 
-    function _registerSwitchbaord(
+    function _registerSwitchboard(
         ChainContext storage cc_,
-        address deployer_,
+        address governance_,
         address switchBoardAddress_,
         uint256 nonce_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
-        vm.startPrank(deployer_);
-        cc_.socket__.registerSwitchBoard(
-            switchBoardAddress_,
-            DEFAULT_BATCH_LENGTH,
+        scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
+
+        hoax(governance_);
+        scc_.switchboard__.registerSiblingSlug(
             uint32(remoteChainSlug_),
-            uint32(capacitorType_)
+            DEFAULT_BATCH_LENGTH,
+            capacitorType_
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
@@ -363,9 +434,6 @@ contract Setup is Test {
             switchBoardAddress_,
             remoteChainSlug_
         );
-        scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
-
-        vm.stopPrank();
     }
 
     function sealAndPropose(
@@ -373,8 +441,8 @@ contract Setup is Test {
     ) internal returns (bytes32 packetId_, bytes32 root_) {
         bytes memory sig_;
         (root_, packetId_, sig_) = _getLatestSignature(
-            _a,
             capacitor,
+            _a.chainSlug,
             _b.chainSlug
         );
 
@@ -385,7 +453,7 @@ contract Setup is Test {
     function _addTransmitters(
         uint256[] memory transmitterPrivateKeys_,
         ChainContext memory cc_,
-        uint256 remoteChainSlug_
+        uint32 remoteChainSlug_
     ) internal {
         vm.startPrank(_socketOwner);
 
@@ -398,8 +466,8 @@ contract Setup is Test {
             // deduce transmitter address from private key
             transmitter = vm.addr(transmitterPrivateKeys_[index]);
             // grant transmitter role
-            cc_.transmitManager__.grantRole(
-                "TRANSMITTER_ROLE",
+            cc_.transmitManager__.grantRoleWithSlug(
+                TRANSMITTER_ROLE,
                 remoteChainSlug_,
                 transmitter
             );
@@ -409,15 +477,15 @@ contract Setup is Test {
     }
 
     function _getLatestSignature(
-        ChainContext storage src_,
         address capacitor_,
-        uint256 remoteChainSlug_
+        uint32 srcChainSlug_,
+        uint32 remoteChainSlug_
     ) internal returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint64 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
-        packetId = _getPackedId(capacitor_, src_.chainSlug, id);
+        packetId = _getPackedId(capacitor_, srcChainSlug_, id);
         bytes32 digest = keccak256(
-            abi.encode(uint32(remoteChainSlug_), packetId, root)
+            abi.encode(versionHash, remoteChainSlug_, packetId, root)
         );
         sig = _createSignature(digest, _transmitterPrivateKey);
     }
@@ -461,10 +529,12 @@ contract Setup is Test {
 
     function _attestOnDst(
         address switchboardAddress,
+        uint32 dstSlug,
         bytes32 packetId_
     ) internal {
-        uint256 srcSlug = uint256(packetId_) >> 224;
-        bytes32 digest = keccak256(abi.encode(srcSlug, packetId_));
+        bytes32 digest = keccak256(
+            abi.encode(switchboardAddress, dstSlug, packetId_)
+        );
 
         // generate attest-signature
         bytes memory attestSignature = _createSignature(
@@ -473,19 +543,15 @@ contract Setup is Test {
         );
 
         // attest with packetId_, srcSlug and signature
-        FastSwitchboard(switchboardAddress).attest(
-            packetId_,
-            srcSlug,
-            attestSignature
-        );
+        FastSwitchboard(switchboardAddress).attest(packetId_, attestSignature);
     }
 
     function _executePayloadOnDstWithExecutor(
         ChainContext storage dst_,
-        address remotePlug_,
         bytes32 packetId_,
         bytes32 msgId_,
         uint256 msgGasLimit_,
+        bytes32 extraParams_,
         uint256 executionFee_,
         bytes32 packedMessage_,
         uint256 executorPrivateKey_,
@@ -496,6 +562,7 @@ contract Setup is Test {
             msgId_,
             executionFee_,
             msgGasLimit_,
+            extraParams_,
             payload_,
             proof_
         );
@@ -504,16 +571,26 @@ contract Setup is Test {
             packedMessage_,
             executorPrivateKey_
         );
-        dst_.socket__.execute(packetId_, remotePlug_, msgDetails, sig);
+
+        (uint8 paramType, uint224 paramValue) = _decodeExtraParams(
+            extraParams_
+        );
+        if (paramType == 1)
+            dst_.socket__.execute{value: paramValue}(
+                packetId_,
+                msgDetails,
+                sig
+            );
+        else dst_.socket__.execute(packetId_, msgDetails, sig);
     }
 
     function _executePayloadOnDst(
         ChainContext storage dst_,
         uint256,
-        address remotePlug_,
         bytes32 packetId_,
         bytes32 msgId_,
         uint256 msgGasLimit_,
+        bytes32 extraParams_,
         uint256 executionFee_,
         bytes32 packedMessage_,
         bytes memory payload_,
@@ -521,10 +598,10 @@ contract Setup is Test {
     ) internal {
         _executePayloadOnDstWithExecutor(
             dst_,
-            remotePlug_,
             packetId_,
             msgId_,
             msgGasLimit_,
+            extraParams_,
             executionFee_,
             packedMessage_,
             executorPrivateKey,
@@ -534,23 +611,37 @@ contract Setup is Test {
     }
 
     function _packMessageId(
-        uint256 srcChainSlug,
-        uint256 nonce
+        uint32 srcChainSlug_,
+        address siblingPlug_,
+        uint256 messageCount_
     ) internal pure returns (bytes32) {
-        return bytes32((srcChainSlug << 224) | nonce);
+        return
+            bytes32(
+                (uint256(srcChainSlug_) << 224) |
+                    (uint256(uint160(siblingPlug_)) << 64) |
+                    messageCount_
+            );
     }
 
     function _getPackedId(
         address capacitorAddr_,
-        uint256 chainSlug_,
+        uint32 chainSlug_,
         uint256 id_
     ) internal pure returns (bytes32) {
         return
             bytes32(
-                (chainSlug_ << 224) |
+                (uint256(chainSlug_) << 224) |
                     (uint256(uint160(capacitorAddr_)) << 64) |
                     id_
             );
+    }
+
+    function _decodeExtraParams(
+        bytes32 extraParams_
+    ) internal pure returns (uint8, uint224) {
+        uint8 paramType = uint8(uint256(extraParams_) >> 224);
+        uint224 paramValue = uint224(uint256(extraParams_));
+        return (paramType, paramValue);
     }
 
     // to ignore this file from coverage

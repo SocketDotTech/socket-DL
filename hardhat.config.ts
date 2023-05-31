@@ -17,7 +17,7 @@ import { resolve } from "path";
 import fs from "fs";
 
 import "./tasks/accounts";
-import { gasPrice, getJsonRpcUrl } from "./scripts/constants/networks";
+import { getJsonRpcUrl } from "./scripts/constants/networks";
 import { ChainKey, chainKeyToSlug } from "./src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
@@ -33,7 +33,6 @@ function getChainConfig(chain: keyof typeof chainKeyToSlug): NetworkUserConfig {
   return {
     accounts: [`0x${privateKey}`],
     chainId: chainKeyToSlug[chain],
-    gasPrice: gasPrice[chain] ? gasPrice[chain] : "auto",
     url: getJsonRpcUrl(chain),
   };
 }
