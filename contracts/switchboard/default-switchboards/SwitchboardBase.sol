@@ -1,41 +1,48 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
+import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
-import "../../interfaces/IGasPriceOracle.sol";
+import "../../interfaces/ISignatureVerifier.sol";
 import "../../utils/AccessControlExtended.sol";
 
-import "../../libraries/SignatureVerifierLib.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
-import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, GAS_LIMIT_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UNTRIP_ROLE, WATCHER_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
-    IGasPriceOracle public gasPriceOracle__;
+    ISignatureVerifier public immutable signatureVerifier__;
+    ISocket public immutable socket__;
 
     bool public tripGlobalFuse;
-    address public socket;
-    uint256 public immutable chainSlug;
+    uint32 public immutable chainSlug;
     uint256 public immutable timeoutInSeconds;
 
-    mapping(uint256 => bool) public isInitialised;
-    mapping(uint256 => uint256) public maxPacketSize;
+    struct Fees {
+        uint256 switchboardFees;
+        uint256 verificationFees;
+    }
 
-    mapping(uint256 => uint256) public executionOverhead;
+    mapping(uint32 => bool) public isInitialised;
+    mapping(uint32 => uint256) public maxPacketLength;
 
     // sourceChain => isPaused
-    mapping(uint256 => bool) public tripSinglePath;
+    mapping(uint32 => bool) public tripSinglePath;
 
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
+
+    // destinationChainSlug => fees-struct with verificationFees and switchboardFees
+    mapping(uint32 => Fees) public fees;
 
     /**
      * @dev Emitted when a path is tripped
      * @param srcChainSlug Chain slug of the source chain
      * @param tripSinglePath New trip status of the path
      */
-    event PathTripped(uint256 srcChainSlug, bool tripSinglePath);
+    event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
     /**
      * @dev Emitted when Switchboard contract is tripped globally
      * @param tripGlobalFuse New trip status of the contract
@@ -46,23 +53,26 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param dstChainSlug Chain slug of the destination chain
      * @param executionOverhead New execution overhead
      */
-    event ExecutionOverheadSet(uint256 dstChainSlug, uint256 executionOverhead);
-    /**
-     * @dev Emitted when gas price oracle is set
-     * @param gasPriceOracle New gas price oracle address
-     */
-    event GasPriceOracleSet(address gasPriceOracle);
+    event ExecutionOverheadSet(uint32 dstChainSlug, uint256 executionOverhead);
+
     /**
      * @dev Emitted when a capacitor is registered
      * @param siblingChainSlug Chain slug of the sibling chain
      * @param capacitor Address of the capacitor
-     * @param maxPacketSize Maximum number of messages in one packet
+     * @param maxPacketLength Maximum number of messages in one packet
      */
-    event CapacitorRegistered(
-        uint256 siblingChainSlug,
+    event SwitchBoardRegistered(
+        uint32 siblingChainSlug,
         address capacitor,
-        uint256 maxPacketSize
+        uint256 maxPacketLength
     );
+
+    /**
+     * @dev Emitted when a fees is set for switchboard
+     * @param siblingChainSlug Chain slug of the sibling chain
+     * @param fees fees struct with verificationFees and switchboardFees
+     */
+    event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
 
     error AlreadyInitialised();
     error InvalidNonce();
@@ -70,21 +80,20 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     /**
      * @dev Constructor of SwitchboardBase
-     * @param gasPriceOracle_ Address of the gas price oracle
      * @param socket_ Address of the socket contract
      * @param chainSlug_ Chain slug of the contract
      * @param timeoutInSeconds_ Timeout duration of the transactions
      */
     constructor(
-        address gasPriceOracle_,
         address socket_,
-        uint256 chainSlug_,
-        uint256 timeoutInSeconds_
+        uint32 chainSlug_,
+        uint256 timeoutInSeconds_,
+        ISignatureVerifier signatureVerifier_
     ) {
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
-        socket = socket_;
+        socket__ = ISocket(socket_);
         chainSlug = chainSlug_;
         timeoutInSeconds = timeoutInSeconds_;
+        signatureVerifier__ = signatureVerifier_;
     }
 
     /**
@@ -98,45 +107,33 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     function getMinFees(
         uint32 dstChainSlug_
     ) external view override returns (uint256, uint256) {
-        return _calculateMinFees(dstChainSlug_);
-    }
-
-    function _calculateMinFees(
-        uint32 dstChainSlug_
-    ) internal view returns (uint256 switchboardFee, uint256 verificationFee) {
-        uint256 dstRelativeGasPrice = gasPriceOracle__.relativeGasPrice(
-            dstChainSlug_
+        return (
+            fees[dstChainSlug_].switchboardFees,
+            fees[dstChainSlug_].verificationFees
         );
-
-        switchboardFee =
-            _getMinSwitchboardFees(dstChainSlug_, dstRelativeGasPrice) /
-            maxPacketSize[dstChainSlug_];
-        verificationFee =
-            executionOverhead[dstChainSlug_] *
-            dstRelativeGasPrice;
     }
 
-    function _getMinSwitchboardFees(
-        uint256 dstChainSlug_,
-        uint256 dstRelativeGasPrice_
-    ) internal view virtual returns (uint256);
-
-    /**
-     * @notice set capacitor address and packet size
-     * @param capacitor_ capacitor address
-     * @param maxPacketSize_ max messages allowed in one packet
-     */
-    function registerCapacitor(
-        uint256 siblingChainSlug_,
-        address capacitor_,
-        uint256 maxPacketSize_
-    ) external override {
-        if (msg.sender != socket) revert OnlySocket();
+    /// @inheritdoc ISwitchboard
+    function registerSiblingSlug(
+        uint32 siblingChainSlug_,
+        uint256 maxPacketLength_,
+        uint256 capacitorType_
+    ) external override onlyRole(GOVERNANCE_ROLE) {
         if (isInitialised[siblingChainSlug_]) revert AlreadyInitialised();
 
+        address capacitor = socket__.registerSwitchBoard(
+            siblingChainSlug_,
+            maxPacketLength_,
+            capacitorType_
+        );
+
         isInitialised[siblingChainSlug_] = true;
-        maxPacketSize[siblingChainSlug_] = maxPacketSize_;
-        emit CapacitorRegistered(siblingChainSlug_, capacitor_, maxPacketSize_);
+        maxPacketLength[siblingChainSlug_] = maxPacketLength_;
+        emit SwitchBoardRegistered(
+            siblingChainSlug_,
+            capacitor,
+            maxPacketLength_
+        );
     }
 
     /**
@@ -144,19 +141,25 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     function tripPath(
         uint256 nonce_,
-        uint256 srcChainSlug_,
+        uint32 srcChainSlug_,
         bytes memory signature_
     ) external {
-        address watcher = SignatureVerifierLib.recoverSignerFromDigest(
+        address watcher = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end
             keccak256(
-                abi.encode("TRIP_PATH", srcChainSlug_, chainSlug, nonce_, true)
+                abi.encode(
+                    TRIP_PATH_SIG_IDENTIFIER,
+                    address(this),
+                    srcChainSlug_,
+                    chainSlug,
+                    nonce_,
+                    true
+                )
             ),
             signature_
         );
 
-        if (!_hasRole("WATCHER_ROLE", srcChainSlug_, watcher))
-            revert NoPermit("WATCHER_ROLE");
+        _checkRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher);
         uint256 nonce = nextNonce[watcher]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -169,13 +172,21 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @notice pause execution
      */
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
-        address tripper = SignatureVerifierLib.recoverSignerFromDigest(
+        address tripper = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end
-            keccak256(abi.encode("TRIP", chainSlug, nonce_, true)),
+            keccak256(
+                abi.encode(
+                    TRIP_GLOBAL_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
+                    nonce_,
+                    true
+                )
+            ),
             signature_
         );
 
-        if (!_hasRole("TRIP_ROLE", tripper)) revert NoPermit("TRIP_ROLE");
+        _checkRole(TRIP_ROLE, tripper);
         uint256 nonce = nextNonce[tripper]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -188,14 +199,15 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     function untripPath(
         uint256 nonce_,
-        uint256 srcChainSlug_,
+        uint32 srcChainSlug_,
         bytes memory signature_
     ) external {
-        address untripper = SignatureVerifierLib.recoverSignerFromDigest(
+        address untripper = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
-                    "UNTRIP_PATH",
+                    UNTRIP_PATH_SIG_IDENTIFIER,
+                    address(this),
                     chainSlug,
                     srcChainSlug_,
                     nonce_,
@@ -205,7 +217,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        if (!_hasRole("UNTRIP_ROLE", untripper)) revert NoPermit("UNTRIP_ROLE");
+        _checkRole(UNTRIP_ROLE, untripper);
         uint256 nonce = nextNonce[untripper]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -217,13 +229,21 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @notice unpause execution
      */
     function untrip(uint256 nonce_, bytes memory signature_) external {
-        address untripper = SignatureVerifierLib.recoverSignerFromDigest(
+        address untripper = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end
-            keccak256(abi.encode("UNTRIP", chainSlug, nonce_, false)),
+            keccak256(
+                abi.encode(
+                    UNTRIP_GLOBAL_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
+                    nonce_,
+                    false
+                )
+            ),
             signature_
         );
 
-        if (!_hasRole("UNTRIP_ROLE", untripper)) revert NoPermit("UNTRIP_ROLE");
+        _checkRole(UNTRIP_ROLE, untripper);
         uint256 nonce = nextNonce[untripper]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
@@ -231,47 +251,41 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         emit SwitchboardTripped(false);
     }
 
-    /**
-     * @notice updates execution overhead
-     * @param executionOverhead_ new execution overhead cost
-     */
-    function setExecutionOverhead(
+    function setFees(
         uint256 nonce_,
-        uint256 dstChainSlug_,
-        uint256 executionOverhead_,
-        bytes memory signature_
-    ) external {
-        address gasLimitUpdater = SignatureVerifierLib.recoverSignerFromDigest(
+        uint32 dstChainSlug_,
+        uint256 switchboardFees_,
+        uint256 verificationFees_,
+        bytes calldata signature_
+    ) external override {
+        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
             keccak256(
                 abi.encode(
-                    "EXECUTION_OVERHEAD_UPDATE",
-                    nonce_,
+                    FEES_UPDATE_SIG_IDENTIFIER,
+                    address(this),
                     chainSlug,
                     dstChainSlug_,
-                    executionOverhead_
+                    nonce_,
+                    switchboardFees_,
+                    verificationFees_
                 )
             ),
             signature_
         );
 
-        if (!_hasRole("GAS_LIMIT_UPDATER_ROLE", dstChainSlug_, gasLimitUpdater))
-            revert NoPermit("GAS_LIMIT_UPDATER_ROLE");
-        uint256 nonce = nextNonce[gasLimitUpdater]++;
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        uint256 nonce = nextNonce[feesUpdater]++;
         if (nonce_ != nonce) revert InvalidNonce();
 
-        executionOverhead[dstChainSlug_] = executionOverhead_;
-        emit ExecutionOverheadSet(dstChainSlug_, executionOverhead_);
-    }
+        Fees memory feesObject = Fees({
+            switchboardFees: switchboardFees_,
+            verificationFees: verificationFees_
+        });
 
-    /**
-     * @notice updates gasPriceOracle_ address
-     * @param gasPriceOracle_ new gasPriceOracle_
-     */
-    function setGasPriceOracle(
-        address gasPriceOracle_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        gasPriceOracle__ = IGasPriceOracle(gasPriceOracle_);
-        emit GasPriceOracleSet(gasPriceOracle_);
+        fees[dstChainSlug_] = feesObject;
+
+        emit SwitchboardFeesSet(dstChainSlug_, feesObject);
     }
 
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {

@@ -12,10 +12,11 @@ import {
   DeploymentMode,
 } from "../../../src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { overrides } from "../config";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
-export const deployedAddressPath = (mode) =>
+export const deployedAddressPath = (mode: DeploymentMode) =>
   deploymentsPath + `${mode}_addresses.json`;
 
 export const getRoleHash = (role: string) =>
@@ -24,10 +25,56 @@ export const getRoleHash = (role: string) =>
 export const getChainRoleHash = (role: string, chainSlug: number) =>
   ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["string", "uint256"],
-      [role, chainSlug]
+      ["bytes32", "uint32"],
+      [getRoleHash(role), chainSlug]
     )
   );
+
+export interface DeployParams {
+  addresses: ChainSocketAddresses;
+  mode: DeploymentMode;
+  signer: SignerWithAddress | Wallet;
+  currentChainSlug: number;
+}
+
+export const getOrDeploy = async (
+  contractName: string,
+  path: string,
+  args: any[],
+  deployUtils: DeployParams
+): Promise<Contract> => {
+  if (!deployUtils || !deployUtils.addresses)
+    throw new Error("No addresses found");
+
+  let contract: Contract;
+  if (!deployUtils.addresses[contractName]) {
+    contract = await deployContractWithArgs(
+      contractName,
+      args,
+      deployUtils.signer
+    );
+
+    console.log(
+      `${contractName} deployed on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
+    );
+
+    await storeVerificationParams(
+      [contract.address, contractName, path, args],
+      deployUtils.currentChainSlug,
+      deployUtils.mode
+    );
+  } else {
+    contract = await getInstance(
+      contractName,
+      deployUtils.addresses[contractName]
+    );
+    console.log(
+      `${contractName} found on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
+    );
+  }
+
+  return contract;
+};
 
 export async function deployContractWithArgs(
   contractName: string,
@@ -38,8 +85,11 @@ export async function deployContractWithArgs(
     const Contract: ContractFactory = await ethers.getContractFactory(
       contractName
     );
-
-    const contract: Contract = await Contract.connect(signer).deploy(...args);
+    // gasLimit is set to undefined to not use the value set in overrides
+    const contract: Contract = await Contract.connect(signer).deploy(...args, {
+      ...overrides[await signer.getChainId()],
+      gasLimit: undefined,
+    });
     await contract.deployed();
     return contract;
   } catch (error) {
@@ -141,8 +191,8 @@ export const storeVerificationParams = async (
 
   if (!verificationDetails[chainSlug]) verificationDetails[chainSlug] = [];
   verificationDetails[chainSlug] = [
+    verificationDetail,
     ...verificationDetails[chainSlug],
-    ...verificationDetail,
   ];
 
   fs.writeFileSync(
@@ -177,6 +227,17 @@ export const getRelayUrl = async (mode: DeploymentMode) => {
       return process.env.RELAYER_URL_PROD;
     default:
       return process.env.RELAYER_URL_DEV;
+  }
+};
+
+export const getRelayAPIKEY = (mode: DeploymentMode) => {
+  switch (mode) {
+    case DeploymentMode.SURGE:
+      return process.env.RELAYER_API_KEY_SURGE;
+    case DeploymentMode.PROD:
+      return process.env.RELAYER_API_KEY_PROD;
+    default:
+      return process.env.RELAYER_API_KEY_DEV;
   }
 };
 

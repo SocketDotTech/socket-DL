@@ -1,15 +1,12 @@
 import { chainKeyToSlug } from "../../../src";
 import { bridgeConsts } from "../../constants";
 
-const executionOverhead = 300000;
-const initiateGasLimit = 300000;
-const confirmGasLimit = 300000;
 const receiveGasLimit = 300000;
 
 export const optimismSwitchboard = (
   network: string,
   socketAddress: string,
-  oracleAddress: string,
+  sigVerifierAddress: string,
   signerAddress: string
 ) => {
   let crossDomainMessengerAddress: string =
@@ -24,13 +21,10 @@ export const optimismSwitchboard = (
     args: [
       chainKeyToSlug[network],
       receiveGasLimit,
-      confirmGasLimit,
-      initiateGasLimit,
-      executionOverhead,
       signerAddress,
       socketAddress,
-      oracleAddress,
       bridgeConsts.crossDomainMessenger[network],
+      sigVerifierAddress,
     ],
     path: "contracts/switchboard/native/OptimismSwitchboard.sol",
   };

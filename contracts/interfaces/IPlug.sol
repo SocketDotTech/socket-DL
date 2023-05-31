@@ -13,7 +13,7 @@ interface IPlug {
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function inbound(
-        uint256 srcChainSlug_,
+        uint32 srcChainSlug_,
         bytes calldata payload_
     ) external payable;
 }

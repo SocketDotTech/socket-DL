@@ -2,11 +2,6 @@ import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
 import {
-  attestGasLimit,
-  executionOverhead,
-  proposeGasLimit,
-} from "../constants";
-import {
   ChainAddresses,
   ChainSocketAddresses,
   Configs,
@@ -14,9 +9,6 @@ import {
   chainKeyToSlug,
 } from "../../src/types";
 import { getAddresses } from "../deploy/utils";
-import { setAttestGasLimit } from "./set-attest-gaslimit";
-import { setExecutionOverhead } from "./set-execution-overhead";
-import { setProposeGasLimit } from "./set-propose-gaslimit";
 import { mode } from "../deploy/config";
 
 export const setLimitsForAChainSlug = async (
@@ -59,82 +51,6 @@ export const setLimitsForAChainSlug = async (
 
         const chainSlugCode = "optimism-goerli";
         // networkToChainSlug[dstChainId]
-
-        //lookup for proposeGasLimit for the chainSlugCode
-        const proposeGasLimitValue = proposeGasLimit[chainSlugCode];
-
-        const isProposeUpdateSuccessful = await setProposeGasLimit(
-          chainId,
-          dstChainId,
-          transmitManagerAddress,
-          proposeGasLimitValue
-        );
-
-        if (isProposeUpdateSuccessful) {
-          console.log(
-            `TransmitManager - Successfully updated proposeLimit: ${proposeGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
-          );
-        } else {
-          throw new Error(
-            `TransmitManager - Failed to update proposeLimit: ${proposeGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
-          );
-        }
-
-        if (chainAddresses.FAST) {
-          const config: Configs = chainAddresses.FAST as Configs;
-          const switchboardAddress = config.switchboard as string;
-          console.log(`FAST Switchboard address is: ${config.switchboard}`);
-
-          //lookup for AttestGasLimit for the chainSlugCode
-          const attestGasLimitValue = attestGasLimit[chainSlugCode];
-
-          const isAttestUpdateSuccessful = await setAttestGasLimit(
-            chainId,
-            dstChainId,
-            switchboardAddress,
-            attestGasLimitValue
-          );
-
-          console.log(
-            `FAST-Switchboard Successfully updated attestGasLimit: ${attestGasLimitValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
-          );
-
-          //lookup for executionOverhead for the chainSlugCode
-          const executionOverheadValue = executionOverhead[chainSlugCode];
-
-          await setExecutionOverhead(
-            chainId,
-            dstChainId,
-            switchboardAddress,
-            executionOverheadValue
-          );
-
-          console.log(
-            `FAST-Switchboard Successfully updated executionOverhead: ${executionOverheadValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
-          );
-        }
-
-        if (chainAddresses.OPTIMISTIC) {
-          const config: Configs = chainAddresses.OPTIMISTIC as Configs;
-          const switchboardAddress = config.switchboard as string;
-          console.log(
-            `Optimistic Switchboard address is: ${config.switchboard}`
-          );
-
-          //lookup for executionOverhead for the chainSlugCode
-          const executionOverheadValue = executionOverhead[chainSlugCode];
-
-          await setExecutionOverhead(
-            chainId,
-            dstChainId,
-            switchboardAddress,
-            executionOverheadValue
-          );
-
-          console.log(
-            `OPTIMISTIC-Switchboard Successfully updated executionOverhead: ${executionOverheadValue} for chainId: ${chainId} and dstChainId: ${dstChainId}`
-          );
-        }
       }
 
       console.log(`-------------------------------------\n\n`);

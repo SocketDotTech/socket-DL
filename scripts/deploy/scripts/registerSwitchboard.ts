@@ -3,6 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { createObj, getInstance } from "../utils";
 import { ChainSlug, ChainSocketAddresses } from "../../../src";
+import { overrides } from "../config";
 
 export default async function registerSwitchBoard(
   switchBoardAddress: string,
@@ -17,22 +18,25 @@ export default async function registerSwitchBoard(
     const socket = (await getInstance("Socket", config["Socket"])).connect(
       signer
     );
+
+    // used fast switchboard here as all have same function signature
+    const switchboard = (
+      await getInstance("FastSwitchboard", switchBoardAddress)
+    ).connect(signer);
+
     let capacitor = await socket.capacitors__(
       switchBoardAddress,
       remoteChainSlug
     );
 
     if (capacitor === constants.AddressZero) {
-      const registerTx = await socket
+      const registerTx = await switchboard
         .connect(signer)
-        .registerSwitchBoard(
-          switchBoardAddress,
-          maxPacketLength,
-          remoteChainSlug,
-          capacitorType
-        );
+        .registerSiblingSlug(remoteChainSlug, maxPacketLength, capacitorType, {
+          ...overrides[await signer.getChainId()],
+        });
       console.log(
-        `Registering Switchboard ${switchBoardAddress}: ${registerTx.hash}`
+        `Registering Switchboard remoteChainSlug - ${remoteChainSlug} ${switchBoardAddress}: ${registerTx.hash}`
       );
       await registerTx.wait();
     }

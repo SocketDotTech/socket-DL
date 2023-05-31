@@ -2,6 +2,7 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/IDecapacitor.sol";
+import "../interfaces/IExecutionManager.sol";
 import "../interfaces/IPlug.sol";
 
 import "./SocketBase.sol";
@@ -17,9 +18,23 @@ import "./SocketBase.sol";
  */
 abstract contract SocketDst is SocketBase {
     /*
-     * @dev Error emitted when a message has already been attested
+     * @dev Error emitted when a packet has already been proposed
      */
-    error AlreadyAttested();
+    error AlreadyProposed();
+
+    /*
+     * @dev Error emitted when a packet has not been proposed
+     */
+    error PacketNotProposed();
+    /*
+     * @dev Error emitted when a packet root is invalid
+     */
+    error InvalidPacketRoot();
+    /*
+     * @dev Error emitted when a packet id is invalid
+     */
+    error InvalidPacketId();
+
     /**
      * @dev Error emitted when proof is invalid
      */
@@ -28,6 +43,7 @@ abstract contract SocketDst is SocketBase {
      * @dev Error emitted when a retry is invalid
      */
     error InvalidRetry();
+
     /**
      * @dev Error emitted when a message has already been executed
      */
@@ -40,6 +56,10 @@ abstract contract SocketDst is SocketBase {
      * @dev Error emitted when verification fails
      */
     error VerificationFailed();
+    /**
+     * @dev Error emitted when source slugs deduced from packet id and msg id don't match
+     */
+    error ErrInSourceValidation();
 
     /**
      * @dev msgId => message status mapping
@@ -82,16 +102,17 @@ abstract contract SocketDst is SocketBase {
         bytes32 root_,
         bytes calldata signature_
     ) external override {
-        if (packetIdRoots[packetId_] != bytes32(0)) revert AlreadyAttested();
+        if (packetId_ == bytes32(0)) revert InvalidPacketId();
+        if (packetIdRoots[packetId_] != bytes32(0)) revert AlreadyProposed();
 
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
                 uint32(_decodeSlug(packetId_)),
-                keccak256(abi.encode(chainSlug, packetId_, root_)),
+                keccak256(abi.encode(version, chainSlug, packetId_, root_)),
                 signature_
             );
 
-        if (!isTransmitter) revert InvalidAttester();
+        if (!isTransmitter) revert InvalidTransmitter();
 
         packetIdRoots[packetId_] = root_;
         rootProposedAt[packetId_] = block.timestamp;
@@ -102,32 +123,34 @@ abstract contract SocketDst is SocketBase {
     /**
      * @notice executes a message, fees will go to recovered executor address
      * @param packetId_ packet id
-     * @param localPlug_ remote plug address
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
         bytes32 packetId_,
-        address localPlug_,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature_
-    ) external override {
+    ) external payable override {
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
 
-        uint256 remoteSlug = _decodeSlug(messageDetails_.msgId);
+        if (packetId_ == bytes32(0)) revert InvalidPacketId();
+        if (packetIdRoots[packetId_] == bytes32(0)) revert PacketNotProposed();
 
-        PlugConfig storage plugConfig = _plugConfigs[localPlug_][remoteSlug];
+        uint32 remoteSlug = _decodeSlug(messageDetails_.msgId);
+        if (_decodeSlug(packetId_) != remoteSlug)
+            revert ErrInSourceValidation();
+
+        address localPlug = _decodePlug(messageDetails_.msgId);
+
+        PlugConfig storage plugConfig = _plugConfigs[localPlug][remoteSlug];
 
         bytes32 packedMessage = hasher__.packMessage(
             remoteSlug,
             plugConfig.siblingPlug,
             chainSlug,
-            localPlug_,
-            messageDetails_.msgId,
-            messageDetails_.msgGasLimit,
-            messageDetails_.executionFee,
-            messageDetails_.payload
+            localPlug,
+            messageDetails_
         );
 
         (address executor, bool isValidExecutor) = executionManager__
@@ -139,25 +162,19 @@ abstract contract SocketDst is SocketBase {
             remoteSlug,
             packedMessage,
             plugConfig,
-            messageDetails_.decapacitorProof
+            messageDetails_.decapacitorProof,
+            messageDetails_.extraParams
         );
-        _execute(
-            executor,
-            messageDetails_.executionFee,
-            localPlug_,
-            remoteSlug,
-            messageDetails_.msgGasLimit,
-            messageDetails_.msgId,
-            messageDetails_.payload
-        );
+        _execute(executor, localPlug, remoteSlug, messageDetails_);
     }
 
     function _verify(
         bytes32 packetId_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         bytes32 packedMessage_,
         PlugConfig storage plugConfig_,
-        bytes memory decapacitorProof_
+        bytes memory decapacitorProof_,
+        bytes32 extraParams_
     ) internal view {
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
@@ -175,42 +192,42 @@ abstract contract SocketDst is SocketBase {
                 decapacitorProof_
             )
         ) revert InvalidProof();
+
+        executionManager__.verifyParams(extraParams_, msg.value);
     }
 
     /**
      * This function assumes localPlug_ will have code while executing. As the message
      * execution failure is not blocking the system, it is not necessary to check if
      * code exists in the given address.
+     * @dev distribution of msg.value in case of inbound failure is to be decided.
      */
     function _execute(
-        address executor,
-        uint256 executionFee,
+        address executor_,
         address localPlug_,
-        uint256 remoteChainSlug_,
-        uint256 msgGasLimit_,
-        bytes32 msgId_,
-        bytes calldata payload_
+        uint32 remoteChainSlug_,
+        ISocket.MessageDetails memory messageDetails_
     ) internal {
         try
-            IPlug(localPlug_).inbound{gas: msgGasLimit_}(
-                remoteChainSlug_,
-                payload_
-            )
+            IPlug(localPlug_).inbound{
+                gas: messageDetails_.msgGasLimit,
+                value: msg.value
+            }(remoteChainSlug_, messageDetails_.payload)
         {
             executionManager__.updateExecutionFees(
-                executor,
-                executionFee,
-                msgId_
+                executor_,
+                messageDetails_.executionFee,
+                messageDetails_.msgId
             );
-            emit ExecutionSuccess(msgId_);
+            emit ExecutionSuccess(messageDetails_.msgId);
         } catch Error(string memory reason) {
             // catch failing revert() and require()
-            messageExecuted[msgId_] = false;
-            emit ExecutionFailed(msgId_, reason);
+            messageExecuted[messageDetails_.msgId] = false;
+            emit ExecutionFailed(messageDetails_.msgId, reason);
         } catch (bytes memory reason) {
             // catch failing assert()
-            messageExecuted[msgId_] = false;
-            emit ExecutionFailedBytes(msgId_, reason);
+            messageExecuted[messageDetails_.msgId] = false;
+            emit ExecutionFailedBytes(messageDetails_.msgId, reason);
         }
     }
 
@@ -224,13 +241,22 @@ abstract contract SocketDst is SocketBase {
     }
 
     /**
-     * @dev Decodes the chain ID from a given packet ID.
-     * @param id_ The ID of the packet to decode the chain ID from.
-     * @return chainSlug_ The chain ID decoded from the packet ID.
+     * @dev Decodes the plug address from a given message id.
+     * @param id_ The ID of the msg to decode the plug from.
+     * @return plug_ The address of sibling plug decoded from the message ID.
+     */
+    function _decodePlug(bytes32 id_) internal pure returns (address plug_) {
+        plug_ = address(uint160(uint256(id_) >> 64));
+    }
+
+    /**
+     * @dev Decodes the chain ID from a given packet/message ID.
+     * @param id_ The ID of the packet/msg to decode the chain slug from.
+     * @return chainSlug_ The chain slug decoded from the packet/message ID.
      */
     function _decodeSlug(
         bytes32 id_
-    ) internal pure returns (uint256 chainSlug_) {
-        chainSlug_ = uint256(id_) >> 224;
+    ) internal pure returns (uint32 chainSlug_) {
+        chainSlug_ = uint32(uint256(id_) >> 224);
     }
 }

@@ -2,26 +2,29 @@
 pragma solidity 0.8.7;
 
 import "../libraries/RescueFundsLib.sol";
-import "../utils/AccessControlExtended.sol";
-import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
+import "../utils/AccessControl.sol";
+
 import {ISocket} from "../interfaces/ISocket.sol";
 import {ITransmitManager} from "../interfaces/ITransmitManager.sol";
+import {IExecutionManager} from "../interfaces/IExecutionManager.sol";
 
 import {FastSwitchboard} from "../switchboard/default-switchboards/FastSwitchboard.sol";
 import {INativeRelay} from "../interfaces/INativeRelay.sol";
+
+import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
 /**
  * @title SocketBatcher
  * @notice A contract that facilitates the batching of packets across chains. It manages requests for sealing, proposing, attesting, and executing packets across multiple chains.
  * It also has functions for setting gas limits, execution overhead, and registering switchboards.
- * @dev This contract uses the AccessControlExtended contract for managing role-based access control.
+ * @dev This contract uses the AccessControl contract for managing role-based access control.
  */
-contract SocketBatcher is AccessControlExtended {
+contract SocketBatcher is AccessControl {
     /*
      * @notice Constructs the SocketBatcher contract and grants the RESCUE_ROLE to the contract deployer.
      * @param owner_ The address of the contract deployer, who will be granted the RESCUE_ROLE.
      */
-    constructor(address owner_) AccessControlExtended(owner_) {
+    constructor(address owner_) AccessControl(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
     }
 
@@ -57,7 +60,6 @@ contract SocketBatcher is AccessControlExtended {
      */
     struct AttestRequest {
         bytes32 packetId;
-        uint256 srcChainSlug;
         bytes signature;
     }
 
@@ -70,7 +72,6 @@ contract SocketBatcher is AccessControlExtended {
      */
     struct ExecuteRequest {
         bytes32 packetId;
-        address localPlug;
         ISocket.MessageDetails messageDetails;
         bytes signature;
     }
@@ -92,62 +93,6 @@ contract SocketBatcher is AccessControlExtended {
     }
 
     /**
-     * @notice A struct representing a request to set the propose gas limit for a chain.
-     * @param nonce The nonce of the request.
-     * @param dstChainId The ID of the destination chain.
-     * @param proposeGasLimit The propose gas limit.
-     * @param signature The signature of the request.
-     */
-    struct SetProposeGasLimitRequest {
-        uint256 nonce;
-        uint256 dstChainId;
-        uint256 proposeGasLimit;
-        bytes signature;
-    }
-
-    /**
-     * @notice A struct representing a request to set the attest gas limit for a chain.
-     * @param nonce The nonce of the request.
-     * @param dstChainId The ID of the destination chain.
-     * @param attestGasLimit The propose gas limit.
-     * @param signature The signature of the request.
-     */
-    struct SetAttestGasLimitRequest {
-        uint256 nonce;
-        uint256 dstChainId;
-        uint256 attestGasLimit;
-        bytes signature;
-    }
-
-    /**
-     * @notice A struct representing a request to set the execution overhead for a chain.
-     * @param nonce The nonce of the request.
-     * @param dstChainId The ID of the destination chain.
-     * @param executionOverhead The propose gas limit.
-     * @param signature The signature of the request.
-     */
-    struct SetExecutionOverheadRequest {
-        uint256 nonce;
-        uint256 dstChainId;
-        uint256 executionOverhead;
-        bytes signature;
-    }
-
-    /**
-     * @notice A struct representing a request to register switchboard for a chain.
-     * @param switchBoardAddress The switchboard address.
-     * @param maxPacketLength The max packet length
-     * @param siblingChainSlug The sibling chain slug
-     * @param capacitorType The capacitor type
-     */
-    struct RegisterSwitchboardRequest {
-        address switchBoardAddress;
-        uint256 maxPacketLength;
-        uint32 siblingChainSlug;
-        uint32 capacitorType;
-    }
-
-    /**
      * @notice A struct representing a request to send proof to polygon root
      * @param proof proof to submit on root tunnel
      */
@@ -156,22 +101,53 @@ contract SocketBatcher is AccessControlExtended {
     }
 
     /**
-     * @notice set propose gas limit for a list of siblings
-     * @param socketAddress_ address of socket
-     * @param registerSwitchboardsRequests_ the list of requests with gas limit details
+     * @notice A struct representing a request set fees in switchboard
+     * @param nonce The nonce of fee setter address
+     * @param dstChainSlug The sibling chain identifier
+     * @param switchboardFees The fees needed by switchboard
+     * @param verificationFees The fees needed for calling allowPacket while executing
+     * @param signature The signature of the packet data.
      */
-    function registerSwitchboards(
-        address socketAddress_,
-        RegisterSwitchboardRequest[] calldata registerSwitchboardsRequests_
+    struct SwitchboardSetFeesRequest {
+        uint256 nonce;
+        uint32 dstChainSlug;
+        uint256 switchboardFees;
+        uint256 verificationFees;
+        bytes signature;
+    }
+
+    /**
+     * @notice A struct representing a request to set fees in execution manager and transmit manager
+     * @param nonce The nonce of fee setter address
+     * @param dstChainSlug The sibling chain identifier
+     * @param fees The total fees needed
+     * @param signature The signature of the packet data.
+     */
+    struct SetFeesRequest {
+        uint256 nonce;
+        uint32 dstChainSlug;
+        uint256 fees;
+        bytes signature;
+        bytes4 functionSelector;
+    }
+
+    /**
+     * @notice sets fees in batch for switchboards
+     * @param contractAddress_ address of contract to set fees
+     * @param switchboardSetFeesRequest_ the list of requests
+     */
+    function setFeesBatch(
+        address contractAddress_,
+        SwitchboardSetFeesRequest[] calldata switchboardSetFeesRequest_
     ) external {
-        uint256 registerSwitchboardsLength = registerSwitchboardsRequests_
-            .length;
-        for (uint256 index = 0; index < registerSwitchboardsLength; ) {
-            ISocket(socketAddress_).registerSwitchBoard(
-                registerSwitchboardsRequests_[index].switchBoardAddress,
-                registerSwitchboardsRequests_[index].maxPacketLength,
-                registerSwitchboardsRequests_[index].siblingChainSlug,
-                registerSwitchboardsRequests_[index].capacitorType
+        uint256 executeRequestslength = switchboardSetFeesRequest_.length;
+        for (uint256 index = 0; index < executeRequestslength; ) {
+            FastSwitchboard(contractAddress_).setFees(
+                switchboardSetFeesRequest_[index].nonce,
+                switchboardSetFeesRequest_[index].dstChainSlug,
+                switchboardSetFeesRequest_[index].switchboardFees,
+                switchboardSetFeesRequest_[index].verificationFees,
+                switchboardSetFeesRequest_[index].signature
             );
             unchecked {
                 ++index;
@@ -180,21 +156,21 @@ contract SocketBatcher is AccessControlExtended {
     }
 
     /**
-     * @notice set propose gas limit for a list of siblings
-     * @param transmitManagerAddress_ address of transmit manager
-     * @param setProposeGasLimitRequests_ the list of requests with gas limit details
+     * @notice sets fees in batch for transmit manager
+     * @param contractAddress_ address of contract to set fees
+     * @param setFeesRequests_ the list of requests
      */
-    function setProposeGasLimits(
-        address transmitManagerAddress_,
-        SetProposeGasLimitRequest[] calldata setProposeGasLimitRequests_
+    function setTransmissionFeesBatch(
+        address contractAddress_,
+        SetFeesRequest[] calldata setFeesRequests_
     ) external {
-        uint256 setProposeGasLimitLength = setProposeGasLimitRequests_.length;
-        for (uint256 index = 0; index < setProposeGasLimitLength; ) {
-            ITransmitManager(transmitManagerAddress_).setProposeGasLimit(
-                setProposeGasLimitRequests_[index].nonce,
-                setProposeGasLimitRequests_[index].dstChainId,
-                setProposeGasLimitRequests_[index].proposeGasLimit,
-                setProposeGasLimitRequests_[index].signature
+        uint256 executeRequestslength = setFeesRequests_.length;
+        for (uint256 index = 0; index < executeRequestslength; ) {
+            ITransmitManager(contractAddress_).setTransmissionFees(
+                setFeesRequests_[index].nonce,
+                setFeesRequests_[index].dstChainSlug,
+                setFeesRequests_[index].fees,
+                setFeesRequests_[index].signature
             );
             unchecked {
                 ++index;
@@ -203,45 +179,60 @@ contract SocketBatcher is AccessControlExtended {
     }
 
     /**
-     * @notice set attest gas limit for a list of siblings
-     * @param fastSwitchboardAddress_ address of fast switchboard
-     * @param setAttestGasLimitRequests_ the list of requests with gas limit details
+     * @notice sets fees in batch for execution manager
+     * @param contractAddress_ address of contract to set fees
+     * @param setFeesRequests_ the list of requests
      */
-    function setAttestGasLimits(
-        address fastSwitchboardAddress_,
-        SetAttestGasLimitRequest[] calldata setAttestGasLimitRequests_
+    function setExecutionFeesBatch(
+        address contractAddress_,
+        SetFeesRequest[] calldata setFeesRequests_
     ) external {
-        uint256 setAttestGasLimitLength = setAttestGasLimitRequests_.length;
-        for (uint256 index = 0; index < setAttestGasLimitLength; ) {
-            FastSwitchboard(fastSwitchboardAddress_).setAttestGasLimit(
-                setAttestGasLimitRequests_[index].nonce,
-                setAttestGasLimitRequests_[index].dstChainId,
-                setAttestGasLimitRequests_[index].attestGasLimit,
-                setAttestGasLimitRequests_[index].signature
-            );
-            unchecked {
-                ++index;
-            }
-        }
-    }
+        uint256 executeRequestslength = setFeesRequests_.length;
+        for (uint256 index = 0; index < executeRequestslength; ) {
+            if (
+                setFeesRequests_[index].functionSelector ==
+                IExecutionManager.setExecutionFees.selector
+            )
+                IExecutionManager(contractAddress_).setExecutionFees(
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    setFeesRequests_[index].fees,
+                    setFeesRequests_[index].signature
+                );
 
-    /**
-     * @notice set execution overhead for a list of siblings
-     * @param switchboardAddress_ address of fast switchboard
-     * @param setExecutionOverheadRequests_ the list of requests with gas limit details
-     */
-    function setExecutionOverheadBatch(
-        address switchboardAddress_,
-        SetExecutionOverheadRequest[] calldata setExecutionOverheadRequests_
-    ) external {
-        uint256 sealRequestslength = setExecutionOverheadRequests_.length;
-        for (uint256 index = 0; index < sealRequestslength; ) {
-            FastSwitchboard(switchboardAddress_).setExecutionOverhead(
-                setExecutionOverheadRequests_[index].nonce,
-                setExecutionOverheadRequests_[index].dstChainId,
-                setExecutionOverheadRequests_[index].executionOverhead,
-                setExecutionOverheadRequests_[index].signature
-            );
+            if (
+                setFeesRequests_[index].functionSelector ==
+                IExecutionManager.setRelativeNativeTokenPrice.selector
+            )
+                IExecutionManager(contractAddress_).setRelativeNativeTokenPrice(
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    setFeesRequests_[index].fees,
+                    setFeesRequests_[index].signature
+                );
+
+            if (
+                setFeesRequests_[index].functionSelector ==
+                IExecutionManager.setMsgValueMaxThreshold.selector
+            )
+                IExecutionManager(contractAddress_).setMsgValueMaxThreshold(
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    setFeesRequests_[index].fees,
+                    setFeesRequests_[index].signature
+                );
+
+            if (
+                setFeesRequests_[index].functionSelector ==
+                IExecutionManager.setMsgValueMinThreshold.selector
+            )
+                IExecutionManager(contractAddress_).setMsgValueMinThreshold(
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    setFeesRequests_[index].fees,
+                    setFeesRequests_[index].signature
+                );
+
             unchecked {
                 ++index;
             }
@@ -305,7 +296,6 @@ contract SocketBatcher is AccessControlExtended {
         for (uint256 index = 0; index < attestRequestslength; ) {
             FastSwitchboard(switchBoardAddress_).attest(
                 attestRequests_[index].packetId,
-                attestRequests_[index].srcChainSlug,
                 attestRequests_[index].signature
             );
             unchecked {
@@ -322,12 +312,16 @@ contract SocketBatcher is AccessControlExtended {
     function executeBatch(
         address socketAddress_,
         ExecuteRequest[] calldata executeRequests_
-    ) external {
+    ) external payable {
         uint256 executeRequestslength = executeRequests_.length;
         for (uint256 index = 0; index < executeRequestslength; ) {
-            ISocket(socketAddress_).execute(
+            bytes32 extraParams = executeRequests_[index]
+                .messageDetails
+                .extraParams;
+            uint256 msgValue = uint256(uint224(uint256(extraParams)));
+
+            ISocket(socketAddress_).execute{value: msgValue}(
                 executeRequests_[index].packetId,
-                executeRequests_[index].localPlug,
                 executeRequests_[index].messageDetails,
                 executeRequests_[index].signature
             );
@@ -364,6 +358,8 @@ contract SocketBatcher is AccessControlExtended {
      */
     function initiateArbitrumNativeBatch(
         address switchboardAddress_,
+        address callValueRefundAddress_,
+        address remoteRefundAddress_,
         ArbitrumNativeInitiatorRequest[]
             calldata arbitrumNativeInitiatorRequests_
     ) external payable {
@@ -380,12 +376,17 @@ contract SocketBatcher is AccessControlExtended {
                 arbitrumNativeInitiatorRequests_[index].packetId,
                 arbitrumNativeInitiatorRequests_[index].maxSubmissionCost,
                 arbitrumNativeInitiatorRequests_[index].maxGas,
-                arbitrumNativeInitiatorRequests_[index].gasPriceBid
+                arbitrumNativeInitiatorRequests_[index].gasPriceBid,
+                callValueRefundAddress_,
+                remoteRefundAddress_
             );
             unchecked {
                 ++index;
             }
         }
+
+        if (address(this).balance > 0)
+            callValueRefundAddress_.call{value: address(this).balance}("");
     }
 
     /**

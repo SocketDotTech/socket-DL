@@ -27,13 +27,15 @@ interface IExecutionManager {
 
     /**
      * @notice Returns the minimum fees required for executing a transaction on the external chain
-     * @param msgGasLimit The gas limit for the transaction
-     * @param dstSlug The destination slug
+     * @param msgGasLimit_ msgGasLimit_
+     * @param siblingChainSlug_ The destination slug
      * @return The minimum fees required for executing the transaction
      */
     function getMinFees(
-        uint256 msgGasLimit,
-        uint32 dstSlug
+        uint256 msgGasLimit_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
+        uint32 siblingChainSlug_
     ) external view returns (uint256);
 
     /**
@@ -47,4 +49,37 @@ interface IExecutionManager {
         uint256 executionFees,
         bytes32 msgId
     ) external;
+
+    function setExecutionFees(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 executionFees_,
+        bytes calldata signature_
+    ) external;
+
+    function setMsgValueMinThreshold(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 msgValueMinThreshold_,
+        bytes calldata signature_
+    ) external;
+
+    function setMsgValueMaxThreshold(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 msgValueMaxThreshold_,
+        bytes calldata signature_
+    ) external;
+
+    function setRelativeNativeTokenPrice(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint256 relativeNativeTokenPrice_,
+        bytes calldata signature_
+    ) external;
+
+    function verifyParams(
+        bytes32 extraParams_,
+        uint256 msgValue_
+    ) external view;
 }

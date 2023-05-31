@@ -1,8 +1,9 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import { ChainSlug, DeploymentMode, TestnetIds } from "../../src";
-
+import { ChainKey, ChainSlug, DeploymentMode, TestnetIds } from "../../src";
+import { BigNumberish, utils } from "ethers";
+import { CORE_CONTRACTS } from "@socket.tech/dl-core";
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
@@ -30,13 +31,30 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.POLYGON_MAINNET,
 ];
 
+export const executionManagerVersion = CORE_CONTRACTS.OpenExecutionManager;
 export const sendTransaction = false;
 export const newRoleStatus = true;
 export const filterChains: number[] = chains;
 
 export const capacitorType = 1;
 export const maxPacketLength = 1;
-export const setGasLimits = true;
+
+export const gasLimit = undefined;
+export const gasPrice = undefined;
+export const type = 0;
+
+export const msgValueMaxThreshold: { [chain in ChainSlug]?: BigNumberish } = {
+  [ChainSlug.ARBITRUM_GOERLI]: utils.parseEther("0.001"),
+  [ChainSlug.OPTIMISM_GOERLI]: utils.parseEther("0.001"),
+  [ChainSlug.POLYGON_MUMBAI]: utils.parseEther("0.1"),
+  [ChainSlug.BSC_TESTNET]: utils.parseEther("0.001"),
+  [ChainSlug.GOERLI]: utils.parseEther("0.001"),
+  [ChainSlug.ARBITRUM]: utils.parseEther("0.001"),
+  [ChainSlug.OPTIMISM]: utils.parseEther("0.001"),
+  [ChainSlug.POLYGON_MAINNET]: utils.parseEther("0.1"),
+  [ChainSlug.BSC]: utils.parseEther("0.001"),
+  [ChainSlug.MAINNET]: utils.parseEther("0.001"),
+};
 
 export const transmitterAddresses = {
   [DeploymentMode.DEV]: "0x138e9840861C983DC0BB9b3e941FB7C0e9Ade320",
@@ -54,4 +72,63 @@ export const executorAddresses = {
   [DeploymentMode.DEV]: "0x8e90345042b2720F33138CC437f8f897AC84A095",
   [DeploymentMode.SURGE]: "0x3051Aa7F267bF425A4e8bF766750D60391F014B4",
   [DeploymentMode.PROD]: "0x557E729E55d49E767c11982d026a63aBFD930Ac9",
+};
+
+export const overrides: {
+  [chain in ChainSlug | number]?: {
+    type: number | undefined;
+    gasLimit?: BigNumberish | undefined;
+    gasPrice: BigNumberish | undefined;
+  };
+} = {
+  [ChainSlug.ARBITRUM]: {
+    type,
+    gasLimit: 20_000_000,
+    gasPrice,
+  },
+  [ChainSlug.ARBITRUM_GOERLI]: {
+    type,
+    gasLimit: 20_000_000,
+    gasPrice,
+  },
+  [ChainSlug.OPTIMISM]: {
+    type,
+    gasLimit: 2_000_000,
+    gasPrice,
+  },
+  [ChainSlug.OPTIMISM_GOERLI]: {
+    type,
+    gasLimit: 2_000_000,
+    gasPrice,
+  },
+  [ChainSlug.BSC]: {
+    type,
+    gasLimit,
+    gasPrice,
+  },
+  [ChainSlug.BSC_TESTNET]: {
+    type,
+    gasLimit,
+    gasPrice,
+  },
+  [ChainSlug.MAINNET]: {
+    type,
+    gasLimit,
+    gasPrice,
+  },
+  [ChainSlug.GOERLI]: {
+    type,
+    gasLimit: 3_000_000,
+    gasPrice,
+  },
+  [ChainSlug.POLYGON_MAINNET]: {
+    type,
+    gasLimit,
+    gasPrice: 250_000_000_000,
+  },
+  [ChainSlug.POLYGON_MUMBAI]: {
+    type: 0,
+    gasLimit: 2_000_000,
+    gasPrice,
+  },
 };

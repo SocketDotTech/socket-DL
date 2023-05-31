@@ -8,7 +8,7 @@ import "./decapacitors/SingleDecapacitor.sol";
 import "./decapacitors/HashChainDecapacitor.sol";
 
 import "./libraries/RescueFundsLib.sol";
-import "./utils/AccessControlExtended.sol";
+import "./utils/AccessControl.sol";
 import {RESCUE_ROLE} from "./utils/AccessRoles.sol";
 
 /**
@@ -17,7 +17,7 @@ import {RESCUE_ROLE} from "./utils/AccessRoles.sol";
  * @dev This contract is modular and can be updated in Socket with more capacitor types.
  * @dev The capacitorType_ parameter determines the type of capacitor and decapacitor to deploy.
  */
-contract CapacitorFactory is ICapacitorFactory, AccessControlExtended {
+contract CapacitorFactory is ICapacitorFactory, AccessControl {
     uint256 private constant SINGLE_CAPACITOR = 1;
     uint256 private constant HASH_CHAIN_CAPACITOR = 2;
 
@@ -25,7 +25,7 @@ contract CapacitorFactory is ICapacitorFactory, AccessControlExtended {
      * @notice initialises and grants RESCUE_ROLE to owner.
      * @param owner_ The address of the owner of the contract.
      */
-    constructor(address owner_) AccessControlExtended(owner_) {
+    constructor(address owner_) AccessControl(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
     }
 
@@ -38,7 +38,7 @@ contract CapacitorFactory is ICapacitorFactory, AccessControlExtended {
      */
     function deploy(
         uint256 capacitorType_,
-        uint256 /** siblingChainSlug */,
+        uint32 /** siblingChainSlug */,
         uint256 /** maxPacketLength */
     ) external override returns (ICapacitor, IDecapacitor) {
         // sets the capacitor factory owner

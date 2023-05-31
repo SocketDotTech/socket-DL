@@ -38,15 +38,6 @@ async function checkNative(
   const contractName = switchboards[localChain][remoteChain];
   const switchboard = await getInstance(contractName, contractAddr);
 
-  let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
-    transmitterAddresses[mode]
-  );
-  assert(
-    hasRole,
-    `❌ NativeSwitchboard has wrong GAS_LIMIT_UPDATER_ROLE ${remoteChain}`
-  );
-
   if (contractName === NativeSwitchboard.POLYGON_L1) {
     const remoteSb = await switchboard.fxChildTunnel();
     assert(remoteSb === remoteSwitchboard, "❌ wrong fxChildTunnel set");
@@ -84,15 +75,6 @@ async function checkDefault(contractAddr, localChain, remoteChain) {
     transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong UNTRIP_ROLE ${remoteChain}`);
-
-  hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainKeyToSlug[remoteChain]),
-    transmitterAddresses[mode]
-  );
-  assert(
-    hasRole,
-    `❌ Switchboard has wrong GAS_LIMIT_UPDATER_ROLE ${remoteChain}`
-  );
 }
 
 async function checkSwitchboardRoles(chain, contractAddr) {
@@ -243,24 +225,6 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
     hasRole,
     `❌ TransmitManager has wrong transmitter address for ${remoteChain}`
   );
-
-  hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("GAS_LIMIT_UPDATER_ROLE", chainKeyToSlug[remoteChain]),
-    transmitterAddresses[mode]
-  );
-  assert(
-    hasRole,
-    `❌ TransmitManager has wrong GAS_LIMIT_UPDATER_ROLE for ${remoteChain}`
-  );
-
-  hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getRoleHash("GAS_LIMIT_UPDATER_ROLE"),
-    transmitterAddresses[mode]
-  );
-  assert(
-    hasRole,
-    `❌ TransmitManager has wrong GAS_LIMIT_UPDATER_ROLE for ${chain}`
-  );
 }
 
 async function checkExecutionManager(chain, contractAddr) {
@@ -316,31 +280,6 @@ async function checkSocket(chain, socketAddr) {
   );
 
   assert(hasRole, `❌ Socket has wrong rescue address ${chain}`);
-}
-
-async function checkOracle(chain, oracleAddr, transmitManagerAddr) {
-  const oracle = await getInstance("GasPriceOracle", oracleAddr);
-
-  // check if transmit manager is set
-  const transmitManager = await oracle.transmitManager__();
-  assert(
-    transmitManager.toLowerCase() === transmitManagerAddr.toLowerCase(),
-    `❌ TransmitManager not set in oracle on ${chain}`
-  );
-
-  // check roles
-  let hasRole = await oracle["hasRole(bytes32,address)"](
-    getRoleHash("GOVERNANCE_ROLE"),
-    socketOwner
-  );
-  assert(hasRole, `❌ GasPriceOracle has wrong governance address ${chain}`);
-
-  hasRole = await oracle["hasRole(bytes32,address)"](
-    getRoleHash("RESCUE_ROLE"),
-    socketOwner
-  );
-
-  assert(hasRole, `❌ GasPriceOracle has wrong rescue address ${chain}`);
 }
 
 async function checkIntegration(
@@ -432,7 +371,6 @@ function checkCoreContractAddress(
     !localConfig["Counter"] ||
     !localConfig[CORE_CONTRACTS.CapacitorFactory] ||
     !localConfig[CORE_CONTRACTS.ExecutionManager] ||
-    !localConfig[CORE_CONTRACTS.GasPriceOracle] ||
     !localConfig[CORE_CONTRACTS.Hasher] ||
     !localConfig[CORE_CONTRACTS.SignatureVerifier] ||
     !localConfig[CORE_CONTRACTS.Socket] ||
@@ -447,7 +385,6 @@ function checkCoreContractAddress(
     !remoteConfig["Counter"] ||
     !remoteConfig[CORE_CONTRACTS.CapacitorFactory] ||
     !remoteConfig[CORE_CONTRACTS.ExecutionManager] ||
-    !remoteConfig[CORE_CONTRACTS.GasPriceOracle] ||
     !remoteConfig[CORE_CONTRACTS.Hasher] ||
     !remoteConfig[CORE_CONTRACTS.SignatureVerifier] ||
     !remoteConfig[CORE_CONTRACTS.Socket] ||
@@ -479,13 +416,6 @@ export const main = async () => {
         await hre.changeNetwork(chain);
         checkCoreContractAddress(localConfig, remoteConfig, chain, remoteChain);
         console.log("✅ Checked Core contracts");
-
-        await checkOracle(
-          chain,
-          localConfig["GasPriceOracle"],
-          localConfig[CORE_CONTRACTS.TransmitManager]
-        );
-        console.log("✅ Checked Oracle");
 
         await checkSocket(chain, localConfig[CORE_CONTRACTS.Socket]);
         console.log("✅ Checked Socket");

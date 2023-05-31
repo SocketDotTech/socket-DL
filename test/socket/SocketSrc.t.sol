@@ -19,7 +19,7 @@ contract SocketSrcTest is Setup {
     bool isFast = true;
     bytes32[] roots;
 
-    error InvalidAttester();
+    error InvalidTransmitter();
     error InsufficientFees();
     event PacketVerifiedAndSealed(
         address indexed transmitter,
@@ -29,9 +29,9 @@ contract SocketSrcTest is Setup {
     );
 
     event MessageTransmitted(
-        uint256 localChainSlug,
+        uint32 localChainSlug,
         address localPlug,
-        uint256 dstChainSlug,
+        uint32 dstChainSlug,
         address dstPlug,
         uint256 msgId,
         uint256 msgGasLimit,
@@ -49,34 +49,6 @@ contract SocketSrcTest is Setup {
 
         uint256 index = isFast ? 0 : 1;
         _configPlugContracts(index);
-
-        bytes32 digest = keccak256(
-            abi.encode(_a.chainSlug, gasPriceOracleNonce, sourceGasPrice)
-        );
-        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
-
-        _a.gasPriceOracle__.setSourceGasPrice(
-            gasPriceOracleNonce++,
-            sourceGasPrice,
-            sig
-        );
-
-        digest = keccak256(
-            abi.encode(
-                _a.chainSlug,
-                _b.chainSlug,
-                gasPriceOracleNonce,
-                relativeGasPrice
-            )
-        );
-        sig = _createSignature(digest, _transmitterPrivateKey);
-
-        _a.gasPriceOracle__.setRelativeGasPrice(
-            _b.chainSlug,
-            gasPriceOracleNonce++,
-            relativeGasPrice,
-            sig
-        );
     }
 
     function testGetMinFeesOnSocketSrc() external {
@@ -94,6 +66,8 @@ contract SocketSrcTest is Setup {
             );
             executionFee = _a.executionManager__.getMinFees(
                 _msgGasLimit,
+                100,
+                bytes32(0),
                 _b.chainSlug
             );
 
@@ -104,6 +78,8 @@ contract SocketSrcTest is Setup {
 
             uint256 minFeesActual = _a.socket__.getMinFees(
                 _msgGasLimit,
+                1000,
+                bytes32(0),
                 _b.chainSlug,
                 address(srcCounter__)
             );
@@ -132,6 +108,8 @@ contract SocketSrcTest is Setup {
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
             executionFee = _a.executionManager__.getMinFees(
                 _msgGasLimit,
+                100,
+                bytes32(0),
                 _b.chainSlug
             );
 
@@ -142,7 +120,7 @@ contract SocketSrcTest is Setup {
                     socketFees +
                     verificationFee +
                     executionFee
-            }(_b.chainSlug, _msgGasLimit, payload);
+            }(_b.chainSlug, _msgGasLimit, bytes32(0), payload);
         }
     }
 
@@ -162,6 +140,8 @@ contract SocketSrcTest is Setup {
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
             executionFee = _a.executionManager__.getMinFees(
                 _msgGasLimit,
+                100,
+                bytes32(0),
                 _b.chainSlug
             );
 
@@ -171,7 +151,7 @@ contract SocketSrcTest is Setup {
                     socketFees +
                     verificationFee +
                     executionFee
-            }(_b.chainSlug, amount, _msgGasLimit);
+            }(_b.chainSlug, amount, _msgGasLimit, bytes32(0));
         }
 
         {
@@ -209,6 +189,8 @@ contract SocketSrcTest is Setup {
             uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
             executionFee = _a.executionManager__.getMinFees(
                 _msgGasLimit,
+                100,
+                bytes32(0),
                 _b.chainSlug
             );
 
@@ -218,7 +200,7 @@ contract SocketSrcTest is Setup {
                     socketFees +
                     verificationFee +
                     executionFee
-            }(_b.chainSlug, amount, _msgGasLimit);
+            }(_b.chainSlug, amount, _msgGasLimit, bytes32(0));
         }
 
         uint256 fakeTransmitterKey = c++;
@@ -230,7 +212,7 @@ contract SocketSrcTest is Setup {
                 fakeTransmitterKey
             );
 
-            vm.expectRevert(InvalidAttester.selector);
+            vm.expectRevert(InvalidTransmitter.selector);
             _sealOnSrc(_a, capacitor, sig_);
         }
     }
@@ -243,21 +225,22 @@ contract SocketSrcTest is Setup {
         srcCounter__.remoteAddOperation{value: 0}(
             _b.chainSlug,
             amount,
-            _msgGasLimit
+            _msgGasLimit,
+            bytes32(0)
         );
     }
 
     function getLatestSignature(
         ChainContext memory src_,
         address capacitor_,
-        uint256 remoteChainSlug_,
+        uint32 remoteChainSlug_,
         uint256 transmitterPrivateKey_
     ) public returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint256 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);
         bytes32 digest = keccak256(
-            abi.encode(remoteChainSlug_, packetId, root)
+            abi.encode(versionHash, remoteChainSlug_, packetId, root)
         );
 
         sig = _createSignature(digest, transmitterPrivateKey_);

@@ -8,12 +8,16 @@ import {
   MainnetIds,
   isTestnet,
   isMainnet,
+  CORE_CONTRACTS,
+  networkToChainSlug,
 } from "../../../src";
-import { getAddresses, getRelayUrl } from "../utils";
+import { getAddresses, getRelayUrl, getRelayAPIKEY } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
-import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
+import Counter from "../../../out/Counter.sol/Counter.json";
+import Socket from "../../../out/Socket.sol/Socket.json";
+
 import { chains, mode } from "../config";
-import { parseUnits } from "ethers/lib/utils";
+import { getProviderFromChainName } from "../../constants/networks";
 
 interface RequestObj {
   to: string;
@@ -23,29 +27,6 @@ interface RequestObj {
   gasPrice?: string | BigNumber;
   gasLimit: number | undefined;
 }
-
-const values = {
-  [ChainSlug.ARBITRUM]: {
-    [ChainSlug.OPTIMISM]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.BSC]: parseUnits("0.003", "ether").toHexString(),
-  },
-  [ChainSlug.OPTIMISM]: {
-    [ChainSlug.ARBITRUM]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.BSC]: parseUnits("0.003", "ether").toHexString(),
-  },
-  [ChainSlug.POLYGON_MAINNET]: {
-    [ChainSlug.ARBITRUM]: parseUnits("1", "ether").toHexString(),
-    [ChainSlug.OPTIMISM]: parseUnits("1", "ether").toHexString(),
-    [ChainSlug.BSC]: parseUnits("1", "ether").toHexString(),
-  },
-  [ChainSlug.BSC]: {
-    [ChainSlug.ARBITRUM]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.OPTIMISM]: parseUnits("0.003", "ether").toHexString(),
-    [ChainSlug.POLYGON_MAINNET]: parseUnits("0.003", "ether").toHexString(),
-  },
-};
 
 const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
   console.log(chainSlug, isMainnet(chainSlug));
@@ -60,25 +41,28 @@ const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
   return [];
 };
 
-const axiosPost = async (url, data, config = {}) => {
+const axiosPost = async (url: string, data: object, config = {}) => {
   try {
     let response = await axios.post(url, data, config);
     // console.log("txStatus : ", response.status, response.data);
-    return { success: true, ...response.data };
-
-    //@ts-ignore
+    return { success: true, ...response?.data };
   } catch (error) {
-    console.log("status : ", error.response.status);
+    //@ts-ignore
+    console.log("status : ", error?.response?.status);
     console.log(
       "error occurred, url : ",
       url,
       "data : ",
       data,
+      config,
       "\n error : ",
-      error.message,
-      error.response.data
+      //@ts-ignore
+      error?.message,
+      //@ts-ignore
+      error?.response.data
     );
-    return { success: false, ...error.response.data };
+    //@ts-ignore
+    return { success: false, ...error?.response?.data };
   }
 };
 
@@ -86,6 +70,11 @@ const relayTx = async (params: RequestObj) => {
   try {
     let { to, data, chainSlug, gasPrice, value, gasLimit } = params;
     let url = await getRelayUrl(mode);
+    let config = {
+      headers: {
+        "x-api-key": getRelayAPIKEY(mode),
+      },
+    };
     // console.log({url})
     let body = {
       to,
@@ -97,7 +86,7 @@ const relayTx = async (params: RequestObj) => {
       sequential: false,
       source: "LoadTester",
     };
-    let response = await axiosPost(url, body);
+    let response = await axiosPost(url!, body, config);
     if (response?.success) return response?.data;
     else return { hash: "" };
   } catch (error) {
@@ -123,8 +112,8 @@ export const sendMessagesToAllPaths = async (params: {
     // parallelize chains
     await Promise.all(
       activeChainSlugs.map(async (chainSlug) => {
-        let siblingSlugs = getSiblingSlugs(chainSlug);
-        let addresses = await getAddresses(chainSlug, mode);
+        const siblingSlugs = getSiblingSlugs(chainSlug);
+        const addresses = await getAddresses(chainSlug, mode);
 
         console.log({ chainSlug, siblingSlugs });
 
@@ -142,9 +131,18 @@ export const sendMessagesToAllPaths = async (params: {
         }
         // console.log(" 3 ");
 
+        const provider = await getProviderFromChainName(
+          networkToChainSlug[chainSlug]
+        );
+        const socket: Contract = new ethers.Contract(
+          addresses[CORE_CONTRACTS.Socket],
+          Socket.abi,
+          provider
+        );
+
         const counter: Contract = new ethers.Contract(
           counterAddress,
-          CounterABI
+          Counter.abi
         );
 
         await Promise.all(
@@ -155,14 +153,30 @@ export const sendMessagesToAllPaths = async (params: {
             )
               return;
 
+            // value = 100
+            let extraParams =
+              "0x0100000000000000000000000000000000000000000000000000000000000064";
             let data = counter.interface.encodeFunctionData(
               "remoteAddOperation",
-              [siblingSlug, amount, msgGasLimit]
+              [
+                siblingSlug,
+                amount,
+                msgGasLimit,
+                // extraParams,
+                ethers.constants.HashZero,
+              ]
             );
             let to = counter.address;
-            let value =
-              values[chainSlug]?.[siblingSlug] ||
-              ethers.utils.parseUnits("3000000", "gwei").toHexString();
+            let value = await socket.getMinFees(
+              msgGasLimit,
+              100, // payload size
+              extraParams,
+              siblingSlug,
+              to
+            );
+
+            console.log(`fees is ${value}`);
+
             gasLimit =
               chainSlug === ChainSlug.ARBITRUM ||
               chainSlug === ChainSlug.ARBITRUM_GOERLI
@@ -184,8 +198,7 @@ export const sendMessagesToAllPaths = async (params: {
       })
     );
   } catch (error) {
-    console.log("Error while checking roles", error);
-    throw error;
+    console.log("Error while sending outbound tx", error);
   }
 };
 

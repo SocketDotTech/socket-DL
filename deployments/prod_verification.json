@@ -43,22 +43,10 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
-      "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
-    ],
-    [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
       "Hasher",
       "contracts/utils/Hasher.sol",
       []
-    ],
-    [
-      "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
@@ -83,12 +71,6 @@
         "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
         "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
       ]
-    ],
-    [
-      "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -285,22 +267,10 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
-      "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
-    ],
-    [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
       "Hasher",
       "contracts/utils/Hasher.sol",
       []
-    ],
-    [
-      "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
@@ -325,12 +295,6 @@
         "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
         "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
       ]
-    ],
-    [
-      "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -527,22 +491,10 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
-      "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
-    ],
-    [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
       "Hasher",
       "contracts/utils/Hasher.sol",
       []
-    ],
-    [
-      "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
@@ -567,12 +519,6 @@
         "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
         "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
       ]
-    ],
-    [
-      "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -763,12 +709,6 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
-      "0x09b471B83b91bdb1AA361f05770CfcEFF7526b65",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
-    ],
-    [
       "0xf50Ed30A7A6951d830Bc4e6498B5abC7132a4F6C",
       "ExecutionManager",
       "contracts/ExecutionManager.sol",
@@ -899,22 +839,10 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
-      "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
-    ],
-    [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
       "Hasher",
       "contracts/utils/Hasher.sol",
       []
-    ],
-    [
-      "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
@@ -939,12 +867,6 @@
         "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
         "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
       ]
-    ],
-    [
-      "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xf096fD1b47DFC14D2320571C5F7eCDb5cad219F0",
@@ -989,22 +911,10 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
-      "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
-    ],
-    [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
       "Hasher",
       "contracts/utils/Hasher.sol",
       []
-    ],
-    [
-      "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 42161]
     ],
     [
       "0x1d254AeF685e9D6457947cEB972659eF0C0243a3",
@@ -1029,12 +939,6 @@
         "0xc2BD14Fe818C6Fc47246Bee79F0D91AFbebb43e2",
         "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
       ]
-    ],
-    [
-      "0xEC5b7075F581D46983EBe2Be6baB0f58Bf1E8C4b",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 137]
     ],
     [
       "0xF68EAa807c14b74E3feD68ED91A6Ac7063F8570B",
@@ -1163,12 +1067,6 @@
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
-    ],
-    [
-      "0xd9a317288843d8Ae4c80Bc78Eb9Af4Ee21AeeDF3",
-      "GasPriceOracle",
-      "contracts/GasPriceOracle.sol",
-      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x6F6CF280B87518A7BDb32b38D2Fabed0886c97DE",
