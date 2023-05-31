@@ -31,6 +31,7 @@ interface ISwitchboard {
     function allowPacket(
         bytes32 root,
         bytes32 packetId,
+        uint64 proposalId,
         uint32 srcChainSlug,
         uint256 proposeTime
     ) external view returns (bool);

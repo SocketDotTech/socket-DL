@@ -132,6 +132,7 @@ interface ISocket {
      */
     function execute(
         bytes32 packetId,
+        uint64 proposalId,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature
     ) external payable;
@@ -191,7 +192,7 @@ interface ISocket {
      * @param packetId_ The packet id for which to retrieve the packet id roots.
      * @return The packet id roots for the specified packet id.
      */
-    function packetIdRoots(bytes32 packetId_) external view returns (bytes32);
+    function packetIdRoots(bytes32 packetId_, uint64 proposalId_) external view returns (bytes32);
 
     /**
      * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.

@@ -31,6 +31,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     // sourceChain => isPaused
     mapping(uint32 => bool) public tripSinglePath;
 
+    // isProposalIdTripped(packetId => proposalId => isTripped)
+    mapping(bytes32 => mapping(uint64 => bool)) isProposalIdTripped;
+    
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
 

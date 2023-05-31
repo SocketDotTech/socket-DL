@@ -9,31 +9,35 @@ import "./SwitchboardBase.sol";
  * that enables packet attestations and watchers registration.
  */
 contract FastSwitchboard is SwitchboardBase {
-    // mapping to store if packet is valid
-    mapping(bytes32 => bool) public isPacketValid;
+    // mapping to store if root is valid
+    mapping(bytes32 => bool) public isRootValid;
 
     // dst chain slug => total watchers registered
     mapping(uint32 => uint256) public totalWatchers;
 
-    // attester => packetId => is attested
+    // attester => root => is attested
     mapping(address => mapping(bytes32 => bool)) public isAttested;
 
-    // packetId => total attestations
+    // root => total attestations
+    // @dev : (assuming here that root will be unique across system)
     mapping(bytes32 => uint256) public attestations;
 
     // Event emitted when a new socket is set
     event SocketSet(address newSocket);
-    // Event emitted when a packet is attested
-    event PacketAttested(bytes32 packetId, address attester);
+    // Event emitted when a root is attested
+    event ProposalAttested(bytes32 packetId, uint64 proposalId, bytes32 root, address attester);
 
     // Error emitted when a watcher is found
     error WatcherFound();
     // Error emitted when a watcher is not found
     error WatcherNotFound();
-    // Error emitted when a packet is already attested
+    // Error emitted when a root is already attested
     error AlreadyAttested();
     // Error emitted when role is invalid
     error InvalidRole();
+
+    // Error emitted when role is invalid
+    error InvalidRoot();
 
     /**
      * @dev Constructor function for the FastSwitchboard contract
@@ -62,26 +66,30 @@ contract FastSwitchboard is SwitchboardBase {
     /**
      * @dev Function to attest a packet
      * @param packetId_ Packet ID
+     * @param proposalId_ Proposal ID
      * @param signature_ Signature of the packet
      */
-    function attest(bytes32 packetId_, bytes calldata signature_) external {
+    function attest(bytes32 packetId_, uint64 proposalId_, bytes calldata signature_) external {
         uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
+        bytes32 root = socket__.packetIdRoots(packetId_, proposalId_);
+        if (root == bytes32(0)) revert InvalidRoot();
+        // Should we change the signature to include proposalId as well? 
         address watcher = signatureVerifier__.recoverSignerFromDigest(
-            keccak256(abi.encode(address(this), chainSlug, packetId_)),
+            keccak256(abi.encode(address(this), chainSlug, packetId_, proposalId_)),
             signature_
         );
 
-        if (isAttested[watcher][packetId_]) revert AlreadyAttested();
+        if (isAttested[watcher][root]) revert AlreadyAttested();
         if (!_hasRoleWithSlug(WATCHER_ROLE, srcChainSlug, watcher))
             revert WatcherNotFound();
 
-        isAttested[watcher][packetId_] = true;
-        attestations[packetId_]++;
+        isAttested[watcher][root] = true;
+        attestations[root]++;
 
-        if (attestations[packetId_] >= totalWatchers[srcChainSlug])
-            isPacketValid[packetId_] = true;
+        if (attestations[root] >= totalWatchers[srcChainSlug])
+            isRootValid[root] = true;
 
-        emit PacketAttested(packetId_, watcher);
+        emit ProposalAttested(packetId_, proposalId_, root, watcher);
     }
 
     /**
@@ -90,13 +98,18 @@ contract FastSwitchboard is SwitchboardBase {
      * @param proposeTime_ time at which packet was proposed
      */
     function allowPacket(
-        bytes32,
+        bytes32 root_,
         bytes32 packetId_,
+        uint64 proposalId_,
         uint32 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {
-        if (tripGlobalFuse || tripSinglePath[srcChainSlug_]) return false;
-        if (isPacketValid[packetId_]) return true;
+        if (
+            tripGlobalFuse || 
+            tripSinglePath[srcChainSlug_] || 
+            isProposalIdTripped[packetId_][proposalId_]
+        ) return false;
+        if (isRootValid[root_]) return true;
         if (block.timestamp - proposeTime_ > timeoutInSeconds) return true;
         return false;
     }
