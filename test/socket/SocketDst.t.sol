@@ -93,7 +93,10 @@ contract SocketDstTest is Setup {
         _proposeOnDst(_b, sig_, packetId_, root_);
 
         assertEq(_b.socket__.packetIdRoots(packetId_, proposalId), root_);
-        assertEq(_b.socket__.rootProposedAt(packetId_, proposalId), block.timestamp);
+        assertEq(
+            _b.socket__.rootProposedAt(packetId_, proposalId),
+            block.timestamp
+        );
     }
 
     function testInvalidPacketPropose() external {
@@ -222,7 +225,6 @@ contract SocketDstTest is Setup {
         assertEq(_b.socket__.packetIdRoots(packetId_, 1), root_);
 
         assertEq(_b.socket__.proposalIdCount(packetId_), 2);
-        
     }
 
     function sendOutboundMessage() internal {

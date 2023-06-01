@@ -120,7 +120,6 @@ contract HappyTest is Setup {
                 payload,
                 proof
             )
-            
         );
 
         assertEq(dstCounter__.counter(), amount);

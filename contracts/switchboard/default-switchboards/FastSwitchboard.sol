@@ -101,7 +101,13 @@ contract FastSwitchboard is SwitchboardBase {
         if (attestations[root] >= totalWatchers[srcChainSlug])
             isRootValid[root] = true;
 
-        emit ProposalAttested(packetId_, proposalId_, root, watcher, attestations[root]);
+        emit ProposalAttested(
+            packetId_,
+            proposalId_,
+            root,
+            watcher,
+            attestations[root]
+        );
     }
 
     /**

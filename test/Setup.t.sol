@@ -15,7 +15,7 @@ import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
 import "../contracts/utils/AccessRoles.sol";
 import "../contracts/utils/SigIdentifiers.sol";
- 
+
 contract Setup is Test {
     uint256 internal c = 1;
     address immutable _plugOwner = address(uint160(c++));
@@ -560,7 +560,11 @@ contract Setup is Test {
         );
 
         // attest with packetId_, srcSlug and signature
-        FastSwitchboard(switchboardAddress).attest(packetId_,proposalId_, attestSignature);
+        FastSwitchboard(switchboardAddress).attest(
+            packetId_,
+            proposalId_,
+            attestSignature
+        );
     }
 
     function _executePayloadOnDstWithExecutor(
@@ -592,14 +596,20 @@ contract Setup is Test {
                 msgDetails,
                 sig
             );
-        else dst_.socket__.execute(executionParams.packetId_, executionParams.proposalId_, msgDetails, sig);
+        else
+            dst_.socket__.execute(
+                executionParams.packetId_,
+                executionParams.proposalId_,
+                msgDetails,
+                sig
+            );
     }
 
     function _executePayloadOnDst(
         ChainContext storage dst_,
         uint32,
         ExecutePayloadOnDstParams memory executionParams
-    ) internal {                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+    ) internal {
         _executePayloadOnDstWithExecutor(
             dst_,
             executorPrivateKey,
