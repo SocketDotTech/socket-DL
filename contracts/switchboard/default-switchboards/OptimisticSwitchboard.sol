@@ -41,7 +41,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
     function allowPacket(
         bytes32,
         bytes32 packetId_,
-        uint64 proposalId_,
+        uint256 proposalId_,
         uint32 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {

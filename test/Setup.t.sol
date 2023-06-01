@@ -76,6 +76,18 @@ contract Setup is Test {
         SocketConfigContext[] configs__;
     }
 
+    struct ExecutePayloadOnDstParams {
+        bytes32 packetId_;
+        uint256 proposalId_;
+        bytes32 msgId_;
+        uint256 msgGasLimit_;
+        bytes32 extraParams_;
+        uint256 executionFee_;
+        bytes32 packedMessage_;
+        bytes payload_;
+        bytes proof_;
+    }
+
     struct MessageContext {
         uint256 amount;
         uint256 msgId;
@@ -530,10 +542,11 @@ contract Setup is Test {
     function _attestOnDst(
         address switchboardAddress,
         uint32 dstSlug,
-        bytes32 packetId_
+        bytes32 packetId_,
+        uint256 proposalId_
     ) internal {
         bytes32 digest = keccak256(
-            abi.encode(switchboardAddress, dstSlug, packetId_)
+            abi.encode(switchboardAddress, dstSlug, packetId_, proposalId_)
         );
 
         // generate attest-signature
@@ -543,70 +556,50 @@ contract Setup is Test {
         );
 
         // attest with packetId_, srcSlug and signature
-        FastSwitchboard(switchboardAddress).attest(packetId_, attestSignature);
+        FastSwitchboard(switchboardAddress).attest(packetId_,proposalId_, attestSignature);
     }
 
     function _executePayloadOnDstWithExecutor(
         ChainContext storage dst_,
-        bytes32 packetId_,
-        bytes32 msgId_,
-        uint256 msgGasLimit_,
-        bytes32 extraParams_,
-        uint256 executionFee_,
-        bytes32 packedMessage_,
         uint256 executorPrivateKey_,
-        bytes memory payload_,
-        bytes memory proof_
+        ExecutePayloadOnDstParams memory executionParams
     ) internal {
         ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
-            msgId_,
-            executionFee_,
-            msgGasLimit_,
-            extraParams_,
-            payload_,
-            proof_
+            executionParams.msgId_,
+            executionParams.executionFee_,
+            executionParams.msgGasLimit_,
+            executionParams.extraParams_,
+            executionParams.payload_,
+            executionParams.proof_
         );
 
         bytes memory sig = _createSignature(
-            packedMessage_,
+            executionParams.packedMessage_,
             executorPrivateKey_
         );
 
         (uint8 paramType, uint224 paramValue) = _decodeExtraParams(
-            extraParams_
+            executionParams.extraParams_
         );
         if (paramType == 1)
             dst_.socket__.execute{value: paramValue}(
-                packetId_,
+                executionParams.packetId_,
+                executionParams.proposalId_,
                 msgDetails,
                 sig
             );
-        else dst_.socket__.execute(packetId_, msgDetails, sig);
+        else dst_.socket__.execute(executionParams.packetId_, executionParams.proposalId_, msgDetails, sig);
     }
 
     function _executePayloadOnDst(
         ChainContext storage dst_,
-        uint256,
-        bytes32 packetId_,
-        bytes32 msgId_,
-        uint256 msgGasLimit_,
-        bytes32 extraParams_,
-        uint256 executionFee_,
-        bytes32 packedMessage_,
-        bytes memory payload_,
-        bytes memory proof_
-    ) internal {
+        uint32,
+        ExecutePayloadOnDstParams memory executionParams
+    ) internal {                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
         _executePayloadOnDstWithExecutor(
             dst_,
-            packetId_,
-            msgId_,
-            msgGasLimit_,
-            extraParams_,
-            executionFee_,
-            packedMessage_,
             executorPrivateKey,
-            payload_,
-            proof_
+            executionParams
         );
     }
 

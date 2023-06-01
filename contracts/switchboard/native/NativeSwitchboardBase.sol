@@ -202,7 +202,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     function allowPacket(
         bytes32 root_,
         bytes32 packetId_,
-        uint64,
+        uint256,
         uint32,
         uint256
     ) external view override returns (bool) {

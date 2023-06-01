@@ -24,6 +24,7 @@ interface ISwitchboard {
      * @notice Checks if a packet can be allowed to go through the switchboard.
      * @param root the packet root.
      * @param packetId The unique identifier for the packet.
+     * @param proposalId The unique identifier for a proposal for the packet.
      * @param srcChainSlug The unique identifier for the source chain of the packet.
      * @param proposeTime The time when the packet was proposed.
      * @return A boolean indicating whether the packet is allowed to go through the switchboard or not.
@@ -31,7 +32,7 @@ interface ISwitchboard {
     function allowPacket(
         bytes32 root,
         bytes32 packetId,
-        uint64 proposalId,
+        uint256 proposalId,
         uint32 srcChainSlug,
         uint256 proposeTime
     ) external view returns (bool);

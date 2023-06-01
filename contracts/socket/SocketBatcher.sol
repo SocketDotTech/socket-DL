@@ -60,7 +60,7 @@ contract SocketBatcher is AccessControl {
      */
     struct AttestRequest {
         bytes32 packetId;
-        uint64 proposalId;
+        uint256 proposalId;
         bytes signature;
     }
 
@@ -73,7 +73,7 @@ contract SocketBatcher is AccessControl {
      */
     struct ExecuteRequest {
         bytes32 packetId;
-        uint64 proposalId;
+        uint256 proposalId;
         ISocket.MessageDetails messageDetails;
         bytes signature;
     }
