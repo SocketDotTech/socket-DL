@@ -10,9 +10,9 @@ import {
   getChainSlug,
   deployedAddressPath,
   deployContractWithArgs,
-} from "../utils";
+} from "../deploy/utils";
 import { Contract } from "ethers";
-import { mode } from "../config";
+import { mode } from "../deploy/config";
 
 export const main = async () => {
   try {

@@ -4,12 +4,12 @@ dotenvConfig();
 import { arrayify } from "@ethersproject/bytes";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { Contract, Wallet, utils } from "ethers";
-import { version, getAddresses } from "../../../src/index";
-import { getProviderFromChainName } from "../../constants/networks";
+import { version, getAddresses } from "../../src/index";
+import { getProviderFromChainName } from "../constants/networks";
 
 import { CORE_CONTRACTS, ChainKey, chainKeyToSlug } from "@socket.tech/dl-core";
-import { getInstance } from "../utils";
-import { mode } from "../config";
+import { getInstance } from "../deploy/utils";
+import { mode } from "../deploy/config";
 
 export const VERSION_HASH = utils.id(version[mode]);
 
