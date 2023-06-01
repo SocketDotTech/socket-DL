@@ -194,7 +194,10 @@ interface ISocket {
      * @param proposalId_ The proposal id for packetId_ for which to retrieve the root.
      * @return The packet id roots for the specified packet id.
      */
-    function packetIdRoots(bytes32 packetId_, uint256 proposalId_) external view returns (bytes32);
+    function packetIdRoots(
+        bytes32 packetId_,
+        uint256 proposalId_
+    ) external view returns (bytes32);
 
     /**
      * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.

@@ -25,7 +25,13 @@ contract FastSwitchboard is SwitchboardBase {
     // Event emitted when a new socket is set
     event SocketSet(address newSocket);
     // Event emitted when a root is attested
-    event ProposalAttested(bytes32 packetId, uint256 proposalId, bytes32 root, address attester);
+    event ProposalAttested(
+        bytes32 packetId,
+        uint256 proposalId,
+        bytes32 root,
+        address attester,
+        uint256 attestationsCount
+    );
 
     // Error emitted when a watcher is found
     error WatcherFound();
@@ -69,13 +75,19 @@ contract FastSwitchboard is SwitchboardBase {
      * @param proposalId_ Proposal ID
      * @param signature_ Signature of the packet
      */
-    function attest(bytes32 packetId_, uint256 proposalId_, bytes calldata signature_) external {
+    function attest(
+        bytes32 packetId_,
+        uint256 proposalId_,
+        bytes calldata signature_
+    ) external {
         uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
         bytes32 root = socket__.packetIdRoots(packetId_, proposalId_);
         if (root == bytes32(0)) revert InvalidRoot();
-        // Should we change the signature to include proposalId as well? 
+        // Should we change the signature to include proposalId as well?
         address watcher = signatureVerifier__.recoverSignerFromDigest(
-            keccak256(abi.encode(address(this), chainSlug, packetId_, proposalId_)),
+            keccak256(
+                abi.encode(address(this), chainSlug, packetId_, proposalId_)
+            ),
             signature_
         );
 
@@ -89,7 +101,7 @@ contract FastSwitchboard is SwitchboardBase {
         if (attestations[root] >= totalWatchers[srcChainSlug])
             isRootValid[root] = true;
 
-        emit ProposalAttested(packetId_, proposalId_, root, watcher);
+        emit ProposalAttested(packetId_, proposalId_, root, watcher, attestations[root]);
     }
 
     /**
@@ -106,8 +118,8 @@ contract FastSwitchboard is SwitchboardBase {
         uint256 proposeTime_
     ) external view override returns (bool) {
         if (
-            tripGlobalFuse || 
-            tripSinglePath[srcChainSlug_] || 
+            tripGlobalFuse ||
+            tripSinglePath[srcChainSlug_] ||
             isProposalIdTripped[packetId_][proposalId_]
         ) return false;
         if (isRootValid[root_]) return true;

@@ -10,7 +10,7 @@ import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
 import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UNTRIP_ROLE, WATCHER_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
-import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER,TRIP_PROPOSAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, TRIP_PROPOSAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     ISignatureVerifier public immutable signatureVerifier__;
@@ -32,8 +32,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     mapping(uint32 => bool) public tripSinglePath;
 
     // isProposalIdTripped(packetId => proposalId => isTripped)
-    mapping(bytes32 => mapping(uint256 => bool)) isProposalIdTripped;
-    
+    mapping(bytes32 => mapping(uint256 => bool)) public isProposalIdTripped;
+
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
 
@@ -50,7 +50,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Emitted when a proposal for a packetId is tripped
      * @param packetId packetId of packet
-     * @param proposalId proposalId being tripped 
+     * @param proposalId proposalId being tripped
      */
     event ProposalTripped(bytes32 packetId, uint256 proposalId);
 
@@ -58,7 +58,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev Emitted when Switchboard contract is tripped globally
      * @param tripGlobalFuse New trip status of the contract
      */
-     
+
     event SwitchboardTripped(bool tripGlobalFuse);
     /**
      * @dev Emitted when execution overhead is set for a destination chain
@@ -185,11 +185,10 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     function tripProposal(
         uint256 nonce_,
-        bytes32 packetId_ ,
+        bytes32 packetId_,
         uint256 proposalId_,
         bytes memory signature_
     ) external {
-
         uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
         address watcher = signatureVerifier__.recoverSignerFromDigest(
             // it includes trip status at the end

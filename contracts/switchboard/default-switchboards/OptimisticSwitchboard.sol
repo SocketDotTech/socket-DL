@@ -46,8 +46,8 @@ contract OptimisticSwitchboard is SwitchboardBase {
         uint256 proposeTime_
     ) external view override returns (bool) {
         if (
-            tripGlobalFuse || 
-            tripSinglePath[srcChainSlug_] || 
+            tripGlobalFuse ||
+            tripSinglePath[srcChainSlug_] ||
             isProposalIdTripped[packetId_][proposalId_]
         ) return false;
         if (block.timestamp - proposeTime_ < timeoutInSeconds) return false;

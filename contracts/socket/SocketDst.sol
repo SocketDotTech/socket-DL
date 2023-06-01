@@ -68,7 +68,9 @@ abstract contract SocketDst is SocketBase {
     /**
      * @dev capacitorAddr|chainSlug|packetId => proposalId mapping to packetIdRoots
      */
-    mapping(bytes32 => mapping(uint256 => bytes32)) public override packetIdRoots;
+    mapping(bytes32 => mapping(uint256 => bytes32))
+        public
+        override packetIdRoots;
     /**
      * @dev packetId => proposalId => proposalTimestamp
      */
@@ -126,7 +128,12 @@ abstract contract SocketDst is SocketBase {
         packetIdRoots[packetId_][proposalIdCount[packetId_]] = root_;
         rootProposedAt[packetId_][proposalIdCount[packetId_]] = block.timestamp;
 
-        emit PacketProposed(transmitter, packetId_,proposalIdCount[packetId_]++, root_);
+        emit PacketProposed(
+            transmitter,
+            packetId_,
+            proposalIdCount[packetId_]++,
+            root_
+        );
     }
 
     /**
@@ -146,7 +153,8 @@ abstract contract SocketDst is SocketBase {
         messageExecuted[messageDetails_.msgId] = true;
 
         if (packetId_ == bytes32(0)) revert InvalidPacketId();
-        if (packetIdRoots[packetId_][proposalId_] == bytes32(0)) revert PacketNotProposed();
+        if (packetIdRoots[packetId_][proposalId_] == bytes32(0))
+            revert PacketNotProposed();
 
         uint32 remoteSlug = _decodeSlug(messageDetails_.msgId);
         if (_decodeSlug(packetId_) != remoteSlug)
@@ -251,8 +259,12 @@ abstract contract SocketDst is SocketBase {
      * @param packetId_ The proposal ID of the packetId to check.
      * @return A boolean indicating whether the packet has been proposed or not.
      */
-    function isPacketProposed(bytes32 packetId_, uint256 proposalId_) external view returns (bool) {
-        return packetIdRoots[packetId_][proposalId_] == bytes32(0) ? false : true;
+    function isPacketProposed(
+        bytes32 packetId_,
+        uint256 proposalId_
+    ) external view returns (bool) {
+        return
+            packetIdRoots[packetId_][proposalId_] == bytes32(0) ? false : true;
     }
 
     /**

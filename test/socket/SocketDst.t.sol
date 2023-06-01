@@ -138,7 +138,8 @@ contract SocketDstTest is Setup {
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
             packetId,
-            proposalId
+            proposalId,
+            _watcherPrivateKey
         );
 
         vm.expectRevert(SocketDst.ErrInSourceValidation.selector);
@@ -215,9 +216,13 @@ contract SocketDstTest is Setup {
             _transmitterPrivateKey
         );
         (bytes32 packetId_, bytes32 root_) = sealAndPropose(capacitor);
-
-        vm.expectRevert(AlreadyProposed.selector);
+        assertEq(_b.socket__.packetIdRoots(packetId_, 0), root_);
+        // vm.expectRevert(AlreadyProposed.selector);
         _proposeOnDst(_b, sig_, packetId_, root_);
+        assertEq(_b.socket__.packetIdRoots(packetId_, 1), root_);
+
+        assertEq(_b.socket__.proposalIdCount(packetId_), 2);
+        
     }
 
     function sendOutboundMessage() internal {
@@ -297,7 +302,8 @@ contract SocketDstTest is Setup {
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
             packetId,
-            0
+            0,
+            _watcherPrivateKey
         );
 
         vm.expectEmit(true, false, false, false);
@@ -397,7 +403,8 @@ contract SocketDstTest is Setup {
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
             packetId,
-            proposalId
+            proposalId,
+            _watcherPrivateKey
         );
 
         _executePayloadOnDst(
@@ -467,7 +474,8 @@ contract SocketDstTest is Setup {
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
             packetId,
-            proposalId
+            proposalId,
+            _watcherPrivateKey
         );
 
         vm.expectRevert(NotExecutor.selector);

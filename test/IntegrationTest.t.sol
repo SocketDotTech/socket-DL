@@ -97,7 +97,8 @@ contract HappyTest is Setup {
                 address(_b.configs__[0].switchboard__),
                 _b.chainSlug,
                 packetId,
-                proposalId
+                proposalId,
+                _watcherPrivateKey
             );
         }
 
@@ -203,7 +204,8 @@ contract HappyTest is Setup {
             address(_a.configs__[0].switchboard__),
             _a.chainSlug,
             packetId,
-            0
+            0,
+            _watcherPrivateKey
         );
 
         _executePayloadOnDst(
@@ -326,7 +328,8 @@ contract HappyTest is Setup {
             address(_b.configs__[_b.configs__.length - 1].switchboard__),
             _b.chainSlug,
             packetId,
-            proposalId
+            proposalId,
+            _watcherPrivateKey
         );
 
         // execute msg 1

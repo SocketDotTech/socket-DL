@@ -15,12 +15,13 @@ import "../contracts/ExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
 import "../contracts/utils/AccessRoles.sol";
 import "../contracts/utils/SigIdentifiers.sol";
-
+ 
 contract Setup is Test {
     uint256 internal c = 1;
     address immutable _plugOwner = address(uint160(c++));
     address immutable _raju = address(uint160(c++));
-
+    uint256 internal aChainSlug = 0x2013AA263;
+    uint256 internal bChainSlug = 0x2013AA264;
     string version = "TEST_NET";
 
     bytes32 versionHash = keccak256(bytes(version));
@@ -104,7 +105,9 @@ contract Setup is Test {
     function initialise() internal {
         _socketOwner = vm.addr(_socketOwnerPrivateKey);
         _watcher = vm.addr(_watcherPrivateKey);
+        _altWatcher = vm.addr(_altWatcherPrivateKey);
         _transmitter = vm.addr(_transmitterPrivateKey);
+        _altTransmitter = vm.addr(_altTransmitterPrivateKey);
         _executor = vm.addr(executorPrivateKey);
     }
 
@@ -112,8 +115,8 @@ contract Setup is Test {
         uint256[] memory transmitterPrivateKeys_
     ) internal {
         initialise();
-        _a.chainSlug = uint32(uint256(0x2013AA263));
-        _b.chainSlug = uint32(uint256(0x2013AA264));
+        _a.chainSlug = uint32(uint256(aChainSlug));
+        _b.chainSlug = uint32(uint256(bChainSlug));
 
         _deployContractsOnSingleChain(
             _a,
@@ -543,7 +546,8 @@ contract Setup is Test {
         address switchboardAddress,
         uint32 dstSlug,
         bytes32 packetId_,
-        uint256 proposalId_
+        uint256 proposalId_,
+        uint256 watcherPrivateKey_
     ) internal {
         bytes32 digest = keccak256(
             abi.encode(switchboardAddress, dstSlug, packetId_, proposalId_)
@@ -552,7 +556,7 @@ contract Setup is Test {
         // generate attest-signature
         bytes memory attestSignature = _createSignature(
             digest,
-            _watcherPrivateKey
+            watcherPrivateKey_
         );
 
         // attest with packetId_, srcSlug and signature

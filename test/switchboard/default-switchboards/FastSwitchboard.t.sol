@@ -5,103 +5,302 @@ import "../../Setup.t.sol";
 
 contract FastSwitchboardTest is Setup {
     bool isFast = true;
-    uint32 remoteChainSlug;
     bytes32 packetId;
-    address watcher;
-    address altWatcher;
     uint256 nonce;
-
-    event PacketAttested(bytes32 packetId, address attester);
+    bytes32 root = bytes32(uint256(1));
     event SwitchboardTripped(bool tripGlobalFuse_);
     event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
+    event ProposalAttested(
+        bytes32 packetId,
+        uint256 proposalId,
+        bytes32 root,
+        address attester,
+        uint256 attestationsCount
+    );
+    event ProposalTripped(bytes32 packetId, uint256 proposalId);
 
     error WatcherFound();
     error WatcherNotFound();
     error AlreadyAttested();
     error InvalidSigLength();
-
+    error InvalidRoot();
+    error NoPermit(bytes32 role);
     FastSwitchboard fastSwitchboard;
 
     function setUp() external {
         initialise();
+        uint256[] memory transmitterPivateKeys = new uint256[](1);
+        transmitterPivateKeys[0] = _transmitterPrivateKey;
 
-        _a.chainSlug = uint32(c++);
-        _a.sigVerifier__ = new SignatureVerifier(_socketOwner);
-        remoteChainSlug = uint32(c++);
-        packetId = bytes32(uint256(remoteChainSlug) << 224);
+        _dualChainSetup(transmitterPivateKeys);
+
+        packetId = bytes32(uint256(_a.chainSlug) << 224);
+
+        bytes32 digest = keccak256(
+            abi.encode(versionHash, _b.chainSlug, packetId, root)
+        );
+        bytes memory sig_ = _createSignature(digest, _transmitterPrivateKey);
+        _proposeOnDst(_b, sig_, packetId, root);
+
+        assertEq(_b.socket__.packetIdRoots(packetId, 0), root);
 
         vm.startPrank(_socketOwner);
 
+        // fastSwitchboard = FastSwitchboard(
+        //     address(_b.configs__[0].switchboard__)
+        // );
+
         fastSwitchboard = new FastSwitchboard(
             _socketOwner,
-            address(uint160(c++)),
-            _a.chainSlug,
+            address(_b.socket__),
+            _b.chainSlug,
             1,
             _a.sigVerifier__
         );
 
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
-        watcher = vm.addr(_watcherPrivateKey);
-        altWatcher = vm.addr(_altWatcherPrivateKey);
-
-        fastSwitchboard.grantWatcherRole(remoteChainSlug, watcher);
-        fastSwitchboard.grantWatcherRole(remoteChainSlug, altWatcher);
+        fastSwitchboard.grantWatcherRole(_a.chainSlug, _watcher);
+        fastSwitchboard.grantWatcherRole(_a.chainSlug, _altWatcher);
 
         vm.stopPrank();
     }
 
-    function testAttest() external {
+    function signAndPropose(
+        uint32 chainSlug_,
+        bytes32 packetId_,
+        bytes32 root_
+    ) internal {
         bytes32 digest = keccak256(
-            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId, 0)
+            abi.encode(versionHash, chainSlug_, packetId_, root_)
         );
-        bytes memory sig = _createSignature(digest, _watcherPrivateKey);
+        bytes memory sig_ = _createSignature(digest, _transmitterPrivateKey);
+        _proposeOnDst(_b, sig_, packetId, root_);
+    }
 
+    function testAttest() external {
         vm.expectEmit(false, false, false, true);
-        emit PacketAttested(packetId, watcher);
+        emit ProposalAttested(packetId, 0, root, _watcher, 1);
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            0,
+            _watcherPrivateKey
+        );
+        assertTrue(fastSwitchboard.isAttested(_watcher, root));
+    }
 
-        fastSwitchboard.attest(packetId, 0, sig);
-
-        assertTrue(fastSwitchboard.isAttested(watcher, packetId));
+    function testAttestInvalidRoot() external {
+        vm.expectRevert(InvalidRoot.selector);
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            1000, // Incorrect proposalId
+            _watcherPrivateKey
+        );
     }
 
     function testDuplicateAttestation() external {
+        vm.expectEmit(false, false, false, true);
+        emit ProposalAttested(packetId, 0, root, _watcher, 1);
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            0,
+            _watcherPrivateKey
+        );
+        assertTrue(fastSwitchboard.isAttested(_watcher, root));
+
+        vm.expectRevert(AlreadyAttested.selector);
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            0,
+            _watcherPrivateKey
+        );
+    }
+
+    function testDuplicateAttestationOnDuplicateProposal() external {
+        signAndPropose(_b.chainSlug, packetId, root);
+
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            0,
+            _watcherPrivateKey
+        );
+        vm.expectRevert(AlreadyAttested.selector);
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            1,
+            _watcherPrivateKey
+        );
+    }
+
+    function testAttestationOnDuplicateProposal() external {
+        signAndPropose(_b.chainSlug, packetId, root);
+
+        vm.expectEmit(false, false, false, true);
+        emit ProposalAttested(packetId, 0, root, _watcher, 1);
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            0,
+            _watcherPrivateKey
+        );
+
+        vm.expectEmit(false, false, false, true);
+        emit ProposalAttested(packetId, 1, root, _altWatcher, 2);
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            1,
+            _altWatcherPrivateKey
+        );
+
+        bool isAllowed = fastSwitchboard.allowPacket(
+            root,
+            packetId,
+            0,
+            _a.chainSlug,
+            0
+        );
+
+        assertTrue(isAllowed);
+
+        isAllowed = fastSwitchboard.allowPacket(
+            root,
+            packetId,
+            1,
+            _a.chainSlug,
+            0
+        );
+
+        assertTrue(isAllowed);
+    }
+
+    function testRecoveryFromWrongProposal() external {
+        bytes32 invalidRoot = bytes32(uint256(100));
+        signAndPropose(_b.chainSlug, packetId, invalidRoot); // wrong root
+        uint256 proposalId = 1; // this is second proposal, 1st one proposed in setup
+
         bytes32 digest = keccak256(
-            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId, 0)
+            abi.encode(
+                TRIP_PROPOSAL_SIG_IDENTIFIER,
+                address(fastSwitchboard),
+                packetId,
+                proposalId,
+                _b.chainSlug,
+                fastSwitchboard.nextNonce(_watcher)
+            )
         );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
-        vm.expectEmit(false, false, false, true);
-        emit PacketAttested(packetId, watcher);
+        fastSwitchboard.tripProposal(
+            fastSwitchboard.nextNonce(_watcher),
+            packetId,
+            proposalId,
+            sig
+        );
 
-        fastSwitchboard.attest(packetId, 0, sig);
+        assertTrue(fastSwitchboard.isProposalIdTripped(packetId, proposalId));
 
-        assertTrue(fastSwitchboard.isAttested(watcher, packetId));
+        signAndPropose(_b.chainSlug, packetId, root); // wrong root
+        proposalId = 2;
 
-        vm.expectRevert(AlreadyAttested.selector);
-        fastSwitchboard.attest(packetId, 0, sig);
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            proposalId,
+            _watcherPrivateKey
+        );
+
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            proposalId,
+            _altWatcherPrivateKey
+        );
+
+        bool isAllowed = fastSwitchboard.allowPacket(
+            root,
+            packetId,
+            proposalId,
+            _a.chainSlug,
+            0
+        );
+
+        assertTrue(isAllowed);
     }
 
     function testIsAllowed() external {
-        bytes32 digest = keccak256(
-            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId, 0)
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            0,
+            _watcherPrivateKey
         );
-        bytes memory sig = _createSignature(digest, _watcherPrivateKey);
-
-        fastSwitchboard.attest(packetId, 0, sig);
-
-        digest = keccak256(
-            abi.encode(address(fastSwitchboard), _a.chainSlug, packetId)
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            0,
+            _altWatcherPrivateKey
         );
-        sig = _createSignature(digest, _altWatcherPrivateKey);
-
-        fastSwitchboard.attest(packetId, 0, sig);
 
         uint256 proposeTime = block.timestamp -
             fastSwitchboard.timeoutInSeconds();
 
         bool isAllowed = fastSwitchboard.allowPacket(
+            root,
+            packetId,
             0,
+            _a.chainSlug,
+            proposeTime
+        );
+
+        assertTrue(isAllowed);
+    }
+
+    function testAttestationOnMultipleProposal() external {
+        bytes32 digest = keccak256(
+            abi.encode(versionHash, _b.chainSlug, packetId, root)
+        );
+        bytes memory sig_ = _createSignature(digest, _transmitterPrivateKey);
+        _proposeOnDst(_b, sig_, packetId, root);
+
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            0,
+            _watcherPrivateKey
+        );
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            0,
+            _altWatcherPrivateKey
+        );
+
+        uint256 proposeTime = block.timestamp -
+            fastSwitchboard.timeoutInSeconds();
+
+        bool isAllowed = fastSwitchboard.allowPacket(
+            root,
             packetId,
             0,
             _a.chainSlug,
@@ -131,8 +330,8 @@ contract FastSwitchboardTest is Setup {
             abi.encode(
                 TRIP_GLOBAL_SIG_IDENTIFIER,
                 address(fastSwitchboard),
-                _a.chainSlug,
-                nonce,
+                _b.chainSlug,
+                fastSwitchboard.nextNonce(_watcher),
                 true
             )
         );
@@ -140,7 +339,7 @@ contract FastSwitchboardTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit SwitchboardTripped(true);
-        fastSwitchboard.tripGlobal(nonce++, sig);
+        fastSwitchboard.tripGlobal(fastSwitchboard.nextNonce(_watcher), sig);
         vm.stopPrank();
 
         assertTrue(fastSwitchboard.tripGlobalFuse());
@@ -149,52 +348,116 @@ contract FastSwitchboardTest is Setup {
     function testTripPath() external {
         vm.startPrank(_socketOwner);
 
-        uint32 srcChainSlug = uint32(123);
-        fastSwitchboard.grantWatcherRole(srcChainSlug, _socketOwner);
+        fastSwitchboard.grantWatcherRole(_a.chainSlug, _socketOwner);
 
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
                 address(fastSwitchboard),
-                srcChainSlug,
                 _a.chainSlug,
-                nonce,
+                _b.chainSlug,
+                fastSwitchboard.nextNonce(_watcher),
                 true
             )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         vm.expectEmit(false, false, false, true);
-        emit PathTripped(srcChainSlug, true);
-        fastSwitchboard.tripPath(nonce++, srcChainSlug, sig);
+        emit PathTripped(_a.chainSlug, true);
+        fastSwitchboard.tripPath(
+            fastSwitchboard.nextNonce(_watcher),
+            _a.chainSlug,
+            sig
+        );
         vm.stopPrank();
 
-        assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
+        assertTrue(fastSwitchboard.tripSinglePath(_a.chainSlug));
     }
 
-    function testNonWatcherToTripPath() external {
-        uint32 srcChainSlug = _a.chainSlug;
+    function testTripProposal() external {
+        uint256 proposalId;
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            proposalId,
+            _watcherPrivateKey
+        );
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            proposalId,
+            _altWatcherPrivateKey
+        );
+
+        assertTrue(
+            fastSwitchboard.allowPacket(
+                root,
+                packetId,
+                proposalId,
+                _a.chainSlug,
+                0
+            )
+        );
+        bytes32 digest = keccak256(
+            abi.encode(
+                TRIP_PROPOSAL_SIG_IDENTIFIER,
+                address(fastSwitchboard),
+                packetId,
+                proposalId,
+                _b.chainSlug,
+                fastSwitchboard.nextNonce(_watcher)
+            )
+        );
+        bytes memory sig = _createSignature(digest, _watcherPrivateKey);
+
+        vm.expectEmit(false, false, false, true);
+        emit ProposalTripped(packetId, proposalId);
+        fastSwitchboard.tripProposal(
+            fastSwitchboard.nextNonce(_watcher),
+            packetId,
+            proposalId,
+            sig
+        );
+
+        assertFalse(
+            fastSwitchboard.allowPacket(
+                root,
+                packetId,
+                proposalId,
+                _a.chainSlug,
+                0
+            )
+        );
+
+        assertTrue(fastSwitchboard.isProposalIdTripped(packetId, proposalId));
+    }
+
+    function testFailNonWatcherToTripPath() external {
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
                 address(fastSwitchboard),
                 _a.chainSlug,
-                srcChainSlug,
-                nonce,
-                false
+                _b.chainSlug,
+                fastSwitchboard.nextNonce(_socketOwner),
+                true
             )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
-        vm.expectRevert();
-        fastSwitchboard.tripPath(nonce++, srcChainSlug, sig);
+        // vm.expectRevert();
+        fastSwitchboard.tripPath(
+            fastSwitchboard.nextNonce(_socketOwner),
+            _a.chainSlug,
+            sig
+        );
     }
 
     function testUnTripAfterTripSingle() external {
-        uint32 srcChainSlug = uint32(123);
-
         vm.startPrank(_socketOwner);
-        fastSwitchboard.grantWatcherRole(srcChainSlug, _socketOwner);
+        fastSwitchboard.grantWatcherRole(_a.chainSlug, _socketOwner);
         fastSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
         vm.stopPrank();
 
@@ -202,35 +465,43 @@ contract FastSwitchboardTest is Setup {
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
                 address(fastSwitchboard),
-                srcChainSlug,
                 _a.chainSlug,
-                nonce,
+                _b.chainSlug,
+                fastSwitchboard.nextNonce(_socketOwner),
                 true
             )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         vm.expectEmit(false, false, false, true);
-        emit PathTripped(srcChainSlug, true);
-        fastSwitchboard.tripPath(nonce++, srcChainSlug, sig);
-        assertTrue(fastSwitchboard.tripSinglePath(srcChainSlug));
+        emit PathTripped(_a.chainSlug, true);
+        fastSwitchboard.tripPath(
+            fastSwitchboard.nextNonce(_socketOwner),
+            _a.chainSlug,
+            sig
+        );
+        assertTrue(fastSwitchboard.tripSinglePath(_a.chainSlug));
 
         digest = keccak256(
             abi.encode(
                 UNTRIP_PATH_SIG_IDENTIFIER,
                 address(fastSwitchboard),
+                _b.chainSlug,
                 _a.chainSlug,
-                srcChainSlug,
-                nonce,
+                fastSwitchboard.nextNonce(_socketOwner),
                 false
             )
         );
         sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         vm.expectEmit(false, false, false, true);
-        emit PathTripped(srcChainSlug, false);
-        fastSwitchboard.untripPath(nonce++, srcChainSlug, sig);
-        assertFalse(fastSwitchboard.tripSinglePath(srcChainSlug));
+        emit PathTripped(_a.chainSlug, false);
+        fastSwitchboard.untripPath(
+            fastSwitchboard.nextNonce(_socketOwner),
+            _a.chainSlug,
+            sig
+        );
+        assertFalse(fastSwitchboard.tripSinglePath(_a.chainSlug));
     }
 
     function testGrantWatcherRole() external {
@@ -238,17 +509,17 @@ contract FastSwitchboardTest is Setup {
         address watcher2 = vm.addr(watcher2PrivateKey);
 
         vm.startPrank(_socketOwner);
-        fastSwitchboard.grantWatcherRole(remoteChainSlug, watcher2);
+        fastSwitchboard.grantWatcherRole(_a.chainSlug, watcher2);
         vm.stopPrank();
 
-        assertEq(fastSwitchboard.totalWatchers(remoteChainSlug), 3);
+        assertEq(fastSwitchboard.totalWatchers(_a.chainSlug), 3);
     }
 
     function testRedundantGrantWatcherRole() public {
         vm.startPrank(_socketOwner);
 
         vm.expectRevert(WatcherFound.selector);
-        fastSwitchboard.grantWatcherRole(remoteChainSlug, watcher);
+        fastSwitchboard.grantWatcherRole(_a.chainSlug, _watcher);
 
         vm.stopPrank();
     }
@@ -257,19 +528,19 @@ contract FastSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
 
         fastSwitchboard.revokeWatcherRole(
-            remoteChainSlug,
+            _a.chainSlug,
             vm.addr(_altWatcherPrivateKey)
         );
         vm.stopPrank();
 
-        assertEq(fastSwitchboard.totalWatchers(remoteChainSlug), 1);
+        assertEq(fastSwitchboard.totalWatchers(_a.chainSlug), 1);
     }
 
     function testRevokeWatcherRoleFail() public {
         vm.startPrank(_socketOwner);
 
         vm.expectRevert(WatcherNotFound.selector);
-        fastSwitchboard.revokeWatcherRole(remoteChainSlug, vm.addr(c++));
+        fastSwitchboard.revokeWatcherRole(_a.chainSlug, vm.addr(c++));
         vm.stopPrank();
     }
 
@@ -281,15 +552,23 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testAttesterCantAttestAllChains() public {
-        // Packet is coming from a chain different from remoteChainSlug
-        bytes32 altPacketId = bytes32(uint256(100) << 224);
+        // Packet is coming from a chain different from _a.chainSlug
+        bytes32 altPacketId = bytes32(uint256(_b.chainSlug) << 224);
 
+        // to avoid invalidRoot error while attesting
         bytes32 digest = keccak256(
-            abi.encode(address(fastSwitchboard), _a.chainSlug, altPacketId, 0)
+            abi.encode(versionHash, _b.chainSlug, altPacketId, root)
         );
-        bytes memory sig = _createSignature(digest, _watcherPrivateKey);
+        bytes memory sig_ = _createSignature(digest, _transmitterPrivateKey);
+        _proposeOnDst(_b, sig_, altPacketId, root);
 
         vm.expectRevert(WatcherNotFound.selector);
-        fastSwitchboard.attest(altPacketId, 0, sig);
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            altPacketId,
+            0,
+            _watcherPrivateKey
+        );
     }
 }
