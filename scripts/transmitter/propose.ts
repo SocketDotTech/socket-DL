@@ -9,7 +9,7 @@ import { getProviderFromChainName } from "../constants/networks";
 
 import { CORE_CONTRACTS, ChainKey, chainKeyToSlug } from "@socket.tech/dl-core";
 import { getInstance } from "../deploy/utils";
-import { mode } from "../deploy/config";
+import { mode, overrides } from "../deploy/config";
 
 export const VERSION_HASH = utils.id(version[mode]);
 
@@ -54,7 +54,9 @@ export const main = async () => {
       await getInstance(CORE_CONTRACTS.Socket, socketAddr)
     ).connect(signer);
 
-    const tx = await socket.propose(packetId, root, signature);
+    const tx = await socket.propose(packetId, root, signature, {
+      ...overrides[chainSlug],
+    });
 
     console.log(`Proposing at tx hash: ${tx.hash}`);
     await tx.wait();
