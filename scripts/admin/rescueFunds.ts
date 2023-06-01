@@ -6,10 +6,10 @@ import {
   DeploymentAddresses,
   IntegrationTypes,
   networkToChainSlug,
-} from "../../../src";
+} from "../../src";
 import { Contract, Wallet, ethers } from "ethers";
-import { mode, overrides } from "../config";
-import { getProviderFromChainName } from "../../constants";
+import { mode, overrides } from "../deploy/config";
+import { getProviderFromChainName } from "../constants";
 import { getAllAddresses } from "@socket.tech/dl-core";
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
