@@ -134,6 +134,7 @@ export enum IntegrationTypes {
   fast = "FAST",
   optimistic = "OPTIMISTIC",
   native = "NATIVE_BRIDGE",
+  unknown = "UNKNOWN",
 }
 
 export enum DeploymentMode {

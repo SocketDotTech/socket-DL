@@ -197,10 +197,11 @@ contract FastSwitchboardTest is Setup {
             abi.encode(
                 TRIP_PROPOSAL_SIG_IDENTIFIER,
                 address(fastSwitchboard),
-                packetId,
-                proposalCount,
+                _a.chainSlug,
                 _b.chainSlug,
-                fastSwitchboard.nextNonce(_watcher)
+                fastSwitchboard.nextNonce(_watcher),
+                packetId,
+                proposalCount
             )
         );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
@@ -404,10 +405,11 @@ contract FastSwitchboardTest is Setup {
             abi.encode(
                 TRIP_PROPOSAL_SIG_IDENTIFIER,
                 address(fastSwitchboard),
-                packetId,
-                proposalCount,
+                _a.chainSlug,
                 _b.chainSlug,
-                fastSwitchboard.nextNonce(_watcher)
+                fastSwitchboard.nextNonce(_watcher),
+                packetId,
+                proposalCount
             )
         );
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
@@ -486,8 +488,8 @@ contract FastSwitchboardTest is Setup {
             abi.encode(
                 UNTRIP_PATH_SIG_IDENTIFIER,
                 address(fastSwitchboard),
-                _b.chainSlug,
                 _a.chainSlug,
+                _b.chainSlug,
                 fastSwitchboard.nextNonce(_socketOwner),
                 false
             )
