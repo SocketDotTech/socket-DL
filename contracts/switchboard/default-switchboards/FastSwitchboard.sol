@@ -27,7 +27,7 @@ contract FastSwitchboard is SwitchboardBase {
     // Event emitted when a root is attested
     event ProposalAttested(
         bytes32 packetId,
-        uint256 proposalId,
+        uint256 proposalCount,
         bytes32 root,
         address attester,
         uint256 attestationsCount
@@ -72,21 +72,25 @@ contract FastSwitchboard is SwitchboardBase {
     /**
      * @dev Function to attest a packet
      * @param packetId_ Packet ID
-     * @param proposalId_ Proposal ID
+     * @param proposalCount_ Proposal ID
      * @param signature_ Signature of the packet
+     * @notice we are attesting a root uniquely identified with packetId and proposalCount. However,
+     * there can be multiple proposals for same root. To avoid need to re-attest for different proposals
+     *  with same root, we are storing attestations against root instead of packetId and proposalCount.
      */
     function attest(
         bytes32 packetId_,
-        uint256 proposalId_,
+        uint256 proposalCount_,
         bytes calldata signature_
     ) external {
         uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
-        bytes32 root = socket__.packetIdRoots(packetId_, proposalId_);
+
+        bytes32 root = socket__.packetIdRoots(packetId_, proposalCount_);
         if (root == bytes32(0)) revert InvalidRoot();
-        // Should we change the signature to include proposalId as well?
+        
         address watcher = signatureVerifier__.recoverSignerFromDigest(
             keccak256(
-                abi.encode(address(this), chainSlug, packetId_, proposalId_)
+                abi.encode(address(this), chainSlug, packetId_, proposalCount_)
             ),
             signature_
         );
@@ -103,7 +107,7 @@ contract FastSwitchboard is SwitchboardBase {
 
         emit ProposalAttested(
             packetId_,
-            proposalId_,
+            proposalCount_,
             root,
             watcher,
             attestations[root]
@@ -113,20 +117,20 @@ contract FastSwitchboard is SwitchboardBase {
     /**
      * @notice verifies if the packet satisfies needed checks before execution
      * @param packetId_ packetId
-     * @param proposalId_ proposalId
+     * @param proposalCount_ proposalCount
      * @param proposeTime_ time at which packet was proposed
      */
     function allowPacket(
         bytes32 root_,
         bytes32 packetId_,
-        uint256 proposalId_,
+        uint256 proposalCount_,
         uint32 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {
         if (
             tripGlobalFuse ||
             tripSinglePath[srcChainSlug_] ||
-            isProposalIdTripped[packetId_][proposalId_]
+            isProposalTripped[packetId_][proposalCount_]
         ) return false;
         if (isRootValid[root_]) return true;
         if (block.timestamp - proposeTime_ > timeoutInSeconds) return true;

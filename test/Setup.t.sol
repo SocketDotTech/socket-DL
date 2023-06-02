@@ -79,7 +79,7 @@ contract Setup is Test {
 
     struct ExecutePayloadOnDstParams {
         bytes32 packetId_;
-        uint256 proposalId_;
+        uint256 proposalCount_;
         bytes32 msgId_;
         uint256 msgGasLimit_;
         bytes32 extraParams_;
@@ -546,11 +546,11 @@ contract Setup is Test {
         address switchboardAddress,
         uint32 dstSlug,
         bytes32 packetId_,
-        uint256 proposalId_,
+        uint256 proposalCount_,
         uint256 watcherPrivateKey_
     ) internal {
         bytes32 digest = keccak256(
-            abi.encode(switchboardAddress, dstSlug, packetId_, proposalId_)
+            abi.encode(switchboardAddress, dstSlug, packetId_, proposalCount_)
         );
 
         // generate attest-signature
@@ -562,7 +562,7 @@ contract Setup is Test {
         // attest with packetId_, srcSlug and signature
         FastSwitchboard(switchboardAddress).attest(
             packetId_,
-            proposalId_,
+            proposalCount_,
             attestSignature
         );
     }
@@ -592,14 +592,14 @@ contract Setup is Test {
         if (paramType == 1)
             dst_.socket__.execute{value: paramValue}(
                 executionParams.packetId_,
-                executionParams.proposalId_,
+                executionParams.proposalCount_,
                 msgDetails,
                 sig
             );
         else
             dst_.socket__.execute(
                 executionParams.packetId_,
-                executionParams.proposalId_,
+                executionParams.proposalCount_,
                 msgDetails,
                 sig
             );

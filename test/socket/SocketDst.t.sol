@@ -46,7 +46,7 @@ contract SocketDstTest is Setup {
     event PacketProposed(
         address indexed transmitter,
         bytes32 indexed packetId,
-        uint256 proposalId,
+        uint256 proposalCount,
         bytes32 root
     );
 
@@ -87,14 +87,14 @@ contract SocketDstTest is Setup {
             );
         _sealOnSrc(_a, capacitor, sig_);
 
-        uint256 proposalId = 0;
+        uint256 proposalCount = 0;
         vm.expectEmit(false, false, false, true);
-        emit PacketProposed(_transmitter, packetId_, proposalId, root_);
+        emit PacketProposed(_transmitter, packetId_, proposalCount, root_);
         _proposeOnDst(_b, sig_, packetId_, root_);
 
-        assertEq(_b.socket__.packetIdRoots(packetId_, proposalId), root_);
+        assertEq(_b.socket__.packetIdRoots(packetId_, proposalCount), root_);
         assertEq(
-            _b.socket__.rootProposedAt(packetId_, proposalId),
+            _b.socket__.rootProposedAt(packetId_, proposalCount),
             block.timestamp
         );
     }
@@ -136,12 +136,12 @@ contract SocketDstTest is Setup {
         FastSwitchboard(address(_b.configs__[index].switchboard__))
             .grantWatcherRole(packetIdSrcSlug, _watcher);
 
-        uint256 proposalId;
+        uint256 proposalCount;
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
             packetId,
-            proposalId,
+            proposalCount,
             _watcherPrivateKey
         );
 
@@ -151,7 +151,7 @@ contract SocketDstTest is Setup {
             _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
-                proposalId,
+                proposalCount,
                 msgId,
                 _msgGasLimit,
                 bytes32(0),
@@ -179,12 +179,12 @@ contract SocketDstTest is Setup {
             );
 
         _sealOnSrc(_a, capacitor, sig_);
-        uint256 proposalId;
-        assertFalse(_b.socket__.isPacketProposed(packetId_, proposalId));
+        uint256 proposalCount;
+        assertFalse(_b.socket__.isPacketProposed(packetId_, proposalCount));
         _proposeOnDst(_b, sig_, packetId_, root_);
 
-        assertEq(_b.socket__.packetIdRoots(packetId_, proposalId), root_);
-        assertTrue(_b.socket__.isPacketProposed(packetId_, proposalId));
+        assertEq(_b.socket__.packetIdRoots(packetId_, proposalCount), root_);
+        assertTrue(_b.socket__.isPacketProposed(packetId_, proposalCount));
     }
 
     function testProposeAPacketByInvalidTransmitter() external {
@@ -224,7 +224,7 @@ contract SocketDstTest is Setup {
         _proposeOnDst(_b, sig_, packetId_, root_);
         assertEq(_b.socket__.packetIdRoots(packetId_, 1), root_);
 
-        assertEq(_b.socket__.proposalIdCount(packetId_), 2);
+        assertEq(_b.socket__.proposalCountCount(packetId_), 2);
     }
 
     function sendOutboundMessage() internal {
@@ -400,12 +400,12 @@ contract SocketDstTest is Setup {
 
         bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
         (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
-        uint256 proposalId;
+        uint256 proposalCount;
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
             packetId,
-            proposalId,
+            proposalCount,
             _watcherPrivateKey
         );
 
@@ -414,7 +414,7 @@ contract SocketDstTest is Setup {
             _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
-                proposalId,
+                proposalCount,
                 msgId,
                 _msgGasLimit,
                 extraParams,
@@ -471,12 +471,12 @@ contract SocketDstTest is Setup {
 
         bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
         (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
-        uint256 proposalId;
+        uint256 proposalCount;
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
             packetId,
-            proposalId,
+            proposalCount,
             _watcherPrivateKey
         );
 
@@ -486,7 +486,7 @@ contract SocketDstTest is Setup {
             uint256(1),
             ExecutePayloadOnDstParams(
                 packetId,
-                proposalId,
+                proposalCount,
                 msgId,
                 _msgGasLimit,
                 bytes32(0),

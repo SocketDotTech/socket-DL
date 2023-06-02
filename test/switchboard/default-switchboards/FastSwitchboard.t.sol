@@ -12,12 +12,12 @@ contract FastSwitchboardTest is Setup {
     event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
     event ProposalAttested(
         bytes32 packetId,
-        uint256 proposalId,
+        uint256 proposalCount,
         bytes32 root,
         address attester,
         uint256 attestationsCount
     );
-    event ProposalTripped(bytes32 packetId, uint256 proposalId);
+    event ProposalTripped(bytes32 packetId, uint256 proposalCount);
 
     error WatcherFound();
     error WatcherNotFound();
@@ -97,7 +97,7 @@ contract FastSwitchboardTest is Setup {
             address(fastSwitchboard),
             _b.chainSlug,
             packetId,
-            1000, // Incorrect proposalId
+            1000, // Incorrect proposalCount
             _watcherPrivateKey
         );
     }
@@ -191,14 +191,14 @@ contract FastSwitchboardTest is Setup {
     function testRecoveryFromWrongProposal() external {
         bytes32 invalidRoot = bytes32(uint256(100));
         signAndPropose(_b.chainSlug, packetId, invalidRoot); // wrong root
-        uint256 proposalId = 1; // this is second proposal, 1st one proposed in setup
+        uint256 proposalCount = 1; // this is second proposal, 1st one proposed in setup
 
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PROPOSAL_SIG_IDENTIFIER,
                 address(fastSwitchboard),
                 packetId,
-                proposalId,
+                proposalCount,
                 _b.chainSlug,
                 fastSwitchboard.nextNonce(_watcher)
             )
@@ -208,20 +208,20 @@ contract FastSwitchboardTest is Setup {
         fastSwitchboard.tripProposal(
             fastSwitchboard.nextNonce(_watcher),
             packetId,
-            proposalId,
+            proposalCount,
             sig
         );
 
-        assertTrue(fastSwitchboard.isProposalIdTripped(packetId, proposalId));
+        assertTrue(fastSwitchboard.isProposalTripped(packetId, proposalCount));
 
         signAndPropose(_b.chainSlug, packetId, root); // wrong root
-        proposalId = 2;
+        proposalCount = 2;
 
         _attestOnDst(
             address(fastSwitchboard),
             _b.chainSlug,
             packetId,
-            proposalId,
+            proposalCount,
             _watcherPrivateKey
         );
 
@@ -229,14 +229,14 @@ contract FastSwitchboardTest is Setup {
             address(fastSwitchboard),
             _b.chainSlug,
             packetId,
-            proposalId,
+            proposalCount,
             _altWatcherPrivateKey
         );
 
         bool isAllowed = fastSwitchboard.allowPacket(
             root,
             packetId,
-            proposalId,
+            proposalCount,
             _a.chainSlug,
             0
         );
@@ -375,19 +375,19 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testTripProposal() external {
-        uint256 proposalId;
+        uint256 proposalCount;
         _attestOnDst(
             address(fastSwitchboard),
             _b.chainSlug,
             packetId,
-            proposalId,
+            proposalCount,
             _watcherPrivateKey
         );
         _attestOnDst(
             address(fastSwitchboard),
             _b.chainSlug,
             packetId,
-            proposalId,
+            proposalCount,
             _altWatcherPrivateKey
         );
 
@@ -395,7 +395,7 @@ contract FastSwitchboardTest is Setup {
             fastSwitchboard.allowPacket(
                 root,
                 packetId,
-                proposalId,
+                proposalCount,
                 _a.chainSlug,
                 0
             )
@@ -405,7 +405,7 @@ contract FastSwitchboardTest is Setup {
                 TRIP_PROPOSAL_SIG_IDENTIFIER,
                 address(fastSwitchboard),
                 packetId,
-                proposalId,
+                proposalCount,
                 _b.chainSlug,
                 fastSwitchboard.nextNonce(_watcher)
             )
@@ -413,11 +413,11 @@ contract FastSwitchboardTest is Setup {
         bytes memory sig = _createSignature(digest, _watcherPrivateKey);
 
         vm.expectEmit(false, false, false, true);
-        emit ProposalTripped(packetId, proposalId);
+        emit ProposalTripped(packetId, proposalCount);
         fastSwitchboard.tripProposal(
             fastSwitchboard.nextNonce(_watcher),
             packetId,
-            proposalId,
+            proposalCount,
             sig
         );
 
@@ -425,13 +425,13 @@ contract FastSwitchboardTest is Setup {
             fastSwitchboard.allowPacket(
                 root,
                 packetId,
-                proposalId,
+                proposalCount,
                 _a.chainSlug,
                 0
             )
         );
 
-        assertTrue(fastSwitchboard.isProposalIdTripped(packetId, proposalId));
+        assertTrue(fastSwitchboard.isProposalTripped(packetId, proposalCount));
     }
 
     function testFailNonWatcherToTripPath() external {

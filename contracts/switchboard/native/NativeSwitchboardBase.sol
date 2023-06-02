@@ -257,9 +257,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(FEES_UPDATER_ROLE, feesUpdater);
-
-        uint256 nonce = nextNonce[feesUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
 
         switchboardFees = switchboardFees_;
         verificationFees = verificationFees_;
@@ -317,8 +315,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(TRIP_ROLE, watcher);
-        uint256 nonce = nextNonce[watcher]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
 
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
@@ -346,8 +343,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(UNTRIP_ROLE, watcher);
-        uint256 nonce = nextNonce[watcher]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
 
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);

@@ -92,12 +92,12 @@ contract HappyTest is Setup {
 
             _sealOnSrc(_a, capacitor, sig_);
             _proposeOnDst(_b, sig_, packetId, root);
-            uint256 proposalId;
+            uint256 proposalCount;
             _attestOnDst(
                 address(_b.configs__[0].switchboard__),
                 _b.chainSlug,
                 packetId,
-                proposalId,
+                proposalCount,
                 _watcherPrivateKey
             );
         }
@@ -322,12 +322,12 @@ contract HappyTest is Setup {
         roots.push(root1);
         roots.push(root2);
 
-        uint256 proposalId;
+        uint256 proposalCount;
         _attestOnDst(
             address(_b.configs__[_b.configs__.length - 1].switchboard__),
             _b.chainSlug,
             packetId,
-            proposalId,
+            proposalCount,
             _watcherPrivateKey
         );
 
