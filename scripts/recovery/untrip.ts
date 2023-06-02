@@ -48,8 +48,8 @@ const main = async () => {
               [
                 utils.id("UNTRIP_PATH"),
                 switchboard.address,
-                chain,
                 siblingChain,
+                chain,
                 nonce,
                 false,
               ]
