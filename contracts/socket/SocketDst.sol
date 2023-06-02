@@ -126,7 +126,8 @@ abstract contract SocketDst is SocketBase {
         if (!isTransmitter) revert InvalidTransmitter();
 
         packetIdRoots[packetId_][proposalCountCount[packetId_]] = root_;
-        rootProposedAt[packetId_][proposalCountCount[packetId_]] = block.timestamp;
+        rootProposedAt[packetId_][proposalCountCount[packetId_]] = block
+            .timestamp;
 
         emit PacketProposed(
             transmitter,
@@ -264,7 +265,9 @@ abstract contract SocketDst is SocketBase {
         uint256 proposalCount_
     ) external view returns (bool) {
         return
-            packetIdRoots[packetId_][proposalCount_] == bytes32(0) ? false : true;
+            packetIdRoots[packetId_][proposalCount_] == bytes32(0)
+                ? false
+                : true;
     }
 
     /**

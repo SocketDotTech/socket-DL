@@ -87,7 +87,7 @@ contract FastSwitchboard is SwitchboardBase {
 
         bytes32 root = socket__.packetIdRoots(packetId_, proposalCount_);
         if (root == bytes32(0)) revert InvalidRoot();
-        
+
         address watcher = signatureVerifier__.recoverSignerFromDigest(
             keccak256(
                 abi.encode(address(this), chainSlug, packetId_, proposalCount_)
