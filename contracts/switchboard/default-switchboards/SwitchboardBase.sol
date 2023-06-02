@@ -196,10 +196,10 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
                 abi.encode(
                     TRIP_PROPOSAL_SIG_IDENTIFIER,
                     address(this),
-                    packetId_,
-                    proposalId_,
                     chainSlug,
-                    nonce_
+                    nonce_,
+                    packetId_,
+                    proposalId_
                 )
             ),
             signature_
@@ -254,8 +254,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
                 abi.encode(
                     UNTRIP_PATH_SIG_IDENTIFIER,
                     address(this),
-                    chainSlug,
                     srcChainSlug_,
+                    chainSlug,
                     nonce_,
                     false
                 )
