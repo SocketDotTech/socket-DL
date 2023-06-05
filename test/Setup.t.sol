@@ -586,18 +586,18 @@ contract Setup is Test {
             executorPrivateKey_
         );
 
-        (uint8 paramType, uint224 paramValue) = _decodeExtraParams(
+        (uint8 paramType, uint248 paramValue) = _decodeExtraParams(
             executionParams.extraParams_
         );
-        if (paramType == 1)
-            dst_.socket__.execute{value: paramValue}(
+        if (paramType == 0)
+            dst_.socket__.execute(
                 executionParams.packetId_,
                 executionParams.proposalCount_,
                 msgDetails,
                 sig
             );
         else
-            dst_.socket__.execute(
+            dst_.socket__.execute{value: paramValue}(
                 executionParams.packetId_,
                 executionParams.proposalCount_,
                 msgDetails,
@@ -645,10 +645,9 @@ contract Setup is Test {
 
     function _decodeExtraParams(
         bytes32 extraParams_
-    ) internal pure returns (uint8, uint224) {
-        uint8 paramType = uint8(uint256(extraParams_) >> 224);
-        uint224 paramValue = uint224(uint256(extraParams_));
-        return (paramType, paramValue);
+    ) internal pure returns (uint8 paramType, uint248 paramValue) {
+        paramType = uint8(uint256(extraParams_) >> 248);
+        paramValue = uint248(uint256(extraParams_));
     }
 
     // to ignore this file from coverage

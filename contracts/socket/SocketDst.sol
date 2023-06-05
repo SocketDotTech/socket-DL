@@ -244,10 +244,22 @@ abstract contract SocketDst is SocketBase {
             );
             emit ExecutionSuccess(messageDetails_.msgId);
         } catch Error(string memory reason) {
+            if (address(this).balance > 0) {
+                (bool success, ) = address(executionManager__).call{
+                    value: address(this).balance
+                }("");
+                require(success, "Fund Transfer Failed");
+            }
             // catch failing revert() and require()
             messageExecuted[messageDetails_.msgId] = false;
             emit ExecutionFailed(messageDetails_.msgId, reason);
         } catch (bytes memory reason) {
+            if (address(this).balance > 0) {
+                (bool success, ) = address(executionManager__).call{
+                    value: address(this).balance
+                }("");
+                require(success, "Fund Transfer Failed");
+            }
             // catch failing assert()
             messageExecuted[messageDetails_.msgId] = false;
             emit ExecutionFailedBytes(messageDetails_.msgId, reason);
