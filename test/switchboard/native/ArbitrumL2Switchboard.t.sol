@@ -2,12 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../../Setup.t.sol";
-import "forge-std/Test.sol";
 import "../../../contracts/switchboard/native/ArbitrumL2Switchboard.sol";
-import "../../../contracts/TransmitManager.sol";
-import "../../../contracts/ExecutionManager.sol";
-import "../../../contracts/CapacitorFactory.sol";
-import "../../../contracts/interfaces/ICapacitor.sol";
 
 // Arbitrum Goerli -> Goerli
 contract ArbitrumL2SwitchboardTest is Setup {

@@ -8,6 +8,7 @@ contract FastSwitchboardTest is Setup {
     bytes32 packetId;
     uint256 nonce;
     bytes32 root = bytes32(uint256(1));
+
     event SwitchboardTripped(bool tripGlobalFuse_);
     event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
     event ProposalAttested(

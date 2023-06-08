@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
+
 import {ISocket, SocketConfig, SocketBase} from "../contracts/socket/SocketBase.sol";
 import {Socket, SocketSrc, SocketDst} from "../contracts/socket/Socket.sol";
 import "../contracts/utils/SignatureVerifier.sol";
@@ -18,38 +19,61 @@ import "../contracts/utils/SigIdentifiers.sol";
 
 contract Setup is Test {
     uint256 internal c = 1;
-    address immutable _plugOwner = address(uint160(c++));
-    address immutable _raju = address(uint160(c++));
-    uint256 internal aChainSlug = 0x2013AA263;
-    uint256 internal bChainSlug = 0x2013AA264;
-    string version = "TEST_NET";
+    uint32 internal aChainSlug = uint32(uint256(0x2013AA262));
+    uint32 internal bChainSlug = uint32(uint256(0x2013AA263));
+    uint32 internal cChainSlug = uint32(uint256(0x2013AA264));
 
+    address public constant NATIVE_TOKEN_ADDRESS =
+        address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+
+    string version = "TEST_NET";
     bytes32 versionHash = keccak256(bytes(version));
 
-    uint256 immutable executorPrivateKey = c++;
-    uint256 immutable _socketOwnerPrivateKey = c++;
+    address immutable _plugOwner = address(uint160(c++));
+    address immutable _raju = address(uint160(c++));
 
     address _socketOwner;
+
     address _executor;
     address _transmitter;
-    address _altTransmitter;
-
     address _watcher;
-    address _altWatcher;
 
+    address _altTransmitter;
+    address _altWatcher;
+    address _altExecutor;
+
+    address _nonTransmitter;
+    address _nonWatcher;
+    address _nonExecutor;
+
+    address _feesPayer;
+    address _feesWithdrawer;
+
+    uint256 immutable _socketOwnerPrivateKey = c++;
     uint256 immutable _transmitterPrivateKey = c++;
     uint256 immutable _watcherPrivateKey = c++;
+    uint256 immutable _executorPrivateKey = c++;
 
     uint256 immutable _altTransmitterPrivateKey = c++;
     uint256 immutable _altWatcherPrivateKey = c++;
+    uint256 immutable _altExecutorPrivateKey = c++;
+
+    uint256 immutable _nonTransmitterPrivateKey = c++;
+    uint256 immutable _nonWatcherPrivateKey = c++;
+    uint256 immutable _nonExecutorPrivateKey = c++;
+
+    uint256 immutable _feesPayerPrivateKey = c++;
+    uint256 immutable _feesWithdrawerPrivateKey = c++;
+
+    uint256 _socketOwnerNonce;
 
     uint256 internal _timeoutInSeconds = 0;
     uint256 internal _slowCapacitorWaitTime = 300;
     uint256 internal _msgGasLimit = 30548;
-    uint256 internal _sealGasLimit = 150000;
     uint256 internal _transmissionFees = 350000000000;
     uint256 internal _executionFees = 110000000000;
     uint256 internal _msgValueMaxThreshold = 1000;
+    uint256 internal _msgValueMinThreshold = 10;
     uint256 internal _relativeNativeTokenPrice = 1000 * 1e18;
 
     uint256 internal _executionOverhead = 50000;
@@ -104,11 +128,21 @@ contract Setup is Test {
 
     function initialise() internal {
         _socketOwner = vm.addr(_socketOwnerPrivateKey);
-        _watcher = vm.addr(_watcherPrivateKey);
-        _altWatcher = vm.addr(_altWatcherPrivateKey);
+
         _transmitter = vm.addr(_transmitterPrivateKey);
         _altTransmitter = vm.addr(_altTransmitterPrivateKey);
-        _executor = vm.addr(executorPrivateKey);
+        _nonTransmitter = vm.addr(_nonTransmitterPrivateKey);
+
+        _executor = vm.addr(_executorPrivateKey);
+        _altExecutor = vm.addr(_altExecutorPrivateKey);
+        _nonExecutor = vm.addr(_nonExecutorPrivateKey);
+
+        _watcher = vm.addr(_watcherPrivateKey);
+        _altWatcher = vm.addr(_altWatcherPrivateKey);
+        _nonWatcher = vm.addr(_nonWatcherPrivateKey);
+
+        _feesPayer = vm.addr(_feesPayerPrivateKey);
+        _feesWithdrawer = vm.addr(_feesWithdrawerPrivateKey);
     }
 
     function _dualChainSetup(
@@ -139,6 +173,8 @@ contract Setup is Test {
         _deploySocket(cc_, _socketOwner);
 
         vm.startPrank(_socketOwner);
+        _grantOwnerTransmitManagerRoles(cc_);
+        _grantOwnerExecutionManagerRoles(cc_);
 
         //grant FeesUpdater Role
         cc_.transmitManager__.grantRoleWithSlug(
@@ -151,6 +187,12 @@ contract Setup is Test {
         cc_.executionManager__.grantRoleWithSlug(
             FEES_UPDATER_ROLE,
             remoteChainSlug_,
+            _socketOwner
+        );
+
+        cc_.executionManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            cc_.chainSlug,
             _socketOwner
         );
 
@@ -181,6 +223,22 @@ contract Setup is Test {
 
         _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
         _addTransmitters(transmitterPrivateKeys_, cc_, cc_.chainSlug);
+    }
+
+    function _grantOwnerTransmitManagerRoles(
+        ChainContext storage cc_
+    ) internal {
+        cc_.transmitManager__.grantRole(RESCUE_ROLE, _socketOwner);
+        cc_.transmitManager__.grantRole(WITHDRAW_ROLE, _socketOwner);
+        cc_.transmitManager__.grantRole(GOVERNANCE_ROLE, _socketOwner);
+    }
+
+    function _grantOwnerExecutionManagerRoles(
+        ChainContext storage cc_
+    ) internal {
+        cc_.executionManager__.grantRole(RESCUE_ROLE, _socketOwner);
+        cc_.executionManager__.grantRole(WITHDRAW_ROLE, _socketOwner);
+        cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
     }
 
     function _setTransmissionFees(
@@ -297,6 +355,35 @@ contract Setup is Test {
         cc_.executionManager__.setMsgValueMinThreshold(
             cc_.executorNonce++,
             uint32(remoteChainSlug_),
+            threshold,
+            feesUpdateSignature
+        );
+    }
+
+    function _setMsgValueMinThreshold(
+        ChainContext storage cc_,
+        uint256 threshold
+    ) internal {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER,
+                address(cc_.executionManager__),
+                aChainSlug,
+                bChainSlug,
+                cc_.executorNonce,
+                threshold
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        cc_.executionManager__.setMsgValueMinThreshold(
+            cc_.executorNonce++,
+            uint32(bChainSlug),
             threshold,
             feesUpdateSignature
         );
@@ -607,14 +694,29 @@ contract Setup is Test {
 
     function _executePayloadOnDst(
         ChainContext storage dst_,
-        uint32,
         ExecutePayloadOnDstParams memory executionParams
     ) internal {
         _executePayloadOnDstWithExecutor(
             dst_,
-            executorPrivateKey,
+            _executorPrivateKey,
             executionParams
         );
+    }
+
+    function _rescueNative(
+        address contractAddress,
+        address token,
+        address to,
+        uint256 amount
+    ) internal {
+        assertEq(address(contractAddress).balance, 0);
+        deal(address(contractAddress), amount);
+        assertEq(address(contractAddress).balance, amount);
+
+        Socket(contractAddress).rescueFunds(token, to, amount);
+
+        assertEq(_feesWithdrawer.balance, amount);
+        assertEq(address(contractAddress).balance, 0);
     }
 
     function _packMessageId(

@@ -10,12 +10,10 @@ contract HappyTest is Setup {
 
     uint256 addAmount = 100;
     uint256 subAmount = 40;
-    uint256 sourceGasPrice = 1200000;
-    uint256 relativeGasPrice = 1100000;
-
     bool isFast = true;
-    bytes32[] roots;
     uint256 index = isFast ? 0 : 1;
+
+    bytes32[] roots;
 
     event ExecutionSuccess(bytes32 msgId);
     event ExecutionFailed(bytes32 msgId, string result);
@@ -108,7 +106,6 @@ contract HappyTest is Setup {
         );
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -133,7 +130,6 @@ contract HappyTest is Setup {
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -209,7 +205,6 @@ contract HappyTest is Setup {
 
         _executePayloadOnDst(
             _a,
-            _b.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -337,7 +332,6 @@ contract HappyTest is Setup {
 
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -360,7 +354,6 @@ contract HappyTest is Setup {
 
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,

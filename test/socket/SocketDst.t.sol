@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "../Setup.t.sol";
 import "../../contracts/examples/Counter.sol";
-import "../ExecutionManager.t.sol";
+import "../managers/ExecutionManager.t.sol";
 
 contract SocketDstTest is Setup {
     Counter srcCounter__;
@@ -12,10 +12,6 @@ contract SocketDstTest is Setup {
     uint256 addAmount = 100;
     uint256 subAmount = 40;
 
-    uint256 sealGasLimit = 200000;
-    uint256 proposeGasLimit = 100000;
-    uint256 sourceGasPrice = 1200000;
-    uint256 relativeGasPrice = 1100000;
     address immutable _invalidExecutor = address(uint160(c++));
 
     bool isFast = true;
@@ -148,7 +144,6 @@ contract SocketDstTest is Setup {
         vm.expectRevert(SocketDst.ErrInSourceValidation.selector);
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 proposalCount,
@@ -313,7 +308,6 @@ contract SocketDstTest is Setup {
 
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -334,7 +328,6 @@ contract SocketDstTest is Setup {
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -411,7 +404,6 @@ contract SocketDstTest is Setup {
 
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 proposalCount,
