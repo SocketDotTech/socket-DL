@@ -94,10 +94,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         override
         returns (address executor, bool isValidExecutor)
     {
-        executor = signatureVerifier__.recoverSignerFromDigest(
-            packedMessage,
-            sig
-        );
+        executor = signatureVerifier__.recoverSigner(packedMessage, sig);
         isValidExecutor = _hasRole(EXECUTOR_ROLE, executor);
     }
 
@@ -125,7 +122,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
      * @return Minimum fees required for executing the transaction
      */
     function getMinFees(
-        uint256 gasLimit_,
+        uint256,
         uint256 payloadSize_,
         bytes32 extraParams_,
         uint32 siblingChainSlug_
@@ -170,7 +167,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 executionFees_,
         bytes calldata signature_
     ) external override {
-        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+        address feesUpdater = signatureVerifier__.recoverSigner(
             keccak256(
                 abi.encode(
                     FEES_UPDATE_SIG_IDENTIFIER,
@@ -197,7 +194,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 relativeNativeTokenPrice_,
         bytes calldata signature_
     ) external override {
-        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+        address feesUpdater = signatureVerifier__.recoverSigner(
             keccak256(
                 abi.encode(
                     RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENTIFIER,
@@ -228,7 +225,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 msgValueMinThreshold_,
         bytes calldata signature_
     ) external override {
-        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+        address feesUpdater = signatureVerifier__.recoverSigner(
             keccak256(
                 abi.encode(
                     MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER,
@@ -255,7 +252,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 msgValueMaxThreshold_,
         bytes calldata signature_
     ) external override {
-        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+        address feesUpdater = signatureVerifier__.recoverSigner(
             keccak256(
                 abi.encode(
                     MSG_VALUE_MAX_THRESHOLD_SIG_IDENTIFIER,
