@@ -10,6 +10,7 @@ import "./SocketBase.sol";
  */
 abstract contract SocketSrc is SocketBase {
     error InsufficientFees();
+    error InvalidCapacitor();
 
     /**
      * @notice emits the verification and seal confirmation of a packet
@@ -234,6 +235,8 @@ abstract contract SocketSrc is SocketBase {
         bytes32 packetId = _encodePacketId(capacitorAddress_, packetCount);
 
         uint32 siblingChainSlug = capacitorToSlug[capacitorAddress_];
+        if (siblingChainSlug == 0) revert InvalidCapacitor();
+
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
                 siblingChainSlug,

@@ -615,8 +615,27 @@ contract Setup is Test {
         address capacitor,
         bytes memory sig_
     ) internal {
-        hoax(_raju);
         src_.socket__.seal(DEFAULT_BATCH_LENGTH, capacitor, sig_);
+
+        // random capacitor
+        address randomCapacitor = address(uint160(c++));
+        vm.expectRevert();
+        src_.socket__.seal(DEFAULT_BATCH_LENGTH, randomCapacitor, sig_);
+
+        // non-socket capacitor
+        SingleCapacitor randomCapacitor__ = new SingleCapacitor(
+            address(src_.socket__),
+            _socketOwner
+        );
+        hoax(address(src_.socket__));
+        randomCapacitor__.addPackedMessage(bytes32("random"));
+
+        vm.expectRevert(SocketSrc.InvalidCapacitor.selector);
+        src_.socket__.seal(
+            DEFAULT_BATCH_LENGTH,
+            address(randomCapacitor__),
+            sig_
+        );
     }
 
     function _proposeOnDst(
@@ -625,8 +644,14 @@ contract Setup is Test {
         bytes32 packetId_,
         bytes32 root_
     ) internal {
-        hoax(_raju);
         dst_.socket__.propose(packetId_, root_, sig_);
+
+        // bytes32(0) packetId proposed
+        // bytes32(0) packetId proposed
+        // bytes32(0) packetId proposed
+
+        vm.expectRevert(SocketDst.InvalidPacketId.selector);
+        dst_.socket__.propose(bytes32(0), root_, sig_);
     }
 
     function _attestOnDst(

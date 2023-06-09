@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "../Setup.t.sol";
-import "forge-std/console.sol";
 
 contract ExecutionManagerTest is Setup {
     ExecutionManager internal executionManager;

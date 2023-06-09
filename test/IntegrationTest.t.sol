@@ -35,7 +35,7 @@ contract HappyTest is Setup {
         _configPlugContracts(index);
     }
 
-    function testRemoteAddFromAtoB1() external {
+    function testRemoteAddFromAtoB() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
             keccak256("OP_ADD"),
