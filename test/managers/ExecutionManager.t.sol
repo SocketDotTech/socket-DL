@@ -88,7 +88,7 @@ contract ExecutionManagerTest is Setup {
             uint256((uint256(paramType) << 248) | uint248(msgValue))
         );
 
-        _setMsgValueMinThreshold(_a, _msgValueMinThreshold);
+        _setMsgValueMinThreshold(_a, bChainSlug, _msgValueMinThreshold);
 
         vm.expectRevert(MsgValueTooLow.selector);
         executionManager.getMinFees(

@@ -204,7 +204,6 @@ contract Setup is Test {
             _socketOwner
         );
 
-        _setTransmissionFees(cc_, remoteChainSlug_, _transmissionFees);
         _setExecutionFees(cc_, remoteChainSlug_, _executionFees);
         _setMsgValueMaxThreshold(cc_, remoteChainSlug_, _msgValueMaxThreshold);
         _setRelativeNativeTokenPrice(
@@ -212,6 +211,8 @@ contract Setup is Test {
             remoteChainSlug_,
             _relativeNativeTokenPrice
         );
+        _setMsgValueMinThreshold(cc_, remoteChainSlug_, _msgValueMinThreshold);
+        _setTransmissionFees(cc_, remoteChainSlug_, _transmissionFees);
         vm.stopPrank();
 
         // deploy default configs: fast, slow
@@ -225,14 +226,10 @@ contract Setup is Test {
         scc_ = _addOptimisticSwitchboard(cc_, remoteChainSlug_, _capacitorType);
         cc_.configs__.push(scc_);
 
-        // add roles
-        hoax(_socketOwner);
-        cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
-
         _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
         _addTransmitters(transmitterPrivateKeys_, cc_, cc_.chainSlug);
 
-        _testUtils(_a);
+        _testUtils(cc_);
     }
 
     function _grantOwnerSocketRoles(ChainContext storage cc_) internal {
@@ -375,35 +372,6 @@ contract Setup is Test {
         );
     }
 
-    function _setMsgValueMinThreshold(
-        ChainContext storage cc_,
-        uint256 threshold
-    ) internal {
-        //set ExecutionFees for remoteChainSlug
-        bytes32 feesUpdateDigest = keccak256(
-            abi.encode(
-                MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER,
-                address(cc_.executionManager__),
-                aChainSlug,
-                bChainSlug,
-                cc_.executorNonce,
-                threshold
-            )
-        );
-
-        bytes memory feesUpdateSignature = _createSignature(
-            feesUpdateDigest,
-            _socketOwnerPrivateKey
-        );
-
-        cc_.executionManager__.setMsgValueMinThreshold(
-            cc_.executorNonce++,
-            uint32(bChainSlug),
-            threshold,
-            feesUpdateSignature
-        );
-    }
-
     function _setRelativeNativeTokenPrice(
         ChainContext storage cc_,
         uint32 remoteChainSlug_,
@@ -477,7 +445,11 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(WITHDRAW_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(RESCUE_ROLE, _socketOwner);
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
+        fastSwitchboard.grantWatcherRole(remoteChainSlug_, _altWatcher);
+
         vm.stopPrank();
 
         scc_ = _registerSwitchboard(
@@ -837,8 +809,22 @@ contract Setup is Test {
         paramValue = uint248(uint256(extraParams_));
     }
 
-    // to ignore this file from coverage
+    // to test contract setup on one chain
+    ChainContext aTestChain;
+
     function test() external {
-        assertTrue(true);
+        initialise();
+        uint256[] memory transmitterPivateKeys = new uint256[](1);
+        transmitterPivateKeys[0] = _transmitterPrivateKey;
+
+        aTestChain.chainSlug = uint32(10);
+        uint32 bTestChainSlug = uint32(20);
+
+        _deployContractsOnSingleChain(
+            aTestChain,
+            bTestChainSlug,
+            isExecutionOpen,
+            transmitterPivateKeys
+        );
     }
 }
