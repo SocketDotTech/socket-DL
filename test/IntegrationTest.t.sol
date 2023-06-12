@@ -142,6 +142,23 @@ contract HappyTest is Setup {
                 proof
             )
         );
+
+        // with different proposal id
+        vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
+        _executePayloadOnDst(
+            _b,
+            ExecutePayloadOnDstParams(
+                packetId,
+                1,
+                _packMessageId(_a.chainSlug, address(dstCounter__), 0),
+                _msgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
+        );
     }
 
     function testRemoteAddFromBtoA() external {

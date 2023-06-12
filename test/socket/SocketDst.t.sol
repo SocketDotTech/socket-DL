@@ -203,6 +203,25 @@ contract SocketDstTest is Setup {
         _proposeOnDst(_b, sig_, packetId_, root_);
     }
 
+    function testProposeWithInvalidChainSlug() external {
+        uint32 randomChainSlug = cChainSlug;
+        bytes32 packetId = _getPackedId(
+            address(uint160(c++)),
+            randomChainSlug,
+            100
+        );
+        bytes32 root = bytes32("RANDOM_ROOT");
+
+        bytes32 digest = keccak256(
+            abi.encode(versionHash, randomChainSlug, packetId, root)
+        );
+
+        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
+
+        vm.expectRevert(InvalidTransmitter.selector);
+        _b.socket__.propose(packetId, root, sig);
+    }
+
     function testDuplicateProposePacket() external {
         address capacitor = address(_a.configs__[index].capacitor__);
 
