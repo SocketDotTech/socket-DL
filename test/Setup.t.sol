@@ -70,6 +70,8 @@ contract Setup is Test {
     uint256 _socketOwnerNonce;
 
     uint256 internal _timeoutInSeconds = 0;
+    uint256 internal _optimisticTimeoutInSeconds = 1;
+
     uint256 internal _slowCapacitorWaitTime = 300;
     uint256 internal _msgGasLimit = 30548;
     uint256 internal _transmissionFees = 350000000000;
@@ -411,7 +413,7 @@ contract Setup is Test {
             _socketOwner,
             address(cc_.socket__),
             cc_.chainSlug,
-            _timeoutInSeconds,
+            _optimisticTimeoutInSeconds,
             cc_.sigVerifier__
         );
 
@@ -448,8 +450,6 @@ contract Setup is Test {
         fastSwitchboard.grantRole(WITHDRAW_ROLE, _socketOwner);
         fastSwitchboard.grantRole(RESCUE_ROLE, _socketOwner);
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
-        fastSwitchboard.grantWatcherRole(remoteChainSlug_, _altWatcher);
-
         vm.stopPrank();
 
         scc_ = _registerSwitchboard(
@@ -687,6 +687,18 @@ contract Setup is Test {
             proposalCount_,
             attestSignature
         );
+    }
+
+    function _signAndPropose(
+        ChainContext storage cc_,
+        bytes32 packetId_,
+        bytes32 root_
+    ) internal {
+        bytes32 digest = keccak256(
+            abi.encode(versionHash, cc_.chainSlug, packetId_, root_)
+        );
+        bytes memory sig_ = _createSignature(digest, _transmitterPrivateKey);
+        _proposeOnDst(cc_, sig_, packetId_, root_);
     }
 
     function _executePayloadOnDstWithExecutor(
