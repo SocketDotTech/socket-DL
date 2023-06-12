@@ -46,6 +46,7 @@ contract SocketDstTest is Setup {
     event PacketProposed(
         address indexed transmitter,
         bytes32 indexed packetId,
+        uint256 proposalCount,
         bytes32 root
     );
 
@@ -86,12 +87,16 @@ contract SocketDstTest is Setup {
             );
         _sealOnSrc(_a, capacitor, sig_);
 
+        uint256 proposalCount = 0;
         vm.expectEmit(false, false, false, true);
-        emit PacketProposed(_transmitter, packetId_, root_);
+        emit PacketProposed(_transmitter, packetId_, proposalCount, root_);
         _proposeOnDst(_b, sig_, packetId_, root_);
 
-        assertEq(_b.socket__.packetIdRoots(packetId_), root_);
-        assertEq(_b.socket__.rootProposedAt(packetId_), block.timestamp);
+        assertEq(_b.socket__.packetIdRoots(packetId_, proposalCount), root_);
+        assertEq(
+            _b.socket__.rootProposedAt(packetId_, proposalCount),
+            block.timestamp
+        );
     }
 
     function testInvalidPacketPropose() external {
@@ -131,24 +136,30 @@ contract SocketDstTest is Setup {
         FastSwitchboard(address(_b.configs__[index].switchboard__))
             .grantWatcherRole(packetIdSrcSlug, _watcher);
 
+        uint256 proposalCount;
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
-            packetId
+            packetId,
+            proposalCount,
+            _watcherPrivateKey
         );
 
         vm.expectRevert(SocketDst.ErrInSourceValidation.selector);
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
-            packetId,
-            msgId,
-            _msgGasLimit,
-            bytes32(0),
-            executionFee,
-            root,
-            payload,
-            abi.encode(0)
+            ExecutePayloadOnDstParams(
+                packetId,
+                proposalCount,
+                msgId,
+                _msgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                abi.encode(0)
+            )
         );
     }
 
@@ -168,11 +179,12 @@ contract SocketDstTest is Setup {
             );
 
         _sealOnSrc(_a, capacitor, sig_);
-        assertFalse(_b.socket__.isPacketProposed(packetId_));
+        uint256 proposalCount;
+        assertFalse(_b.socket__.isPacketProposed(packetId_, proposalCount));
         _proposeOnDst(_b, sig_, packetId_, root_);
 
-        assertEq(_b.socket__.packetIdRoots(packetId_), root_);
-        assertTrue(_b.socket__.isPacketProposed(packetId_));
+        assertEq(_b.socket__.packetIdRoots(packetId_, proposalCount), root_);
+        assertTrue(_b.socket__.isPacketProposed(packetId_, proposalCount));
     }
 
     function testProposeAPacketByInvalidTransmitter() external {
@@ -207,9 +219,12 @@ contract SocketDstTest is Setup {
             _transmitterPrivateKey
         );
         (bytes32 packetId_, bytes32 root_) = sealAndPropose(capacitor);
-
-        vm.expectRevert(AlreadyProposed.selector);
+        assertEq(_b.socket__.packetIdRoots(packetId_, 0), root_);
+        // vm.expectRevert(AlreadyProposed.selector);
         _proposeOnDst(_b, sig_, packetId_, root_);
+        assertEq(_b.socket__.packetIdRoots(packetId_, 1), root_);
+
+        assertEq(_b.socket__.proposalCountCount(packetId_), 2);
     }
 
     function sendOutboundMessage() internal {
@@ -288,7 +303,9 @@ contract SocketDstTest is Setup {
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
-            packetId
+            packetId,
+            0,
+            _watcherPrivateKey
         );
 
         vm.expectEmit(true, false, false, false);
@@ -297,14 +314,17 @@ contract SocketDstTest is Setup {
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
-            packetId,
-            msgId,
-            _msgGasLimit,
-            bytes32(0),
-            executionFee,
-            root,
-            payload,
-            proof
+            ExecutePayloadOnDstParams(
+                packetId,
+                0,
+                msgId,
+                _msgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
         );
 
         assertEq(dstCounter__.counter(), amount);
@@ -315,14 +335,17 @@ contract SocketDstTest is Setup {
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
-            packetId,
-            msgId,
-            _msgGasLimit,
-            bytes32(0),
-            executionFee,
-            root,
-            payload,
-            proof
+            ExecutePayloadOnDstParams(
+                packetId,
+                0,
+                msgId,
+                _msgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
         );
     }
 
@@ -377,23 +400,29 @@ contract SocketDstTest is Setup {
 
         bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
         (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        uint256 proposalCount;
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
-            packetId
+            packetId,
+            proposalCount,
+            _watcherPrivateKey
         );
 
         _executePayloadOnDst(
             _b,
             _a.chainSlug,
-            packetId,
-            msgId,
-            _msgGasLimit,
-            extraParams,
-            executionFee,
-            root,
-            payload,
-            proof
+            ExecutePayloadOnDstParams(
+                packetId,
+                proposalCount,
+                msgId,
+                _msgGasLimit,
+                extraParams,
+                executionFee,
+                root,
+                payload,
+                proof
+            )
         );
     }
 
@@ -442,24 +471,30 @@ contract SocketDstTest is Setup {
 
         bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
         (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        uint256 proposalCount;
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
-            packetId
+            packetId,
+            proposalCount,
+            _watcherPrivateKey
         );
 
         vm.expectRevert(NotExecutor.selector);
         _executePayloadOnDstWithExecutor(
             _b,
-            packetId,
-            msgId,
-            _msgGasLimit,
-            bytes32(0),
-            executionFee,
-            root,
             uint256(1),
-            payload,
-            proof
+            ExecutePayloadOnDstParams(
+                packetId,
+                proposalCount,
+                msgId,
+                _msgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
         );
     }
 

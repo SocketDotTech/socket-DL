@@ -66,20 +66,32 @@ abstract contract SocketDst is SocketBase {
      */
     mapping(bytes32 => bool) public messageExecuted;
     /**
-     * @dev capacitorAddr|chainSlug|packetId mapping to packetIdRoots
+     * @dev capacitorAddr|chainSlug|packetId => proposalCount mapping to packetIdRoots
      */
-    mapping(bytes32 => bytes32) public override packetIdRoots;
-    mapping(bytes32 => uint256) public rootProposedAt;
+    mapping(bytes32 => mapping(uint256 => bytes32))
+        public
+        override packetIdRoots;
+    /**
+     * @dev packetId => proposalCount => proposalTimestamp
+     */
+    mapping(bytes32 => mapping(uint256 => uint256)) public rootProposedAt;
+
+    /**
+     * @dev packetId => proposalCountCount
+     */
+    mapping(bytes32 => uint256) public proposalCountCount;
 
     /**
      * @notice emits the packet details when proposed at remote
      * @param transmitter address of transmitter
      * @param packetId packet id
+     * @param proposalCount proposal id
      * @param root packet root
      */
     event PacketProposed(
         address indexed transmitter,
         bytes32 indexed packetId,
+        uint256 proposalCount,
         bytes32 root
     );
 
@@ -103,7 +115,6 @@ abstract contract SocketDst is SocketBase {
         bytes calldata signature_
     ) external override {
         if (packetId_ == bytes32(0)) revert InvalidPacketId();
-        if (packetIdRoots[packetId_] != bytes32(0)) revert AlreadyProposed();
 
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
@@ -114,19 +125,27 @@ abstract contract SocketDst is SocketBase {
 
         if (!isTransmitter) revert InvalidTransmitter();
 
-        packetIdRoots[packetId_] = root_;
-        rootProposedAt[packetId_] = block.timestamp;
+        packetIdRoots[packetId_][proposalCountCount[packetId_]] = root_;
+        rootProposedAt[packetId_][proposalCountCount[packetId_]] = block
+            .timestamp;
 
-        emit PacketProposed(transmitter, packetId_, root_);
+        emit PacketProposed(
+            transmitter,
+            packetId_,
+            proposalCountCount[packetId_]++,
+            root_
+        );
     }
 
     /**
      * @notice executes a message, fees will go to recovered executor address
      * @param packetId_ packet id
+     * @param proposalCount_ proposal id
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
         bytes32 packetId_,
+        uint256 proposalCount_,
         ISocket.MessageDetails calldata messageDetails_,
         bytes memory signature_
     ) external payable override {
@@ -135,7 +154,8 @@ abstract contract SocketDst is SocketBase {
         messageExecuted[messageDetails_.msgId] = true;
 
         if (packetId_ == bytes32(0)) revert InvalidPacketId();
-        if (packetIdRoots[packetId_] == bytes32(0)) revert PacketNotProposed();
+        if (packetIdRoots[packetId_][proposalCount_] == bytes32(0))
+            revert PacketNotProposed();
 
         uint32 remoteSlug = _decodeSlug(messageDetails_.msgId);
         if (_decodeSlug(packetId_) != remoteSlug)
@@ -159,6 +179,7 @@ abstract contract SocketDst is SocketBase {
 
         _verify(
             packetId_,
+            proposalCount_,
             remoteSlug,
             packedMessage,
             plugConfig,
@@ -170,6 +191,7 @@ abstract contract SocketDst is SocketBase {
 
     function _verify(
         bytes32 packetId_,
+        uint256 proposalCount_,
         uint32 remoteChainSlug_,
         bytes32 packedMessage_,
         PlugConfig storage plugConfig_,
@@ -178,16 +200,17 @@ abstract contract SocketDst is SocketBase {
     ) internal view {
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
-                packetIdRoots[packetId_],
+                packetIdRoots[packetId_][proposalCount_],
                 packetId_,
+                proposalCount_,
                 uint32(remoteChainSlug_),
-                rootProposedAt[packetId_]
+                rootProposedAt[packetId_][proposalCount_]
             )
         ) revert VerificationFailed();
 
         if (
             !plugConfig_.decapacitor__.verifyMessageInclusion(
-                packetIdRoots[packetId_],
+                packetIdRoots[packetId_][proposalCount_],
                 packedMessage_,
                 decapacitorProof_
             )
@@ -234,10 +257,17 @@ abstract contract SocketDst is SocketBase {
     /**
      * @dev Checks whether the specified packet has been proposed.
      * @param packetId_ The ID of the packet to check.
+     * @param packetId_ The proposal ID of the packetId to check.
      * @return A boolean indicating whether the packet has been proposed or not.
      */
-    function isPacketProposed(bytes32 packetId_) external view returns (bool) {
-        return packetIdRoots[packetId_] == bytes32(0) ? false : true;
+    function isPacketProposed(
+        bytes32 packetId_,
+        uint256 proposalCount_
+    ) external view returns (bool) {
+        return
+            packetIdRoots[packetId_][proposalCount_] == bytes32(0)
+                ? false
+                : true;
     }
 
     /**

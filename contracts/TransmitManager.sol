@@ -121,8 +121,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
 
-        uint256 nonce = nextNonce[feesUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
 
         transmissionFees[dstChainSlug_] = transmissionFees_;
         emit TransmissionFeesSet(dstChainSlug_, transmissionFees_);

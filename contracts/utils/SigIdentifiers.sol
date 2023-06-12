@@ -2,6 +2,7 @@
 pragma solidity 0.8.7;
 
 bytes32 constant TRIP_PATH_SIG_IDENTIFIER = keccak256("TRIP_PATH");
+bytes32 constant TRIP_PROPOSAL_SIG_IDENTIFIER = keccak256("TRIP_PROPOSAL");
 bytes32 constant TRIP_GLOBAL_SIG_IDENTIFIER = keccak256("TRIP_GLOBAL");
 
 bytes32 constant UNTRIP_PATH_SIG_IDENTIFIER = keccak256("UNTRIP_PATH");

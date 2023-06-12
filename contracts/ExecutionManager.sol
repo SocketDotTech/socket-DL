@@ -185,9 +185,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-
-        uint256 nonce = nextNonce[feesUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
 
         executionFees[dstChainSlug_] = executionFees_;
         emit ExecutionFeesSet(dstChainSlug_, executionFees_);
@@ -215,8 +213,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
 
-        uint256 nonce = nextNonce[feesUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
 
         relativeNativeTokenPrice[dstChainSlug_] = relativeNativeTokenPrice_;
         emit RelativeNativeTokenPriceSet(
@@ -246,9 +243,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-
-        uint256 nonce = nextNonce[feesUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
 
         msgValueMinThreshold[dstChainSlug_] = msgValueMinThreshold_;
         emit MsgValueMinThresholdSet(dstChainSlug_, msgValueMinThreshold_);
@@ -276,8 +271,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
 
-        uint256 nonce = nextNonce[feesUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
 
         msgValueMaxThreshold[dstChainSlug_] = msgValueMaxThreshold_;
         emit MsgValueMaxThresholdSet(dstChainSlug_, msgValueMaxThreshold_);

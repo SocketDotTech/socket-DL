@@ -72,7 +72,9 @@ export const main = async () => {
         if (!addr["integrations"]) return;
 
         const integrations = addr["integrations"] ?? {};
-        const integrationList = Object.keys(integrations);
+        const integrationList = Object.keys(integrations).filter((chain) =>
+          chains.includes(parseInt(chain) as ChainSlug)
+        );
 
         console.log(`Configuring for ${chain}`);
 

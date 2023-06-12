@@ -1,9 +1,14 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import { ChainKey, ChainSlug, DeploymentMode, TestnetIds } from "../../src";
+import {
+  ChainKey,
+  ChainSlug,
+  DeploymentMode,
+  TestnetIds,
+  CORE_CONTRACTS,
+} from "../../src";
 import { BigNumberish, utils } from "ethers";
-import { CORE_CONTRACTS } from "@socket.tech/dl-core";
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
@@ -76,9 +81,9 @@ export const executorAddresses = {
 
 export const overrides: {
   [chain in ChainSlug | number]?: {
-    type: number | undefined;
+    type?: number | undefined;
     gasLimit?: BigNumberish | undefined;
-    gasPrice: BigNumberish | undefined;
+    gasPrice?: BigNumberish | undefined;
   };
 } = {
   [ChainSlug.ARBITRUM]: {

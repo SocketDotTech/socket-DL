@@ -10,7 +10,7 @@ import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
 import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UNTRIP_ROLE, WATCHER_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
-import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, TRIP_PROPOSAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     ISignatureVerifier public immutable signatureVerifier__;
@@ -31,6 +31,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     // sourceChain => isPaused
     mapping(uint32 => bool) public tripSinglePath;
 
+    // isProposalTripped(packetId => proposalCount => isTripped)
+    mapping(bytes32 => mapping(uint256 => bool)) public isProposalTripped;
+
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
 
@@ -43,10 +46,19 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param tripSinglePath New trip status of the path
      */
     event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
+
+    /**
+     * @dev Emitted when a proposal for a packetId is tripped
+     * @param packetId packetId of packet
+     * @param proposalCount proposalCount being tripped
+     */
+    event ProposalTripped(bytes32 packetId, uint256 proposalCount);
+
     /**
      * @dev Emitted when Switchboard contract is tripped globally
      * @param tripGlobalFuse New trip status of the contract
      */
+
     event SwitchboardTripped(bool tripGlobalFuse);
     /**
      * @dev Emitted when execution overhead is set for a destination chain
@@ -160,12 +172,45 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher);
-        uint256 nonce = nextNonce[watcher]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
 
         //source chain based tripping
         tripSinglePath[srcChainSlug_] = true;
         emit PathTripped(srcChainSlug_, true);
+    }
+
+    /**
+     * @notice pause a particular proposal of a packet
+     */
+    function tripProposal(
+        uint256 nonce_,
+        bytes32 packetId_,
+        uint256 proposalCount_,
+        bytes memory signature_
+    ) external {
+        uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
+        address watcher = signatureVerifier__.recoverSignerFromDigest(
+            // it includes trip status at the end
+            keccak256(
+                abi.encode(
+                    TRIP_PROPOSAL_SIG_IDENTIFIER,
+                    address(this),
+                    srcChainSlug,
+                    chainSlug,
+                    nonce_,
+                    packetId_,
+                    proposalCount_
+                )
+            ),
+            signature_
+        );
+
+        _checkRoleWithSlug(WATCHER_ROLE, srcChainSlug, watcher);
+        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+
+        //source chain based tripping
+        isProposalTripped[packetId_][proposalCount_] = true;
+        emit ProposalTripped(packetId_, proposalCount_);
     }
 
     /**
@@ -187,8 +232,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(TRIP_ROLE, tripper);
-        uint256 nonce = nextNonce[tripper]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[tripper]++) revert InvalidNonce();
 
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
@@ -208,8 +252,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
                 abi.encode(
                     UNTRIP_PATH_SIG_IDENTIFIER,
                     address(this),
-                    chainSlug,
                     srcChainSlug_,
+                    chainSlug,
                     nonce_,
                     false
                 )
@@ -218,8 +262,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(UNTRIP_ROLE, untripper);
-        uint256 nonce = nextNonce[untripper]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
 
         tripSinglePath[srcChainSlug_] = false;
         emit PathTripped(srcChainSlug_, false);
@@ -244,8 +287,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(UNTRIP_ROLE, untripper);
-        uint256 nonce = nextNonce[untripper]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
 
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
@@ -274,9 +316,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-
-        uint256 nonce = nextNonce[feesUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
 
         Fees memory feesObject = Fees({
             switchboardFees: switchboardFees_,

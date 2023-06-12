@@ -180,6 +180,7 @@ contract OptimisticSwitchboardTest is Setup {
         bool isAllowed = optimisticSwitchboard.allowPacket(
             0,
             0,
+            0,
             _a.chainSlug,
             proposeTime
         );
@@ -190,6 +191,7 @@ contract OptimisticSwitchboardTest is Setup {
     function testIsAllowedWhenProposedAfterTimeout() external {
         uint256 proposeTime = block.timestamp;
         bool isAllowed = optimisticSwitchboard.allowPacket(
+            0,
             0,
             0,
             _a.chainSlug,
@@ -228,6 +230,7 @@ contract OptimisticSwitchboardTest is Setup {
         optimisticSwitchboard.tripPath(nonce++, srcChainSlug, sig);
 
         bool isAllowed = optimisticSwitchboard.allowPacket(
+            0,
             0,
             0,
             srcChainSlug,
