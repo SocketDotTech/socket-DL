@@ -47,10 +47,6 @@ contract FastSwitchboardTest is Setup {
 
         vm.startPrank(_socketOwner);
 
-        // fastSwitchboard = FastSwitchboard(
-        //     address(_b.configs__[0].switchboard__)
-        // );
-
         fastSwitchboard = new FastSwitchboard(
             _socketOwner,
             address(_b.socket__),
@@ -60,6 +56,8 @@ contract FastSwitchboardTest is Setup {
         );
 
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(WITHDRAW_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(RESCUE_ROLE, _socketOwner);
 
         fastSwitchboard.grantWatcherRole(_a.chainSlug, _watcher);
         fastSwitchboard.grantWatcherRole(_a.chainSlug, _altWatcher);
@@ -333,7 +331,7 @@ contract FastSwitchboardTest is Setup {
                 TRIP_GLOBAL_SIG_IDENTIFIER,
                 address(fastSwitchboard),
                 _b.chainSlug,
-                fastSwitchboard.nextNonce(_watcher),
+                fastSwitchboard.nextNonce(_socketOwner),
                 true
             )
         );
@@ -341,7 +339,10 @@ contract FastSwitchboardTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit SwitchboardTripped(true);
-        fastSwitchboard.tripGlobal(fastSwitchboard.nextNonce(_watcher), sig);
+        fastSwitchboard.tripGlobal(
+            fastSwitchboard.nextNonce(_socketOwner),
+            sig
+        );
         vm.stopPrank();
 
         assertTrue(fastSwitchboard.tripGlobalFuse());
@@ -572,6 +573,40 @@ contract FastSwitchboardTest is Setup {
             altPacketId,
             0,
             _watcherPrivateKey
+        );
+    }
+
+    function testWithdrawFees() public {
+        (uint256 minFees, ) = fastSwitchboard.getMinFees(bChainSlug);
+        deal(_feesPayer, minFees);
+
+        assertEq(address(fastSwitchboard).balance, 0);
+        assertEq(_feesPayer.balance, minFees);
+
+        vm.startPrank(_feesPayer);
+        fastSwitchboard.payFees{value: minFees}(bChainSlug);
+        vm.stopPrank();
+
+        assertEq(_feesWithdrawer.balance, 0);
+
+        hoax(_raju);
+        vm.expectRevert();
+        fastSwitchboard.withdrawFees(_feesWithdrawer);
+
+        hoax(_socketOwner);
+        fastSwitchboard.withdrawFees(_feesWithdrawer);
+
+        assertEq(_feesWithdrawer.balance, minFees);
+    }
+
+    function testRescueNativeFunds() public {
+        uint256 amount = 1e18;
+        hoax(_socketOwner);
+        _rescueNative(
+            address(fastSwitchboard),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
         );
     }
 }

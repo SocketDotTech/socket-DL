@@ -18,7 +18,12 @@ contract ExecutionManagerTest is Setup {
         _a.chainSlug = uint32(uint256(aChainSlug));
         uint256[] memory transmitterPivateKeys = new uint256[](1);
         transmitterPivateKeys[0] = _transmitterPrivateKey;
-        _deployContractsOnSingleChain(_a, bChainSlug, transmitterPivateKeys);
+        _deployContractsOnSingleChain(
+            _a,
+            bChainSlug,
+            isExecutionOpen,
+            transmitterPivateKeys
+        );
 
         executionManager = _a.executionManager__;
         assertTrue(
@@ -178,9 +183,12 @@ contract ExecutionManagerTest is Setup {
 
         assertEq(_feesWithdrawer.balance, 0);
 
-        vm.startPrank(_socketOwner);
+        hoax(_raju);
+        vm.expectRevert();
         executionManager.withdrawFees(_feesWithdrawer);
-        vm.stopPrank();
+
+        hoax(_socketOwner);
+        executionManager.withdrawFees(_feesWithdrawer);
 
         assertEq(_feesWithdrawer.balance, minFees);
     }

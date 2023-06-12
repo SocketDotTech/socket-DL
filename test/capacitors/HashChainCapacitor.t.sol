@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "../Setup.t.sol";
 
 contract HashChainCapacitorTest is Setup {
-    address immutable _owner = address(uint160(c++));
     address immutable _socket = address(uint160(c++));
 
     bytes32 immutable _message_0 = bytes32(c++);
@@ -16,13 +15,15 @@ contract HashChainCapacitorTest is Setup {
     HashChainDecapacitor _hcDecapacitor;
 
     function setUp() external {
-        hoax(_owner);
-        _hcCapacitor = new HashChainCapacitor(_socket, _owner);
-        _hcDecapacitor = new HashChainDecapacitor(_owner);
+        initialise();
+
+        hoax(_socketOwner);
+        _hcCapacitor = new HashChainCapacitor(_socket, _socketOwner);
+        _hcDecapacitor = new HashChainDecapacitor(_socketOwner);
     }
 
     function testSetUp() external {
-        assertEq(_hcCapacitor.owner(), _owner, "Owner not set");
+        assertEq(_hcCapacitor.owner(), _socketOwner, "Owner not set");
         assertTrue(_hcCapacitor.socket() == _socket, "Socket role not set");
         _assertPacketById(bytes32(0), 0);
         _assertPacketToBeSealed(bytes32(0), 0);
@@ -103,6 +104,28 @@ contract HashChainCapacitorTest is Setup {
         );
         hoax(_raju);
         _hcCapacitor.sealPacket(DEFAULT_BATCH_LENGTH);
+    }
+
+    function testCapacitorRescueNativeFunds() public {
+        uint256 amount = 1e18;
+        hoax(_socketOwner);
+        _rescueNative(
+            address(_hcCapacitor),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
+        );
+    }
+
+    function testDecapacitorRescueNativeFunds() public {
+        uint256 amount = 1e18;
+        hoax(_socketOwner);
+        _rescueNative(
+            address(_hcDecapacitor),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
+        );
     }
 
     function _assertPacketToBeSealed(bytes32, uint256 packetId_) private {

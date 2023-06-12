@@ -73,6 +73,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         SocketConfigContext memory scc_ = addArbitrumL2Switchboard(

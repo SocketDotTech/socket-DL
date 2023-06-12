@@ -20,7 +20,12 @@ contract TransmitManagerTest is Setup {
         uint256[] memory transmitterPivateKeys = new uint256[](1);
         transmitterPivateKeys[0] = _transmitterPrivateKey;
 
-        _deployContractsOnSingleChain(_a, bChainSlug, transmitterPivateKeys);
+        _deployContractsOnSingleChain(
+            _a,
+            bChainSlug,
+            isExecutionOpen,
+            transmitterPivateKeys
+        );
         signatureVerifier = _a.sigVerifier__;
         transmitManager = _a.transmitManager__;
     }
@@ -172,7 +177,7 @@ contract TransmitManagerTest is Setup {
         _rescueNative(
             address(transmitManager),
             NATIVE_TOKEN_ADDRESS,
-            _feesWithdrawer,
+            _fundRescuer,
             amount
         );
     }

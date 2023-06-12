@@ -13,6 +13,7 @@ import "../contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol"
 
 import "../contracts/TransmitManager.sol";
 import "../contracts/ExecutionManager.sol";
+import "../contracts/OpenExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
 import "../contracts/utils/AccessRoles.sol";
 import "../contracts/utils/SigIdentifiers.sol";
@@ -31,6 +32,7 @@ contract Setup is Test {
 
     address immutable _plugOwner = address(uint160(c++));
     address immutable _raju = address(uint160(c++));
+    address immutable _fundRescuer = address(uint160(c++));
 
     address _socketOwner;
 
@@ -79,6 +81,8 @@ contract Setup is Test {
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
+
+    bool isExecutionOpen = false;
 
     struct SocketConfigContext {
         uint32 siblingChainSlug;
@@ -155,11 +159,13 @@ contract Setup is Test {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         _deployContractsOnSingleChain(
             _b,
             _a.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
     }
@@ -167,14 +173,16 @@ contract Setup is Test {
     function _deployContractsOnSingleChain(
         ChainContext storage cc_,
         uint32 remoteChainSlug_,
+        bool isExecutionOpen_,
         uint256[] memory transmitterPrivateKeys_
     ) internal {
         // deploy socket setup
-        _deploySocket(cc_, _socketOwner);
+        _deploySocket(cc_, _socketOwner, isExecutionOpen_);
 
         vm.startPrank(_socketOwner);
         _grantOwnerTransmitManagerRoles(cc_);
         _grantOwnerExecutionManagerRoles(cc_);
+        _grantOwnerSocketRoles(cc_);
 
         //grant FeesUpdater Role
         cc_.transmitManager__.grantRoleWithSlug(
@@ -223,6 +231,13 @@ contract Setup is Test {
 
         _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
         _addTransmitters(transmitterPrivateKeys_, cc_, cc_.chainSlug);
+
+        _testUtils(_a);
+    }
+
+    function _grantOwnerSocketRoles(ChainContext storage cc_) internal {
+        cc_.socket__.grantRole(RESCUE_ROLE, _socketOwner);
+        cc_.socket__.grantRole(GOVERNANCE_ROLE, _socketOwner);
     }
 
     function _grantOwnerTransmitManagerRoles(
@@ -477,18 +492,32 @@ contract Setup is Test {
 
     function _deploySocket(
         ChainContext storage cc_,
-        address deployer_
+        address deployer_,
+        bool isExecutionOpen_
     ) internal {
         vm.startPrank(deployer_);
 
         cc_.hasher__ = new Hasher(deployer_);
+        cc_.hasher__.grantRole(RESCUE_ROLE, deployer_);
+
         cc_.sigVerifier__ = new SignatureVerifier(deployer_);
+        cc_.sigVerifier__.grantRole(RESCUE_ROLE, deployer_);
+
         cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
-        cc_.executionManager__ = new ExecutionManager(
-            deployer_,
-            cc_.chainSlug,
-            cc_.sigVerifier__
-        );
+
+        if (isExecutionOpen_) {
+            cc_.executionManager__ = new OpenExecutionManager(
+                deployer_,
+                cc_.chainSlug,
+                cc_.sigVerifier__
+            );
+        } else {
+            cc_.executionManager__ = new ExecutionManager(
+                deployer_,
+                cc_.chainSlug,
+                cc_.sigVerifier__
+            );
+        }
 
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
@@ -518,6 +547,19 @@ contract Setup is Test {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        scc_.switchboard__.registerSiblingSlug(
+            uint32(remoteChainSlug_),
+            DEFAULT_BATCH_LENGTH,
+            capacitorType_
+        );
 
         hoax(governance_);
         scc_.switchboard__.registerSiblingSlug(
@@ -646,10 +688,6 @@ contract Setup is Test {
     ) internal {
         dst_.socket__.propose(packetId_, root_, sig_);
 
-        // bytes32(0) packetId proposed
-        // bytes32(0) packetId proposed
-        // bytes32(0) packetId proposed
-
         vm.expectRevert(SocketDst.InvalidPacketId.selector);
         dst_.socket__.propose(bytes32(0), root_, sig_);
     }
@@ -728,19 +766,41 @@ contract Setup is Test {
         );
     }
 
+    function _testUtils(ChainContext storage cc_) internal {
+        uint256 amount = 1e18;
+
+        hoax(_socketOwner);
+        _rescueNative(
+            address(cc_.hasher__),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
+        );
+
+        hoax(_socketOwner);
+        _rescueNative(
+            address(cc_.sigVerifier__),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
+        );
+    }
+
     function _rescueNative(
         address contractAddress,
         address token,
         address to,
         uint256 amount
     ) internal {
+        uint256 initialBal = to.balance;
+
         assertEq(address(contractAddress).balance, 0);
         deal(address(contractAddress), amount);
         assertEq(address(contractAddress).balance, amount);
 
         Socket(contractAddress).rescueFunds(token, to, amount);
 
-        assertEq(_feesWithdrawer.balance, amount);
+        assertEq(to.balance, initialBal + amount);
         assertEq(address(contractAddress).balance, 0);
     }
 

@@ -224,6 +224,22 @@ contract SocketSrcTest is Setup {
         );
     }
 
+    function testRescueNativeFunds() public {
+        uint256 amount = 1e18;
+
+        hoax(_socketOwner);
+        vm.expectRevert();
+        _a.socket__.rescueFunds(NATIVE_TOKEN_ADDRESS, address(0), amount);
+
+        hoax(_socketOwner);
+        _rescueNative(
+            address(_a.socket__),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
+        );
+    }
+
     function getLatestSignature(
         ChainContext memory src_,
         address capacitor_,

@@ -78,10 +78,68 @@ contract ArbitrumL1SwitchboardTest is Setup {
         vm.stopPrank();
     }
 
+    function testUpdateInboxAddresses() public {
+        address newInbox = address(uint160(c++));
+        assertEq(address(arbitrumL1Switchboard.inbox__()), address(inbox_));
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        arbitrumL1Switchboard.updateInboxAddresses(newInbox);
+
+        hoax(_socketOwner);
+        arbitrumL1Switchboard.updateInboxAddresses(newInbox);
+
+        assertEq(address(arbitrumL1Switchboard.inbox__()), newInbox);
+    }
+
+    function testUpdateBridge() public {
+        address newBridge = address(uint160(c++));
+        assertEq(address(arbitrumL1Switchboard.bridge__()), address(bridge_));
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        arbitrumL1Switchboard.updateBridge(newBridge);
+
+        hoax(_socketOwner);
+        arbitrumL1Switchboard.updateBridge(newBridge);
+
+        assertEq(address(arbitrumL1Switchboard.bridge__()), newBridge);
+    }
+
+    function testUpdateOutbox() public {
+        address newOutbox = address(uint160(c++));
+        assertEq(address(arbitrumL1Switchboard.outbox__()), address(outbox_));
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        arbitrumL1Switchboard.updateOutbox(newOutbox);
+
+        hoax(_socketOwner);
+        arbitrumL1Switchboard.updateOutbox(newOutbox);
+
+        assertEq(address(arbitrumL1Switchboard.outbox__()), newOutbox);
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         SocketConfigContext memory scc_ = addArbitrumL1Switchboard(

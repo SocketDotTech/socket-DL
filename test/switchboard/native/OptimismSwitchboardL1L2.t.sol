@@ -68,10 +68,30 @@ contract OptimismSwitchboardL1L2Test is Setup {
         vm.stopPrank();
     }
 
+    function testUpdateReceiveGasLimit() public {
+        uint256 receiveGasLimit = 1000;
+        assertEq(optimismSwitchboard.receiveGasLimit(), receiveGasLimit_);
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        optimismSwitchboard.updateReceiveGasLimit(receiveGasLimit);
+
+        hoax(_socketOwner);
+        optimismSwitchboard.updateReceiveGasLimit(receiveGasLimit);
+
+        assertEq(optimismSwitchboard.receiveGasLimit(), receiveGasLimit);
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         SocketConfigContext memory scc_ = addOptimismSwitchboard(

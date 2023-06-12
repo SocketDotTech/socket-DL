@@ -87,11 +87,6 @@ contract CapacitorFactoryTest is Setup {
         uint256 amount = 1e18;
 
         hoax(_socketOwner);
-        _rescueNative(
-            address(_cf),
-            NATIVE_TOKEN_ADDRESS,
-            _feesWithdrawer,
-            amount
-        );
+        _rescueNative(address(_cf), NATIVE_TOKEN_ADDRESS, _fundRescuer, amount);
     }
 }
