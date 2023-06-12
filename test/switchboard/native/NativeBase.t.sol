@@ -152,16 +152,10 @@ contract NativeBaseSwitchboardTest is Setup {
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
-        // vm.expectRevert(
-        //     abi.encodeWithSelector(
-        //         AccessControl.NoPermit.selector,
-        //         TRIP_ROLE
-        //     )
-        // );
-        // optimismSwitchboard.tripGlobal(
-        //     tripNonce,
-        //     sig
-        // );
+        vm.expectRevert(
+            abi.encodeWithSelector(AccessControl.NoPermit.selector, TRIP_ROLE)
+        );
+        optimismSwitchboard.tripGlobal(tripNonce, sig);
 
         optimismSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
@@ -210,16 +204,10 @@ contract NativeBaseSwitchboardTest is Setup {
         );
         sig = _createSignature(digest, _socketOwnerPrivateKey);
 
-        // vm.expectRevert(
-        //     abi.encodeWithSelector(
-        //         AccessControl.NoPermit.selector,
-        //         UNTRIP_ROLE
-        //     )
-        // );
-        // optimismSwitchboard.untrip(
-        //     untripNonce,
-        //     sig
-        // );
+        vm.expectRevert(
+            abi.encodeWithSelector(AccessControl.NoPermit.selector, UNTRIP_ROLE)
+        );
+        optimismSwitchboard.untrip(untripNonce, sig);
 
         optimismSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
 
@@ -285,14 +273,10 @@ contract NativeBaseSwitchboardTest is Setup {
             transmitterPrivateKeys_
         );
 
-        addOptimismSwitchboard(_a, _b.chainSlug, _capacitorType);
+        addOptimismSwitchboard(_a);
     }
 
-    function addOptimismSwitchboard(
-        ChainContext storage cc_,
-        uint32 remoteChainSlug_,
-        uint256 capacitorType_
-    ) internal returns (SocketConfigContext memory) {
+    function addOptimismSwitchboard(ChainContext storage cc_) internal {
         vm.startPrank(_socketOwner);
 
         optimismSwitchboard = new OptimismSwitchboard(

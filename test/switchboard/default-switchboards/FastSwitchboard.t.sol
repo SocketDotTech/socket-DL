@@ -5,7 +5,6 @@ import "../../Setup.t.sol";
 
 contract FastSwitchboardTest is Setup {
     bool isFast = true;
-
     bytes32 root = bytes32("RANDOM_ROOT");
 
     bytes32 packetId;
@@ -482,14 +481,20 @@ contract FastSwitchboardTest is Setup {
         uint256 watcher2PrivateKey = c++;
         address watcher2 = vm.addr(watcher2PrivateKey);
 
-        hoax(_socketOwner);
+        vm.startPrank(_socketOwner);
+        vm.expectRevert(FastSwitchboard.InvalidRole.selector);
+        fastSwitchboard.grantRole(
+            keccak256(abi.encode(WATCHER_ROLE, bChainSlug)),
+            watcher2
+        );
+
         vm.expectRevert(FastSwitchboard.InvalidRole.selector);
         fastSwitchboard.grantRoleWithSlug(WATCHER_ROLE, bChainSlug, watcher2);
 
-        hoax(_socketOwner);
         fastSwitchboard.grantWatcherRole(bChainSlug, watcher2);
 
         assertEq(fastSwitchboard.totalWatchers(bChainSlug), 3);
+        vm.stopPrank();
     }
 
     function testRedundantGrantWatcherRole() public {

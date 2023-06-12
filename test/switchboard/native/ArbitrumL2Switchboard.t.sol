@@ -69,6 +69,40 @@ contract ArbitrumL2SwitchboardTest is Setup {
         vm.stopPrank();
     }
 
+    function testReceivePacket() public {
+        bytes32 root = bytes32("RANDOM_ROOT");
+        bytes32 packetId = bytes32("RANDOM_PACKET");
+
+        assertFalse(
+            arbitrumL2Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+
+        vm.expectRevert(NativeSwitchboardBase.InvalidSender.selector);
+        arbitrumL2Switchboard.receivePacket(packetId, root);
+
+        address remoteAlias = AddressAliasHelper.applyL1ToL2Alias(
+            remoteNativeSwitchboard_
+        );
+        hoax(remoteAlias);
+        arbitrumL2Switchboard.receivePacket(packetId, root);
+
+        assertTrue(
+            arbitrumL2Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
