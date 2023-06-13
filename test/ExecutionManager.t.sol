@@ -265,9 +265,9 @@ contract ExecutionManagerTest is Setup {
         uint256 msgGasLimit = 100000;
         uint256 payloadSize = 1000;
         uint256 msgValue = 1000000;
-        uint paramType = 1;
+        uint8 paramType = 1;
         bytes32 extraParams = bytes32(
-            uint256((uint256(paramType) << 224) | uint224(msgValue))
+            uint256((uint256(paramType) << 248) | uint248(msgValue))
         );
 
         vm.expectRevert(MsgValueTooHigh.selector);
@@ -283,9 +283,9 @@ contract ExecutionManagerTest is Setup {
         uint256 msgGasLimit = 100000;
         uint256 payloadSize = 1000;
         uint256 msgValue = 1;
-        uint paramType = 1;
+        uint8 paramType = 1;
         bytes32 extraParams = bytes32(
-            uint256((uint256(paramType) << 224) | uint224(msgValue))
+            uint256((uint256(paramType) << 248) | uint248(msgValue))
         );
 
         vm.expectRevert(MsgValueTooLow.selector);
@@ -301,9 +301,9 @@ contract ExecutionManagerTest is Setup {
         uint256 msgGasLimit = 100000;
         uint256 payloadSize = 1000;
         uint256 msgValue = 100;
-        uint paramType = 1;
+        uint8 paramType = 1;
         bytes32 extraParams = bytes32(
-            uint256((uint256(paramType) << 224) | uint224(msgValue))
+            uint256((uint256(paramType) << 248) | uint248(msgValue))
         );
 
         uint256 minFees = executionManager.getMinFees(

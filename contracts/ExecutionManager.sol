@@ -133,11 +133,11 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         if (payloadSize_ > 3000) revert PayloadTooLarge();
 
         uint256 params = uint256(extraParams_);
-        uint8 paramType = uint8(params >> 224);
+        uint8 paramType = uint8(params >> 248);
 
         if (paramType == 0) return executionFees[siblingChainSlug_];
 
-        uint256 msgValue = uint256(uint224(params));
+        uint256 msgValue = uint256(uint248(params));
 
         if (msgValue < msgValueMinThreshold[siblingChainSlug_])
             revert MsgValueTooLow();
@@ -155,11 +155,11 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 msgValue_
     ) external pure override {
         uint256 params = uint256(extraParams_);
-        uint8 paramType = uint8(params >> 224);
+        uint8 paramType = uint8(params >> 248);
 
         if (paramType == 0) return;
 
-        uint256 expectedMsgValue = uint256(uint224(params));
+        uint256 expectedMsgValue = uint256(uint248(params));
 
         if (msgValue_ < expectedMsgValue) revert InsufficientMsgValue();
     }
