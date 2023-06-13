@@ -321,7 +321,9 @@ contract SocketBatcher is AccessControl {
             bytes32 extraParams = executeRequests_[index]
                 .messageDetails
                 .extraParams;
-            uint256 msgValue = uint256(uint224(uint256(extraParams)));
+            uint8 paramType = uint8(uint256(extraParams) >> 248);
+            uint256 msgValue = uint256(uint248(uint256(extraParams)));
+            if (paramType == 0) msgValue = 0;
 
             ISocket(socketAddress_).execute{value: msgValue}(
                 executeRequests_[index].packetId,
