@@ -7,3 +7,6 @@
 [submodule "lib/contracts"]
 	path = lib/contracts
 	url = https://github.com/fx-portal/contracts
+[submodule "lib/solmate"]
+	path = lib/solmate
+	url = https://github.com/transmissions11/solmate
