@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../Setup.t.sol";
-import "lib/openzeppelin-contracts/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
+import {ERC20PresetFixedSupply} from "lib/openzeppelin-contracts/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 
 contract CapacitorFactoryTest is Setup {
     uint256 tokenSupply = 10000;
