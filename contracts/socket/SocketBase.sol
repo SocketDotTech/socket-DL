@@ -2,13 +2,16 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/IHasher.sol";
+import "../utils/AccessControlExtended.sol";
+import {GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
+
 import "./SocketConfig.sol";
 
 /**
  * @title SocketBase
  * @notice A contract that is responsible for the governance setters and inherits SocketConfig
  */
-abstract contract SocketBase is SocketConfig {
+abstract contract SocketBase is SocketConfig, AccessControlExtended {
     IHasher public hasher__;
     ITransmitManager public transmitManager__;
     IExecutionManager public executionManager__;
@@ -34,6 +37,11 @@ abstract contract SocketBase is SocketConfig {
     error InvalidTransmitter();
 
     /**
+     * @notice An event that is emitted when the capacitor factory is updated.
+     * @param capacitorFactory The address of the new capacitorFactory.
+     */
+    event CapacitorFactorySet(address capacitorFactory);
+    /**
      * @notice An event that is emitted when the hasher is updated.
      * @param hasher The address of the new hasher.
      */
@@ -45,23 +53,24 @@ abstract contract SocketBase is SocketConfig {
     event ExecutionManagerSet(address executionManager);
 
     /**
+     * @dev Set the capacitor factory contract
+     * @dev Only governance can call this function
+     * @param capacitorFactory_ The address of the capacitor factory contract
+     */
+    function setCapacitorFactory(
+        address capacitorFactory_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
+        emit CapacitorFactorySet(capacitorFactory_);
+    }
+
+    /**
      * @notice updates hasher_
      * @param hasher_ address of hasher
      */
     function setHasher(address hasher_) external onlyRole(GOVERNANCE_ROLE) {
         hasher__ = IHasher(hasher_);
         emit HasherSet(hasher_);
-    }
-
-    /**
-     * @notice updates transmitManager_
-     * @param transmitManager_ address of Transmit Manager
-     */
-    function setTransmitManager(
-        address transmitManager_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        transmitManager__ = ITransmitManager(transmitManager_);
-        emit TransmitManagerSet(transmitManager_);
     }
 
     /**
@@ -73,5 +82,16 @@ abstract contract SocketBase is SocketConfig {
     ) external onlyRole(GOVERNANCE_ROLE) {
         executionManager__ = IExecutionManager(executionManager_);
         emit ExecutionManagerSet(executionManager_);
+    }
+
+    /**
+     * @notice updates transmitManager_
+     * @param transmitManager_ address of Transmit Manager
+     */
+    function setTransmitManager(
+        address transmitManager_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        transmitManager__ = ITransmitManager(transmitManager_);
+        emit TransmitManagerSet(transmitManager_);
     }
 }
