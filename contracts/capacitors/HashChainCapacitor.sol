@@ -14,6 +14,7 @@ import "./BaseCapacitor.sol";
 contract HashChainCapacitor is BaseCapacitor {
     uint256 private _chainLength;
     uint256 private constant _MAX_LEN = 10;
+    uint256 public maxPacketLength;
 
     /**
      * @notice Initializes the HashChainCapacitor contract with a socket address.
@@ -22,9 +23,21 @@ contract HashChainCapacitor is BaseCapacitor {
      */
     constructor(
         address socket_,
-        address owner_
+        address owner_,
+        uint256 maxPacketLength_
     ) BaseCapacitor(socket_, owner_) {
         _grantRole(RESCUE_ROLE, owner_);
+        maxPacketLength = maxPacketLength_;
+    }
+
+    function updateMaxPacketLength(
+        uint256 maxPacketLength_
+    ) external onlyOwner {
+        maxPacketLength = maxPacketLength_;
+    }
+
+    function getMaxPacketLength() external view override returns (uint256) {
+        return maxPacketLength;
     }
 
     /**

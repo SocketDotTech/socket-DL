@@ -21,8 +21,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     uint256 public immutable timeoutInSeconds;
 
     struct Fees {
-        uint256 switchboardFees;
-        uint256 verificationFees;
+        uint128 switchboardFees;
+        uint128 verificationFees;
     }
 
     mapping(uint32 => bool) public isInitialised;
@@ -118,11 +118,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     function getMinFees(
         uint32 dstChainSlug_
-    ) external view override returns (uint256, uint256) {
-        return (
-            fees[dstChainSlug_].switchboardFees,
-            fees[dstChainSlug_].verificationFees
-        );
+    ) external view override returns (uint128, uint128) {
+        Fees memory minFees = fees[dstChainSlug_];
+        return (minFees.switchboardFees, minFees.verificationFees);
     }
 
     /// @inheritdoc ISwitchboard
@@ -296,8 +294,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     function setFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
-        uint256 switchboardFees_,
-        uint256 verificationFees_,
+        uint128 switchboardFees_,
+        uint128 verificationFees_,
         bytes calldata signature_
     ) external override {
         address feesUpdater = signatureVerifier__.recoverSignerFromDigest(

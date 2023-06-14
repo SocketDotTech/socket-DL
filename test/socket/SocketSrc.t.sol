@@ -49,6 +49,28 @@ contract SocketSrcTest is Setup {
 
         uint256 index = isFast ? 0 : 1;
         _configPlugContracts(index);
+
+        _a.executionManager__.payAndCheckFees{value: 10000000000000}(
+            100000,
+            1000,
+            bytes32(0),
+            _b.chainSlug,
+            100,
+            100,
+            address(_a.transmitManager__),
+            address(_a.configs__[0].switchboard__),
+            1
+        );
+        // _a.executionManager__.payFees(
+        //     100000,
+        //     1000,
+        //     bytes32(0),
+        //     _b.chainSlug,
+        //     100,
+        //     100,
+        //     100,
+        //     address(_a.configs__[0].switchboard__)
+        // );
     }
 
     function testGetMinFeesOnSocketSrc() external {
@@ -61,15 +83,16 @@ contract SocketSrcTest is Setup {
                 .switchboard__
                 .getMinFees(_b.chainSlug);
 
-            uint256 transmitFees = _a.transmitManager__.getMinFees(
-                _b.chainSlug
-            );
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                100,
-                bytes32(0),
-                _b.chainSlug
-            );
+            uint256 transmitFees;
+            (executionFee, transmitFees) = _a
+                .executionManager__
+                .getExecutionTransmissionMinFees(
+                    _msgGasLimit,
+                    100,
+                    bytes32(0),
+                    _b.chainSlug,
+                    address(_a.transmitManager__)
+                );
 
             uint256 minFeesExpected = transmitFees +
                 switchboardFees +
@@ -86,6 +109,55 @@ contract SocketSrcTest is Setup {
 
             assertEq(minFeesActual, minFeesExpected);
         }
+    }
+
+    function testGas() external {
+        // uint256 fees = _a.socket__.getMinFees(
+        //     _msgGasLimit,
+        //     1000,
+        //     bytes32(0),
+        //     _b.chainSlug,
+        //     address(srcCounter__)
+        // );
+
+        // console.log(_a.executionManager__.totalExecutionFees());
+        // console.log(_a.executionManager__.totalTransmitionFees());
+        // console.log(_a.executionManager__.totalSwitchboardFees(address(_a.configs__[0].switchboard__)));
+        // initializing storage variables to get runtime cost
+        // _a.executionManager__.payFees(
+        //     100000,
+        //     _b.chainSlug,
+        //     100,
+        //     100,
+        //     100,
+        //     address(_a.configs__[0].switchboard__)
+        // );
+
+        // console.log(_a.executionManager__.totalExecutionFees());
+        // console.log(_a.executionManager__.totalTransmitionFees());
+        // console.log(_a.executionManager__.totalSwitchboardFees(address(_a.configs__[0].switchboard__)));
+
+        hoax(address(srcCounter__));
+
+        _a.socket__.outbound{value: 100000000000000000000000}(
+            _b.chainSlug,
+            _msgGasLimit,
+            bytes32(0),
+            "0x"
+        );
+
+        (uint128 totalExecutionFees, uint128 totalTransmissionFees) = _a
+            .executionManager__
+            .totalTransmissionExecutionFees();
+        console.log(totalExecutionFees);
+        console.log(totalTransmissionFees);
+        // console.log(_a.executionManager__.totalTransmissionExecutionFees());
+        // console.log(_a.executionManager__.totalTransmitionFees());
+        console.log(
+            _a.executionManager__.totalSwitchboardFees(
+                address(_a.configs__[0].switchboard__)
+            )
+        );
     }
 
     function testOutboundFromSocketSrc() external {
@@ -105,13 +177,16 @@ contract SocketSrcTest is Setup {
                 .switchboard__
                 .getMinFees(_b.chainSlug);
 
-            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                100,
-                bytes32(0),
-                _b.chainSlug
-            );
+            uint256 socketFees;
+            (executionFee, socketFees) = _a
+                .executionManager__
+                .getExecutionTransmissionMinFees(
+                    _msgGasLimit,
+                    100,
+                    bytes32(0),
+                    _b.chainSlug,
+                    address(_a.transmitManager__)
+                );
 
             hoax(address(srcCounter__));
 
@@ -137,13 +212,16 @@ contract SocketSrcTest is Setup {
                 .switchboard__
                 .getMinFees(_b.chainSlug);
 
-            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                100,
-                bytes32(0),
-                _b.chainSlug
-            );
+            uint256 socketFees;
+            (executionFee, socketFees) = _a
+                .executionManager__
+                .getExecutionTransmissionMinFees(
+                    _msgGasLimit,
+                    100,
+                    bytes32(0),
+                    _b.chainSlug,
+                    address(_a.transmitManager__)
+                );
 
             hoax(_plugOwner);
             srcCounter__.remoteAddOperation{
@@ -186,13 +264,16 @@ contract SocketSrcTest is Setup {
                 .switchboard__
                 .getMinFees(_b.chainSlug);
 
-            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                100,
-                bytes32(0),
-                _b.chainSlug
-            );
+            uint256 socketFees;
+            (executionFee, socketFees) = _a
+                .executionManager__
+                .getExecutionTransmissionMinFees(
+                    _msgGasLimit,
+                    100,
+                    bytes32(0),
+                    _b.chainSlug,
+                    address(_a.transmitManager__)
+                );
 
             hoax(_plugOwner);
             srcCounter__.remoteAddOperation{

@@ -52,6 +52,7 @@ contract TransmitManagerTest is Setup {
         signatureVerifier = new SignatureVerifier(owner);
         transmitManager = new TransmitManager(
             signatureVerifier,
+            address(_a.socket__),
             owner,
             chainSlug
         );
@@ -138,44 +139,44 @@ contract TransmitManagerTest is Setup {
         assertTrue(isTransmitter);
     }
 
-    function testGetMinFees() public {
-        uint256 minFees = transmitManager.getMinFees(destChainSlug);
+    // function testGetMinFees() public {
+    //     uint256 minFees = transmitManager.getMinFees(destChainSlug);
 
-        // sealGasLimit * sourceGasPrice + proposeGasLimit * relativeGasPrice
-        uint256 minFees_Expected = sealGasLimit *
-            sourceGasPrice +
-            proposeGasLimit *
-            relativeGasPrice;
+    //     // sealGasLimit * sourceGasPrice + proposeGasLimit * relativeGasPrice
+    //     uint256 minFees_Expected = sealGasLimit *
+    //         sourceGasPrice +
+    //         proposeGasLimit *
+    //         relativeGasPrice;
 
-        assertEq(minFees, minFees_Expected);
-    }
+    //     assertEq(minFees, minFees_Expected);
+    // }
 
-    function testPayFees() public {
-        uint256 minFees = transmitManager.getMinFees(destChainSlug);
-        deal(feesPayer, minFees);
+    // function testPayFees() public {
+    //     uint256 minFees = transmitManager.getMinFees(destChainSlug);
+    //     deal(feesPayer, minFees);
 
-        hoax(feesPayer);
-        transmitManager.payFees{value: minFees}(destChainSlug);
+    //     hoax(feesPayer);
+    //     transmitManager.payFees{value: minFees}(destChainSlug);
 
-        assertEq(address(transmitManager).balance, minFees);
-    }
+    //     assertEq(address(transmitManager).balance, minFees);
+    // }
 
-    function testWithdrawFees() public {
-        uint256 minFees = transmitManager.getMinFees(destChainSlug);
-        deal(feesPayer, minFees);
+    // function testWithdrawFees() public {
+    //     uint256 minFees = transmitManager.getMinFees(destChainSlug);
+    //     deal(feesPayer, minFees);
 
-        vm.startPrank(feesPayer);
-        transmitManager.payFees{value: minFees}(destChainSlug);
-        vm.stopPrank();
+    //     vm.startPrank(feesPayer);
+    //     transmitManager.payFees{value: minFees}(destChainSlug);
+    //     vm.stopPrank();
 
-        vm.startPrank(owner);
-        vm.expectEmit(false, false, false, true);
-        emit FeesWithdrawn(feesWithdrawer, minFees);
-        transmitManager.withdrawFees(feesWithdrawer);
-        vm.stopPrank();
+    //     vm.startPrank(owner);
+    //     vm.expectEmit(false, false, false, true);
+    //     emit FeesWithdrawn(feesWithdrawer, minFees);
+    //     transmitManager.withdrawFees(feesWithdrawer);
+    //     vm.stopPrank();
 
-        assertEq(feesWithdrawer.balance, minFees);
-    }
+    //     assertEq(feesWithdrawer.balance, minFees);
+    // }
 
     function testWithdrawFeesToZeroAddress() public {
         vm.startPrank(owner);

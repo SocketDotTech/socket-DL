@@ -113,8 +113,8 @@ contract SocketBatcher is AccessControl {
     struct SwitchboardSetFeesRequest {
         uint256 nonce;
         uint32 dstChainSlug;
-        uint256 switchboardFees;
-        uint256 verificationFees;
+        uint128 switchboardFees;
+        uint128 verificationFees;
         bytes signature;
     }
 
@@ -128,7 +128,7 @@ contract SocketBatcher is AccessControl {
     struct SetFeesRequest {
         uint256 nonce;
         uint32 dstChainSlug;
-        uint256 fees;
+        uint128 fees;
         bytes signature;
         bytes4 functionSelector;
     }

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
-
 import "./interfaces/IExecutionManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./libraries/RescueFundsLib.sol";
@@ -17,6 +16,7 @@ import {FEES_UPDATE_SIG_IDENTIFIER, RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENT
  */
 contract ExecutionManager is IExecutionManager, AccessControlExtended {
     ISignatureVerifier public immutable signatureVerifier__;
+    uint32 public immutable chainSlug;
 
     /**
      * @notice Emitted when the executionFees is updated
@@ -39,13 +39,22 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 msgValueMinThresholdSet
     );
 
-    uint32 public immutable chainSlug;
+    struct TotalTransmissionAndExecutionFees {
+        uint128 totalTransmissionFees;
+        uint128 totalExecutionFees;
+    }
+
+    TotalTransmissionAndExecutionFees public totalTransmissionExecutionFees;
+
+    mapping(address => uint256) public totalSwitchboardFees;
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
 
     // remoteChainSlug => executionFees
     mapping(uint32 => uint256) public executionFees;
+
+    mapping(address => mapping(uint32 => uint128)) transmissionMinFees;
 
     // destSlug => relativeNativePrice (stores (destnativeTokenPriceUSD*(1e18)/srcNativeTokenPriceUSD))
     mapping(uint32 => uint256) public relativeNativeTokenPrice;
@@ -63,6 +72,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     error MsgValueTooHigh();
     error PayloadTooLarge();
     error InsufficientMsgValue();
+    error InsufficientFees();
 
     /**
      * @dev Constructor for ExecutionManager contract
@@ -104,17 +114,63 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     /**
      * @dev Function to be used for on-chain fee distribution later
      */
-    function updateExecutionFees(address, uint256, bytes32) external override {}
+    function updateExecutionFees(address, uint128, bytes32) external override {}
 
-    /**
-     * @notice Function for paying fees for cross-chain transaction execution
-     * @param msgGasLimit_ Gas limit for the transaction
-     * @param siblingChainSlug_ Sibling chain identifier
-     */
-    function payFees(
+    function updateTransmissionMinFees(
+        uint32 remoteChainSlug_,
+        uint128 fees_
+    ) external override {
+        transmissionMinFees[msg.sender][remoteChainSlug_] = fees_;
+    }
+
+    function payAndCheckFees(
         uint256 msgGasLimit_,
-        uint32 siblingChainSlug_
-    ) external payable override {}
+        uint256 payloadSize_,
+        bytes32 extraParams_,
+        uint32 siblingChainSlug_,
+        uint128 switchboardFees_,
+        uint128 verificationFees_,
+        address transmitManager_,
+        address switchboard_,
+        uint256 maxPacketLength_
+    )
+        external
+        payable
+        override
+        returns (uint128 executionFee, uint128 transmissionFees)
+    {
+        transmissionFees =
+            transmissionMinFees[transmitManager_][siblingChainSlug_] /
+            uint128(maxPacketLength_);
+
+        uint128 minMsgExecutionFees = uint128(
+            _getMinFees(
+                msgGasLimit_,
+                payloadSize_,
+                extraParams_,
+                siblingChainSlug_
+            )
+        );
+        uint128 minExecutionFees = minMsgExecutionFees + verificationFees_;
+        if (msg.value < transmissionFees + switchboardFees_ + minExecutionFees)
+            revert InsufficientFees();
+
+        executionFee;
+
+        // any extra fee is considered as executionFee
+        // Have to recheck overflow/underflow conditions here
+        executionFee = uint128(
+            msg.value - uint256(transmissionFees) - uint256(switchboardFees_)
+        );
+
+        totalTransmissionExecutionFees = TotalTransmissionAndExecutionFees({
+            totalTransmissionFees: totalTransmissionExecutionFees
+                .totalTransmissionFees + transmissionFees,
+            totalExecutionFees: totalTransmissionExecutionFees
+                .totalExecutionFees + executionFee
+        });
+        totalSwitchboardFees[switchboard_] += switchboardFees_;
+    }
 
     /**
      * @notice Function for getting the minimum fees required for executing a cross-chain transaction
@@ -122,14 +178,55 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
      * @param siblingChainSlug_ Sibling chain identifier
      * @param payloadSize_ byte length of payload. Currently only used to check max length, later on will be used for fees calculation.
      * @param extraParams_ Can be used for providing extra information. Currently used for msgValue
-     * @return Minimum fees required for executing the transaction
+     * @return minExecutionFee : Minimum fees required for executing the transaction
      */
     function getMinFees(
         uint256 gasLimit_,
         uint256 payloadSize_,
         bytes32 extraParams_,
         uint32 siblingChainSlug_
-    ) external view override returns (uint256) {
+    ) external view override returns (uint128 minExecutionFee) {
+        minExecutionFee = uint128(
+            _getMinFees(
+                gasLimit_,
+                payloadSize_,
+                extraParams_,
+                siblingChainSlug_
+            )
+        );
+    }
+
+    function getExecutionTransmissionMinFees(
+        uint256 msgGasLimit_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
+        uint32 siblingChainSlug_,
+        address transmitManager_
+    )
+        external
+        view
+        override
+        returns (uint128 minExecutionFee, uint128 transmissionFees)
+    {
+        minExecutionFee = uint128(
+            _getMinFees(
+                msgGasLimit_,
+                payloadSize_,
+                extraParams_,
+                siblingChainSlug_
+            )
+        );
+        transmissionFees = transmissionMinFees[transmitManager_][
+            siblingChainSlug_
+        ];
+    }
+
+    function _getMinFees(
+        uint256 gasLimit_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
+        uint32 siblingChainSlug_
+    ) internal view returns (uint256) {
         if (payloadSize_ > 3000) revert PayloadTooLarge();
 
         uint256 params = uint256(extraParams_);
@@ -167,7 +264,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     function setExecutionFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
-        uint256 executionFees_,
+        uint128 executionFees_,
         bytes calldata signature_
     ) external override {
         address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
@@ -283,6 +380,16 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
      */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         FeesHelper.withdrawFees(account_);
+    }
+
+    function withdrawSwitchboardFees(uint128 amount_) external override {
+        require(
+            totalSwitchboardFees[msg.sender] >= amount_,
+            "Insufficient Fees"
+        );
+        totalSwitchboardFees[msg.sender] -= amount_;
+        (bool success, ) = msg.sender.call{value: amount_}("");
+        require(success, "withdraw switchboard fee failed");
     }
 
     /**

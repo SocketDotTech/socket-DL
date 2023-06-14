@@ -17,7 +17,11 @@ contract HashChainCapacitorTest is Setup {
 
     function setUp() external {
         hoax(_owner);
-        _hcCapacitor = new HashChainCapacitor(_socket, _owner);
+        _hcCapacitor = new HashChainCapacitor(
+            _socket,
+            _owner,
+            DEFAULT_BATCH_LENGTH
+        );
         _hcDecapacitor = new HashChainDecapacitor(_owner);
     }
 

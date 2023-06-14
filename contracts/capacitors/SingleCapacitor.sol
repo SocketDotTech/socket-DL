@@ -10,16 +10,25 @@ import "./BaseCapacitor.sol";
  * basic implementation for adding messages to packets, sealing packets and retrieving packet roots.
  */
 contract SingleCapacitor is BaseCapacitor {
+    uint256 public immutable maxPacketLength;
+
     /**
      * @notice Initializes the SingleCapacitor contract with a socket address.
      * @param socket_ The address of the socket contract
      * @param owner_ The address of the contract owner
      */
+
     constructor(
         address socket_,
-        address owner_
+        address owner_,
+        uint256 maxPacketLength_
     ) BaseCapacitor(socket_, owner_) {
         _grantRole(RESCUE_ROLE, owner_);
+        maxPacketLength = maxPacketLength_;
+    }
+
+    function getMaxPacketLength() external view override returns (uint256) {
+        return maxPacketLength;
     }
 
     /**

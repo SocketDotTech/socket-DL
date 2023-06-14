@@ -237,13 +237,16 @@ contract SocketDstTest is Setup {
                 .switchboard__
                 .getMinFees(_b.chainSlug);
 
-            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                100,
-                bytes32(0),
-                _b.chainSlug
-            );
+            uint256 socketFees;
+            (executionFee, socketFees) = _a
+                .executionManager__
+                .getExecutionTransmissionMinFees(
+                    _msgGasLimit,
+                    100,
+                    bytes32(0),
+                    _b.chainSlug,
+                    address(_a.transmitManager__)
+                );
 
             hoax(_plugOwner);
             srcCounter__.remoteAddOperation{
@@ -272,13 +275,16 @@ contract SocketDstTest is Setup {
                 .switchboard__
                 .getMinFees(_b.chainSlug);
 
-            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                100,
-                bytes32(0),
-                _b.chainSlug
-            );
+            uint256 socketFees;
+            (executionFee, socketFees) = _a
+                .executionManager__
+                .getExecutionTransmissionMinFees(
+                    _msgGasLimit,
+                    100,
+                    bytes32(0),
+                    _b.chainSlug,
+                    address(_a.transmitManager__)
+                );
 
             uint256 value = switchboardFees +
                 socketFees +
@@ -372,13 +378,16 @@ contract SocketDstTest is Setup {
                 .switchboard__
                 .getMinFees(_b.chainSlug);
 
-            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                100,
-                extraParams,
-                _b.chainSlug
-            );
+            uint256 socketFees;
+            (executionFee, socketFees) = _a
+                .executionManager__
+                .getExecutionTransmissionMinFees(
+                    _msgGasLimit,
+                    100,
+                    bytes32(0),
+                    _b.chainSlug,
+                    address(_a.transmitManager__)
+                );
 
             uint256 value = switchboardFees +
                 socketFees +
@@ -443,13 +452,16 @@ contract SocketDstTest is Setup {
                 .switchboard__
                 .getMinFees(_b.chainSlug);
 
-            uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
-            executionFee = _a.executionManager__.getMinFees(
-                _msgGasLimit,
-                100,
-                bytes32(0),
-                _b.chainSlug
-            );
+            uint256 socketFees;
+            (executionFee, socketFees) = _a
+                .executionManager__
+                .getExecutionTransmissionMinFees(
+                    _msgGasLimit,
+                    100,
+                    bytes32(0),
+                    _b.chainSlug,
+                    address(_a.transmitManager__)
+                );
 
             uint256 value = switchboardFees +
                 socketFees +

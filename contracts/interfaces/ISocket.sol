@@ -20,9 +20,9 @@ interface ISocket {
      * @param executionFee fees needed for execution
      */
     struct Fees {
-        uint256 transmissionFees;
-        uint256 switchboardFees;
-        uint256 executionFee;
+        uint128 transmissionFees;
+        uint128 executionFee;
+        uint128 switchboardFees;
     }
 
     /**

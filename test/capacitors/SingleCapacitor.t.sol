@@ -17,7 +17,7 @@ contract SingleCapacitorTest is Test {
 
     function setUp() external {
         hoax(_owner);
-        _sa = new SingleCapacitor(_socket, _owner);
+        _sa = new SingleCapacitor(_socket, _owner, 1);
     }
 
     function testSingleCapacitorSetup() external {

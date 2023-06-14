@@ -15,3 +15,6 @@ typechain-types/
 
 .env
 .DS_Store
+
+.gas-snapshot/
+scripts/deploy/gasEstimate.ts

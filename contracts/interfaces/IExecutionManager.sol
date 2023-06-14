@@ -23,7 +23,39 @@ interface IExecutionManager {
      * @param msgGasLimit The gas limit for the transaction
      * @param dstSlug The destination slug
      */
-    function payFees(uint256 msgGasLimit, uint32 dstSlug) external payable;
+    // function payFees(
+    //     uint256 msgGasLimit,
+    //     uint32 dstSlug,
+    //     uint128 transmissionFees_,
+    //     uint128 executionFees_,
+    //     uint256 switchboardFees_,
+    //     address switchboardAddress_
+    // ) external payable;
+
+    /**
+     * @notice Pays the fees for executing a transaction on the external chain
+     * @dev This function is payable and assumes the socket is going to send correct amount of fees.
+     * @param msgGasLimit_ The gas limit for the transaction
+     * @param payloadSize_ The gas limit for the transaction
+     * @param extraParams_ The gas limit for the transaction
+     * @param siblingChainSlug_ The gas limit for the transaction
+     * @param switchboardFees_ The gas limit for the transaction
+     * @param verificationFees_ The gas limit for the transaction
+     * @param transmitManager_ The transmitManager address
+     * @param switchboard_ The switchboard address
+     * @param maxPacketLength_ The maxPacketLength for the capacitor
+     */
+    function payAndCheckFees(
+        uint256 msgGasLimit_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
+        uint32 siblingChainSlug_,
+        uint128 switchboardFees_,
+        uint128 verificationFees_,
+        address transmitManager_,
+        address switchboard_,
+        uint256 maxPacketLength_
+    ) external payable returns (uint128, uint128);
 
     /**
      * @notice Returns the minimum fees required for executing a transaction on the external chain
@@ -36,7 +68,15 @@ interface IExecutionManager {
         uint256 payloadSize_,
         bytes32 extraParams_,
         uint32 siblingChainSlug_
-    ) external view returns (uint256);
+    ) external view returns (uint128);
+
+    function getExecutionTransmissionMinFees(
+        uint256 msgGasLimit_,
+        uint256 payloadSize_,
+        bytes32 extraParams_,
+        uint32 siblingChainSlug_,
+        address transmitManager_
+    ) external view returns (uint128, uint128);
 
     /**
      * @notice Updates the execution fees for an executor and message ID
@@ -46,14 +86,19 @@ interface IExecutionManager {
      */
     function updateExecutionFees(
         address executor,
-        uint256 executionFees,
+        uint128 executionFees,
         bytes32 msgId
+    ) external;
+
+    function updateTransmissionMinFees(
+        uint32 remoteChainSlug_,
+        uint128 transmitMinFees_
     ) external;
 
     function setExecutionFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
-        uint256 executionFees_,
+        uint128 executionFees_,
         bytes calldata signature_
     ) external;
 
@@ -82,4 +127,6 @@ interface IExecutionManager {
         bytes32 extraParams_,
         uint256 msgValue_
     ) external view;
+
+    function withdrawSwitchboardFees(uint128 amount_) external;
 }

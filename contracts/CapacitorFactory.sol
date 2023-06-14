@@ -39,7 +39,7 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
     function deploy(
         uint256 capacitorType_,
         uint32 /** siblingChainSlug */,
-        uint256 /** maxPacketLength */
+        uint256 maxPacketLength_
     ) external override returns (ICapacitor, IDecapacitor) {
         // sets the capacitor factory owner
         address owner = this.owner();
@@ -47,14 +47,14 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
         if (capacitorType_ == SINGLE_CAPACITOR) {
             return (
                 // msg.sender is socket address
-                new SingleCapacitor(msg.sender, owner),
+                new SingleCapacitor(msg.sender, owner, maxPacketLength_),
                 new SingleDecapacitor(owner)
             );
         }
         if (capacitorType_ == HASH_CHAIN_CAPACITOR) {
             return (
                 // msg.sender is socket address
-                new HashChainCapacitor(msg.sender, owner),
+                new HashChainCapacitor(msg.sender, owner, maxPacketLength_),
                 new HashChainDecapacitor(owner)
             );
         }

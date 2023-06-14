@@ -163,7 +163,13 @@ abstract contract SocketDst is SocketBase {
 
         address localPlug = _decodePlug(messageDetails_.msgId);
 
-        PlugConfig storage plugConfig = _plugConfigs[localPlug][remoteSlug];
+        PlugConfig memory plugConfig;
+        plugConfig.decapacitor__ = _plugConfigs[localPlug][remoteSlug]
+            .decapacitor__;
+        plugConfig.siblingPlug = _plugConfigs[localPlug][remoteSlug]
+            .siblingPlug;
+        plugConfig.inboundSwitchboard__ = _plugConfigs[localPlug][remoteSlug]
+            .inboundSwitchboard__;
 
         bytes32 packedMessage = hasher__.packMessage(
             remoteSlug,
@@ -194,7 +200,7 @@ abstract contract SocketDst is SocketBase {
         uint256 proposalCount_,
         uint32 remoteChainSlug_,
         bytes32 packedMessage_,
-        PlugConfig storage plugConfig_,
+        PlugConfig memory plugConfig_,
         bytes memory decapacitorProof_,
         bytes32 extraParams_
     ) internal view {
@@ -239,7 +245,7 @@ abstract contract SocketDst is SocketBase {
         {
             executionManager__.updateExecutionFees(
                 executor_,
-                messageDetails_.executionFee,
+                uint128(messageDetails_.executionFee),
                 messageDetails_.msgId
             );
             emit ExecutionSuccess(messageDetails_.msgId);

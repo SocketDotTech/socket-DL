@@ -23,6 +23,10 @@ of fees, gas limits, and packet validation.
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     ISignatureVerifier public immutable signatureVerifier__;
     ISocket public immutable socket__;
+    uint32 public immutable chainSlug;
+
+    uint128 public switchboardFees;
+    uint128 public verificationFees;
 
     /**
      * @dev Flag that indicates if the global fuse is tripped, meaning no more packets can be sent.
@@ -49,8 +53,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     address public remoteNativeSwitchboard;
 
-    uint32 public immutable chainSlug;
-
     /**
      * @dev Stores the roots received from native bridge.
      */
@@ -60,9 +62,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev Transmitter to next nonce.
      */
     mapping(address => uint256) public nextNonce;
-
-    uint256 public switchboardFees;
-    uint256 public verificationFees;
 
     /**
      * @dev Event emitted when the switchboard is tripped.
@@ -230,7 +229,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         external
         view
         override
-        returns (uint256 switchboardFee_, uint256 verificationFee_)
+        returns (uint128 switchboardFee_, uint128 verificationFee_)
     {
         return (switchboardFees, verificationFees);
     }
@@ -238,8 +237,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     function setFees(
         uint256 nonce_,
         uint32,
-        uint256 switchboardFees_,
-        uint256 verificationFees_,
+        uint128 switchboardFees_,
+        uint128 verificationFees_,
         bytes calldata signature_
     ) external override {
         address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
