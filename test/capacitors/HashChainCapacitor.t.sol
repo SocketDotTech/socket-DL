@@ -36,7 +36,7 @@ contract HashChainCapacitorTest is Setup {
     }
 
     function testSealPacket() external {
-        vm.expectRevert(BaseCapacitor.NoPendingPacket.selector);
+        vm.expectRevert(HashChainCapacitor.InsufficentMessageLength.selector);
         _sealPacket();
 
         _addPackedMessage(_message_0);
