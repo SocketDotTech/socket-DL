@@ -11,6 +11,18 @@ import "./BaseCapacitor.sol";
  */
 contract SingleCapacitor is BaseCapacitor {
     /**
+     * @notice emitted when a new message is added to a packet
+     * @param packedMessage the message packed with payload, fees and config
+     * @param packetCount an incremental id assigned to each new packet
+     * @param newRootHash the packed message hash (to be replaced with the root hash of the merkle tree)
+     */
+    event MessageAdded(
+        bytes32 packedMessage,
+        uint64 packetCount,
+        bytes32 newRootHash
+    );
+
+    /**
      * @notice Initializes the SingleCapacitor contract with a socket address.
      * @param socket_ The address of the socket contract
      * @param owner_ The address of the contract owner

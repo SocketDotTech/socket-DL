@@ -7,18 +7,6 @@ pragma solidity 0.8.7;
  */
 interface ICapacitor {
     /**
-     * @notice emitted when a new message is added to a packet
-     * @param packedMessage the message packed with payload, fees and config
-     * @param packetCount an incremental id assigned to each new packet
-     * @param newRootHash the packed message hash (to be replaced with the root hash of the merkle tree)
-     */
-    event MessageAdded(
-        bytes32 packedMessage,
-        uint64 packetCount,
-        bytes32 newRootHash
-    );
-
-    /**
      * @notice adds the packed message to a packet
      * @dev this should be only executable by socket
      * @dev it will be later replaced with a function adding each message to a merkle tree
