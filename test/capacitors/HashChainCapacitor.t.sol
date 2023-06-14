@@ -37,11 +37,11 @@ contract HashChainCapacitorTest is Setup {
 
     function testSealPacket() external {
         vm.expectRevert(HashChainCapacitor.InsufficentMessageLength.selector);
-        _sealPacket();
+        _sealPacket(1);
 
         _addPackedMessage(_message_0);
 
-        _sealPacket();
+        _sealPacket(1);
         _assertPacketById(_message_0, 0);
         _assertPacketById(bytes32(0), 1);
         _assertNextPacket(bytes32(0), 1);
@@ -61,7 +61,7 @@ contract HashChainCapacitorTest is Setup {
         (, uint256 packetToSeal) = _hcCapacitor.getNextPacketToBeSealed();
         assertEq(packetToSeal, 0);
 
-        _sealPacket();
+        _sealPacket(3);
         (, packetToSeal) = _hcCapacitor.getNextPacketToBeSealed();
         assertEq(packetToSeal, 1);
 
@@ -153,8 +153,10 @@ contract HashChainCapacitorTest is Setup {
         _hcCapacitor.addPackedMessage(packedMessage);
     }
 
-    function _sealPacket() private returns (bytes32 root, uint256 packetId) {
+    function _sealPacket(
+        uint256 batchSize
+    ) private returns (bytes32 root, uint256 packetId) {
         hoax(_socket);
-        (root, packetId) = _hcCapacitor.sealPacket(DEFAULT_BATCH_LENGTH);
+        (root, packetId) = _hcCapacitor.sealPacket(batchSize);
     }
 }

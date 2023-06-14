@@ -92,14 +92,15 @@ contract HashChainCapacitor is BaseCapacitor {
         // revert if batch size exceeds max length
         if (batchSize > _MAX_LEN) revert InvalidBatchSize();
 
-        // if no message found or total message count is less than expected length
-        if (messageCount <= _messagePacked + batchSize)
-            revert InsufficentMessageLength();
-
         packetCount = _nextSealCount++;
         if (_roots[packetCount] == bytes32(0)) {
             // last message count included in this packet
-            uint64 lastMessageCount = _messagePacked + uint64(batchSize);
+            uint64 lastMessageCount = _messagePacked + uint64(batchSize) - 1;
+
+            // if no message found or total message count is less than expected length
+            if (messageCount <= lastMessageCount)
+                revert InsufficentMessageLength();
+
             _createPacket(
                 packetCount,
                 lastMessageCount,
