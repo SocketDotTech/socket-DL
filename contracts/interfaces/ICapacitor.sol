@@ -9,7 +9,6 @@ interface ICapacitor {
     /**
      * @notice adds the packed message to a packet
      * @dev this should be only executable by socket
-     * @dev it will be later replaced with a function adding each message to a merkle tree
      * @param packedMessage the message packed with payload, fees and config
      */
     function addPackedMessage(bytes32 packedMessage) external;
@@ -33,9 +32,9 @@ interface ICapacitor {
 
     /**
      * @notice seals the packet
-     * @dev also indicates the packet is ready to be shipped and no more messages can be added now.
-     * @dev this should be executable by socket only
-     * @param batchSize_ later to be used with packet batching capacitors
+     * @dev indicates the packet is ready to be shipped and no more messages can be added now.
+     * @dev this should be called by socket only
+     * @param batchSize_ used with packet batching capacitors
      * @return root root hash of the packet
      * @return packetCount id of the packed sealed
      */
