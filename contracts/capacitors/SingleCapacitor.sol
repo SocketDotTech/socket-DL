@@ -69,11 +69,21 @@ contract SingleCapacitor is BaseCapacitor {
     function getNextPacketToBeSealed()
         external
         view
-        virtual
         override
         returns (bytes32, uint64)
     {
         uint64 toSeal = _nextSealCount;
         return (_roots[toSeal], toSeal);
+    }
+
+    /**
+     * @dev Returns the root hash of the packet with the specified count.
+     * @param count_ The count of the packet.
+     * @return The root hash of the packet.
+     */
+    function getRootByCount(
+        uint64 count_
+    ) external view override returns (bytes32) {
+        return _roots[count_];
     }
 }

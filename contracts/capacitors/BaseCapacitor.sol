@@ -46,17 +46,6 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl {
     }
 
     /**
-     * @dev Returns the root hash of the packet with the specified count.
-     * @param count_ The count of the packet.
-     * @return The root hash of the packet.
-     */
-    function getRootByCount(
-        uint64 count_
-    ) external view virtual override returns (bytes32) {
-        return _roots[count_];
-    }
-
-    /**
      * @dev Returns the count of the latest packet.
      * @return The count of the latest packet.
      */

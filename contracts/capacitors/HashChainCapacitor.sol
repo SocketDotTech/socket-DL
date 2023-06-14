@@ -86,13 +86,7 @@ contract HashChainCapacitor is BaseCapacitor {
      */
     function sealPacket(
         uint256 batchSize
-    )
-        external
-        virtual
-        override
-        onlySocket
-        returns (bytes32 root, uint64 packetCount)
-    {
+    ) external override onlySocket returns (bytes32 root, uint64 packetCount) {
         uint256 messageCount = _nextMessageCount;
 
         // revert if batch size exceeds max length
@@ -124,20 +118,34 @@ contract HashChainCapacitor is BaseCapacitor {
     function getNextPacketToBeSealed()
         external
         view
-        virtual
         override
         returns (bytes32 root, uint64 count)
     {
         count = _nextSealCount;
+        root = _getLatestRoot(count);
+    }
 
-        uint64 lastMessageCount;
-        if (_roots[count] == bytes32(0)) {
+    /**
+     * @dev Returns the root hash of the packet with the specified count.
+     * @param count_ The count of the packet.
+     * @return root The root hash of the packet.
+     */
+    function getRootByCount(
+        uint64 count_
+    ) external view override returns (bytes32) {
+        return _getLatestRoot(count_);
+    }
+
+    function _getLatestRoot(
+        uint64 count_
+    ) internal view returns (bytes32 root) {
+        if (_roots[count_] == bytes32(0)) {
             // as addPackedMessage auto update _roots as max length is reached, hence length is not verified here
-            lastMessageCount = _nextMessageCount == 0
+            uint64 lastMessageCount = _nextMessageCount == 0
                 ? 0
                 : _nextMessageCount - 1;
             root = _messageRoots[lastMessageCount];
-        } else root = _roots[count];
+        } else root = _roots[count_];
     }
 
     function _createPacket(
