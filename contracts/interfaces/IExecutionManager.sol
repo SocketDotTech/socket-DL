@@ -128,5 +128,8 @@ interface IExecutionManager {
         uint256 msgValue_
     ) external view;
 
-    function withdrawSwitchboardFees(uint128 amount_) external;
+    function withdrawSwitchboardFees(
+        uint32 siblingChainSlug_,
+        uint128 amount_
+    ) external;
 }

@@ -44,9 +44,10 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint128 totalExecutionFees;
     }
 
-    TotalTransmissionAndExecutionFees public totalTransmissionExecutionFees;
+    mapping(uint32 => TotalTransmissionAndExecutionFees)
+        public totalTransmissionExecutionFees;
 
-    mapping(address => uint256) public totalSwitchboardFees;
+    mapping(address => mapping(uint32 => uint128)) public totalSwitchboardFees;
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
@@ -160,13 +161,21 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             msg.value - uint256(transmissionFees) - uint256(switchboardFees_)
         );
 
-        totalTransmissionExecutionFees = TotalTransmissionAndExecutionFees({
-            totalTransmissionFees: totalTransmissionExecutionFees
-                .totalTransmissionFees + transmissionFees,
-            totalExecutionFees: totalTransmissionExecutionFees
-                .totalExecutionFees + executionFee
+        TotalTransmissionAndExecutionFees
+            memory currentTotalFees = totalTransmissionExecutionFees[
+                siblingChainSlug_
+            ];
+        totalTransmissionExecutionFees[
+            siblingChainSlug_
+        ] = TotalTransmissionAndExecutionFees({
+            totalTransmissionFees: currentTotalFees.totalTransmissionFees +
+                transmissionFees,
+            totalExecutionFees: currentTotalFees.totalExecutionFees +
+                executionFee
         });
-        totalSwitchboardFees[switchboard_] += switchboardFees_;
+        totalSwitchboardFees[switchboard_][
+            siblingChainSlug_
+        ] += switchboardFees_;
     }
 
     /**
@@ -379,12 +388,15 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         FeesHelper.withdrawFees(account_);
     }
 
-    function withdrawSwitchboardFees(uint128 amount_) external override {
+    function withdrawSwitchboardFees(
+        uint32 siblingChainSlug_,
+        uint128 amount_
+    ) external override {
         require(
-            totalSwitchboardFees[msg.sender] >= amount_,
+            totalSwitchboardFees[msg.sender][siblingChainSlug_] >= amount_,
             "Insufficient Fees"
         );
-        totalSwitchboardFees[msg.sender] -= amount_;
+        totalSwitchboardFees[msg.sender][siblingChainSlug_] -= amount_;
         (bool success, ) = msg.sender.call{value: amount_}("");
         require(success, "withdraw switchboard fee failed");
     }
