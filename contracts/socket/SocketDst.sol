@@ -50,15 +50,16 @@ abstract contract SocketDst is SocketBase {
      */
     mapping(bytes32 => bool) public messageExecuted;
     /**
-     * @dev capacitorAddr|chainSlug|packetId => proposalCount => packetIdRoots
+     * @dev capacitorAddr|chainSlug|packetId => proposalCount => switchboard => packetIdRoots
      */
-    mapping(bytes32 => mapping(uint256 => bytes32))
+    mapping(bytes32 => mapping(uint256 => mapping(address => bytes32)))
         public
         override packetIdRoots;
     /**
-     * @dev packetId => proposalCount => proposalTimestamp
+     * @dev packetId => proposalCount => switchboard => proposalTimestamp
      */
-    mapping(bytes32 => mapping(uint256 => uint256)) public rootProposedAt;
+    mapping(bytes32 => mapping(uint256 => mapping(address => uint256)))
+        public rootProposedAt;
 
     /**
      * @dev packetId => proposalCount
@@ -92,11 +93,13 @@ abstract contract SocketDst is SocketBase {
      * @notice the signature is validated if it belongs to transmitter or not
      * @param packetId_ packet id
      * @param root_ packet root
+     * @param switchboard_ The address of switchboard for which this packet is proposed
      * @param signature_ signature
      */
-    function propose(
+    function proposeForSwitchboard(
         bytes32 packetId_,
         bytes32 root_,
+        address switchboard_,
         bytes calldata signature_
     ) external override {
         if (packetId_ == bytes32(0)) revert InvalidPacketId();
@@ -110,8 +113,12 @@ abstract contract SocketDst is SocketBase {
 
         if (!isTransmitter) revert InvalidTransmitter();
 
-        packetIdRoots[packetId_][proposalCount[packetId_]] = root_;
-        rootProposedAt[packetId_][proposalCount[packetId_]] = block.timestamp;
+        packetIdRoots[packetId_][proposalCount[packetId_]][
+            switchboard_
+        ] = root_;
+        rootProposedAt[packetId_][proposalCount[packetId_]][
+            switchboard_
+        ] = block.timestamp;
 
         emit PacketProposed(
             transmitter,
@@ -259,15 +266,17 @@ abstract contract SocketDst is SocketBase {
     /**
      * @dev Checks whether the specified packet has been proposed.
      * @param packetId_ The ID of the packet to check.
-     * @param packetId_ The proposal ID of the packetId to check.
+     * @param proposalCount_ The proposal ID of the packetId to check.
+     * @param switchboard_ The address of switchboard for which this packet is proposed
      * @return A boolean indicating whether the packet has been proposed or not.
      */
     function isPacketProposed(
         bytes32 packetId_,
-        uint256 proposalCount_
+        uint256 proposalCount_,
+        address switchboard_
     ) external view returns (bool) {
         return
-            packetIdRoots[packetId_][proposalCount_] == bytes32(0)
+            packetIdRoots[packetId_][proposalCount_][switchboard_] == bytes32(0)
                 ? false
                 : true;
     }

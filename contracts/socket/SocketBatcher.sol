@@ -44,11 +44,13 @@ contract SocketBatcher is AccessControl {
      * @notice A struct representing a proposal request for a packet.
      * @param packetId The ID of the packet being proposed.
      * @param root The Merkle root of the packet data.
+     * @param switchboard The address of switchboard
      * @param signature The signature of the packet data.
      */
     struct ProposeRequest {
         bytes32 packetId;
         bytes32 root;
+        address switchboard;
         bytes signature;
     }
 
@@ -274,9 +276,10 @@ contract SocketBatcher is AccessControl {
     ) external {
         uint256 proposeRequestslength = proposeRequests_.length;
         for (uint256 index = 0; index < proposeRequestslength; ) {
-            ISocket(socketAddress_).propose(
+            ISocket(socketAddress_).proposeForSwitchboard(
                 proposeRequests_[index].packetId,
                 proposeRequests_[index].root,
+                proposeRequests_[index].switchboard,
                 proposeRequests_[index].signature
             );
             unchecked {

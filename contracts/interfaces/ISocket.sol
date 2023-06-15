@@ -146,11 +146,13 @@ interface ISocket {
      * @notice proposes a packet
      * @param packetId_ packet id
      * @param root_ root data
+     * @param switchboard_ The address of switchboard for which this packet is proposed
      * @param signature_ signed Data needed for verification
      */
-    function propose(
+    function proposeForSwitchboard(
         bytes32 packetId_,
         bytes32 root_,
+        address switchboard_,
         bytes calldata signature_
     ) external;
 
@@ -184,11 +186,13 @@ interface ISocket {
      * @notice Retrieves the packet id roots for a specified packet id.
      * @param packetId_ The packet id for which to retrieve the root.
      * @param proposalCount_ The proposal id for packetId_ for which to retrieve the root.
+     * @param switchboard_ The address of switchboard for which this packet is proposed
      * @return The packet id roots for the specified packet id.
      */
     function packetIdRoots(
         bytes32 packetId_,
-        uint256 proposalCount_
+        uint256 proposalCount_,
+        address switchboard_
     ) external view returns (bytes32);
 
     /**

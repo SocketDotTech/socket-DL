@@ -85,7 +85,11 @@ contract FastSwitchboard is SwitchboardBase {
     ) external {
         uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
 
-        bytes32 root = socket__.packetIdRoots(packetId_, proposalCount_);
+        bytes32 root = socket__.packetIdRoots(
+            packetId_,
+            proposalCount_,
+            address(this)
+        );
         if (root == bytes32(0)) revert InvalidRoot();
 
         address watcher = signatureVerifier__.recoverSigner(
