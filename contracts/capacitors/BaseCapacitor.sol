@@ -18,12 +18,13 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl {
     /// tracks the last packet sealed
     uint64 internal _nextSealCount;
 
+    /// address of socket
     address public immutable socket;
 
     /// maps the packet count with the root hash generated while adding message
     mapping(uint64 => bytes32) internal _roots;
 
-    error NoPendingPacket();
+    // Error triggered when not called by socket
     error OnlySocket();
 
     /**
@@ -31,7 +32,6 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl {
      */
     modifier onlySocket() {
         if (msg.sender != socket) revert OnlySocket();
-
         _;
     }
 
@@ -42,47 +42,7 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl {
      */
     constructor(address socket_, address owner_) AccessControl(owner_) {
         socket = socket_;
-    }
-
-    /**
-     * @dev Seals the next pending packet and returns its root hash and packet count.
-     * @dev we use seal packet count to make sure there is no scope of censorship and all the packets get sealed.
-     * @return The root hash and packet count of the sealed packet.
-     */
-    function sealPacket(
-        uint256
-    ) external virtual override onlySocket returns (bytes32, uint64) {
-        uint64 packetCount = _nextSealCount++;
-        if (_roots[packetCount] == bytes32(0)) revert NoPendingPacket();
-
-        bytes32 root = _roots[packetCount];
-        return (root, packetCount);
-    }
-
-    /**
-     * @dev Returns the root hash and packet count of the next pending packet to be sealed.
-     * @return The root hash and packet count of the next pending packet.
-     */
-    function getNextPacketToBeSealed()
-        external
-        view
-        virtual
-        override
-        returns (bytes32, uint64)
-    {
-        uint64 toSeal = _nextSealCount;
-        return (_roots[toSeal], toSeal);
-    }
-
-    /**
-     * @dev Returns the root hash of the packet with the specified count.
-     * @param count_ The count of the packet.
-     * @return The root hash of the packet.
-     */
-    function getRootByCount(
-        uint64 count_
-    ) external view virtual override returns (bytes32) {
-        return _roots[count_];
+        _grantRole(RESCUE_ROLE, owner_);
     }
 
     /**

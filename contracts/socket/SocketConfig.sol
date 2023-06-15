@@ -4,25 +4,23 @@ pragma solidity 0.8.7;
 import "../interfaces/ISocket.sol";
 import "../interfaces/ICapacitorFactory.sol";
 import "../interfaces/ISwitchboard.sol";
-import "../utils/AccessControlExtended.sol";
-
-import {GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
 
 /**
  * @title SocketConfig
- * @notice An abstract contract for configuring socket connections between different chains
+ * @notice An abstract contract for configuring socket connections for plugs between different chains,
+ * manages plug configs and switchboard registrations
  * @dev This contract is meant to be inherited by other contracts that require socket configuration functionality
  */
-abstract contract SocketConfig is ISocket, AccessControlExtended {
+abstract contract SocketConfig is ISocket {
     /**
-     * @dev Struct to hold the configuration for a plug connection
+     * @dev Struct to store the configuration for a plug connection
      */
     struct PlugConfig {
         // address of the sibling plug on the remote chain
         address siblingPlug;
-        // capacitor instance for the plug connection
+        // capacitor instance for the outbound plug connection
         ICapacitor capacitor__;
-        // decapacitor instance for the plug connection
+        // decapacitor instance for the inbound plug connection
         IDecapacitor decapacitor__;
         // inbound switchboard instance for the plug connection
         ISwitchboard inboundSwitchboard__;
@@ -34,6 +32,7 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
     ICapacitorFactory public capacitorFactory__;
 
     // capacitor address => siblingChainSlug
+    // It is used to maintain record of capacitors in the system registered for a slug. It is used in seal for verification
     mapping(address => uint32) public capacitorToSlug;
 
     // switchboard => siblingChainSlug => ICapacitor
@@ -53,8 +52,6 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
         uint256 maxPacketLength,
         uint256 capacitorType
     );
-    // Event triggered when the capacitor factory is set
-    event CapacitorFactorySet(address capacitorFactory);
 
     // Error triggered when a switchboard already exists
     error SwitchboardExists();
@@ -62,22 +59,11 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
     error InvalidConnection();
 
     /**
-     * @dev Set the capacitor factory contract
-     * @param capacitorFactory_ The address of the capacitor factory contract
-     */
-    function setCapacitorFactory(
-        address capacitorFactory_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
-        emit CapacitorFactorySet(capacitorFactory_);
-    }
-
-    /**
      * @dev Register a switchboard with the given configuration
-     * @dev This function is called from switchboard
-     * @param maxPacketLength_ The maximum packet length supported by the switchboard
+     * @dev This function should be called from switchboard
+     * @param maxPacketLength_ The maximum number of messages a packet can support for this switchboard
      * @param siblingChainSlug_ The sibling chain slug to register the switchboard with
-     * @param capacitorType_ The type of capacitor to use for the switchboard
+     * @param capacitorType_ The type of capacitor to use for the switchboard (refer capacitor factory for more)
      */
     function registerSwitchBoard(
         uint32 siblingChainSlug_,
@@ -100,27 +86,27 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
                 maxPacketLength_
             );
 
-        capacitorToSlug[address(capacitor__)] = siblingChainSlug_;
+        capacitor = address(capacitor__);
+        capacitorToSlug[capacitor] = siblingChainSlug_;
         capacitors__[switchBoardAddress][siblingChainSlug_] = capacitor__;
         decapacitors__[switchBoardAddress][siblingChainSlug_] = decapacitor__;
 
         emit SwitchboardAdded(
             switchBoardAddress,
             siblingChainSlug_,
-            address(capacitor__),
+            capacitor,
             address(decapacitor__),
             maxPacketLength_,
             capacitorType_
         );
-
-        return address(capacitor__);
     }
 
     /**
-     * @notice sets the config specific to the plug
+     * @notice connects Plug to Socket and sets the config for given `siblingChainSlug_`
+     * @notice msg.sender is stored as switchboard address against given configuration
      * @param siblingChainSlug_ the sibling chain slug
-     * @param siblingPlug_ address of plug present at sibling chain to call inbound
-     * @param inboundSwitchboard_ the address of switchboard to use for receiving messages
+     * @param siblingPlug_ address of plug present at siblingChainSlug_ to call at inbound
+     * @param inboundSwitchboard_ the address of switchboard to use for verifying messages at inbound
      * @param outboundSwitchboard_ the address of switchboard to use for sending messages
      */
     function connect(
@@ -153,16 +139,16 @@ abstract contract SocketConfig is ISocket, AccessControlExtended {
         emit PlugConnected(
             msg.sender,
             siblingChainSlug_,
-            _plugConfig.siblingPlug,
-            address(_plugConfig.inboundSwitchboard__),
-            address(_plugConfig.outboundSwitchboard__),
+            siblingPlug_,
+            inboundSwitchboard_,
+            outboundSwitchboard_,
             address(_plugConfig.capacitor__),
             address(_plugConfig.decapacitor__)
         );
     }
 
     /**
-     * @notice returns the config for given plug and sibling
+     * @notice returns the config for given `plugAddress_` and `siblingChainSlug_`
      * @param siblingChainSlug_ the sibling chain slug
      * @param plugAddress_ address of plug present at current chain
      */

@@ -37,7 +37,7 @@ interface IExecutionManager {
      * @dev This function is payable and assumes the socket is going to send correct amount of fees.
      * @param msgGasLimit_ The gas limit for the transaction
      * @param payloadSize_ The gas limit for the transaction
-     * @param extraParams_ The gas limit for the transaction
+     * @param executionParams_ The gas limit for the transaction
      * @param siblingChainSlug_ The gas limit for the transaction
      * @param switchboardFees_ The gas limit for the transaction
      * @param verificationFees_ The gas limit for the transaction
@@ -48,7 +48,7 @@ interface IExecutionManager {
     function payAndCheckFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 siblingChainSlug_,
         uint128 switchboardFees_,
         uint128 verificationFees_,
@@ -66,14 +66,14 @@ interface IExecutionManager {
     function getMinFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 siblingChainSlug_
     ) external view returns (uint128);
 
     function getExecutionTransmissionMinFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 siblingChainSlug_,
         address transmitManager_
     ) external view returns (uint128, uint128);
@@ -124,7 +124,7 @@ interface IExecutionManager {
     ) external;
 
     function verifyParams(
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint256 msgValue_
     ) external view;
 

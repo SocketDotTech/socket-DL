@@ -241,7 +241,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint128 verificationFees_,
         bytes calldata signature_
     ) external override {
-        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+        address feesUpdater = signatureVerifier__.recoverSigner(
             keccak256(
                 abi.encode(
                     FEES_UPDATE_SIG_IDENTIFIER,
@@ -299,7 +299,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param signature_ The signature of the message "TRIP" + chainSlug + nonce_ + true.
      */
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
-        address watcher = signatureVerifier__.recoverSignerFromDigest(
+        address watcher = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
@@ -327,7 +327,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param signature_ The signature created by the watcher.
      */
     function untrip(uint256 nonce_, bytes memory signature_) external {
-        address watcher = signatureVerifier__.recoverSignerFromDigest(
+        address watcher = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(

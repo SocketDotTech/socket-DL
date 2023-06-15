@@ -24,10 +24,7 @@ contract OpenExecutionManager is ExecutionManager {
         bytes32 packedMessage,
         bytes memory sig
     ) external view override returns (address executor, bool isValidExecutor) {
-        executor = signatureVerifier__.recoverSignerFromDigest(
-            packedMessage,
-            sig
-        );
+        executor = signatureVerifier__.recoverSigner(packedMessage, sig);
         isValidExecutor = true;
     }
 }

@@ -68,10 +68,71 @@ contract OptimismSwitchboardL1L2Test is Setup {
         vm.stopPrank();
     }
 
+    function testUpdateReceiveGasLimit() public {
+        uint256 receiveGasLimit = 1000;
+        assertEq(optimismSwitchboard.receiveGasLimit(), receiveGasLimit_);
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        optimismSwitchboard.updateReceiveGasLimit(receiveGasLimit);
+
+        hoax(_socketOwner);
+        optimismSwitchboard.updateReceiveGasLimit(receiveGasLimit);
+
+        assertEq(optimismSwitchboard.receiveGasLimit(), receiveGasLimit);
+    }
+
+    function testReceivePacket() public {
+        bytes32 packetId = bytes32(uint256(100));
+        bytes32 root = bytes32(uint256(200));
+
+        // call is not from crossDomainManagerAddress_
+        vm.expectRevert(NativeSwitchboardBase.InvalidSender.selector);
+        optimismSwitchboard.receivePacket(packetId, root);
+
+        // call from wrong remoteNativeSwitchboard
+        vm.mockCall(
+            crossDomainManagerAddress_,
+            abi.encodeWithSelector(
+                optimismSwitchboard
+                    .crossDomainMessenger__()
+                    .xDomainMessageSender
+                    .selector
+            ),
+            abi.encode(address(1))
+        );
+
+        hoax(crossDomainManagerAddress_);
+        vm.expectRevert(NativeSwitchboardBase.InvalidSender.selector);
+        optimismSwitchboard.receivePacket(packetId, root);
+
+        // correct call
+        vm.mockCall(
+            crossDomainManagerAddress_,
+            abi.encodeWithSelector(
+                optimismSwitchboard
+                    .crossDomainMessenger__()
+                    .xDomainMessageSender
+                    .selector
+            ),
+            abi.encode(optimismSwitchboard.remoteNativeSwitchboard())
+        );
+
+        vm.startPrank(crossDomainManagerAddress_);
+        optimismSwitchboard.receivePacket(packetId, root);
+        vm.stopPrank();
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         SocketConfigContext memory scc_ = addOptimismSwitchboard(

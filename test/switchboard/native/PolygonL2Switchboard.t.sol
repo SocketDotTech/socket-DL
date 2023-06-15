@@ -67,6 +67,7 @@ contract PolygonL2SwitchboardTest is Setup {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         SocketConfigContext memory scc_ = addPolygonL2Switchboard(
@@ -75,6 +76,44 @@ contract PolygonL2SwitchboardTest is Setup {
             _capacitorType
         );
         _a.configs__.push(scc_);
+    }
+
+    function testSetFxRootTunnel() public {
+        address rootTunnel = address(uint160(c++));
+        assertEq(address(polygonL2Switchboard.fxRootTunnel()), address(0));
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        polygonL2Switchboard.setFxRootTunnel(rootTunnel);
+
+        hoax(_socketOwner);
+        polygonL2Switchboard.setFxRootTunnel(rootTunnel);
+
+        assertEq(address(polygonL2Switchboard.fxRootTunnel()), rootTunnel);
+    }
+
+    function testUpdateFxChild() public {
+        address fxChild = address(uint160(c++));
+        assertEq(address(polygonL2Switchboard.fxChild()), fxChild_);
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        polygonL2Switchboard.updateFxChild(fxChild);
+
+        hoax(_socketOwner);
+        polygonL2Switchboard.updateFxChild(fxChild);
+
+        assertEq(address(polygonL2Switchboard.fxChild()), fxChild);
     }
 
     function addPolygonL2Switchboard(

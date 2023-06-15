@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/ICapacitor.sol";
 import "./SocketBase.sol";
 
 /**
  * @title SocketSrc
- * @dev The SocketSrc contract inherits from SocketBase and provides the functionality to send messages from the local chain to a remote chain via a Capacitor.
+ * @dev The SocketSrc contract inherits from SocketBase and provides the functionality
+ * to send messages from the local chain to a remote chain via a capacitor, estimate min fees
+ * and allow transmitters to seal packets for a path.
  */
 abstract contract SocketSrc is SocketBase {
     error InsufficientFees();
+    error InvalidCapacitor();
 
     /**
      * @notice emits the verification and seal confirmation of a packet
@@ -35,7 +37,7 @@ abstract contract SocketSrc is SocketBase {
     function outbound(
         uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         bytes calldata payload_
     ) external payable override returns (bytes32 msgId) {
         PlugConfig memory plugConfig;
@@ -48,12 +50,12 @@ abstract contract SocketSrc is SocketBase {
             remoteChainSlug_
         ].outboundSwitchboard__;
 
-        msgId = _encodeMsgId(chainSlug, plugConfig.siblingPlug);
+        msgId = _encodeMsgId(plugConfig.siblingPlug);
 
         ISocket.Fees memory fees = _validateAndSendFees(
             msgGasLimit_,
             uint256(payload_.length),
-            extraParams_,
+            executionParams_,
             uint32(remoteChainSlug_),
             plugConfig.outboundSwitchboard__,
             plugConfig.capacitor__.getMaxPacketLength()
@@ -62,7 +64,7 @@ abstract contract SocketSrc is SocketBase {
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = msgId;
         messageDetails.msgGasLimit = msgGasLimit_;
-        messageDetails.extraParams = extraParams_;
+        messageDetails.executionParams = executionParams_;
         messageDetails.payload = payload_;
         messageDetails.executionFee = fees.executionFee;
 
@@ -83,7 +85,7 @@ abstract contract SocketSrc is SocketBase {
             plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
-            extraParams_,
+            executionParams_,
             payload_,
             fees
         );
@@ -92,7 +94,7 @@ abstract contract SocketSrc is SocketBase {
     function _validateAndSendFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 remoteChainSlug_,
         ISwitchboard switchboard__,
         uint256 maxPacketLength_
@@ -107,7 +109,7 @@ abstract contract SocketSrc is SocketBase {
             .payAndCheckFees{value: msg.value}(
             msgGasLimit_,
             payloadSize_,
-            extraParams_,
+            executionParams_,
             remoteChainSlug_,
             fees.switchboardFees,
             verificationFees,
@@ -127,7 +129,7 @@ abstract contract SocketSrc is SocketBase {
     function getMinFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view override returns (uint256 totalFees) {
@@ -138,7 +140,7 @@ abstract contract SocketSrc is SocketBase {
         ) = _getAllMinFees(
                 msgGasLimit_,
                 payloadSize_,
-                extraParams_,
+                executionParams_,
                 remoteChainSlug_,
                 _plugConfigs[plug_][remoteChainSlug_].outboundSwitchboard__
             );
@@ -161,7 +163,7 @@ abstract contract SocketSrc is SocketBase {
     function _getAllMinFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 remoteChainSlug_,
         ISwitchboard switchboard__
     )
@@ -184,7 +186,7 @@ abstract contract SocketSrc is SocketBase {
             .getExecutionTransmissionMinFees(
                 msgGasLimit_,
                 payloadSize_,
-                extraParams_,
+                executionParams_,
                 remoteChainSlug_,
                 address(transmitManager__)
             );
@@ -203,12 +205,13 @@ abstract contract SocketSrc is SocketBase {
         address capacitorAddress_,
         bytes calldata signature_
     ) external payable override {
+        uint32 siblingChainSlug = capacitorToSlug[capacitorAddress_];
+        if (siblingChainSlug == 0) revert InvalidCapacitor();
+
         (bytes32 root, uint64 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket(batchSize_);
 
         bytes32 packetId = _encodePacketId(capacitorAddress_, packetCount);
-
-        uint32 siblingChainSlug = capacitorToSlug[capacitorAddress_];
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
                 siblingChainSlug,
@@ -225,13 +228,10 @@ abstract contract SocketSrc is SocketBase {
     // Packs the local plug, local chain slug, remote chain slug and nonce
     // messageCount++ will take care of msg id overflow as well
     // msgId(256) = localChainSlug(32) | siblingPlug_(160) | nonce(64)
-    function _encodeMsgId(
-        uint32 slug_,
-        address siblingPlug_
-    ) internal returns (bytes32) {
+    function _encodeMsgId(address siblingPlug_) internal returns (bytes32) {
         return
             bytes32(
-                (uint256(slug_) << 224) |
+                (uint256(chainSlug) << 224) |
                     (uint256(uint160(siblingPlug_)) << 64) |
                     messageCount++
             );
@@ -239,7 +239,7 @@ abstract contract SocketSrc is SocketBase {
 
     function _encodePacketId(
         address capacitorAddress_,
-        uint256 packetCount_
+        uint64 packetCount_
     ) internal view returns (bytes32) {
         return
             bytes32(
