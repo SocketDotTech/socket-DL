@@ -14,7 +14,7 @@ contract HashChainCapacitor is BaseCapacitor {
     uint64 private constant _MAX_LEN = 10;
 
     /// an incrementing count for each new message added
-    uint64 internal _nextMessageCount;
+    uint64 internal _nextMessageCount = 1;
     /// points to last message included in packet
     uint64 internal _messagePacked;
     // message count => root
@@ -62,18 +62,15 @@ contract HashChainCapacitor is BaseCapacitor {
         uint64 messageCount = _nextMessageCount++;
         uint64 packetCount = _nextPacketCount;
 
-        // index to get root for last message, if created first time, takes current index hence bytes32(0)
-        uint64 rootIndex = messageCount == 0 ? 0 : messageCount - 1;
-
         // hash the packed message with last root and create a new root
         bytes32 root = keccak256(
-            abi.encode(_messageRoots[rootIndex], packedMessage_)
+            abi.encode(_messageRoots[messageCount - 1], packedMessage_)
         );
         // update the root for each new message added
         _messageRoots[messageCount] = root;
 
         // create a packet if max length is reached and update packet count
-        if (_messagePacked - packetCount == _MAX_LEN)
+        if (messageCount - _messagePacked == _MAX_LEN)
             _createPacket(packetCount, messageCount, root);
 
         emit MessageAdded(packedMessage_, messageCount, packetCount, root);
@@ -95,7 +92,7 @@ contract HashChainCapacitor is BaseCapacitor {
         packetCount = _nextSealCount++;
         if (_roots[packetCount] == bytes32(0)) {
             // last message count included in this packet
-            uint64 lastMessageCount = _messagePacked + uint64(batchSize) - 1;
+            uint64 lastMessageCount = _messagePacked + uint64(batchSize);
 
             // if no message found or total message count is less than expected length
             if (messageCount <= lastMessageCount)
@@ -123,7 +120,7 @@ contract HashChainCapacitor is BaseCapacitor {
         returns (bytes32 root, uint64 count)
     {
         count = _nextSealCount;
-        root = _getLatestRoot(count);
+        root = _getLatestRoot(count, 0);
     }
 
     /**
@@ -134,17 +131,32 @@ contract HashChainCapacitor is BaseCapacitor {
     function getRootByCount(
         uint64 count_
     ) external view override returns (bytes32) {
-        return _getLatestRoot(count_);
+        return _getLatestRoot(count_, 0);
+    }
+
+    /**
+     * @dev Returns the root hash and packet count of the next pending packet to be sealed with batch size.
+     * @dev includes all the messages till `batchSize_` height from last msg packed
+     * @param batchSize_ length of packet
+     * @return root The root hash and packet count of the next pending packet.
+     */
+    function getNextPacketToBeSealed(
+        uint256 batchSize_
+    ) external view returns (bytes32 root, uint64 count) {
+        count = _nextSealCount;
+        root = _getLatestRoot(count, uint64(batchSize_));
     }
 
     function _getLatestRoot(
-        uint64 count_
+        uint64 count_,
+        uint64 batchSize_
     ) internal view returns (bytes32 root) {
         if (_roots[count_] == bytes32(0)) {
             // as addPackedMessage auto update _roots as max length is reached, hence length is not verified here
-            uint64 lastMessageCount = _nextMessageCount == 0
-                ? 0
-                : _nextMessageCount - 1;
+            uint64 lastMessageCount = batchSize_ == 0
+                ? _nextMessageCount - 1
+                : _messagePacked + batchSize_;
+            if (_nextMessageCount <= lastMessageCount) return bytes32(0);
             root = _messageRoots[lastMessageCount];
         } else root = _roots[count_];
     }

@@ -88,7 +88,7 @@ contract HappyTest is Setup {
                 _b.chainSlug
             );
 
-            _sealOnSrc(_a, capacitor, sig_);
+            _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
             _proposeOnDst(_b, sig_, packetId, root);
             uint256 proposalCount;
             _attestOnDst(
@@ -210,7 +210,7 @@ contract HappyTest is Setup {
             bytes memory sig
         ) = _getLatestSignature(capacitor, _b.chainSlug, _a.chainSlug);
 
-        _sealOnSrc(_b, capacitor, sig);
+        _sealOnSrc(_b, capacitor, DEFAULT_BATCH_LENGTH, sig);
         _proposeOnDst(_a, sig, packetId, root);
         _attestOnDst(
             address(_a.configs__[0].switchboard__),
@@ -330,7 +330,10 @@ contract HappyTest is Setup {
         }
 
         // seal 2 messages together
-        (bytes32 packetId, ) = sealAndPropose(address(srcConfig.capacitor__));
+        (bytes32 packetId, ) = sealAndPropose(
+            address(srcConfig.capacitor__),
+            2
+        );
         roots.push(root1);
         roots.push(root2);
 

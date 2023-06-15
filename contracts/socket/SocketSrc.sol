@@ -37,19 +37,19 @@ abstract contract SocketSrc is SocketBase {
     function outbound(
         uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         bytes calldata payload_
     ) external payable override returns (bytes32 msgId) {
         PlugConfig memory plugConfig = _plugConfigs[msg.sender][
             remoteChainSlug_
         ];
 
-        msgId = _encodeMsgId(chainSlug, plugConfig.siblingPlug);
+        msgId = _encodeMsgId(plugConfig.siblingPlug);
 
         ISocket.Fees memory fees = _validateAndGetFees(
             msgGasLimit_,
             uint256(payload_.length),
-            extraParams_,
+            executionParams_,
             uint32(remoteChainSlug_),
             plugConfig.outboundSwitchboard__
         );
@@ -57,7 +57,7 @@ abstract contract SocketSrc is SocketBase {
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = msgId;
         messageDetails.msgGasLimit = msgGasLimit_;
-        messageDetails.extraParams = extraParams_;
+        messageDetails.extraParams = executionParams_;
         messageDetails.payload = payload_;
         messageDetails.executionFee = fees.executionFee;
 
@@ -85,7 +85,7 @@ abstract contract SocketSrc is SocketBase {
             plugConfig.siblingPlug,
             msgId,
             msgGasLimit_,
-            extraParams_,
+            executionParams_,
             payload_,
             fees
         );
@@ -101,7 +101,7 @@ abstract contract SocketSrc is SocketBase {
     function _validateAndGetFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 remoteChainSlug_,
         ISwitchboard switchboard__
     ) internal returns (Fees memory fees) {
@@ -113,7 +113,7 @@ abstract contract SocketSrc is SocketBase {
         ) = _getMinFees(
             msgGasLimit_,
             payloadSize_,
-            extraParams_,
+            executionParams_,
             remoteChainSlug_,
             switchboard__
         );
@@ -167,7 +167,7 @@ abstract contract SocketSrc is SocketBase {
     function getMinFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view override returns (uint256 totalFees) {
@@ -180,7 +180,7 @@ abstract contract SocketSrc is SocketBase {
         ) = _getMinFees(
                 msgGasLimit_,
                 payloadSize_,
-                extraParams_,
+                executionParams_,
                 remoteChainSlug_,
                 plugConfig.outboundSwitchboard__
             );
@@ -191,7 +191,7 @@ abstract contract SocketSrc is SocketBase {
     function _getMinFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 remoteChainSlug_,
         ISwitchboard switchboard__
     )
@@ -212,7 +212,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 msgExecutionFee = executionManager__.getMinFees(
             msgGasLimit_,
             payloadSize_,
-            extraParams_,
+            executionParams_,
             remoteChainSlug_
         );
 
@@ -253,13 +253,10 @@ abstract contract SocketSrc is SocketBase {
     // Packs the local plug, local chain slug, remote chain slug and nonce
     // messageCount++ will take care of msg id overflow as well
     // msgId(256) = localChainSlug(32) | siblingPlug_(160) | nonce(64)
-    function _encodeMsgId(
-        uint32 slug_,
-        address siblingPlug_
-    ) internal returns (bytes32) {
+    function _encodeMsgId(address siblingPlug_) internal returns (bytes32) {
         return
             bytes32(
-                (uint256(slug_) << 224) |
+                (uint256(chainSlug) << 224) |
                     (uint256(uint160(siblingPlug_)) << 64) |
                     messageCount++
             );
@@ -267,7 +264,7 @@ abstract contract SocketSrc is SocketBase {
 
     function _encodePacketId(
         address capacitorAddress_,
-        uint256 packetCount_
+        uint64 packetCount_
     ) internal view returns (bytes32) {
         return
             bytes32(

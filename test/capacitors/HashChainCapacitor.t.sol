@@ -140,8 +140,8 @@ contract HashChainCapacitorTest is Setup {
         assertEq(nextPacketId, packetId_, "packetId Invalid");
     }
 
-    function _assertPacketById(bytes32 root_, uint64 packetId_) private {
-        bytes32 root = _hcCapacitor.getRootByCount(packetId_);
+    function _assertPacketById(bytes32 root_, uint64 packetCount_) private {
+        bytes32 root = _hcCapacitor.getRootByCount(packetCount_);
         bytes32 packedRoot = root_;
         if (root != bytes32(0))
             packedRoot = keccak256(abi.encode(bytes32(0), root_));

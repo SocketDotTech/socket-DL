@@ -32,6 +32,7 @@ abstract contract SocketConfig is ISocket {
     ICapacitorFactory public capacitorFactory__;
 
     // capacitor address => siblingChainSlug
+    // It is used to maintain record of capacitors in the system registered for a slug. It is used in seal for verification
     mapping(address => uint32) public capacitorToSlug;
 
     // switchboard => siblingChainSlug => ICapacitor

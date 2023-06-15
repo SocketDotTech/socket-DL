@@ -81,7 +81,7 @@ contract SocketDstTest is Setup {
                 _b.chainSlug,
                 _transmitterPrivateKey
             );
-        _sealOnSrc(_a, capacitor, sig_);
+        _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
 
         uint256 proposalCount = 0;
         vm.expectEmit(false, false, false, true);
@@ -173,7 +173,7 @@ contract SocketDstTest is Setup {
                 _transmitterPrivateKey
             );
 
-        _sealOnSrc(_a, capacitor, sig_);
+        _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
         uint256 proposalCount;
         assertFalse(_b.socket__.isPacketProposed(packetId_, proposalCount));
         _proposeOnDst(_b, sig_, packetId_, root_);
@@ -232,7 +232,10 @@ contract SocketDstTest is Setup {
             _b.chainSlug,
             _transmitterPrivateKey
         );
-        (bytes32 packetId_, bytes32 root_) = sealAndPropose(capacitor);
+        (bytes32 packetId_, bytes32 root_) = sealAndPropose(
+            capacitor,
+            DEFAULT_BATCH_LENGTH
+        );
         assertEq(_b.socket__.packetIdRoots(packetId_, 0), root_);
         // vm.expectRevert(AlreadyProposed.selector);
         _proposeOnDst(_b, sig_, packetId_, root_);
@@ -313,7 +316,10 @@ contract SocketDstTest is Setup {
         }
 
         bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
-        (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        (bytes32 packetId, bytes32 root) = sealAndPropose(
+            capacitor,
+            DEFAULT_BATCH_LENGTH
+        );
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
@@ -411,7 +417,10 @@ contract SocketDstTest is Setup {
         }
 
         bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
-        (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        (bytes32 packetId, bytes32 root) = sealAndPropose(
+            capacitor,
+            DEFAULT_BATCH_LENGTH
+        );
         uint256 proposalCount;
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
@@ -481,7 +490,10 @@ contract SocketDstTest is Setup {
         }
 
         bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
-        (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        (bytes32 packetId, bytes32 root) = sealAndPropose(
+            capacitor,
+            DEFAULT_BATCH_LENGTH
+        );
         uint256 proposalCount;
         _attestOnDst(
             address(_b.configs__[index].switchboard__),

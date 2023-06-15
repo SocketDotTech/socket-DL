@@ -163,7 +163,7 @@ contract SocketSrcTest is Setup {
             vm.expectEmit(false, false, false, true);
             emit PacketVerifiedAndSealed(_transmitter, packetId_, root_, sig_);
 
-            _sealOnSrc(_a, capacitor, sig_);
+            _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
         }
     }
 
@@ -207,7 +207,7 @@ contract SocketSrcTest is Setup {
             );
 
             vm.expectRevert(InvalidTransmitter.selector);
-            _sealOnSrc(_a, capacitor, sig_);
+            _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
         }
     }
 

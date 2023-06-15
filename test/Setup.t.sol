@@ -553,7 +553,8 @@ contract Setup is Test {
     }
 
     function sealAndPropose(
-        address capacitor
+        address capacitor,
+        uint256 batchSize
     ) internal returns (bytes32 packetId_, bytes32 root_) {
         bytes memory sig_;
         (root_, packetId_, sig_) = _getLatestSignature(
@@ -562,7 +563,7 @@ contract Setup is Test {
             _b.chainSlug
         );
 
-        _sealOnSrc(_a, capacitor, sig_);
+        _sealOnSrc(_a, capacitor, batchSize, sig_);
         _proposeOnDst(_b, sig_, packetId_, root_);
     }
 
@@ -627,14 +628,15 @@ contract Setup is Test {
     function _sealOnSrc(
         ChainContext storage src_,
         address capacitor,
+        uint256 batchSize,
         bytes memory sig_
     ) internal {
-        src_.socket__.seal(DEFAULT_BATCH_LENGTH, capacitor, sig_);
+        src_.socket__.seal(batchSize, capacitor, sig_);
 
         // random capacitor
         address randomCapacitor = address(uint160(c++));
         vm.expectRevert();
-        src_.socket__.seal(DEFAULT_BATCH_LENGTH, randomCapacitor, sig_);
+        src_.socket__.seal(batchSize, randomCapacitor, sig_);
 
         // non-socket capacitor
         SingleCapacitor randomCapacitor__ = new SingleCapacitor(
@@ -645,11 +647,7 @@ contract Setup is Test {
         randomCapacitor__.addPackedMessage(bytes32("random"));
 
         vm.expectRevert(SocketSrc.InvalidCapacitor.selector);
-        src_.socket__.seal(
-            DEFAULT_BATCH_LENGTH,
-            address(randomCapacitor__),
-            sig_
-        );
+        src_.socket__.seal(batchSize, address(randomCapacitor__), sig_);
     }
 
     function _proposeOnDst(
