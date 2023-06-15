@@ -32,7 +32,7 @@ abstract contract SocketSrc is SocketBase {
      * @dev Packs the message and includes it in a packet with capacitor
      * @param remoteChainSlug_ the remote chain slug
      * @param msgGasLimit_ the gas limit needed to execute the payload on remote
-     * @param extraParams_ a 32 bytes param to add extra details for execution
+     * @param executionParams_ a 32 bytes param to add extra details for execution
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
@@ -96,7 +96,7 @@ abstract contract SocketSrc is SocketBase {
      * @notice Validates if enough fee is provided for message execution. If yes, fees is sent and stored in execution manager.
      * @param msgGasLimit_ The gas limit of the message.
      * @param payloadSize_ The byte length of payload of the message.
-     * @param extraParams_ The extraParams required for execution.
+     * @param executionParams_ The extraParams required for execution.
      * @param remoteChainSlug_ The slug of the destination chain for the message.
      * @param switchboard__ The address of the switchboard through which the message is sent.
      * @param maxPacketLength_ The maxPacketLength for the capacitor used. Used for calculating transmission Fees.
@@ -133,7 +133,7 @@ abstract contract SocketSrc is SocketBase {
      * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
      * @param msgGasLimit_ The gas limit of the message.
      * @param payloadSize_ The byte length of payload of the message.
-     * @param extraParams_ The extraParams required for execution.
+     * @param executionParams_ The extraParams required for execution.
      * @param remoteChainSlug_ The slug of the destination chain for the message.
      * @param plug_ The address of the plug through which the message is sent.
      * @return totalFees The minimum fees required for the specified message.
@@ -182,7 +182,7 @@ abstract contract SocketSrc is SocketBase {
      * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
      * @param msgGasLimit_ The gas limit of the message.
      * @param payloadSize_ The byte length of payload of the message.
-     * @param extraParams_ The extraParams required for execution.
+     * @param executionParams_ The extraParams required for execution.
      * @param remoteChainSlug_ The slug of the destination chain for the message.
      * @param switchboard__ The address of the switchboard through which the message is sent.
      */
