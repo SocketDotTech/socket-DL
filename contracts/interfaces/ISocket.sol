@@ -37,8 +37,23 @@ interface ISocket {
         bytes32 executionParams;
         // The payload data to be executed in the message.
         bytes payload;
-        // The proof data required by the Decapacitor contract to verify the message's authenticity.
+    }
+
+    /**
+     * @title ExecutionDetails
+     * @dev This struct defines the execution details
+     */
+    struct ExecutionDetails {
+        // packet id
+        bytes32 packetId;
+        // proposal count
+        uint256 proposalCount;
+        // gas limit needed to execute inbound
+        uint256 executionGasLimit;
+        // proof data required by the Decapacitor contract to verify the message's authenticity
         bytes decapacitorProof;
+        // signature of executor
+        bytes signature;
     }
 
     /**
@@ -119,15 +134,12 @@ interface ISocket {
 
     /**
      * @notice executes a message
-     * @param packetId packet id
-     * @param proposalCount proposal id for a proposal for packetId
-     * @param messageDetails_ the details needed for message verification
+     * @param executionDetails_ the packet details, proof and signature needed for message execution
+     * @param messageDetails_ the message details
      */
     function execute(
-        bytes32 packetId,
-        uint256 proposalCount,
-        ISocket.MessageDetails calldata messageDetails_,
-        bytes memory signature
+        ISocket.ExecutionDetails calldata executionDetails_,
+        ISocket.MessageDetails calldata messageDetails_
     ) external payable;
 
     /**

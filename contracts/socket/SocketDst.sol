@@ -44,6 +44,10 @@ abstract contract SocketDst is SocketBase {
      * @dev Error emitted when source slugs deduced from packet id and msg id don't match
      */
     error ErrInSourceValidation();
+    /**
+     * @dev Error emitted when less gas limit is provided for execution than expected
+     */
+    error LowGasLimit();
 
     /**
      * @dev msgId => message status mapping
@@ -130,26 +134,24 @@ abstract contract SocketDst is SocketBase {
 
     /**
      * @notice executes a message, fees will go to recovered executor address
-     * @param packetId_ packet id
-     * @param proposalCount_ proposal id
+     * @param executionDetails_ the packet details, proof and signature needed for message execution
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
-        bytes32 packetId_,
-        uint256 proposalCount_,
-        ISocket.MessageDetails calldata messageDetails_,
-        bytes memory signature_
+        ISocket.ExecutionDetails calldata executionDetails_,
+        ISocket.MessageDetails calldata messageDetails_
     ) external payable override {
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
 
-        if (packetId_ == bytes32(0)) revert InvalidPacketId();
-        if (packetIdRoots[packetId_][proposalCount_] == bytes32(0))
-            revert PacketNotProposed();
+        if (executionDetails_.executionGasLimit < messageDetails_.msgGasLimit)
+            revert LowGasLimit();
+
+        if (executionDetails_.packetId == bytes32(0)) revert InvalidPacketId();
 
         uint32 remoteSlug = _decodeSlug(messageDetails_.msgId);
-        if (_decodeSlug(packetId_) != remoteSlug)
+        if (_decodeSlug(executionDetails_.packetId) != remoteSlug)
             revert ErrInSourceValidation();
 
         address localPlug = _decodePlug(messageDetails_.msgId);
@@ -162,6 +164,11 @@ abstract contract SocketDst is SocketBase {
         plugConfig.inboundSwitchboard__ = _plugConfigs[localPlug][remoteSlug]
             .inboundSwitchboard__;
 
+        bytes32 packetRoot = packetIdRoots[executionDetails_.packetId][
+            executionDetails_.proposalCount
+        ][address(plugConfig.inboundSwitchboard__)];
+        if (packetRoot == bytes32(0)) revert PacketNotProposed();
+
         bytes32 packedMessage = hasher__.packMessage(
             remoteSlug,
             plugConfig.siblingPlug,
@@ -171,19 +178,26 @@ abstract contract SocketDst is SocketBase {
         );
 
         (address executor, bool isValidExecutor) = executionManager__
-            .isExecutor(packedMessage, signature_);
+            .isExecutor(packedMessage, executionDetails_.signature);
         if (!isValidExecutor) revert NotExecutor();
 
         _verify(
-            packetId_,
-            proposalCount_,
+            executionDetails_.packetId,
+            executionDetails_.proposalCount,
             remoteSlug,
             packedMessage,
+            packetRoot,
             plugConfig,
-            messageDetails_.decapacitorProof,
+            bytes(""), //messageDetails_.decapacitorProof,
             messageDetails_.executionParams
         );
-        _execute(executor, localPlug, remoteSlug, messageDetails_);
+        _execute(
+            executor,
+            localPlug,
+            remoteSlug,
+            executionDetails_.executionGasLimit,
+            messageDetails_
+        );
     }
 
     function _verify(
@@ -191,23 +205,26 @@ abstract contract SocketDst is SocketBase {
         uint256 proposalCount_,
         uint32 remoteChainSlug_,
         bytes32 packedMessage_,
+        bytes32 packetRoot_,
         PlugConfig memory plugConfig_,
         bytes memory decapacitorProof_,
         bytes32 executionParams_
     ) internal view {
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
-                packetIdRoots[packetId_][proposalCount_],
+                packetRoot_,
                 packetId_,
                 proposalCount_,
                 uint32(remoteChainSlug_),
-                rootProposedAt[packetId_][proposalCount_]
+                rootProposedAt[packetId_][proposalCount_][
+                    address(plugConfig_.inboundSwitchboard__)
+                ]
             )
         ) revert VerificationFailed();
 
         if (
             !plugConfig_.decapacitor__.verifyMessageInclusion(
-                packetIdRoots[packetId_][proposalCount_],
+                packetRoot_,
                 packedMessage_,
                 decapacitorProof_
             )
@@ -226,11 +243,12 @@ abstract contract SocketDst is SocketBase {
         address executor_,
         address localPlug_,
         uint32 remoteChainSlug_,
+        uint256 executionGasLimit_,
         ISocket.MessageDetails memory messageDetails_
     ) internal {
         try
             IPlug(localPlug_).inbound{
-                gas: messageDetails_.msgGasLimit,
+                gas: executionGasLimit_,
                 value: msg.value
             }(remoteChainSlug_, messageDetails_.payload)
         {

@@ -68,16 +68,12 @@ contract SocketBatcher is AccessControl {
 
     /**
      * @notice A struct representing a request to execute a packet.
-     * @param packetId The ID of the packet to be executed.
-     * @param localPlug The address of the local plug contract.
+     * @param executionDetails The execution details.
      * @param messageDetails The message details of the packet.
-     * @param signature The signature of the packet data.
      */
     struct ExecuteRequest {
-        bytes32 packetId;
-        uint256 proposalCount;
+        ISocket.ExecutionDetails executionDetails;
         ISocket.MessageDetails messageDetails;
-        bytes signature;
     }
 
     /**
@@ -329,10 +325,8 @@ contract SocketBatcher is AccessControl {
             if (paramType == 0) msgValue = 0;
 
             ISocket(socketAddress_).execute{value: msgValue}(
-                executeRequests_[index].packetId,
-                executeRequests_[index].proposalCount,
-                executeRequests_[index].messageDetails,
-                executeRequests_[index].signature
+                executeRequests_[index].executionDetails,
+                executeRequests_[index].messageDetails
             );
             unchecked {
                 ++index;
