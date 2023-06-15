@@ -77,9 +77,9 @@ abstract contract SocketDst is SocketBase {
     mapping(bytes32 => mapping(uint256 => uint256)) public rootProposedAt;
 
     /**
-     * @dev packetId => proposalCountCount
+     * @dev packetId => proposalCount
      */
-    mapping(bytes32 => uint256) public proposalCountCount;
+    mapping(bytes32 => uint256) public proposalCount;
 
     /**
      * @notice emits the packet details when proposed at remote
@@ -125,14 +125,13 @@ abstract contract SocketDst is SocketBase {
 
         if (!isTransmitter) revert InvalidTransmitter();
 
-        packetIdRoots[packetId_][proposalCountCount[packetId_]] = root_;
-        rootProposedAt[packetId_][proposalCountCount[packetId_]] = block
-            .timestamp;
+        packetIdRoots[packetId_][proposalCount[packetId_]] = root_;
+        rootProposedAt[packetId_][proposalCount[packetId_]] = block.timestamp;
 
         emit PacketProposed(
             transmitter,
             packetId_,
-            proposalCountCount[packetId_]++,
+            proposalCount[packetId_]++,
             root_
         );
     }
