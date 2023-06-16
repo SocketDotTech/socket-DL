@@ -188,7 +188,7 @@ abstract contract SocketDst is SocketBase {
             packedMessage,
             packetRoot,
             plugConfig,
-            bytes(""), //messageDetails_.decapacitorProof,
+            executionDetails_.decapacitorProof,
             messageDetails_.executionParams
         );
         _execute(
