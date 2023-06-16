@@ -92,7 +92,13 @@ contract HappyTest is Setup {
             );
 
             _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
-            _proposeOnDst(_b, sig_, packetId, root);
+            _proposeOnDst(
+                _b,
+                sig_,
+                packetId,
+                root,
+                address(_b.configs__[0].switchboard__)
+            );
             uint256 proposalCount;
             _attestOnDst(
                 address(_b.configs__[0].switchboard__),

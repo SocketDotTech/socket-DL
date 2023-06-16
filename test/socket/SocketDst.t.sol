@@ -86,11 +86,28 @@ contract SocketDstTest is Setup {
         uint256 proposalCount = 0;
         vm.expectEmit(false, false, false, true);
         emit PacketProposed(_transmitter, packetId_, proposalCount, root_);
-        _proposeOnDst(_b, sig_, packetId_, root_);
+        _proposeOnDst(
+            _b,
+            sig_,
+            packetId_,
+            root_,
+            address(_b.configs__[0].switchboard__)
+        );
 
-        assertEq(_b.socket__.packetIdRoots(packetId_, proposalCount), root_);
         assertEq(
-            _b.socket__.rootProposedAt(packetId_, proposalCount),
+            _b.socket__.packetIdRoots(
+                packetId_,
+                proposalCount,
+                address(_b.configs__[0].switchboard__)
+            ),
+            root_
+        );
+        assertEq(
+            _b.socket__.rootProposedAt(
+                packetId_,
+                proposalCount,
+                address(_b.configs__[0].switchboard__)
+            ),
             block.timestamp
         );
     }
@@ -126,7 +143,13 @@ contract SocketDstTest is Setup {
             vm.addr(_transmitterPrivateKey)
         );
 
-        _proposeOnDst(_b, sig, packetId, root);
+        _proposeOnDst(
+            _b,
+            sig,
+            packetId,
+            root,
+            address(_b.configs__[0].switchboard__)
+        );
 
         hoax(_socketOwner);
         FastSwitchboard(address(_b.configs__[index].switchboard__))
@@ -175,11 +198,36 @@ contract SocketDstTest is Setup {
 
         _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
         uint256 proposalCount;
-        assertFalse(_b.socket__.isPacketProposed(packetId_, proposalCount));
-        _proposeOnDst(_b, sig_, packetId_, root_);
+        assertFalse(
+            _b.socket__.isPacketProposed(
+                packetId_,
+                proposalCount,
+                address(_b.configs__[0].switchboard__)
+            )
+        );
+        _proposeOnDst(
+            _b,
+            sig_,
+            packetId_,
+            root_,
+            address(_b.configs__[0].switchboard__)
+        );
 
-        assertEq(_b.socket__.packetIdRoots(packetId_, proposalCount), root_);
-        assertTrue(_b.socket__.isPacketProposed(packetId_, proposalCount));
+        assertEq(
+            _b.socket__.packetIdRoots(
+                packetId_,
+                proposalCount,
+                address(_b.configs__[0].switchboard__)
+            ),
+            root_
+        );
+        assertTrue(
+            _b.socket__.isPacketProposed(
+                packetId_,
+                proposalCount,
+                address(_b.configs__[0].switchboard__)
+            )
+        );
     }
 
     function testProposeAPacketByInvalidTransmitter() external {
@@ -200,7 +248,13 @@ contract SocketDstTest is Setup {
 
         vm.expectRevert(InvalidTransmitter.selector);
 
-        _proposeOnDst(_b, sig_, packetId_, root_);
+        _proposeOnDst(
+            _b,
+            sig_,
+            packetId_,
+            root_,
+            address(_b.configs__[0].switchboard__)
+        );
     }
 
     function testProposeWithInvalidChainSlug() external {
@@ -219,7 +273,12 @@ contract SocketDstTest is Setup {
         bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
 
         vm.expectRevert(InvalidTransmitter.selector);
-        _b.socket__.propose(packetId, root, sig);
+        _b.socket__.proposeForSwitchboard(
+            packetId,
+            root,
+            address(_b.configs__[0].switchboard__),
+            sig
+        );
     }
 
     function testDuplicateProposePacket() external {
@@ -236,12 +295,32 @@ contract SocketDstTest is Setup {
             capacitor,
             DEFAULT_BATCH_LENGTH
         );
-        assertEq(_b.socket__.packetIdRoots(packetId_, 0), root_);
+        assertEq(
+            _b.socket__.packetIdRoots(
+                packetId_,
+                0,
+                address(_b.configs__[0].switchboard__)
+            ),
+            root_
+        );
         // vm.expectRevert(AlreadyProposed.selector);
-        _proposeOnDst(_b, sig_, packetId_, root_);
-        assertEq(_b.socket__.packetIdRoots(packetId_, 1), root_);
+        _proposeOnDst(
+            _b,
+            sig_,
+            packetId_,
+            root_,
+            address(_b.configs__[0].switchboard__)
+        );
+        assertEq(
+            _b.socket__.packetIdRoots(
+                packetId_,
+                1,
+                address(_b.configs__[0].switchboard__)
+            ),
+            root_
+        );
 
-        assertEq(_b.socket__.proposalCountCount(packetId_), 2);
+        assertEq(_b.socket__.proposalCount(packetId_), 2);
     }
 
     function sendOutboundMessage() internal {

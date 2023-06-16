@@ -623,7 +623,7 @@ contract Setup is Test {
         );
 
         _sealOnSrc(_a, capacitor, batchSize, sig_);
-        _proposeOnDst(_b, sig_, packetId_, root_);
+        _proposeOnDst(_b, sig_, packetId_, root_, address(_b.configs__[0].switchboard__));
     }
 
     function _addTransmitters(
@@ -713,12 +713,13 @@ contract Setup is Test {
         ChainContext storage dst_,
         bytes memory sig_,
         bytes32 packetId_,
-        bytes32 root_
+        bytes32 root_,
+        address switchboard_
     ) internal {
-        dst_.socket__.propose(packetId_, root_, sig_);
+        dst_.socket__.proposeForSwitchboard(packetId_, root_,switchboard_, sig_);
 
         vm.expectRevert(SocketDst.InvalidPacketId.selector);
-        dst_.socket__.propose(bytes32(0), root_, sig_);
+        dst_.socket__.proposeForSwitchboard(bytes32(0), root_,switchboard_, sig_);
     }
 
     function _attestOnDst(
@@ -755,7 +756,7 @@ contract Setup is Test {
             abi.encode(versionHash, cc_.chainSlug, packetId_, root_)
         );
         bytes memory sig_ = _createSignature(digest, _transmitterPrivateKey);
-        _proposeOnDst(cc_, sig_, packetId_, root_);
+        _proposeOnDst(cc_, sig_, packetId_, root_, address(_b.configs__[0].switchboard__));
     }
 
     function _executePayloadOnDstWithExecutor(
