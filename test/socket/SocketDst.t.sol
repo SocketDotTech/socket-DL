@@ -224,7 +224,7 @@ contract SocketDstTest is Setup {
         _proposeOnDst(_b, sig_, packetId_, root_);
         assertEq(_b.socket__.packetIdRoots(packetId_, 1), root_);
 
-        assertEq(_b.socket__.proposalCountCount(packetId_), 2);
+        assertEq(_b.socket__.proposalCount(packetId_), 2);
     }
 
     function sendOutboundMessage() internal {
