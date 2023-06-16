@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "../Setup.t.sol";
 import "../../contracts/examples/Counter.sol";
-import "../ExecutionManager.t.sol";
+import "../managers/ExecutionManager.t.sol";
 
 contract SocketDstTest is Setup {
     Counter srcCounter__;
@@ -12,10 +12,6 @@ contract SocketDstTest is Setup {
     uint256 addAmount = 100;
     uint256 subAmount = 40;
 
-    uint256 sealGasLimit = 200000;
-    uint256 proposeGasLimit = 100000;
-    uint256 sourceGasPrice = 1200000;
-    uint256 relativeGasPrice = 1100000;
     address immutable _invalidExecutor = address(uint160(c++));
 
     bool isFast = true;
@@ -85,7 +81,7 @@ contract SocketDstTest is Setup {
                 _b.chainSlug,
                 _transmitterPrivateKey
             );
-        _sealOnSrc(_a, capacitor, sig_);
+        _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
 
         uint256 proposalCount = 0;
         vm.expectEmit(false, false, false, true);
@@ -148,7 +144,6 @@ contract SocketDstTest is Setup {
         vm.expectRevert(SocketDst.ErrInSourceValidation.selector);
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 proposalCount,
@@ -178,7 +173,7 @@ contract SocketDstTest is Setup {
                 _transmitterPrivateKey
             );
 
-        _sealOnSrc(_a, capacitor, sig_);
+        _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
         uint256 proposalCount;
         assertFalse(_b.socket__.isPacketProposed(packetId_, proposalCount));
         _proposeOnDst(_b, sig_, packetId_, root_);
@@ -208,6 +203,25 @@ contract SocketDstTest is Setup {
         _proposeOnDst(_b, sig_, packetId_, root_);
     }
 
+    function testProposeWithInvalidChainSlug() external {
+        uint32 randomChainSlug = cChainSlug;
+        bytes32 packetId = _getPackedId(
+            address(uint160(c++)),
+            randomChainSlug,
+            100
+        );
+        bytes32 root = bytes32("RANDOM_ROOT");
+
+        bytes32 digest = keccak256(
+            abi.encode(versionHash, randomChainSlug, packetId, root)
+        );
+
+        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
+
+        vm.expectRevert(InvalidTransmitter.selector);
+        _b.socket__.propose(packetId, root, sig);
+    }
+
     function testDuplicateProposePacket() external {
         address capacitor = address(_a.configs__[index].capacitor__);
 
@@ -218,7 +232,10 @@ contract SocketDstTest is Setup {
             _b.chainSlug,
             _transmitterPrivateKey
         );
-        (bytes32 packetId_, bytes32 root_) = sealAndPropose(capacitor);
+        (bytes32 packetId_, bytes32 root_) = sealAndPropose(
+            capacitor,
+            DEFAULT_BATCH_LENGTH
+        );
         assertEq(_b.socket__.packetIdRoots(packetId_, 0), root_);
         // vm.expectRevert(AlreadyProposed.selector);
         _proposeOnDst(_b, sig_, packetId_, root_);
@@ -305,7 +322,10 @@ contract SocketDstTest is Setup {
         }
 
         bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
-        (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        (bytes32 packetId, bytes32 root) = sealAndPropose(
+            capacitor,
+            DEFAULT_BATCH_LENGTH
+        );
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
             _b.chainSlug,
@@ -319,7 +339,6 @@ contract SocketDstTest is Setup {
 
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -340,7 +359,6 @@ contract SocketDstTest is Setup {
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -359,7 +377,7 @@ contract SocketDstTest is Setup {
         uint256 amount = 100;
         uint256 msgValue = 100;
         uint paramType = 1;
-        bytes32 extraParams = bytes32(
+        bytes32 executionParams = bytes32(
             uint256((uint256(paramType) << 224) | uint224(msgValue))
         );
 
@@ -403,12 +421,15 @@ contract SocketDstTest is Setup {
                 _b.chainSlug,
                 amount,
                 _msgGasLimit,
-                extraParams
+                executionParams
             );
         }
 
         bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
-        (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        (bytes32 packetId, bytes32 root) = sealAndPropose(
+            capacitor,
+            DEFAULT_BATCH_LENGTH
+        );
         uint256 proposalCount;
         _attestOnDst(
             address(_b.configs__[index].switchboard__),
@@ -420,13 +441,12 @@ contract SocketDstTest is Setup {
 
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 proposalCount,
                 msgId,
                 _msgGasLimit,
-                extraParams,
+                executionParams,
                 executionFee,
                 root,
                 payload,
@@ -482,7 +502,10 @@ contract SocketDstTest is Setup {
         }
 
         bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
-        (bytes32 packetId, bytes32 root) = sealAndPropose(capacitor);
+        (bytes32 packetId, bytes32 root) = sealAndPropose(
+            capacitor,
+            DEFAULT_BATCH_LENGTH
+        );
         uint256 proposalCount;
         _attestOnDst(
             address(_b.configs__[index].switchboard__),

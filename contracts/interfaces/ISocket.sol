@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./ITransmitManager.sol";
-import "./IExecutionManager.sol";
-
 /**
  * @title ISocket
  * @notice An interface for a cross-chain communication contract
@@ -36,7 +33,8 @@ interface ISocket {
         uint256 executionFee;
         // The maximum amount of gas that can be used to execute the message.
         uint256 msgGasLimit;
-        bytes32 extraParams;
+        // The extra params which provides msg value and additional info needed for message exec
+        bytes32 executionParams;
         // The payload data to be executed in the message.
         bytes payload;
         // The proof data required by the Decapacitor contract to verify the message's authenticity.
@@ -60,7 +58,7 @@ interface ISocket {
         address dstPlug,
         bytes32 msgId,
         uint256 msgGasLimit,
-        bytes32 extraParams,
+        bytes32 executionParams,
         bytes payload,
         Fees fees
     );
@@ -106,12 +104,6 @@ interface ISocket {
     );
 
     /**
-     * @notice emits when a new transmitManager contract is set
-     * @param transmitManager address of new transmitManager contract
-     */
-    event TransmitManagerSet(address transmitManager);
-
-    /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with capacitor
      * @param remoteChainSlug_ the remote chain slug
@@ -121,7 +113,7 @@ interface ISocket {
     function outbound(
         uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         bytes calldata payload_
     ) external payable returns (bytes32 msgId);
 
@@ -209,7 +201,7 @@ interface ISocket {
     function getMinFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view returns (uint256 totalFees);

@@ -47,7 +47,7 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
         if (capacitorType_ == SINGLE_CAPACITOR) {
             return (
                 // msg.sender is socket address
-                new SingleCapacitor(msg.sender, owner, maxPacketLength_),
+                new SingleCapacitor(msg.sender, owner),
                 new SingleDecapacitor(owner)
             );
         }

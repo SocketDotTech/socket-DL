@@ -2,12 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../../Setup.t.sol";
-import "forge-std/Test.sol";
 import "../../../contracts/switchboard/native/ArbitrumL2Switchboard.sol";
-import "../../../contracts/TransmitManager.sol";
-import "../../../contracts/ExecutionManager.sol";
-import "../../../contracts/CapacitorFactory.sol";
-import "../../../contracts/interfaces/ICapacitor.sol";
 
 // Arbitrum Goerli -> Goerli
 contract ArbitrumL2SwitchboardTest is Setup {
@@ -74,10 +69,45 @@ contract ArbitrumL2SwitchboardTest is Setup {
         vm.stopPrank();
     }
 
+    function testReceivePacket() public {
+        bytes32 root = bytes32("RANDOM_ROOT");
+        bytes32 packetId = bytes32("RANDOM_PACKET");
+
+        assertFalse(
+            arbitrumL2Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+
+        vm.expectRevert(NativeSwitchboardBase.InvalidSender.selector);
+        arbitrumL2Switchboard.receivePacket(packetId, root);
+
+        address remoteAlias = AddressAliasHelper.applyL1ToL2Alias(
+            remoteNativeSwitchboard_
+        );
+        hoax(remoteAlias);
+        arbitrumL2Switchboard.receivePacket(packetId, root);
+
+        assertTrue(
+            arbitrumL2Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         SocketConfigContext memory scc_ = addArbitrumL2Switchboard(

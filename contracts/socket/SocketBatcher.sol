@@ -318,11 +318,11 @@ contract SocketBatcher is AccessControl {
     ) external payable {
         uint256 executeRequestslength = executeRequests_.length;
         for (uint256 index = 0; index < executeRequestslength; ) {
-            bytes32 extraParams = executeRequests_[index]
+            bytes32 executionParams = executeRequests_[index]
                 .messageDetails
-                .extraParams;
-            uint8 paramType = uint8(uint256(extraParams) >> 248);
-            uint256 msgValue = uint256(uint248(uint256(extraParams)));
+                .executionParams;
+            uint8 paramType = uint8(uint256(executionParams) >> 248);
+            uint256 msgValue = uint256(uint248(uint256(executionParams)));
             if (paramType == 0) msgValue = 0;
 
             ISocket(socketAddress_).execute{value: msgValue}(

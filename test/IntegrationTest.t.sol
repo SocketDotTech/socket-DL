@@ -10,12 +10,10 @@ contract HappyTest is Setup {
 
     uint256 addAmount = 100;
     uint256 subAmount = 40;
-    uint256 sourceGasPrice = 1200000;
-    uint256 relativeGasPrice = 1100000;
-
     bool isFast = true;
-    bytes32[] roots;
     uint256 index = isFast ? 0 : 1;
+
+    bytes32[] roots;
 
     event ExecutionSuccess(bytes32 msgId);
     event ExecutionFailed(bytes32 msgId, string result);
@@ -37,7 +35,7 @@ contract HappyTest is Setup {
         _configPlugContracts(index);
     }
 
-    function testRemoteAddFromAtoB1() external {
+    function testRemoteAddFromAtoB() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
             keccak256("OP_ADD"),
@@ -93,7 +91,7 @@ contract HappyTest is Setup {
                 _b.chainSlug
             );
 
-            _sealOnSrc(_a, capacitor, sig_);
+            _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
             _proposeOnDst(_b, sig_, packetId, root);
             uint256 proposalCount;
             _attestOnDst(
@@ -111,7 +109,6 @@ contract HappyTest is Setup {
         );
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -136,10 +133,26 @@ contract HappyTest is Setup {
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
+                _packMessageId(_a.chainSlug, address(dstCounter__), 0),
+                _msgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
+        );
+
+        // with different proposal id
+        vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
+        _executePayloadOnDst(
+            _b,
+            ExecutePayloadOnDstParams(
+                packetId,
+                1,
                 _packMessageId(_a.chainSlug, address(dstCounter__), 0),
                 _msgGasLimit,
                 bytes32(0),
@@ -200,31 +213,30 @@ contract HappyTest is Setup {
     //         bytes memory sig
     //     ) = _getLatestSignature(capacitor, _b.chainSlug, _a.chainSlug);
 
-    //     _sealOnSrc(_b, capacitor, sig);
-    //     _proposeOnDst(_a, sig, packetId, root);
-    //     _attestOnDst(
-    //         address(_a.configs__[0].switchboard__),
-    //         _a.chainSlug,
+    // _sealOnSrc(_b, capacitor, DEFAULT_BATCH_LENGTH, sig);
+    // _proposeOnDst(_a, sig, packetId, root);
+    // _attestOnDst(
+    //     address(_a.configs__[0].switchboard__),
+    //     _a.chainSlug,
+    //     packetId,
+    //     0,
+    //     _watcherPrivateKey
+    // );
+
+    // _executePayloadOnDst(
+    //     _a,
+    //     ExecutePayloadOnDstParams(
     //         packetId,
     //         0,
-    //         _watcherPrivateKey
-    //     );
-
-    //     _executePayloadOnDst(
-    //         _a,
-    //         _b.chainSlug,
-    //         ExecutePayloadOnDstParams(
-    //             packetId,
-    //             0,
-    //             _packMessageId(_b.chainSlug, address(srcCounter__), 0),
-    //             _msgGasLimit,
-    //             bytes32(0),
-    //             executionFee,
-    //             root,
-    //             payload,
-    //             proof
-    //         )
-    //     );
+    //         _packMessageId(_b.chainSlug, address(srcCounter__), 0),
+    //         _msgGasLimit,
+    //         bytes32(0),
+    //         executionFee,
+    //         root,
+    //         payload,
+    //         proof
+    //     )
+    // );
 
     //     assertEq(srcCounter__.counter(), amount);
     //     assertEq(dstCounter__.counter(), 0);
@@ -320,10 +332,13 @@ contract HappyTest is Setup {
     //         (msgId2, root2) = outbound(1, amount, executionFee, fees, payload);
     //     }
 
-    //     // seal 2 messages together
-    //     (bytes32 packetId, ) = sealAndPropose(address(srcConfig.capacitor__));
-    //     roots.push(root1);
-    //     roots.push(root2);
+    // seal 2 messages together
+    // (bytes32 packetId, ) = sealAndPropose(
+    //     address(srcConfig.capacitor__),
+    //     2
+    // );
+    // roots.push(root1);
+    // roots.push(root2);
 
     //     uint256 proposalCount;
     //     _attestOnDst(
@@ -338,21 +353,20 @@ contract HappyTest is Setup {
     //     vm.expectEmit(true, false, false, false);
     //     emit ExecutionSuccess(msgId1);
 
-    //     _executePayloadOnDst(
-    //         _b,
-    //         _a.chainSlug,
-    //         ExecutePayloadOnDstParams(
-    //             packetId,
-    //             0,
-    //             msgId1,
-    //             _msgGasLimit,
-    //             bytes32(0),
-    //             executionFee,
-    //             root1,
-    //             payload,
-    //             abi.encode(roots)
-    //         )
-    //     );
+    // _executePayloadOnDst(
+    //     _b,
+    //     ExecutePayloadOnDstParams(
+    //         packetId,
+    //         0,
+    //         msgId1,
+    //         _msgGasLimit,
+    //         bytes32(0),
+    //         executionFee,
+    //         root1,
+    //         payload,
+    //         abi.encode(roots)
+    //     )
+    // );
 
     //     assertEq(dstCounter__.counter(), amount);
     //     assertEq(srcCounter__.counter(), 0);
@@ -361,21 +375,20 @@ contract HappyTest is Setup {
     //     vm.expectEmit(true, false, false, false);
     //     emit ExecutionSuccess(msgId2);
 
-    //     _executePayloadOnDst(
-    //         _b,
-    //         _a.chainSlug,
-    //         ExecutePayloadOnDstParams(
-    //             packetId,
-    //             0,
-    //             msgId2,
-    //             _msgGasLimit,
-    //             bytes32(0),
-    //             executionFee,
-    //             root2,
-    //             payload,
-    //             abi.encode(roots)
-    //         )
-    //     );
+    // _executePayloadOnDst(
+    //     _b,
+    //     ExecutePayloadOnDstParams(
+    //         packetId,
+    //         0,
+    //         msgId2,
+    //         _msgGasLimit,
+    //         bytes32(0),
+    //         executionFee,
+    //         root2,
+    //         payload,
+    //         abi.encode(roots)
+    //     )
+    // );
 
     //     assertEq(dstCounter__.counter(), 2 * amount);
     //     assertEq(srcCounter__.counter(), 0);

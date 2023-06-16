@@ -1,27 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.0;
 
-import "forge-std/Test.sol";
+import "../Setup.t.sol";
 import "../../contracts/capacitors/SingleCapacitor.sol";
 
-contract SingleCapacitorTest is Test {
-    uint256 internal c = 1;
-    address immutable _owner = address(uint160(c++));
+contract SingleCapacitorTest is Setup {
     address immutable _socket = address(uint160(c++));
-    address immutable _raju = address(uint160(c++));
     bytes32 immutable _message_0 = bytes32(c++);
     bytes32 immutable _message_1 = bytes32(c++);
     bytes32 immutable _message_2 = bytes32(c++);
 
     SingleCapacitor _sa;
+    SingleDecapacitor _sd;
 
     function setUp() external {
-        hoax(_owner);
-        _sa = new SingleCapacitor(_socket, _owner, 1);
+        initialise();
+
+        hoax(_socketOwner);
+        _sa = new SingleCapacitor(_socket, _socketOwner);
+        _sd = new SingleDecapacitor(_socketOwner);
     }
 
     function testSingleCapacitorSetup() external {
-        assertEq(_sa.owner(), _owner, "Owner not set");
+        assertEq(_sa.owner(), _socketOwner, "Owner not set");
 
         assertTrue(_sa.socket() == _socket, "Socket role not set");
 
@@ -36,7 +37,7 @@ contract SingleCapacitorTest is Test {
     }
 
     function testSealPacket() external {
-        vm.expectRevert(BaseCapacitor.NoPendingPacket.selector);
+        vm.expectRevert(SingleCapacitor.NoPendingPacket.selector);
         _sealPacket();
 
         _addPackedMessage(_message_0);
@@ -101,6 +102,18 @@ contract SingleCapacitorTest is Test {
         );
         hoax(_raju);
         _sa.sealPacket(0);
+    }
+
+    function testCapacitorRescueNativeFunds() public {
+        uint256 amount = 1e18;
+        hoax(_socketOwner);
+        _rescueNative(address(_sa), NATIVE_TOKEN_ADDRESS, _fundRescuer, amount);
+    }
+
+    function testDecapacitorRescueNativeFunds() public {
+        uint256 amount = 1e18;
+        hoax(_socketOwner);
+        _rescueNative(address(_sd), NATIVE_TOKEN_ADDRESS, _fundRescuer, amount);
     }
 
     function _assertPacketToBeSealed(bytes32 root_, uint256 packetId_) private {

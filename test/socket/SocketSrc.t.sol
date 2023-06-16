@@ -10,12 +10,6 @@ contract SocketSrcTest is Setup {
 
     uint256 addAmount = 100;
     uint256 subAmount = 40;
-
-    uint256 sealGasLimit = 200000;
-    uint256 proposeGasLimit = 100000;
-    uint256 sourceGasPrice = 1200000;
-    uint256 relativeGasPrice = 1100000;
-
     bool isFast = true;
     bytes32[] roots;
 
@@ -247,7 +241,7 @@ contract SocketSrcTest is Setup {
             vm.expectEmit(false, false, false, true);
             emit PacketVerifiedAndSealed(_transmitter, packetId_, root_, sig_);
 
-            _sealOnSrc(_a, capacitor, sig_);
+            _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
         }
     }
 
@@ -294,7 +288,7 @@ contract SocketSrcTest is Setup {
             );
 
             vm.expectRevert(InvalidTransmitter.selector);
-            _sealOnSrc(_a, capacitor, sig_);
+            _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
         }
     }
 
@@ -308,6 +302,22 @@ contract SocketSrcTest is Setup {
             amount,
             _msgGasLimit,
             bytes32(0)
+        );
+    }
+
+    function testRescueNativeFunds() public {
+        uint256 amount = 1e18;
+
+        hoax(_socketOwner);
+        vm.expectRevert();
+        _a.socket__.rescueFunds(NATIVE_TOKEN_ADDRESS, address(0), amount);
+
+        hoax(_socketOwner);
+        _rescueNative(
+            address(_a.socket__),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
         );
     }
 

@@ -5,8 +5,9 @@ import "../../Setup.t.sol";
 
 contract OptimisticSwitchboardTest is Setup {
     bool isFast = true;
-    uint32 immutable remoteChainSlug = uint32(uint256(2));
-    uint256 immutable packetId = 1;
+    uint32 immutable remoteChainSlug = bChainSlug;
+
+    bytes32 packetId;
     address watcher;
     uint256 nonce;
 
@@ -20,40 +21,23 @@ contract OptimisticSwitchboardTest is Setup {
 
     function setUp() external {
         initialise();
-        _a.chainSlug = uint32(uint256(1));
-        _a.sigVerifier__ = new SignatureVerifier(_socketOwner);
+        _a.chainSlug = uint32(uint256(aChainSlug));
 
-        watcher = vm.addr(_watcherPrivateKey);
+        uint256[] memory transmitterPivateKeys = new uint256[](1);
+        transmitterPivateKeys[0] = _transmitterPrivateKey;
 
-        vm.startPrank(_socketOwner);
-
-        optimisticSwitchboard = new OptimisticSwitchboard(
-            _socketOwner,
-            address(uint160(c++)),
-            _a.chainSlug,
-            1,
-            _a.sigVerifier__
-        );
-
-        optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-
-        optimisticSwitchboard.grantRoleWithSlug(
-            WATCHER_ROLE,
+        _deployContractsOnSingleChain(
+            _a,
             remoteChainSlug,
-            watcher
-        );
-        optimisticSwitchboard.grantRoleWithSlug(
-            WATCHER_ROLE,
-            _a.chainSlug,
-            watcher
-        );
-        optimisticSwitchboard.grantRoleWithSlug(
-            WATCHER_ROLE,
-            remoteChainSlug,
-            vm.addr(_altWatcherPrivateKey)
+            isExecutionOpen,
+            transmitterPivateKeys
         );
 
-        vm.stopPrank();
+        optimisticSwitchboard = OptimisticSwitchboard(
+            address(_a.configs__[1].switchboard__)
+        );
+
+        packetId = _packMessageId(remoteChainSlug, address(uint160(c++)), 0);
     }
 
     function testTripGlobal() external {
@@ -77,6 +61,43 @@ contract OptimisticSwitchboardTest is Setup {
         optimisticSwitchboard.tripGlobal(nonce++, sig);
         vm.stopPrank();
         assertTrue(optimisticSwitchboard.tripGlobalFuse());
+    }
+
+    function testUntripGlobal() external {
+        hoax(_socketOwner);
+        optimisticSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
+
+        bytes32 digest = keccak256(
+            abi.encode(
+                TRIP_GLOBAL_SIG_IDENTIFIER,
+                address(optimisticSwitchboard),
+                _a.chainSlug,
+                nonce,
+                true
+            )
+        );
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
+
+        optimisticSwitchboard.tripGlobal(nonce++, sig);
+        assertTrue(optimisticSwitchboard.tripGlobalFuse());
+
+        digest = keccak256(
+            abi.encode(
+                UNTRIP_GLOBAL_SIG_IDENTIFIER,
+                address(optimisticSwitchboard),
+                _a.chainSlug,
+                nonce,
+                false
+            )
+        );
+        sig = _createSignature(digest, _socketOwnerPrivateKey);
+
+        vm.expectRevert();
+        optimisticSwitchboard.untrip(nonce, sig);
+
+        hoax(_socketOwner);
+        optimisticSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
+        optimisticSwitchboard.untrip(nonce++, sig);
     }
 
     function testTripPath() external {
@@ -263,5 +284,55 @@ contract OptimisticSwitchboardTest is Setup {
             vm.addr(_altWatcherPrivateKey)
         );
         vm.stopPrank();
+    }
+
+    function testSetFees() external {
+        uint256 switchboardFee = 1000;
+        uint256 verificationFee = 1000;
+        uint256 feeNonce = optimisticSwitchboard.nextNonce(_feesWithdrawer);
+
+        (uint256 sbFee, uint256 vFee) = optimisticSwitchboard.fees(
+            remoteChainSlug
+        );
+
+        assertEq(sbFee, 0);
+        assertEq(vFee, 0);
+
+        bytes32 digest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                address(optimisticSwitchboard),
+                _a.chainSlug,
+                remoteChainSlug,
+                feeNonce,
+                switchboardFee,
+                verificationFee
+            )
+        );
+        bytes memory sig = _createSignature(digest, _feesWithdrawerPrivateKey);
+
+        hoax(_socketOwner);
+        optimisticSwitchboard.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            remoteChainSlug,
+            _feesWithdrawer
+        );
+
+        optimisticSwitchboard.setFees(
+            feeNonce,
+            remoteChainSlug,
+            switchboardFee,
+            verificationFee,
+            sig
+        );
+
+        vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
+        optimisticSwitchboard.setFees(
+            feeNonce,
+            remoteChainSlug,
+            switchboardFee,
+            verificationFee,
+            sig
+        );
     }
 }

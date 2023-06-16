@@ -105,10 +105,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         override
         returns (address executor, bool isValidExecutor)
     {
-        executor = signatureVerifier__.recoverSignerFromDigest(
-            packedMessage,
-            sig
-        );
+        executor = signatureVerifier__.recoverSigner(packedMessage, sig);
         isValidExecutor = _hasRole(EXECUTOR_ROLE, executor);
     }
 
@@ -127,7 +124,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     function payAndCheckFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 siblingChainSlug_,
         uint128 switchboardFees_,
         uint128 verificationFees_,
@@ -148,7 +145,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             _getMinFees(
                 msgGasLimit_,
                 payloadSize_,
-                extraParams_,
+                executionParams_,
                 siblingChainSlug_
             )
         );
@@ -186,20 +183,20 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
      * @dev This function is called at source to calculate the execution cost.
      * @param siblingChainSlug_ Sibling chain identifier
      * @param payloadSize_ byte length of payload. Currently only used to check max length, later on will be used for fees calculation.
-     * @param extraParams_ Can be used for providing extra information. Currently used for msgValue
+     * @param executionParams_ Can be used for providing extra information. Currently used for msgValue
      * @return minExecutionFee : Minimum fees required for executing the transaction
      */
     function getMinFees(
         uint256 gasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 siblingChainSlug_
     ) external view override returns (uint128 minExecutionFee) {
         minExecutionFee = uint128(
             _getMinFees(
                 gasLimit_,
                 payloadSize_,
-                extraParams_,
+                executionParams_,
                 siblingChainSlug_
             )
         );
@@ -208,7 +205,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     function getExecutionTransmissionMinFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 siblingChainSlug_,
         address transmitManager_
     )
@@ -221,7 +218,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             _getMinFees(
                 msgGasLimit_,
                 payloadSize_,
-                extraParams_,
+                executionParams_,
                 siblingChainSlug_
             )
         );
@@ -233,12 +230,12 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     function _getMinFees(
         uint256 gasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 siblingChainSlug_
     ) internal view returns (uint256) {
         if (payloadSize_ > 3000) revert PayloadTooLarge();
 
-        uint256 params = uint256(extraParams_);
+        uint256 params = uint256(executionParams_);
         uint8 paramType = uint8(params >> 248);
 
         if (paramType == 0) return executionFees[siblingChainSlug_];
@@ -257,10 +254,10 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     }
 
     function verifyParams(
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint256 msgValue_
     ) external pure override {
-        uint256 params = uint256(extraParams_);
+        uint256 params = uint256(executionParams_);
         uint8 paramType = uint8(params >> 248);
 
         if (paramType == 0) return;
@@ -276,7 +273,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint128 executionFees_,
         bytes calldata signature_
     ) external override {
-        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+        address feesUpdater = signatureVerifier__.recoverSigner(
             keccak256(
                 abi.encode(
                     FEES_UPDATE_SIG_IDENTIFIER,
@@ -303,7 +300,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 relativeNativeTokenPrice_,
         bytes calldata signature_
     ) external override {
-        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+        address feesUpdater = signatureVerifier__.recoverSigner(
             keccak256(
                 abi.encode(
                     RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENTIFIER,
@@ -334,7 +331,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 msgValueMinThreshold_,
         bytes calldata signature_
     ) external override {
-        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+        address feesUpdater = signatureVerifier__.recoverSigner(
             keccak256(
                 abi.encode(
                     MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER,
@@ -361,7 +358,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 msgValueMaxThreshold_,
         bytes calldata signature_
     ) external override {
-        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+        address feesUpdater = signatureVerifier__.recoverSigner(
             keccak256(
                 abi.encode(
                     MSG_VALUE_MAX_THRESHOLD_SIG_IDENTIFIER,

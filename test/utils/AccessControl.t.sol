@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../contracts/mocks/MockAccessControl.sol";
+import "../../contracts/mocks/MockAccessControl.sol";
 
 contract AccessControlTest is Test {
     uint256 internal c = 1;

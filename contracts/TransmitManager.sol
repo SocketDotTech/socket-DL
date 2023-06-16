@@ -76,7 +76,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         bytes32 digest_,
         bytes calldata signature_
     ) external view override returns (address, bool) {
-        address transmitter = signatureVerifier__.recoverSignerFromDigest(
+        address transmitter = signatureVerifier__.recoverSigner(
             digest_,
             signature_
         );
@@ -99,7 +99,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         uint128 transmissionFees_,
         bytes calldata signature_
     ) external override {
-        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+        address feesUpdater = signatureVerifier__.recoverSigner(
             keccak256(
                 abi.encode(
                     FEES_UPDATE_SIG_IDENTIFIER,
