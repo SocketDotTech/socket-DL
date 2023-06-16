@@ -623,7 +623,13 @@ contract Setup is Test {
         );
 
         _sealOnSrc(_a, capacitor, batchSize, sig_);
-        _proposeOnDst(_b, sig_, packetId_, root_, address(_b.configs__[0].switchboard__));
+        _proposeOnDst(
+            _b,
+            sig_,
+            packetId_,
+            root_,
+            address(_b.configs__[0].switchboard__)
+        );
     }
 
     function _addTransmitters(
@@ -716,10 +722,20 @@ contract Setup is Test {
         bytes32 root_,
         address switchboard_
     ) internal {
-        dst_.socket__.proposeForSwitchboard(packetId_, root_,switchboard_, sig_);
+        dst_.socket__.proposeForSwitchboard(
+            packetId_,
+            root_,
+            switchboard_,
+            sig_
+        );
 
         vm.expectRevert(SocketDst.InvalidPacketId.selector);
-        dst_.socket__.proposeForSwitchboard(bytes32(0), root_,switchboard_, sig_);
+        dst_.socket__.proposeForSwitchboard(
+            bytes32(0),
+            root_,
+            switchboard_,
+            sig_
+        );
     }
 
     function _attestOnDst(
@@ -756,7 +772,13 @@ contract Setup is Test {
             abi.encode(versionHash, cc_.chainSlug, packetId_, root_)
         );
         bytes memory sig_ = _createSignature(digest, _transmitterPrivateKey);
-        _proposeOnDst(cc_, sig_, packetId_, root_, address(_b.configs__[0].switchboard__));
+        _proposeOnDst(
+            cc_,
+            sig_,
+            packetId_,
+            root_,
+            address(_b.configs__[0].switchboard__)
+        );
     }
 
     function _executePayloadOnDstWithExecutor(
@@ -769,8 +791,7 @@ contract Setup is Test {
             executionParams.executionFee_,
             executionParams.msgGasLimit_,
             executionParams.executionParams_,
-            executionParams.payload_,
-            executionParams.proof_
+            executionParams.payload_
         );
 
         bytes memory sig = _createSignature(
@@ -781,19 +802,21 @@ contract Setup is Test {
         (uint8 paramType, uint248 paramValue) = _decodeexecutionParams(
             executionParams.executionParams_
         );
-        if (paramType == 0)
-            dst_.socket__.execute(
+
+        ISocket.ExecutionDetails memory executionDetails = ISocket
+            .ExecutionDetails(
                 executionParams.packetId_,
                 executionParams.proposalCount_,
-                msgDetails,
+                executionParams.msgGasLimit_,
+                executionParams.proof_,
                 sig
             );
+
+        if (paramType == 0) dst_.socket__.execute(executionDetails, msgDetails);
         else
             dst_.socket__.execute{value: paramValue}(
-                executionParams.packetId_,
-                executionParams.proposalCount_,
-                msgDetails,
-                sig
+                executionDetails,
+                msgDetails
             );
     }
 
