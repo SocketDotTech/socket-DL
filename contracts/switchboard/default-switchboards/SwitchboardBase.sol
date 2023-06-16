@@ -131,7 +131,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     ) external override onlyRole(GOVERNANCE_ROLE) {
         if (isInitialised[siblingChainSlug_]) revert AlreadyInitialised();
 
-        address capacitor = socket__.registerSwitchBoard(
+        (address capacitor, ) = socket__.registerSwitchBoard(
             siblingChainSlug_,
             maxPacketLength_,
             capacitorType_
