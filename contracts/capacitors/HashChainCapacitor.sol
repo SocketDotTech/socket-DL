@@ -56,6 +56,22 @@ contract HashChainCapacitor is BaseCapacitor {
     function updateMaxPacketLength(
         uint256 maxPacketLength_
     ) external onlyOwner {
+        if (maxPacketLength_ < maxPacketLength) {
+            uint256 packets = (_nextMessageCount - _messagePacked) %
+                maxPacketLength_;
+
+            for (uint256 index = 0; index < packets; ) {
+                uint64 packetEndAt = _messagePacked + uint64(maxPacketLength_);
+                _createPacket(
+                    _nextPacketCount,
+                    packetEndAt,
+                    _messageRoots[packetEndAt]
+                );
+                unchecked {
+                    index++;
+                }
+            }
+        }
         maxPacketLength = maxPacketLength_;
     }
 
