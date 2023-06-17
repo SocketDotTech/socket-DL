@@ -224,8 +224,8 @@ contract NativeBaseSwitchboardTest is Setup {
     }
 
     function testSetFees() external {
-        uint256 switchboardFee = 1000;
-        uint256 verificationFee = 1000;
+        uint128 switchboardFee = 1000;
+        uint128 verificationFee = 1000;
         uint256 feeNonce = optimismSwitchboard.nextNonce(_feesWithdrawer);
         assertEq(optimismSwitchboard.switchboardFees(), 0);
         assertEq(optimismSwitchboard.verificationFees(), 0);
