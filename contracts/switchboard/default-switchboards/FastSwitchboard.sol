@@ -81,6 +81,7 @@ contract FastSwitchboard is SwitchboardBase {
     function attest(
         bytes32 packetId_,
         uint256 proposalCount_,
+        bytes32 root_,
         bytes calldata signature_
     ) external {
         uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
@@ -91,6 +92,7 @@ contract FastSwitchboard is SwitchboardBase {
             address(this)
         );
         if (root == bytes32(0)) revert InvalidRoot();
+        if (root != root_) revert InvalidRoot();
 
         address watcher = signatureVerifier__.recoverSigner(
             keccak256(
@@ -131,10 +133,13 @@ contract FastSwitchboard is SwitchboardBase {
         uint32 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {
+        uint64 packetCount = uint64(uint256(packetId_));
+
         if (
             tripGlobalFuse ||
             tripSinglePath[srcChainSlug_] ||
-            isProposalTripped[packetId_][proposalCount_]
+            isProposalTripped[packetId_][proposalCount_] ||
+            packetCount < initialPacketCount[srcChainSlug_]
         ) return false;
         if (isRootValid[root_]) return true;
         if (block.timestamp - proposeTime_ > timeoutInSeconds) return true;
@@ -171,6 +176,9 @@ contract FastSwitchboard is SwitchboardBase {
         totalWatchers[srcChainSlug_]--;
     }
 
+    /**
+     * @dev If adding any new role to FastSwitchboard, have to add it here as well to make sure it can be set
+     */
     function isNonWatcherRole(bytes32 role_) public pure returns (bool) {
         if (
             role_ == TRIP_ROLE ||

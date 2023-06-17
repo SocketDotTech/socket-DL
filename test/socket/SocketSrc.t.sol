@@ -142,14 +142,15 @@ contract SocketSrcTest is Setup {
 
         (uint128 totalExecutionFees, uint128 totalTransmissionFees) = _a
             .executionManager__
-            .totalTransmissionExecutionFees();
+            .totalTransmissionExecutionFees(_b.chainSlug);
         console.log(totalExecutionFees);
         console.log(totalTransmissionFees);
         // console.log(_a.executionManager__.totalTransmissionExecutionFees());
         // console.log(_a.executionManager__.totalTransmitionFees());
         console.log(
             _a.executionManager__.totalSwitchboardFees(
-                address(_a.configs__[0].switchboard__)
+                address(_a.configs__[0].switchboard__),
+                _b.chainSlug
             )
         );
     }

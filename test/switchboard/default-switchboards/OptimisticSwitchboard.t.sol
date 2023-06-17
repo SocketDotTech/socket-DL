@@ -287,8 +287,8 @@ contract OptimisticSwitchboardTest is Setup {
     }
 
     function testSetFees() external {
-        uint256 switchboardFee = 1000;
-        uint256 verificationFee = 1000;
+        uint128 switchboardFee = 1000;
+        uint128 verificationFee = 1000;
         uint256 feeNonce = optimisticSwitchboard.nextNonce(_feesWithdrawer);
 
         (uint256 sbFee, uint256 vFee) = optimisticSwitchboard.fees(

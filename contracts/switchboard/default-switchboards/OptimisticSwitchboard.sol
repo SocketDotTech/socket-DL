@@ -45,10 +45,14 @@ contract OptimisticSwitchboard is SwitchboardBase {
         uint32 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {
+        uint64 packetCount = uint64(uint256(packetId_));
+
         if (
             tripGlobalFuse ||
             tripSinglePath[srcChainSlug_] ||
-            isProposalTripped[packetId_][proposalCount_]
+            isProposalTripped[packetId_][proposalCount_] ||
+            packetCount < initialPacketCount[srcChainSlug_]
+            // decode packetId to get packetCount if < initial return false
         ) return false;
         if (block.timestamp - proposeTime_ < timeoutInSeconds) return false;
         return true;

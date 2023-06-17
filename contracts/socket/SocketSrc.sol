@@ -121,8 +121,8 @@ abstract contract SocketSrc is SocketBase {
             payloadSize_,
             executionParams_,
             remoteChainSlug_,
-            fees.switchboardFees,
-            verificationFees,
+            fees.switchboardFees / uint128(maxPacketLength_),
+            verificationFees / uint128(maxPacketLength_),
             address(transmitManager__),
             address(switchboard__),
             maxPacketLength_
@@ -145,6 +145,9 @@ abstract contract SocketSrc is SocketBase {
         uint32 remoteChainSlug_,
         address plug_
     ) external view override returns (uint256 totalFees) {
+        ICapacitor capacitor__ = _plugConfigs[plug_][remoteChainSlug_]
+            .capacitor__;
+        uint256 maxPacketLength = capacitor__.getMaxPacketLength();
         (
             uint128 transmissionFees,
             uint128 switchboardFees,
@@ -154,7 +157,8 @@ abstract contract SocketSrc is SocketBase {
                 payloadSize_,
                 executionParams_,
                 remoteChainSlug_,
-                _plugConfigs[plug_][remoteChainSlug_].outboundSwitchboard__
+                _plugConfigs[plug_][remoteChainSlug_].outboundSwitchboard__,
+                maxPacketLength
             );
         totalFees = transmissionFees + switchboardFees + executionFees;
     }
@@ -191,7 +195,8 @@ abstract contract SocketSrc is SocketBase {
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 remoteChainSlug_,
-        ISwitchboard switchboard__
+        ISwitchboard switchboard__,
+        uint256 maxPacketLength_
     )
         internal
         view
@@ -207,7 +212,7 @@ abstract contract SocketSrc is SocketBase {
             remoteChainSlug_,
             switchboard__
         );
-
+        switchboardFees = switchboardFees / uint128(maxPacketLength_);
         (msgExecutionFee, transmissionFees) = executionManager__
             .getExecutionTransmissionMinFees(
                 msgGasLimit_,
@@ -217,7 +222,10 @@ abstract contract SocketSrc is SocketBase {
                 address(transmitManager__)
             );
 
-        executionFees = msgExecutionFee + verificationFees;
+        executionFees =
+            msgExecutionFee +
+            verificationFees /
+            uint128(maxPacketLength_);
     }
 
     /**

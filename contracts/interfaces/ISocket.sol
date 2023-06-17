@@ -221,4 +221,8 @@ interface ISocket {
         uint32 remoteChainSlug_,
         address plug_
     ) external view returns (uint256 totalFees);
+
+    function transmitManager() external view returns (address);
+
+    function executionManager() external view returns (address);
 }

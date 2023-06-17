@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 import "./interfaces/IExecutionManager.sol";
+import "./interfaces/ISocket.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/FeesHelper.sol";
@@ -16,6 +17,7 @@ import {FEES_UPDATE_SIG_IDENTIFIER, RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENT
  */
 contract ExecutionManager is IExecutionManager, AccessControlExtended {
     ISignatureVerifier public immutable signatureVerifier__;
+    ISocket public immutable socket__;
     uint32 public immutable chainSlug;
 
     /**
@@ -23,7 +25,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
      * @param dstChainSlug The destination chain slug for which the executionFees is updated
      * @param executionFees The new executionFees
      */
-    event ExecutionFeesSet(uint256 dstChainSlug, uint256 executionFees);
+    event ExecutionFeesSet(uint256 dstChainSlug, uint128 executionFees);
 
     event RelativeNativeTokenPriceSet(
         uint256 dstChainSlug,
@@ -53,7 +55,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     mapping(address => uint256) public nextNonce;
 
     // remoteChainSlug => executionFees
-    mapping(uint32 => uint256) public executionFees;
+    mapping(uint32 => uint128) public executionFees;
 
     mapping(address => mapping(uint32 => uint128)) transmissionMinFees;
 
@@ -74,6 +76,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     error PayloadTooLarge();
     error InsufficientMsgValue();
     error InsufficientFees();
+    error InvalidTransmitManager();
 
     /**
      * @dev Constructor for ExecutionManager contract
@@ -82,10 +85,12 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     constructor(
         address owner_,
         uint32 chainSlug_,
-        ISignatureVerifier signatureVerifier_
+        ISignatureVerifier signatureVerifier_,
+        ISocket socket_
     ) AccessControlExtended(owner_) {
         chainSlug = chainSlug_;
         signatureVerifier__ = signatureVerifier_;
+        socket__ = ISocket(socket_);
     }
 
     /**
@@ -382,23 +387,63 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
     /**
      * @notice withdraws fees from contract
+     * @param siblingChainSlug_ withdraw fees corresponding to this slug
+     * @param amount_ withdraw amount
      * @param account_ withdraw fees to
      */
-    function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        FeesHelper.withdrawFees(account_);
+    function withdrawExecutionFees(
+        uint32 siblingChainSlug_,
+        uint128 amount_,
+        address account_
+    ) external onlyRole(WITHDRAW_ROLE) {
+        if (
+            totalTransmissionExecutionFees[siblingChainSlug_]
+                .totalExecutionFees < amount_
+        ) revert InsufficientFees();
+
+        totalTransmissionExecutionFees[siblingChainSlug_]
+            .totalExecutionFees -= amount_;
+        (bool success, ) = account_.call{value: amount_}("");
+        require(success, "withdraw execution fee failed");
     }
 
+    /**
+     * @notice withdraws switchboard fees from contract
+     * @param siblingChainSlug_ withdraw fees corresponding to this slug
+     * @param amount_ withdraw amount
+     */
     function withdrawSwitchboardFees(
         uint32 siblingChainSlug_,
         uint128 amount_
     ) external override {
-        require(
-            totalSwitchboardFees[msg.sender][siblingChainSlug_] >= amount_,
-            "Insufficient Fees"
-        );
+        if (totalSwitchboardFees[msg.sender][siblingChainSlug_] < amount_)
+            revert InsufficientFees();
+
         totalSwitchboardFees[msg.sender][siblingChainSlug_] -= amount_;
         (bool success, ) = msg.sender.call{value: amount_}("");
         require(success, "withdraw switchboard fee failed");
+    }
+
+    /**
+     * @notice withdraws transmission fees from contract
+     * @param siblingChainSlug_ withdraw fees corresponding to this slug
+     * @param amount_ withdraw amount
+     */
+    function withdrawTransmissionFees(
+        uint32 siblingChainSlug_,
+        uint128 amount_
+    ) external override {
+        if (msg.sender != socket__.transmitManager())
+            revert InvalidTransmitManager();
+
+        if (
+            totalTransmissionExecutionFees[siblingChainSlug_]
+                .totalTransmissionFees < amount_
+        ) revert InsufficientFees();
+        totalTransmissionExecutionFees[siblingChainSlug_]
+            .totalTransmissionFees -= amount_;
+        (bool success, ) = msg.sender.call{value: amount_}("");
+        require(success, "withdraw transmit fee failed");
     }
 
     /**

@@ -161,6 +161,7 @@ contract SocketDstTest is Setup {
             _b.chainSlug,
             packetId,
             proposalCount,
+            root,
             _watcherPrivateKey
         );
 
@@ -410,6 +411,7 @@ contract SocketDstTest is Setup {
             _b.chainSlug,
             packetId,
             0,
+            root,
             _watcherPrivateKey
         );
 
@@ -515,6 +517,7 @@ contract SocketDstTest is Setup {
             _b.chainSlug,
             packetId,
             proposalCount,
+            root,
             _watcherPrivateKey
         );
 
@@ -591,6 +594,7 @@ contract SocketDstTest is Setup {
             _b.chainSlug,
             packetId,
             proposalCount,
+            root,
             _watcherPrivateKey
         );
 

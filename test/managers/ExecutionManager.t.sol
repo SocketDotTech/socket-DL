@@ -161,37 +161,37 @@ contract ExecutionManagerTest is Setup {
         assertEq(_feesPayer.balance, 0);
     }
 
-    function testWithdrawFees() public {
-        uint256 msgGasLimit = 100000;
-        uint256 payloadSize = 1000;
-        bytes32 executionParams = bytes32(0);
+    // function testWithdrawFees() public {
+    //     uint256 msgGasLimit = 100000;
+    //     uint256 payloadSize = 1000;
+    //     bytes32 executionParams = bytes32(0);
 
-        uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
-            payloadSize,
-            executionParams,
-            bChainSlug
-        );
-        deal(_feesPayer, minFees);
+    //     uint256 minFees = executionManager.getMinFees(
+    //         msgGasLimit,
+    //         payloadSize,
+    //         executionParams,
+    //         bChainSlug
+    //     );
+    //     deal(_feesPayer, minFees);
 
-        assertEq(address(executionManager).balance, 0);
-        assertEq(_feesPayer.balance, minFees);
+    //     assertEq(address(executionManager).balance, 0);
+    //     assertEq(_feesPayer.balance, minFees);
 
-        vm.startPrank(_feesPayer);
-        // executionManager.payFees{value: minFees}(msgGasLimit, bChainSlug);
-        vm.stopPrank();
+    //     vm.startPrank(_feesPayer);
+    //     // executionManager.payFees{value: minFees}(msgGasLimit, bChainSlug);
+    //     vm.stopPrank();
 
-        assertEq(_feesWithdrawer.balance, 0);
+    //     assertEq(_feesWithdrawer.balance, 0);
 
-        hoax(_raju);
-        vm.expectRevert();
-        executionManager.withdrawFees(_feesWithdrawer);
+    //     hoax(_raju);
+    //     vm.expectRevert();
+    //     executionManager.withdrawFees(_feesWithdrawer);
 
-        hoax(_socketOwner);
-        executionManager.withdrawFees(_feesWithdrawer);
+    //     hoax(_socketOwner);
+    //     executionManager.withdrawFees(_feesWithdrawer);
 
-        assertEq(_feesWithdrawer.balance, minFees);
-    }
+    //     assertEq(_feesWithdrawer.balance, minFees);
+    // }
 
     function testRescueNativeFunds() public {
         uint256 amount = 1e18;

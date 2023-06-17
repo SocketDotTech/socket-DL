@@ -533,27 +533,6 @@ contract Setup is Test {
 
         cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
 
-        if (isExecutionOpen_) {
-            cc_.executionManager__ = new OpenExecutionManager(
-                deployer_,
-                cc_.chainSlug,
-                cc_.sigVerifier__
-            );
-        } else {
-            cc_.executionManager__ = new ExecutionManager(
-                deployer_,
-                cc_.chainSlug,
-                cc_.sigVerifier__
-            );
-        }
-
-        cc_.transmitManager__ = new TransmitManager(
-            cc_.sigVerifier__,
-            address(cc_.executionManager__),
-            deployer_,
-            cc_.chainSlug
-        );
-
         cc_.socket__ = new Socket(
             uint32(cc_.chainSlug),
             address(cc_.hasher__),
@@ -564,7 +543,32 @@ contract Setup is Test {
             version
         );
 
+        if (isExecutionOpen_) {
+            cc_.executionManager__ = new OpenExecutionManager(
+                deployer_,
+                cc_.chainSlug,
+                cc_.sigVerifier__,
+                cc_.socket__
+            );
+        } else {
+            cc_.executionManager__ = new ExecutionManager(
+                deployer_,
+                cc_.chainSlug,
+                cc_.sigVerifier__,
+                cc_.socket__
+            );
+        }
+
+        cc_.transmitManager__ = new TransmitManager(
+            cc_.sigVerifier__,
+            cc_.socket__,
+            deployer_,
+            cc_.chainSlug
+        );
+
         cc_.socket__.grantRole(GOVERNANCE_ROLE, _socketOwner);
+        cc_.socket__.setExecutionManager(address(cc_.executionManager__));
+        cc_.socket__.setTransmitManager(address(cc_.transmitManager__));
 
         vm.stopPrank();
     }
@@ -589,14 +593,16 @@ contract Setup is Test {
         scc_.switchboard__.registerSiblingSlug(
             uint32(remoteChainSlug_),
             DEFAULT_BATCH_LENGTH,
-            capacitorType_
+            capacitorType_,
+            0
         );
 
         hoax(governance_);
         scc_.switchboard__.registerSiblingSlug(
             uint32(remoteChainSlug_),
             DEFAULT_BATCH_LENGTH,
-            capacitorType_
+            capacitorType_,
+            0
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
@@ -743,6 +749,7 @@ contract Setup is Test {
         uint32 dstSlug,
         bytes32 packetId_,
         uint256 proposalCount_,
+        bytes32 root_,
         uint256 watcherPrivateKey_
     ) internal {
         bytes32 digest = keccak256(
@@ -759,6 +766,7 @@ contract Setup is Test {
         FastSwitchboard(switchboardAddress).attest(
             packetId_,
             proposalCount_,
+            root_,
             attestSignature
         );
     }

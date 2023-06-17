@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import "./interfaces/ITransmitManager.sol";
 import "./interfaces/IExecutionManager.sol";
+import "./interfaces/ISocket.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
@@ -17,10 +18,12 @@ import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
  * @dev This contract inherits AccessControlExtended which manages access control
  */
 contract TransmitManager is ITransmitManager, AccessControlExtended {
-    IExecutionManager public executionManager__;
-    ISignatureVerifier public signatureVerifier__;
+    ISocket public immutable socket__;
+    // IExecutionManager public executionManager__;
 
     uint32 public immutable chainSlug;
+
+    ISignatureVerifier public signatureVerifier__;
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
@@ -53,13 +56,15 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      */
     constructor(
         ISignatureVerifier signatureVerifier_,
-        address executionManager_,
+        ISocket socket_,
+        // address executionManager_,
         address owner_,
         uint32 chainSlug_
     ) AccessControlExtended(owner_) {
         chainSlug = chainSlug_;
         signatureVerifier__ = signatureVerifier_;
-        executionManager__ = IExecutionManager(executionManager_);
+        socket__ = socket_;
+        // executionManager__ = IExecutionManager(executionManager_);
     }
 
     /**
@@ -87,12 +92,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         );
     }
 
-    /**
-     * @notice takes fees for the given sibling slug from socket for seal and propose
-     * @param siblingChainSlug_ sibling id
-     */
-    function payFees(uint32 siblingChainSlug_) external payable override {}
-
     function setTransmissionFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
@@ -118,6 +117,9 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
 
         // transmissionFees[dstChainSlug_] = transmissionFees_;
+        IExecutionManager executionManager__ = IExecutionManager(
+            socket__.executionManager()
+        );
         executionManager__.updateTransmissionMinFees(
             dstChainSlug_,
             transmissionFees_
@@ -133,6 +135,16 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         FeesHelper.withdrawFees(account_);
     }
 
+    function withdrawFeesFromExecutionManager(
+        uint32 siblingChainSlug_,
+        uint128 amount_
+    ) external onlyRole(WITHDRAW_ROLE) {
+        IExecutionManager executionManager__ = IExecutionManager(
+            socket__.executionManager()
+        );
+        executionManager__.withdrawTransmissionFees(siblingChainSlug_, amount_);
+    }
+
     /**
      * @notice updates signatureVerifier_
      * @param signatureVerifier_ address of Signature Verifier
@@ -144,16 +156,16 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         emit SignatureVerifierSet(signatureVerifier_);
     }
 
-    /**
-     * @notice updates signatureVerifier_
-     * @param executionManager_ address of Signature Verifier
-     */
-    function setExecutionManager(
-        address executionManager_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        executionManager__ = IExecutionManager(executionManager_);
-        emit ExecutionManagerSet(executionManager_);
-    }
+    // /**
+    //  * @notice updates executionManager_
+    //  * @param executionManager_ address of ExecutionManager
+    //  */
+    // function setExecutionManager(
+    //     address executionManager_
+    // ) external onlyRole(GOVERNANCE_ROLE) {
+    //     executionManager__ = IExecutionManager(executionManager_);
+    //     emit ExecutionManagerSet(executionManager_);
+    // }
 
     /**
      * @notice Rescues funds from a contract that has lost access to them.

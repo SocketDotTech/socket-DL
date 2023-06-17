@@ -105,6 +105,7 @@ contract HappyTest is Setup {
                 _b.chainSlug,
                 packetId,
                 proposalCount,
+                root,
                 _watcherPrivateKey
             );
         }

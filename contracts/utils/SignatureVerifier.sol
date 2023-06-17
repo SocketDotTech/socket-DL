@@ -2,6 +2,7 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ISignatureVerifier.sol";
+import "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 import "../libraries/RescueFundsLib.sol";
 import "../utils/AccessControl.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
@@ -38,10 +39,8 @@ contract SignatureVerifier is ISignatureVerifier, AccessControl {
         bytes32 digest = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest_)
         );
-        (bytes32 sigR, bytes32 sigS, uint8 sigV) = _splitSignature(signature_);
-
         // recovered signer is checked for the valid roles later
-        signer = ecrecover(digest, sigV, sigR, sigS);
+        signer = ECDSA.recover(digest, signature_);
     }
 
     /**
