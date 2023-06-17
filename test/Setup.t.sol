@@ -33,6 +33,8 @@ contract Setup is Test {
     address immutable _plugOwner = address(uint160(c++));
     address immutable _raju = address(uint160(c++));
     address immutable _fundRescuer = address(uint160(c++));
+    address immutable _feesPayer = address(uint160(c++));
+    address immutable _feesWithdrawer = address(uint160(c++));
 
     address _socketOwner;
 
@@ -48,9 +50,6 @@ contract Setup is Test {
     address _nonWatcher;
     address _nonExecutor;
 
-    address _feesPayer;
-    address _feesWithdrawer;
-
     uint256 immutable _socketOwnerPrivateKey = c++;
     uint256 immutable _transmitterPrivateKey = c++;
     uint256 immutable _watcherPrivateKey = c++;
@@ -63,9 +62,6 @@ contract Setup is Test {
     uint256 immutable _nonTransmitterPrivateKey = c++;
     uint256 immutable _nonWatcherPrivateKey = c++;
     uint256 immutable _nonExecutorPrivateKey = c++;
-
-    uint256 immutable _feesPayerPrivateKey = c++;
-    uint256 immutable _feesWithdrawerPrivateKey = c++;
 
     uint256 _socketOwnerNonce;
 
@@ -149,9 +145,6 @@ contract Setup is Test {
         _watcher = vm.addr(_watcherPrivateKey);
         _altWatcher = vm.addr(_altWatcherPrivateKey);
         _nonWatcher = vm.addr(_nonWatcherPrivateKey);
-
-        _feesPayer = vm.addr(_feesPayerPrivateKey);
-        _feesWithdrawer = vm.addr(_feesWithdrawerPrivateKey);
     }
 
     function _dualChainSetup(
@@ -274,7 +267,6 @@ contract Setup is Test {
     ) internal {
         cc_.executionManager__.grantRole(RESCUE_ROLE, _socketOwner);
         cc_.executionManager__.grantRole(WITHDRAW_ROLE, _socketOwner);
-        cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
     }
 
     function _setTransmissionFees(
@@ -557,6 +549,7 @@ contract Setup is Test {
                 cc_.sigVerifier__,
                 cc_.socket__
             );
+            cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
         }
 
         cc_.transmitManager__ = new TransmitManager(
