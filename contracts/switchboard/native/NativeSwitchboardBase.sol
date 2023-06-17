@@ -254,7 +254,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         if (isInitialised) revert AlreadyInitialised();
 
         initialPacketCount = initialPacketCount_;
-        address capacitor = socket__.registerSwitchBoard(
+        (address capacitor, ) = socket__.registerSwitchBoard(
             siblingChainSlug_,
             maxPacketLength_,
             capacitorType_

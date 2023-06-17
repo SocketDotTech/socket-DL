@@ -69,7 +69,7 @@ abstract contract SocketConfig is ISocket {
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
         uint256 capacitorType_
-    ) external override returns (address capacitor) {
+    ) external override returns (address capacitor, address decapacitor) {
         address switchBoardAddress = msg.sender;
         // only capacitor checked, decapacitor assumed will exist if capacitor does
         if (
@@ -87,6 +87,8 @@ abstract contract SocketConfig is ISocket {
             );
 
         capacitor = address(capacitor__);
+        decapacitor = address(decapacitor__);
+
         capacitorToSlug[capacitor] = siblingChainSlug_;
         capacitors__[switchBoardAddress][siblingChainSlug_] = capacitor__;
         decapacitors__[switchBoardAddress][siblingChainSlug_] = decapacitor__;
@@ -95,7 +97,7 @@ abstract contract SocketConfig is ISocket {
             switchBoardAddress,
             siblingChainSlug_,
             capacitor,
-            address(decapacitor__),
+            decapacitor,
             maxPacketLength_,
             capacitorType_
         );

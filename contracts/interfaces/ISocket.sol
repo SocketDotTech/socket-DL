@@ -192,7 +192,7 @@ interface ISocket {
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
         uint256 capacitorType_
-    ) external returns (address capacitor);
+    ) external returns (address capacitor, address decapacitor);
 
     /**
      * @notice Retrieves the packet id roots for a specified packet id.

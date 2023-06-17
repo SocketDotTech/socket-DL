@@ -16,5 +16,5 @@ interface IDecapacitor {
         bytes32 root_,
         bytes32 packedMessage_,
         bytes calldata proof_
-    ) external pure returns (bool);
+    ) external view returns (bool);
 }
