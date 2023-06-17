@@ -327,32 +327,21 @@ contract SocketDstTest is Setup {
     function sendOutboundMessage() internal {
         uint256 amount = 100;
 
-        uint256 executionFee;
-        {
-            (uint256 switchboardFees, uint256 verificationFee) = _a
-                .configs__[index]
-                .switchboard__
-                .getMinFees(_b.chainSlug);
+        uint256 minFees = _a.socket__.getMinFees(
+            _msgGasLimit,
+            1000,
+            bytes32(0),
+            _b.chainSlug,
+            address(srcCounter__)
+        );
 
-            uint256 socketFees;
-            (executionFee, socketFees) = _a
-                .executionManager__
-                .getExecutionTransmissionMinFees(
-                    _msgGasLimit,
-                    100,
-                    bytes32(0),
-                    _b.chainSlug,
-                    address(_a.transmitManager__)
-                );
-
-            hoax(_plugOwner);
-            srcCounter__.remoteAddOperation{
-                value: switchboardFees +
-                    socketFees +
-                    verificationFee +
-                    executionFee
-            }(_b.chainSlug, amount, _msgGasLimit, bytes32(0));
-        }
+        hoax(_plugOwner);
+        srcCounter__.remoteAddOperation{value: minFees}(
+            _b.chainSlug,
+            amount,
+            _msgGasLimit,
+            bytes32(0)
+        );
     }
 
     function testExecuteMessageOnSocketDst() external {

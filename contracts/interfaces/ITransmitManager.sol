@@ -19,6 +19,13 @@ interface ITransmitManager {
         bytes calldata signature
     ) external view returns (address, bool);
 
+    /**
+     * @notice Pays the fees required for the destination chain to process the packet.
+     * @dev The fees are paid by the sender of the packet to the switchboard contract.
+     * @param dstChainSlug The unique identifier for the destination chain of the packet.
+     */
+    function payFees(uint32 dstChainSlug) external payable;
+
     function setTransmissionFees(
         uint256 nonce_,
         uint32 dstChainSlug_,

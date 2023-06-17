@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 import "./interfaces/IExecutionManager.sol";
+import "./interfaces/ITransmitManager.sol";
+import "./interfaces/ISwitchboard.sol";
 import "./interfaces/ISocket.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./libraries/RescueFundsLib.sol";
@@ -41,13 +43,13 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 msgValueMinThresholdSet
     );
 
-    struct TotalTransmissionAndExecutionFees {
-        uint128 totalTransmissionFees;
+    struct TotalExecutionAndTransmissionFees {
         uint128 totalExecutionFees;
+        uint128 totalTransmissionFees;
     }
 
-    mapping(uint32 => TotalTransmissionAndExecutionFees)
-        public totalTransmissionExecutionFees;
+    mapping(uint32 => TotalExecutionAndTransmissionFees)
+        public totalExecutionAndTransmissionFees;
 
     mapping(address => mapping(uint32 => uint128)) public totalSwitchboardFees;
 
@@ -166,17 +168,17 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             msg.value - uint256(transmissionFees) - uint256(switchboardFees_)
         );
 
-        TotalTransmissionAndExecutionFees
-            memory currentTotalFees = totalTransmissionExecutionFees[
+        TotalExecutionAndTransmissionFees
+            memory currentTotalFees = totalExecutionAndTransmissionFees[
                 siblingChainSlug_
             ];
-        totalTransmissionExecutionFees[
+        totalExecutionAndTransmissionFees[
             siblingChainSlug_
-        ] = TotalTransmissionAndExecutionFees({
-            totalTransmissionFees: currentTotalFees.totalTransmissionFees +
-                transmissionFees,
+        ] = TotalExecutionAndTransmissionFees({
             totalExecutionFees: currentTotalFees.totalExecutionFees +
-                executionFee
+                executionFee,
+            totalTransmissionFees: currentTotalFees.totalTransmissionFees +
+                transmissionFees
         });
         totalSwitchboardFees[switchboard_][
             siblingChainSlug_
@@ -397,11 +399,11 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         address account_
     ) external onlyRole(WITHDRAW_ROLE) {
         if (
-            totalTransmissionExecutionFees[siblingChainSlug_]
+            totalExecutionAndTransmissionFees[siblingChainSlug_]
                 .totalExecutionFees < amount_
         ) revert InsufficientFees();
 
-        totalTransmissionExecutionFees[siblingChainSlug_]
+        totalExecutionAndTransmissionFees[siblingChainSlug_]
             .totalExecutionFees -= amount_;
         (bool success, ) = account_.call{value: amount_}("");
         require(success, "withdraw execution fee failed");
@@ -420,8 +422,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             revert InsufficientFees();
 
         totalSwitchboardFees[msg.sender][siblingChainSlug_] -= amount_;
-        (bool success, ) = msg.sender.call{value: amount_}("");
-        require(success, "withdraw switchboard fee failed");
+        ISwitchboard(msg.sender).payFees{value: amount_}(siblingChainSlug_);
     }
 
     /**
@@ -437,13 +438,13 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             revert InvalidTransmitManager();
 
         if (
-            totalTransmissionExecutionFees[siblingChainSlug_]
+            totalExecutionAndTransmissionFees[siblingChainSlug_]
                 .totalTransmissionFees < amount_
         ) revert InsufficientFees();
-        totalTransmissionExecutionFees[siblingChainSlug_]
+        totalExecutionAndTransmissionFees[siblingChainSlug_]
             .totalTransmissionFees -= amount_;
-        (bool success, ) = msg.sender.call{value: amount_}("");
-        require(success, "withdraw transmit fee failed");
+
+        ITransmitManager(msg.sender).payFees{value: amount_}(siblingChainSlug_);
     }
 
     /**

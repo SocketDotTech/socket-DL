@@ -320,7 +320,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     function withdrawFeesFromExecutionManager(
         uint32 siblingChainSlug_,
         uint128 amount_
-    ) external onlyRole(WITHDRAW_ROLE) {
+    ) external override onlyRole(WITHDRAW_ROLE) {
         IExecutionManager executionManager__ = IExecutionManager(
             socket__.executionManager()
         );
@@ -340,4 +340,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
+
+    function payFees(uint32 siblingChainSlug_) external payable override {}
 }

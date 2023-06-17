@@ -626,6 +626,7 @@ const main = async () => {
         filterRoles: [
           ROLES.TRIP_ROLE,
           ROLES.UNTRIP_ROLE,
+          ROLES.RESCUE_ROLE,
           ROLES.GOVERNANCE_ROLE,
           ROLES.FEES_UPDATER_ROLE,
         ],

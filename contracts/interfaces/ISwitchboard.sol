@@ -40,6 +40,13 @@ interface ISwitchboard {
     ) external view returns (bool);
 
     /**
+     * @notice Pays the fees required for the destination chain to process the packet.
+     * @dev The fees are paid by the sender of the packet to the switchboard contract.
+     * @param dstChainSlug The unique identifier for the destination chain of the packet.
+     */
+    function payFees(uint32 dstChainSlug) external payable;
+
+    /**
      * @notice Retrieves the minimum fees required for the destination chain to process the packet.
      * @param dstChainSlug the unique identifier for the destination chain of the packet.
      * @return switchboardFee the switchboard fee required for the destination chain to process the packet.
@@ -55,5 +62,10 @@ interface ISwitchboard {
         uint128 verificationFees_,
         uint128 switchboardFees_,
         bytes calldata signature_
+    ) external;
+
+    function withdrawFeesFromExecutionManager(
+        uint32 siblingChainSlug_,
+        uint128 amount_
     ) external;
 }

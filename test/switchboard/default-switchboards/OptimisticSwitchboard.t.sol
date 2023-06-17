@@ -16,7 +16,7 @@ contract OptimisticSwitchboardTest is Setup {
 
     error WatcherFound();
     error WatcherNotFound();
-
+    error SwitchboardExists();
     OptimisticSwitchboard optimisticSwitchboard;
 
     function setUp() external {
@@ -283,6 +283,27 @@ contract OptimisticSwitchboardTest is Setup {
             remoteChainSlug,
             vm.addr(_altWatcherPrivateKey)
         );
+        vm.stopPrank();
+    }
+
+    function testRegisterSiblingSlug() public {
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        optimisticSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 0);
+
+        vm.startPrank(_socketOwner);
+        optimisticSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 1);
+
+        vm.expectRevert(SwitchboardExists.selector);
+        optimisticSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 1);
+
+        assertEq(optimisticSwitchboard.initialPacketCount(_b.chainSlug), 1);
+
         vm.stopPrank();
     }
 

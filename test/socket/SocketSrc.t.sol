@@ -44,30 +44,21 @@ contract SocketSrcTest is Setup {
         uint256 index = isFast ? 0 : 1;
         _configPlugContracts(index);
 
-        _a.executionManager__.payAndCheckFees{value: 10000000000000}(
-            100000,
-            1000,
-            bytes32(0),
-            _b.chainSlug,
-            100,
-            100,
-            address(_a.transmitManager__),
-            address(_a.configs__[0].switchboard__),
-            1
-        );
-        // _a.executionManager__.payFees(
+        // _a.executionManager__.payAndCheckFees{value: 10000000000000}(
         //     100000,
         //     1000,
         //     bytes32(0),
         //     _b.chainSlug,
         //     100,
         //     100,
-        //     100,
-        //     address(_a.configs__[0].switchboard__)
+        //     address(_a.transmitManager__),
+        //     address(_a.configs__[0].switchboard__),
+        //     1
         // );
     }
 
     function testGetMinFeesOnSocketSrc() external {
+        // Checking fees for single capacitor, so no need to use maxPacketLength
         uint256 index = isFast ? 0 : 1;
 
         uint256 executionFee;
@@ -105,56 +96,6 @@ contract SocketSrcTest is Setup {
         }
     }
 
-    function testGas() external {
-        // uint256 fees = _a.socket__.getMinFees(
-        //     _msgGasLimit,
-        //     1000,
-        //     bytes32(0),
-        //     _b.chainSlug,
-        //     address(srcCounter__)
-        // );
-
-        // console.log(_a.executionManager__.totalExecutionFees());
-        // console.log(_a.executionManager__.totalTransmitionFees());
-        // console.log(_a.executionManager__.totalSwitchboardFees(address(_a.configs__[0].switchboard__)));
-        // initializing storage variables to get runtime cost
-        // _a.executionManager__.payFees(
-        //     100000,
-        //     _b.chainSlug,
-        //     100,
-        //     100,
-        //     100,
-        //     address(_a.configs__[0].switchboard__)
-        // );
-
-        // console.log(_a.executionManager__.totalExecutionFees());
-        // console.log(_a.executionManager__.totalTransmitionFees());
-        // console.log(_a.executionManager__.totalSwitchboardFees(address(_a.configs__[0].switchboard__)));
-
-        hoax(address(srcCounter__));
-
-        _a.socket__.outbound{value: 100000000000000000000000}(
-            _b.chainSlug,
-            _msgGasLimit,
-            bytes32(0),
-            "0x"
-        );
-
-        (uint128 totalExecutionFees, uint128 totalTransmissionFees) = _a
-            .executionManager__
-            .totalTransmissionExecutionFees(_b.chainSlug);
-        console.log(totalExecutionFees);
-        console.log(totalTransmissionFees);
-        // console.log(_a.executionManager__.totalTransmissionExecutionFees());
-        // console.log(_a.executionManager__.totalTransmitionFees());
-        console.log(
-            _a.executionManager__.totalSwitchboardFees(
-                address(_a.configs__[0].switchboard__),
-                _b.chainSlug
-            )
-        );
-    }
-
     function testOutboundFromSocketSrc() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
@@ -163,70 +104,29 @@ contract SocketSrcTest is Setup {
             _plugOwner
         );
 
-        uint256 index = isFast ? 0 : 1;
+        uint256 minFees = _a.socket__.getMinFees(
+            _msgGasLimit,
+            1000,
+            bytes32(0),
+            _b.chainSlug,
+            address(srcCounter__)
+        );
 
-        uint256 executionFee;
-        {
-            (uint256 switchboardFees, uint256 verificationFee) = _a
-                .configs__[index]
-                .switchboard__
-                .getMinFees(_b.chainSlug);
+        hoax(address(srcCounter__));
 
-            uint256 socketFees;
-            (executionFee, socketFees) = _a
-                .executionManager__
-                .getExecutionTransmissionMinFees(
-                    _msgGasLimit,
-                    100,
-                    bytes32(0),
-                    _b.chainSlug,
-                    address(_a.transmitManager__)
-                );
-
-            hoax(address(srcCounter__));
-
-            _a.socket__.outbound{
-                value: switchboardFees +
-                    socketFees +
-                    verificationFee +
-                    executionFee
-            }(_b.chainSlug, _msgGasLimit, bytes32(0), payload);
-        }
+        _a.socket__.outbound{value: minFees}(
+            _b.chainSlug,
+            _msgGasLimit,
+            bytes32(0),
+            payload
+        );
     }
 
     function testSendMessageAndSealSuccessfully() external {
-        uint256 amount = 100;
-
         uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
 
-        uint256 executionFee;
-        {
-            (uint256 switchboardFees, uint256 verificationFee) = _a
-                .configs__[index]
-                .switchboard__
-                .getMinFees(_b.chainSlug);
-
-            uint256 socketFees;
-            (executionFee, socketFees) = _a
-                .executionManager__
-                .getExecutionTransmissionMinFees(
-                    _msgGasLimit,
-                    100,
-                    bytes32(0),
-                    _b.chainSlug,
-                    address(_a.transmitManager__)
-                );
-
-            hoax(_plugOwner);
-            srcCounter__.remoteAddOperation{
-                value: switchboardFees +
-                    socketFees +
-                    verificationFee +
-                    executionFee
-            }(_b.chainSlug, amount, _msgGasLimit, bytes32(0));
-        }
-
+        sendOutboundMessage();
         {
             (
                 bytes32 root_,
@@ -247,37 +147,10 @@ contract SocketSrcTest is Setup {
     }
 
     function testSealWithNonTransmitter() public {
-        uint256 amount = 100;
-
         uint256 index = isFast ? 0 : 1;
         address capacitor = address(_a.configs__[index].capacitor__);
 
-        uint256 executionFee;
-        {
-            (uint256 switchboardFees, uint256 verificationFee) = _a
-                .configs__[index]
-                .switchboard__
-                .getMinFees(_b.chainSlug);
-
-            uint256 socketFees;
-            (executionFee, socketFees) = _a
-                .executionManager__
-                .getExecutionTransmissionMinFees(
-                    _msgGasLimit,
-                    100,
-                    bytes32(0),
-                    _b.chainSlug,
-                    address(_a.transmitManager__)
-                );
-
-            hoax(_plugOwner);
-            srcCounter__.remoteAddOperation{
-                value: switchboardFees +
-                    socketFees +
-                    verificationFee +
-                    executionFee
-            }(_b.chainSlug, amount, _msgGasLimit, bytes32(0));
-        }
+        sendOutboundMessage();
 
         uint256 fakeTransmitterKey = c++;
         {
@@ -361,6 +234,26 @@ contract SocketSrcTest is Setup {
             _a.chainSlug,
             address(srcCounter__),
             address(_b.configs__[socketConfigIndex].switchboard__)
+        );
+    }
+
+    function sendOutboundMessage() internal {
+        uint256 amount = 100;
+
+        uint256 minFees = _a.socket__.getMinFees(
+            _msgGasLimit,
+            1000,
+            bytes32(0),
+            _b.chainSlug,
+            address(srcCounter__)
+        );
+
+        hoax(_plugOwner);
+        srcCounter__.remoteAddOperation{value: minFees}(
+            _b.chainSlug,
+            amount,
+            _msgGasLimit,
+            bytes32(0)
         );
     }
 }

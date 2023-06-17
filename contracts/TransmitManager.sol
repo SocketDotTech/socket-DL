@@ -180,4 +180,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
+
+    function payFees(uint32 siblingChainSlug_) external payable override {}
 }

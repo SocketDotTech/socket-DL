@@ -892,14 +892,14 @@ contract Setup is Test {
 
     function _getPackedId(
         address capacitorAddr_,
-        uint32 chainSlug_,
-        uint256 id_
+        uint32 srcChainSlug_,
+        uint256 packetCount_
     ) internal pure returns (bytes32) {
         return
             bytes32(
-                (uint256(chainSlug_) << 224) |
+                (uint256(srcChainSlug_) << 224) |
                     (uint256(uint160(capacitorAddr_)) << 64) |
-                    id_
+                    packetCount_
             );
     }
 
