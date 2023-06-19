@@ -114,9 +114,6 @@ contract ExecutionManagerTest is Setup {
         );
     }
 
-
-
-
     function testGetMinFeesWithMsgValue() public {
         uint256 msgGasLimit = 100000;
         uint256 payloadSize = 1000;
