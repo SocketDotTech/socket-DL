@@ -133,7 +133,7 @@ contract SocketBatcher is AccessControl {
      * @param switchboardSetFeesRequest_ the list of requests
      */
     function setFeesBatch(
-        address payable contractAddress_,
+        address contractAddress_,
         SwitchboardSetFeesRequest[] calldata switchboardSetFeesRequest_
     ) external {
         uint256 executeRequestslength = switchboardSetFeesRequest_.length;
@@ -286,7 +286,7 @@ contract SocketBatcher is AccessControl {
      * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
      */
     function attestBatch(
-        address payable switchBoardAddress_,
+        address switchBoardAddress_,
         AttestRequest[] calldata attestRequests_
     ) external {
         uint256 attestRequestslength = attestRequests_.length;
