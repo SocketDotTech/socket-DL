@@ -102,8 +102,8 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
      * @notice updates transmitManager_
      * @param transmitManager_ address of Transmit Manager
      * @dev Only governance can call this function
-     * @dev This function sets the transmitManager address. If it is ever upgraded, 
-     * remove the fees from executionManager first, and then upgrade address at socket. 
+     * @dev This function sets the transmitManager address. If it is ever upgraded,
+     * remove the fees from executionManager first, and then upgrade address at socket.
      */
     function setTransmitManager(
         address transmitManager_
@@ -125,5 +125,4 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
-
 }

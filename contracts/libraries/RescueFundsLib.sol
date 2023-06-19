@@ -30,7 +30,7 @@ library RescueFundsLib {
         address userAddress_,
         uint256 amount_
     ) internal {
-        require(userAddress_!=address(0), "Zero Address");
+        require(userAddress_ != address(0), "Zero Address");
 
         if (token_ == ETH_ADDRESS) {
             SafeTransferLib.safeTransferETH(userAddress_, amount_);

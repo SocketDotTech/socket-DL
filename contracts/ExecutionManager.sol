@@ -77,6 +77,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     error InsufficientFees();
     error InvalidTransmitManager();
     error InvalidMSgValue();
+
     /**
      * @dev Constructor for ExecutionManager contract
      * @param owner_ Address of the contract owner
@@ -141,7 +142,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         override
         returns (uint128 executionFee, uint128 transmissionFees)
     {
-        if (msg.value>=type(uint128).max) revert InvalidMSgValue();
+        if (msg.value >= type(uint128).max) revert InvalidMSgValue();
         uint128 msgValue = uint128(msg.value);
         transmissionFees =
             transmissionMinFees[transmitManager_][siblingChainSlug_] /
@@ -163,7 +164,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
         // any extra fee is considered as executionFee
         // Have to recheck overflow/underflow conditions here
-        executionFee =  msgValue - transmissionFees - switchboardFees_;
+        executionFee = msgValue - transmissionFees - switchboardFees_;
 
         TotalExecutionAndTransmissionFees
             memory currentTotalFees = totalExecutionAndTransmissionFees[
@@ -395,7 +396,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint128 amount_,
         address account_
     ) external onlyRole(WITHDRAW_ROLE) {
-        require(account_!=address(0), "Zero Address");
+        require(account_ != address(0), "Zero Address");
         if (
             totalExecutionAndTransmissionFees[siblingChainSlug_]
                 .totalExecutionFees < amount_
@@ -427,8 +428,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
      * @notice withdraws transmission fees from contract
      * @param siblingChainSlug_ withdraw fees corresponding to this slug
      * @param amount_ withdraw amount
-     * @dev This function gets the transmitManager address from the socket contract. If it is ever upgraded in socket, 
-     * remove the fees from executionManager first, and then upgrade address at socket. 
+     * @dev This function gets the transmitManager address from the socket contract. If it is ever upgraded in socket,
+     * remove the fees from executionManager first, and then upgrade address at socket.
      */
     function withdrawTransmissionFees(
         uint32 siblingChainSlug_,
@@ -444,7 +445,9 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         totalExecutionAndTransmissionFees[siblingChainSlug_]
             .totalTransmissionFees -= amount_;
 
-        ITransmitManager(msg.sender).receiveFees{value: amount_}(siblingChainSlug_);
+        ITransmitManager(msg.sender).receiveFees{value: amount_}(
+            siblingChainSlug_
+        );
     }
 
     /**

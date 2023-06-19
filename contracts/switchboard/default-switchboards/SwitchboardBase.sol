@@ -123,7 +123,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 capacitorType_,
         uint256 initialPacketCount_
     ) external override onlyRole(GOVERNANCE_ROLE) {
-
         initialPacketCount[siblingChainSlug_] = initialPacketCount_;
 
         socket__.registerSwitchBoard(
@@ -314,7 +313,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        require(account_!=address(0), "Zero Address");
+        require(account_ != address(0), "Zero Address");
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 

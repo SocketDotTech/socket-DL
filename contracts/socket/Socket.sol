@@ -4,7 +4,6 @@ pragma solidity 0.8.7;
 import "./SocketDst.sol";
 import {SocketSrc} from "./SocketSrc.sol";
 
-
 /**
  * @title Socket
  * @notice A contract that acts as both a source and destination for cross-chain transactions.
@@ -34,6 +33,4 @@ contract Socket is SocketSrc, SocketDst {
         executionManager__ = IExecutionManager(executionManager_);
         capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
     }
-
-
 }

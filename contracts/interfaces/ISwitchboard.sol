@@ -39,7 +39,6 @@ interface ISwitchboard {
         uint256 proposeTime
     ) external view returns (bool);
 
-
     /**
      * @notice Receives the fees for processing of packet.
      * @param siblingChainSlug_ the chain slug of the sibling chain.

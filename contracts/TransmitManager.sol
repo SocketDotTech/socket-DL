@@ -112,7 +112,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
         if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
 
-        IExecutionManager executionManager__ =  socket__.executionManager__();
+        IExecutionManager executionManager__ = socket__.executionManager__();
         executionManager__.updateTransmissionMinFees(
             dstChainSlug_,
             transmissionFees_
@@ -125,7 +125,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param account_ withdraw fees to
      */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        require(account_!=address(0), "Zero Address");
+        require(account_ != address(0), "Zero Address");
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
@@ -133,7 +133,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         uint32 siblingChainSlug_,
         uint128 amount_
     ) external onlyRole(WITHDRAW_ROLE) {
-        IExecutionManager executionManager__ =  socket__.executionManager__();
+        IExecutionManager executionManager__ = socket__.executionManager__();
         executionManager__.withdrawTransmissionFees(siblingChainSlug_, amount_);
     }
 

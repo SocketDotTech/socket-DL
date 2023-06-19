@@ -131,8 +131,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev Modifier to ensure that a function can only be called by the remote switchboard.
      */
     modifier onlyRemoteSwitchboard() virtual {
-
-
         _;
     }
 
@@ -343,7 +341,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev The caller must have the WITHDRAW_ROLE.
      */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        require(account_!=address(0), "Zero Address");
+        require(account_ != address(0), "Zero Address");
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
