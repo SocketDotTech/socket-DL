@@ -40,6 +40,22 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 msgValueMinThresholdSet
     );
 
+    event ExecutionFeesWithdrawn(
+        address account,
+        uint32 siblingChainSlug,
+        uint256 amount
+    );
+    event TransmissionFeesWithdrawn(
+        address transmitManager,
+        uint32 siblingChainSlug,
+        uint256 amount
+    );
+    event SwitchboardFeesWithdrawn(
+        address switchboard,
+        uint32 siblingChainSlug,
+        uint256 amount
+    );
+
     struct TotalExecutionAndTransmissionFees {
         uint128 totalExecutionFees;
         uint128 totalTransmissionFees;
@@ -76,7 +92,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     error InsufficientMsgValue();
     error InsufficientFees();
     error InvalidTransmitManager();
-    error InvalidMSgValue();
+    error InvalidMsgValue();
 
     /**
      * @dev Constructor for ExecutionManager contract
@@ -142,7 +158,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         override
         returns (uint128 executionFee, uint128 transmissionFees)
     {
-        if (msg.value >= type(uint128).max) revert InvalidMSgValue();
+        if (msg.value >= type(uint128).max) revert InvalidMsgValue();
         uint128 msgValue = uint128(msg.value);
         transmissionFees =
             transmissionMinFees[transmitManager_][siblingChainSlug_] /
@@ -406,6 +422,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             .totalExecutionFees -= amount_;
 
         SafeTransferLib.safeTransferETH(account_, amount_);
+        emit ExecutionFeesWithdrawn(account_, siblingChainSlug_, amount_);
     }
 
     /**
@@ -422,6 +439,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
         totalSwitchboardFees[msg.sender][siblingChainSlug_] -= amount_;
         ISwitchboard(msg.sender).receiveFees{value: amount_}(siblingChainSlug_);
+
+        emit SwitchboardFeesWithdrawn(msg.sender, siblingChainSlug_, amount_);
     }
 
     /**
@@ -448,6 +467,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         ITransmitManager(msg.sender).receiveFees{value: amount_}(
             siblingChainSlug_
         );
+
+        emit TransmissionFeesWithdrawn(msg.sender, siblingChainSlug_, amount_);
     }
 
     /**

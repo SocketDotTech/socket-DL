@@ -114,6 +114,9 @@ contract ExecutionManagerTest is Setup {
         );
     }
 
+
+
+
     function testGetMinFeesWithMsgValue() public {
         uint256 msgGasLimit = 100000;
         uint256 payloadSize = 1000;
@@ -204,6 +207,49 @@ contract ExecutionManagerTest is Setup {
                 bChainSlug
             ),
             _switchboardFees
+        );
+    }
+
+    function testFailPayAndCheckFeesWithFeeSetTooHigh() public {
+        uint256 msgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        bytes32 executionParams = bytes32(0);
+
+        uint256 totalFees = _transmissionFees +
+            _executionFees +
+            type(uint128).max + //_switchboardFees
+            _verificationFees;
+
+        _a.executionManager__.payAndCheckFees{value: totalFees}(
+            msgGasLimit,
+            payloadSize,
+            executionParams,
+            _b.chainSlug,
+            _switchboardFees,
+            _verificationFees,
+            address(_a.transmitManager__),
+            address(_a.configs__[0].switchboard__),
+            1
+        );
+    }
+
+    function testPayAndCheckFeesWithMsgValueTooHigh() public {
+        uint256 msgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        bytes32 executionParams = bytes32(0);
+        deal(_feesPayer, type(uint256).max);
+        hoax(_feesPayer);
+        vm.expectRevert(ExecutionManager.InvalidMsgValue.selector);
+        _a.executionManager__.payAndCheckFees{value: type(uint128).max}(
+            msgGasLimit,
+            payloadSize,
+            executionParams,
+            _b.chainSlug,
+            _switchboardFees,
+            _verificationFees,
+            address(_a.transmitManager__),
+            address(_a.configs__[0].switchboard__),
+            1
         );
     }
 
