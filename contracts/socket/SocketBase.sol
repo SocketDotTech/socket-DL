@@ -2,12 +2,10 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/IHasher.sol";
-import "../interfaces/ITransmitManager.sol";
-import "../interfaces/IExecutionManager.sol";
-
 import "../utils/AccessControlExtended.sol";
 import {GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
-
+import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
+import "../libraries/RescueFundsLib.sol";
 import "./SocketConfig.sol";
 
 /**
@@ -19,9 +17,9 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     // Hasher contract
     IHasher public hasher__;
     // Transmit Manager contract
-    ITransmitManager public transmitManager__;
+    ITransmitManager public override transmitManager__;
     // Execution Manager contract
-    IExecutionManager public executionManager__;
+    IExecutionManager public override executionManager__;
 
     // chain slug
     uint32 public immutable chainSlug;
@@ -102,8 +100,10 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
 
     /**
      * @notice updates transmitManager_
-     * @dev Only governance can call this function
      * @param transmitManager_ address of Transmit Manager
+     * @dev Only governance can call this function
+     * @dev This function sets the transmitManager address. If it is ever upgraded, 
+     * remove the fees from executionManager first, and then upgrade address at socket. 
      */
     function setTransmitManager(
         address transmitManager_
@@ -112,11 +112,18 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
         emit TransmitManagerSet(transmitManager_);
     }
 
-    function transmitManager() external view override returns (address) {
-        return address(transmitManager__);
+    /**
+     * @notice Rescues funds from a contract that has lost access to them.
+     * @param token_ The address of the token contract.
+     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param amount_ The amount of tokens to be rescued.
+     */
+    function rescueFunds(
+        address token_,
+        address userAddress_,
+        uint256 amount_
+    ) external onlyRole(RESCUE_ROLE) {
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 
-    function executionManager() external view override returns (address) {
-        return address(executionManager__);
-    }
 }

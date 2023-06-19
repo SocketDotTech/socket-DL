@@ -7,7 +7,6 @@ import "../../interfaces/ICapacitor.sol";
 import "../../interfaces/ISignatureVerifier.sol";
 import "../../interfaces/IExecutionManager.sol";
 import "../../libraries/RescueFundsLib.sol";
-import "../../libraries/FeesHelper.sol";
 import "../../utils/AccessControlExtended.sol";
 
 import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
@@ -132,6 +131,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev Modifier to ensure that a function can only be called by the remote switchboard.
      */
     modifier onlyRemoteSwitchboard() virtual {
+
+
         _;
     }
 
@@ -342,16 +343,15 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev The caller must have the WITHDRAW_ROLE.
      */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        FeesHelper.withdrawFees(account_);
+        require(account_!=address(0), "Zero Address");
+        SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
     function withdrawFeesFromExecutionManager(
         uint32 siblingChainSlug_,
         uint128 amount_
     ) external override onlyRole(WITHDRAW_ROLE) {
-        IExecutionManager executionManager__ = IExecutionManager(
-            socket__.executionManager()
-        );
+        IExecutionManager executionManager__ = socket__.executionManager__();
         executionManager__.withdrawSwitchboardFees(siblingChainSlug_, amount_);
     }
 
@@ -369,5 +369,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 
-    function payFees(uint32 siblingChainSlug_) external payable override {}
+    /// @inheritdoc ISwitchboard
+    function receiveFees(uint32 siblingChainSlug_) external payable override {}
 }

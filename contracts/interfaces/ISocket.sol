@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
+import "./ITransmitManager.sol";
+import "./IExecutionManager.sol";
+
 /**
  * @title ISocket
  * @notice An interface for a cross-chain communication contract
@@ -222,7 +225,7 @@ interface ISocket {
         address plug_
     ) external view returns (uint256 totalFees);
 
-    function transmitManager() external view returns (address);
+    function transmitManager__() external view returns (ITransmitManager);
 
-    function executionManager() external view returns (address);
+    function executionManager__() external view returns (IExecutionManager);
 }

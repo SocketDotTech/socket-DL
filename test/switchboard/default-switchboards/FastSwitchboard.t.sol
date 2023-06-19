@@ -664,7 +664,7 @@ contract FastSwitchboardTest is Setup {
     //     assertEq(_feesPayer.balance, minFees);
 
     //     vm.startPrank(_feesPayer);
-    //     fastSwitchboard.payFees{value: minFees}(bChainSlug);
+    //     fastSwitchboard.receiveFees{value: minFees}(bChainSlug);
     //     vm.stopPrank();
 
     //     assertEq(_feesWithdrawer.balance, 0);

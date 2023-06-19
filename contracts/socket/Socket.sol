@@ -3,8 +3,7 @@ pragma solidity 0.8.7;
 
 import "./SocketDst.sol";
 import {SocketSrc} from "./SocketSrc.sol";
-import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
-import "../libraries/RescueFundsLib.sol";
+
 
 /**
  * @title Socket
@@ -36,17 +35,5 @@ contract Socket is SocketSrc, SocketDst {
         capacitorFactory__ = ICapacitorFactory(capacitorFactory_);
     }
 
-    /**
-     * @notice Rescues funds from a contract that has lost access to them.
-     * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
-     * @param amount_ The amount of tokens to be rescued.
-     */
-    function rescueFunds(
-        address token_,
-        address userAddress_,
-        uint256 amount_
-    ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
-    }
+
 }

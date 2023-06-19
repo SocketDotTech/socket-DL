@@ -260,20 +260,20 @@ abstract contract SocketDst is SocketBase {
             emit ExecutionSuccess(messageDetails_.msgId);
         } catch Error(string memory reason) {
             if (address(this).balance > 0) {
-                (bool success, ) = msg.sender.call{
-                    value: address(this).balance
-                }("");
-                require(success, "Fund Transfer Failed");
+                SafeTransferLib.safeTransferETH(
+                    msg.sender,
+                    address(this).balance
+                );
             }
             // catch failing revert() and require()
             messageExecuted[messageDetails_.msgId] = false;
             emit ExecutionFailed(messageDetails_.msgId, reason);
         } catch (bytes memory reason) {
             if (address(this).balance > 0) {
-                (bool success, ) = msg.sender.call{
-                    value: address(this).balance
-                }("");
-                require(success, "Fund Transfer Failed");
+                SafeTransferLib.safeTransferETH(
+                    msg.sender,
+                    address(this).balance
+                );
             }
             // catch failing assert()
             messageExecuted[messageDetails_.msgId] = false;

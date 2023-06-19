@@ -47,24 +47,6 @@ contract TransmitManagerTest is Setup {
         assertTrue(isTransmitter);
     }
 
-    // function testWithdrawFees() public {
-    //     uint256 minFees = 0;
-    //     // transmitManager.getMinFees(bChainSlug);
-    //     deal(_feesPayer, minFees);
-
-    //     vm.startPrank(_feesPayer);
-    //     transmitManager.payFees{value: minFees}(bChainSlug);
-    //     vm.stopPrank();
-
-    //     vm.startPrank(_socketOwner);
-    //     vm.expectEmit(false, false, false, true);
-    //     emit FeesWithdrawn(_feesWithdrawer, minFees);
-    //     transmitManager.withdrawFees(_feesWithdrawer);
-    //     vm.stopPrank();
-
-    //     assertEq(_feesWithdrawer.balance, minFees);
-    // }
-
     function testWithdrawFeesToZeroAddress() public {
         vm.startPrank(_socketOwner);
 

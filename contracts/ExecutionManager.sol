@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
-import "./interfaces/IExecutionManager.sol";
-import "./interfaces/ITransmitManager.sol";
 import "./interfaces/ISwitchboard.sol";
 import "./interfaces/ISocket.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./libraries/RescueFundsLib.sol";
-import "./libraries/FeesHelper.sol";
 import "./utils/AccessControlExtended.sol";
 import {WITHDRAW_ROLE, RESCUE_ROLE, GOVERNANCE_ROLE, EXECUTOR_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
 import {FEES_UPDATE_SIG_IDENTIFIER, RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENTIFIER, MSG_VALUE_MAX_THRESHOLD_SIG_IDENTIFIER, MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
@@ -79,7 +76,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     error InsufficientMsgValue();
     error InsufficientFees();
     error InvalidTransmitManager();
-
+    error InvalidMSgValue();
     /**
      * @dev Constructor for ExecutionManager contract
      * @param owner_ Address of the contract owner
@@ -144,6 +141,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         override
         returns (uint128 executionFee, uint128 transmissionFees)
     {
+        if (msg.value>=type(uint128).max) revert InvalidMSgValue();
+        uint128 msgValue = uint128(msg.value);
         transmissionFees =
             transmissionMinFees[transmitManager_][siblingChainSlug_] /
             uint128(maxPacketLength_);
@@ -157,16 +156,14 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             )
         );
         uint128 minExecutionFees = minMsgExecutionFees + verificationFees_;
-        if (msg.value < transmissionFees + switchboardFees_ + minExecutionFees)
+        if (msgValue < transmissionFees + switchboardFees_ + minExecutionFees)
             revert InsufficientFees();
 
         executionFee;
 
         // any extra fee is considered as executionFee
         // Have to recheck overflow/underflow conditions here
-        executionFee = uint128(
-            msg.value - uint256(transmissionFees) - uint256(switchboardFees_)
-        );
+        executionFee =  msgValue - transmissionFees - switchboardFees_;
 
         TotalExecutionAndTransmissionFees
             memory currentTotalFees = totalExecutionAndTransmissionFees[
@@ -398,6 +395,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint128 amount_,
         address account_
     ) external onlyRole(WITHDRAW_ROLE) {
+        require(account_!=address(0), "Zero Address");
         if (
             totalExecutionAndTransmissionFees[siblingChainSlug_]
                 .totalExecutionFees < amount_
@@ -405,8 +403,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
         totalExecutionAndTransmissionFees[siblingChainSlug_]
             .totalExecutionFees -= amount_;
-        (bool success, ) = account_.call{value: amount_}("");
-        require(success, "withdraw execution fee failed");
+
+        SafeTransferLib.safeTransferETH(account_, amount_);
     }
 
     /**
@@ -422,19 +420,21 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             revert InsufficientFees();
 
         totalSwitchboardFees[msg.sender][siblingChainSlug_] -= amount_;
-        ISwitchboard(msg.sender).payFees{value: amount_}(siblingChainSlug_);
+        ISwitchboard(msg.sender).receiveFees{value: amount_}(siblingChainSlug_);
     }
 
     /**
      * @notice withdraws transmission fees from contract
      * @param siblingChainSlug_ withdraw fees corresponding to this slug
      * @param amount_ withdraw amount
+     * @dev This function gets the transmitManager address from the socket contract. If it is ever upgraded in socket, 
+     * remove the fees from executionManager first, and then upgrade address at socket. 
      */
     function withdrawTransmissionFees(
         uint32 siblingChainSlug_,
         uint128 amount_
     ) external override {
-        if (msg.sender != socket__.transmitManager())
+        if (msg.sender != address(socket__.transmitManager__()))
             revert InvalidTransmitManager();
 
         if (
@@ -444,7 +444,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         totalExecutionAndTransmissionFees[siblingChainSlug_]
             .totalTransmissionFees -= amount_;
 
-        ITransmitManager(msg.sender).payFees{value: amount_}(siblingChainSlug_);
+        ITransmitManager(msg.sender).receiveFees{value: amount_}(siblingChainSlug_);
     }
 
     /**

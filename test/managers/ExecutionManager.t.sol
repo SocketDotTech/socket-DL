@@ -6,14 +6,8 @@ import "../Setup.t.sol";
 contract ExecutionManagerTest is Setup {
     ExecutionManager internal executionManager;
 
-    error InsufficientExecutionFees();
     event FeesWithdrawn(address account_, uint256 value_);
-    error MsgValueTooLow();
-    error MsgValueTooHigh();
-    error PayloadTooLarge();
-    error InsufficientMsgValue();
-    error InsufficientFees();
-    error InvalidTransmitManager();
+
 
     function setUp() public {
         initialise();
@@ -92,7 +86,7 @@ contract ExecutionManagerTest is Setup {
             uint256((uint256(paramType) << 248) | uint248(msgValue))
         );
 
-        vm.expectRevert(MsgValueTooHigh.selector);
+        vm.expectRevert(ExecutionManager.MsgValueTooHigh.selector);
         executionManager.getMinFees(
             msgGasLimit,
             payloadSize,
@@ -112,7 +106,7 @@ contract ExecutionManagerTest is Setup {
 
         _setMsgValueMinThreshold(_a, bChainSlug, _msgValueMinThreshold);
 
-        vm.expectRevert(MsgValueTooLow.selector);
+        vm.expectRevert(ExecutionManager.MsgValueTooLow.selector);
         executionManager.getMinFees(
             msgGasLimit,
             payloadSize,
@@ -150,7 +144,7 @@ contract ExecutionManagerTest is Setup {
             uint256((uint256(1) << 224) | uint224(100))
         );
 
-        vm.expectRevert(PayloadTooLarge.selector);
+        vm.expectRevert(ExecutionManager.PayloadTooLarge.selector);
         executionManager.getMinFees(
             msgGasLimit,
             payloadSize,
@@ -228,7 +222,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         vm.startPrank(_socketOwner);
-        vm.expectRevert(InsufficientFees.selector);
+        vm.expectRevert(ExecutionManager.InsufficientFees.selector);
         executionManager.withdrawExecutionFees(
             bChainSlug,
             type(uint128).max,
@@ -236,7 +230,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         // should fail as no receive or fallback function in socket
-        vm.expectRevert("withdraw execution fee failed");
+        vm.expectRevert("ETH_TRANSFER_FAILED");
         executionManager.withdrawExecutionFees(
             bChainSlug,
             amount,
@@ -265,10 +259,10 @@ contract ExecutionManagerTest is Setup {
         uint128 amount = 100;
 
         vm.startPrank(_socketOwner);
-        vm.expectRevert(InvalidTransmitManager.selector);
+        vm.expectRevert(ExecutionManager.InvalidTransmitManager.selector);
         executionManager.withdrawTransmissionFees(bChainSlug, amount);
 
-        vm.expectRevert(InsufficientFees.selector);
+        vm.expectRevert(ExecutionManager.InsufficientFees.selector);
         _a.transmitManager__.withdrawFeesFromExecutionManager(
             bChainSlug,
             type(uint128).max
@@ -295,7 +289,7 @@ contract ExecutionManagerTest is Setup {
         uint128 amount = 100;
 
         vm.startPrank(_socketOwner);
-        vm.expectRevert(InsufficientFees.selector);
+        vm.expectRevert(ExecutionManager.InsufficientFees.selector);
         executionManager.withdrawSwitchboardFees(bChainSlug, amount);
 
         uint128 storedSwitchboardFees1 = executionManager.totalSwitchboardFees(

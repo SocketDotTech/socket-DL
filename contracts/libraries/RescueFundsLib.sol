@@ -30,11 +30,10 @@ library RescueFundsLib {
         address userAddress_,
         uint256 amount_
     ) internal {
-        require(userAddress_ != address(0));
+        require(userAddress_!=address(0), "Zero Address");
 
         if (token_ == ETH_ADDRESS) {
-            (bool success, ) = userAddress_.call{value: amount_}("");
-            require(success);
+            SafeTransferLib.safeTransferETH(userAddress_, amount_);
         } else {
             if (token_.code.length == 0) revert InvalidTokenAddress();
             SafeTransferLib.safeTransfer(ERC20(token_), userAddress_, amount_);

@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
-
-import "./interfaces/ITransmitManager.sol";
-import "./interfaces/IExecutionManager.sol";
 import "./interfaces/ISocket.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
-import "./libraries/FeesHelper.sol";
 import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRANSMITTER_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
 import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 
@@ -116,10 +112,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
         if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
 
-        // transmissionFees[dstChainSlug_] = transmissionFees_;
-        IExecutionManager executionManager__ = IExecutionManager(
-            socket__.executionManager()
-        );
+        IExecutionManager executionManager__ =  socket__.executionManager__();
         executionManager__.updateTransmissionMinFees(
             dstChainSlug_,
             transmissionFees_
@@ -132,16 +125,15 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param account_ withdraw fees to
      */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        FeesHelper.withdrawFees(account_);
+        require(account_!=address(0), "Zero Address");
+        SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
     function withdrawFeesFromExecutionManager(
         uint32 siblingChainSlug_,
         uint128 amount_
     ) external onlyRole(WITHDRAW_ROLE) {
-        IExecutionManager executionManager__ = IExecutionManager(
-            socket__.executionManager()
-        );
+        IExecutionManager executionManager__ =  socket__.executionManager__();
         executionManager__.withdrawTransmissionFees(siblingChainSlug_, amount_);
     }
 
@@ -181,5 +173,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 
-    function payFees(uint32 siblingChainSlug_) external payable override {}
+    /// @inheritdoc	ITransmitManager
+    function receiveFees(uint32 siblingChainSlug_) external payable override {}
 }

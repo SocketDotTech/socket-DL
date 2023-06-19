@@ -3,14 +3,9 @@ pragma solidity 0.8.7;
 
 import "../libraries/RescueFundsLib.sol";
 import "../utils/AccessControl.sol";
-
-import {ISocket} from "../interfaces/ISocket.sol";
-import {ITransmitManager} from "../interfaces/ITransmitManager.sol";
-import {IExecutionManager} from "../interfaces/IExecutionManager.sol";
-
-import {FastSwitchboard} from "../switchboard/default-switchboards/FastSwitchboard.sol";
-import {INativeRelay} from "../interfaces/INativeRelay.sol";
-
+import "../interfaces/ISocket.sol";
+import "../switchboard/default-switchboards/FastSwitchboard.sol";
+import "../interfaces/INativeRelay.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
 /**
@@ -138,7 +133,7 @@ contract SocketBatcher is AccessControl {
      * @param switchboardSetFeesRequest_ the list of requests
      */
     function setFeesBatch(
-        address contractAddress_,
+        address payable contractAddress_,
         SwitchboardSetFeesRequest[] calldata switchboardSetFeesRequest_
     ) external {
         uint256 executeRequestslength = switchboardSetFeesRequest_.length;
@@ -291,7 +286,7 @@ contract SocketBatcher is AccessControl {
      * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
      */
     function attestBatch(
-        address switchBoardAddress_,
+        address payable switchBoardAddress_,
         AttestRequest[] calldata attestRequests_
     ) external {
         uint256 attestRequestslength = attestRequests_.length;
@@ -390,8 +385,14 @@ contract SocketBatcher is AccessControl {
             }
         }
 
-        if (address(this).balance > 0)
-            callValueRefundAddress_.call{value: address(this).balance}("");
+        if (address(this).balance > 0) {
+            require(callValueRefundAddress_!=address(0), "Zero Address");
+            SafeTransferLib.safeTransferETH(
+                callValueRefundAddress_,
+                address(this).balance
+            );
+        }
+            
     }
 
     /**

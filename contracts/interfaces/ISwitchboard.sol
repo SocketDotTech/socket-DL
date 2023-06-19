@@ -39,12 +39,12 @@ interface ISwitchboard {
         uint256 proposeTime
     ) external view returns (bool);
 
+
     /**
-     * @notice Pays the fees required for the destination chain to process the packet.
-     * @dev The fees are paid by the sender of the packet to the switchboard contract.
-     * @param dstChainSlug The unique identifier for the destination chain of the packet.
+     * @notice Receives the fees for processing of packet.
+     * @param siblingChainSlug_ the chain slug of the sibling chain.
      */
-    function payFees(uint32 dstChainSlug) external payable;
+    function receiveFees(uint32 siblingChainSlug_) external payable;
 
     /**
      * @notice Retrieves the minimum fees required for the destination chain to process the packet.

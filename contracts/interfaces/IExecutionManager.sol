@@ -23,7 +23,7 @@ interface IExecutionManager {
      * @param msgGasLimit The gas limit for the transaction
      * @param dstSlug The destination slug
      */
-    // function payFees(
+    // function receiveFees(
     //     uint256 msgGasLimit,
     //     uint32 dstSlug,
     //     uint128 transmissionFees_,

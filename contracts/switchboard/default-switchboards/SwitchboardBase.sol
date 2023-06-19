@@ -5,9 +5,7 @@ import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/ISignatureVerifier.sol";
 import "../../utils/AccessControlExtended.sol";
-import "../../interfaces/IExecutionManager.sol";
 import "../../libraries/RescueFundsLib.sol";
-import "../../libraries/FeesHelper.sol";
 
 import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UNTRIP_ROLE, WATCHER_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
 import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, TRIP_PROPOSAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
@@ -37,7 +35,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     // destinationChainSlug => fees-struct with verificationFees and switchboardFees
     mapping(uint32 => Fees) public fees;
 
-    // destinationChainSlug => fees-struct with verificationFees and switchboardFees
+    // destinationChainSlug => initialPacketCount - packets with  packetCount after this will be accepted at the switchboard.
+    // This is to prevent attacks with sending messages for chain slugs before the switchboard is registered for them.
     mapping(uint32 => uint256) public initialPacketCount;
 
     /**
@@ -124,6 +123,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 capacitorType_,
         uint256 initialPacketCount_
     ) external override onlyRole(GOVERNANCE_ROLE) {
+
         initialPacketCount[siblingChainSlug_] = initialPacketCount_;
 
         socket__.registerSwitchBoard(
@@ -314,16 +314,15 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        FeesHelper.withdrawFees(account_);
+        require(account_!=address(0), "Zero Address");
+        SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
     function withdrawFeesFromExecutionManager(
         uint32 siblingChainSlug_,
         uint128 amount_
     ) external override onlyRole(WITHDRAW_ROLE) {
-        IExecutionManager executionManager__ = IExecutionManager(
-            socket__.executionManager()
-        );
+        IExecutionManager executionManager__ = socket__.executionManager__();
         executionManager__.withdrawSwitchboardFees(siblingChainSlug_, amount_);
     }
 
@@ -341,5 +340,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 
-    function payFees(uint32 siblingChainSlug_) external payable override {}
+    /// @inheritdoc ISwitchboard
+    function receiveFees(uint32 siblingChainSlug_) external payable override {}
 }

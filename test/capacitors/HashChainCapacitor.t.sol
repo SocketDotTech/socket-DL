@@ -105,9 +105,7 @@ contract HashChainCapacitorTest is Setup {
 
     function testSealPacketByRaju() external {
         _addPackedMessage(_message_0);
-        vm.expectRevert(
-            abi.encodeWithSelector(BaseCapacitor.OnlySocket.selector)
-        );
+        vm.expectRevert(BaseCapacitor.OnlySocket.selector);    
         hoax(_raju);
         _hcCapacitor.sealPacket(maxPacketLength);
     }

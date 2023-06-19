@@ -100,7 +100,7 @@ contract NativeBaseSwitchboardTest is Setup {
     //     assertEq(_feesPayer.balance, minFees);
 
     //     vm.startPrank(_feesPayer);
-    //     optimismSwitchboard.payFees{value: minFees}(bChainSlug);
+    //     optimismSwitchboard.receiveFees{value: minFees}(bChainSlug);
     //     vm.stopPrank();
 
     //     assertEq(_feesWithdrawer.balance, 0);

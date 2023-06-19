@@ -24,7 +24,12 @@ interface ITransmitManager {
      * @dev The fees are paid by the sender of the packet to the switchboard contract.
      * @param dstChainSlug The unique identifier for the destination chain of the packet.
      */
-    function payFees(uint32 dstChainSlug) external payable;
+
+    /**
+     * @notice Receives the fees for processing of packet.
+     * @param siblingChainSlug_ the chain slug of the sibling chain.
+     */
+    function receiveFees(uint32 siblingChainSlug_) external payable;
 
     function setTransmissionFees(
         uint256 nonce_,
