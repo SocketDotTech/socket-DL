@@ -166,7 +166,7 @@ interface ISocket {
         bytes32 root_,
         address switchboard_,
         bytes calldata signature_
-    ) external;
+    ) external payable;
 
     /**
      * @notice sets the config specific to the plug

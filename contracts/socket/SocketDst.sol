@@ -105,7 +105,7 @@ abstract contract SocketDst is SocketBase {
         bytes32 root_,
         address switchboard_,
         bytes calldata signature_
-    ) external override {
+    ) external payable override {
         if (packetId_ == bytes32(0)) revert InvalidPacketId();
 
         (address transmitter, bool isTransmitter) = transmitManager__
