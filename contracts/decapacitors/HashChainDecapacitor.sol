@@ -37,9 +37,12 @@ contract HashChainDecapacitor is IDecapacitor, AccessControl {
         uint256 len = chain.length;
         bytes32 generatedRoot;
         bool isIncluded;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len; ) {
             generatedRoot = keccak256(abi.encode(generatedRoot, chain[i]));
             if (chain[i] == packedMessage_) isIncluded = true;
+            unchecked {
+                ++i;
+            }
         }
 
         return root_ == generatedRoot && isIncluded;

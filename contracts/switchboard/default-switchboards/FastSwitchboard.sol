@@ -106,7 +106,7 @@ contract FastSwitchboard is SwitchboardBase {
             revert WatcherNotFound();
 
         isAttested[watcher][root] = true;
-        attestations[root]++;
+        ++attestations[root];
 
         if (attestations[root] >= totalWatchers[srcChainSlug])
             isRootValid[root] = true;
@@ -158,7 +158,7 @@ contract FastSwitchboard is SwitchboardBase {
             revert WatcherFound();
         _grantRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_);
 
-        totalWatchers[srcChainSlug_]++;
+        ++totalWatchers[srcChainSlug_];
     }
 
     /**
@@ -261,7 +261,9 @@ contract FastSwitchboard is SwitchboardBase {
             roleNames_.length != grantees_.length ||
             roleNames_.length != slugs_.length
         ) revert UnequalArrayLengths();
-        for (uint256 index = 0; index < roleNames_.length; index++) {
+
+        uint256 totalRoles = roleNames_.length;
+        for (uint256 index = 0; index < totalRoles; ) {
             if (isNonWatcherRole(roleNames_[index])) {
                 if (slugs_[index] > 0)
                     _grantRoleWithSlug(
@@ -272,6 +274,10 @@ contract FastSwitchboard is SwitchboardBase {
                 else _grantRole(roleNames_[index], grantees_[index]);
             } else {
                 revert InvalidRole();
+            }
+
+            unchecked {
+                ++index;
             }
         }
     }
@@ -289,7 +295,8 @@ contract FastSwitchboard is SwitchboardBase {
             roleNames_.length != grantees_.length ||
             roleNames_.length != slugs_.length
         ) revert UnequalArrayLengths();
-        for (uint256 index = 0; index < roleNames_.length; index++) {
+        uint256 totalRoles = roleNames_.length;
+        for (uint256 index = 0; index < totalRoles; ) {
             if (isNonWatcherRole(roleNames_[index])) {
                 if (slugs_[index] > 0)
                     _revokeRoleWithSlug(
@@ -300,6 +307,9 @@ contract FastSwitchboard is SwitchboardBase {
                 else _revokeRole(roleNames_[index], grantees_[index]);
             } else {
                 revert InvalidRole();
+            }
+            unchecked {
+                ++index;
             }
         }
     }

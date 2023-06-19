@@ -49,7 +49,7 @@ contract SingleCapacitor is BaseCapacitor {
     ) external override onlySocket {
         uint64 packetCount = _nextPacketCount;
         _roots[packetCount] = packedMessage_;
-        _nextPacketCount++;
+        ++_nextPacketCount;
 
         // as it is a single capacitor, here root and packed message are same
         emit MessageAdded(packedMessage_, packetCount, packedMessage_);

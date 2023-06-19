@@ -157,8 +157,10 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher);
-        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
 
+        unchecked {
+            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+        }
         //source chain based tripping
         tripSinglePath[srcChainSlug_] = true;
         emit PathTripped(srcChainSlug_, true);
@@ -191,8 +193,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRoleWithSlug(WATCHER_ROLE, srcChainSlug, watcher);
-        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+        }
         //source chain based tripping
         isProposalTripped[packetId_][proposalCount_] = true;
         emit ProposalTripped(packetId_, proposalCount_);
@@ -217,8 +220,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(TRIP_ROLE, tripper);
-        if (nonce_ != nextNonce[tripper]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[tripper]++) revert InvalidNonce();
+        }
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
     }
@@ -247,8 +251,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(UNTRIP_ROLE, untripper);
-        if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
+        }
         tripSinglePath[srcChainSlug_] = false;
         emit PathTripped(srcChainSlug_, false);
     }
@@ -272,8 +277,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(UNTRIP_ROLE, untripper);
-        if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
+        }
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
     }
@@ -301,8 +307,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
         Fees memory feesObject = Fees({
             switchboardFees: switchboardFees_,
             verificationFees: verificationFees_
