@@ -226,6 +226,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32,
         uint32 siblingChainSlug_,
         address transmitManager_
     )

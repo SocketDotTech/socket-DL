@@ -223,6 +223,7 @@ interface ISocket {
         uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view returns (uint256 totalFees);

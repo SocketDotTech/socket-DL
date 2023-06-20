@@ -110,9 +110,9 @@ abstract contract SocketSrc is SocketBase {
      * @param payloadSize_ The byte length of payload of the message.
      * @param executionParams_ The extraParams required for execution.
      * @param transmissionParams_ The extraParams required for transmission.
-     * @param siblingChainSlug_ The slug of the destination chain for the message.
      * @param switchboard_ The address of the switchboard through which the message is sent.
      * @param maxPacketLength_ The maxPacketLength for the capacitor used. Used for calculating transmission Fees.
+     * @param siblingChainSlug_ The slug of the destination chain for the message.
      */
     function _validateAndSendFees(
         uint256 minMsgGasLimit_,
@@ -157,6 +157,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         uint32 siblingChainSlug_,
         address plug_
     ) external view override returns (uint256 totalFees) {
@@ -171,6 +172,7 @@ abstract contract SocketSrc is SocketBase {
                 minMsgGasLimit_,
                 payloadSize_,
                 executionParams_,
+                transmissionParams_,
                 siblingChainSlug_,
                 _plugConfigs[plug_][siblingChainSlug_].outboundSwitchboard__,
                 maxPacketLength
@@ -209,6 +211,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         uint32 siblingChainSlug_,
         ISwitchboard switchboard__,
         uint256 maxPacketLength_
@@ -233,6 +236,7 @@ abstract contract SocketSrc is SocketBase {
                 minMsgGasLimit_,
                 payloadSize_,
                 executionParams_,
+                transmissionParams_,
                 siblingChainSlug_,
                 address(transmitManager__)
             );
