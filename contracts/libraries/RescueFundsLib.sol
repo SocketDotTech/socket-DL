@@ -3,10 +3,13 @@ pragma solidity 0.8.7;
 
 import "solmate/utils/SafeTransferLib.sol";
 
+error ZeroAddress();
+
 /**
  * @title RescueFundsLib
  * @dev A library that provides a function to rescue funds from a contract.
  */
+
 library RescueFundsLib {
     /**
      * @dev The address used to identify ETH.
@@ -30,7 +33,7 @@ library RescueFundsLib {
         address userAddress_,
         uint256 amount_
     ) internal {
-        require(userAddress_ != address(0), "Zero Address");
+        if (userAddress_ == address(0)) revert ZeroAddress();
 
         if (token_ == ETH_ADDRESS) {
             SafeTransferLib.safeTransferETH(userAddress_, amount_);

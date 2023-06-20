@@ -386,7 +386,7 @@ contract SocketBatcher is AccessControl {
         }
 
         if (address(this).balance > 0) {
-            require(callValueRefundAddress_ != address(0), "Zero Address");
+            if (callValueRefundAddress_ == address(0)) revert ZeroAddress();
             SafeTransferLib.safeTransferETH(
                 callValueRefundAddress_,
                 address(this).balance

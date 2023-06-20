@@ -93,6 +93,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     error InsufficientFees();
     error InvalidTransmitManager();
     error InvalidMsgValue();
+    error FeesTooHigh();
 
     /**
      * @dev Constructor for ExecutionManager contract
@@ -143,7 +144,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     }
 
     function payAndCheckFees(
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 siblingChainSlug_,
@@ -164,14 +165,13 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             transmissionMinFees[transmitManager_][siblingChainSlug_] /
             uint128(maxPacketLength_);
 
-        uint128 minMsgExecutionFees = uint128(
-            _getMinFees(
-                msgGasLimit_,
-                payloadSize_,
-                executionParams_,
-                siblingChainSlug_
-            )
+        uint128 minMsgExecutionFees = _getMinFees(
+            minMsgGasLimit_,
+            payloadSize_,
+            executionParams_,
+            siblingChainSlug_
         );
+
         uint128 minExecutionFees = minMsgExecutionFees + verificationFees_;
         if (msgValue < transmissionFees + switchboardFees_ + minExecutionFees)
             revert InsufficientFees();
@@ -213,18 +213,16 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         bytes32 executionParams_,
         uint32 siblingChainSlug_
     ) external view override returns (uint128 minExecutionFee) {
-        minExecutionFee = uint128(
-            _getMinFees(
-                gasLimit_,
-                payloadSize_,
-                executionParams_,
-                siblingChainSlug_
-            )
+        minExecutionFee = _getMinFees(
+            gasLimit_,
+            payloadSize_,
+            executionParams_,
+            siblingChainSlug_
         );
     }
 
     function getExecutionTransmissionMinFees(
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 siblingChainSlug_,
@@ -235,13 +233,11 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         override
         returns (uint128 minExecutionFee, uint128 transmissionFees)
     {
-        minExecutionFee = uint128(
-            _getMinFees(
-                msgGasLimit_,
-                payloadSize_,
-                executionParams_,
-                siblingChainSlug_
-            )
+        minExecutionFee = _getMinFees(
+            minMsgGasLimit_,
+            payloadSize_,
+            executionParams_,
+            siblingChainSlug_
         );
         transmissionFees = transmissionMinFees[transmitManager_][
             siblingChainSlug_
@@ -253,7 +249,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 siblingChainSlug_
-    ) internal view returns (uint256) {
+    ) internal view returns (uint128) {
         if (payloadSize_ > 3000) revert PayloadTooLarge();
 
         uint256 params = uint256(executionParams_);
@@ -271,7 +267,11 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 msgValueRequiredOnSrcChain = (relativeNativeTokenPrice[
             siblingChainSlug_
         ] * msgValue) / 1e18;
-        return msgValueRequiredOnSrcChain + executionFees[siblingChainSlug_];
+
+        uint256 totalNativeValue = msgValueRequiredOnSrcChain +
+            executionFees[siblingChainSlug_];
+        if (totalNativeValue >= type(uint128).max) revert FeesTooHigh();
+        return uint128(totalNativeValue);
     }
 
     function verifyParams(
@@ -412,7 +412,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint128 amount_,
         address account_
     ) external onlyRole(WITHDRAW_ROLE) {
-        require(account_ != address(0), "Zero Address");
+        if (account_ == address(0)) revert ZeroAddress();
         if (
             totalExecutionAndTransmissionFees[siblingChainSlug_]
                 .totalExecutionFees < amount_

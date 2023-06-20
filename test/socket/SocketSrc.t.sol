@@ -28,7 +28,7 @@ contract SocketSrcTest is Setup {
         uint32 dstChainSlug,
         address dstPlug,
         uint256 msgId,
-        uint256 msgGasLimit,
+        uint256 minMsgGasLimit,
         uint256 executionFee,
         uint256 fees,
         bytes payload
@@ -72,7 +72,7 @@ contract SocketSrcTest is Setup {
             (executionFee, transmitFees) = _a
                 .executionManager__
                 .getExecutionTransmissionMinFees(
-                    _msgGasLimit,
+                    _minMsgGasLimit,
                     100,
                     bytes32(0),
                     _b.chainSlug,
@@ -85,7 +85,7 @@ contract SocketSrcTest is Setup {
                 executionFee;
 
             uint256 minFeesActual = _a.socket__.getMinFees(
-                _msgGasLimit,
+                _minMsgGasLimit,
                 1000,
                 bytes32(0),
                 _b.chainSlug,
@@ -105,7 +105,7 @@ contract SocketSrcTest is Setup {
         );
 
         uint256 minFees = _a.socket__.getMinFees(
-            _msgGasLimit,
+            _minMsgGasLimit,
             1000,
             bytes32(0),
             _b.chainSlug,
@@ -116,7 +116,7 @@ contract SocketSrcTest is Setup {
 
         _a.socket__.outbound{value: minFees}(
             _b.chainSlug,
-            _msgGasLimit,
+            _minMsgGasLimit,
             bytes32(0),
             payload
         );
@@ -174,7 +174,7 @@ contract SocketSrcTest is Setup {
         srcCounter__.remoteAddOperation{value: 0}(
             _b.chainSlug,
             amount,
-            _msgGasLimit,
+            _minMsgGasLimit,
             bytes32(0)
         );
     }
@@ -241,7 +241,7 @@ contract SocketSrcTest is Setup {
         uint256 amount = 100;
 
         uint256 minFees = _a.socket__.getMinFees(
-            _msgGasLimit,
+            _minMsgGasLimit,
             1000,
             bytes32(0),
             _b.chainSlug,
@@ -252,7 +252,7 @@ contract SocketSrcTest is Setup {
         srcCounter__.remoteAddOperation{value: minFees}(
             _b.chainSlug,
             amount,
-            _msgGasLimit,
+            _minMsgGasLimit,
             bytes32(0)
         );
     }

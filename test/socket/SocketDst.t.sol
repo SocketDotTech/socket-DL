@@ -52,7 +52,7 @@ contract SocketDstTest is Setup {
         uint32 dstChainSlug,
         address dstPlug,
         bytes32 msgId,
-        uint256 msgGasLimit,
+        uint256 minMsgGasLimit,
         uint256 executionFee,
         uint256 fees,
         bytes payload
@@ -172,7 +172,7 @@ contract SocketDstTest is Setup {
                 packetId,
                 proposalCount,
                 msgId,
-                _msgGasLimit,
+                _minMsgGasLimit,
                 bytes32(0),
                 executionFee,
                 root,
@@ -328,7 +328,7 @@ contract SocketDstTest is Setup {
         uint256 amount = 100;
 
         uint256 minFees = _a.socket__.getMinFees(
-            _msgGasLimit,
+            _minMsgGasLimit,
             1000,
             bytes32(0),
             _b.chainSlug,
@@ -339,7 +339,7 @@ contract SocketDstTest is Setup {
         srcCounter__.remoteAddOperation{value: minFees}(
             _b.chainSlug,
             amount,
-            _msgGasLimit,
+            _minMsgGasLimit,
             bytes32(0)
         );
     }
@@ -365,7 +365,7 @@ contract SocketDstTest is Setup {
             (executionFee, socketFees) = _a
                 .executionManager__
                 .getExecutionTransmissionMinFees(
-                    _msgGasLimit,
+                    _minMsgGasLimit,
                     100,
                     bytes32(0),
                     _b.chainSlug,
@@ -385,7 +385,7 @@ contract SocketDstTest is Setup {
             srcCounter__.remoteAddOperation{value: value}(
                 _b.chainSlug,
                 amount,
-                _msgGasLimit,
+                _minMsgGasLimit,
                 bytes32(0)
             );
         }
@@ -413,7 +413,7 @@ contract SocketDstTest is Setup {
                 packetId,
                 0,
                 msgId,
-                _msgGasLimit,
+                _minMsgGasLimit,
                 bytes32(0),
                 executionFee,
                 root,
@@ -433,7 +433,7 @@ contract SocketDstTest is Setup {
                 packetId,
                 0,
                 msgId,
-                _msgGasLimit,
+                _minMsgGasLimit,
                 bytes32(0),
                 executionFee,
                 root,
@@ -470,7 +470,7 @@ contract SocketDstTest is Setup {
             (executionFee, socketFees) = _a
                 .executionManager__
                 .getExecutionTransmissionMinFees(
-                    _msgGasLimit,
+                    _minMsgGasLimit,
                     100,
                     bytes32(0),
                     _b.chainSlug,
@@ -490,7 +490,7 @@ contract SocketDstTest is Setup {
             srcCounter__.remoteAddOperation{value: value}(
                 _b.chainSlug,
                 amount,
-                _msgGasLimit,
+                _minMsgGasLimit,
                 executionParams
             );
         }
@@ -516,7 +516,7 @@ contract SocketDstTest is Setup {
                 packetId,
                 proposalCount,
                 msgId,
-                _msgGasLimit,
+                _minMsgGasLimit,
                 executionParams,
                 executionFee,
                 root,
@@ -547,7 +547,7 @@ contract SocketDstTest is Setup {
             (executionFee, socketFees) = _a
                 .executionManager__
                 .getExecutionTransmissionMinFees(
-                    _msgGasLimit,
+                    _minMsgGasLimit,
                     100,
                     bytes32(0),
                     _b.chainSlug,
@@ -567,7 +567,7 @@ contract SocketDstTest is Setup {
             srcCounter__.remoteAddOperation{value: value}(
                 _b.chainSlug,
                 amount,
-                _msgGasLimit,
+                _minMsgGasLimit,
                 bytes32(0)
             );
         }
@@ -595,7 +595,7 @@ contract SocketDstTest is Setup {
                 packetId,
                 proposalCount,
                 msgId,
-                _msgGasLimit,
+                _minMsgGasLimit,
                 bytes32(0),
                 executionFee,
                 root,

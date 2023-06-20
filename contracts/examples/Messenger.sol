@@ -11,24 +11,24 @@ contract Messenger is IPlug, Ownable(msg.sender) {
     uint256 public immutable _localChainSlug;
 
     bytes32 public _message;
-    uint256 public _msgGasLimit;
+    uint256 public _minMsgGasLimit;
 
     bytes32 public constant _PING = keccak256("PING");
     bytes32 public constant _PONG = keccak256("PONG");
 
     error NoSocketFee();
 
-    constructor(address socket_, uint256 chainSlug_, uint256 msgGasLimit_) {
+    constructor(address socket_, uint256 chainSlug_, uint256 minMsgGasLimit_) {
         _socket__ = ISocket(socket_);
         _localChainSlug = chainSlug_;
 
-        _msgGasLimit = msgGasLimit_;
+        _minMsgGasLimit = minMsgGasLimit_;
     }
 
     receive() external payable {}
 
-    function updateMsgGasLimit(uint256 msgGasLimit_) external onlyOwner {
-        _msgGasLimit = msgGasLimit_;
+    function updateMsgGasLimit(uint256 minMsgGasLimit_) external onlyOwner {
+        _minMsgGasLimit = minMsgGasLimit_;
     }
 
     function removeGas(address payable receiver_) external onlyOwner {
@@ -95,7 +95,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         bytes memory payload_
     ) private {
         uint256 fee = _socket__.getMinFees(
-            _msgGasLimit,
+            _minMsgGasLimit,
             uint256(payload_.length),
             executionParams_,
             targetChain_,
@@ -104,7 +104,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         if (!(address(this).balance >= fee)) revert NoSocketFee();
         _socket__.outbound{value: fee}(
             targetChain_,
-            _msgGasLimit,
+            _minMsgGasLimit,
             executionParams_,
             payload_
         );

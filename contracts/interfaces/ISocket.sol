@@ -35,7 +35,7 @@ interface ISocket {
         // The fee to be paid for executing the message.
         uint256 executionFee;
         // The maximum amount of gas that can be used to execute the message.
-        uint256 msgGasLimit;
+        uint256 minMsgGasLimit;
         // The extra params which provides msg value and additional info needed for message exec
         bytes32 executionParams;
         // The payload data to be executed in the message.
@@ -66,7 +66,7 @@ interface ISocket {
      * @param dstChainSlug remote chain slug
      * @param dstPlug remote plug address
      * @param msgId message id packed with remoteChainSlug and nonce
-     * @param msgGasLimit gas limit needed to execute the inbound at remote
+     * @param minMsgGasLimit gas limit needed to execute the inbound at remote
      * @param payload the data which will be used by inbound at remote
      */
     event MessageOutbound(
@@ -75,7 +75,7 @@ interface ISocket {
         uint32 dstChainSlug,
         address dstPlug,
         bytes32 msgId,
-        uint256 msgGasLimit,
+        uint256 minMsgGasLimit,
         bytes32 executionParams,
         bytes payload,
         Fees fees
@@ -125,12 +125,12 @@ interface ISocket {
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with capacitor
      * @param remoteChainSlug_ the remote chain slug
-     * @param msgGasLimit_ the gas limit needed to execute the payload on remote
+     * @param minMsgGasLimit_ the gas limit needed to execute the payload on remote
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
         uint32 remoteChainSlug_,
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         bytes32 executionParams_,
         bytes calldata payload_
     ) external payable returns (bytes32 msgId);
@@ -212,13 +212,13 @@ interface ISocket {
 
     /**
      * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
-     * @param msgGasLimit_ The gas limit of the message.
+     * @param minMsgGasLimit_ The gas limit of the message.
      * @param remoteChainSlug_ The slug of the destination chain for the message.
      * @param plug_ The address of the plug through which the message is sent.
      * @return totalFees The minimum fees required for the specified message.
      */
     function getMinFees(
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 remoteChainSlug_,

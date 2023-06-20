@@ -145,8 +145,9 @@ abstract contract SocketDst is SocketBase {
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
 
-        if (executionDetails_.executionGasLimit < messageDetails_.msgGasLimit)
-            revert LowGasLimit();
+        if (
+            executionDetails_.executionGasLimit < messageDetails_.minMsgGasLimit
+        ) revert LowGasLimit();
 
         if (executionDetails_.packetId == bytes32(0)) revert InvalidPacketId();
 

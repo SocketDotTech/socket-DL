@@ -41,22 +41,22 @@ contract Counter is IPlug {
     function remoteAddOperation(
         uint32 chainSlug_,
         uint256 amount_,
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         bytes32 executionParams_
     ) external payable {
         bytes memory payload = abi.encode(OP_ADD, amount_, msg.sender);
 
-        _outbound(chainSlug_, msgGasLimit_, executionParams_, payload);
+        _outbound(chainSlug_, minMsgGasLimit_, executionParams_, payload);
     }
 
     function remoteSubOperation(
         uint32 chainSlug_,
         uint256 amount_,
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         bytes32 executionParams_
     ) external payable {
         bytes memory payload = abi.encode(OP_SUB, amount_, msg.sender);
-        _outbound(chainSlug_, msgGasLimit_, executionParams_, payload);
+        _outbound(chainSlug_, minMsgGasLimit_, executionParams_, payload);
     }
 
     function inbound(
@@ -80,13 +80,13 @@ contract Counter is IPlug {
 
     function _outbound(
         uint32 targetChain_,
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         bytes32 executionParams_,
         bytes memory payload_
     ) private {
         ISocket(socket).outbound{value: msg.value}(
             targetChain_,
-            msgGasLimit_,
+            minMsgGasLimit_,
             executionParams_,
             payload_
         );

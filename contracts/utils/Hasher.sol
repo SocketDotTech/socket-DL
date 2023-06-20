@@ -39,7 +39,7 @@ contract Hasher is IHasher, AccessControl {
                     dstChainSlug_,
                     dstPlug_,
                     messageDetails_.msgId,
-                    messageDetails_.msgGasLimit,
+                    messageDetails_.minMsgGasLimit,
                     messageDetails_.executionParams,
                     messageDetails_.executionFee,
                     messageDetails_.payload

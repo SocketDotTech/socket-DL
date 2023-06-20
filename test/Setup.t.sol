@@ -69,7 +69,7 @@ contract Setup is Test {
     uint256 internal _optimisticTimeoutInSeconds = 1;
 
     uint256 internal _slowCapacitorWaitTime = 300;
-    uint256 internal _msgGasLimit = 30548;
+    uint256 internal _minMsgGasLimit = 30548;
     uint256 internal _sealGasLimit = 150000;
     uint128 internal _transmissionFees = 350000000000;
     uint128 internal _executionFees = 110000000000;
@@ -110,7 +110,7 @@ contract Setup is Test {
         bytes32 packetId_;
         uint256 proposalCount_;
         bytes32 msgId_;
-        uint256 msgGasLimit_;
+        uint256 minMsgGasLimit_;
         bytes32 executionParams_;
         uint256 executionFee_;
         bytes32 packedMessage_;
@@ -790,7 +790,7 @@ contract Setup is Test {
         ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
             executionParams.msgId_,
             executionParams.executionFee_,
-            executionParams.msgGasLimit_,
+            executionParams.minMsgGasLimit_,
             executionParams.executionParams_,
             executionParams.payload_
         );
@@ -808,7 +808,7 @@ contract Setup is Test {
             .ExecutionDetails(
                 executionParams.packetId_,
                 executionParams.proposalCount_,
-                executionParams.msgGasLimit_,
+                executionParams.minMsgGasLimit_,
                 executionParams.proof_,
                 sig
             );
@@ -873,13 +873,13 @@ contract Setup is Test {
     function _packMessageId(
         uint32 srcChainSlug_,
         address siblingPlug_,
-        uint256 messageCount_
+        uint256 globalMessageCount_
     ) internal pure returns (bytes32) {
         return
             bytes32(
                 (uint256(srcChainSlug_) << 224) |
                     (uint256(uint160(siblingPlug_)) << 64) |
-                    messageCount_
+                    globalMessageCount_
             );
     }
 

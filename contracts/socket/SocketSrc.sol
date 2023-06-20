@@ -31,13 +31,13 @@ abstract contract SocketSrc is SocketBase {
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with capacitor
      * @param remoteChainSlug_ the remote chain slug
-     * @param msgGasLimit_ the gas limit needed to execute the payload on remote
+     * @param minMsgGasLimit_ the gas limit needed to execute the payload on remote
      * @param executionParams_ a 32 bytes param to add extra details for execution
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
         uint32 remoteChainSlug_,
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         bytes32 executionParams_,
         bytes calldata payload_
     ) external payable override returns (bytes32 msgId) {
@@ -54,7 +54,7 @@ abstract contract SocketSrc is SocketBase {
         msgId = _encodeMsgId(plugConfig.siblingPlug);
 
         ISocket.Fees memory fees = _validateAndSendFees(
-            msgGasLimit_,
+            minMsgGasLimit_,
             uint256(payload_.length),
             executionParams_,
             uint32(remoteChainSlug_),
@@ -64,7 +64,7 @@ abstract contract SocketSrc is SocketBase {
 
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = msgId;
-        messageDetails.msgGasLimit = msgGasLimit_;
+        messageDetails.minMsgGasLimit = minMsgGasLimit_;
         messageDetails.executionParams = executionParams_;
         messageDetails.payload = payload_;
         messageDetails.executionFee = fees.executionFee;
@@ -85,7 +85,7 @@ abstract contract SocketSrc is SocketBase {
             remoteChainSlug_,
             plugConfig.siblingPlug,
             msgId,
-            msgGasLimit_,
+            minMsgGasLimit_,
             executionParams_,
             payload_,
             fees
@@ -94,7 +94,7 @@ abstract contract SocketSrc is SocketBase {
 
     /**
      * @notice Validates if enough fee is provided for message execution. If yes, fees is sent and stored in execution manager.
-     * @param msgGasLimit_ The gas limit of the message.
+     * @param minMsgGasLimit_ The gas limit of the message.
      * @param payloadSize_ The byte length of payload of the message.
      * @param executionParams_ The extraParams required for execution.
      * @param remoteChainSlug_ The slug of the destination chain for the message.
@@ -102,7 +102,7 @@ abstract contract SocketSrc is SocketBase {
      * @param maxPacketLength_ The maxPacketLength for the capacitor used. Used for calculating transmission Fees.
      */
     function _validateAndSendFees(
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 remoteChainSlug_,
@@ -117,7 +117,7 @@ abstract contract SocketSrc is SocketBase {
 
         (fees.executionFee, fees.transmissionFees) = executionManager__
             .payAndCheckFees{value: msg.value}(
-            msgGasLimit_,
+            minMsgGasLimit_,
             payloadSize_,
             executionParams_,
             remoteChainSlug_,
@@ -131,7 +131,7 @@ abstract contract SocketSrc is SocketBase {
 
     /**
      * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
-     * @param msgGasLimit_ The gas limit of the message.
+     * @param minMsgGasLimit_ The gas limit of the message.
      * @param payloadSize_ The byte length of payload of the message.
      * @param executionParams_ The extraParams required for execution.
      * @param remoteChainSlug_ The slug of the destination chain for the message.
@@ -139,7 +139,7 @@ abstract contract SocketSrc is SocketBase {
      * @return totalFees The minimum fees required for the specified message.
      */
     function getMinFees(
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 remoteChainSlug_,
@@ -153,7 +153,7 @@ abstract contract SocketSrc is SocketBase {
             uint128 switchboardFees,
             uint128 executionFees
         ) = _getAllMinFees(
-                msgGasLimit_,
+                minMsgGasLimit_,
                 payloadSize_,
                 executionParams_,
                 remoteChainSlug_,
@@ -184,14 +184,14 @@ abstract contract SocketSrc is SocketBase {
 
     /**
      * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
-     * @param msgGasLimit_ The gas limit of the message.
+     * @param minMsgGasLimit_ The gas limit of the message.
      * @param payloadSize_ The byte length of payload of the message.
      * @param executionParams_ The extraParams required for execution.
      * @param remoteChainSlug_ The slug of the destination chain for the message.
      * @param switchboard__ The address of the switchboard through which the message is sent.
      */
     function _getAllMinFees(
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 remoteChainSlug_,
@@ -215,7 +215,7 @@ abstract contract SocketSrc is SocketBase {
         switchboardFees = switchboardFees / uint128(maxPacketLength_);
         (msgExecutionFee, transmissionFees) = executionManager__
             .getExecutionTransmissionMinFees(
-                msgGasLimit_,
+                minMsgGasLimit_,
                 payloadSize_,
                 executionParams_,
                 remoteChainSlug_,
@@ -260,14 +260,14 @@ abstract contract SocketSrc is SocketBase {
     }
 
     // Packs the local plug, local chain slug, remote chain slug and nonce
-    // messageCount++ will take care of msg id overflow as well
+    // globalMessageCount++ will take care of msg id overflow as well
     // msgId(256) = localChainSlug(32) | siblingPlug_(160) | nonce(64)
     function _encodeMsgId(address siblingPlug_) internal returns (bytes32) {
         return
             bytes32(
                 (uint256(chainSlug) << 224) |
                     (uint256(uint160(siblingPlug_)) << 64) |
-                    messageCount++
+                    globalMessageCount++
             );
     }
 

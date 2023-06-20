@@ -313,7 +313,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        require(account_ != address(0), "Zero Address");
+        if (account_ == address(0)) revert ZeroAddress();
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 

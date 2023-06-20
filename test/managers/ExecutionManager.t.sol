@@ -42,12 +42,12 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testGetMinFees() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
 
         uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             bChainSlug
@@ -58,13 +58,13 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testGetTransmissionExecutionFees() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
 
         (uint128 executionFees, uint128 transmissionFees) = executionManager
             .getExecutionTransmissionMinFees(
-                msgGasLimit,
+                minMsgGasLimit,
                 payloadSize,
                 executionParams,
                 bChainSlug,
@@ -77,7 +77,7 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testGetMinFeesWithMsgValueTooHigh() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         uint256 msgValue = 1000000;
         uint8 paramType = 1;
@@ -87,7 +87,7 @@ contract ExecutionManagerTest is Setup {
 
         vm.expectRevert(ExecutionManager.MsgValueTooHigh.selector);
         executionManager.getMinFees(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             bChainSlug
@@ -95,7 +95,7 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testGetMinFeesWithMsgValueTooLow() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         uint256 msgValue = 1;
         uint8 paramType = 1;
@@ -107,7 +107,7 @@ contract ExecutionManagerTest is Setup {
 
         vm.expectRevert(ExecutionManager.MsgValueTooLow.selector);
         executionManager.getMinFees(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             bChainSlug
@@ -115,7 +115,7 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testGetMinFeesWithMsgValue() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         uint256 msgValue = 100;
         uint8 paramType = 1;
@@ -124,7 +124,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             bChainSlug
@@ -137,7 +137,7 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testGetMinFeesWithPayloadTooLong() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 10000;
         bytes32 executionParams = bytes32(
             uint256((uint256(1) << 224) | uint224(100))
@@ -145,7 +145,7 @@ contract ExecutionManagerTest is Setup {
 
         vm.expectRevert(ExecutionManager.PayloadTooLarge.selector);
         executionManager.getMinFees(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             bChainSlug
@@ -153,13 +153,13 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testPayAndCheckFees() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
 
         (uint128 executionFees, uint128 transmissionFees) = executionManager
             .getExecutionTransmissionMinFees(
-                msgGasLimit,
+                minMsgGasLimit,
                 payloadSize,
                 executionParams,
                 bChainSlug,
@@ -176,7 +176,7 @@ contract ExecutionManagerTest is Setup {
 
         vm.startPrank(_feesPayer);
         _a.executionManager__.payAndCheckFees{value: totalFees}(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             _b.chainSlug,
@@ -208,7 +208,7 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testFailPayAndCheckFeesWithFeeSetTooHigh() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
 
@@ -218,7 +218,7 @@ contract ExecutionManagerTest is Setup {
             _verificationFees;
 
         _a.executionManager__.payAndCheckFees{value: totalFees}(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             _b.chainSlug,
@@ -231,14 +231,14 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testPayAndCheckFeesWithMsgValueTooHigh() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
         deal(_feesPayer, type(uint256).max);
         hoax(_feesPayer);
         vm.expectRevert(ExecutionManager.InvalidMsgValue.selector);
         _a.executionManager__.payAndCheckFees{value: type(uint128).max}(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             _b.chainSlug,
@@ -354,7 +354,7 @@ contract ExecutionManagerTest is Setup {
     }
 
     function sendFeesToExecutionManager() internal {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
 
@@ -364,7 +364,7 @@ contract ExecutionManagerTest is Setup {
             _verificationFees;
 
         _a.executionManager__.payAndCheckFees{value: totalFees}(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             _b.chainSlug,

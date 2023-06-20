@@ -50,7 +50,7 @@ contract TransmitManagerTest is Setup {
     function testWithdrawFeesToZeroAddress() public {
         vm.startPrank(_socketOwner);
 
-        vm.expectRevert();
+        vm.expectRevert(ZeroAddress.selector);
         transmitManager.withdrawFees(address(0));
         vm.stopPrank();
     }

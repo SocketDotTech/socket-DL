@@ -20,22 +20,7 @@ interface IExecutionManager {
     /**
      * @notice Pays the fees for executing a transaction on the external chain
      * @dev This function is payable and assumes the socket is going to send correct amount of fees.
-     * @param msgGasLimit The gas limit for the transaction
-     * @param dstSlug The destination slug
-     */
-    // function receiveFees(
-    //     uint256 msgGasLimit,
-    //     uint32 dstSlug,
-    //     uint128 transmissionFees_,
-    //     uint128 executionFees_,
-    //     uint256 switchboardFees_,
-    //     address switchboardAddress_
-    // ) external payable;
-
-    /**
-     * @notice Pays the fees for executing a transaction on the external chain
-     * @dev This function is payable and assumes the socket is going to send correct amount of fees.
-     * @param msgGasLimit_ The gas limit for the transaction
+     * @param minMsgGasLimit_ The gas limit for the transaction
      * @param payloadSize_ The gas limit for the transaction
      * @param executionParams_ The gas limit for the transaction
      * @param siblingChainSlug_ The gas limit for the transaction
@@ -46,7 +31,7 @@ interface IExecutionManager {
      * @param maxPacketLength_ The maxPacketLength for the capacitor
      */
     function payAndCheckFees(
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 siblingChainSlug_,
@@ -59,19 +44,19 @@ interface IExecutionManager {
 
     /**
      * @notice Returns the minimum fees required for executing a transaction on the external chain
-     * @param msgGasLimit_ msgGasLimit_
+     * @param minMsgGasLimit_ minMsgGasLimit_
      * @param siblingChainSlug_ The destination slug
      * @return The minimum fees required for executing the transaction
      */
     function getMinFees(
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 siblingChainSlug_
     ) external view returns (uint128);
 
     function getExecutionTransmissionMinFees(
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 siblingChainSlug_,

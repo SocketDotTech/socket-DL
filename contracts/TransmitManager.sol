@@ -125,7 +125,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param account_ withdraw fees to
      */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        require(account_ != address(0), "Zero Address");
+        if (account_ == address(0)) revert ZeroAddress();
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
@@ -147,17 +147,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         signatureVerifier__ = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
     }
-
-    // /**
-    //  * @notice updates executionManager_
-    //  * @param executionManager_ address of ExecutionManager
-    //  */
-    // function setExecutionManager(
-    //     address executionManager_
-    // ) external onlyRole(GOVERNANCE_ROLE) {
-    //     executionManager__ = IExecutionManager(executionManager_);
-    //     emit ExecutionManagerSet(executionManager_);
-    // }
 
     /**
      * @notice Rescues funds from a contract that has lost access to them.

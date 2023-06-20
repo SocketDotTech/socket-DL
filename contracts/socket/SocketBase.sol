@@ -24,7 +24,7 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     // chain slug
     uint32 public immutable chainSlug;
     // incrementing nonce, should be handled in next socket version.
-    uint64 public messageCount;
+    uint64 public globalMessageCount;
     // current version
     bytes32 public immutable version;
 
