@@ -340,6 +340,7 @@ contract SocketDstTest is Setup {
             _b.chainSlug,
             amount,
             _minMsgGasLimit,
+            bytes32(0),
             bytes32(0)
         );
     }
@@ -386,6 +387,7 @@ contract SocketDstTest is Setup {
                 _b.chainSlug,
                 amount,
                 _minMsgGasLimit,
+                bytes32(0),
                 bytes32(0)
             );
         }
@@ -491,7 +493,8 @@ contract SocketDstTest is Setup {
                 _b.chainSlug,
                 amount,
                 _minMsgGasLimit,
-                executionParams
+                executionParams,
+                bytes32(0)
             );
         }
 
@@ -568,6 +571,7 @@ contract SocketDstTest is Setup {
                 _b.chainSlug,
                 amount,
                 _minMsgGasLimit,
+                bytes32(0),
                 bytes32(0)
             );
         }

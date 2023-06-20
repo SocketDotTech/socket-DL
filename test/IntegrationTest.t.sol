@@ -77,6 +77,7 @@ contract HappyTest is Setup {
                 _b.chainSlug,
                 amount,
                 _minMsgGasLimit,
+                bytes32(0),
                 bytes32(0)
             );
         }
@@ -211,7 +212,8 @@ contract HappyTest is Setup {
     //             _a.chainSlug,
     //             amount,
     //             _minMsgGasLimit,
-    //             bytes32(0)
+    //             bytes32(0),
+    // bytes32(0)
     //         );
     //     }
     //     (
@@ -263,7 +265,8 @@ contract HappyTest is Setup {
         srcCounter__.remoteAddOperation{value: fees}(
             dstSlug,
             amount,
-            minMsgGasLimit,
+            _minMsgGasLimit,
+            bytes32(0),
             bytes32(0)
         );
 
