@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.20;
+
 import "./interfaces/ISocket.sol";
 import "./interfaces/ISignatureVerifier.sol";
-import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
+import "./utils/AccessControlExtended.sol";
 import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRANSMITTER_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
 import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 
@@ -14,14 +15,13 @@ import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
  * @dev This contract inherits AccessControlExtended which manages access control
  */
 contract TransmitManager is ITransmitManager, AccessControlExtended {
-    ISocket public immutable socket__;
-
     uint32 public immutable chainSlug;
-
+    ISocket public immutable socket__;
     ISignatureVerifier public signatureVerifier__;
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
+
     error InsufficientTransmitFees();
     error InvalidNonce();
 
@@ -115,6 +115,10 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         emit TransmissionFeesSet(dstChainSlug_, transmissionFees_);
     }
 
+    function receiveFees(uint32, uint128) external payable override {
+        require(msg.sender == address(socket__.executionManager__()));
+    }
+
     /**
      * @notice withdraws fees from contract
      * @param account_ withdraw fees to
@@ -124,16 +128,9 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
-    function withdrawFeesFromExecutionManager(
-        uint32 siblingChainSlug_,
-        uint128 amount_
-    ) external onlyRole(WITHDRAW_ROLE) {
-        IExecutionManager executionManager__ = socket__.executionManager__();
-        executionManager__.withdrawTransmissionFees(siblingChainSlug_, amount_);
-    }
-
     /**
      * @notice updates signatureVerifier_
+     * @dev caller needs governance role
      * @param signatureVerifier_ address of Signature Verifier
      */
     function setSignatureVerifier(
@@ -156,7 +153,4 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
-
-    /// @inheritdoc	ITransmitManager
-    function receiveFees(uint32 siblingChainSlug_) external payable override {}
 }

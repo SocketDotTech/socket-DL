@@ -348,14 +348,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
-    function withdrawFeesFromExecutionManager(
-        uint32 siblingChainSlug_,
-        uint128 amount_
-    ) external override onlyRole(WITHDRAW_ROLE) {
-        IExecutionManager executionManager__ = socket__.executionManager__();
-        executionManager__.withdrawSwitchboardFees(siblingChainSlug_, amount_);
-    }
-
     /**
      * @notice Rescues funds from a contract that has lost access to them.
      * @param token_ The address of the token contract.
@@ -371,5 +363,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /// @inheritdoc ISwitchboard
-    function receiveFees(uint32 siblingChainSlug_) external payable override {}
+    function receiveFees(uint32, uint128) external payable override {
+        require(msg.sender == address(socket__.executionManager__()));
+    }
 }

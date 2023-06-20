@@ -117,6 +117,7 @@ interface IExecutionManager {
 
     function withdrawSwitchboardFees(
         uint32 siblingChainSlug_,
+        address switchboard_,
         uint128 amount_
     ) external;
 

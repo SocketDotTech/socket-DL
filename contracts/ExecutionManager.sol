@@ -439,43 +439,43 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
      */
     function withdrawSwitchboardFees(
         uint32 siblingChainSlug_,
+        address switchboard_,
         uint128 amount_
     ) external override {
-        if (totalSwitchboardFees[msg.sender][siblingChainSlug_] < amount_)
+        if (totalSwitchboardFees[switchboard_][siblingChainSlug_] < amount_)
             revert InsufficientFees();
 
-        totalSwitchboardFees[msg.sender][siblingChainSlug_] -= amount_;
-        ISwitchboard(msg.sender).receiveFees{value: amount_}(siblingChainSlug_);
+        totalSwitchboardFees[switchboard_][siblingChainSlug_] -= amount_;
+        ISwitchboard(switchboard_).receiveFees{value: amount_}(
+            siblingChainSlug_,
+            amount_
+        );
 
-        emit SwitchboardFeesWithdrawn(msg.sender, siblingChainSlug_, amount_);
+        emit SwitchboardFeesWithdrawn(switchboard_, siblingChainSlug_, amount_);
     }
 
     /**
+     * @dev This function gets the transmitManager address from the socket contract. If it is ever upgraded in socket,
+     * @dev remove the fees from executionManager first, and then upgrade address at socket.
      * @notice withdraws transmission fees from contract
      * @param siblingChainSlug_ withdraw fees corresponding to this slug
      * @param amount_ withdraw amount
-     * @dev This function gets the transmitManager address from the socket contract. If it is ever upgraded in socket,
-     * remove the fees from executionManager first, and then upgrade address at socket.
      */
     function withdrawTransmissionFees(
         uint32 siblingChainSlug_,
         uint128 amount_
     ) external override {
-        if (msg.sender != address(socket__.transmitManager__()))
-            revert InvalidTransmitManager();
-
         if (
             totalExecutionAndTransmissionFees[siblingChainSlug_]
                 .totalTransmissionFees < amount_
         ) revert InsufficientFees();
+
         totalExecutionAndTransmissionFees[siblingChainSlug_]
             .totalTransmissionFees -= amount_;
 
-        ITransmitManager(msg.sender).receiveFees{value: amount_}(
-            siblingChainSlug_
-        );
-
-        emit TransmissionFeesWithdrawn(msg.sender, siblingChainSlug_, amount_);
+        ITransmitManager tm = socket__.transmitManager__();
+        tm.receiveFees{value: amount_}(siblingChainSlug_, amount_);
+        emit TransmissionFeesWithdrawn(address(tm), siblingChainSlug_, amount_);
     }
 
     /**

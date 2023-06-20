@@ -43,7 +43,10 @@ interface ISwitchboard {
      * @notice Receives the fees for processing of packet.
      * @param siblingChainSlug_ the chain slug of the sibling chain.
      */
-    function receiveFees(uint32 siblingChainSlug_) external payable;
+    function receiveFees(
+        uint32 siblingChainSlug_,
+        uint128 amount_
+    ) external payable;
 
     /**
      * @notice Retrieves the minimum fees required for the destination chain to process the packet.
@@ -61,10 +64,5 @@ interface ISwitchboard {
         uint128 verificationFees_,
         uint128 switchboardFees_,
         bytes calldata signature_
-    ) external;
-
-    function withdrawFeesFromExecutionManager(
-        uint32 siblingChainSlug_,
-        uint128 amount_
     ) external;
 }
