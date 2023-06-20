@@ -34,9 +34,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
     {}
 
     /**
-     * @notice verifies if the packet satisfies needed checks before execution
-     * @param srcChainSlug_ source chain slug
-     * @param proposeTime_ time at which packet was proposed
+     * @inheritdoc ISwitchboard
      */
     function allowPacket(
         bytes32,
@@ -52,7 +50,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
             tripSinglePath[srcChainSlug_] ||
             isProposalTripped[packetId_][proposalCount_] ||
             packetCount < initialPacketCount[srcChainSlug_]
-            // decode packetId to get packetCount if < initial return false
+            
         ) return false;
         if (block.timestamp - proposeTime_ < timeoutInSeconds) return false;
         return true;

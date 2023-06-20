@@ -73,7 +73,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
 
-    error AlreadyInitialised();
     error InvalidNonce();
     error OnlySocket();
 
@@ -82,6 +81,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param socket_ Address of the socket contract
      * @param chainSlug_ Chain slug of the contract
      * @param timeoutInSeconds_ Timeout duration of the transactions
+     * @param signatureVerifier_ signatureVerifier_ contract
      */
     constructor(
         address socket_,
@@ -95,17 +95,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         signatureVerifier__ = signatureVerifier_;
     }
 
-    // /**
-    //  * @notice updates executionManager_
-    //  * @param executionManager_ address of ExecutionManager
-    //  */
-    // function setExecutionManager(
-    //     address executionManager_
-    // ) external onlyRole(GOVERNANCE_ROLE) {
-    //     executionManager__ = IExecutionManager(executionManager_);
-    //     emit ExecutionManagerSet(executionManager_);
-    // }
-
     /**
      * @inheritdoc ISwitchboard
      */
@@ -116,7 +105,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         return (minFees.switchboardFees, minFees.verificationFees);
     }
 
-    /// @inheritdoc ISwitchboard
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function registerSiblingSlug(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
@@ -133,7 +124,10 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice pause a path
+     * @notice Pauses a path.
+     * @param nonce_ The nonce used for the trip transaction.
+     * @param srcChainSlug_ The source chain slug of the path to be paused.
+     * @param signature_ The signature provided to validate the trip transaction.
      */
     function tripPath(
         uint256 nonce_,
@@ -156,7 +150,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher);
-
+        
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
         }
@@ -166,7 +161,11 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice pause a particular proposal of a packet
+     * @notice Pauses a particular proposal of a packet.
+     * @param nonce_ The nonce used for the trip transaction.
+     * @param packetId_ The ID of the packet.
+     * @param proposalCount_ The count of the proposal to be paused.
+     * @param signature_ The signature provided to validate the trip transaction.
      */
     function tripProposal(
         uint256 nonce_,
@@ -176,7 +175,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     ) external {
         uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
         address watcher = signatureVerifier__.recoverSigner(
-            // it includes trip status at the end
             keccak256(
                 abi.encode(
                     TRIP_PROPOSAL_SIG_IDENTIFIER,
@@ -192,16 +190,19 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRoleWithSlug(WATCHER_ROLE, srcChainSlug, watcher);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
         }
-        //source chain based tripping
+
         isProposalTripped[packetId_][proposalCount_] = true;
         emit ProposalTripped(packetId_, proposalCount_);
     }
 
     /**
-     * @notice pause execution
+     * @notice Pauses global execution.
+     * @param nonce_ The nonce used for the trip transaction.
+     * @param signature_ The signature provided to validate the trip transaction.
      */
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
         address tripper = signatureVerifier__.recoverSigner(
@@ -219,6 +220,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(TRIP_ROLE, tripper);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[tripper]++) revert InvalidNonce();
         }
@@ -227,7 +229,10 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice unpause a path
+     * @notice Unpauses a path.
+     * @param nonce_ The nonce used for the untrip transaction.
+     * @param srcChainSlug_ The source chain slug of the path to be unpaused.
+     * @param signature_ The signature provided to validate the untrip transaction.
      */
     function untripPath(
         uint256 nonce_,
@@ -250,6 +255,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(UNTRIP_ROLE, untripper);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
         }
@@ -258,7 +264,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice unpause execution
+     * @notice Unpauses global execution.
+     * @param nonce_ The nonce used for the untrip transaction.
+     * @param signature_ The signature provided to validate the untrip transaction.
      */
     function untrip(uint256 nonce_, bytes memory signature_) external {
         address untripper = signatureVerifier__.recoverSigner(
@@ -276,6 +284,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(UNTRIP_ROLE, untripper);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
         }
@@ -283,6 +292,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         emit SwitchboardTripped(false);
     }
 
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function setFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
@@ -306,6 +318,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
@@ -319,11 +332,18 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         emit SwitchboardFeesSet(dstChainSlug_, feesObject);
     }
 
+    /**
+     * @notice Withdraw fees from the contract to an account.
+     * @param account_ The address where we should send the fees.
+     */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         if (account_ == address(0)) revert ZeroAddress();
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function withdrawFeesFromExecutionManager(
         uint32 siblingChainSlug_,
         uint128 amount_
@@ -346,6 +366,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 
-    /// @inheritdoc ISwitchboard
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function receiveFees(uint32 siblingChainSlug_) external payable override {}
 }

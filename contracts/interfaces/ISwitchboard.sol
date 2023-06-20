@@ -55,14 +55,27 @@ interface ISwitchboard {
         uint32 dstChainSlug
     ) external view returns (uint128 switchboardFee, uint128 verificationFee);
 
+    /**
+     * @notice Sets the minimum fees required for the destination chain to process the packet.
+     * @param nonce_ the nonce of fee Updater to avoid replay.
+     * @param dstChainSlug_ the unique identifier for the destination chain.
+     * @param switchboardFees_ the switchboard fee required for the destination chain to process the packet.
+     * @param verificationFees_ the verification fee required for the destination chain to process the packet.
+     * @param signature_ the signature of the request.
+     */
     function setFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
-        uint128 verificationFees_,
         uint128 switchboardFees_,
+        uint128 verificationFees_,
         bytes calldata signature_
     ) external;
 
+    /**
+     * @notice Withdraws the fees from the execution manager.
+     * @param siblingChainSlug_ the chain slug of the sibling chain.
+     * @param amount_ the amount to withdraw.
+     */
     function withdrawFeesFromExecutionManager(
         uint32 siblingChainSlug_,
         uint128 amount_

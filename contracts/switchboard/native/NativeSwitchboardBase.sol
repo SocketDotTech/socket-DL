@@ -176,10 +176,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice checks if a packet can be executed
-     * @param root_ Merkle root associated with the packet ID
-     * @param packetId_ packet ID
-     * @return true if the packet satisfies all the checks and can be executed, false otherwise
+     * @inheritdoc ISwitchboard
      */
     function allowPacket(
         bytes32 root_,
@@ -213,6 +210,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         return (switchboardFees, verificationFees);
     }
 
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function setFees(
         uint256 nonce_,
         uint32,
@@ -235,6 +235,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(FEES_UPDATER_ROLE, feesUpdater);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
@@ -244,7 +245,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         emit SwitchboardFeesSet(switchboardFees, verificationFees);
     }
 
-    /// @inheritdoc ISwitchboard
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function registerSiblingSlug(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
@@ -271,7 +274,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      *      is incorrect, it will revert.
      *       Once the function is successful, the tripGlobalFuse variable is set to true and the SwitchboardTripped event is emitted.
      * @param nonce_ The nonce of the caller.
-     * @param signature_ The signature of the message "TRIP" + chainSlug + nonce_ + true.
+     * @param signature_ The signature of the message
      */
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
         address watcher = signatureVerifier__.recoverSigner(
@@ -289,6 +292,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(TRIP_ROLE, watcher);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
         }
@@ -298,7 +302,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
 
     /**
      * @notice Allows a watcher to untrip the switchboard by providing a signature and a nonce.
-     * @dev To untrip, the watcher must have the UNTRIP_ROLE. The signature must be created by signing the concatenation of the following values: "UNTRIP", the chainSlug, the nonce and false.
+     * @dev To untrip, the watcher must have the UNTRIP_ROLE.
      * @param nonce_ The nonce to prevent replay attacks.
      * @param signature_ The signature created by the watcher.
      */
@@ -318,6 +322,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(UNTRIP_ROLE, watcher);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
         }
@@ -348,6 +353,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function withdrawFeesFromExecutionManager(
         uint32 siblingChainSlug_,
         uint128 amount_
@@ -370,6 +378,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 
-    /// @inheritdoc ISwitchboard
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function receiveFees(uint32 siblingChainSlug_) external payable override {}
 }
