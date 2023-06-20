@@ -33,12 +33,14 @@ abstract contract SocketSrc is SocketBase {
      * @param remoteChainSlug_ the remote chain slug
      * @param minMsgGasLimit_ the gas limit needed to execute the payload on remote
      * @param executionParams_ a 32 bytes param to add extra details for execution
+     * @param transmissionParams_ a 32 bytes param to add extra details for transmission
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
         uint32 remoteChainSlug_,
         uint256 minMsgGasLimit_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         bytes calldata payload_
     ) external payable override returns (bytes32 msgId) {
         PlugConfig memory plugConfig;
@@ -57,6 +59,7 @@ abstract contract SocketSrc is SocketBase {
             minMsgGasLimit_,
             uint256(payload_.length),
             executionParams_,
+            transmissionParams_,
             uint32(remoteChainSlug_),
             plugConfig.outboundSwitchboard__,
             plugConfig.capacitor__.getMaxPacketLength()
@@ -87,6 +90,7 @@ abstract contract SocketSrc is SocketBase {
             msgId,
             minMsgGasLimit_,
             executionParams_,
+            transmissionParams_,
             payload_,
             fees
         );
@@ -105,6 +109,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         uint32 remoteChainSlug_,
         ISwitchboard switchboard__,
         uint256 maxPacketLength_
@@ -120,6 +125,7 @@ abstract contract SocketSrc is SocketBase {
             minMsgGasLimit_,
             payloadSize_,
             executionParams_,
+            transmissionParams_,
             remoteChainSlug_,
             fees.switchboardFees / uint128(maxPacketLength_),
             verificationFees / uint128(maxPacketLength_),

@@ -34,6 +34,7 @@ interface IExecutionManager {
         uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         uint32 siblingChainSlug_,
         uint128 switchboardFees_,
         uint128 verificationFees_,

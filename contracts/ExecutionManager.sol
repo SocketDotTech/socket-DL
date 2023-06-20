@@ -147,6 +147,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32,
         uint32 siblingChainSlug_,
         uint128 switchboardFees_,
         uint128 verificationFees_,
@@ -245,7 +246,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     }
 
     function _getMinFees(
-        uint256 gasLimit_,
+        uint256,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 siblingChainSlug_

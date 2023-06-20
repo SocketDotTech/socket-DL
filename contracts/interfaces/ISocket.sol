@@ -77,6 +77,7 @@ interface ISocket {
         bytes32 msgId,
         uint256 minMsgGasLimit,
         bytes32 executionParams,
+        bytes32 transmissionParams,
         bytes payload,
         Fees fees
     );
@@ -132,6 +133,7 @@ interface ISocket {
         uint32 remoteChainSlug_,
         uint256 minMsgGasLimit_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         bytes calldata payload_
     ) external payable returns (bytes32 msgId);
 
