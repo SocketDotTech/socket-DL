@@ -42,7 +42,7 @@ contract HashChainCapacitorTest is Setup {
     }
 
     function testSealPacket() external {
-        vm.expectRevert(HashChainCapacitor.InsufficentMessageLength.selector);
+        vm.expectRevert(HashChainCapacitor.InsufficientMessageLength.selector);
         _sealPacket(1);
 
         _addPackedMessage(_message_0);

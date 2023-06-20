@@ -182,7 +182,7 @@ abstract contract SocketSrc is SocketBase {
      * @notice Retrieves the minimum fees required for switchboard.
      * @param siblingChainSlug_ The slug of the destination chain for the message.
      * @param switchboard__ The switchboard address for which fees is retrieved.
-     * @return switchboardFees , verificationFees The minimum fees for message execution
+     * @return switchboardFees , verificationFees The minimum fees required for message execution
      */
     function _getSwitchboardMinFees(
         uint32 siblingChainSlug_,
@@ -244,7 +244,7 @@ abstract contract SocketSrc is SocketBase {
     }
 
     /**
-     * @notice seals data in capacitor for specific batchSizr
+     * @notice seals data in capacitor for specific batchSize
      * @param batchSize_ size of batch to be sealed
      * @param capacitorAddress_ address of capacitor
      * @param signature_ signed Data needed for verification

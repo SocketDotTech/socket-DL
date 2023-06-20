@@ -148,7 +148,7 @@ interface ISocket {
     ) external payable;
 
     /**
-     * @notice seals data in capacitor for specific batchSizr
+     * @notice seals data in capacitor for specific batchSize
      * @param batchSize_ size of batch to be sealed
      * @param capacitorAddress_ address of capacitor
      * @param signature_ signed Data needed for verification

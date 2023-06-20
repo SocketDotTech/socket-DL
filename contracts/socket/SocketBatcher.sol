@@ -136,8 +136,8 @@ contract SocketBatcher is AccessControl {
         address contractAddress_,
         SwitchboardSetFeesRequest[] calldata switchboardSetFeesRequest_
     ) external {
-        uint256 executeRequestslength = switchboardSetFeesRequest_.length;
-        for (uint256 index = 0; index < executeRequestslength; ) {
+        uint256 executeRequestLength = switchboardSetFeesRequest_.length;
+        for (uint256 index = 0; index < executeRequestLength; ) {
             FastSwitchboard(contractAddress_).setFees(
                 switchboardSetFeesRequest_[index].nonce,
                 switchboardSetFeesRequest_[index].dstChainSlug,
@@ -160,8 +160,8 @@ contract SocketBatcher is AccessControl {
         address contractAddress_,
         SetFeesRequest[] calldata setFeesRequests_
     ) external {
-        uint256 executeRequestslength = setFeesRequests_.length;
-        for (uint256 index = 0; index < executeRequestslength; ) {
+        uint256 feeRequestLength = setFeesRequests_.length;
+        for (uint256 index = 0; index < feeRequestLength; ) {
             ITransmitManager(contractAddress_).setTransmissionFees(
                 setFeesRequests_[index].nonce,
                 setFeesRequests_[index].dstChainSlug,
@@ -183,8 +183,8 @@ contract SocketBatcher is AccessControl {
         address contractAddress_,
         SetFeesRequest[] calldata setFeesRequests_
     ) external {
-        uint256 executeRequestslength = setFeesRequests_.length;
-        for (uint256 index = 0; index < executeRequestslength; ) {
+        uint256 feeRequestLength = setFeesRequests_.length;
+        for (uint256 index = 0; index < feeRequestLength; ) {
             if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setExecutionFees.selector
@@ -244,8 +244,8 @@ contract SocketBatcher is AccessControl {
         address socketAddress_,
         SealRequest[] calldata sealRequests_
     ) external {
-        uint256 sealRequestslength = sealRequests_.length;
-        for (uint256 index = 0; index < sealRequestslength; ) {
+        uint256 sealRequestLength = sealRequests_.length;
+        for (uint256 index = 0; index < sealRequestLength; ) {
             ISocket(socketAddress_).seal(
                 sealRequests_[index].batchSize,
                 sealRequests_[index].capacitorAddress,
@@ -266,8 +266,8 @@ contract SocketBatcher is AccessControl {
         address socketAddress_,
         ProposeRequest[] calldata proposeRequests_
     ) external {
-        uint256 proposeRequestslength = proposeRequests_.length;
-        for (uint256 index = 0; index < proposeRequestslength; ) {
+        uint256 proposeRequestLength = proposeRequests_.length;
+        for (uint256 index = 0; index < proposeRequestLength; ) {
             ISocket(socketAddress_).proposeForSwitchboard(
                 proposeRequests_[index].packetId,
                 proposeRequests_[index].root,
@@ -289,8 +289,8 @@ contract SocketBatcher is AccessControl {
         address switchBoardAddress_,
         AttestRequest[] calldata attestRequests_
     ) external {
-        uint256 attestRequestslength = attestRequests_.length;
-        for (uint256 index = 0; index < attestRequestslength; ) {
+        uint256 attestRequestLength = attestRequests_.length;
+        for (uint256 index = 0; index < attestRequestLength; ) {
             FastSwitchboard(switchBoardAddress_).attest(
                 attestRequests_[index].packetId,
                 attestRequests_[index].proposalCount,
@@ -312,8 +312,8 @@ contract SocketBatcher is AccessControl {
         address socketAddress_,
         ExecuteRequest[] calldata executeRequests_
     ) external payable {
-        uint256 executeRequestslength = executeRequests_.length;
-        for (uint256 index = 0; index < executeRequestslength; ) {
+        uint256 executeRequestLength = executeRequests_.length;
+        for (uint256 index = 0; index < executeRequestLength; ) {
             bytes32 executionParams = executeRequests_[index]
                 .messageDetails
                 .executionParams;
@@ -332,7 +332,7 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
-     * @notice invoke receieve Message on PolygonRootReceiver for a batch of messages in loop
+     * @notice invoke receive Message on PolygonRootReceiver for a batch of messages in loop
      * @param polygonRootReceiverAddress_ address of polygonRootReceiver
      * @param receivePacketProofs_ the list of receivePacketProofs to be sent to receiveHook of polygonRootReceiver
      */

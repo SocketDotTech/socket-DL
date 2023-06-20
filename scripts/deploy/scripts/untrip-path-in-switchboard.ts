@@ -29,10 +29,10 @@ export const main = async () => {
       switchBoardAddress
     );
 
-    const untripTxn = await switchboard
+    const unTripTxn = await switchboard
       .connect(signer)
       ["tripPath(uint256,bool)"](srcChainSlug, false);
-    await untripTxn.wait();
+    await unTripTxn.wait();
 
     const isTripped = await switchboard.tripSinglePath(srcChainSlug);
 
@@ -40,7 +40,7 @@ export const main = async () => {
       `trip indicator for srcChainSlug: ${srcChainSlug} and switchBoard on ChainSlug: ${chainSlug} is: ${isTripped}`
     );
   } catch (error) {
-    console.log("Error while sending untrip transaction", error);
+    console.log("Error while sending unTrip transaction", error);
     throw error;
   }
 };

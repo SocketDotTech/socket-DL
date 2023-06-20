@@ -7,8 +7,8 @@ import "../../interfaces/ISignatureVerifier.sol";
 import "../../utils/AccessControlExtended.sol";
 import "../../libraries/RescueFundsLib.sol";
 
-import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UNTRIP_ROLE, WATCHER_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
-import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, TRIP_PROPOSAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UN_TRIP_ROLE, WATCHER_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, TRIP_PROPOSAL_SIG_IDENTIFIER, UN_TRIP_PATH_SIG_IDENTIFIER, UN_TRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     ISignatureVerifier public immutable signatureVerifier__;
@@ -73,9 +73,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
 
-    error AlreadyInitialised();
     error InvalidNonce();
-    error OnlySocket();
 
     /**
      * @dev Constructor of SwitchboardBase
@@ -229,16 +227,16 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @notice unpause a path
      */
-    function untripPath(
+    function unTripPath(
         uint256 nonce_,
         uint32 srcChainSlug_,
         bytes memory signature_
     ) external {
-        address untripper = signatureVerifier__.recoverSigner(
+        address unTripper = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
-                    UNTRIP_PATH_SIG_IDENTIFIER,
+                    UN_TRIP_PATH_SIG_IDENTIFIER,
                     address(this),
                     srcChainSlug_,
                     chainSlug,
@@ -249,9 +247,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRole(UNTRIP_ROLE, untripper);
+        _checkRole(UN_TRIP_ROLE, unTripper);
         unchecked {
-            if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
+            if (nonce_ != nextNonce[unTripper]++) revert InvalidNonce();
         }
         tripSinglePath[srcChainSlug_] = false;
         emit PathTripped(srcChainSlug_, false);
@@ -260,12 +258,12 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @notice unpause execution
      */
-    function untrip(uint256 nonce_, bytes memory signature_) external {
-        address untripper = signatureVerifier__.recoverSigner(
+    function unTrip(uint256 nonce_, bytes memory signature_) external {
+        address unTripper = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
-                    UNTRIP_GLOBAL_SIG_IDENTIFIER,
+                    UN_TRIP_GLOBAL_SIG_IDENTIFIER,
                     address(this),
                     chainSlug,
                     nonce_,
@@ -275,9 +273,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRole(UNTRIP_ROLE, untripper);
+        _checkRole(UN_TRIP_ROLE, unTripper);
         unchecked {
-            if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
+            if (nonce_ != nextNonce[unTripper]++) revert InvalidNonce();
         }
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);

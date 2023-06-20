@@ -74,7 +74,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
     mapping(address => mapping(uint32 => uint128)) transmissionMinFees;
 
-    // destSlug => relativeNativePrice (stores (destnativeTokenPriceUSD*(1e18)/srcNativeTokenPriceUSD))
+    // destSlug => relativeNativePrice (stores (destNativeTokenPriceUSD*(1e18)/srcNativeTokenPriceUSD))
     mapping(uint32 => uint256) public relativeNativeTokenPrice;
 
     // mapping(uint32 => uint256) public baseGasUsed;

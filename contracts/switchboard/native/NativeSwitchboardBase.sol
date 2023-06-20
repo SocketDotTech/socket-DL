@@ -9,8 +9,8 @@ import "../../interfaces/IExecutionManager.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../utils/AccessControlExtended.sol";
 
-import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
-import {TRIP_NATIVE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UN_TRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {TRIP_NATIVE_SIG_IDENTIFIER, UN_TRIP_NATIVE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
 @title Native Switchboard Base Contract
@@ -40,7 +40,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Flag that indicates if the capacitor has been registered.
      */
-    bool public isInitialised;
+    bool public isInitialized;
 
     uint256 initialPacketCount;
 
@@ -105,7 +105,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Error thrown when the contract has already been initialized.
      */
-    error AlreadyInitialised();
+    error AlreadyInitialized();
 
     /**
      * @dev Error thrown when the transaction is not sent by a valid sender.
@@ -251,7 +251,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 capacitorType_,
         uint256 initialPacketCount_
     ) external override onlyRole(GOVERNANCE_ROLE) {
-        if (isInitialised) revert AlreadyInitialised();
+        if (isInitialized) revert AlreadyInitialized();
 
         initialPacketCount = initialPacketCount_;
         (address capacitor, ) = socket__.registerSwitchBoard(
@@ -260,7 +260,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             capacitorType_
         );
 
-        isInitialised = true;
+        isInitialized = true;
         capacitor__ = ICapacitor(capacitor);
     }
 
@@ -297,17 +297,17 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice Allows a watcher to untrip the switchboard by providing a signature and a nonce.
-     * @dev To untrip, the watcher must have the UNTRIP_ROLE. The signature must be created by signing the concatenation of the following values: "UNTRIP", the chainSlug, the nonce and false.
+     * @notice Allows a watcher to un trip the switchboard by providing a signature and a nonce.
+     * @dev To un trip, the watcher must have the UN_TRIP_ROLE. The signature must be created by signing the concatenation of the following values: "UN_TRIP", the chainSlug, the nonce and false.
      * @param nonce_ The nonce to prevent replay attacks.
      * @param signature_ The signature created by the watcher.
      */
-    function untrip(uint256 nonce_, bytes memory signature_) external {
+    function unTrip(uint256 nonce_, bytes memory signature_) external {
         address watcher = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
-                    UNTRIP_NATIVE_SIG_IDENTIFIER,
+                    UN_TRIP_NATIVE_SIG_IDENTIFIER,
                     address(this),
                     chainSlug,
                     nonce_,
@@ -317,7 +317,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRole(UNTRIP_ROLE, watcher);
+        _checkRole(UN_TRIP_ROLE, watcher);
         unchecked {
             if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
         }
