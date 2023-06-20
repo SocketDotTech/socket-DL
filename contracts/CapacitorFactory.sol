@@ -22,7 +22,7 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
     uint256 private constant HASH_CHAIN_CAPACITOR = 2;
 
     /**
-     * @notice initialises and grants RESCUE_ROLE to owner.
+     * @notice initializes and grants RESCUE_ROLE to owner.
      * @param owner_ The address of the owner of the contract.
      */
     constructor(address owner_) AccessControl(owner_) {

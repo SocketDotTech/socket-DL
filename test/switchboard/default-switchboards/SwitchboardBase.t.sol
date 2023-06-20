@@ -177,12 +177,7 @@ contract SwitchboardBaseTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit ProposalTripped(packetId, proposalCount);
-        fastSwitchboard.tripProposal(
-            nonce,
-            packetId,
-            proposalCount,
-            sig
-        );
+        fastSwitchboard.tripProposal(nonce, packetId, proposalCount, sig);
 
         assertFalse(
             fastSwitchboard.allowPacket(
@@ -194,12 +189,7 @@ contract SwitchboardBaseTest is Setup {
             )
         );
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
-        fastSwitchboard.tripProposal(
-            nonce,
-            packetId,
-            proposalCount,
-            sig
-        );
+        fastSwitchboard.tripProposal(nonce, packetId, proposalCount, sig);
         assertTrue(fastSwitchboard.isProposalTripped(packetId, proposalCount));
     }
 
@@ -229,7 +219,7 @@ contract SwitchboardBaseTest is Setup {
     function testUnTripAfterTripSingle() external {
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantWatcherRole(aChainSlug, _socketOwner);
-        fastSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
         vm.stopPrank();
 
         bytes32 digest = keccak256(
@@ -256,7 +246,7 @@ contract SwitchboardBaseTest is Setup {
         nonce = fastSwitchboard.nextNonce(_socketOwner);
         digest = keccak256(
             abi.encode(
-                UNTRIP_PATH_SIG_IDENTIFIER,
+                UN_TRIP_PATH_SIG_IDENTIFIER,
                 address(fastSwitchboard),
                 _a.chainSlug,
                 bChainSlug,
@@ -268,11 +258,11 @@ contract SwitchboardBaseTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit PathTripped(aChainSlug, false);
-        fastSwitchboard.untripPath(nonce, aChainSlug, sig);
+        fastSwitchboard.unTripPath(nonce, aChainSlug, sig);
         assertFalse(fastSwitchboard.tripSinglePath(aChainSlug));
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
-        fastSwitchboard.untripPath(nonce, aChainSlug, sig);
+        fastSwitchboard.unTripPath(nonce, aChainSlug, sig);
     }
 
     function testRescueNativeFunds() public {

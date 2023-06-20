@@ -19,7 +19,7 @@ contract SignatureVerifier is ISignatureVerifier, AccessControl {
     error InvalidSigLength();
 
     /**
-     * @notice initialises and grants RESCUE_ROLE to owner.
+     * @notice initializes and grants RESCUE_ROLE to owner.
      * @param owner_ The address of the owner of the contract.
      */
     constructor(address owner_) AccessControl(owner_) {

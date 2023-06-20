@@ -50,7 +50,6 @@ contract OptimisticSwitchboard is SwitchboardBase {
             tripSinglePath[srcChainSlug_] ||
             isProposalTripped[packetId_][proposalCount_] ||
             packetCount < initialPacketCount[srcChainSlug_]
-            
         ) return false;
         if (block.timestamp - proposeTime_ < timeoutInSeconds) return false;
         return true;

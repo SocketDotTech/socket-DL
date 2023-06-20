@@ -11,6 +11,7 @@ import "./BaseCapacitor.sol";
  * When a packet is full, a new packet is created and the root of the last packet is sealed.
  */
 contract HashChainCapacitor is BaseCapacitor {
+    uint256 private constant MAX_LEN = 10;
     uint256 public maxPacketLength;
 
     /// an incrementing count for each new message added
@@ -23,9 +24,11 @@ contract HashChainCapacitor is BaseCapacitor {
     // Error triggered when batch size is more than max length
     error InvalidBatchSize();
     // Error triggered when no message found or total message count is less than expected length
-    error InsufficentMessageLength();
+    error InsufficientMessageLength();
+    // Error triggered when packet length is more than max packet length supported
+    error InvalidPacketLength();
 
-    // Event triggered when max packe length is updated
+    // Event triggered when max packet length is updated
     event MaxPacketLengthSet(uint256 maxPacketLength);
 
     /**
@@ -54,19 +57,22 @@ contract HashChainCapacitor is BaseCapacitor {
         uint256 maxPacketLength_
     ) BaseCapacitor(socket_, owner_) {
         _grantRole(RESCUE_ROLE, owner_);
+
+        if (maxPacketLength > MAX_LEN) revert InvalidPacketLength();
         maxPacketLength = maxPacketLength_;
     }
 
     /**
      * @notice Update packet length of the hash chain capacitor.
      * @notice Only owner can call this function
-     * @dev The function will update the packet length of the hash chain capacitor, and also create any packets 
+     * @dev The function will update the packet length of the hash chain capacitor, and also create any packets
      * if the new packet length is less than the current packet length.
      * @param maxPacketLength_ The new nax packet length of the hash chain.
      */
     function updateMaxPacketLength(
         uint256 maxPacketLength_
     ) external onlyOwner {
+        if (maxPacketLength > MAX_LEN) revert InvalidPacketLength();
         if (maxPacketLength_ < maxPacketLength) {
             uint64 lastPackedMsgIndex = messagePacked;
             uint64 packetCount = _nextPacketCount;
@@ -103,7 +109,7 @@ contract HashChainCapacitor is BaseCapacitor {
      * @notice Adds a packed message to the hash chain.
      * @notice Only socket can call this function
      * @dev The packed message is added to the current packet and hashed with the previous root to create a new root.
-     * If the packet is full, a new packet is created and the root of the last packet is finalised to be sealed.
+     * If the packet is full, a new packet is created and the root of the last packet is finalized to be sealed.
      * @param packedMessage_ The packed message to be added to the hash chain.
      */
     function addPackedMessage(
@@ -146,7 +152,7 @@ contract HashChainCapacitor is BaseCapacitor {
 
             // if no message found or total message count is less than expected length
             if (messageCount <= lastMessageCount)
-                revert InsufficentMessageLength();
+                revert InsufficientMessageLength();
 
             _createPacket(
                 packetCount,

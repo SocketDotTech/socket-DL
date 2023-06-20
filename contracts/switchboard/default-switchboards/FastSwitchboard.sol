@@ -183,7 +183,7 @@ contract FastSwitchboard is SwitchboardBase {
     function isNonWatcherRole(bytes32 role_) public pure returns (bool) {
         if (
             role_ == TRIP_ROLE ||
-            role_ == UNTRIP_ROLE ||
+            role_ == UN_TRIP_ROLE ||
             role_ == WITHDRAW_ROLE ||
             role_ == RESCUE_ROLE ||
             role_ == GOVERNANCE_ROLE ||

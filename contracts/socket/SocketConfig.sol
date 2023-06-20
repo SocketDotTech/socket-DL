@@ -32,7 +32,7 @@ abstract contract SocketConfig is ISocket {
     ICapacitorFactory public capacitorFactory__;
 
     // capacitor address => siblingChainSlug
-    // It is used to maintain record of capacitors in the system registered for a slug. It is used in seal for verification
+    // It is used to maintain record of capacitors in the system registered for a slug and also used in seal for verification
     mapping(address => uint32) public capacitorToSlug;
 
     // switchboard => siblingChainSlug => ICapacitor
@@ -105,7 +105,7 @@ abstract contract SocketConfig is ISocket {
 
     /**
      * @notice connects Plug to Socket and sets the config for given `siblingChainSlug_`
-     * @notice msg.sender is stored as switchboard address against given configuration
+     * @notice msg.sender is stored as plug address against given configuration
      * @param siblingChainSlug_ the sibling chain slug
      * @param siblingPlug_ address of plug present at siblingChainSlug_ to call at inbound
      * @param inboundSwitchboard_ the address of switchboard to use for verifying messages at inbound
@@ -117,6 +117,7 @@ abstract contract SocketConfig is ISocket {
         address inboundSwitchboard_,
         address outboundSwitchboard_
     ) external override {
+        // only capacitor checked, decapacitor assumed will exist if capacitor does
         if (
             address(capacitors__[inboundSwitchboard_][siblingChainSlug_]) ==
             address(0) ||
