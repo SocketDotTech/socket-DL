@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 import "./interfaces/ISocket.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./utils/AccessControlExtended.sol";
@@ -15,7 +15,6 @@ import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
  */
 contract TransmitManager is ITransmitManager, AccessControlExtended {
     ISocket public immutable socket__;
-    // IExecutionManager public executionManager__;
 
     uint32 public immutable chainSlug;
 
@@ -23,10 +22,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
-
-    // remoteChainSlug => transmissionFees
-    // mapping(uint32 => uint128) public transmissionFees;
-
     error InsufficientTransmitFees();
     error InvalidNonce();
 
@@ -109,9 +104,9 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-
-        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
         IExecutionManager executionManager__ = socket__.executionManager__();
         executionManager__.updateTransmissionMinFees(
             dstChainSlug_,
