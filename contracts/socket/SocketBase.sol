@@ -2,10 +2,10 @@
 pragma solidity 0.8.20;
 
 import "../interfaces/IHasher.sol";
-import "../utils/AccessControlExtended.sol";
-import {GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
-import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 import "../libraries/RescueFundsLib.sol";
+import "../utils/AccessControlExtended.sol";
+import {RESCUE_ROLE, GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
+
 import "./SocketConfig.sol";
 
 /**
@@ -23,7 +23,7 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
 
     // chain slug
     uint32 public immutable chainSlug;
-    // incrementing nonce, should be handled in next socket version.
+    // incrementing nonce
     uint64 public globalMessageCount;
     // current version
     bytes32 public immutable version;
@@ -77,7 +77,7 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     }
 
     /**
-     * @notice updates hasher_
+     * @notice updates hasher__
      * @dev Only governance can call this function
      * @param hasher_ address of hasher
      */
@@ -87,7 +87,7 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     }
 
     /**
-     * @notice updates executionManager_
+     * @notice updates executionManager__
      * @dev Only governance can call this function
      * @param executionManager_ address of Execution Manager
      */
@@ -99,7 +99,7 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     }
 
     /**
-     * @notice updates transmitManager_
+     * @notice updates transmitManager__
      * @param transmitManager_ address of Transmit Manager
      * @dev Only governance can call this function
      * @dev This function sets the transmitManager address. If it is ever upgraded,
