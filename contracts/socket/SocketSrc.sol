@@ -65,9 +65,9 @@ abstract contract SocketSrc is SocketBase {
             uint256(payload_.length),
             executionParams_,
             transmissionParams_,
+            plugConfig.outboundSwitchboard__,
             plugConfig.capacitor__.getMaxPacketLength(),
-            uint32(siblingChainSlug_),
-            plugConfig.outboundSwitchboard__
+            uint32(siblingChainSlug_)
         );
 
         ISocket.MessageDetails memory messageDetails;
@@ -119,9 +119,9 @@ abstract contract SocketSrc is SocketBase {
         uint256 payloadSize_,
         bytes32 executionParams_,
         bytes32 transmissionParams_,
+        ISwitchboard switchboard_,
         uint256 maxPacketLength_,
-        uint32 siblingChainSlug_,
-        ISwitchboard switchboard_
+        uint32 siblingChainSlug_
     ) internal returns (ISocket.Fees memory fees) {
         uint128 verificationFees;
         (fees.switchboardFees, verificationFees) = _getSwitchboardMinFees(
