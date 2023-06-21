@@ -6,6 +6,7 @@ import "../Setup.t.sol";
 contract ExecutionManagerTest is Setup {
     ExecutionManager internal executionManager;
 
+    error ZeroAddress();
     event FeesWithdrawn(address account_, uint256 value_);
 
     function setUp() public {
@@ -257,8 +258,13 @@ contract ExecutionManagerTest is Setup {
 
     function testWithdrawExecutionFees() public {
         sendFeesToExecutionManager();
-
         uint128 amount = 100;
+
+        // should revert with zero address
+        hoax(_socketOwner);
+        vm.expectRevert(ZeroAddress.selector);
+        executionManager.withdrawExecutionFees(bChainSlug, amount, address(0));
+
         // should revert with NoPermit
         hoax(_raju);
         vm.expectRevert();
