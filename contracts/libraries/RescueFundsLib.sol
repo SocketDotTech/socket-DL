@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./SafeTransferLib.sol";
+import "solmate/utils/SafeTransferLib.sol";
 
 /**
  * @title RescueFundsLib
  * @dev A library that provides a function to rescue funds from a contract.
  */
 library RescueFundsLib {
-    using SafeTransferLib for IERC20;
-
     /**
      * @dev The address used to identify ETH.
      */
@@ -39,7 +37,7 @@ library RescueFundsLib {
             require(success);
         } else {
             if (token_.code.length == 0) revert InvalidTokenAddress();
-            IERC20(token_).safeTransfer(userAddress_, amount_);
+            SafeTransferLib.safeTransfer(ERC20(token_), userAddress_, amount_);
         }
     }
 }

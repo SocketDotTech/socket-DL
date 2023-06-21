@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
+
 import {ISocket, SocketConfig, SocketBase} from "../contracts/socket/SocketBase.sol";
 import {Socket, SocketSrc, SocketDst} from "../contracts/socket/Socket.sol";
 import "../contracts/utils/SignatureVerifier.sol";
@@ -12,49 +13,78 @@ import "../contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol"
 
 import "../contracts/TransmitManager.sol";
 import "../contracts/ExecutionManager.sol";
+import "../contracts/OpenExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
 import "../contracts/utils/AccessRoles.sol";
 import "../contracts/utils/SigIdentifiers.sol";
 
 contract Setup is Test {
     uint256 internal c = 1;
-    address immutable _plugOwner = address(uint160(c++));
-    address immutable _raju = address(uint160(c++));
-    uint256 internal aChainSlug = 0x2013AA263;
-    uint256 internal bChainSlug = 0x2013AA264;
-    string version = "TEST_NET";
+    uint32 internal aChainSlug = uint32(uint256(0x2013AA262));
+    uint32 internal bChainSlug = uint32(uint256(0x2013AA263));
+    uint32 internal cChainSlug = uint32(uint256(0x2013AA264));
 
+    address public constant NATIVE_TOKEN_ADDRESS =
+        address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+
+    string version = "TEST_NET";
     bytes32 versionHash = keccak256(bytes(version));
 
-    uint256 immutable executorPrivateKey = c++;
-    uint256 immutable _socketOwnerPrivateKey = c++;
+    address immutable _plugOwner = address(uint160(c++));
+    address immutable _raju = address(uint160(c++));
+    address immutable _fundRescuer = address(uint160(c++));
 
     address _socketOwner;
+
     address _executor;
     address _transmitter;
-    address _altTransmitter;
-
     address _watcher;
-    address _altWatcher;
 
+    address _altTransmitter;
+    address _altWatcher;
+    address _altExecutor;
+
+    address _nonTransmitter;
+    address _nonWatcher;
+    address _nonExecutor;
+
+    address _feesPayer;
+    address _feesWithdrawer;
+
+    uint256 immutable _socketOwnerPrivateKey = c++;
     uint256 immutable _transmitterPrivateKey = c++;
     uint256 immutable _watcherPrivateKey = c++;
+    uint256 immutable _executorPrivateKey = c++;
 
     uint256 immutable _altTransmitterPrivateKey = c++;
     uint256 immutable _altWatcherPrivateKey = c++;
+    uint256 immutable _altExecutorPrivateKey = c++;
+
+    uint256 immutable _nonTransmitterPrivateKey = c++;
+    uint256 immutable _nonWatcherPrivateKey = c++;
+    uint256 immutable _nonExecutorPrivateKey = c++;
+
+    uint256 immutable _feesPayerPrivateKey = c++;
+    uint256 immutable _feesWithdrawerPrivateKey = c++;
+
+    uint256 _socketOwnerNonce;
 
     uint256 internal _timeoutInSeconds = 0;
+    uint256 internal _optimisticTimeoutInSeconds = 1;
+
     uint256 internal _slowCapacitorWaitTime = 300;
     uint256 internal _msgGasLimit = 30548;
-    uint256 internal _sealGasLimit = 150000;
     uint256 internal _transmissionFees = 350000000000;
     uint256 internal _executionFees = 110000000000;
     uint256 internal _msgValueMaxThreshold = 1000;
+    uint256 internal _msgValueMinThreshold = 10;
     uint256 internal _relativeNativeTokenPrice = 1000 * 1e18;
 
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
+
+    bool isExecutionOpen = false;
 
     struct SocketConfigContext {
         uint32 siblingChainSlug;
@@ -104,11 +134,21 @@ contract Setup is Test {
 
     function initialise() internal {
         _socketOwner = vm.addr(_socketOwnerPrivateKey);
-        _watcher = vm.addr(_watcherPrivateKey);
-        _altWatcher = vm.addr(_altWatcherPrivateKey);
+
         _transmitter = vm.addr(_transmitterPrivateKey);
         _altTransmitter = vm.addr(_altTransmitterPrivateKey);
-        _executor = vm.addr(executorPrivateKey);
+        _nonTransmitter = vm.addr(_nonTransmitterPrivateKey);
+
+        _executor = vm.addr(_executorPrivateKey);
+        _altExecutor = vm.addr(_altExecutorPrivateKey);
+        _nonExecutor = vm.addr(_nonExecutorPrivateKey);
+
+        _watcher = vm.addr(_watcherPrivateKey);
+        _altWatcher = vm.addr(_altWatcherPrivateKey);
+        _nonWatcher = vm.addr(_nonWatcherPrivateKey);
+
+        _feesPayer = vm.addr(_feesPayerPrivateKey);
+        _feesWithdrawer = vm.addr(_feesWithdrawerPrivateKey);
     }
 
     function _dualChainSetup(
@@ -121,11 +161,13 @@ contract Setup is Test {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         _deployContractsOnSingleChain(
             _b,
             _a.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
     }
@@ -133,12 +175,16 @@ contract Setup is Test {
     function _deployContractsOnSingleChain(
         ChainContext storage cc_,
         uint32 remoteChainSlug_,
+        bool isExecutionOpen_,
         uint256[] memory transmitterPrivateKeys_
     ) internal {
         // deploy socket setup
-        _deploySocket(cc_, _socketOwner);
+        _deploySocket(cc_, _socketOwner, isExecutionOpen_);
 
         vm.startPrank(_socketOwner);
+        _grantOwnerTransmitManagerRoles(cc_);
+        _grantOwnerExecutionManagerRoles(cc_);
+        _grantOwnerSocketRoles(cc_);
 
         //grant FeesUpdater Role
         cc_.transmitManager__.grantRoleWithSlug(
@@ -154,7 +200,12 @@ contract Setup is Test {
             _socketOwner
         );
 
-        _setTransmissionFees(cc_, remoteChainSlug_, _transmissionFees);
+        cc_.executionManager__.grantRoleWithSlug(
+            FEES_UPDATER_ROLE,
+            cc_.chainSlug,
+            _socketOwner
+        );
+
         _setExecutionFees(cc_, remoteChainSlug_, _executionFees);
         _setMsgValueMaxThreshold(cc_, remoteChainSlug_, _msgValueMaxThreshold);
         _setRelativeNativeTokenPrice(
@@ -162,6 +213,8 @@ contract Setup is Test {
             remoteChainSlug_,
             _relativeNativeTokenPrice
         );
+        _setMsgValueMinThreshold(cc_, remoteChainSlug_, _msgValueMinThreshold);
+        _setTransmissionFees(cc_, remoteChainSlug_, _transmissionFees);
         vm.stopPrank();
 
         // deploy default configs: fast, slow
@@ -175,12 +228,29 @@ contract Setup is Test {
         scc_ = _addOptimisticSwitchboard(cc_, remoteChainSlug_, _capacitorType);
         cc_.configs__.push(scc_);
 
-        // add roles
-        hoax(_socketOwner);
-        cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
-
         _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
         _addTransmitters(transmitterPrivateKeys_, cc_, cc_.chainSlug);
+    }
+
+    function _grantOwnerSocketRoles(ChainContext storage cc_) internal {
+        cc_.socket__.grantRole(RESCUE_ROLE, _socketOwner);
+        cc_.socket__.grantRole(GOVERNANCE_ROLE, _socketOwner);
+    }
+
+    function _grantOwnerTransmitManagerRoles(
+        ChainContext storage cc_
+    ) internal {
+        cc_.transmitManager__.grantRole(RESCUE_ROLE, _socketOwner);
+        cc_.transmitManager__.grantRole(WITHDRAW_ROLE, _socketOwner);
+        cc_.transmitManager__.grantRole(GOVERNANCE_ROLE, _socketOwner);
+    }
+
+    function _grantOwnerExecutionManagerRoles(
+        ChainContext storage cc_
+    ) internal {
+        cc_.executionManager__.grantRole(RESCUE_ROLE, _socketOwner);
+        cc_.executionManager__.grantRole(WITHDRAW_ROLE, _socketOwner);
+        cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
     }
 
     function _setTransmissionFees(
@@ -341,7 +411,7 @@ contract Setup is Test {
             _socketOwner,
             address(cc_.socket__),
             cc_.chainSlug,
-            _timeoutInSeconds,
+            _optimisticTimeoutInSeconds,
             cc_.sigVerifier__
         );
 
@@ -375,6 +445,8 @@ contract Setup is Test {
 
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(WITHDRAW_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(RESCUE_ROLE, _socketOwner);
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
         vm.stopPrank();
 
@@ -390,18 +462,32 @@ contract Setup is Test {
 
     function _deploySocket(
         ChainContext storage cc_,
-        address deployer_
+        address deployer_,
+        bool isExecutionOpen_
     ) internal {
         vm.startPrank(deployer_);
 
         cc_.hasher__ = new Hasher(deployer_);
+        cc_.hasher__.grantRole(RESCUE_ROLE, deployer_);
+
         cc_.sigVerifier__ = new SignatureVerifier(deployer_);
+        cc_.sigVerifier__.grantRole(RESCUE_ROLE, deployer_);
+
         cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
-        cc_.executionManager__ = new ExecutionManager(
-            deployer_,
-            cc_.chainSlug,
-            cc_.sigVerifier__
-        );
+
+        if (isExecutionOpen_) {
+            cc_.executionManager__ = new OpenExecutionManager(
+                deployer_,
+                cc_.chainSlug,
+                cc_.sigVerifier__
+            );
+        } else {
+            cc_.executionManager__ = new ExecutionManager(
+                deployer_,
+                cc_.chainSlug,
+                cc_.sigVerifier__
+            );
+        }
 
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
@@ -431,6 +517,19 @@ contract Setup is Test {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        scc_.switchboard__.registerSiblingSlug(
+            uint32(remoteChainSlug_),
+            DEFAULT_BATCH_LENGTH,
+            capacitorType_
+        );
 
         hoax(governance_);
         scc_.switchboard__.registerSiblingSlug(
@@ -528,8 +627,27 @@ contract Setup is Test {
         address capacitor,
         bytes memory sig_
     ) internal {
-        hoax(_raju);
         src_.socket__.seal(DEFAULT_BATCH_LENGTH, capacitor, sig_);
+
+        // random capacitor
+        address randomCapacitor = address(uint160(c++));
+        vm.expectRevert();
+        src_.socket__.seal(DEFAULT_BATCH_LENGTH, randomCapacitor, sig_);
+
+        // non-socket capacitor
+        SingleCapacitor randomCapacitor__ = new SingleCapacitor(
+            address(src_.socket__),
+            _socketOwner
+        );
+        hoax(address(src_.socket__));
+        randomCapacitor__.addPackedMessage(bytes32("random"));
+
+        vm.expectRevert(SocketSrc.InvalidCapacitor.selector);
+        src_.socket__.seal(
+            DEFAULT_BATCH_LENGTH,
+            address(randomCapacitor__),
+            sig_
+        );
     }
 
     function _proposeOnDst(
@@ -538,8 +656,10 @@ contract Setup is Test {
         bytes32 packetId_,
         bytes32 root_
     ) internal {
-        hoax(_raju);
         dst_.socket__.propose(packetId_, root_, sig_);
+
+        vm.expectRevert(SocketDst.InvalidPacketId.selector);
+        dst_.socket__.propose(bytes32(0), root_, sig_);
     }
 
     function _attestOnDst(
@@ -565,6 +685,18 @@ contract Setup is Test {
             proposalCount_,
             attestSignature
         );
+    }
+
+    function _signAndPropose(
+        ChainContext storage cc_,
+        bytes32 packetId_,
+        bytes32 root_
+    ) internal {
+        bytes32 digest = keccak256(
+            abi.encode(versionHash, cc_.chainSlug, packetId_, root_)
+        );
+        bytes memory sig_ = _createSignature(digest, _transmitterPrivateKey);
+        _proposeOnDst(cc_, sig_, packetId_, root_);
     }
 
     function _executePayloadOnDstWithExecutor(
@@ -607,14 +739,31 @@ contract Setup is Test {
 
     function _executePayloadOnDst(
         ChainContext storage dst_,
-        uint32,
         ExecutePayloadOnDstParams memory executionParams
     ) internal {
         _executePayloadOnDstWithExecutor(
             dst_,
-            executorPrivateKey,
+            _executorPrivateKey,
             executionParams
         );
+    }
+
+    function _rescueNative(
+        address contractAddress,
+        address token,
+        address to,
+        uint256 amount
+    ) internal {
+        uint256 initialBal = to.balance;
+
+        assertEq(address(contractAddress).balance, 0);
+        deal(address(contractAddress), amount);
+        assertEq(address(contractAddress).balance, amount);
+
+        Socket(contractAddress).rescueFunds(token, to, amount);
+
+        assertEq(to.balance, initialBal + amount);
+        assertEq(address(contractAddress).balance, 0);
     }
 
     function _packMessageId(
@@ -650,8 +799,7 @@ contract Setup is Test {
         paramValue = uint248(uint256(extraParams_));
     }
 
-    // to ignore this file from coverage
     function test() external {
-        assertTrue(true);
+        assert(true);
     }
 }

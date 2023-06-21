@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "./ITransmitManager.sol";
-import "./IExecutionManager.sol";
-
 /**
  * @title ISocket
  * @notice An interface for a cross-chain communication contract
@@ -36,6 +33,7 @@ interface ISocket {
         uint256 executionFee;
         // The maximum amount of gas that can be used to execute the message.
         uint256 msgGasLimit;
+        // The extra params which provides msg value and additional info needed for message exec
         bytes32 extraParams;
         // The payload data to be executed in the message.
         bytes payload;
@@ -104,12 +102,6 @@ interface ISocket {
         address capacitor,
         address decapacitor
     );
-
-    /**
-     * @notice emits when a new transmitManager contract is set
-     * @param transmitManager address of new transmitManager contract
-     */
-    event TransmitManagerSet(address transmitManager);
 
     /**
      * @notice registers a message

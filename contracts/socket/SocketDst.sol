@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/IDecapacitor.sol";
-import "../interfaces/IExecutionManager.sol";
 import "../interfaces/IPlug.sol";
-
 import "./SocketBase.sol";
 
 /**
@@ -18,18 +15,9 @@ import "./SocketBase.sol";
  */
 abstract contract SocketDst is SocketBase {
     /*
-     * @dev Error emitted when a packet has already been proposed
-     */
-    error AlreadyProposed();
-
-    /*
      * @dev Error emitted when a packet has not been proposed
      */
     error PacketNotProposed();
-    /*
-     * @dev Error emitted when a packet root is invalid
-     */
-    error InvalidPacketRoot();
     /*
      * @dev Error emitted when a packet id is invalid
      */
@@ -39,10 +27,6 @@ abstract contract SocketDst is SocketBase {
      * @dev Error emitted when proof is invalid
      */
     error InvalidProof();
-    /**
-     * @dev Error emitted when a retry is invalid
-     */
-    error InvalidRetry();
 
     /**
      * @dev Error emitted when a message has already been executed
@@ -66,7 +50,7 @@ abstract contract SocketDst is SocketBase {
      */
     mapping(bytes32 => bool) public messageExecuted;
     /**
-     * @dev capacitorAddr|chainSlug|packetId => proposalCount mapping to packetIdRoots
+     * @dev capacitorAddr|chainSlug|packetId => proposalCount => packetIdRoots
      */
     mapping(bytes32 => mapping(uint256 => bytes32))
         public
@@ -105,9 +89,10 @@ abstract contract SocketDst is SocketBase {
 
     /**
      * @dev Function to propose a packet
-     * @param packetId_ Packet ID
-     * @param root_ Packet root
-     * @param signature_ Signature
+     * @notice the signature is validated if it belongs to transmitter or not
+     * @param packetId_ packet id
+     * @param root_ packet root
+     * @param signature_ signature
      */
     function propose(
         bytes32 packetId_,
@@ -245,7 +230,7 @@ abstract contract SocketDst is SocketBase {
             emit ExecutionSuccess(messageDetails_.msgId);
         } catch Error(string memory reason) {
             if (address(this).balance > 0) {
-                (bool success, ) = address(executionManager__).call{
+                (bool success, ) = msg.sender.call{
                     value: address(this).balance
                 }("");
                 require(success, "Fund Transfer Failed");
@@ -255,7 +240,7 @@ abstract contract SocketDst is SocketBase {
             emit ExecutionFailed(messageDetails_.msgId, reason);
         } catch (bytes memory reason) {
             if (address(this).balance > 0) {
-                (bool success, ) = address(executionManager__).call{
+                (bool success, ) = msg.sender.call{
                     value: address(this).balance
                 }("");
                 require(success, "Fund Transfer Failed");

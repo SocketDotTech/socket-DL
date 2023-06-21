@@ -71,10 +71,30 @@ contract PolygonL1SwitchboardTest is Setup {
         polygonL1Switchboard.receivePacket(bytes32(0), bytes32(0));
     }
 
+    function testSetFxChildTunnel() public {
+        address childTunnel = address(uint160(c++));
+        assertEq(address(polygonL1Switchboard.fxChildTunnel()), address(0));
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        polygonL1Switchboard.setFxChildTunnel(childTunnel);
+
+        hoax(_socketOwner);
+        polygonL1Switchboard.setFxChildTunnel(childTunnel);
+
+        assertEq(address(polygonL1Switchboard.fxChildTunnel()), childTunnel);
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         SocketConfigContext memory scc_ = addPolygonL1Switchboard(

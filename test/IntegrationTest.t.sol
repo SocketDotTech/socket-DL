@@ -10,12 +10,10 @@ contract HappyTest is Setup {
 
     uint256 addAmount = 100;
     uint256 subAmount = 40;
-    uint256 sourceGasPrice = 1200000;
-    uint256 relativeGasPrice = 1100000;
-
     bool isFast = true;
-    bytes32[] roots;
     uint256 index = isFast ? 0 : 1;
+
+    bytes32[] roots;
 
     event ExecutionSuccess(bytes32 msgId);
     event ExecutionFailed(bytes32 msgId, string result);
@@ -37,7 +35,7 @@ contract HappyTest is Setup {
         _configPlugContracts(index);
     }
 
-    function testRemoteAddFromAtoB1() external {
+    function testRemoteAddFromAtoB() external {
         uint256 amount = 100;
         bytes memory payload = abi.encode(
             keccak256("OP_ADD"),
@@ -108,7 +106,6 @@ contract HappyTest is Setup {
         );
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -133,10 +130,26 @@ contract HappyTest is Setup {
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
+                _packMessageId(_a.chainSlug, address(dstCounter__), 0),
+                _msgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
+        );
+
+        // with different proposal id
+        vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
+        _executePayloadOnDst(
+            _b,
+            ExecutePayloadOnDstParams(
+                packetId,
+                1,
                 _packMessageId(_a.chainSlug, address(dstCounter__), 0),
                 _msgGasLimit,
                 bytes32(0),
@@ -209,7 +222,6 @@ contract HappyTest is Setup {
 
         _executePayloadOnDst(
             _a,
-            _b.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -337,7 +349,6 @@ contract HappyTest is Setup {
 
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -360,7 +371,6 @@ contract HappyTest is Setup {
 
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -376,6 +386,26 @@ contract HappyTest is Setup {
 
         assertEq(dstCounter__.counter(), 2 * amount);
         assertEq(srcCounter__.counter(), 0);
+    }
+
+    function testRescueFunds() public {
+        uint256 amount = 1e18;
+
+        hoax(_socketOwner);
+        _rescueNative(
+            address(_a.hasher__),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
+        );
+
+        hoax(_socketOwner);
+        _rescueNative(
+            address(_a.sigVerifier__),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
+        );
     }
 
     function _deployPlugContracts() internal {

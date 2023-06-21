@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.7;
 
-import "../interfaces/ICapacitor.sol";
 import "./SocketBase.sol";
 
 /**
  * @title SocketSrc
- * @dev The SocketSrc contract inherits from SocketBase and provides the functionality to send messages from the local chain to a remote chain via a Capacitor.
+ * @dev The SocketSrc contract inherits from SocketBase and provides the functionality
+ * to send messages from the local chain to a remote chain via a capacitor, estimate min fees
+ * and allow transmitters to seal packets for a path.
  */
 abstract contract SocketSrc is SocketBase {
     error InsufficientFees();
+    error InvalidCapacitor();
 
     /**
      * @notice emits the verification and seal confirmation of a packet
@@ -228,12 +230,13 @@ abstract contract SocketSrc is SocketBase {
         address capacitorAddress_,
         bytes calldata signature_
     ) external payable override {
+        uint32 siblingChainSlug = capacitorToSlug[capacitorAddress_];
+        if (siblingChainSlug == 0) revert InvalidCapacitor();
+
         (bytes32 root, uint64 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket(batchSize_);
 
         bytes32 packetId = _encodePacketId(capacitorAddress_, packetCount);
-
-        uint32 siblingChainSlug = capacitorToSlug[capacitorAddress_];
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
                 siblingChainSlug,

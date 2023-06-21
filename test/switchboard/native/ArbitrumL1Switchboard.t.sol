@@ -6,14 +6,11 @@ import "../../../contracts/switchboard/native/ArbitrumL1Switchboard.sol";
 
 // Goerli -> Arbitrum-Goerli
 contract ArbitrumL1SwitchboardTest is Setup {
-    bytes32[] roots;
-    uint256 nonce;
-
     address remoteNativeSwitchboard_ =
         0x3f0121d91B5c04B716Ea960790a89b173da7929c;
     address inbox_ = 0x6BEbC4925716945D46F0Ec336D5C2564F419682C;
     address bridge_ = 0xaf4159A80B6Cc41ED517DB1c453d1Ef5C2e4dB72;
-    address outbox_ = 0x0000000000000000000000000000000000000000;
+    address outbox_ = 0x0B9857ae2D4A3DBe74ffE1d7DF045bb7F96E4840;
 
     ArbitrumL1Switchboard arbitrumL1Switchboard;
     ICapacitor singleCapacitor;
@@ -78,10 +75,117 @@ contract ArbitrumL1SwitchboardTest is Setup {
         vm.stopPrank();
     }
 
+    function testReceivePacket() public {
+        bytes32 root = bytes32("RANDOM_ROOT");
+        bytes32 packetId = bytes32("RANDOM_PACKET");
+
+        assertFalse(
+            arbitrumL1Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+
+        vm.expectRevert(NativeSwitchboardBase.InvalidSender.selector);
+        arbitrumL1Switchboard.receivePacket(packetId, root);
+
+        hoax(bridge_);
+        vm.expectRevert(NativeSwitchboardBase.InvalidSender.selector);
+        vm.mockCall(
+            outbox_,
+            abi.encodeWithSelector(
+                arbitrumL1Switchboard.outbox__().l2ToL1Sender.selector
+            ),
+            abi.encode(address(0))
+        );
+        arbitrumL1Switchboard.receivePacket(packetId, root);
+
+        vm.mockCall(
+            outbox_,
+            abi.encodeWithSelector(
+                arbitrumL1Switchboard.outbox__().l2ToL1Sender.selector
+            ),
+            abi.encode(remoteNativeSwitchboard_)
+        );
+        hoax(bridge_);
+        arbitrumL1Switchboard.receivePacket(packetId, root);
+
+        assertTrue(
+            arbitrumL1Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+    }
+
+    function testUpdateInboxAddresses() public {
+        address newInbox = address(uint160(c++));
+        assertEq(address(arbitrumL1Switchboard.inbox__()), address(inbox_));
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        arbitrumL1Switchboard.updateInboxAddresses(newInbox);
+
+        hoax(_socketOwner);
+        arbitrumL1Switchboard.updateInboxAddresses(newInbox);
+
+        assertEq(address(arbitrumL1Switchboard.inbox__()), newInbox);
+    }
+
+    function testUpdateBridge() public {
+        address newBridge = address(uint160(c++));
+        assertEq(address(arbitrumL1Switchboard.bridge__()), address(bridge_));
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        arbitrumL1Switchboard.updateBridge(newBridge);
+
+        hoax(_socketOwner);
+        arbitrumL1Switchboard.updateBridge(newBridge);
+
+        assertEq(address(arbitrumL1Switchboard.bridge__()), newBridge);
+    }
+
+    function testUpdateOutbox() public {
+        address newOutbox = address(uint160(c++));
+        assertEq(address(arbitrumL1Switchboard.outbox__()), address(outbox_));
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        arbitrumL1Switchboard.updateOutbox(newOutbox);
+
+        hoax(_socketOwner);
+        arbitrumL1Switchboard.updateOutbox(newOutbox);
+
+        assertEq(address(arbitrumL1Switchboard.outbox__()), newOutbox);
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         SocketConfigContext memory scc_ = addArbitrumL1Switchboard(

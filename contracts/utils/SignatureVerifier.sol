@@ -2,10 +2,7 @@
 pragma solidity 0.8.7;
 
 import "../interfaces/ISignatureVerifier.sol";
-
 import "../libraries/RescueFundsLib.sol";
-import "../libraries/SignatureVerifierLib.sol";
-
 import "../utils/AccessControl.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
@@ -15,6 +12,11 @@ import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
  * @dev This contract is modular component in socket to support different signing algorithms.
  */
 contract SignatureVerifier is ISignatureVerifier, AccessControl {
+    /*
+     * @dev Error thrown when signature length is invalid
+     */
+    error InvalidSigLength();
+
     /**
      * @notice initialises and grants RESCUE_ROLE to owner.
      * @param owner_ The address of the owner of the contract.
@@ -23,31 +25,41 @@ contract SignatureVerifier is ISignatureVerifier, AccessControl {
         _grantRole(RESCUE_ROLE, owner_);
     }
 
-    /// @inheritdoc ISignatureVerifier
-    function recoverSigner(
-        uint32 dstChainSlug_,
-        bytes32 packetId_,
-        bytes32 root_,
-        bytes calldata signature_
-    ) external pure override returns (address signer) {
-        return
-            SignatureVerifierLib.recoverSigner(
-                dstChainSlug_,
-                packetId_,
-                root_,
-                signature_
-            );
-    }
-
     /**
      * @notice returns the address of signer recovered from input signature and digest
+     * @param digest_ The message digest to be signed
+     * @param signature_ The signature to be verified
+     * @return signer The address of the signer
      */
-    function recoverSignerFromDigest(
+    function recoverSigner(
         bytes32 digest_,
         bytes memory signature_
     ) public pure override returns (address signer) {
-        return
-            SignatureVerifierLib.recoverSignerFromDigest(digest_, signature_);
+        bytes32 digest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest_)
+        );
+        (bytes32 sigR, bytes32 sigS, uint8 sigV) = _splitSignature(signature_);
+
+        // recovered signer is checked for the valid roles later
+        signer = ecrecover(digest, sigV, sigR, sigS);
+    }
+
+    /**
+     * @notice splits the signature into v, r and s.
+     * @param signature_ The signature to be split
+     * @return r The r component of the signature
+     * @return s The s component of the signature
+     * @return v The v component of the signature
+     */
+    function _splitSignature(
+        bytes memory signature_
+    ) private pure returns (bytes32 r, bytes32 s, uint8 v) {
+        if (signature_.length != 65) revert InvalidSigLength();
+        assembly {
+            r := mload(add(signature_, 0x20))
+            s := mload(add(signature_, 0x40))
+            v := byte(0, mload(add(signature_, 0x60)))
+        }
     }
 
     /**

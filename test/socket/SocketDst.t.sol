@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "../Setup.t.sol";
 import "../../contracts/examples/Counter.sol";
-import "../ExecutionManager.t.sol";
+import "../managers/ExecutionManager.t.sol";
 
 contract SocketDstTest is Setup {
     Counter srcCounter__;
@@ -12,10 +12,6 @@ contract SocketDstTest is Setup {
     uint256 addAmount = 100;
     uint256 subAmount = 40;
 
-    uint256 sealGasLimit = 200000;
-    uint256 proposeGasLimit = 100000;
-    uint256 sourceGasPrice = 1200000;
-    uint256 relativeGasPrice = 1100000;
     address immutable _invalidExecutor = address(uint160(c++));
 
     bool isFast = true;
@@ -148,7 +144,6 @@ contract SocketDstTest is Setup {
         vm.expectRevert(SocketDst.ErrInSourceValidation.selector);
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 proposalCount,
@@ -206,6 +201,25 @@ contract SocketDstTest is Setup {
         vm.expectRevert(InvalidTransmitter.selector);
 
         _proposeOnDst(_b, sig_, packetId_, root_);
+    }
+
+    function testProposeWithInvalidChainSlug() external {
+        uint32 randomChainSlug = cChainSlug;
+        bytes32 packetId = _getPackedId(
+            address(uint160(c++)),
+            randomChainSlug,
+            100
+        );
+        bytes32 root = bytes32("RANDOM_ROOT");
+
+        bytes32 digest = keccak256(
+            abi.encode(versionHash, randomChainSlug, packetId, root)
+        );
+
+        bytes memory sig = _createSignature(digest, _transmitterPrivateKey);
+
+        vm.expectRevert(InvalidTransmitter.selector);
+        _b.socket__.propose(packetId, root, sig);
     }
 
     function testDuplicateProposePacket() external {
@@ -313,7 +327,6 @@ contract SocketDstTest is Setup {
 
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -334,7 +347,6 @@ contract SocketDstTest is Setup {
         vm.expectRevert(SocketDst.MessageAlreadyExecuted.selector);
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 0,
@@ -411,7 +423,6 @@ contract SocketDstTest is Setup {
 
         _executePayloadOnDst(
             _b,
-            _a.chainSlug,
             ExecutePayloadOnDstParams(
                 packetId,
                 proposalCount,
