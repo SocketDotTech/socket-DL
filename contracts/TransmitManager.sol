@@ -113,7 +113,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
 
-        socket__.executionManager__().updateTransmissionMinFees(
+        socket__.executionManager__().setTransmissionMinFees(
             dstChainSlug_,
             transmissionFees_
         );
