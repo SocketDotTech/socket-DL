@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 /**
  * @title ISocket
@@ -166,7 +166,7 @@ interface ISocket {
         bytes32 root_,
         address switchboard_,
         bytes calldata signature_
-    ) external;
+    ) external payable;
 
     /**
      * @notice sets the config specific to the plug

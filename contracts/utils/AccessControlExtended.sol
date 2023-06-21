@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "./AccessControl.sol";
 
@@ -64,7 +64,8 @@ contract AccessControlExtended is AccessControl {
             roleNames_.length != grantees_.length ||
             roleNames_.length != slugs_.length
         ) revert UnequalArrayLengths();
-        for (uint256 index = 0; index < roleNames_.length; index++) {
+        uint256 totalRoles = roleNames_.length;
+        for (uint256 index = 0; index < totalRoles; ) {
             if (slugs_[index] > 0)
                 _grantRoleWithSlug(
                     roleNames_[index],
@@ -72,6 +73,10 @@ contract AccessControlExtended is AccessControl {
                     grantees_[index]
                 );
             else _grantRole(roleNames_[index], grantees_[index]);
+
+            unchecked {
+                ++index;
+            }
         }
     }
 
@@ -90,7 +95,8 @@ contract AccessControlExtended is AccessControl {
             roleNames_.length != grantees_.length ||
             roleNames_.length != slugs_.length
         ) revert UnequalArrayLengths();
-        for (uint256 index = 0; index < roleNames_.length; index++) {
+        uint256 totalRoles = roleNames_.length;
+        for (uint256 index = 0; index < totalRoles; ) {
             if (slugs_[index] > 0)
                 _revokeRoleWithSlug(
                     roleNames_[index],
@@ -98,6 +104,10 @@ contract AccessControlExtended is AccessControl {
                     grantees_[index]
                 );
             else _revokeRole(roleNames_[index], grantees_[index]);
+
+            unchecked {
+                ++index;
+            }
         }
     }
 

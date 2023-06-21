@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "../interfaces/ISignatureVerifier.sol";
 import "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";

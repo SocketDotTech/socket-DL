@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "../interfaces/IPlug.sol";
 import "./SocketBase.sol";
@@ -105,7 +105,7 @@ abstract contract SocketDst is SocketBase {
         bytes32 root_,
         address switchboard_,
         bytes calldata signature_
-    ) external override {
+    ) external payable override {
         if (packetId_ == bytes32(0)) revert InvalidPacketId();
 
         (address transmitter, bool isTransmitter) = transmitManager__
