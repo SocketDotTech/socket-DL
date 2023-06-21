@@ -44,24 +44,6 @@ contract SignatureVerifier is ISignatureVerifier, AccessControl {
     }
 
     /**
-     * @notice splits the signature into v, r and s.
-     * @param signature_ The signature to be split
-     * @return r The r component of the signature
-     * @return s The s component of the signature
-     * @return v The v component of the signature
-     */
-    function _splitSignature(
-        bytes memory signature_
-    ) private pure returns (bytes32 r, bytes32 s, uint8 v) {
-        if (signature_.length != 65) revert InvalidSigLength();
-        assembly {
-            r := mload(add(signature_, 0x20))
-            s := mload(add(signature_, 0x40))
-            v := byte(0, mload(add(signature_, 0x60)))
-        }
-    }
-
-    /**
      * @notice Rescues funds from a contract that has lost access to them.
      * @param token_ The address of the token contract.
      * @param userAddress_ The address of the user who lost access to the funds.

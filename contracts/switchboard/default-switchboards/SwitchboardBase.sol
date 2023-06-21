@@ -93,17 +93,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         signatureVerifier__ = signatureVerifier_;
     }
 
-    // /**
-    //  * @notice updates executionManager_
-    //  * @param executionManager_ address of ExecutionManager
-    //  */
-    // function setExecutionManager(
-    //     address executionManager_
-    // ) external onlyRole(GOVERNANCE_ROLE) {
-    //     executionManager__ = IExecutionManager(executionManager_);
-    //     emit ExecutionManagerSet(executionManager_);
-    // }
-
     /**
      * @inheritdoc ISwitchboard
      */
@@ -281,6 +270,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         emit SwitchboardTripped(false);
     }
 
+    /// @inheritdoc ISwitchboard
     function setFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
@@ -313,21 +303,17 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         });
 
         fees[dstChainSlug_] = feesObject;
-
         emit SwitchboardFeesSet(dstChainSlug_, feesObject);
+    }
+
+    /// @inheritdoc ISwitchboard
+    function receiveFees(uint32, uint128) external payable override {
+        require(msg.sender == address(socket__.executionManager__()));
     }
 
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         if (account_ == address(0)) revert ZeroAddress();
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
-    }
-
-    function withdrawFeesFromExecutionManager(
-        uint32 siblingChainSlug_,
-        uint128 amount_
-    ) external override onlyRole(WITHDRAW_ROLE) {
-        IExecutionManager executionManager__ = socket__.executionManager__();
-        executionManager__.withdrawSwitchboardFees(siblingChainSlug_, amount_);
     }
 
     /**
@@ -343,7 +329,4 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
-
-    /// @inheritdoc ISwitchboard
-    function receiveFees(uint32 siblingChainSlug_) external payable override {}
 }
