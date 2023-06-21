@@ -76,12 +76,14 @@ abstract contract SocketDst is SocketBase {
      * @param packetId packet id
      * @param proposalCount proposal id
      * @param root packet root
+     * @param switchboard switchboard address for which packet was proposed
      */
     event PacketProposed(
         address indexed transmitter,
         bytes32 indexed packetId,
         uint256 proposalCount,
-        bytes32 root
+        bytes32 root,
+        address switchboard
     );
 
     /**
@@ -128,7 +130,8 @@ abstract contract SocketDst is SocketBase {
             transmitter,
             packetId_,
             proposalCount[packetId_]++,
-            root_
+            root_,
+            switchboard_
         );
     }
 
