@@ -51,7 +51,7 @@ contract CapacitorFactoryTest is Setup {
         );
     }
 
-    function testDeploy(uint256 capacitorType) external {
+    function testDeployForInvalidCapacitorType(uint256 capacitorType) external {
         if (capacitorType != 1 && capacitorType != 2) {
             vm.expectRevert(ICapacitorFactory.InvalidCapacitorType.selector);
         }
@@ -83,7 +83,7 @@ contract CapacitorFactoryTest is Setup {
         assertEq(finalBalOfOwner - initialBalOfOwner, amount);
     }
 
-    function testRescueNativeFunds() public {
+    function testRescueNativeFunds() external {
         uint256 amount = 1e18;
 
         hoax(_socketOwner);

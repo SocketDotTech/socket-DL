@@ -12,13 +12,13 @@ contract ExecutionManagerTest is Setup {
         initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
         _b.chainSlug = uint32(uint256(bChainSlug));
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
         _deployContractsOnSingleChain(
             _a,
             bChainSlug,
             isExecutionOpen,
-            transmitterPivateKeys
+            transmitterPrivateKeys
         );
 
         executionManager = _a.executionManager__;

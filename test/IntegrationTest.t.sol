@@ -26,10 +26,10 @@ contract HappyTest is Setup {
     );
 
     function setUp() external {
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
-        _dualChainSetup(transmitterPivateKeys);
+        _dualChainSetup(transmitterPrivateKeys);
         _deployPlugContracts();
 
         _configPlugContracts(index);

@@ -30,10 +30,10 @@ contract PolygonL1SwitchboardTest is Setup {
         uint256 fork = vm.createFork(vm.envString("GOERLI_RPC"), 8546583);
         vm.selectFork(fork);
 
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
-        _chainSetup(transmitterPivateKeys);
+        _chainSetup(transmitterPrivateKeys);
     }
 
     function testInitateNativeConfirmation() public {

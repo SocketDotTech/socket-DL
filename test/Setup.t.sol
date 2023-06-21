@@ -676,7 +676,7 @@ contract Setup is Test {
     function _createSignature(
         bytes32 digest_,
         uint256 privateKey_
-    ) internal returns (bytes memory sig) {
+    ) internal pure returns (bytes memory sig) {
         bytes32 digest = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest_)
         );
