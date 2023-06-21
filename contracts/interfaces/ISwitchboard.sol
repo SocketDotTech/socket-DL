@@ -40,12 +40,6 @@ interface ISwitchboard {
     ) external view returns (bool);
 
     /**
-     * @notice Receives the fees for processing of packet.
-     * @param siblingChainSlug_ the chain slug of the sibling chain.
-     */
-    function receiveFees(uint32 siblingChainSlug_) external payable;
-
-    /**
      * @notice Retrieves the minimum fees required for the destination chain to process the packet.
      * @param dstChainSlug the unique identifier for the destination chain of the packet.
      * @return switchboardFee the switchboard fee required for the destination chain to process the packet.
@@ -54,6 +48,15 @@ interface ISwitchboard {
     function getMinFees(
         uint32 dstChainSlug
     ) external view returns (uint128 switchboardFee, uint128 verificationFee);
+    
+    
+    /**
+     * @notice Receives the fees for processing of packet.
+     * @param siblingChainSlug_ the chain slug of the sibling chain.
+     */
+    function receiveFees(
+        uint32 siblingChainSlug_
+    ) external payable;
 
     /**
      * @notice Sets the minimum fees required for the destination chain to process the packet.
@@ -62,6 +65,7 @@ interface ISwitchboard {
      * @param switchboardFees_ the switchboard fee required for the destination chain to process the packet.
      * @param verificationFees_ the verification fee required for the destination chain to process the packet.
      * @param signature_ the signature of the request.
+     * @dev not important to override in all switchboards
      */
     function setFees(
         uint256 nonce_,
@@ -69,15 +73,5 @@ interface ISwitchboard {
         uint128 switchboardFees_,
         uint128 verificationFees_,
         bytes calldata signature_
-    ) external;
-
-    /**
-     * @notice Withdraws the fees from the execution manager.
-     * @param siblingChainSlug_ the chain slug of the sibling chain.
-     * @param amount_ the amount to withdraw.
-     */
-    function withdrawFeesFromExecutionManager(
-        uint32 siblingChainSlug_,
-        uint128 amount_
     ) external;
 }

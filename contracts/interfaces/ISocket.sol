@@ -89,20 +89,6 @@ interface ISocket {
     event ExecutionSuccess(bytes32 msgId);
 
     /**
-     * @notice emits the status of message after inbound call
-     * @param msgId msg id which is executed
-     * @param result if message reverts, returns the revert message
-     */
-    event ExecutionFailed(bytes32 msgId, string result);
-
-    /**
-     * @notice emits the error message in bytes after inbound call
-     * @param msgId msg id which is executed
-     * @param result if message reverts, returns the revert message in bytes
-     */
-    event ExecutionFailedBytes(bytes32 msgId, bytes result);
-
-    /**
      * @notice emits the config set by a plug for a remoteChainSlug
      * @param plug address of plug on current chain
      * @param siblingChainSlug sibling chain slug
@@ -223,11 +209,14 @@ interface ISocket {
         uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view returns (uint256 totalFees);
 
+    /// return instance of transmit manager
     function transmitManager__() external view returns (ITransmitManager);
 
+    /// return instance of execution manager
     function executionManager__() external view returns (IExecutionManager);
 }

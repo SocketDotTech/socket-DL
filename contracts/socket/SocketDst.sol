@@ -85,14 +85,6 @@ abstract contract SocketDst is SocketBase {
     );
 
     /**
-     * @notice emits the root details when root is replaced by owner
-     * @param packetId packet id
-     * @param oldRoot old root
-     * @param newRoot old root
-     */
-    event PacketRootUpdated(bytes32 packetId, bytes32 oldRoot, bytes32 newRoot);
-
-    /**
      * @dev Function to propose a packet
      * @notice the signature is validated if it belongs to transmitter or not
      * @param packetId_ packet id
@@ -247,39 +239,17 @@ abstract contract SocketDst is SocketBase {
         uint256 executionGasLimit_,
         ISocket.MessageDetails memory messageDetails_
     ) internal {
-        try
-            IPlug(localPlug_).inbound{
-                gas: executionGasLimit_,
-                value: msg.value
-            }(remoteChainSlug_, messageDetails_.payload)
-        {
-            executionManager__.updateExecutionFees(
-                executor_,
-                uint128(messageDetails_.executionFee),
-                messageDetails_.msgId
-            );
-            emit ExecutionSuccess(messageDetails_.msgId);
-        } catch Error(string memory reason) {
-            if (address(this).balance > 0) {
-                SafeTransferLib.safeTransferETH(
-                    msg.sender,
-                    address(this).balance
-                );
-            }
-            // catch failing revert() and require()
-            messageExecuted[messageDetails_.msgId] = false;
-            emit ExecutionFailed(messageDetails_.msgId, reason);
-        } catch (bytes memory reason) {
-            if (address(this).balance > 0) {
-                SafeTransferLib.safeTransferETH(
-                    msg.sender,
-                    address(this).balance
-                );
-            }
-            // catch failing assert()
-            messageExecuted[messageDetails_.msgId] = false;
-            emit ExecutionFailedBytes(messageDetails_.msgId, reason);
-        }
+        IPlug(localPlug_).inbound{gas: executionGasLimit_, value: msg.value}(
+            remoteChainSlug_,
+            messageDetails_.payload
+        );
+
+        executionManager__.updateExecutionFees(
+            executor_,
+            uint128(messageDetails_.executionFee),
+            messageDetails_.msgId
+        );
+        emit ExecutionSuccess(messageDetails_.msgId);
     }
 
     /**
