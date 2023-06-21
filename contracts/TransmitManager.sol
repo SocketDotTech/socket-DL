@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "./interfaces/ITransmitManager.sol";
 import "./interfaces/IExecutionManager.sol";
@@ -19,7 +19,6 @@ import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
  */
 contract TransmitManager is ITransmitManager, AccessControlExtended {
     ISocket public immutable socket__;
-    // IExecutionManager public executionManager__;
 
     uint32 public immutable chainSlug;
 
@@ -27,10 +26,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
-
-    // remoteChainSlug => transmissionFees
-    // mapping(uint32 => uint128) public transmissionFees;
-
     error InsufficientTransmitFees();
     error InvalidNonce();
 
@@ -113,9 +108,9 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-
-        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
         // transmissionFees[dstChainSlug_] = transmissionFees_;
         IExecutionManager executionManager__ = IExecutionManager(
             socket__.executionManager()
@@ -155,17 +150,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         signatureVerifier__ = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
     }
-
-    // /**
-    //  * @notice updates executionManager_
-    //  * @param executionManager_ address of ExecutionManager
-    //  */
-    // function setExecutionManager(
-    //     address executionManager_
-    // ) external onlyRole(GOVERNANCE_ROLE) {
-    //     executionManager__ = IExecutionManager(executionManager_);
-    //     emit ExecutionManagerSet(executionManager_);
-    // }
 
     /**
      * @notice Rescues funds from a contract that has lost access to them.

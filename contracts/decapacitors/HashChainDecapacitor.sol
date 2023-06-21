@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "../interfaces/IDecapacitor.sol";
 import "../libraries/RescueFundsLib.sol";
@@ -37,9 +37,12 @@ contract HashChainDecapacitor is IDecapacitor, AccessControl {
         uint256 len = chain.length;
         bytes32 generatedRoot;
         bool isIncluded;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len; ) {
             generatedRoot = keccak256(abi.encode(generatedRoot, chain[i]));
             if (chain[i] == packedMessage_) isIncluded = true;
+            unchecked {
+                ++i;
+            }
         }
 
         return root_ == generatedRoot && isIncluded;

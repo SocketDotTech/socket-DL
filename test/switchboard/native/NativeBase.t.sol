@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../../Setup.t.sol";
 import "../../../contracts/switchboard/native/OptimismSwitchboard.sol";
@@ -226,7 +226,7 @@ contract NativeBaseSwitchboardTest is Setup {
     function testSetFees() external {
         uint128 switchboardFee = 1000;
         uint128 verificationFee = 1000;
-        uint256 feeNonce = optimismSwitchboard.nextNonce(_feesWithdrawer);
+        uint256 feeNonce = optimismSwitchboard.nextNonce(_socketOwner);
         assertEq(optimismSwitchboard.switchboardFees(), 0);
         assertEq(optimismSwitchboard.verificationFees(), 0);
 
@@ -240,10 +240,7 @@ contract NativeBaseSwitchboardTest is Setup {
                 verificationFee
             )
         );
-        bytes memory sig = _createSignature(digest, _feesWithdrawerPrivateKey);
-
-        hoax(_socketOwner);
-        optimismSwitchboard.grantRole(FEES_UPDATER_ROLE, _feesWithdrawer);
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         vm.expectEmit(false, false, false, true);
         emit SwitchboardFeesSet(switchboardFee, verificationFee);
@@ -289,8 +286,9 @@ contract NativeBaseSwitchboardTest is Setup {
         );
 
         optimismSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-        optimismSwitchboard.grantRole(WITHDRAW_ROLE, _socketOwner);
+        optimismSwitchboard.grantRole(WITHDRAW_ROLE, _feesWithdrawer);
         optimismSwitchboard.grantRole(RESCUE_ROLE, _socketOwner);
+        optimismSwitchboard.grantRole(FEES_UPDATER_ROLE, _socketOwner);
 
         vm.stopPrank();
 

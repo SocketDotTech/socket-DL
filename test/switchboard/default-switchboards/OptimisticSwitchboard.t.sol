@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../../Setup.t.sol";
 
@@ -310,7 +310,7 @@ contract OptimisticSwitchboardTest is Setup {
     function testSetFees() external {
         uint128 switchboardFee = 1000;
         uint128 verificationFee = 1000;
-        uint256 feeNonce = optimisticSwitchboard.nextNonce(_feesWithdrawer);
+        uint256 feeNonce = optimisticSwitchboard.nextNonce(_socketOwner);
 
         (uint256 sbFee, uint256 vFee) = optimisticSwitchboard.fees(
             remoteChainSlug
@@ -330,13 +330,13 @@ contract OptimisticSwitchboardTest is Setup {
                 verificationFee
             )
         );
-        bytes memory sig = _createSignature(digest, _feesWithdrawerPrivateKey);
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         hoax(_socketOwner);
         optimisticSwitchboard.grantRoleWithSlug(
             FEES_UPDATER_ROLE,
             remoteChainSlug,
-            _feesWithdrawer
+            _socketOwner
         );
 
         optimisticSwitchboard.setFees(

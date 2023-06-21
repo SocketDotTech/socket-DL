@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "./BaseCapacitor.sol";
 
@@ -14,16 +14,19 @@ contract HashChainCapacitor is BaseCapacitor {
     uint256 public maxPacketLength;
 
     /// an incrementing count for each new message added
-    uint64 internal _nextMessageCount = 1;
+    uint64 public nextMessageCount = 1;
     /// points to last message included in packet
-    uint64 internal _messagePacked;
+    uint64 public messagePacked;
     // message count => root
-    mapping(uint64 => bytes32) internal _messageRoots;
+    mapping(uint64 => bytes32) public messageRoots;
 
     // Error triggered when batch size is more than max length
     error InvalidBatchSize();
     // Error triggered when no message found or total message count is less than expected length
     error InsufficentMessageLength();
+
+    // Event triggered when max packe length is updated
+    event MaxPacketLengthSet(uint256 maxPacketLength);
 
     /**
      * @notice emitted when a new message is added to a packet
@@ -57,22 +60,28 @@ contract HashChainCapacitor is BaseCapacitor {
         uint256 maxPacketLength_
     ) external onlyOwner {
         if (maxPacketLength_ < maxPacketLength) {
-            uint256 packets = (_nextMessageCount - _messagePacked) %
-                maxPacketLength_;
+            uint64 lastPackedMsgIndex = messagePacked;
+            uint64 packetCount = _nextPacketCount;
+            uint64 packets = (nextMessageCount - lastPackedMsgIndex) %
+                uint64(maxPacketLength_);
 
-            for (uint256 index = 0; index < packets; ) {
-                uint64 packetEndAt = _messagePacked + uint64(maxPacketLength_);
-                _createPacket(
-                    _nextPacketCount,
-                    packetEndAt,
-                    _messageRoots[packetEndAt]
-                );
+            _nextPacketCount += packets;
+
+            for (uint64 index = 0; index < packets; ) {
+                uint64 packetEndAt = lastPackedMsgIndex +
+                    uint64(maxPacketLength_);
+
+                _roots[packetCount + index] = messageRoots[packetEndAt];
+                lastPackedMsgIndex = packetEndAt;
                 unchecked {
-                    index++;
+                    ++index;
                 }
             }
+            messagePacked = lastPackedMsgIndex;
         }
+
         maxPacketLength = maxPacketLength_;
+        emit MaxPacketLengthSet(maxPacketLength_);
     }
 
     function getMaxPacketLength() external view override returns (uint256) {
@@ -89,18 +98,18 @@ contract HashChainCapacitor is BaseCapacitor {
     function addPackedMessage(
         bytes32 packedMessage_
     ) external override onlySocket {
-        uint64 messageCount = _nextMessageCount++;
+        uint64 messageCount = nextMessageCount++;
         uint64 packetCount = _nextPacketCount;
 
         // hash the packed message with last root and create a new root
         bytes32 root = keccak256(
-            abi.encode(_messageRoots[messageCount - 1], packedMessage_)
+            abi.encode(messageRoots[messageCount - 1], packedMessage_)
         );
         // update the root for each new message added
-        _messageRoots[messageCount] = root;
+        messageRoots[messageCount] = root;
 
         // create a packet if max length is reached and update packet count
-        if (messageCount - _messagePacked == maxPacketLength)
+        if (messageCount - messagePacked == maxPacketLength)
             _createPacket(packetCount, messageCount, root);
 
         emit MessageAdded(packedMessage_, messageCount, packetCount, root);
@@ -114,7 +123,7 @@ contract HashChainCapacitor is BaseCapacitor {
     function sealPacket(
         uint256 batchSize
     ) external override onlySocket returns (bytes32 root, uint64 packetCount) {
-        uint256 messageCount = _nextMessageCount;
+        uint256 messageCount = nextMessageCount;
 
         // revert if batch size exceeds max length
         if (batchSize > maxPacketLength) revert InvalidBatchSize();
@@ -122,7 +131,7 @@ contract HashChainCapacitor is BaseCapacitor {
         packetCount = _nextSealCount++;
         if (_roots[packetCount] == bytes32(0)) {
             // last message count included in this packet
-            uint64 lastMessageCount = _messagePacked + uint64(batchSize);
+            uint64 lastMessageCount = messagePacked + uint64(batchSize);
 
             // if no message found or total message count is less than expected length
             if (messageCount <= lastMessageCount)
@@ -131,7 +140,7 @@ contract HashChainCapacitor is BaseCapacitor {
             _createPacket(
                 packetCount,
                 lastMessageCount,
-                _messageRoots[lastMessageCount]
+                messageRoots[lastMessageCount]
             );
         }
 
@@ -184,10 +193,11 @@ contract HashChainCapacitor is BaseCapacitor {
         if (_roots[count_] == bytes32(0)) {
             // as addPackedMessage auto update _roots as max length is reached, hence length is not verified here
             uint64 lastMessageCount = batchSize_ == 0
-                ? _nextMessageCount - 1
-                : _messagePacked + batchSize_;
-            if (_nextMessageCount <= lastMessageCount) return bytes32(0);
-            root = _messageRoots[lastMessageCount];
+                ? nextMessageCount - 1
+                : messagePacked + batchSize_;
+
+            if (nextMessageCount <= lastMessageCount) return bytes32(0);
+            root = messageRoots[lastMessageCount];
         } else root = _roots[count_];
     }
 
@@ -198,7 +208,7 @@ contract HashChainCapacitor is BaseCapacitor {
     ) internal {
         // stores the root on given packet count and updated messages packed
         _roots[packetCount] = root;
-        _messagePacked = messageCount;
+        messagePacked = messageCount;
 
         // increments total packet count
         _nextPacketCount++;

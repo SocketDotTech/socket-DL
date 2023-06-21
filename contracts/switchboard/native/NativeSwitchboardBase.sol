@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
@@ -236,8 +236,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(FEES_UPDATER_ROLE, feesUpdater);
-        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
         switchboardFees = switchboardFees_;
         verificationFees = verificationFees_;
 
@@ -289,8 +290,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(TRIP_ROLE, watcher);
-        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+        }
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
     }
@@ -317,8 +319,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(UNTRIP_ROLE, watcher);
-        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+        }
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
     }

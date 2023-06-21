@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../Setup.t.sol";
 
@@ -14,6 +14,8 @@ contract HashChainCapacitorTest is Setup {
     HashChainCapacitor _hcCapacitor;
     HashChainDecapacitor _hcDecapacitor;
 
+    uint256 maxPacketLength = 5;
+
     function setUp() external {
         initialise();
 
@@ -21,7 +23,7 @@ contract HashChainCapacitorTest is Setup {
         _hcCapacitor = new HashChainCapacitor(
             _socket,
             _socketOwner,
-            DEFAULT_BATCH_LENGTH
+            maxPacketLength
         );
         _hcDecapacitor = new HashChainDecapacitor(_socketOwner);
     }
@@ -107,7 +109,7 @@ contract HashChainCapacitorTest is Setup {
             abi.encodeWithSelector(BaseCapacitor.OnlySocket.selector)
         );
         hoax(_raju);
-        _hcCapacitor.sealPacket(DEFAULT_BATCH_LENGTH);
+        _hcCapacitor.sealPacket(maxPacketLength);
     }
 
     function testCapacitorRescueNativeFunds() public {

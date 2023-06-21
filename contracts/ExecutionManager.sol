@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 import "./interfaces/IExecutionManager.sol";
 import "./interfaces/ITransmitManager.sol";
 import "./interfaces/ISwitchboard.sol";
@@ -295,7 +295,10 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
 
         executionFees[dstChainSlug_] = executionFees_;
         emit ExecutionFeesSet(dstChainSlug_, executionFees_);
@@ -322,8 +325,9 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-
-        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
 
         relativeNativeTokenPrice[dstChainSlug_] = relativeNativeTokenPrice_;
         emit RelativeNativeTokenPriceSet(
@@ -353,8 +357,9 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
         msgValueMinThreshold[dstChainSlug_] = msgValueMinThreshold_;
         emit MsgValueMinThresholdSet(dstChainSlug_, msgValueMinThreshold_);
     }
@@ -380,9 +385,9 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-
-        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
         msgValueMaxThreshold[dstChainSlug_] = msgValueMaxThreshold_;
         emit MsgValueMaxThresholdSet(dstChainSlug_, msgValueMaxThreshold_);
     }
