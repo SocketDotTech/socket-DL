@@ -148,6 +148,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view override returns (uint256 totalFees) {
@@ -162,6 +163,7 @@ abstract contract SocketSrc is SocketBase {
                 minMsgGasLimit_,
                 payloadSize_,
                 executionParams_,
+                transmissionParams_,
                 remoteChainSlug_,
                 _plugConfigs[plug_][remoteChainSlug_].outboundSwitchboard__,
                 maxPacketLength
@@ -200,6 +202,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         uint32 remoteChainSlug_,
         ISwitchboard switchboard__,
         uint256 maxPacketLength_
@@ -224,6 +227,7 @@ abstract contract SocketSrc is SocketBase {
                 minMsgGasLimit_,
                 payloadSize_,
                 executionParams_,
+                transmissionParams_,
                 remoteChainSlug_,
                 address(transmitManager__)
             );

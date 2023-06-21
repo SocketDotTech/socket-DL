@@ -60,6 +60,7 @@ interface IExecutionManager {
         uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         uint32 siblingChainSlug_,
         address transmitManager_
     ) external view returns (uint128, uint128);

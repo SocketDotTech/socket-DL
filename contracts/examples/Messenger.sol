@@ -105,6 +105,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
             _minMsgGasLimit,
             uint256(payload_.length),
             executionParams_,
+            transmissionParams_,
             targetChain_,
             address(this)
         );
