@@ -40,7 +40,6 @@ contract OptimisticSwitchboardTest is Setup {
         packetId = _packMessageId(remoteChainSlug, address(uint160(c++)), 0);
     }
 
-
     function testIsAllowed() external {
         uint256 proposeTime = block.timestamp -
             optimisticSwitchboard.timeoutInSeconds();

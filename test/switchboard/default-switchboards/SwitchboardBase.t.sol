@@ -97,16 +97,10 @@ contract SwitchboardBaseTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit SwitchboardTripped(true);
-        fastSwitchboard.tripGlobal(
-            nonce,
-            sig
-        );
+        fastSwitchboard.tripGlobal(nonce, sig);
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
-        fastSwitchboard.tripGlobal(
-            nonce,
-            sig
-        );
+        fastSwitchboard.tripGlobal(nonce, sig);
         vm.stopPrank();
 
         assertTrue(fastSwitchboard.tripGlobalFuse());
@@ -115,7 +109,7 @@ contract SwitchboardBaseTest is Setup {
     function testUntripGlobal() external {
         hoax(_socketOwner);
         fastSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
-        
+
         nonce = fastSwitchboard.nextNonce(_socketOwner);
 
         bytes32 digest = keccak256(
@@ -180,18 +174,10 @@ contract SwitchboardBaseTest is Setup {
         nonce = fastSwitchboard.nextNonce(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit PathTripped(aChainSlug, true);
-        fastSwitchboard.tripPath(
-            nonce,
-            aChainSlug,
-            sig
-        );
+        fastSwitchboard.tripPath(nonce, aChainSlug, sig);
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
-        fastSwitchboard.tripPath(
-            nonce,
-            aChainSlug,
-            sig
-        );
+        fastSwitchboard.tripPath(nonce, aChainSlug, sig);
 
         vm.stopPrank();
 
@@ -243,7 +229,7 @@ contract SwitchboardBaseTest is Setup {
         vm.expectEmit(false, false, false, true);
         emit ProposalTripped(packetId, proposalCount);
         fastSwitchboard.tripProposal(nonce, packetId, proposalCount, sig);
-        
+
         assertFalse(
             fastSwitchboard.allowPacket(
                 root,
@@ -302,20 +288,11 @@ contract SwitchboardBaseTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit PathTripped(aChainSlug, true);
-        fastSwitchboard.tripPath(
-            nonce,
-            aChainSlug,
-            sig
-        );
+        fastSwitchboard.tripPath(nonce, aChainSlug, sig);
         assertTrue(fastSwitchboard.tripSinglePath(aChainSlug));
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
-        fastSwitchboard.tripPath(
-            nonce,
-            aChainSlug,
-            sig
-        );
-
+        fastSwitchboard.tripPath(nonce, aChainSlug, sig);
 
         nonce = fastSwitchboard.nextNonce(_socketOwner);
         digest = keccak256(

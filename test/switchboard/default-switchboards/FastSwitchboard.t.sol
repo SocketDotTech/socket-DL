@@ -56,7 +56,6 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testAttest() external {
-    
         vm.expectEmit(false, false, false, true);
         emit ProposalAttested(packetId, 0, root, _watcher, 1);
         _attestOnDst(
@@ -72,7 +71,6 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testAttestInvalidRoot() external {
-
         vm.expectRevert(InvalidRoot.selector);
         _attestOnDst(
             address(fastSwitchboard),
@@ -386,7 +384,7 @@ contract FastSwitchboardTest is Setup {
         uint32[] memory chainSlugs = new uint32[](1);
         chainSlugs[0] = aChainSlug;
         address[] memory watchers = new address[](1);
-        watchers[0] =_watcher;
+        watchers[0] = _watcher;
         vm.expectRevert(FastSwitchboard.InvalidRole.selector);
         fastSwitchboard.grantBatchRole(roles, chainSlugs, watchers);
 
@@ -406,7 +404,6 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testRevokeWatcherRole() external {
-        
         vm.startPrank(_socketOwner);
 
         fastSwitchboard.revokeWatcherRole(
@@ -414,23 +411,23 @@ contract FastSwitchboardTest is Setup {
             vm.addr(_altWatcherPrivateKey)
         );
 
-
         vm.expectRevert(FastSwitchboard.InvalidRole.selector);
-        fastSwitchboard.revokeRole(keccak256(abi.encode(WATCHER_ROLE, aChainSlug)), _watcher);
-
+        fastSwitchboard.revokeRole(
+            keccak256(abi.encode(WATCHER_ROLE, aChainSlug)),
+            _watcher
+        );
 
         vm.expectRevert(FastSwitchboard.InvalidRole.selector);
         fastSwitchboard.revokeRoleWithSlug(WATCHER_ROLE, aChainSlug, _watcher);
 
         bytes32[] memory roles = new bytes32[](1);
-        roles[0] = WATCHER_ROLE; 
+        roles[0] = WATCHER_ROLE;
         uint32[] memory chainSlugs = new uint32[](1);
         chainSlugs[0] = aChainSlug;
         address[] memory watchers = new address[](1);
-        watchers[0] =_watcher;
+        watchers[0] = _watcher;
         vm.expectRevert(FastSwitchboard.InvalidRole.selector);
         fastSwitchboard.revokeBatchRole(roles, chainSlugs, watchers);
-
 
         vm.stopPrank();
 
