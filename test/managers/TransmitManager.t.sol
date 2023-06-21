@@ -47,11 +47,23 @@ contract TransmitManagerTest is Setup {
         assertTrue(isTransmitter);
     }
 
-    function testWithdrawFeesToZeroAddress() public {
+    function testWithdrawFees() public {
+        uint256 amount = 1e18;
+
         vm.startPrank(_socketOwner);
+        vm.deal(address(transmitManager), amount);
+        uint256 initialBal = _fundRescuer.balance;
 
         vm.expectRevert(ZeroAddress.selector);
         transmitManager.withdrawFees(address(0));
+
+        transmitManager.withdrawFees(_fundRescuer);
+
+        uint256 finalBal = _fundRescuer.balance;
+
+        assertEq(address(transmitManager).balance, 0);
+        assertEq(_fundRescuer.balance, initialBal + amount);
+
         vm.stopPrank();
     }
 

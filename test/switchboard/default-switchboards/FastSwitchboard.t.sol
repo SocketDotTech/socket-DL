@@ -56,6 +56,7 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testAttest() external {
+    
         vm.expectEmit(false, false, false, true);
         emit ProposalAttested(packetId, 0, root, _watcher, 1);
         _attestOnDst(
@@ -71,6 +72,17 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testAttestInvalidRoot() external {
+
+        vm.expectRevert(InvalidRoot.selector);
+        _attestOnDst(
+            address(fastSwitchboard),
+            _b.chainSlug,
+            packetId,
+            0,
+            bytes32("WRONG_ROOT"),
+            _watcherPrivateKey
+        );
+
         vm.expectRevert(InvalidRoot.selector);
         _attestOnDst(
             address(fastSwitchboard),
@@ -369,6 +381,15 @@ contract FastSwitchboardTest is Setup {
         vm.expectRevert(FastSwitchboard.InvalidRole.selector);
         fastSwitchboard.grantRoleWithSlug(WATCHER_ROLE, aChainSlug, watcher2);
 
+        bytes32[] memory roles = new bytes32[](1);
+        roles[0] = WATCHER_ROLE;
+        uint32[] memory chainSlugs = new uint32[](1);
+        chainSlugs[0] = aChainSlug;
+        address[] memory watchers = new address[](1);
+        watchers[0] =_watcher;
+        vm.expectRevert(FastSwitchboard.InvalidRole.selector);
+        fastSwitchboard.grantBatchRole(roles, chainSlugs, watchers);
+
         fastSwitchboard.grantWatcherRole(aChainSlug, watcher2);
 
         assertEq(fastSwitchboard.totalWatchers(aChainSlug), 3);
@@ -385,12 +406,32 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testRevokeWatcherRole() external {
+        
         vm.startPrank(_socketOwner);
 
         fastSwitchboard.revokeWatcherRole(
             aChainSlug,
             vm.addr(_altWatcherPrivateKey)
         );
+
+
+        vm.expectRevert(FastSwitchboard.InvalidRole.selector);
+        fastSwitchboard.revokeRole(keccak256(abi.encode(WATCHER_ROLE, aChainSlug)), _watcher);
+
+
+        vm.expectRevert(FastSwitchboard.InvalidRole.selector);
+        fastSwitchboard.revokeRoleWithSlug(WATCHER_ROLE, aChainSlug, _watcher);
+
+        bytes32[] memory roles = new bytes32[](1);
+        roles[0] = WATCHER_ROLE; 
+        uint32[] memory chainSlugs = new uint32[](1);
+        chainSlugs[0] = aChainSlug;
+        address[] memory watchers = new address[](1);
+        watchers[0] =_watcher;
+        vm.expectRevert(FastSwitchboard.InvalidRole.selector);
+        fastSwitchboard.revokeBatchRole(roles, chainSlugs, watchers);
+
+
         vm.stopPrank();
 
         assertEq(fastSwitchboard.totalWatchers(aChainSlug), 1);
