@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
@@ -9,8 +9,8 @@ import "../../interfaces/IExecutionManager.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../utils/AccessControlExtended.sol";
 
-import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
-import {TRIP_NATIVE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UN_TRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {TRIP_NATIVE_SIG_IDENTIFIER, UN_TRIP_NATIVE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
 @title Native Switchboard Base Contract
@@ -40,7 +40,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Flag that indicates if the capacitor has been registered.
      */
-    bool public isInitialised;
+    bool public isInitialized;
 
     uint256 initialPacketCount;
 
@@ -105,7 +105,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Error thrown when the contract has already been initialized.
      */
-    error AlreadyInitialised();
+    error AlreadyInitialized();
 
     /**
      * @dev Error thrown when the transaction is not sent by a valid sender.
@@ -235,8 +235,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(FEES_UPDATER_ROLE, feesUpdater);
-        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
         switchboardFees = switchboardFees_;
         verificationFees = verificationFees_;
 
@@ -250,7 +251,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 capacitorType_,
         uint256 initialPacketCount_
     ) external override onlyRole(GOVERNANCE_ROLE) {
-        if (isInitialised) revert AlreadyInitialised();
+        if (isInitialized) revert AlreadyInitialized();
 
         initialPacketCount = initialPacketCount_;
         (address capacitor, ) = socket__.registerSwitchBoard(
@@ -259,7 +260,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             capacitorType_
         );
 
-        isInitialised = true;
+        isInitialized = true;
         capacitor__ = ICapacitor(capacitor);
     }
 
@@ -288,24 +289,25 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(TRIP_ROLE, watcher);
-        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+        }
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
     }
 
     /**
-     * @notice Allows a watcher to untrip the switchboard by providing a signature and a nonce.
-     * @dev To untrip, the watcher must have the UNTRIP_ROLE. The signature must be created by signing the concatenation of the following values: "UNTRIP", the chainSlug, the nonce and false.
+     * @notice Allows a watcher to un trip the switchboard by providing a signature and a nonce.
+     * @dev To un trip, the watcher must have the UN_TRIP_ROLE. The signature must be created by signing the concatenation of the following values: "UN_TRIP", the chainSlug, the nonce and false.
      * @param nonce_ The nonce to prevent replay attacks.
      * @param signature_ The signature created by the watcher.
      */
-    function untrip(uint256 nonce_, bytes memory signature_) external {
+    function unTrip(uint256 nonce_, bytes memory signature_) external {
         address watcher = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
-                    UNTRIP_NATIVE_SIG_IDENTIFIER,
+                    UN_TRIP_NATIVE_SIG_IDENTIFIER,
                     address(this),
                     chainSlug,
                     nonce_,
@@ -315,9 +317,10 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRole(UNTRIP_ROLE, watcher);
-        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
-
+        _checkRole(UN_TRIP_ROLE, watcher);
+        unchecked {
+            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+        }
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
     }
@@ -345,14 +348,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
-    function withdrawFeesFromExecutionManager(
-        uint32 siblingChainSlug_,
-        uint128 amount_
-    ) external override onlyRole(WITHDRAW_ROLE) {
-        IExecutionManager executionManager__ = socket__.executionManager__();
-        executionManager__.withdrawSwitchboardFees(siblingChainSlug_, amount_);
-    }
-
     /**
      * @notice Rescues funds from a contract that has lost access to them.
      * @param token_ The address of the token contract.
@@ -368,5 +363,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /// @inheritdoc ISwitchboard
-    function receiveFees(uint32 siblingChainSlug_) external payable override {}
+    function receiveFees(uint32, uint128) external payable override {
+        require(msg.sender == address(socket__.executionManager__()));
+    }
 }

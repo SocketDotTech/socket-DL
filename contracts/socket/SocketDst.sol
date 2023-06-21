@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "../interfaces/IPlug.sol";
 import "./SocketBase.sol";
@@ -85,14 +85,6 @@ abstract contract SocketDst is SocketBase {
     );
 
     /**
-     * @notice emits the root details when root is replaced by owner
-     * @param packetId packet id
-     * @param oldRoot old root
-     * @param newRoot old root
-     */
-    event PacketRootUpdated(bytes32 packetId, bytes32 oldRoot, bytes32 newRoot);
-
-    /**
      * @dev Function to propose a packet
      * @notice the signature is validated if it belongs to transmitter or not
      * @param packetId_ packet id
@@ -105,7 +97,7 @@ abstract contract SocketDst is SocketBase {
         bytes32 root_,
         address switchboard_,
         bytes calldata signature_
-    ) external override {
+    ) external payable override {
         if (packetId_ == bytes32(0)) revert InvalidPacketId();
 
         (address transmitter, bool isTransmitter) = transmitManager__

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "./Setup.t.sol";
 import "../contracts/examples/Counter.sol";
@@ -198,7 +198,6 @@ contract HappyTest is Setup {
     //             100,
     //             bytes32(0),
     // _transmissionParams,
-
     //             _a.chainSlug
     //         );
 

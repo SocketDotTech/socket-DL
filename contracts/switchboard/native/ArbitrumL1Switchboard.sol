@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "openzeppelin-contracts/contracts/vendor/arbitrum/IBridge.sol";
 import "openzeppelin-contracts/contracts/vendor/arbitrum/IInbox.sol";
@@ -11,7 +11,7 @@ import "./NativeSwitchboardBase.sol";
  * @dev This contract is a switchboard contract for the Arbitrum chain that handles packet attestation and actions on the L1 to Arbitrum and
  * Arbitrum to L1 path.
  * This contract inherits base functions from NativeSwitchboardBase, including fee calculation,
- * trip and untrip actions, and limit setting functions.
+ * trip and un trip actions, and limit setting functions.
  */
 contract ArbitrumL1Switchboard is NativeSwitchboardBase {
     /**

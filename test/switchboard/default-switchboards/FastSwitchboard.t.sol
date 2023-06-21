@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../../Setup.t.sol";
 
@@ -519,7 +519,7 @@ contract FastSwitchboardTest is Setup {
     function testUnTripAfterTripSingle() external {
         vm.startPrank(_socketOwner);
         fastSwitchboard.grantWatcherRole(aChainSlug, _socketOwner);
-        fastSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
+        fastSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
         vm.stopPrank();
 
         bytes32 digest = keccak256(
@@ -545,7 +545,7 @@ contract FastSwitchboardTest is Setup {
 
         digest = keccak256(
             abi.encode(
-                UNTRIP_PATH_SIG_IDENTIFIER,
+                UN_TRIP_PATH_SIG_IDENTIFIER,
                 address(fastSwitchboard),
                 _a.chainSlug,
                 bChainSlug,
@@ -557,7 +557,7 @@ contract FastSwitchboardTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit PathTripped(aChainSlug, false);
-        fastSwitchboard.untripPath(
+        fastSwitchboard.unTripPath(
             fastSwitchboard.nextNonce(_socketOwner),
             aChainSlug,
             sig

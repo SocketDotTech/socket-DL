@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "./ITransmitManager.sol";
 import "./IExecutionManager.sol";
@@ -148,7 +148,7 @@ interface ISocket {
     ) external payable;
 
     /**
-     * @notice seals data in capacitor for specific batchSizr
+     * @notice seals data in capacitor for specific batchSize
      * @param batchSize_ size of batch to be sealed
      * @param capacitorAddress_ address of capacitor
      * @param signature_ signed Data needed for verification
@@ -171,7 +171,7 @@ interface ISocket {
         bytes32 root_,
         address switchboard_,
         bytes calldata signature_
-    ) external;
+    ) external payable;
 
     /**
      * @notice sets the config specific to the plug

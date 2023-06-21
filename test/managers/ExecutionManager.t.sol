@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../Setup.t.sol";
 
@@ -305,12 +305,8 @@ contract ExecutionManagerTest is Setup {
 
         uint128 amount = 100;
 
-        vm.startPrank(_socketOwner);
-        vm.expectRevert(ExecutionManager.InvalidTransmitManager.selector);
-        executionManager.withdrawTransmissionFees(bChainSlug, amount);
-
         vm.expectRevert(ExecutionManager.InsufficientFees.selector);
-        _a.transmitManager__.withdrawFeesFromExecutionManager(
+        executionManager.withdrawTransmissionFees(
             bChainSlug,
             type(uint128).max
         );
@@ -318,10 +314,7 @@ contract ExecutionManagerTest is Setup {
         (, uint128 storedTransmissionFees1) = executionManager
             .totalExecutionAndTransmissionFees(bChainSlug);
 
-        _a.transmitManager__.withdrawFeesFromExecutionManager(
-            bChainSlug,
-            amount
-        );
+        executionManager.withdrawTransmissionFees(bChainSlug, amount);
 
         (, uint128 storedTransmissionFees2) = executionManager
             .totalExecutionAndTransmissionFees(bChainSlug);
@@ -335,17 +328,21 @@ contract ExecutionManagerTest is Setup {
 
         uint128 amount = 100;
 
-        vm.startPrank(_socketOwner);
         vm.expectRevert(ExecutionManager.InsufficientFees.selector);
-        executionManager.withdrawSwitchboardFees(bChainSlug, amount);
+        executionManager.withdrawSwitchboardFees(
+            bChainSlug,
+            _socketOwner,
+            amount
+        );
 
         uint128 storedSwitchboardFees1 = executionManager.totalSwitchboardFees(
             address(_a.configs__[0].switchboard__),
             bChainSlug
         );
 
-        _a.configs__[0].switchboard__.withdrawFeesFromExecutionManager(
+        executionManager.withdrawSwitchboardFees(
             bChainSlug,
+            address(_a.configs__[0].switchboard__),
             amount
         );
 

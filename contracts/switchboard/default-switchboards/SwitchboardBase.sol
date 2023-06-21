@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
@@ -7,8 +7,8 @@ import "../../interfaces/ISignatureVerifier.sol";
 import "../../utils/AccessControlExtended.sol";
 import "../../libraries/RescueFundsLib.sol";
 
-import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UNTRIP_ROLE, WATCHER_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
-import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, TRIP_PROPOSAL_SIG_IDENTIFIER, UNTRIP_PATH_SIG_IDENTIFIER, UNTRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UN_TRIP_ROLE, WATCHER_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, TRIP_PROPOSAL_SIG_IDENTIFIER, UN_TRIP_PATH_SIG_IDENTIFIER, UN_TRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     ISignatureVerifier public immutable signatureVerifier__;
@@ -73,9 +73,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
 
-    error AlreadyInitialised();
     error InvalidNonce();
-    error OnlySocket();
 
     /**
      * @dev Constructor of SwitchboardBase
@@ -94,17 +92,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         timeoutInSeconds = timeoutInSeconds_;
         signatureVerifier__ = signatureVerifier_;
     }
-
-    // /**
-    //  * @notice updates executionManager_
-    //  * @param executionManager_ address of ExecutionManager
-    //  */
-    // function setExecutionManager(
-    //     address executionManager_
-    // ) external onlyRole(GOVERNANCE_ROLE) {
-    //     executionManager__ = IExecutionManager(executionManager_);
-    //     emit ExecutionManagerSet(executionManager_);
-    // }
 
     /**
      * @inheritdoc ISwitchboard
@@ -156,8 +143,10 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher);
-        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
 
+        unchecked {
+            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+        }
         //source chain based tripping
         tripSinglePath[srcChainSlug_] = true;
         emit PathTripped(srcChainSlug_, true);
@@ -190,8 +179,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRoleWithSlug(WATCHER_ROLE, srcChainSlug, watcher);
-        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+        }
         //source chain based tripping
         isProposalTripped[packetId_][proposalCount_] = true;
         emit ProposalTripped(packetId_, proposalCount_);
@@ -216,8 +206,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(TRIP_ROLE, tripper);
-        if (nonce_ != nextNonce[tripper]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[tripper]++) revert InvalidNonce();
+        }
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
     }
@@ -225,16 +216,16 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @notice unpause a path
      */
-    function untripPath(
+    function unTripPath(
         uint256 nonce_,
         uint32 srcChainSlug_,
         bytes memory signature_
     ) external {
-        address untripper = signatureVerifier__.recoverSigner(
+        address unTripper = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
-                    UNTRIP_PATH_SIG_IDENTIFIER,
+                    UN_TRIP_PATH_SIG_IDENTIFIER,
                     address(this),
                     srcChainSlug_,
                     chainSlug,
@@ -245,9 +236,10 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRole(UNTRIP_ROLE, untripper);
-        if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
-
+        _checkRole(UN_TRIP_ROLE, unTripper);
+        unchecked {
+            if (nonce_ != nextNonce[unTripper]++) revert InvalidNonce();
+        }
         tripSinglePath[srcChainSlug_] = false;
         emit PathTripped(srcChainSlug_, false);
     }
@@ -255,12 +247,12 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @notice unpause execution
      */
-    function untrip(uint256 nonce_, bytes memory signature_) external {
-        address untripper = signatureVerifier__.recoverSigner(
+    function unTrip(uint256 nonce_, bytes memory signature_) external {
+        address unTripper = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
-                    UNTRIP_GLOBAL_SIG_IDENTIFIER,
+                    UN_TRIP_GLOBAL_SIG_IDENTIFIER,
                     address(this),
                     chainSlug,
                     nonce_,
@@ -270,13 +262,15 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRole(UNTRIP_ROLE, untripper);
-        if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
-
+        _checkRole(UN_TRIP_ROLE, unTripper);
+        unchecked {
+            if (nonce_ != nextNonce[unTripper]++) revert InvalidNonce();
+        }
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
     }
 
+    /// @inheritdoc ISwitchboard
     function setFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
@@ -300,29 +294,26 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
-        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
-
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
         Fees memory feesObject = Fees({
             switchboardFees: switchboardFees_,
             verificationFees: verificationFees_
         });
 
         fees[dstChainSlug_] = feesObject;
-
         emit SwitchboardFeesSet(dstChainSlug_, feesObject);
+    }
+
+    /// @inheritdoc ISwitchboard
+    function receiveFees(uint32, uint128) external payable override {
+        require(msg.sender == address(socket__.executionManager__()));
     }
 
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         if (account_ == address(0)) revert ZeroAddress();
         SafeTransferLib.safeTransferETH(account_, address(this).balance);
-    }
-
-    function withdrawFeesFromExecutionManager(
-        uint32 siblingChainSlug_,
-        uint128 amount_
-    ) external override onlyRole(WITHDRAW_ROLE) {
-        IExecutionManager executionManager__ = socket__.executionManager__();
-        executionManager__.withdrawSwitchboardFees(siblingChainSlug_, amount_);
     }
 
     /**
@@ -338,7 +329,4 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
-
-    /// @inheritdoc ISwitchboard
-    function receiveFees(uint32 siblingChainSlug_) external payable override {}
 }

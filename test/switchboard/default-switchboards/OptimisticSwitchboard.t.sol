@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../../Setup.t.sol";
 
@@ -83,7 +83,7 @@ contract OptimisticSwitchboardTest is Setup {
 
         digest = keccak256(
             abi.encode(
-                UNTRIP_GLOBAL_SIG_IDENTIFIER,
+                UN_TRIP_GLOBAL_SIG_IDENTIFIER,
                 address(optimisticSwitchboard),
                 _a.chainSlug,
                 nonce,
@@ -93,11 +93,11 @@ contract OptimisticSwitchboardTest is Setup {
         sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         vm.expectRevert();
-        optimisticSwitchboard.untrip(nonce, sig);
+        optimisticSwitchboard.unTrip(nonce, sig);
 
         hoax(_socketOwner);
-        optimisticSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
-        optimisticSwitchboard.untrip(nonce++, sig);
+        optimisticSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
+        optimisticSwitchboard.unTrip(nonce++, sig);
     }
 
     function testTripPath() external {
@@ -154,7 +154,7 @@ contract OptimisticSwitchboardTest is Setup {
             srcChainSlug,
             _socketOwner
         );
-        optimisticSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
+        optimisticSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
         vm.stopPrank();
 
         hoax(_socketOwner);
@@ -178,7 +178,7 @@ contract OptimisticSwitchboardTest is Setup {
         hoax(_socketOwner);
         digest = keccak256(
             abi.encode(
-                UNTRIP_PATH_SIG_IDENTIFIER,
+                UN_TRIP_PATH_SIG_IDENTIFIER,
                 address(optimisticSwitchboard),
                 _a.chainSlug,
                 srcChainSlug,
@@ -190,7 +190,7 @@ contract OptimisticSwitchboardTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit PathTripped(srcChainSlug, false);
-        optimisticSwitchboard.untripPath(nonce++, srcChainSlug, sig);
+        optimisticSwitchboard.unTripPath(nonce++, srcChainSlug, sig);
         assertFalse(optimisticSwitchboard.tripSinglePath(srcChainSlug));
     }
 
