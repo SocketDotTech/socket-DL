@@ -67,7 +67,7 @@ abstract contract SocketSrc is SocketBase {
             transmissionParams_,
             plugConfig.outboundSwitchboard__,
             plugConfig.capacitor__.getMaxPacketLength(),
-            uint32(siblingChainSlug_)
+            siblingChainSlug_
         );
 
         ISocket.MessageDetails memory messageDetails;
