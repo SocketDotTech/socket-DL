@@ -48,15 +48,12 @@ interface ISwitchboard {
     function getMinFees(
         uint32 dstChainSlug
     ) external view returns (uint128 switchboardFee, uint128 verificationFee);
-    
-    
+
     /**
      * @notice Receives the fees for processing of packet.
      * @param siblingChainSlug_ the chain slug of the sibling chain.
      */
-    function receiveFees(
-        uint32 siblingChainSlug_
-    ) external payable;
+    function receiveFees(uint32 siblingChainSlug_) external payable;
 
     /**
      * @notice Sets the minimum fees required for the destination chain to process the packet.
