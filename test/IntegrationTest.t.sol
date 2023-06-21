@@ -388,6 +388,26 @@ contract HappyTest is Setup {
         assertEq(srcCounter__.counter(), 0);
     }
 
+    function testRescueFunds() public {
+        uint256 amount = 1e18;
+
+        hoax(_socketOwner);
+        _rescueNative(
+            address(_a.hasher__),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
+        );
+
+        hoax(_socketOwner);
+        _rescueNative(
+            address(_a.sigVerifier__),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
+        );
+    }
+
     function _deployPlugContracts() internal {
         vm.startPrank(_plugOwner);
 
