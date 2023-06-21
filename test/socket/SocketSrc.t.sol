@@ -48,6 +48,7 @@ contract SocketSrcTest is Setup {
         //     100000,
         //     1000,
         //     bytes32(0),
+        //     _transmissionParams,
         //     _b.chainSlug,
         //     100,
         //     100,
@@ -75,6 +76,7 @@ contract SocketSrcTest is Setup {
                     _minMsgGasLimit,
                     100,
                     bytes32(0),
+                    _transmissionParams,
                     _b.chainSlug,
                     address(_a.transmitManager__)
                 );
@@ -88,6 +90,7 @@ contract SocketSrcTest is Setup {
                 _minMsgGasLimit,
                 1000,
                 bytes32(0),
+                _transmissionParams,
                 _b.chainSlug,
                 address(srcCounter__)
             );
@@ -108,6 +111,7 @@ contract SocketSrcTest is Setup {
             _minMsgGasLimit,
             1000,
             bytes32(0),
+            _transmissionParams,
             _b.chainSlug,
             address(srcCounter__)
         );
@@ -118,6 +122,7 @@ contract SocketSrcTest is Setup {
             _b.chainSlug,
             _minMsgGasLimit,
             bytes32(0),
+            _transmissionParams,
             payload
         );
     }
@@ -175,6 +180,7 @@ contract SocketSrcTest is Setup {
             _b.chainSlug,
             amount,
             _minMsgGasLimit,
+            bytes32(0),
             bytes32(0)
         );
     }
@@ -244,6 +250,7 @@ contract SocketSrcTest is Setup {
             _minMsgGasLimit,
             1000,
             bytes32(0),
+            _transmissionParams,
             _b.chainSlug,
             address(srcCounter__)
         );
@@ -253,6 +260,7 @@ contract SocketSrcTest is Setup {
             _b.chainSlug,
             amount,
             _minMsgGasLimit,
+            bytes32(0),
             bytes32(0)
         );
     }

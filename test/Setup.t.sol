@@ -83,6 +83,8 @@ contract Setup is Test {
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
 
+    bytes32 internal _transmissionParams = bytes32(0);
+
     bool isExecutionOpen = false;
 
     struct SocketConfigContext {

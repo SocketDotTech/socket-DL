@@ -67,6 +67,7 @@ contract ExecutionManagerTest is Setup {
                 minMsgGasLimit,
                 payloadSize,
                 executionParams,
+                _transmissionParams,
                 bChainSlug,
                 address(_a.transmitManager__)
             );
@@ -162,6 +163,7 @@ contract ExecutionManagerTest is Setup {
                 minMsgGasLimit,
                 payloadSize,
                 executionParams,
+                _transmissionParams,
                 bChainSlug,
                 address(_a.transmitManager__)
             );
@@ -179,6 +181,7 @@ contract ExecutionManagerTest is Setup {
             minMsgGasLimit,
             payloadSize,
             executionParams,
+            _transmissionParams,
             _b.chainSlug,
             _switchboardFees,
             _verificationFees,
@@ -221,6 +224,7 @@ contract ExecutionManagerTest is Setup {
             minMsgGasLimit,
             payloadSize,
             executionParams,
+            _transmissionParams,
             _b.chainSlug,
             _switchboardFees,
             _verificationFees,
@@ -241,6 +245,7 @@ contract ExecutionManagerTest is Setup {
             minMsgGasLimit,
             payloadSize,
             executionParams,
+            _transmissionParams,
             _b.chainSlug,
             _switchboardFees,
             _verificationFees,
@@ -367,6 +372,7 @@ contract ExecutionManagerTest is Setup {
             minMsgGasLimit,
             payloadSize,
             executionParams,
+            _transmissionParams,
             _b.chainSlug,
             _switchboardFees,
             _verificationFees,
