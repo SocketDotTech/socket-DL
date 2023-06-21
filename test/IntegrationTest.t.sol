@@ -59,7 +59,7 @@ contract HappyTest is Setup {
                     _minMsgGasLimit,
                     100,
                     bytes32(0),
-                    bytes32(0),
+                    _transmissionParams,
                     _b.chainSlug,
                     address(_a.transmitManager__)
                 );
@@ -197,7 +197,7 @@ contract HappyTest is Setup {
     //             _minMsgGasLimit,
     //             100,
     //             bytes32(0),
-    // bytes32(0),
+    // _transmissionParams,
     //             _a.chainSlug
     //         );
 
@@ -327,6 +327,8 @@ contract HappyTest is Setup {
     //             _minMsgGasLimit,
     //             100,
     //             bytes32(0),
+    // _transmissionParams,
+
     //             _b.chainSlug
     //         );
 
