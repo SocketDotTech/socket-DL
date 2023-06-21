@@ -18,7 +18,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        initialise();
+        initialize();
 
         _a.chainSlug = uint32(uint256(421613));
         _b.chainSlug = uint32(uint256(5));

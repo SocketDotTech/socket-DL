@@ -70,10 +70,10 @@ abstract contract SocketConfig is ISocket {
         uint256 maxPacketLength_,
         uint256 capacitorType_
     ) external override returns (address capacitor, address decapacitor) {
-        address switchBoardAddress = msg.sender;
+        address switchboardAddress = msg.sender;
         // only capacitor checked, decapacitor assumed will exist if capacitor does
         if (
-            address(capacitors__[switchBoardAddress][siblingChainSlug_]) !=
+            address(capacitors__[switchboardAddress][siblingChainSlug_]) !=
             address(0)
         ) revert SwitchboardExists();
 
@@ -90,11 +90,11 @@ abstract contract SocketConfig is ISocket {
         decapacitor = address(decapacitor__);
 
         capacitorToSlug[capacitor] = siblingChainSlug_;
-        capacitors__[switchBoardAddress][siblingChainSlug_] = capacitor__;
-        decapacitors__[switchBoardAddress][siblingChainSlug_] = decapacitor__;
+        capacitors__[switchboardAddress][siblingChainSlug_] = capacitor__;
+        decapacitors__[switchboardAddress][siblingChainSlug_] = decapacitor__;
 
         emit SwitchboardAdded(
-            switchBoardAddress,
+            switchboardAddress,
             siblingChainSlug_,
             capacitor,
             decapacitor,

@@ -30,7 +30,7 @@ contract SwitchboardBaseTest is Setup {
     FastSwitchboard fastSwitchboard;
 
     function setUp() external {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
         _b.chainSlug = uint32(uint256(bChainSlug));
 

@@ -12,7 +12,7 @@ contract SocketSrcTest is Setup {
     address newCapacitorFactory = address(uint160(c++));
 
     function setUp() external {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
         uint256[] memory transmitterPivateKeys = new uint256[](1);
         transmitterPivateKeys[0] = _transmitterPrivateKey;

@@ -69,7 +69,7 @@ contract HappyTest is Setup {
                 verificationFee +
                 executionFee;
 
-            // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+            // executionFees to be recomputed which is totalValue - (socketFees + switchboardFees)
             // verificationFees also should go to Executor, hence we do the additional computation below
             executionFee = verificationFee + executionFee;
 
@@ -206,7 +206,7 @@ contract HappyTest is Setup {
     //             verificationFee +
     //             executionFee;
 
-    //         // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+    //         // executionFees to be recomputed which is totalValue - (socketFees + switchboardFees)
     //         // verificationFees also should go to Executor, hence we do the additional computation below
     //         executionFee = verificationFee + executionFee;
     //         hoax(_plugOwner);
@@ -335,7 +335,7 @@ contract HappyTest is Setup {
     //             socketFees +
     //             executionFee;
 
-    //         // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+    //         // executionFees to be recomputed which is totalValue - (socketFees + switchboardFees)
     //         // verificationFees also should go to Executor, hence we do the additional computation below
     //         executionFee = executionOverhead + executionFee;
 
