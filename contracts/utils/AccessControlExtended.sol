@@ -74,6 +74,7 @@ contract AccessControlExtended is AccessControl {
                 );
             else _grantRole(roleNames_[index], grantees_[index]);
 
+            // inputs are controlled by owner
             unchecked {
                 ++index;
             }
@@ -105,6 +106,7 @@ contract AccessControlExtended is AccessControl {
                 );
             else _revokeRole(roleNames_[index], grantees_[index]);
 
+            // inputs are controlled by owner
             unchecked {
                 ++index;
             }

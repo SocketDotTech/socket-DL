@@ -19,12 +19,26 @@ interface ITransmitManager {
         bytes calldata signature
     ) external view returns (address, bool);
 
+    /**
+     * @notice sets the transmission fee needed to transmit message to given `siblingSlug_`
+     * @dev recovered address should add have feeUpdater role for `siblingSlug_`
+     * @param nonce_ The incremental nonce to prevent signature replay
+     * @param siblingSlug_ sibling id for which fee updater is registered
+     * @param transmissionFees_ digest which is signed by transmitter
+     * @param signature_ signature
+     */
     function setTransmissionFees(
         uint256 nonce_,
-        uint32 dstChainSlug_,
+        uint32 siblingSlug_,
         uint128 transmissionFees_,
         bytes calldata signature_
     ) external;
 
-    function receiveFees(uint32, uint128) external payable;
+    /**
+     * @notice receives fees from Execution manager
+     * @dev this function can be used to keep track of fees received for each slug
+     * @param siblingSlug_ sibling id for which fee updater is registered
+     * @param amount_ The amount of native tokens received from execution manager
+     */
+    function receiveFees(uint32 siblingSlug_, uint128 amount_) external payable;
 }

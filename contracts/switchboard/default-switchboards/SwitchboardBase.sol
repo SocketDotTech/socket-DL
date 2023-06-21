@@ -270,6 +270,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         emit SwitchboardTripped(false);
     }
 
+    /// @inheritdoc ISwitchboard
     function setFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
@@ -302,8 +303,12 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         });
 
         fees[dstChainSlug_] = feesObject;
-
         emit SwitchboardFeesSet(dstChainSlug_, feesObject);
+    }
+
+    /// @inheritdoc ISwitchboard
+    function receiveFees(uint32, uint128) external payable override {
+        require(msg.sender == address(socket__.executionManager__()));
     }
 
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
@@ -323,10 +328,5 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
-    }
-
-    /// @inheritdoc ISwitchboard
-    function receiveFees(uint32, uint128) external payable override {
-        require(msg.sender == address(socket__.executionManager__()));
     }
 }

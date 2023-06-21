@@ -40,15 +40,6 @@ interface ISwitchboard {
     ) external view returns (bool);
 
     /**
-     * @notice Receives the fees for processing of packet.
-     * @param siblingChainSlug_ the chain slug of the sibling chain.
-     */
-    function receiveFees(
-        uint32 siblingChainSlug_,
-        uint128 amount_
-    ) external payable;
-
-    /**
      * @notice Retrieves the minimum fees required for the destination chain to process the packet.
      * @param dstChainSlug the unique identifier for the destination chain of the packet.
      * @return switchboardFee the switchboard fee required for the destination chain to process the packet.
@@ -58,6 +49,16 @@ interface ISwitchboard {
         uint32 dstChainSlug
     ) external view returns (uint128 switchboardFee, uint128 verificationFee);
 
+    /**
+     * @notice Receives the fees for processing of packet.
+     * @param siblingChainSlug_ the chain slug of the sibling chain.
+     */
+    function receiveFees(
+        uint32 siblingChainSlug_,
+        uint128 amount_
+    ) external payable;
+
+    // not important to override in all switchboards
     function setFees(
         uint256 nonce_,
         uint32 dstChainSlug_,

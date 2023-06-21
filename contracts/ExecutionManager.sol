@@ -312,6 +312,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
 
+        // nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
@@ -341,6 +342,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        // nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
@@ -373,6 +376,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        // nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
@@ -401,6 +406,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        // nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }

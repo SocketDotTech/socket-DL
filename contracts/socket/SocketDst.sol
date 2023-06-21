@@ -85,14 +85,6 @@ abstract contract SocketDst is SocketBase {
     );
 
     /**
-     * @notice emits the root details when root is replaced by owner
-     * @param packetId packet id
-     * @param oldRoot old root
-     * @param newRoot old root
-     */
-    event PacketRootUpdated(bytes32 packetId, bytes32 oldRoot, bytes32 newRoot);
-
-    /**
      * @dev Function to propose a packet
      * @notice the signature is validated if it belongs to transmitter or not
      * @param packetId_ packet id
