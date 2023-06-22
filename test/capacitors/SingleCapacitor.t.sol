@@ -14,7 +14,7 @@ contract SingleCapacitorTest is Setup {
     SingleDecapacitor _sd;
 
     function setUp() external {
-        initialise();
+        initialize();
 
         hoax(_socketOwner);
         _sa = new SingleCapacitor(_socket, _socketOwner);

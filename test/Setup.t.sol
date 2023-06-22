@@ -133,7 +133,7 @@ contract Setup is Test {
     ChainContext _a;
     ChainContext _b;
 
-    function initialise() internal {
+    function initialize() internal {
         _socketOwner = vm.addr(_socketOwnerPrivateKey);
 
         _transmitter = vm.addr(_transmitterPrivateKey);
@@ -152,7 +152,7 @@ contract Setup is Test {
     function _dualChainSetup(
         uint256[] memory transmitterPrivateKeys_
     ) internal {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
         _b.chainSlug = uint32(uint256(bChainSlug));
 
@@ -571,12 +571,12 @@ contract Setup is Test {
     function _registerSwitchboard(
         ChainContext storage cc_,
         address governance_,
-        address switchBoardAddress_,
+        address switchboardAddress_,
         uint256 nonce_,
         uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
-        scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
+        scc_.switchboard__ = ISwitchboard(switchboardAddress_);
 
         hoax(_raju);
         vm.expectRevert(
@@ -603,11 +603,11 @@ contract Setup is Test {
         scc_.siblingChainSlug = remoteChainSlug_;
         scc_.switchboardNonce = nonce_;
         scc_.capacitor__ = cc_.socket__.capacitors__(
-            switchBoardAddress_,
+            switchboardAddress_,
             remoteChainSlug_
         );
         scc_.decapacitor__ = cc_.socket__.decapacitors__(
-            switchBoardAddress_,
+            switchboardAddress_,
             remoteChainSlug_
         );
     }
@@ -802,7 +802,7 @@ contract Setup is Test {
             executorPrivateKey_
         );
 
-        (uint8 paramType, uint248 paramValue) = _decodeexecutionParams(
+        (uint8 paramType, uint248 paramValue) = _decodeExecutionParams(
             executionParams.executionParams_
         );
 
@@ -898,7 +898,7 @@ contract Setup is Test {
             );
     }
 
-    function _decodeexecutionParams(
+    function _decodeExecutionParams(
         bytes32 executionParams_
     ) internal pure returns (uint8 paramType, uint248 paramValue) {
         paramType = uint8(uint256(executionParams_) >> 248);
@@ -909,9 +909,9 @@ contract Setup is Test {
     ChainContext aTestChain;
 
     function test() external {
-        initialise();
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        initialize();
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
         aTestChain.chainSlug = uint32(10);
         uint32 bTestChainSlug = uint32(20);
@@ -920,7 +920,7 @@ contract Setup is Test {
             aTestChain,
             bTestChainSlug,
             isExecutionOpen,
-            transmitterPivateKeys
+            transmitterPrivateKeys
         );
     }
 }

@@ -15,7 +15,7 @@ contract TransmitManagerTest is Setup {
     event SignatureVerifierSet(address signatureVerifier_);
 
     function setUp() public {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
         uint256[] memory transmitterPivateKeys = new uint256[](1);
         transmitterPivateKeys[0] = _transmitterPrivateKey;

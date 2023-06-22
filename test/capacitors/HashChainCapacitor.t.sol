@@ -17,7 +17,7 @@ contract HashChainCapacitorTest is Setup {
     uint256 maxPacketLength = 5;
 
     function setUp() external {
-        initialise();
+        initialize();
 
         hoax(_socketOwner);
         _hcCapacitor = new HashChainCapacitor(
