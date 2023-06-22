@@ -528,8 +528,6 @@ contract Setup is Test {
         cc_.socket__ = new Socket(
             uint32(cc_.chainSlug),
             address(cc_.hasher__),
-            address(cc_.transmitManager__),
-            address(cc_.executionManager__),
             address(cc_.capacitorFactory__),
             deployer_,
             version
@@ -539,24 +537,24 @@ contract Setup is Test {
             cc_.executionManager__ = new OpenExecutionManager(
                 deployer_,
                 cc_.chainSlug,
-                cc_.sigVerifier__,
-                cc_.socket__
+                cc_.socket__,
+                cc_.sigVerifier__
             );
         } else {
             cc_.executionManager__ = new ExecutionManager(
                 deployer_,
                 cc_.chainSlug,
-                cc_.sigVerifier__,
-                cc_.socket__
+                cc_.socket__,
+                cc_.sigVerifier__
             );
             cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
         }
 
         cc_.transmitManager__ = new TransmitManager(
-            cc_.sigVerifier__,
-            cc_.socket__,
             deployer_,
-            cc_.chainSlug
+            cc_.chainSlug,
+            cc_.socket__,
+            cc_.sigVerifier__
         );
 
         cc_.socket__.grantRole(GOVERNANCE_ROLE, _socketOwner);

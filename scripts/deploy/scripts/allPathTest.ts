@@ -157,7 +157,7 @@ export const sendMessagesToAllPaths = async (params: {
             let executionParams =
               "0x0100000000000000000000000000000000000000000000000000000000000064";
             let transmissionParams =
-              "0x0100000000000000000000000000000000000000000000000000000000000064";
+              "0x0000000000000000000000000000000000000000000000000000000000000000";
             let data = counter.interface.encodeFunctionData(
               "remoteAddOperation",
               [
@@ -165,6 +165,7 @@ export const sendMessagesToAllPaths = async (params: {
                 amount,
                 msgGasLimit,
                 // executionParams,
+                ethers.constants.HashZero,
                 ethers.constants.HashZero,
               ]
             );

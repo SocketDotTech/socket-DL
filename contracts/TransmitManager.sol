@@ -51,10 +51,10 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param chainSlug_ The chain slug of the current chain
      */
     constructor(
-        ISignatureVerifier signatureVerifier_,
-        ISocket socket_,
         address owner_,
-        uint32 chainSlug_
+        uint32 chainSlug_,
+        ISocket socket_,
+        ISignatureVerifier signatureVerifier_
     ) AccessControlExtended(owner_) {
         chainSlug = chainSlug_;
         signatureVerifier__ = signatureVerifier_;
