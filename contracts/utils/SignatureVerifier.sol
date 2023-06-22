@@ -19,7 +19,7 @@ contract SignatureVerifier is ISignatureVerifier, AccessControl {
     error InvalidSigLength();
 
     /**
-     * @notice initialises and grants RESCUE_ROLE to owner.
+     * @notice initializes and grants RESCUE_ROLE to owner.
      * @param owner_ The address of the owner of the contract.
      */
     constructor(address owner_) AccessControl(owner_) {
@@ -41,24 +41,6 @@ contract SignatureVerifier is ISignatureVerifier, AccessControl {
         );
         // recovered signer is checked for the valid roles later
         signer = ECDSA.recover(digest, signature_);
-    }
-
-    /**
-     * @notice splits the signature into v, r and s.
-     * @param signature_ The signature to be split
-     * @return r The r component of the signature
-     * @return s The s component of the signature
-     * @return v The v component of the signature
-     */
-    function _splitSignature(
-        bytes memory signature_
-    ) private pure returns (bytes32 r, bytes32 s, uint8 v) {
-        if (signature_.length != 65) revert InvalidSigLength();
-        assembly {
-            r := mload(add(signature_, 0x20))
-            s := mload(add(signature_, 0x40))
-            v := byte(0, mload(add(signature_, 0x60)))
-        }
     }
 
     /**

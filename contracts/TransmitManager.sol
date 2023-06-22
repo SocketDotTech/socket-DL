@@ -1,32 +1,32 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.20;
 
-import "./interfaces/ITransmitManager.sol";
-import "./interfaces/IExecutionManager.sol";
 import "./interfaces/ISocket.sol";
 import "./interfaces/ISignatureVerifier.sol";
-import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
-import "./libraries/FeesHelper.sol";
+import "./utils/AccessControlExtended.sol";
 import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRANSMITTER_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
 import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 
 /**
  * @title TransmitManager
- * @notice The TransmitManager contract facilitates communication between chains
+ * @notice The TransmitManager contract managers transmitter which facilitates communication between chains
  * @dev This contract is responsible for verifying signatures and updating gas limits
  * @dev This contract inherits AccessControlExtended which manages access control
+ * @dev The transmission fees is collected in execution manager which can be pulled from it when needed
  */
 contract TransmitManager is ITransmitManager, AccessControlExtended {
-    ISocket public immutable socket__;
-
+    // chain slug of the current chain
     uint32 public immutable chainSlug;
-
+    // socket contract
+    ISocket public immutable socket__;
+    // signature verifier contract
     ISignatureVerifier public signatureVerifier__;
 
-    // transmitter => nextNonce
+    // feeUpdater => nextNonce
     mapping(address => uint256) public nextNonce;
-    error InsufficientTransmitFees();
+
+    // triggered when nonce is not as expected for feeUpdater recovered from sig
     error InvalidNonce();
 
     /**
@@ -34,7 +34,6 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param signatureVerifier The address of the new signature verifier contract
      */
     event SignatureVerifierSet(address signatureVerifier);
-    event ExecutionManagerSet(address executionManager);
 
     /**
      * @notice Emitted when the transmissionFees is updated
@@ -46,27 +45,26 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     /**
      * @notice Initializes the TransmitManager contract
      * @param signatureVerifier_ The address of the signature verifier contract
+     * @param socket_ The address of socket contract
      * @param owner_ The owner of the contract with GOVERNANCE_ROLE
-     * @param chainSlug_ The chain slug of the current contract
+     * @param chainSlug_ The chain slug of the current chain
      */
     constructor(
         ISignatureVerifier signatureVerifier_,
         ISocket socket_,
-        // address executionManager_,
         address owner_,
         uint32 chainSlug_
     ) AccessControlExtended(owner_) {
         chainSlug = chainSlug_;
         signatureVerifier__ = signatureVerifier_;
         socket__ = socket_;
-        // executionManager__ = IExecutionManager(executionManager_);
     }
 
     /**
      * @notice verifies if the given signatures recovers a valid transmitter
-     * @dev signature sent to this function can be reused on other chains
-     * @dev hence caller should add some identifier to prevent this.
-     * @dev In socket, this is handled by the calling functions everywhere.
+     * @dev signature sent to this function is validated against digest
+     * @dev recovered transmitter should add have transmitter role for `siblingSlug_`
+     * @dev This function is called by socket which creates the digest which is used to recover sig
      * @param siblingSlug_ sibling id for which transmitter is registered
      * @param digest_ digest which is signed by transmitter
      * @param signature_ signature
@@ -87,6 +85,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         );
     }
 
+    /// @inheritdoc ITransmitManager
     function setTransmissionFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
@@ -108,40 +107,37 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
         );
 
         _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+
+        // nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
-        // transmissionFees[dstChainSlug_] = transmissionFees_;
-        IExecutionManager executionManager__ = IExecutionManager(
-            socket__.executionManager()
-        );
-        executionManager__.updateTransmissionMinFees(
+
+        socket__.executionManager__().setTransmissionMinFees(
             dstChainSlug_,
             transmissionFees_
         );
         emit TransmissionFeesSet(dstChainSlug_, transmissionFees_);
     }
 
+    /// @inheritdoc ITransmitManager
+    function receiveFees(uint32) external payable override {
+        require(msg.sender == address(socket__.executionManager__()));
+    }
+
     /**
      * @notice withdraws fees from contract
+     * @dev caller needs withdraw role
      * @param account_ withdraw fees to
      */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        FeesHelper.withdrawFees(account_);
-    }
-
-    function withdrawFeesFromExecutionManager(
-        uint32 siblingChainSlug_,
-        uint128 amount_
-    ) external onlyRole(WITHDRAW_ROLE) {
-        IExecutionManager executionManager__ = IExecutionManager(
-            socket__.executionManager()
-        );
-        executionManager__.withdrawTransmissionFees(siblingChainSlug_, amount_);
+        if (account_ == address(0)) revert ZeroAddress();
+        SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
     /**
      * @notice updates signatureVerifier_
+     * @dev caller needs governance role
      * @param signatureVerifier_ address of Signature Verifier
      */
     function setSignatureVerifier(
@@ -164,6 +160,4 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
-
-    function payFees(uint32 siblingChainSlug_) external payable override {}
 }

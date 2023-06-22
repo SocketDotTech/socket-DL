@@ -73,6 +73,7 @@ contract FastSwitchboard is SwitchboardBase {
      * @dev Function to attest a packet
      * @param packetId_ Packet ID
      * @param proposalCount_ Proposal ID
+     * @param root_ Root of the packet
      * @param signature_ Signature of the packet
      * @notice we are attesting a root uniquely identified with packetId and proposalCount. However,
      * there can be multiple proposals for same root. To avoid need to re-attest for different proposals
@@ -121,10 +122,7 @@ contract FastSwitchboard is SwitchboardBase {
     }
 
     /**
-     * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId_ packetId
-     * @param proposalCount_ proposalCount
-     * @param proposeTime_ time at which packet was proposed
+     * @inheritdoc ISwitchboard
      */
     function allowPacket(
         bytes32 root_,
@@ -148,6 +146,7 @@ contract FastSwitchboard is SwitchboardBase {
 
     /**
      * @notice adds a watcher for `srcChainSlug_` chain
+     * @param srcChainSlug_ chain slug of the chain where the watcher is being added
      * @param watcher_ watcher address
      */
     function grantWatcherRole(
@@ -163,6 +162,7 @@ contract FastSwitchboard is SwitchboardBase {
 
     /**
      * @notice removes a watcher from `srcChainSlug_` chain list
+     * @param srcChainSlug_ chain slug of the chain where the watcher is being removed
      * @param watcher_ watcher address
      */
     function revokeWatcherRole(
@@ -177,12 +177,13 @@ contract FastSwitchboard is SwitchboardBase {
     }
 
     /**
+     * @notice returns true if non watcher role. Used to avoid granting watcher role directly
      * @dev If adding any new role to FastSwitchboard, have to add it here as well to make sure it can be set
      */
     function isNonWatcherRole(bytes32 role_) public pure returns (bool) {
         if (
             role_ == TRIP_ROLE ||
-            role_ == UNTRIP_ROLE ||
+            role_ == UN_TRIP_ROLE ||
             role_ == WITHDRAW_ROLE ||
             role_ == RESCUE_ROLE ||
             role_ == GOVERNANCE_ROLE ||
@@ -275,7 +276,7 @@ contract FastSwitchboard is SwitchboardBase {
             } else {
                 revert InvalidRole();
             }
-
+            // we will reach block gas limit before this overflows
             unchecked {
                 ++index;
             }
@@ -308,6 +309,7 @@ contract FastSwitchboard is SwitchboardBase {
             } else {
                 revert InvalidRole();
             }
+            // we will reach block gas limit before this overflows
             unchecked {
                 ++index;
             }

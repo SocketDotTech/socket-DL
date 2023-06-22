@@ -21,7 +21,7 @@ contract NativeBaseSwitchboardTest is Setup {
     event SwitchboardFeesSet(uint256 switchboardFees, uint256 verificationFees);
 
     function setUp() external {
-        initialise();
+        initialize();
 
         _a.chainSlug = uint32(uint256(420));
         _b.chainSlug = uint32(uint256(5));
@@ -40,7 +40,7 @@ contract NativeBaseSwitchboardTest is Setup {
     }
 
     function testRegisterSiblingSlug() public {
-        assertFalse(optimismSwitchboard.isInitialised());
+        assertFalse(optimismSwitchboard.isInitialized());
 
         hoax(_raju);
         vm.expectRevert(
@@ -54,10 +54,10 @@ contract NativeBaseSwitchboardTest is Setup {
         vm.startPrank(_socketOwner);
         optimismSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 0);
 
-        vm.expectRevert(NativeSwitchboardBase.AlreadyInitialised.selector);
+        vm.expectRevert(NativeSwitchboardBase.AlreadyInitialized.selector);
         optimismSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 0);
 
-        assertTrue(optimismSwitchboard.isInitialised());
+        assertTrue(optimismSwitchboard.isInitialized());
         // assertEq(optimismSwitchboard.maxPacketLength(), 1);
 
         vm.stopPrank();
@@ -100,7 +100,7 @@ contract NativeBaseSwitchboardTest is Setup {
     //     assertEq(_feesPayer.balance, minFees);
 
     //     vm.startPrank(_feesPayer);
-    //     optimismSwitchboard.payFees{value: minFees}(bChainSlug);
+    //     optimismSwitchboard.receiveFees{value: minFees}(bChainSlug);
     //     vm.stopPrank();
 
     //     assertEq(_feesWithdrawer.balance, 0);
@@ -191,36 +191,39 @@ contract NativeBaseSwitchboardTest is Setup {
         );
         assertTrue(optimismSwitchboard.tripGlobalFuse());
 
-        // untrip
-        uint256 untripNonce = optimismSwitchboard.nextNonce(_socketOwner);
+        // unTrip
+        uint256 unTripNonce = optimismSwitchboard.nextNonce(_socketOwner);
         digest = keccak256(
             abi.encode(
-                UNTRIP_NATIVE_SIG_IDENTIFIER,
+                UN_TRIP_NATIVE_SIG_IDENTIFIER,
                 address(optimismSwitchboard),
                 _a.chainSlug,
-                untripNonce,
+                unTripNonce,
                 false
             )
         );
         sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         vm.expectRevert(
-            abi.encodeWithSelector(AccessControl.NoPermit.selector, UNTRIP_ROLE)
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                UN_TRIP_ROLE
+            )
         );
-        optimismSwitchboard.untrip(untripNonce, sig);
+        optimismSwitchboard.unTrip(unTripNonce, sig);
 
-        optimismSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
+        optimismSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
 
         vm.expectEmit(false, false, false, true);
         emit SwitchboardTripped(false);
-        optimismSwitchboard.untrip(untripNonce, sig);
+        optimismSwitchboard.unTrip(unTripNonce, sig);
 
         vm.stopPrank();
 
         assertFalse(optimismSwitchboard.tripGlobalFuse());
 
         vm.expectRevert(NativeSwitchboardBase.InvalidNonce.selector);
-        optimismSwitchboard.untrip(untripNonce, sig);
+        optimismSwitchboard.unTrip(unTripNonce, sig);
     }
 
     function testSetFees() external {

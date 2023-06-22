@@ -31,7 +31,6 @@ contract SingleCapacitor is BaseCapacitor {
      * @param socket_ The address of the socket contract.
      * @param owner_ The address of the owner of the capacitor contract.
      */
-
     constructor(
         address socket_,
         address owner_
@@ -39,11 +38,16 @@ contract SingleCapacitor is BaseCapacitor {
         _grantRole(RESCUE_ROLE, owner_);
     }
 
+    /**
+     * @inheritdoc ICapacitor
+     */
     function getMaxPacketLength() external pure override returns (uint256) {
         return maxPacketLength;
     }
 
-    /// @inheritdoc ICapacitor
+    /**
+     * @inheritdoc ICapacitor
+     */
     function addPackedMessage(
         bytes32 packedMessage_
     ) external override onlySocket {
@@ -56,9 +60,7 @@ contract SingleCapacitor is BaseCapacitor {
     }
 
     /**
-     * @dev Seals the next pending packet and returns its root hash and packet count.
-     * @dev we use seal packet count to make sure there is no scope of censorship and all the packets get sealed.
-     * @return The root hash and packet count of the sealed packet.
+     * @inheritdoc ICapacitor
      */
     function sealPacket(
         uint256
@@ -71,8 +73,7 @@ contract SingleCapacitor is BaseCapacitor {
     }
 
     /**
-     * @dev Returns the root hash and packet count of the next pending packet to be sealed.
-     * @return The root hash and packet count of the next pending packet.
+     * @inheritdoc ICapacitor
      */
     function getNextPacketToBeSealed()
         external

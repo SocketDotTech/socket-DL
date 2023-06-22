@@ -15,7 +15,7 @@ contract TransmitManagerTest is Setup {
     event SignatureVerifierSet(address signatureVerifier_);
 
     function setUp() public {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
         uint256[] memory transmitterPivateKeys = new uint256[](1);
         transmitterPivateKeys[0] = _transmitterPrivateKey;
@@ -47,29 +47,23 @@ contract TransmitManagerTest is Setup {
         assertTrue(isTransmitter);
     }
 
-    // function testWithdrawFees() public {
-    //     uint256 minFees = 0;
-    //     // transmitManager.getMinFees(bChainSlug);
-    //     deal(_feesPayer, minFees);
+    function testWithdrawFees() public {
+        uint256 amount = 1e18;
 
-    //     vm.startPrank(_feesPayer);
-    //     transmitManager.payFees{value: minFees}(bChainSlug);
-    //     vm.stopPrank();
-
-    //     vm.startPrank(_socketOwner);
-    //     vm.expectEmit(false, false, false, true);
-    //     emit FeesWithdrawn(_feesWithdrawer, minFees);
-    //     transmitManager.withdrawFees(_feesWithdrawer);
-    //     vm.stopPrank();
-
-    //     assertEq(_feesWithdrawer.balance, minFees);
-    // }
-
-    function testWithdrawFeesToZeroAddress() public {
         vm.startPrank(_socketOwner);
+        vm.deal(address(transmitManager), amount);
+        uint256 initialBal = _fundRescuer.balance;
 
-        vm.expectRevert();
+        vm.expectRevert(ZeroAddress.selector);
         transmitManager.withdrawFees(address(0));
+
+        transmitManager.withdrawFees(_fundRescuer);
+
+        uint256 finalBal = _fundRescuer.balance;
+
+        assertEq(address(transmitManager).balance, 0);
+        assertEq(_fundRescuer.balance, initialBal + amount);
+
         vm.stopPrank();
     }
 

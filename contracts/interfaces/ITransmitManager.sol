@@ -20,16 +20,24 @@ interface ITransmitManager {
     ) external view returns (address, bool);
 
     /**
-     * @notice Pays the fees required for the destination chain to process the packet.
-     * @dev The fees are paid by the sender of the packet to the switchboard contract.
-     * @param dstChainSlug The unique identifier for the destination chain of the packet.
+     * @notice sets the transmission fee needed to transmit message to given `siblingSlug_`
+     * @dev recovered address should add have feeUpdater role for `siblingSlug_`
+     * @param nonce_ The incremental nonce to prevent signature replay
+     * @param siblingSlug_ sibling id for which fee updater is registered
+     * @param transmissionFees_ digest which is signed by transmitter
+     * @param signature_ signature
      */
-    function payFees(uint32 dstChainSlug) external payable;
-
     function setTransmissionFees(
         uint256 nonce_,
-        uint32 dstChainSlug_,
+        uint32 siblingSlug_,
         uint128 transmissionFees_,
         bytes calldata signature_
     ) external;
+
+    /**
+     * @notice receives fees from Execution manager
+     * @dev this function can be used to keep track of fees received for each slug
+     * @param siblingSlug_ sibling id for which fee updater is registered
+     */
+    function receiveFees(uint32 siblingSlug_) external payable;
 }

@@ -11,24 +11,24 @@ contract Messenger is IPlug, Ownable(msg.sender) {
     uint256 public immutable _localChainSlug;
 
     bytes32 public _message;
-    uint256 public _msgGasLimit;
+    uint256 public _minMsgGasLimit;
 
     bytes32 public constant _PING = keccak256("PING");
     bytes32 public constant _PONG = keccak256("PONG");
 
     error NoSocketFee();
 
-    constructor(address socket_, uint256 chainSlug_, uint256 msgGasLimit_) {
+    constructor(address socket_, uint256 chainSlug_, uint256 minMsgGasLimit_) {
         _socket__ = ISocket(socket_);
         _localChainSlug = chainSlug_;
 
-        _msgGasLimit = msgGasLimit_;
+        _minMsgGasLimit = minMsgGasLimit_;
     }
 
     receive() external payable {}
 
-    function updateMsgGasLimit(uint256 msgGasLimit_) external onlyOwner {
-        _msgGasLimit = msgGasLimit_;
+    function updateMsgGasLimit(uint256 minMsgGasLimit_) external onlyOwner {
+        _minMsgGasLimit = minMsgGasLimit_;
     }
 
     function removeGas(address payable receiver_) external onlyOwner {
@@ -42,10 +42,16 @@ contract Messenger is IPlug, Ownable(msg.sender) {
     function sendRemoteMessage(
         uint32 remoteChainSlug_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         bytes32 message_
     ) external payable {
         bytes memory payload = abi.encode(_localChainSlug, message_);
-        _outbound(remoteChainSlug_, executionParams_, payload);
+        _outbound(
+            remoteChainSlug_,
+            executionParams_,
+            transmissionParams_,
+            payload
+        );
     }
 
     function inbound(
@@ -64,7 +70,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
             _localChainSlug,
             msgDecoded == _PING ? _PONG : _PING
         );
-        _outbound(remoteChainSlug, bytes32(0), newPayload);
+        _outbound(remoteChainSlug, bytes32(0), bytes32(0), newPayload);
     }
 
     // settings
@@ -92,20 +98,23 @@ contract Messenger is IPlug, Ownable(msg.sender) {
     function _outbound(
         uint32 targetChain_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         bytes memory payload_
     ) private {
         uint256 fee = _socket__.getMinFees(
-            _msgGasLimit,
+            _minMsgGasLimit,
             uint256(payload_.length),
             executionParams_,
+            transmissionParams_,
             targetChain_,
             address(this)
         );
         if (!(address(this).balance >= fee)) revert NoSocketFee();
         _socket__.outbound{value: fee}(
             targetChain_,
-            _msgGasLimit,
+            _minMsgGasLimit,
             executionParams_,
+            transmissionParams_,
             payload_
         );
     }

@@ -22,7 +22,7 @@ contract PolygonL1SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        initialise();
+        initialize();
 
         _a.chainSlug = uint32(uint256(5));
         _b.chainSlug = uint32(uint256(80001));
@@ -43,7 +43,7 @@ contract PolygonL1SwitchboardTest is Setup {
 
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = bytes32(0);
-        messageDetails.msgGasLimit = 1000000;
+        messageDetails.minMsgGasLimit = 1000000;
         messageDetails.executionFee = 100;
         messageDetails.payload = abi.encode(msg.sender);
 

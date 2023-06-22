@@ -18,7 +18,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        initialise();
+        initialize();
 
         _a.chainSlug = uint32(uint256(421613));
         _b.chainSlug = uint32(uint256(5));
@@ -38,7 +38,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
 
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = 0;
-        messageDetails.msgGasLimit = 1000000;
+        messageDetails.minMsgGasLimit = 1000000;
         messageDetails.executionFee = 100;
         messageDetails.payload = abi.encode(msg.sender);
 

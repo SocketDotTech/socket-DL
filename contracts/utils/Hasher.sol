@@ -16,7 +16,7 @@ import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
  */
 contract Hasher is IHasher, AccessControl {
     /**
-     * @notice initialises and grants RESCUE_ROLE to owner.
+     * @notice initializes and grants RESCUE_ROLE to owner.
      * @param owner_ The address of the owner of the contract.
      */
     constructor(address owner_) AccessControl(owner_) {
@@ -39,7 +39,7 @@ contract Hasher is IHasher, AccessControl {
                     dstChainSlug_,
                     dstPlug_,
                     messageDetails_.msgId,
-                    messageDetails_.msgGasLimit,
+                    messageDetails_.minMsgGasLimit,
                     messageDetails_.executionParams,
                     messageDetails_.executionFee,
                     messageDetails_.payload

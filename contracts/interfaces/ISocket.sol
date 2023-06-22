@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.20;
 
+import "./ITransmitManager.sol";
+import "./IExecutionManager.sol";
+
 /**
  * @title ISocket
  * @notice An interface for a cross-chain communication contract
@@ -32,7 +35,7 @@ interface ISocket {
         // The fee to be paid for executing the message.
         uint256 executionFee;
         // The maximum amount of gas that can be used to execute the message.
-        uint256 msgGasLimit;
+        uint256 minMsgGasLimit;
         // The extra params which provides msg value and additional info needed for message exec
         bytes32 executionParams;
         // The payload data to be executed in the message.
@@ -63,7 +66,7 @@ interface ISocket {
      * @param dstChainSlug remote chain slug
      * @param dstPlug remote plug address
      * @param msgId message id packed with remoteChainSlug and nonce
-     * @param msgGasLimit gas limit needed to execute the inbound at remote
+     * @param minMsgGasLimit gas limit needed to execute the inbound at remote
      * @param payload the data which will be used by inbound at remote
      */
     event MessageOutbound(
@@ -72,8 +75,9 @@ interface ISocket {
         uint32 dstChainSlug,
         address dstPlug,
         bytes32 msgId,
-        uint256 msgGasLimit,
+        uint256 minMsgGasLimit,
         bytes32 executionParams,
+        bytes32 transmissionParams,
         bytes payload,
         Fees fees
     );
@@ -83,20 +87,6 @@ interface ISocket {
      * @param msgId msg id which is executed
      */
     event ExecutionSuccess(bytes32 msgId);
-
-    /**
-     * @notice emits the status of message after inbound call
-     * @param msgId msg id which is executed
-     * @param result if message reverts, returns the revert message
-     */
-    event ExecutionFailed(bytes32 msgId, string result);
-
-    /**
-     * @notice emits the error message in bytes after inbound call
-     * @param msgId msg id which is executed
-     * @param result if message reverts, returns the revert message in bytes
-     */
-    event ExecutionFailedBytes(bytes32 msgId, bytes result);
 
     /**
      * @notice emits the config set by a plug for a remoteChainSlug
@@ -122,13 +112,14 @@ interface ISocket {
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with capacitor
      * @param remoteChainSlug_ the remote chain slug
-     * @param msgGasLimit_ the gas limit needed to execute the payload on remote
+     * @param minMsgGasLimit_ the gas limit needed to execute the payload on remote
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
         uint32 remoteChainSlug_,
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         bytes calldata payload_
     ) external payable returns (bytes32 msgId);
 
@@ -143,7 +134,7 @@ interface ISocket {
     ) external payable;
 
     /**
-     * @notice seals data in capacitor for specific batchSizr
+     * @notice seals data in capacitor for specific batchSize
      * @param batchSize_ size of batch to be sealed
      * @param capacitorAddress_ address of capacitor
      * @param signature_ signed Data needed for verification
@@ -209,20 +200,23 @@ interface ISocket {
 
     /**
      * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
-     * @param msgGasLimit_ The gas limit of the message.
+     * @param minMsgGasLimit_ The gas limit of the message.
      * @param remoteChainSlug_ The slug of the destination chain for the message.
      * @param plug_ The address of the plug through which the message is sent.
      * @return totalFees The minimum fees required for the specified message.
      */
     function getMinFees(
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
+        bytes32 transmissionParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view returns (uint256 totalFees);
 
-    function transmitManager() external view returns (address);
+    /// return instance of transmit manager
+    function transmitManager__() external view returns (ITransmitManager);
 
-    function executionManager() external view returns (address);
+    /// return instance of execution manager
+    function executionManager__() external view returns (IExecutionManager);
 }
