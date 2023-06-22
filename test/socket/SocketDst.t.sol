@@ -59,10 +59,10 @@ contract SocketDstTest is Setup {
     );
 
     function setUp() external {
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
-        _dualChainSetup(transmitterPivateKeys);
+        _dualChainSetup(transmitterPrivateKeys);
         _deployPlugContracts();
         _configPlugContracts(index);
     }
@@ -618,7 +618,7 @@ contract SocketDstTest is Setup {
         address capacitor_,
         uint32 remoteChainSlug_,
         uint256 transmitterPrivateKey_
-    ) public returns (bytes32 root, bytes32 packetId, bytes memory sig) {
+    ) public view returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint256 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);

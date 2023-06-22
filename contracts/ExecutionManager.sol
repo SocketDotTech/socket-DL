@@ -115,7 +115,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     mapping(uint32 => uint128) public executionFees;
 
     // transmit manager => chain slug => switchboard fees collected
-    mapping(address => mapping(uint32 => uint128)) transmissionMinFees;
+    mapping(address => mapping(uint32 => uint128)) public transmissionMinFees;
 
     // destSlug => relativeNativePrice (stores (destNativeTokenPriceUSD*(1e18)/srcNativeTokenPriceUSD))
     mapping(uint32 => uint256) public relativeNativeTokenPrice;

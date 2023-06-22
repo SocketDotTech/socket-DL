@@ -23,10 +23,10 @@ contract ArbitrumL2SwitchboardTest is Setup {
         _a.chainSlug = uint32(uint256(421613));
         _b.chainSlug = uint32(uint256(5));
 
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
-        _chainSetup(transmitterPivateKeys);
+        _chainSetup(transmitterPrivateKeys);
     }
 
     function testInitateNativeConfirmation() public {

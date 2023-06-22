@@ -130,9 +130,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Modifier to ensure that a function can only be called by the remote switchboard.
      */
-    modifier onlyRemoteSwitchboard() virtual {
-        _;
-    }
+    modifier onlyRemoteSwitchboard() virtual;
 
     /**
      * @dev Constructor function for the CrossChainReceiver contract.

@@ -34,14 +34,13 @@ contract SwitchboardBaseTest is Setup {
         _a.chainSlug = uint32(uint256(aChainSlug));
         _b.chainSlug = uint32(uint256(bChainSlug));
 
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
-        console.log(_transmitter);
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
         _deployContractsOnSingleChain(
             _b,
             _a.chainSlug,
             isExecutionOpen,
-            transmitterPivateKeys
+            transmitterPrivateKeys
         );
 
         fastSwitchboard = FastSwitchboard(
@@ -338,8 +337,6 @@ contract SwitchboardBaseTest is Setup {
         fastSwitchboard.withdrawFees(address(0));
 
         fastSwitchboard.withdrawFees(_fundRescuer);
-
-        uint256 finalBal = _fundRescuer.balance;
 
         assertEq(address(fastSwitchboard).balance, 0);
         assertEq(_fundRescuer.balance, initialBal + amount);
