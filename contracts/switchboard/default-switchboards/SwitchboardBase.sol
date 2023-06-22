@@ -229,9 +229,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     /**
      * @notice Unpauses a path.
-     * @param nonce_ The nonce used for the untrip transaction.
+     * @param nonce_ The nonce used for the un trip transaction.
      * @param srcChainSlug_ The source chain slug of the path to be unpaused.
-     * @param signature_ The signature provided to validate the untrip transaction.
+     * @param signature_ The signature provided to validate the un trip transaction.
      */
     function unTripPath(
         uint256 nonce_,
@@ -264,8 +264,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     /**
      * @notice Unpauses global execution.
-     * @param nonce_ The nonce used for the untrip transaction.
-     * @param signature_ The signature provided to validate the untrip transaction.
+     * @param nonce_ The nonce used for the un trip transaction.
+     * @param signature_ The signature provided to validate the un trip transaction.
      */
     function unTrip(uint256 nonce_, bytes memory signature_) external {
         address unTripper = signatureVerifier__.recoverSigner(
