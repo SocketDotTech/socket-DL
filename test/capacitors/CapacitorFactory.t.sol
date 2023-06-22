@@ -13,7 +13,7 @@ contract CapacitorFactoryTest is Setup {
     error NoPermit(bytes32 role);
 
     function setUp() external {
-        initialise();
+        initialize();
         _cf = new CapacitorFactory(_socketOwner);
         _token = new ERC20PresetFixedSupply(
             "TEST",

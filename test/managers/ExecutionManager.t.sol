@@ -9,7 +9,7 @@ contract ExecutionManagerTest is Setup {
     event FeesWithdrawn(address account_, uint256 value_);
 
     function setUp() public {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
         _b.chainSlug = uint32(uint256(bChainSlug));
         uint256[] memory transmitterPivateKeys = new uint256[](1);

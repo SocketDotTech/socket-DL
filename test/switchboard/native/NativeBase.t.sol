@@ -21,7 +21,7 @@ contract NativeBaseSwitchboardTest is Setup {
     event SwitchboardFeesSet(uint256 switchboardFees, uint256 verificationFees);
 
     function setUp() external {
-        initialise();
+        initialize();
 
         _a.chainSlug = uint32(uint256(420));
         _b.chainSlug = uint32(uint256(5));

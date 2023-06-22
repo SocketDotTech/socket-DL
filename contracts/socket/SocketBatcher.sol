@@ -282,16 +282,16 @@ contract SocketBatcher is AccessControl {
 
     /**
      * @notice attests a batch of Packets
-     * @param switchBoardAddress_ address of switchboard
+     * @param switchboardAddress_ address of switchboard
      * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
      */
     function attestBatch(
-        address switchBoardAddress_,
+        address switchboardAddress_,
         AttestRequest[] calldata attestRequests_
     ) external {
         uint256 attestRequestLength = attestRequests_.length;
         for (uint256 index = 0; index < attestRequestLength; ) {
-            FastSwitchboard(switchBoardAddress_).attest(
+            FastSwitchboard(switchboardAddress_).attest(
                 attestRequests_[index].packetId,
                 attestRequests_[index].proposalCount,
                 attestRequests_[index].root,

@@ -23,7 +23,7 @@ contract OptimismSwitchboardL2L1Test is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        initialise();
+        initialize();
 
         _a.chainSlug = uint32(uint256(420));
         _b.chainSlug = uint32(uint256(5));
