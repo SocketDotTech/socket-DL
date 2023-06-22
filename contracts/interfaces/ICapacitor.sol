@@ -31,6 +31,15 @@ interface ICapacitor {
     function getRootByCount(uint64 id) external view returns (bytes32 root);
 
     /**
+     * @notice returns the maxPacketLength
+     * @return maxPacketLength of the capacitor
+     */
+    function getMaxPacketLength()
+        external
+        view
+        returns (uint256 maxPacketLength);
+
+    /**
      * @notice seals the packet
      * @dev indicates the packet is ready to be shipped and no more messages can be added now.
      * @dev this should be called by socket only

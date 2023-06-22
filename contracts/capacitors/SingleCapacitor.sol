@@ -10,6 +10,7 @@ import "./BaseCapacitor.sol";
  * basic storage and common function implementations.
  */
 contract SingleCapacitor is BaseCapacitor {
+    uint256 public constant maxPacketLength = 1;
     // Error triggered when no new packet/message is there to be sealed
     error NoPendingPacket();
 
@@ -30,10 +31,17 @@ contract SingleCapacitor is BaseCapacitor {
      * @param socket_ The address of the socket contract.
      * @param owner_ The address of the owner of the capacitor contract.
      */
+
     constructor(
         address socket_,
         address owner_
-    ) BaseCapacitor(socket_, owner_) {}
+    ) BaseCapacitor(socket_, owner_) {
+        _grantRole(RESCUE_ROLE, owner_);
+    }
+
+    function getMaxPacketLength() external pure override returns (uint256) {
+        return maxPacketLength;
+    }
 
     /// @inheritdoc ICapacitor
     function addPackedMessage(

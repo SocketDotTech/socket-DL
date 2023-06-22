@@ -17,9 +17,9 @@ interface ISocket {
      * @param executionFee fees needed for execution
      */
     struct Fees {
-        uint256 transmissionFees;
-        uint256 switchboardFees;
-        uint256 executionFee;
+        uint128 transmissionFees;
+        uint128 executionFee;
+        uint128 switchboardFees;
     }
 
     /**
@@ -34,7 +34,7 @@ interface ISocket {
         // The maximum amount of gas that can be used to execute the message.
         uint256 msgGasLimit;
         // The extra params which provides msg value and additional info needed for message exec
-        bytes32 extraParams;
+        bytes32 executionParams;
         // The payload data to be executed in the message.
         bytes payload;
         // The proof data required by the Decapacitor contract to verify the message's authenticity.
@@ -58,7 +58,7 @@ interface ISocket {
         address dstPlug,
         bytes32 msgId,
         uint256 msgGasLimit,
-        bytes32 extraParams,
+        bytes32 executionParams,
         bytes payload,
         Fees fees
     );
@@ -113,7 +113,7 @@ interface ISocket {
     function outbound(
         uint32 remoteChainSlug_,
         uint256 msgGasLimit_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         bytes calldata payload_
     ) external payable returns (bytes32 msgId);
 
@@ -201,7 +201,7 @@ interface ISocket {
     function getMinFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view returns (uint256 totalFees);

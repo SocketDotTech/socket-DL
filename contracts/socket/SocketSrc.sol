@@ -32,6 +32,7 @@ abstract contract SocketSrc is SocketBase {
      * @dev Packs the message and includes it in a packet with capacitor
      * @param remoteChainSlug_ the remote chain slug
      * @param msgGasLimit_ the gas limit needed to execute the payload on remote
+     * @param executionParams_ a 32 bytes param to add extra details for execution
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
@@ -40,24 +41,31 @@ abstract contract SocketSrc is SocketBase {
         bytes32 executionParams_,
         bytes calldata payload_
     ) external payable override returns (bytes32 msgId) {
-        PlugConfig memory plugConfig = _plugConfigs[msg.sender][
+        PlugConfig memory plugConfig;
+
+        plugConfig.siblingPlug = _plugConfigs[msg.sender][remoteChainSlug_]
+            .siblingPlug;
+        plugConfig.capacitor__ = _plugConfigs[msg.sender][remoteChainSlug_]
+            .capacitor__;
+        plugConfig.outboundSwitchboard__ = _plugConfigs[msg.sender][
             remoteChainSlug_
-        ];
+        ].outboundSwitchboard__;
 
         msgId = _encodeMsgId(plugConfig.siblingPlug);
 
-        ISocket.Fees memory fees = _validateAndGetFees(
+        ISocket.Fees memory fees = _validateAndSendFees(
             msgGasLimit_,
             uint256(payload_.length),
             executionParams_,
             uint32(remoteChainSlug_),
-            plugConfig.outboundSwitchboard__
+            plugConfig.outboundSwitchboard__,
+            plugConfig.capacitor__.getMaxPacketLength()
         );
 
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = msgId;
         messageDetails.msgGasLimit = msgGasLimit_;
-        messageDetails.extraParams = executionParams_;
+        messageDetails.executionParams = executionParams_;
         messageDetails.payload = payload_;
         messageDetails.executionFee = fees.executionFee;
 
@@ -70,13 +78,6 @@ abstract contract SocketSrc is SocketBase {
         );
 
         plugConfig.capacitor__.addPackedMessage(packedMessage);
-
-        _sendFees(
-            msgGasLimit_,
-            uint32(remoteChainSlug_),
-            plugConfig.outboundSwitchboard__,
-            fees
-        );
 
         emit MessageOutbound(
             chainSlug,
@@ -92,74 +93,47 @@ abstract contract SocketSrc is SocketBase {
     }
 
     /**
-     * @dev Calculates fees needed for message transmission and execution and checks if msg value is enough
-     * @param msgGasLimit_ The gas limit needed to execute the payload on the remote chain
-     * @param remoteChainSlug_ The slug of the remote chain
-     * @param switchboard__ The address of the switchboard contract
-     * @return fees The fees object
+     * @notice Validates if enough fee is provided for message execution. If yes, fees is sent and stored in execution manager.
+     * @param msgGasLimit_ The gas limit of the message.
+     * @param payloadSize_ The byte length of payload of the message.
+     * @param executionParams_ The extraParams required for execution.
+     * @param remoteChainSlug_ The slug of the destination chain for the message.
+     * @param switchboard__ The address of the switchboard through which the message is sent.
+     * @param maxPacketLength_ The maxPacketLength for the capacitor used. Used for calculating transmission Fees.
      */
-    function _validateAndGetFees(
+    function _validateAndSendFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 remoteChainSlug_,
-        ISwitchboard switchboard__
-    ) internal returns (Fees memory fees) {
-        uint256 minExecutionFees;
-        (
-            fees.transmissionFees,
-            fees.switchboardFees,
-            minExecutionFees
-        ) = _getMinFees(
-            msgGasLimit_,
-            payloadSize_,
-            executionParams_,
+        ISwitchboard switchboard__,
+        uint256 maxPacketLength_
+    ) internal returns (ISocket.Fees memory fees) {
+        uint128 verificationFees;
+        (fees.switchboardFees, verificationFees) = _getSwitchboardMinFees(
             remoteChainSlug_,
             switchboard__
         );
 
-        if (
-            msg.value <
-            fees.transmissionFees + fees.switchboardFees + minExecutionFees
-        ) revert InsufficientFees();
-
-        unchecked {
-            // any extra fee is considered as executionFee
-            fees.executionFee =
-                msg.value -
-                fees.transmissionFees -
-                fees.switchboardFees;
-        }
-    }
-
-    /**
-     * @dev Deducts the fees needed for message transmission and execution
-     * @param msgGasLimit_ The gas limit needed to execute the payload on the remote chain
-     * @param remoteChainSlug_ The slug of the remote chain
-     * @param switchboard__ The address of the switchboard contract
-     * @param fees_ The fees object
-     */
-    function _sendFees(
-        uint256 msgGasLimit_,
-        uint32 remoteChainSlug_,
-        ISwitchboard switchboard__,
-        Fees memory fees_
-    ) internal {
-        transmitManager__.payFees{value: fees_.transmissionFees}(
-            remoteChainSlug_
-        );
-        executionManager__.payFees{value: fees_.executionFee}(
+        (fees.executionFee, fees.transmissionFees) = executionManager__
+            .payAndCheckFees{value: msg.value}(
             msgGasLimit_,
-            remoteChainSlug_
+            payloadSize_,
+            executionParams_,
+            remoteChainSlug_,
+            fees.switchboardFees,
+            verificationFees,
+            address(transmitManager__),
+            address(switchboard__),
+            maxPacketLength_
         );
-
-        // call to unknown external contract at the end
-        switchboard__.payFees{value: fees_.switchboardFees}(remoteChainSlug_);
     }
 
     /**
      * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
      * @param msgGasLimit_ The gas limit of the message.
+     * @param payloadSize_ The byte length of payload of the message.
+     * @param executionParams_ The extraParams required for execution.
      * @param remoteChainSlug_ The slug of the destination chain for the message.
      * @param plug_ The address of the plug through which the message is sent.
      * @return totalFees The minimum fees required for the specified message.
@@ -171,24 +145,48 @@ abstract contract SocketSrc is SocketBase {
         uint32 remoteChainSlug_,
         address plug_
     ) external view override returns (uint256 totalFees) {
-        PlugConfig storage plugConfig = _plugConfigs[plug_][remoteChainSlug_];
-
         (
-            uint256 transmissionFees,
-            uint256 switchboardFees,
-            uint256 executionFee
-        ) = _getMinFees(
+            uint128 transmissionFees,
+            uint128 switchboardFees,
+            uint128 executionFees
+        ) = _getAllMinFees(
                 msgGasLimit_,
                 payloadSize_,
                 executionParams_,
                 remoteChainSlug_,
-                plugConfig.outboundSwitchboard__
+                _plugConfigs[plug_][remoteChainSlug_].outboundSwitchboard__
             );
-
-        totalFees = transmissionFees + switchboardFees + executionFee;
+        totalFees = transmissionFees + switchboardFees + executionFees;
     }
 
-    function _getMinFees(
+    /**
+     * @notice Retrieves the minimum fees required for switchboard.
+     * @param remoteChainSlug_ The slug of the destination chain for the message.
+     * @param switchboard__ The switchboard address for which fees is retrieved.
+     * @return switchboardFees , verificationFees The minimum fees for message execution
+     */
+    function _getSwitchboardMinFees(
+        uint32 remoteChainSlug_,
+        ISwitchboard switchboard__
+    )
+        internal
+        view
+        returns (uint128 switchboardFees, uint128 verificationFees)
+    {
+        (switchboardFees, verificationFees) = switchboard__.getMinFees(
+            remoteChainSlug_
+        );
+    }
+
+    /**
+     * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
+     * @param msgGasLimit_ The gas limit of the message.
+     * @param payloadSize_ The byte length of payload of the message.
+     * @param executionParams_ The extraParams required for execution.
+     * @param remoteChainSlug_ The slug of the destination chain for the message.
+     * @param switchboard__ The address of the switchboard through which the message is sent.
+     */
+    function _getAllMinFees(
         uint256 msgGasLimit_,
         uint256 payloadSize_,
         bytes32 executionParams_,
@@ -198,25 +196,28 @@ abstract contract SocketSrc is SocketBase {
         internal
         view
         returns (
-            uint256 transmissionFees,
-            uint256 switchboardFees,
-            uint256 executionFee
+            uint128 transmissionFees,
+            uint128 switchboardFees,
+            uint128 executionFees
         )
     {
-        transmissionFees = transmitManager__.getMinFees(remoteChainSlug_);
-
-        uint256 verificationFee;
-        (switchboardFees, verificationFee) = switchboard__.getMinFees(
-            remoteChainSlug_
-        );
-        uint256 msgExecutionFee = executionManager__.getMinFees(
-            msgGasLimit_,
-            payloadSize_,
-            executionParams_,
-            remoteChainSlug_
+        uint128 verificationFees;
+        uint128 msgExecutionFee;
+        (switchboardFees, verificationFees) = _getSwitchboardMinFees(
+            remoteChainSlug_,
+            switchboard__
         );
 
-        executionFee = msgExecutionFee + verificationFee;
+        (msgExecutionFee, transmissionFees) = executionManager__
+            .getExecutionTransmissionMinFees(
+                msgGasLimit_,
+                payloadSize_,
+                executionParams_,
+                remoteChainSlug_,
+                address(transmitManager__)
+            );
+
+        executionFees = msgExecutionFee + verificationFees;
     }
 
     /**

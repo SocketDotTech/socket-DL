@@ -18,7 +18,11 @@ contract HashChainCapacitorTest is Setup {
         initialise();
 
         hoax(_socketOwner);
-        _hcCapacitor = new HashChainCapacitor(_socket, _socketOwner);
+        _hcCapacitor = new HashChainCapacitor(
+            _socket,
+            _socketOwner,
+            DEFAULT_BATCH_LENGTH
+        );
         _hcDecapacitor = new HashChainDecapacitor(_socketOwner);
     }
 

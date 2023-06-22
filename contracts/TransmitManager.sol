@@ -2,8 +2,8 @@
 pragma solidity 0.8.7;
 
 import "./interfaces/ITransmitManager.sol";
+import "./interfaces/IExecutionManager.sol";
 import "./interfaces/ISignatureVerifier.sol";
-
 import "./utils/AccessControlExtended.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./libraries/FeesHelper.sol";
@@ -17,6 +17,7 @@ import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
  * @dev This contract inherits AccessControlExtended which manages access control
  */
 contract TransmitManager is ITransmitManager, AccessControlExtended {
+    IExecutionManager public executionManager__;
     ISignatureVerifier public signatureVerifier__;
 
     uint32 public immutable chainSlug;
@@ -25,7 +26,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     mapping(address => uint256) public nextNonce;
 
     // remoteChainSlug => transmissionFees
-    mapping(uint32 => uint256) public transmissionFees;
+    // mapping(uint32 => uint128) public transmissionFees;
 
     error InsufficientTransmitFees();
     error InvalidNonce();
@@ -35,6 +36,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param signatureVerifier The address of the new signature verifier contract
      */
     event SignatureVerifierSet(address signatureVerifier);
+    event ExecutionManagerSet(address executionManager);
 
     /**
      * @notice Emitted when the transmissionFees is updated
@@ -51,11 +53,13 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      */
     constructor(
         ISignatureVerifier signatureVerifier_,
+        address executionManager_,
         address owner_,
         uint32 chainSlug_
     ) AccessControlExtended(owner_) {
         chainSlug = chainSlug_;
         signatureVerifier__ = signatureVerifier_;
+        executionManager__ = IExecutionManager(executionManager_);
     }
 
     /**
@@ -89,20 +93,10 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      */
     function payFees(uint32 siblingChainSlug_) external payable override {}
 
-    /**
-     * @notice calculates fees for the given sibling slug
-     * @param siblingChainSlug_ sibling id
-     */
-    function getMinFees(
-        uint32 siblingChainSlug_
-    ) external view override returns (uint256) {
-        return transmissionFees[siblingChainSlug_];
-    }
-
     function setTransmissionFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
-        uint256 transmissionFees_,
+        uint128 transmissionFees_,
         bytes calldata signature_
     ) external override {
         address feesUpdater = signatureVerifier__.recoverSigner(
@@ -123,7 +117,11 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
         if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
 
-        transmissionFees[dstChainSlug_] = transmissionFees_;
+        // transmissionFees[dstChainSlug_] = transmissionFees_;
+        executionManager__.updateTransmissionMinFees(
+            dstChainSlug_,
+            transmissionFees_
+        );
         emit TransmissionFeesSet(dstChainSlug_, transmissionFees_);
     }
 
@@ -144,6 +142,17 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     ) external onlyRole(GOVERNANCE_ROLE) {
         signatureVerifier__ = ISignatureVerifier(signatureVerifier_);
         emit SignatureVerifierSet(signatureVerifier_);
+    }
+
+    /**
+     * @notice updates signatureVerifier_
+     * @param executionManager_ address of Signature Verifier
+     */
+    function setExecutionManager(
+        address executionManager_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        executionManager__ = IExecutionManager(executionManager_);
+        emit ExecutionManagerSet(executionManager_);
     }
 
     /**

@@ -52,13 +52,13 @@ interface ISwitchboard {
      */
     function getMinFees(
         uint32 dstChainSlug
-    ) external view returns (uint256 switchboardFee, uint256 verificationFee);
+    ) external view returns (uint128 switchboardFee, uint128 verificationFee);
 
     function setFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
-        uint256 verificationFees_,
-        uint256 switchboardFees_,
+        uint128 verificationFees_,
+        uint128 switchboardFees_,
         bytes calldata signature_
     ) external;
 }

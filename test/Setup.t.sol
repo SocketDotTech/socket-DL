@@ -74,8 +74,11 @@ contract Setup is Test {
 
     uint256 internal _slowCapacitorWaitTime = 300;
     uint256 internal _msgGasLimit = 30548;
-    uint256 internal _transmissionFees = 350000000000;
-    uint256 internal _executionFees = 110000000000;
+    uint256 internal _sealGasLimit = 150000;
+    uint128 internal _transmissionFees = 350000000000;
+    uint128 internal _executionFees = 110000000000;
+    uint128 internal _switchboardFees = 100000;
+    uint128 internal _verificationFees = 100000;
     uint256 internal _msgValueMaxThreshold = 1000;
     uint256 internal _msgValueMinThreshold = 10;
     uint256 internal _relativeNativeTokenPrice = 1000 * 1e18;
@@ -112,7 +115,7 @@ contract Setup is Test {
         uint256 proposalCount_;
         bytes32 msgId_;
         uint256 msgGasLimit_;
-        bytes32 extraParams_;
+        bytes32 executionParams_;
         uint256 executionFee_;
         bytes32 packedMessage_;
         bytes payload_;
@@ -225,6 +228,25 @@ contract Setup is Test {
         );
         cc_.configs__.push(scc_);
 
+        vm.startPrank(_socketOwner);
+
+        //grant FeesUpdater Role
+        FastSwitchboard(address(cc_.configs__[0].switchboard__))
+            .grantRoleWithSlug(
+                FEES_UPDATER_ROLE,
+                remoteChainSlug_,
+                _socketOwner
+            );
+
+        vm.stopPrank();
+
+        _setSwitchboardFees(
+            cc_,
+            remoteChainSlug_,
+            _switchboardFees,
+            _verificationFees,
+            0
+        );
         scc_ = _addOptimisticSwitchboard(cc_, remoteChainSlug_, _capacitorType);
         cc_.configs__.push(scc_);
 
@@ -258,7 +280,7 @@ contract Setup is Test {
     function _setTransmissionFees(
         ChainContext storage cc_,
         uint32 remoteChainSlug_,
-        uint256 transmissionFees_
+        uint128 transmissionFees_
     ) internal {
         //set TransmissionFees for remoteChainSlug
         bytes32 feesUpdateDigest = keccak256(
@@ -287,7 +309,7 @@ contract Setup is Test {
     function _setExecutionFees(
         ChainContext storage cc_,
         uint32 remoteChainSlug_,
-        uint256 executionFees_
+        uint128 executionFees_
     ) internal {
         //set ExecutionFees for remoteChainSlug
         bytes32 feesUpdateDigest = keccak256(
@@ -310,6 +332,40 @@ contract Setup is Test {
             cc_.executorNonce++,
             uint32(remoteChainSlug_),
             executionFees_,
+            feesUpdateSignature
+        );
+    }
+
+    function _setSwitchboardFees(
+        ChainContext storage cc_,
+        uint32 dstChainSlug_,
+        uint128 switchboardFees_,
+        uint128 verificationFees_,
+        uint256 switchboardIndex
+    ) internal {
+        //set ExecutionFees for remoteChainSlug
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                address(cc_.configs__[switchboardIndex].switchboard__),
+                cc_.chainSlug,
+                dstChainSlug_,
+                cc_.configs__[switchboardIndex].switchboardNonce,
+                switchboardFees_,
+                verificationFees_
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        cc_.configs__[switchboardIndex].switchboard__.setFees(
+            cc_.configs__[switchboardIndex].switchboardNonce++,
+            dstChainSlug_,
+            switchboardFees_,
+            verificationFees_,
             feesUpdateSignature
         );
     }
@@ -493,6 +549,7 @@ contract Setup is Test {
 
         cc_.transmitManager__ = new TransmitManager(
             cc_.sigVerifier__,
+            address(cc_.executionManager__),
             deployer_,
             cc_.chainSlug
         );
@@ -506,6 +563,8 @@ contract Setup is Test {
             deployer_,
             version
         );
+
+        cc_.socket__.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
         vm.stopPrank();
     }
@@ -708,7 +767,7 @@ contract Setup is Test {
             executionParams.msgId_,
             executionParams.executionFee_,
             executionParams.msgGasLimit_,
-            executionParams.extraParams_,
+            executionParams.executionParams_,
             executionParams.payload_,
             executionParams.proof_
         );
@@ -718,8 +777,8 @@ contract Setup is Test {
             executorPrivateKey_
         );
 
-        (uint8 paramType, uint248 paramValue) = _decodeExtraParams(
-            executionParams.extraParams_
+        (uint8 paramType, uint248 paramValue) = _decodeexecutionParams(
+            executionParams.executionParams_
         );
         if (paramType == 0)
             dst_.socket__.execute(
@@ -812,11 +871,11 @@ contract Setup is Test {
             );
     }
 
-    function _decodeExtraParams(
-        bytes32 extraParams_
+    function _decodeexecutionParams(
+        bytes32 executionParams_
     ) internal pure returns (uint8 paramType, uint248 paramValue) {
-        paramType = uint8(uint256(extraParams_) >> 248);
-        paramValue = uint248(uint256(extraParams_));
+        paramType = uint8(uint256(executionParams_) >> 248);
+        paramValue = uint248(uint256(executionParams_));
     }
 
     // to test contract setup on one chain

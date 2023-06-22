@@ -11,7 +11,7 @@ import "./BaseCapacitor.sol";
  * When a packet is full, a new packet is created and the root of the last packet is sealed.
  */
 contract HashChainCapacitor is BaseCapacitor {
-    uint64 private constant _MAX_LEN = 10;
+    uint256 public maxPacketLength;
 
     /// an incrementing count for each new message added
     uint64 internal _nextMessageCount = 1;
@@ -46,8 +46,22 @@ contract HashChainCapacitor is BaseCapacitor {
      */
     constructor(
         address socket_,
-        address owner_
-    ) BaseCapacitor(socket_, owner_) {}
+        address owner_,
+        uint256 maxPacketLength_
+    ) BaseCapacitor(socket_, owner_) {
+        _grantRole(RESCUE_ROLE, owner_);
+        maxPacketLength = maxPacketLength_;
+    }
+
+    function updateMaxPacketLength(
+        uint256 maxPacketLength_
+    ) external onlyOwner {
+        maxPacketLength = maxPacketLength_;
+    }
+
+    function getMaxPacketLength() external view override returns (uint256) {
+        return maxPacketLength;
+    }
 
     /**
      * @notice Adds a packed message to the hash chain.
@@ -70,7 +84,7 @@ contract HashChainCapacitor is BaseCapacitor {
         _messageRoots[messageCount] = root;
 
         // create a packet if max length is reached and update packet count
-        if (messageCount - _messagePacked == _MAX_LEN)
+        if (messageCount - _messagePacked == maxPacketLength)
             _createPacket(packetCount, messageCount, root);
 
         emit MessageAdded(packedMessage_, messageCount, packetCount, root);
@@ -87,7 +101,7 @@ contract HashChainCapacitor is BaseCapacitor {
         uint256 messageCount = _nextMessageCount;
 
         // revert if batch size exceeds max length
-        if (batchSize > _MAX_LEN) revert InvalidBatchSize();
+        if (batchSize > maxPacketLength) revert InvalidBatchSize();
 
         packetCount = _nextSealCount++;
         if (_roots[packetCount] == bytes32(0)) {
