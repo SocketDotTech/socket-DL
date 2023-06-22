@@ -132,4 +132,9 @@ interface IExecutionManager {
         uint32 siblingChainSlug_,
         uint128 amount_
     ) external;
+
+    function withdrawTransmissionFees(
+        uint32 siblingChainSlug_,
+        uint128 amount_
+    ) external;
 }

@@ -10,8 +10,9 @@ contract OpenExecutionManager is ExecutionManager {
     constructor(
         address owner_,
         uint32 chainSlug_,
-        ISignatureVerifier signatureVerifier_
-    ) ExecutionManager(owner_, chainSlug_, signatureVerifier_) {}
+        ISignatureVerifier signatureVerifier_,
+        ISocket socket_
+    ) ExecutionManager(owner_, chainSlug_, signatureVerifier_, socket_) {}
 
     /**
      * @notice This function allows all executors

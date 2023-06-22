@@ -13,11 +13,13 @@ interface ISwitchboard {
      * @param siblingChainSlug_ The slug of the sibling chain to register switchboard with.
      * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
      * @param capacitorType_ The type of capacitor that the switchboard uses.
+     * @param initialPacketCount_ The packet count at the time of registering switchboard. Packets with packet count below this won't be allowed
      */
     function registerSiblingSlug(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
-        uint256 capacitorType_
+        uint256 capacitorType_,
+        uint256 initialPacketCount_
     ) external;
 
     /**
@@ -36,13 +38,6 @@ interface ISwitchboard {
         uint32 srcChainSlug,
         uint256 proposeTime
     ) external view returns (bool);
-
-    /**
-     * @notice Pays the fees required for the destination chain to process the packet.
-     * @dev The fees are paid by the sender of the packet to the switchboard contract.
-     * @param dstChainSlug The unique identifier for the destination chain of the packet.
-     */
-    function payFees(uint32 dstChainSlug) external payable;
 
     /**
      * @notice Retrieves the minimum fees required for the destination chain to process the packet.

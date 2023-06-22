@@ -5,7 +5,7 @@ import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/ICapacitor.sol";
 import "../../interfaces/ISignatureVerifier.sol";
-
+import "../../interfaces/IExecutionManager.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 import "../../utils/AccessControlExtended.sol";
@@ -43,10 +43,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     bool public isInitialised;
 
-    /**
-     * @dev The maximum packet size.
-     */
-    uint256 public maxPacketLength;
+    uint256 initialPacketCount;
 
     /**
      * @dev Address of the remote native switchboard.
@@ -79,19 +76,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param packetId The packet ID.
      */
     event InitiatedNativeConfirmation(bytes32 packetId);
-
-    /**
-     * @dev This event is emitted when a new capacitor is registered.
-     *     It includes the address of the capacitor and the maximum size of the packet allowed.
-     * @param siblingChainSlug Chain slug of the sibling chain
-     * @param capacitor address of capacitor registered to switchboard
-     * @param maxPacketLength maximum packets that can be set to capacitor
-     */
-    event SwitchBoardRegistered(
-        uint32 siblingChainSlug,
-        address capacitor,
-        uint256 maxPacketLength
-    );
 
     /**
      * @dev This event is emitted when a new capacitor is registered.
@@ -205,18 +189,14 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32,
         uint256
     ) external view override returns (bool) {
+        uint64 packetCount = uint64(uint256(packetId_));
+
         if (tripGlobalFuse) return false;
+        if (packetCount < initialPacketCount) return false;
         if (packetIdToRoot[packetId_] != root_) return false;
 
         return true;
     }
-
-    /**
-     * @notice receives fees to be paid to the relayer for executing the packet
-     * @param dstChainSlug_ chain slug of the destination chain
-     * @dev assumes that the amount is paid in the native currency of the destination chain and has 18 decimals
-     */
-    function payFees(uint32 dstChainSlug_) external payable override {}
 
     /**
      * @dev Get the minimum fees for a cross-chain transaction.
@@ -268,10 +248,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     function registerSiblingSlug(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
-        uint256 capacitorType_
+        uint256 capacitorType_,
+        uint256 initialPacketCount_
     ) external override onlyRole(GOVERNANCE_ROLE) {
         if (isInitialised) revert AlreadyInitialised();
 
+        initialPacketCount = initialPacketCount_;
         (address capacitor, ) = socket__.registerSwitchBoard(
             siblingChainSlug_,
             maxPacketLength_,
@@ -279,14 +261,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         isInitialised = true;
-        maxPacketLength = maxPacketLength_;
         capacitor__ = ICapacitor(capacitor);
-
-        emit SwitchBoardRegistered(
-            siblingChainSlug_,
-            capacitor,
-            maxPacketLength_
-        );
     }
 
     /**
@@ -368,6 +343,16 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         FeesHelper.withdrawFees(account_);
+    }
+
+    function withdrawFeesFromExecutionManager(
+        uint32 siblingChainSlug_,
+        uint128 amount_
+    ) external onlyRole(WITHDRAW_ROLE) {
+        IExecutionManager executionManager__ = IExecutionManager(
+            socket__.executionManager()
+        );
+        executionManager__.withdrawSwitchboardFees(siblingChainSlug_, amount_);
     }
 
     /**

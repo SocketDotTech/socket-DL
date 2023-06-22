@@ -63,6 +63,7 @@ contract SocketBatcher is AccessControl {
     struct AttestRequest {
         bytes32 packetId;
         uint256 proposalCount;
+        bytes32 root;
         bytes signature;
     }
 
@@ -298,6 +299,7 @@ contract SocketBatcher is AccessControl {
             FastSwitchboard(switchBoardAddress_).attest(
                 attestRequests_[index].packetId,
                 attestRequests_[index].proposalCount,
+                attestRequests_[index].root,
                 attestRequests_[index].signature
             );
             unchecked {

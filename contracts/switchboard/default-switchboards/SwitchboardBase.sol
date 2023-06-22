@@ -5,7 +5,7 @@ import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/ISignatureVerifier.sol";
 import "../../utils/AccessControlExtended.sol";
-
+import "../../interfaces/IExecutionManager.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../libraries/FeesHelper.sol";
 
@@ -16,17 +16,14 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     ISignatureVerifier public immutable signatureVerifier__;
     ISocket public immutable socket__;
 
-    bool public tripGlobalFuse;
     uint32 public immutable chainSlug;
     uint256 public immutable timeoutInSeconds;
 
+    bool public tripGlobalFuse;
     struct Fees {
         uint128 switchboardFees;
         uint128 verificationFees;
     }
-
-    mapping(uint32 => bool) public isInitialised;
-    mapping(uint32 => uint256) public maxPacketLength;
 
     // sourceChain => isPaused
     mapping(uint32 => bool) public tripSinglePath;
@@ -39,6 +36,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     // destinationChainSlug => fees-struct with verificationFees and switchboardFees
     mapping(uint32 => Fees) public fees;
+
+    // destinationChainSlug => fees-struct with verificationFees and switchboardFees
+    mapping(uint32 => uint256) public initialPacketCount;
 
     /**
      * @dev Emitted when a path is tripped
@@ -66,18 +66,6 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param executionOverhead New execution overhead
      */
     event ExecutionOverheadSet(uint32 dstChainSlug, uint256 executionOverhead);
-
-    /**
-     * @dev Emitted when a capacitor is registered
-     * @param siblingChainSlug Chain slug of the sibling chain
-     * @param capacitor Address of the capacitor
-     * @param maxPacketLength Maximum number of messages in one packet
-     */
-    event SwitchBoardRegistered(
-        uint32 siblingChainSlug,
-        address capacitor,
-        uint256 maxPacketLength
-    );
 
     /**
      * @dev Emitted when a fees is set for switchboard
@@ -108,10 +96,16 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         signatureVerifier__ = signatureVerifier_;
     }
 
-    /**
-     * @inheritdoc ISwitchboard
-     */
-    function payFees(uint32 dstChainSlug_) external payable override {}
+    // /**
+    //  * @notice updates executionManager_
+    //  * @param executionManager_ address of ExecutionManager
+    //  */
+    // function setExecutionManager(
+    //     address executionManager_
+    // ) external onlyRole(GOVERNANCE_ROLE) {
+    //     executionManager__ = IExecutionManager(executionManager_);
+    //     emit ExecutionManagerSet(executionManager_);
+    // }
 
     /**
      * @inheritdoc ISwitchboard
@@ -127,22 +121,15 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     function registerSiblingSlug(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
-        uint256 capacitorType_
+        uint256 capacitorType_,
+        uint256 initialPacketCount_
     ) external override onlyRole(GOVERNANCE_ROLE) {
-        if (isInitialised[siblingChainSlug_]) revert AlreadyInitialised();
+        initialPacketCount[siblingChainSlug_] = initialPacketCount_;
 
-        (address capacitor, ) = socket__.registerSwitchBoard(
+        socket__.registerSwitchBoard(
             siblingChainSlug_,
             maxPacketLength_,
             capacitorType_
-        );
-
-        isInitialised[siblingChainSlug_] = true;
-        maxPacketLength[siblingChainSlug_] = maxPacketLength_;
-        emit SwitchBoardRegistered(
-            siblingChainSlug_,
-            capacitor,
-            maxPacketLength_
         );
     }
 
@@ -328,6 +315,16 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
         FeesHelper.withdrawFees(account_);
+    }
+
+    function withdrawFeesFromExecutionManager(
+        uint32 siblingChainSlug_,
+        uint128 amount_
+    ) external onlyRole(WITHDRAW_ROLE) {
+        IExecutionManager executionManager__ = IExecutionManager(
+            socket__.executionManager()
+        );
+        executionManager__.withdrawSwitchboardFees(siblingChainSlug_, amount_);
     }
 
     /**

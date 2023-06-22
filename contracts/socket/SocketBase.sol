@@ -111,4 +111,12 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
         transmitManager__ = ITransmitManager(transmitManager_);
         emit TransmitManagerSet(transmitManager_);
     }
+
+    function transmitManager() external view override returns (address) {
+        return address(transmitManager__);
+    }
+
+    function executionManager() external view override returns (address) {
+        return address(executionManager__);
+    }
 }
