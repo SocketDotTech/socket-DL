@@ -231,7 +231,7 @@ abstract contract SocketSrc is SocketBase {
             siblingChainSlug_,
             switchboard__
         );
-        switchboardFees/= uint128(maxPacketLength_);
+        switchboardFees /= uint128(maxPacketLength_);
         (msgExecutionFee, transmissionFees) = executionManager__
             .getExecutionTransmissionMinFees(
                 minMsgGasLimit_,
@@ -242,10 +242,8 @@ abstract contract SocketSrc is SocketBase {
                 address(transmitManager__)
             );
 
-        transmissionFees/= uint128(maxPacketLength_);
-        executionFees =
-            msgExecutionFee +
-            verificationFees;
+        transmissionFees /= uint128(maxPacketLength_);
+        executionFees = msgExecutionFee + verificationFees;
     }
 
     /**
