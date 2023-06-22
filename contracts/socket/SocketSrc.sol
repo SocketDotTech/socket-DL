@@ -70,12 +70,13 @@ abstract contract SocketSrc is SocketBase {
             uint32(siblingChainSlug_)
         );
 
-        ISocket.MessageDetails memory messageDetails;
-        messageDetails.msgId = msgId;
-        messageDetails.minMsgGasLimit = minMsgGasLimit_;
-        messageDetails.executionParams = executionParams_;
-        messageDetails.payload = payload_;
-        messageDetails.executionFee = fees.executionFee;
+        ISocket.MessageDetails memory messageDetails = ISocket.MessageDetails({
+            msgId: msgId,
+            minMsgGasLimit: minMsgGasLimit_,
+            executionParams: executionParams_,
+            payload: payload_,
+            executionFee: fees.executionFee
+        });
 
         // this packed message can be re-created if socket is redeployed with a new version
         // it is plug's responsibility to have proper checks in functions interacting

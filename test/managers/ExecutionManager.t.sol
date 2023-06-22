@@ -234,6 +234,32 @@ contract ExecutionManagerTest is Setup {
         );
     }
 
+    function testFailPayAndCheckFeesWithExecutionFeeSetTooHigh() public {
+        uint256 minMsgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        bytes32 executionParams = bytes32(0);
+
+        _setExecutionFees(_a, _b.chainSlug, type(uint128).max);
+
+        uint256 totalFees = _transmissionFees +
+            type(uint128).max +
+            _switchboardFees + //_switchboardFees
+            _verificationFees;
+
+        _a.executionManager__.payAndCheckFees{value: totalFees}(
+            minMsgGasLimit,
+            payloadSize,
+            executionParams,
+            _transmissionParams,
+            _b.chainSlug,
+            _switchboardFees,
+            _verificationFees,
+            address(_a.transmitManager__),
+            address(_a.configs__[0].switchboard__),
+            1
+        );
+    }
+
     function testPayAndCheckFeesWithMsgValueTooHigh() public {
         uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;

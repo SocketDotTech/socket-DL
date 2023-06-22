@@ -11,6 +11,7 @@ import {
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { socketOwner, executionManagerVersion, mode } from "../config";
+import { overrides } from "../config";
 
 let allDeployed = false;
 
@@ -62,31 +63,12 @@ export const deploySocket = async (
     deployUtils.addresses[CORE_CONTRACTS.CapacitorFactory] =
       capacitorFactory.address;
 
-    const executionManager: Contract = await getOrDeploy(
-      executionManagerVersion,
-      `contracts/${executionManagerVersion}.sol`,
-      [socketOwner, chainSlug, signatureVerifier.address],
-      deployUtils
-    );
-    deployUtils.addresses[executionManagerVersion] = executionManager.address;
-
-    const transmitManager: Contract = await getOrDeploy(
-      CORE_CONTRACTS.TransmitManager,
-      "contracts/TransmitManager.sol",
-      [signatureVerifier.address, socketOwner, chainSlug],
-      deployUtils
-    );
-    deployUtils.addresses[CORE_CONTRACTS.TransmitManager] =
-      transmitManager.address;
-
     const socket: Contract = await getOrDeploy(
       CORE_CONTRACTS.Socket,
       "contracts/socket/Socket.sol",
       [
         chainSlug,
         hasher.address,
-        transmitManager.address,
-        executionManager.address,
         capacitorFactory.address,
         socketOwner,
         version[deployUtils.mode],
@@ -94,6 +76,39 @@ export const deploySocket = async (
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.Socket] = socket.address;
+
+    const executionManager: Contract = await getOrDeploy(
+      executionManagerVersion,
+      `contracts/${executionManagerVersion}.sol`,
+      [socketOwner, chainSlug, socket.address, signatureVerifier.address],
+      deployUtils
+    );
+    deployUtils.addresses[executionManagerVersion] = executionManager.address;
+
+    let tx = await socket
+      .connect(deployUtils.signer)
+      .updateExecutionManager(executionManager.address, {
+        ...overrides[await deployUtils.signer.getChainId()],
+      });
+    console.log("updateExecutionManager", tx.hash);
+    await tx.wait();
+
+    const transmitManager: Contract = await getOrDeploy(
+      CORE_CONTRACTS.TransmitManager,
+      "contracts/TransmitManager.sol",
+      [socketOwner, chainSlug, socket.address, signatureVerifier.address],
+      deployUtils
+    );
+    deployUtils.addresses[CORE_CONTRACTS.TransmitManager] =
+      transmitManager.address;
+
+    tx = await socket
+      .connect(deployUtils.signer)
+      .updateTransmitManager(transmitManager.address, {
+        ...overrides[await deployUtils.signer.getChainId()],
+      });
+    console.log("updateTransmitManager", tx.hash);
+    await tx.wait();
 
     // switchboards deploy
     deployUtils.addresses = await deploySwitchboards(
