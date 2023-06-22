@@ -129,6 +129,7 @@ abstract contract SocketSrc is SocketBase {
             switchboard_
         );
 
+        // verificationFee is per message, so no need to divide by maxPacketLength
         (fees.executionFee, fees.transmissionFees) = executionManager__
             .payAndCheckFees{value: msg.value}(
             minMsgGasLimit_,
@@ -137,7 +138,7 @@ abstract contract SocketSrc is SocketBase {
             transmissionParams_,
             siblingChainSlug_,
             fees.switchboardFees / uint128(maxPacketLength_),
-            verificationFees / uint128(maxPacketLength_),
+            verificationFees,
             address(transmitManager__),
             address(switchboard_),
             maxPacketLength_

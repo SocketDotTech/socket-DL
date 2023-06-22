@@ -53,17 +53,22 @@ interface ISwitchboard {
      * @notice Receives the fees for processing of packet.
      * @param siblingChainSlug_ the chain slug of the sibling chain.
      */
-    function receiveFees(
-        uint32 siblingChainSlug_,
-        uint128 amount_
-    ) external payable;
+    function receiveFees(uint32 siblingChainSlug_) external payable;
 
-    // not important to override in all switchboards
+    /**
+     * @notice Sets the minimum fees required for the destination chain to process the packet.
+     * @param nonce_ the nonce of fee Updater to avoid replay.
+     * @param dstChainSlug_ the unique identifier for the destination chain.
+     * @param switchboardFees_ the switchboard fee required for the destination chain to process the packet.
+     * @param verificationFees_ the verification fee required for the destination chain to process the packet.
+     * @param signature_ the signature of the request.
+     * @dev not important to override in all switchboards
+     */
     function setFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
-        uint128 verificationFees_,
         uint128 switchboardFees_,
+        uint128 verificationFees_,
         bytes calldata signature_
     ) external;
 }

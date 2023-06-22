@@ -121,7 +121,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     }
 
     /// @inheritdoc ITransmitManager
-    function receiveFees(uint32, uint128) external payable override {
+    function receiveFees(uint32) external payable override {
         require(msg.sender == address(socket__.executionManager__()));
     }
 

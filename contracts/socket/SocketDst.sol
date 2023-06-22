@@ -239,39 +239,17 @@ abstract contract SocketDst is SocketBase {
         uint256 executionGasLimit_,
         ISocket.MessageDetails memory messageDetails_
     ) internal {
-        try
-            IPlug(localPlug_).inbound{
-                gas: executionGasLimit_,
-                value: msg.value
-            }(remoteChainSlug_, messageDetails_.payload)
-        {
-            executionManager__.updateExecutionFees(
-                executor_,
-                uint128(messageDetails_.executionFee),
-                messageDetails_.msgId
-            );
-            emit ExecutionSuccess(messageDetails_.msgId);
-        } catch Error(string memory reason) {
-            if (address(this).balance > 0) {
-                SafeTransferLib.safeTransferETH(
-                    msg.sender,
-                    address(this).balance
-                );
-            }
-            // catch failing revert() and require()
-            messageExecuted[messageDetails_.msgId] = false;
-            emit ExecutionFailed(messageDetails_.msgId, reason);
-        } catch (bytes memory reason) {
-            if (address(this).balance > 0) {
-                SafeTransferLib.safeTransferETH(
-                    msg.sender,
-                    address(this).balance
-                );
-            }
-            // catch failing assert()
-            messageExecuted[messageDetails_.msgId] = false;
-            emit ExecutionFailedBytes(messageDetails_.msgId, reason);
-        }
+        IPlug(localPlug_).inbound{gas: executionGasLimit_, value: msg.value}(
+            remoteChainSlug_,
+            messageDetails_.payload
+        );
+
+        executionManager__.updateExecutionFees(
+            executor_,
+            uint128(messageDetails_.executionFee),
+            messageDetails_.msgId
+        );
+        emit ExecutionSuccess(messageDetails_.msgId);
     }
 
     /**

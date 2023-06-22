@@ -38,7 +38,6 @@ interface ITransmitManager {
      * @notice receives fees from Execution manager
      * @dev this function can be used to keep track of fees received for each slug
      * @param siblingSlug_ sibling id for which fee updater is registered
-     * @param amount_ The amount of native tokens received from execution manager
      */
-    function receiveFees(uint32 siblingSlug_, uint128 amount_) external payable;
+    function receiveFees(uint32 siblingSlug_) external payable;
 }

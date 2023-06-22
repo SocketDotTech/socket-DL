@@ -21,12 +21,13 @@ interface IExecutionManager {
     /**
      * @notice Pays the fees for executing a transaction on the external chain
      * @dev This function is payable and assumes the socket is going to send correct amount of fees.
-     * @param minMsgGasLimit_ The gas limit for the transaction
-     * @param payloadSize_ The gas limit for the transaction
-     * @param executionParams_ The gas limit for the transaction
-     * @param siblingChainSlug_ The gas limit for the transaction
-     * @param switchboardFees_ The gas limit for the transaction
-     * @param verificationFees_ The gas limit for the transaction
+     * @param minMsgGasLimit_ The minimum gas limit for the transaction
+     * @param payloadSize_ The payload size in bytes
+     * @param executionParams_ Extra params for execution
+     * @param transmissionParams_ Extra params for transmission
+     * @param siblingChainSlug_ Sibling chain identifier
+     * @param switchboardFees_ fee charged by switchboard for processing transaction
+     * @param verificationFees_ fee charged for verifying transaction
      * @param transmitManager_ The transmitManager address
      * @param switchboard_ The switchboard address
      * @param maxPacketLength_ The maxPacketLength for the capacitor

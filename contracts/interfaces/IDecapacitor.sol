@@ -11,6 +11,7 @@ interface IDecapacitor {
      * @param root_ root hash of the packet
      * @param packedMessage_ packed message which needs to be verified
      * @param proof_ proof used to determine the inclusion
+     * @dev this function is kept as view instead of pure, as in future we may have stateful decapacitors
      */
     function verifyMessageInclusion(
         bytes32 root_,

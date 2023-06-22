@@ -232,7 +232,6 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         executionFee;
 
         // any extra fee is considered as executionFee
-        // Have to recheck overflow/underflow conditions here
         executionFee = msgValue - transmissionFees - switchboardFees_;
 
         TotalExecutionAndTransmissionFees
@@ -560,8 +559,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
         totalSwitchboardFees[switchboard_][siblingChainSlug_] -= amount_;
         ISwitchboard(switchboard_).receiveFees{value: amount_}(
-            siblingChainSlug_,
-            amount_
+            siblingChainSlug_
         );
 
         emit SwitchboardFeesWithdrawn(switchboard_, siblingChainSlug_, amount_);
@@ -587,7 +585,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             .totalTransmissionFees -= amount_;
 
         ITransmitManager tm = socket__.transmitManager__();
-        tm.receiveFees{value: amount_}(siblingChainSlug_, amount_);
+        tm.receiveFees{value: amount_}(siblingChainSlug_);
         emit TransmissionFeesWithdrawn(address(tm), siblingChainSlug_, amount_);
     }
 

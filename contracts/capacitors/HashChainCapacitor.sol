@@ -49,6 +49,7 @@ contract HashChainCapacitor is BaseCapacitor {
      * @dev Initializes the contract with the specified socket address.
      * @param socket_ The address of the socket contract.
      * @param owner_ The address of the owner of the capacitor contract.
+     * @param maxPacketLength_ The max Packet Length of the capacitor contract.
      */
     constructor(
         address socket_,
@@ -61,6 +62,13 @@ contract HashChainCapacitor is BaseCapacitor {
         maxPacketLength = maxPacketLength_;
     }
 
+    /**
+     * @notice Update packet length of the hash chain capacitor.
+     * @notice Only owner can call this function
+     * @dev The function will update the packet length of the hash chain capacitor, and also create any packets
+     * if the new packet length is less than the current packet length.
+     * @param maxPacketLength_ The new nax packet length of the hash chain.
+     */
     function updateMaxPacketLength(
         uint256 maxPacketLength_
     ) external onlyOwner {
@@ -90,6 +98,9 @@ contract HashChainCapacitor is BaseCapacitor {
         emit MaxPacketLengthSet(maxPacketLength_);
     }
 
+    /**
+     * @inheritdoc ICapacitor
+     */
     function getMaxPacketLength() external view override returns (uint256) {
         return maxPacketLength;
     }
@@ -123,7 +134,7 @@ contract HashChainCapacitor is BaseCapacitor {
 
     /**
      * @dev Seals the next pending packet and returns its root hash and packet count.
-     * @dev we use seal packet count to make sure there is no scope of censorship and all the packets get sealed.
+     * @param batchSize we use seal packet count to make sure there is no scope of censorship and all the packets get sealed.
      * @return root The root hash and packet count of the sealed packet.
      */
     function sealPacket(
@@ -216,7 +227,9 @@ contract HashChainCapacitor is BaseCapacitor {
         _roots[packetCount] = root;
         messagePacked = messageCount;
 
-        // increments total packet count
-        _nextPacketCount++;
+        // increments total packet count. we don't expect _nextPacketCount to reach the max value of uint256
+        unchecked {
+            _nextPacketCount++;
+        }
     }
 }
