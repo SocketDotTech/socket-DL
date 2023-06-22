@@ -69,6 +69,23 @@ export const main = async () => {
           socketSigner
         );
 
+        const socket = await getInstance(CORE_CONTRACTS.Socket, addr.Socket);
+        let tx = await socket
+          .connect(socketSigner)
+          .updateExecutionManager(addr.ExecutionManager, {
+            ...overrides[await socketSigner.getChainId()],
+          });
+        console.log("updateExecutionManager", tx.hash);
+        await tx.wait();
+
+        tx = await socket
+          .connect(socketSigner)
+          .updateTransmitManager(addr.TransmitManager, {
+            ...overrides[await socketSigner.getChainId()],
+          });
+        console.log("updateTransmitManager", tx.hash);
+        await tx.wait();
+
         if (!addr["integrations"]) return;
 
         const integrations = addr["integrations"] ?? {};

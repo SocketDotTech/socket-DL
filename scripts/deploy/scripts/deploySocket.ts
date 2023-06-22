@@ -85,14 +85,6 @@ export const deploySocket = async (
     );
     deployUtils.addresses[executionManagerVersion] = executionManager.address;
 
-    let tx = await socket
-      .connect(deployUtils.signer)
-      .updateExecutionManager(executionManager.address, {
-        ...overrides[await deployUtils.signer.getChainId()],
-      });
-    console.log("updateExecutionManager", tx.hash);
-    await tx.wait();
-
     const transmitManager: Contract = await getOrDeploy(
       CORE_CONTRACTS.TransmitManager,
       "contracts/TransmitManager.sol",
@@ -101,14 +93,6 @@ export const deploySocket = async (
     );
     deployUtils.addresses[CORE_CONTRACTS.TransmitManager] =
       transmitManager.address;
-
-    tx = await socket
-      .connect(deployUtils.signer)
-      .updateTransmitManager(transmitManager.address, {
-        ...overrides[await deployUtils.signer.getChainId()],
-      });
-    console.log("updateTransmitManager", tx.hash);
-    await tx.wait();
 
     // switchboards deploy
     deployUtils.addresses = await deploySwitchboards(
