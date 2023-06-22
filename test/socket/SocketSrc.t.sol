@@ -114,9 +114,6 @@ contract SocketSrcTest is Setup {
         //     address(srcCounter__)
         // );
 
-        // console.log(_a.executionManager__.totalExecutionFees());
-        // console.log(_a.executionManager__.totalTransmitionFees());
-        // console.log(_a.executionManager__.totalSwitchboardFees(address(_a.configs__[0].switchboard__)));
         // initializing storage variables to get runtime cost
         // _a.executionManager__.payFees(
         //     100000,
@@ -126,10 +123,6 @@ contract SocketSrcTest is Setup {
         //     100,
         //     address(_a.configs__[0].switchboard__)
         // );
-
-        // console.log(_a.executionManager__.totalExecutionFees());
-        // console.log(_a.executionManager__.totalTransmitionFees());
-        // console.log(_a.executionManager__.totalSwitchboardFees(address(_a.configs__[0].switchboard__)));
 
         hoax(address(srcCounter__));
 
@@ -143,16 +136,6 @@ contract SocketSrcTest is Setup {
         (uint128 totalExecutionFees, uint128 totalTransmissionFees) = _a
             .executionManager__
             .totalTransmissionExecutionFees(_b.chainSlug);
-        console.log(totalExecutionFees);
-        console.log(totalTransmissionFees);
-        // console.log(_a.executionManager__.totalTransmissionExecutionFees());
-        // console.log(_a.executionManager__.totalTransmitionFees());
-        console.log(
-            _a.executionManager__.totalSwitchboardFees(
-                address(_a.configs__[0].switchboard__),
-                _b.chainSlug
-            )
-        );
     }
 
     function testOutboundFromSocketSrc() external {

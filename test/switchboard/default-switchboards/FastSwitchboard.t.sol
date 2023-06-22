@@ -565,13 +565,7 @@ contract FastSwitchboardTest is Setup {
             cChainSlug,
             _transmitter
         );
-        _proposeOnDst(
-            _a,
-            sig_,
-            altPacketId,
-            root,
-            address(_b.configs__[0].switchboard__)
-        );
+        _proposeOnDst(_a, sig_, altPacketId, root, address(fastSwitchboard));
 
         vm.expectRevert(WatcherNotFound.selector);
         _attestOnDst(
