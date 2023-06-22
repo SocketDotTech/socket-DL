@@ -37,7 +37,7 @@ contract SingleCapacitorTest is Setup {
     }
 
     function testSealPacket() external {
-        vm.expectRevert(BaseCapacitor.NoPendingPacket.selector);
+        vm.expectRevert(SingleCapacitor.NoPendingPacket.selector);
         _sealPacket();
 
         _addPackedMessage(_message_0);

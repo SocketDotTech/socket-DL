@@ -154,7 +154,7 @@ export const sendMessagesToAllPaths = async (params: {
               return;
 
             // value = 100
-            let extraParams =
+            let executionParams =
               "0x0100000000000000000000000000000000000000000000000000000000000064";
             let data = counter.interface.encodeFunctionData(
               "remoteAddOperation",
@@ -162,7 +162,7 @@ export const sendMessagesToAllPaths = async (params: {
                 siblingSlug,
                 amount,
                 msgGasLimit,
-                // extraParams,
+                // executionParams,
                 ethers.constants.HashZero,
               ]
             );
@@ -170,7 +170,7 @@ export const sendMessagesToAllPaths = async (params: {
             let value = await socket.getMinFees(
               msgGasLimit,
               100, // payload size
-              extraParams,
+              executionParams,
               siblingSlug,
               to
             );

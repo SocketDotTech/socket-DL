@@ -61,9 +61,9 @@ abstract contract SocketDst is SocketBase {
     mapping(bytes32 => mapping(uint256 => uint256)) public rootProposedAt;
 
     /**
-     * @dev packetId => proposalCountCount
+     * @dev packetId => proposalCount
      */
-    mapping(bytes32 => uint256) public proposalCountCount;
+    mapping(bytes32 => uint256) public proposalCount;
 
     /**
      * @notice emits the packet details when proposed at remote
@@ -110,14 +110,13 @@ abstract contract SocketDst is SocketBase {
 
         if (!isTransmitter) revert InvalidTransmitter();
 
-        packetIdRoots[packetId_][proposalCountCount[packetId_]] = root_;
-        rootProposedAt[packetId_][proposalCountCount[packetId_]] = block
-            .timestamp;
+        packetIdRoots[packetId_][proposalCount[packetId_]] = root_;
+        rootProposedAt[packetId_][proposalCount[packetId_]] = block.timestamp;
 
         emit PacketProposed(
             transmitter,
             packetId_,
-            proposalCountCount[packetId_]++,
+            proposalCount[packetId_]++,
             root_
         );
     }
@@ -148,7 +147,13 @@ abstract contract SocketDst is SocketBase {
 
         address localPlug = _decodePlug(messageDetails_.msgId);
 
-        PlugConfig storage plugConfig = _plugConfigs[localPlug][remoteSlug];
+        PlugConfig memory plugConfig;
+        plugConfig.decapacitor__ = _plugConfigs[localPlug][remoteSlug]
+            .decapacitor__;
+        plugConfig.siblingPlug = _plugConfigs[localPlug][remoteSlug]
+            .siblingPlug;
+        plugConfig.inboundSwitchboard__ = _plugConfigs[localPlug][remoteSlug]
+            .inboundSwitchboard__;
 
         bytes32 packedMessage = hasher__.packMessage(
             remoteSlug,
@@ -169,7 +174,7 @@ abstract contract SocketDst is SocketBase {
             packedMessage,
             plugConfig,
             messageDetails_.decapacitorProof,
-            messageDetails_.extraParams
+            messageDetails_.executionParams
         );
         _execute(executor, localPlug, remoteSlug, messageDetails_);
     }
@@ -179,9 +184,9 @@ abstract contract SocketDst is SocketBase {
         uint256 proposalCount_,
         uint32 remoteChainSlug_,
         bytes32 packedMessage_,
-        PlugConfig storage plugConfig_,
+        PlugConfig memory plugConfig_,
         bytes memory decapacitorProof_,
-        bytes32 extraParams_
+        bytes32 executionParams_
     ) internal view {
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
@@ -201,7 +206,7 @@ abstract contract SocketDst is SocketBase {
             )
         ) revert InvalidProof();
 
-        executionManager__.verifyParams(extraParams_, msg.value);
+        executionManager__.verifyParams(executionParams_, msg.value);
     }
 
     /**
@@ -224,7 +229,7 @@ abstract contract SocketDst is SocketBase {
         {
             executionManager__.updateExecutionFees(
                 executor_,
-                messageDetails_.executionFee,
+                uint128(messageDetails_.executionFee),
                 messageDetails_.msgId
             );
             emit ExecutionSuccess(messageDetails_.msgId);

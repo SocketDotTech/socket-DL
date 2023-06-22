@@ -26,17 +26,10 @@ interface ITransmitManager {
      */
     function payFees(uint32 dstSlug) external payable;
 
-    /**
-     * @notice Retrieves the minimum fees required for the destination chain to process the packet.
-     * @param dstSlug The unique identifier for the destination chain of the packet.
-     * @return The minimum fee required for the destination chain to process the packet.
-     */
-    function getMinFees(uint32 dstSlug) external view returns (uint256);
-
     function setTransmissionFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
-        uint256 transmissionFees_,
+        uint128 transmissionFees_,
         bytes calldata signature_
     ) external;
 }
