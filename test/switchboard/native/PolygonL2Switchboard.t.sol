@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../../Setup.t.sol";
 import "../../../contracts/switchboard/native/PolygonL2Switchboard.sol";
@@ -18,14 +18,14 @@ contract PolygonL2SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(80001));
         _b.chainSlug = uint32(uint256(5));
 
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
-        _chainSetup(transmitterPivateKeys);
+        _chainSetup(transmitterPrivateKeys);
     }
 
     function testInitateNativeConfirmation() public {
@@ -35,7 +35,7 @@ contract PolygonL2SwitchboardTest is Setup {
 
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = 0;
-        messageDetails.msgGasLimit = 1000000;
+        messageDetails.minMsgGasLimit = 1000000;
         messageDetails.executionFee = 100;
         messageDetails.payload = abi.encode(msg.sender);
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../../Setup.t.sol";
 
@@ -16,21 +16,21 @@ contract OptimisticSwitchboardTest is Setup {
 
     error WatcherFound();
     error WatcherNotFound();
-
+    error SwitchboardExists();
     OptimisticSwitchboard optimisticSwitchboard;
 
     function setUp() external {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
 
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
         _deployContractsOnSingleChain(
             _a,
             remoteChainSlug,
             isExecutionOpen,
-            transmitterPivateKeys
+            transmitterPrivateKeys
         );
 
         optimisticSwitchboard = OptimisticSwitchboard(
@@ -38,160 +38,6 @@ contract OptimisticSwitchboardTest is Setup {
         );
 
         packetId = _packMessageId(remoteChainSlug, address(uint160(c++)), 0);
-    }
-
-    function testTripGlobal() external {
-        vm.startPrank(_socketOwner);
-
-        optimisticSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                TRIP_GLOBAL_SIG_IDENTIFIER,
-                address(optimisticSwitchboard),
-                _a.chainSlug,
-                nonce,
-                true
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        vm.expectEmit(false, false, false, true);
-        emit SwitchboardTripped(true);
-        optimisticSwitchboard.tripGlobal(nonce++, sig);
-        vm.stopPrank();
-        assertTrue(optimisticSwitchboard.tripGlobalFuse());
-    }
-
-    function testUntripGlobal() external {
-        hoax(_socketOwner);
-        optimisticSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                TRIP_GLOBAL_SIG_IDENTIFIER,
-                address(optimisticSwitchboard),
-                _a.chainSlug,
-                nonce,
-                true
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        optimisticSwitchboard.tripGlobal(nonce++, sig);
-        assertTrue(optimisticSwitchboard.tripGlobalFuse());
-
-        digest = keccak256(
-            abi.encode(
-                UNTRIP_GLOBAL_SIG_IDENTIFIER,
-                address(optimisticSwitchboard),
-                _a.chainSlug,
-                nonce,
-                false
-            )
-        );
-        sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        vm.expectRevert();
-        optimisticSwitchboard.untrip(nonce, sig);
-
-        hoax(_socketOwner);
-        optimisticSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
-        optimisticSwitchboard.untrip(nonce++, sig);
-    }
-
-    function testTripPath() external {
-        vm.startPrank(_socketOwner);
-        uint32 srcChainSlug = _a.chainSlug;
-        optimisticSwitchboard.grantRoleWithSlug(
-            WATCHER_ROLE,
-            srcChainSlug,
-            _socketOwner
-        );
-
-        bytes32 digest = keccak256(
-            abi.encode(
-                TRIP_PATH_SIG_IDENTIFIER,
-                address(optimisticSwitchboard),
-                _a.chainSlug,
-                srcChainSlug,
-                nonce,
-                true
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        vm.expectEmit(false, false, false, true);
-        emit PathTripped(srcChainSlug, true);
-        optimisticSwitchboard.tripPath(nonce++, srcChainSlug, sig);
-        assertTrue(optimisticSwitchboard.tripSinglePath(srcChainSlug));
-    }
-
-    function testNonWatcherToTripPath() external {
-        uint32 srcChainSlug = _a.chainSlug;
-        bytes32 digest = keccak256(
-            abi.encode(
-                TRIP_PATH_SIG_IDENTIFIER,
-                address(optimisticSwitchboard),
-                _a.chainSlug,
-                srcChainSlug,
-                nonce,
-                false
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        vm.expectRevert();
-        optimisticSwitchboard.tripPath(nonce++, srcChainSlug, sig);
-    }
-
-    function testUnTripAfterTripSingle() external {
-        uint32 srcChainSlug = _a.chainSlug;
-
-        vm.startPrank(_socketOwner);
-        optimisticSwitchboard.grantRoleWithSlug(
-            WATCHER_ROLE,
-            srcChainSlug,
-            _socketOwner
-        );
-        optimisticSwitchboard.grantRole(UNTRIP_ROLE, _socketOwner);
-        vm.stopPrank();
-
-        hoax(_socketOwner);
-        bytes32 digest = keccak256(
-            abi.encode(
-                TRIP_PATH_SIG_IDENTIFIER,
-                address(optimisticSwitchboard),
-                _a.chainSlug,
-                srcChainSlug,
-                nonce,
-                true
-            )
-        );
-        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        vm.expectEmit(false, false, false, true);
-        emit PathTripped(srcChainSlug, true);
-        optimisticSwitchboard.tripPath(nonce++, srcChainSlug, sig);
-        assertTrue(optimisticSwitchboard.tripSinglePath(srcChainSlug));
-
-        hoax(_socketOwner);
-        digest = keccak256(
-            abi.encode(
-                UNTRIP_PATH_SIG_IDENTIFIER,
-                address(optimisticSwitchboard),
-                _a.chainSlug,
-                srcChainSlug,
-                nonce,
-                false
-            )
-        );
-        sig = _createSignature(digest, _socketOwnerPrivateKey);
-
-        vm.expectEmit(false, false, false, true);
-        emit PathTripped(srcChainSlug, false);
-        optimisticSwitchboard.untripPath(nonce++, srcChainSlug, sig);
-        assertFalse(optimisticSwitchboard.tripSinglePath(srcChainSlug));
     }
 
     function testIsAllowed() external {
@@ -286,10 +132,31 @@ contract OptimisticSwitchboardTest is Setup {
         vm.stopPrank();
     }
 
+    function testRegisterSiblingSlug() public {
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        optimisticSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 0);
+
+        vm.startPrank(_socketOwner);
+        optimisticSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 1);
+
+        vm.expectRevert(SwitchboardExists.selector);
+        optimisticSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 1);
+
+        assertEq(optimisticSwitchboard.initialPacketCount(_b.chainSlug), 1);
+
+        vm.stopPrank();
+    }
+
     function testSetFees() external {
-        uint256 switchboardFee = 1000;
-        uint256 verificationFee = 1000;
-        uint256 feeNonce = optimisticSwitchboard.nextNonce(_feesWithdrawer);
+        uint128 switchboardFee = 1000;
+        uint128 verificationFee = 1000;
+        uint256 feeNonce = optimisticSwitchboard.nextNonce(_socketOwner);
 
         (uint256 sbFee, uint256 vFee) = optimisticSwitchboard.fees(
             remoteChainSlug
@@ -309,13 +176,13 @@ contract OptimisticSwitchboardTest is Setup {
                 verificationFee
             )
         );
-        bytes memory sig = _createSignature(digest, _feesWithdrawerPrivateKey);
+        bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         hoax(_socketOwner);
         optimisticSwitchboard.grantRoleWithSlug(
             FEES_UPDATER_ROLE,
             remoteChainSlug,
-            _feesWithdrawer
+            _socketOwner
         );
 
         optimisticSwitchboard.setFees(

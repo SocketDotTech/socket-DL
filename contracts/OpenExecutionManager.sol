@@ -1,20 +1,29 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 import "./ExecutionManager.sol";
 
 /**
  * @title OpenExecutionManager
- * @dev ExecutionManager contract along with open execution
+ * @dev ExecutionManager contract with open execution
  */
 contract OpenExecutionManager is ExecutionManager {
+    /**
+     * @dev Constructor for OpenExecutionManager contract
+     * @param owner_ Address of the contract owner
+     * @param chainSlug_ chain slug used to identify current chain
+     * @param signatureVerifier_ Address of the signature verifier contract
+     * @param socket_ Address of the socket contract
+     */
     constructor(
         address owner_,
         uint32 chainSlug_,
-        ISignatureVerifier signatureVerifier_
-    ) ExecutionManager(owner_, chainSlug_, signatureVerifier_) {}
+        ISignatureVerifier signatureVerifier_,
+        ISocket socket_
+    ) ExecutionManager(owner_, chainSlug_, signatureVerifier_, socket_) {}
 
     /**
      * @notice This function allows all executors
+     * @notice The executor recovered here can be a random address hence should not be used for fee accounting
      * @param packedMessage Packed message to be executed
      * @param sig Signature of the message
      * @return executor Address of the executor

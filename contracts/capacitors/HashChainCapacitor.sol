@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "./BaseCapacitor.sol";
 
@@ -11,19 +11,25 @@ import "./BaseCapacitor.sol";
  * When a packet is full, a new packet is created and the root of the last packet is sealed.
  */
 contract HashChainCapacitor is BaseCapacitor {
+    uint256 private constant MAX_LEN = 10;
     uint256 public maxPacketLength;
 
     /// an incrementing count for each new message added
-    uint64 internal _nextMessageCount = 1;
+    uint64 public nextMessageCount = 1;
     /// points to last message included in packet
-    uint64 internal _messagePacked;
+    uint64 public messagePacked;
     // message count => root
-    mapping(uint64 => bytes32) internal _messageRoots;
+    mapping(uint64 => bytes32) public messageRoots;
 
     // Error triggered when batch size is more than max length
     error InvalidBatchSize();
     // Error triggered when no message found or total message count is less than expected length
-    error InsufficentMessageLength();
+    error InsufficientMessageLength();
+    // Error triggered when packet length is more than max packet length supported
+    error InvalidPacketLength();
+
+    // Event triggered when max packet length is updated
+    event MaxPacketLengthSet(uint256 maxPacketLength);
 
     /**
      * @notice emitted when a new message is added to a packet
@@ -43,6 +49,7 @@ contract HashChainCapacitor is BaseCapacitor {
      * @dev Initializes the contract with the specified socket address.
      * @param socket_ The address of the socket contract.
      * @param owner_ The address of the owner of the capacitor contract.
+     * @param maxPacketLength_ The max Packet Length of the capacitor contract.
      */
     constructor(
         address socket_,
@@ -50,15 +57,50 @@ contract HashChainCapacitor is BaseCapacitor {
         uint256 maxPacketLength_
     ) BaseCapacitor(socket_, owner_) {
         _grantRole(RESCUE_ROLE, owner_);
+
+        if (maxPacketLength > MAX_LEN) revert InvalidPacketLength();
         maxPacketLength = maxPacketLength_;
     }
 
+    /**
+     * @notice Update packet length of the hash chain capacitor.
+     * @notice Only owner can call this function
+     * @dev The function will update the packet length of the hash chain capacitor, and also create any packets
+     * if the new packet length is less than the current packet length.
+     * @param maxPacketLength_ The new nax packet length of the hash chain.
+     */
     function updateMaxPacketLength(
         uint256 maxPacketLength_
     ) external onlyOwner {
+        if (maxPacketLength > MAX_LEN) revert InvalidPacketLength();
+        if (maxPacketLength_ < maxPacketLength) {
+            uint64 lastPackedMsgIndex = messagePacked;
+            uint64 packetCount = _nextPacketCount;
+            uint64 packets = (nextMessageCount - lastPackedMsgIndex) %
+                uint64(maxPacketLength_);
+
+            _nextPacketCount += packets;
+
+            for (uint64 index = 0; index < packets; ) {
+                uint64 packetEndAt = lastPackedMsgIndex +
+                    uint64(maxPacketLength_);
+
+                _roots[packetCount + index] = messageRoots[packetEndAt];
+                lastPackedMsgIndex = packetEndAt;
+                unchecked {
+                    ++index;
+                }
+            }
+            messagePacked = lastPackedMsgIndex;
+        }
+
         maxPacketLength = maxPacketLength_;
+        emit MaxPacketLengthSet(maxPacketLength_);
     }
 
+    /**
+     * @inheritdoc ICapacitor
+     */
     function getMaxPacketLength() external view override returns (uint256) {
         return maxPacketLength;
     }
@@ -67,24 +109,24 @@ contract HashChainCapacitor is BaseCapacitor {
      * @notice Adds a packed message to the hash chain.
      * @notice Only socket can call this function
      * @dev The packed message is added to the current packet and hashed with the previous root to create a new root.
-     * If the packet is full, a new packet is created and the root of the last packet is finalised to be sealed.
+     * If the packet is full, a new packet is created and the root of the last packet is finalized to be sealed.
      * @param packedMessage_ The packed message to be added to the hash chain.
      */
     function addPackedMessage(
         bytes32 packedMessage_
     ) external override onlySocket {
-        uint64 messageCount = _nextMessageCount++;
+        uint64 messageCount = nextMessageCount++;
         uint64 packetCount = _nextPacketCount;
 
         // hash the packed message with last root and create a new root
         bytes32 root = keccak256(
-            abi.encode(_messageRoots[messageCount - 1], packedMessage_)
+            abi.encode(messageRoots[messageCount - 1], packedMessage_)
         );
         // update the root for each new message added
-        _messageRoots[messageCount] = root;
+        messageRoots[messageCount] = root;
 
         // create a packet if max length is reached and update packet count
-        if (messageCount - _messagePacked == maxPacketLength)
+        if (messageCount - messagePacked == maxPacketLength)
             _createPacket(packetCount, messageCount, root);
 
         emit MessageAdded(packedMessage_, messageCount, packetCount, root);
@@ -92,13 +134,13 @@ contract HashChainCapacitor is BaseCapacitor {
 
     /**
      * @dev Seals the next pending packet and returns its root hash and packet count.
-     * @dev we use seal packet count to make sure there is no scope of censorship and all the packets get sealed.
+     * @param batchSize we use seal packet count to make sure there is no scope of censorship and all the packets get sealed.
      * @return root The root hash and packet count of the sealed packet.
      */
     function sealPacket(
         uint256 batchSize
     ) external override onlySocket returns (bytes32 root, uint64 packetCount) {
-        uint256 messageCount = _nextMessageCount;
+        uint256 messageCount = nextMessageCount;
 
         // revert if batch size exceeds max length
         if (batchSize > maxPacketLength) revert InvalidBatchSize();
@@ -106,16 +148,16 @@ contract HashChainCapacitor is BaseCapacitor {
         packetCount = _nextSealCount++;
         if (_roots[packetCount] == bytes32(0)) {
             // last message count included in this packet
-            uint64 lastMessageCount = _messagePacked + uint64(batchSize);
+            uint64 lastMessageCount = messagePacked + uint64(batchSize);
 
             // if no message found or total message count is less than expected length
             if (messageCount <= lastMessageCount)
-                revert InsufficentMessageLength();
+                revert InsufficientMessageLength();
 
             _createPacket(
                 packetCount,
                 lastMessageCount,
-                _messageRoots[lastMessageCount]
+                messageRoots[lastMessageCount]
             );
         }
 
@@ -168,10 +210,11 @@ contract HashChainCapacitor is BaseCapacitor {
         if (_roots[count_] == bytes32(0)) {
             // as addPackedMessage auto update _roots as max length is reached, hence length is not verified here
             uint64 lastMessageCount = batchSize_ == 0
-                ? _nextMessageCount - 1
-                : _messagePacked + batchSize_;
-            if (_nextMessageCount <= lastMessageCount) return bytes32(0);
-            root = _messageRoots[lastMessageCount];
+                ? nextMessageCount - 1
+                : messagePacked + batchSize_;
+
+            if (nextMessageCount <= lastMessageCount) return bytes32(0);
+            root = messageRoots[lastMessageCount];
         } else root = _roots[count_];
     }
 
@@ -182,9 +225,11 @@ contract HashChainCapacitor is BaseCapacitor {
     ) internal {
         // stores the root on given packet count and updated messages packed
         _roots[packetCount] = root;
-        _messagePacked = messageCount;
+        messagePacked = messageCount;
 
-        // increments total packet count
-        _nextPacketCount++;
+        // increments total packet count. we don't expect _nextPacketCount to reach the max value of uint256
+        unchecked {
+            _nextPacketCount++;
+        }
     }
 }

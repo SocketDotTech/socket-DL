@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../Setup.t.sol";
 
@@ -12,15 +12,15 @@ contract SocketSrcTest is Setup {
     address newCapacitorFactory = address(uint160(c++));
 
     function setUp() external {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
         _deployContractsOnSingleChain(
             _a,
             bChainSlug,
             isExecutionOpen,
-            transmitterPivateKeys
+            transmitterPrivateKeys
         );
 
         socket__ = _a.socket__;

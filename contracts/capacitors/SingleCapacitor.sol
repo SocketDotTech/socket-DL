@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "./BaseCapacitor.sol";
 
@@ -39,26 +39,29 @@ contract SingleCapacitor is BaseCapacitor {
         _grantRole(RESCUE_ROLE, owner_);
     }
 
+    /**
+     * @inheritdoc ICapacitor
+     */
     function getMaxPacketLength() external pure override returns (uint256) {
         return maxPacketLength;
     }
 
-    /// @inheritdoc ICapacitor
+    /**
+     * @inheritdoc ICapacitor
+     */
     function addPackedMessage(
         bytes32 packedMessage_
     ) external override onlySocket {
         uint64 packetCount = _nextPacketCount;
         _roots[packetCount] = packedMessage_;
-        _nextPacketCount++;
+        ++_nextPacketCount;
 
         // as it is a single capacitor, here root and packed message are same
         emit MessageAdded(packedMessage_, packetCount, packedMessage_);
     }
 
     /**
-     * @dev Seals the next pending packet and returns its root hash and packet count.
-     * @dev we use seal packet count to make sure there is no scope of censorship and all the packets get sealed.
-     * @return The root hash and packet count of the sealed packet.
+     * @inheritdoc ICapacitor
      */
     function sealPacket(
         uint256
@@ -71,8 +74,7 @@ contract SingleCapacitor is BaseCapacitor {
     }
 
     /**
-     * @dev Returns the root hash and packet count of the next pending packet to be sealed.
-     * @return The root hash and packet count of the next pending packet.
+     * @inheritdoc ICapacitor
      */
     function getNextPacketToBeSealed()
         external

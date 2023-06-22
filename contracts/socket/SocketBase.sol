@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "../interfaces/IHasher.sol";
-import "../interfaces/ITransmitManager.sol";
-import "../interfaces/IExecutionManager.sol";
-
+import "../libraries/RescueFundsLib.sol";
 import "../utils/AccessControlExtended.sol";
-import {GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
+import {RESCUE_ROLE, GOVERNANCE_ROLE} from "../utils/AccessRoles.sol";
 
 import "./SocketConfig.sol";
 
@@ -19,14 +17,14 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     // Hasher contract
     IHasher public hasher__;
     // Transmit Manager contract
-    ITransmitManager public transmitManager__;
+    ITransmitManager public override transmitManager__;
     // Execution Manager contract
-    IExecutionManager public executionManager__;
+    IExecutionManager public override executionManager__;
 
     // chain slug
     uint32 public immutable chainSlug;
-    // incrementing nonce, should be handled in next socket version.
-    uint64 public messageCount;
+    // incrementing counter for messages going out of current chain
+    uint64 public globalMessageCount;
     // current version
     bytes32 public immutable version;
 
@@ -79,7 +77,7 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     }
 
     /**
-     * @notice updates hasher_
+     * @notice updates hasher__
      * @dev Only governance can call this function
      * @param hasher_ address of hasher
      */
@@ -89,7 +87,7 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     }
 
     /**
-     * @notice updates executionManager_
+     * @notice updates executionManager__
      * @dev Only governance can call this function
      * @param executionManager_ address of Execution Manager
      */
@@ -101,14 +99,30 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     }
 
     /**
-     * @notice updates transmitManager_
-     * @dev Only governance can call this function
+     * @notice updates transmitManager__
      * @param transmitManager_ address of Transmit Manager
+     * @dev Only governance can call this function
+     * @dev This function sets the transmitManager address. If it is ever upgraded,
+     * remove the fees from executionManager first, and then upgrade address at socket.
      */
     function setTransmitManager(
         address transmitManager_
     ) external onlyRole(GOVERNANCE_ROLE) {
         transmitManager__ = ITransmitManager(transmitManager_);
         emit TransmitManagerSet(transmitManager_);
+    }
+
+    /**
+     * @notice Rescues funds from a contract that has lost access to them.
+     * @param token_ The address of the token contract.
+     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param amount_ The amount of tokens to be rescued.
+     */
+    function rescueFunds(
+        address token_,
+        address userAddress_,
+        uint256 amount_
+    ) external onlyRole(RESCUE_ROLE) {
+        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
     }
 }

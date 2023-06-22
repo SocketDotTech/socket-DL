@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "./Setup.t.sol";
 import "../contracts/examples/Counter.sol";
@@ -26,10 +26,10 @@ contract HappyTest is Setup {
     );
 
     function setUp() external {
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
-        _dualChainSetup(transmitterPivateKeys);
+        _dualChainSetup(transmitterPrivateKeys);
         _deployPlugContracts();
 
         _configPlugContracts(index);
@@ -56,9 +56,10 @@ contract HappyTest is Setup {
             (executionFee, socketFees) = _a
                 .executionManager__
                 .getExecutionTransmissionMinFees(
-                    _msgGasLimit,
+                    _minMsgGasLimit,
                     100,
                     bytes32(0),
+                    _transmissionParams,
                     _b.chainSlug,
                     address(_a.transmitManager__)
                 );
@@ -68,7 +69,7 @@ contract HappyTest is Setup {
                 verificationFee +
                 executionFee;
 
-            // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+            // executionFees to be recomputed which is totalValue - (socketFees + switchboardFees)
             // verificationFees also should go to Executor, hence we do the additional computation below
             executionFee = verificationFee + executionFee;
 
@@ -76,7 +77,8 @@ contract HappyTest is Setup {
             srcCounter__.remoteAddOperation{value: value}(
                 _b.chainSlug,
                 amount,
-                _msgGasLimit,
+                _minMsgGasLimit,
+                bytes32(0),
                 bytes32(0)
             );
         }
@@ -92,13 +94,20 @@ contract HappyTest is Setup {
             );
 
             _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
-            _proposeOnDst(_b, sig_, packetId, root);
+            _proposeOnDst(
+                _b,
+                sig_,
+                packetId,
+                root,
+                address(_b.configs__[0].switchboard__)
+            );
             uint256 proposalCount;
             _attestOnDst(
                 address(_b.configs__[0].switchboard__),
                 _b.chainSlug,
                 packetId,
                 proposalCount,
+                root,
                 _watcherPrivateKey
             );
         }
@@ -113,7 +122,7 @@ contract HappyTest is Setup {
                 packetId,
                 0,
                 _packMessageId(_a.chainSlug, address(dstCounter__), 0),
-                _msgGasLimit,
+                _minMsgGasLimit,
                 bytes32(0),
                 executionFee,
                 root,
@@ -137,7 +146,7 @@ contract HappyTest is Setup {
                 packetId,
                 0,
                 _packMessageId(_a.chainSlug, address(dstCounter__), 0),
-                _msgGasLimit,
+                _minMsgGasLimit,
                 bytes32(0),
                 executionFee,
                 root,
@@ -154,7 +163,7 @@ contract HappyTest is Setup {
                 packetId,
                 1,
                 _packMessageId(_a.chainSlug, address(dstCounter__), 0),
-                _msgGasLimit,
+                _minMsgGasLimit,
                 bytes32(0),
                 executionFee,
                 root,
@@ -176,67 +185,44 @@ contract HappyTest is Setup {
     //         ? address(_b.configs__[0].capacitor__)
     //         : address(_b.configs__[1].capacitor__);
 
-    //     uint256 executionFee;
-    //     {
-    //         (uint256 switchboardFees, uint256 verificationFee) = _b
-    //             .configs__[index]
-    //             .switchboard__
-    //             .getMinFees(_a.chainSlug);
-
-    //         uint256 socketFees = _b.transmitManager__.getMinFees(_a.chainSlug);
-    //         executionFee = _b.executionManager__.getMinFees(
-    //             _msgGasLimit,
-    //             100,
-    //             bytes32(0),
-    //             _a.chainSlug
-    //         );
-
-    //         uint256 value = switchboardFees +
-    //             socketFees +
-    //             verificationFee +
-    //             executionFee;
-
-    //         // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
-    //         // verificationFees also should go to Executor, hence we do the additional computation below
-    //         executionFee = verificationFee + executionFee;
-    //         hoax(_plugOwner);
-    //         dstCounter__.remoteAddOperation{value: value}(
-    //             _a.chainSlug,
-    //             amount,
-    //             _msgGasLimit,
-    //             bytes32(0)
-    //         );
-    //     }
+    //     sendOutboundMessage(_b, _a.chainSlug);
     //     (
     //         bytes32 root,
     //         bytes32 packetId,
     //         bytes memory sig
     //     ) = _getLatestSignature(capacitor, _b.chainSlug, _a.chainSlug);
 
-    // _sealOnSrc(_b, capacitor, DEFAULT_BATCH_LENGTH, sig);
-    // _proposeOnDst(_a, sig, packetId, root);
-    // _attestOnDst(
-    //     address(_a.configs__[0].switchboard__),
-    //     _a.chainSlug,
-    //     packetId,
-    //     0,
-    //     _watcherPrivateKey
-    // );
-
-    // _executePayloadOnDst(
-    //     _a,
-    //     ExecutePayloadOnDstParams(
+    //     _sealOnSrc(_b, capacitor, DEFAULT_BATCH_LENGTH, sig);
+    //     _proposeOnDst(
+    //         _a,
+    //         sig,
+    //         packetId,
+    //         root,
+    //         address(_a.configs__[0].switchboard__)
+    //     );
+    //     _attestOnDst(
+    //         address(_a.configs__[0].switchboard__),
+    //         _a.chainSlug,
     //         packetId,
     //         0,
-    //         _packMessageId(_b.chainSlug, address(srcCounter__), 0),
-    //         _msgGasLimit,
-    //         bytes32(0),
-    //         executionFee,
     //         root,
-    //         payload,
-    //         proof
-    //     )
-    // );
+    //         _watcherPrivateKey
+    //     );
+
+    //     _executePayloadOnDst(
+    //         _a,
+    //         ExecutePayloadOnDstParams(
+    //             packetId,
+    //             0,
+    //             _packMessageId(_b.chainSlug, address(srcCounter__), 0),
+    //             _minMsgGasLimit,
+    //             bytes32(0),
+    //             _executionFees,
+    //             root,
+    //             payload,
+    //             proof
+    //         )
+    //     );
 
     //     assertEq(srcCounter__.counter(), amount);
     //     assertEq(dstCounter__.counter(), 0);
@@ -249,21 +235,22 @@ contract HappyTest is Setup {
         uint256 fees,
         bytes memory payload
     ) internal returns (bytes32 msgId, bytes32 root) {
-        uint256 msgGasLimit = _msgGasLimit;
+        uint256 minMsgGasLimit = _minMsgGasLimit;
         uint32 dstSlug = _b.chainSlug;
 
         hoax(_plugOwner);
         srcCounter__.remoteAddOperation{value: fees}(
             dstSlug,
             amount,
-            msgGasLimit,
+            _minMsgGasLimit,
+            bytes32(0),
             bytes32(0)
         );
 
         msgId = _packMessageId(_a.chainSlug, address(dstCounter__), count);
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = msgId;
-        messageDetails.msgGasLimit = msgGasLimit;
+        messageDetails.minMsgGasLimit = minMsgGasLimit;
         messageDetails.executionFee = executionFees;
         messageDetails.payload = payload;
 
@@ -312,9 +299,11 @@ contract HappyTest is Setup {
 
     //         uint256 socketFees = _a.transmitManager__.getMinFees(_b.chainSlug);
     //         executionFee = _a.executionManager__.getMinFees(
-    //             _msgGasLimit,
+    //             _minMsgGasLimit,
     //             100,
     //             bytes32(0),
+    // _transmissionParams,
+
     //             _b.chainSlug
     //         );
 
@@ -323,7 +312,7 @@ contract HappyTest is Setup {
     //             socketFees +
     //             executionFee;
 
-    //         // executionFees to be recomputed which is totalValue - (socketFees + switchBoardFees)
+    //         // executionFees to be recomputed which is totalValue - (socketFees + switchboardFees)
     //         // verificationFees also should go to Executor, hence we do the additional computation below
     //         executionFee = executionOverhead + executionFee;
 
@@ -359,7 +348,7 @@ contract HappyTest is Setup {
     //         packetId,
     //         0,
     //         msgId1,
-    //         _msgGasLimit,
+    //         _minMsgGasLimit,
     //         bytes32(0),
     //         executionFee,
     //         root1,
@@ -381,7 +370,7 @@ contract HappyTest is Setup {
     //         packetId,
     //         0,
     //         msgId2,
-    //         _msgGasLimit,
+    //         _minMsgGasLimit,
     //         bytes32(0),
     //         executionFee,
     //         root2,
@@ -437,6 +426,31 @@ contract HappyTest is Setup {
             _a.chainSlug,
             address(srcCounter__),
             address(_b.configs__[socketConfigIndex].switchboard__)
+        );
+    }
+
+    function sendOutboundMessage(
+        ChainContext storage cc_,
+        uint32 siblingChainSlug_
+    ) internal {
+        uint256 amount = 100;
+
+        uint256 minFees = cc_.socket__.getMinFees(
+            _minMsgGasLimit,
+            1000,
+            bytes32(0),
+            _transmissionParams,
+            siblingChainSlug_,
+            address(srcCounter__)
+        );
+
+        hoax(_plugOwner);
+        srcCounter__.remoteAddOperation{value: minFees}(
+            siblingChainSlug_,
+            amount,
+            _minMsgGasLimit,
+            bytes32(0),
+            bytes32(0)
         );
     }
 }

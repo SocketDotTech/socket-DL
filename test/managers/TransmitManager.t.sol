@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../Setup.t.sol";
 
@@ -13,18 +13,19 @@ contract TransmitManagerTest is Setup {
     event TransmitManagerUpdated(address transmitManager);
     event FeesWithdrawn(address account_, uint256 value_);
     event SignatureVerifierSet(address signatureVerifier_);
+    event TransmissionFeesSet(uint256 dstChainSlug, uint256 transmissionFees);
 
     function setUp() public {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
         _deployContractsOnSingleChain(
             _a,
             bChainSlug,
             isExecutionOpen,
-            transmitterPivateKeys
+            transmitterPrivateKeys
         );
         signatureVerifier = _a.sigVerifier__;
         transmitManager = _a.transmitManager__;
@@ -48,28 +49,20 @@ contract TransmitManagerTest is Setup {
     }
 
     function testWithdrawFees() public {
-        uint256 minFees = 0;
-        // transmitManager.getMinFees(bChainSlug);
-        deal(_feesPayer, minFees);
-
-        vm.startPrank(_feesPayer);
-        transmitManager.payFees{value: minFees}(bChainSlug);
-        vm.stopPrank();
+        uint256 amount = 1e18;
 
         vm.startPrank(_socketOwner);
-        vm.expectEmit(false, false, false, true);
-        emit FeesWithdrawn(_feesWithdrawer, minFees);
-        transmitManager.withdrawFees(_feesWithdrawer);
-        vm.stopPrank();
+        vm.deal(address(transmitManager), amount);
+        uint256 initialBal = _fundRescuer.balance;
 
-        assertEq(_feesWithdrawer.balance, minFees);
-    }
-
-    function testWithdrawFeesToZeroAddress() public {
-        vm.startPrank(_socketOwner);
-
-        vm.expectRevert();
+        vm.expectRevert(ZeroAddress.selector);
         transmitManager.withdrawFees(address(0));
+
+        transmitManager.withdrawFees(_fundRescuer);
+
+        assertEq(address(transmitManager).balance, 0);
+        assertEq(_fundRescuer.balance, initialBal + amount);
+
         vm.stopPrank();
     }
 
@@ -154,6 +147,91 @@ contract TransmitManagerTest is Setup {
         assertEq(
             address(transmitManager.signatureVerifier__()),
             address(signatureVerifierNew)
+        );
+    }
+
+    function testSetTransmissionFees() public {
+        uint128 newTransmissionFees = _transmissionFees * 2;
+
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                address(transmitManager),
+                _a.chainSlug,
+                bChainSlug,
+                _a.transmitterNonce,
+                newTransmissionFees
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        ExecutionManager em = ExecutionManager(
+            address(_a.socket__.executionManager__())
+        );
+
+        assertEq(
+            em.transmissionMinFees(address(transmitManager), bChainSlug),
+            _transmissionFees
+        );
+
+        vm.expectEmit(true, true, false, false);
+        emit TransmissionFeesSet(bChainSlug, newTransmissionFees);
+        transmitManager.setTransmissionFees(
+            _a.transmitterNonce++,
+            bChainSlug,
+            newTransmissionFees,
+            feesUpdateSignature
+        );
+
+        assertEq(
+            em.transmissionMinFees(address(transmitManager), bChainSlug),
+            newTransmissionFees
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                keccak256(abi.encode(FEES_UPDATER_ROLE, cChainSlug))
+            )
+        );
+        transmitManager.setTransmissionFees(
+            _a.transmitterNonce++,
+            cChainSlug,
+            newTransmissionFees,
+            feesUpdateSignature
+        );
+    }
+
+    function testSetTransmissionFeesForInvalidNonce() public {
+        uint128 newTransmissionFees = _transmissionFees * 2;
+        uint256 wrongNonce = _a.transmitterNonce + 1;
+
+        bytes32 feesUpdateDigest = keccak256(
+            abi.encode(
+                FEES_UPDATE_SIG_IDENTIFIER,
+                address(transmitManager),
+                _a.chainSlug,
+                bChainSlug,
+                wrongNonce,
+                newTransmissionFees
+            )
+        );
+
+        bytes memory feesUpdateSignature = _createSignature(
+            feesUpdateDigest,
+            _socketOwnerPrivateKey
+        );
+
+        vm.expectRevert(TransmitManager.InvalidNonce.selector);
+        transmitManager.setTransmissionFees(
+            wrongNonce,
+            bChainSlug,
+            newTransmissionFees,
+            feesUpdateSignature
         );
     }
 

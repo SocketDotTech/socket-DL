@@ -597,7 +597,7 @@ const main = async () => {
           ROLES.RESCUE_ROLE,
           ROLES.GOVERNANCE_ROLE,
           ROLES.TRIP_ROLE,
-          ROLES.UNTRIP_ROLE,
+          ROLES.UN_TRIP_ROLE,
           ROLES.WITHDRAW_ROLE,
           ROLES.FEES_UPDATER_ROLE,
         ],
@@ -625,7 +625,8 @@ const main = async () => {
         userAddress: ownerAddress,
         filterRoles: [
           ROLES.TRIP_ROLE,
-          ROLES.UNTRIP_ROLE,
+          ROLES.UN_TRIP_ROLE,
+          ROLES.RESCUE_ROLE,
           ROLES.GOVERNANCE_ROLE,
           ROLES.FEES_UPDATER_ROLE,
         ],
@@ -652,7 +653,7 @@ const main = async () => {
         userAddress: ownerAddress,
         filterRoles: [
           ROLES.TRIP_ROLE,
-          ROLES.UNTRIP_ROLE,
+          ROLES.UN_TRIP_ROLE,
           ROLES.GOVERNANCE_ROLE,
           ROLES.WITHDRAW_ROLE,
           ROLES.RESCUE_ROLE,

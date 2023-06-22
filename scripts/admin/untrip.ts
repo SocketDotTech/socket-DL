@@ -62,7 +62,7 @@ const main = async () => {
             arrayify(digest)
           );
 
-          const tx = await switchboard.untripPath(
+          const tx = await switchboard.unTripPath(
             nonce,
             siblingChain,
             signature,

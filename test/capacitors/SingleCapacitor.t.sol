@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../Setup.t.sol";
 import "../../contracts/capacitors/SingleCapacitor.sol";
@@ -14,7 +14,7 @@ contract SingleCapacitorTest is Setup {
     SingleDecapacitor _sd;
 
     function setUp() external {
-        initialise();
+        initialize();
 
         hoax(_socketOwner);
         _sa = new SingleCapacitor(_socket, _socketOwner);

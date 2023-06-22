@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/ICapacitor.sol";
 import "../../interfaces/ISignatureVerifier.sol";
-
+import "../../interfaces/IExecutionManager.sol";
 import "../../libraries/RescueFundsLib.sol";
-import "../../libraries/FeesHelper.sol";
 import "../../utils/AccessControlExtended.sol";
 
-import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
-import {TRIP_NATIVE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UN_TRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {TRIP_NATIVE_SIG_IDENTIFIER, UN_TRIP_NATIVE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
 @title Native Switchboard Base Contract
@@ -41,12 +40,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Flag that indicates if the capacitor has been registered.
      */
-    bool public isInitialised;
+    bool public isInitialized;
 
-    /**
-     * @dev The maximum packet size.
-     */
-    uint256 public maxPacketLength;
+    uint256 initialPacketCount;
 
     /**
      * @dev Address of the remote native switchboard.
@@ -83,19 +79,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev This event is emitted when a new capacitor is registered.
      *     It includes the address of the capacitor and the maximum size of the packet allowed.
-     * @param siblingChainSlug Chain slug of the sibling chain
-     * @param capacitor address of capacitor registered to switchboard
-     * @param maxPacketLength maximum packets that can be set to capacitor
-     */
-    event SwitchBoardRegistered(
-        uint32 siblingChainSlug,
-        address capacitor,
-        uint256 maxPacketLength
-    );
-
-    /**
-     * @dev This event is emitted when a new capacitor is registered.
-     *     It includes the address of the capacitor and the maximum size of the packet allowed.
      * @param remoteNativeSwitchboard address of capacitor registered to switchboard
      */
     event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
@@ -122,7 +105,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Error thrown when the contract has already been initialized.
      */
-    error AlreadyInitialised();
+    error AlreadyInitialized();
 
     /**
      * @dev Error thrown when the transaction is not sent by a valid sender.
@@ -147,9 +130,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Modifier to ensure that a function can only be called by the remote switchboard.
      */
-    modifier onlyRemoteSwitchboard() virtual {
-        _;
-    }
+    modifier onlyRemoteSwitchboard() virtual;
 
     /**
      * @dev Constructor function for the CrossChainReceiver contract.
@@ -193,10 +174,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice checks if a packet can be executed
-     * @param root_ Merkle root associated with the packet ID
-     * @param packetId_ packet ID
-     * @return true if the packet satisfies all the checks and can be executed, false otherwise
+     * @inheritdoc ISwitchboard
      */
     function allowPacket(
         bytes32 root_,
@@ -205,18 +183,14 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32,
         uint256
     ) external view override returns (bool) {
+        uint64 packetCount = uint64(uint256(packetId_));
+
         if (tripGlobalFuse) return false;
+        if (packetCount < initialPacketCount) return false;
         if (packetIdToRoot[packetId_] != root_) return false;
 
         return true;
     }
-
-    /**
-     * @notice receives fees to be paid to the relayer for executing the packet
-     * @param dstChainSlug_ chain slug of the destination chain
-     * @dev assumes that the amount is paid in the native currency of the destination chain and has 18 decimals
-     */
-    function payFees(uint32 dstChainSlug_) external payable override {}
 
     /**
      * @dev Get the minimum fees for a cross-chain transaction.
@@ -234,6 +208,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         return (switchboardFees, verificationFees);
     }
 
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function setFees(
         uint256 nonce_,
         uint32,
@@ -256,37 +233,36 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(FEES_UPDATER_ROLE, feesUpdater);
-        if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
-
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
         switchboardFees = switchboardFees_;
         verificationFees = verificationFees_;
 
         emit SwitchboardFeesSet(switchboardFees, verificationFees);
     }
 
-    /// @inheritdoc ISwitchboard
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function registerSiblingSlug(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
-        uint256 capacitorType_
+        uint256 capacitorType_,
+        uint256 initialPacketCount_
     ) external override onlyRole(GOVERNANCE_ROLE) {
-        if (isInitialised) revert AlreadyInitialised();
+        if (isInitialized) revert AlreadyInitialized();
 
-        address capacitor = socket__.registerSwitchBoard(
+        initialPacketCount = initialPacketCount_;
+        (address capacitor, ) = socket__.registerSwitchBoard(
             siblingChainSlug_,
             maxPacketLength_,
             capacitorType_
         );
 
-        isInitialised = true;
-        maxPacketLength = maxPacketLength_;
+        isInitialized = true;
         capacitor__ = ICapacitor(capacitor);
-
-        emit SwitchBoardRegistered(
-            siblingChainSlug_,
-            capacitor,
-            maxPacketLength_
-        );
     }
 
     /**
@@ -296,7 +272,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      *      is incorrect, it will revert.
      *       Once the function is successful, the tripGlobalFuse variable is set to true and the SwitchboardTripped event is emitted.
      * @param nonce_ The nonce of the caller.
-     * @param signature_ The signature of the message "TRIP" + chainSlug + nonce_ + true.
+     * @param signature_ The signature of the message
      */
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
         address watcher = signatureVerifier__.recoverSigner(
@@ -314,24 +290,26 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         );
 
         _checkRole(TRIP_ROLE, watcher);
-        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
-
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
+        unchecked {
+            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+        }
         tripGlobalFuse = true;
         emit SwitchboardTripped(true);
     }
 
     /**
-     * @notice Allows a watcher to untrip the switchboard by providing a signature and a nonce.
-     * @dev To untrip, the watcher must have the UNTRIP_ROLE. The signature must be created by signing the concatenation of the following values: "UNTRIP", the chainSlug, the nonce and false.
+     * @notice Allows a watcher to un trip the switchboard by providing a signature and a nonce.
+     * @dev To un trip, the watcher must have the UN_TRIP_ROLE.
      * @param nonce_ The nonce to prevent replay attacks.
      * @param signature_ The signature created by the watcher.
      */
-    function untrip(uint256 nonce_, bytes memory signature_) external {
+    function unTrip(uint256 nonce_, bytes memory signature_) external {
         address watcher = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
-                    UNTRIP_NATIVE_SIG_IDENTIFIER,
+                    UN_TRIP_NATIVE_SIG_IDENTIFIER,
                     address(this),
                     chainSlug,
                     nonce_,
@@ -341,9 +319,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRole(UNTRIP_ROLE, watcher);
-        if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+        _checkRole(UN_TRIP_ROLE, watcher);
 
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
+        unchecked {
+            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+        }
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
     }
@@ -367,7 +348,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev The caller must have the WITHDRAW_ROLE.
      */
     function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        FeesHelper.withdrawFees(account_);
+        if (account_ == address(0)) revert ZeroAddress();
+        SafeTransferLib.safeTransferETH(account_, address(this).balance);
     }
 
     /**
@@ -382,5 +364,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+    }
+
+    /**
+     * @inheritdoc ISwitchboard
+     */
+    function receiveFees(uint32) external payable override {
+        require(msg.sender == address(socket__.executionManager__()));
     }
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "./SwitchboardBase.sol";
 
@@ -73,6 +73,7 @@ contract FastSwitchboard is SwitchboardBase {
      * @dev Function to attest a packet
      * @param packetId_ Packet ID
      * @param proposalCount_ Proposal ID
+     * @param root_ Root of the packet
      * @param signature_ Signature of the packet
      * @notice we are attesting a root uniquely identified with packetId and proposalCount. However,
      * there can be multiple proposals for same root. To avoid need to re-attest for different proposals
@@ -81,12 +82,18 @@ contract FastSwitchboard is SwitchboardBase {
     function attest(
         bytes32 packetId_,
         uint256 proposalCount_,
+        bytes32 root_,
         bytes calldata signature_
     ) external {
         uint32 srcChainSlug = uint32(uint256(packetId_) >> 224);
 
-        bytes32 root = socket__.packetIdRoots(packetId_, proposalCount_);
+        bytes32 root = socket__.packetIdRoots(
+            packetId_,
+            proposalCount_,
+            address(this)
+        );
         if (root == bytes32(0)) revert InvalidRoot();
+        if (root != root_) revert InvalidRoot();
 
         address watcher = signatureVerifier__.recoverSigner(
             keccak256(
@@ -100,7 +107,7 @@ contract FastSwitchboard is SwitchboardBase {
             revert WatcherNotFound();
 
         isAttested[watcher][root] = true;
-        attestations[root]++;
+        ++attestations[root];
 
         if (attestations[root] >= totalWatchers[srcChainSlug])
             isRootValid[root] = true;
@@ -115,10 +122,7 @@ contract FastSwitchboard is SwitchboardBase {
     }
 
     /**
-     * @notice verifies if the packet satisfies needed checks before execution
-     * @param packetId_ packetId
-     * @param proposalCount_ proposalCount
-     * @param proposeTime_ time at which packet was proposed
+     * @inheritdoc ISwitchboard
      */
     function allowPacket(
         bytes32 root_,
@@ -127,10 +131,13 @@ contract FastSwitchboard is SwitchboardBase {
         uint32 srcChainSlug_,
         uint256 proposeTime_
     ) external view override returns (bool) {
+        uint64 packetCount = uint64(uint256(packetId_));
+
         if (
             tripGlobalFuse ||
             tripSinglePath[srcChainSlug_] ||
-            isProposalTripped[packetId_][proposalCount_]
+            isProposalTripped[packetId_][proposalCount_] ||
+            packetCount < initialPacketCount[srcChainSlug_]
         ) return false;
         if (isRootValid[root_]) return true;
         if (block.timestamp - proposeTime_ > timeoutInSeconds) return true;
@@ -139,6 +146,7 @@ contract FastSwitchboard is SwitchboardBase {
 
     /**
      * @notice adds a watcher for `srcChainSlug_` chain
+     * @param srcChainSlug_ chain slug of the chain where the watcher is being added
      * @param watcher_ watcher address
      */
     function grantWatcherRole(
@@ -149,11 +157,12 @@ contract FastSwitchboard is SwitchboardBase {
             revert WatcherFound();
         _grantRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_);
 
-        totalWatchers[srcChainSlug_]++;
+        ++totalWatchers[srcChainSlug_];
     }
 
     /**
      * @notice removes a watcher from `srcChainSlug_` chain list
+     * @param srcChainSlug_ chain slug of the chain where the watcher is being removed
      * @param watcher_ watcher address
      */
     function revokeWatcherRole(
@@ -167,10 +176,14 @@ contract FastSwitchboard is SwitchboardBase {
         totalWatchers[srcChainSlug_]--;
     }
 
+    /**
+     * @notice returns true if non watcher role. Used to avoid granting watcher role directly
+     * @dev If adding any new role to FastSwitchboard, have to add it here as well to make sure it can be set
+     */
     function isNonWatcherRole(bytes32 role_) public pure returns (bool) {
         if (
             role_ == TRIP_ROLE ||
-            role_ == UNTRIP_ROLE ||
+            role_ == UN_TRIP_ROLE ||
             role_ == WITHDRAW_ROLE ||
             role_ == RESCUE_ROLE ||
             role_ == GOVERNANCE_ROLE ||
@@ -249,7 +262,9 @@ contract FastSwitchboard is SwitchboardBase {
             roleNames_.length != grantees_.length ||
             roleNames_.length != slugs_.length
         ) revert UnequalArrayLengths();
-        for (uint256 index = 0; index < roleNames_.length; index++) {
+
+        uint256 totalRoles = roleNames_.length;
+        for (uint256 index = 0; index < totalRoles; ) {
             if (isNonWatcherRole(roleNames_[index])) {
                 if (slugs_[index] > 0)
                     _grantRoleWithSlug(
@@ -260,6 +275,10 @@ contract FastSwitchboard is SwitchboardBase {
                 else _grantRole(roleNames_[index], grantees_[index]);
             } else {
                 revert InvalidRole();
+            }
+            // we will reach block gas limit before this overflows
+            unchecked {
+                ++index;
             }
         }
     }
@@ -277,7 +296,8 @@ contract FastSwitchboard is SwitchboardBase {
             roleNames_.length != grantees_.length ||
             roleNames_.length != slugs_.length
         ) revert UnequalArrayLengths();
-        for (uint256 index = 0; index < roleNames_.length; index++) {
+        uint256 totalRoles = roleNames_.length;
+        for (uint256 index = 0; index < totalRoles; ) {
             if (isNonWatcherRole(roleNames_[index])) {
                 if (slugs_[index] > 0)
                     _revokeRoleWithSlug(
@@ -288,6 +308,10 @@ contract FastSwitchboard is SwitchboardBase {
                 else _revokeRole(roleNames_[index], grantees_[index]);
             } else {
                 revert InvalidRole();
+            }
+            // we will reach block gas limit before this overflows
+            unchecked {
+                ++index;
             }
         }
     }

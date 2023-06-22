@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../Setup.t.sol";
 import {ERC20PresetFixedSupply} from "lib/openzeppelin-contracts/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
@@ -13,7 +13,7 @@ contract CapacitorFactoryTest is Setup {
     error NoPermit(bytes32 role);
 
     function setUp() external {
-        initialise();
+        initialize();
         _cf = new CapacitorFactory(_socketOwner);
         _token = new ERC20PresetFixedSupply(
             "TEST",
@@ -51,7 +51,7 @@ contract CapacitorFactoryTest is Setup {
         );
     }
 
-    function testDeploy(uint256 capacitorType) external {
+    function testDeployForInvalidCapacitorType(uint256 capacitorType) external {
         if (capacitorType != 1 && capacitorType != 2) {
             vm.expectRevert(ICapacitorFactory.InvalidCapacitorType.selector);
         }
@@ -83,7 +83,7 @@ contract CapacitorFactoryTest is Setup {
         assertEq(finalBalOfOwner - initialBalOfOwner, amount);
     }
 
-    function testRescueNativeFunds() public {
+    function testRescueNativeFunds() external {
         uint256 amount = 1e18;
 
         hoax(_socketOwner);

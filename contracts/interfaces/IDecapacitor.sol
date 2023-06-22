@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 /**
  * @title IDecapacitor interface
@@ -8,13 +8,15 @@ pragma solidity 0.8.7;
 interface IDecapacitor {
     /**
      * @notice returns if the packed message is the part of a packet or not
+     * @dev this function can be used to update deCapacitor states as well
      * @param root_ root hash of the packet
      * @param packedMessage_ packed message which needs to be verified
      * @param proof_ proof used to determine the inclusion
+     * @dev this function is kept as view instead of pure, as in future we may have stateful decapacitors
      */
     function verifyMessageInclusion(
         bytes32 root_,
         bytes32 packedMessage_,
         bytes calldata proof_
-    ) external pure returns (bool);
+    ) external returns (bool);
 }

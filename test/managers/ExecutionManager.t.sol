@@ -1,28 +1,24 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "../Setup.t.sol";
 
 contract ExecutionManagerTest is Setup {
     ExecutionManager internal executionManager;
 
-    error InsufficientExecutionFees();
     event FeesWithdrawn(address account_, uint256 value_);
-    error MsgValueTooLow();
-    error MsgValueTooHigh();
-    error PayloadTooLarge();
-    error InsufficientMsgValue();
 
     function setUp() public {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        _b.chainSlug = uint32(uint256(bChainSlug));
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
         _deployContractsOnSingleChain(
             _a,
             bChainSlug,
             isExecutionOpen,
-            transmitterPivateKeys
+            transmitterPrivateKeys
         );
 
         executionManager = _a.executionManager__;
@@ -46,12 +42,12 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testGetMinFees() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
 
         uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             bChainSlug
@@ -61,8 +57,28 @@ contract ExecutionManagerTest is Setup {
         assertEq(minFees, _executionFees);
     }
 
+    function testGetTransmissionExecutionFees() public {
+        uint256 minMsgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        bytes32 executionParams = bytes32(0);
+
+        (uint128 executionFees, uint128 transmissionFees) = executionManager
+            .getExecutionTransmissionMinFees(
+                minMsgGasLimit,
+                payloadSize,
+                executionParams,
+                _transmissionParams,
+                bChainSlug,
+                address(_a.transmitManager__)
+            );
+
+        //assert actual and expected data
+        assertEq(executionFees, _executionFees);
+        assertEq(transmissionFees, _transmissionFees);
+    }
+
     function testGetMinFeesWithMsgValueTooHigh() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         uint256 msgValue = 1000000;
         uint8 paramType = 1;
@@ -70,9 +86,9 @@ contract ExecutionManagerTest is Setup {
             uint256((uint256(paramType) << 248) | uint248(msgValue))
         );
 
-        vm.expectRevert(MsgValueTooHigh.selector);
+        vm.expectRevert(ExecutionManager.MsgValueTooHigh.selector);
         executionManager.getMinFees(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             bChainSlug
@@ -80,7 +96,7 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testGetMinFeesWithMsgValueTooLow() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         uint256 msgValue = 1;
         uint8 paramType = 1;
@@ -90,9 +106,9 @@ contract ExecutionManagerTest is Setup {
 
         _setMsgValueMinThreshold(_a, bChainSlug, _msgValueMinThreshold);
 
-        vm.expectRevert(MsgValueTooLow.selector);
+        vm.expectRevert(ExecutionManager.MsgValueTooLow.selector);
         executionManager.getMinFees(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             bChainSlug
@@ -100,7 +116,7 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testGetMinFeesWithMsgValue() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         uint256 msgValue = 100;
         uint8 paramType = 1;
@@ -109,7 +125,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             bChainSlug
@@ -122,75 +138,252 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testGetMinFeesWithPayloadTooLong() public {
-        uint256 msgGasLimit = 100000;
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 10000;
         bytes32 executionParams = bytes32(
             uint256((uint256(1) << 224) | uint224(100))
         );
 
-        vm.expectRevert(PayloadTooLarge.selector);
+        vm.expectRevert(ExecutionManager.PayloadTooLarge.selector);
         executionManager.getMinFees(
-            msgGasLimit,
+            minMsgGasLimit,
             payloadSize,
             executionParams,
             bChainSlug
         );
     }
 
-    function testPayFees() public {
-        uint256 msgGasLimit = 100000;
+    function testPayAndCheckFees() public {
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
 
-        uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
-            payloadSize,
-            executionParams,
-            bChainSlug
-        );
-        deal(_feesPayer, minFees);
+        (uint128 executionFees, uint128 transmissionFees) = executionManager
+            .getExecutionTransmissionMinFees(
+                minMsgGasLimit,
+                payloadSize,
+                executionParams,
+                _transmissionParams,
+                bChainSlug,
+                address(_a.transmitManager__)
+            );
+
+        uint256 totalFees = transmissionFees +
+            executionFees +
+            _switchboardFees +
+            _verificationFees; //
+        deal(_feesPayer, totalFees);
 
         assertEq(address(executionManager).balance, 0);
-        assertEq(_feesPayer.balance, minFees);
 
         vm.startPrank(_feesPayer);
-        // executionManager.payFees{value: minFees}(msgGasLimit, bChainSlug);
+        _a.executionManager__.payAndCheckFees{value: totalFees}(
+            minMsgGasLimit,
+            payloadSize,
+            executionParams,
+            _transmissionParams,
+            _b.chainSlug,
+            _switchboardFees,
+            _verificationFees,
+            address(_a.transmitManager__),
+            address(_a.configs__[0].switchboard__),
+            1
+        );
         vm.stopPrank();
 
-        assertEq(address(executionManager).balance, minFees);
+        assertEq(address(executionManager).balance, totalFees);
         assertEq(_feesPayer.balance, 0);
+
+        (
+            uint128 storedExecutionFees,
+            uint128 storedTransmissionFees
+        ) = executionManager.totalExecutionAndTransmissionFees(bChainSlug);
+
+        assertEq(storedTransmissionFees, _transmissionFees);
+        assertEq(storedExecutionFees, _executionFees + _verificationFees);
+        assertEq(
+            executionManager.totalSwitchboardFees(
+                address(_a.configs__[0].switchboard__),
+                bChainSlug
+            ),
+            _switchboardFees
+        );
     }
 
-    function testWithdrawFees() public {
-        uint256 msgGasLimit = 100000;
+    function testFailPayAndCheckFeesWithFeeSetTooHigh() public {
+        uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
 
-        uint256 minFees = executionManager.getMinFees(
-            msgGasLimit,
+        uint256 totalFees = _transmissionFees +
+            _executionFees +
+            type(uint128).max + //_switchboardFees
+            _verificationFees;
+
+        _a.executionManager__.payAndCheckFees{value: totalFees}(
+            minMsgGasLimit,
             payloadSize,
             executionParams,
-            bChainSlug
+            _transmissionParams,
+            _b.chainSlug,
+            _switchboardFees,
+            _verificationFees,
+            address(_a.transmitManager__),
+            address(_a.configs__[0].switchboard__),
+            1
         );
-        deal(_feesPayer, minFees);
+    }
 
-        assertEq(address(executionManager).balance, 0);
-        assertEq(_feesPayer.balance, minFees);
+    function testPayAndCheckFeesWithMsgValueTooHigh() public {
+        uint256 minMsgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        bytes32 executionParams = bytes32(0);
+        deal(_feesPayer, type(uint256).max);
+        hoax(_feesPayer);
+        vm.expectRevert(ExecutionManager.InvalidMsgValue.selector);
+        _a.executionManager__.payAndCheckFees{value: type(uint128).max}(
+            minMsgGasLimit,
+            payloadSize,
+            executionParams,
+            _transmissionParams,
+            _b.chainSlug,
+            _switchboardFees,
+            _verificationFees,
+            address(_a.transmitManager__),
+            address(_a.configs__[0].switchboard__),
+            1
+        );
+    }
 
-        vm.startPrank(_feesPayer);
-        // executionManager.payFees{value: minFees}(msgGasLimit, bChainSlug);
-        vm.stopPrank();
+    function testWithdrawExecutionFees() public {
+        sendFeesToExecutionManager();
+        uint128 amount = 100;
 
-        assertEq(_feesWithdrawer.balance, 0);
+        // should revert with zero address
+        hoax(_socketOwner);
+        vm.expectRevert(ZeroAddress.selector);
+        executionManager.withdrawExecutionFees(bChainSlug, amount, address(0));
 
+        // should revert with NoPermit
         hoax(_raju);
         vm.expectRevert();
-        executionManager.withdrawFees(_feesWithdrawer);
+        executionManager.withdrawExecutionFees(
+            bChainSlug,
+            amount,
+            _feesWithdrawer
+        );
 
-        hoax(_socketOwner);
-        executionManager.withdrawFees(_feesWithdrawer);
+        vm.startPrank(_socketOwner);
+        vm.expectRevert(ExecutionManager.InsufficientFees.selector);
+        executionManager.withdrawExecutionFees(
+            bChainSlug,
+            type(uint128).max,
+            _feesWithdrawer
+        );
 
-        assertEq(_feesWithdrawer.balance, minFees);
+        // should fail as no receive or fallback function in socket
+        vm.expectRevert("ETH_TRANSFER_FAILED");
+        executionManager.withdrawExecutionFees(
+            bChainSlug,
+            amount,
+            address(_a.socket__)
+        );
+
+        (uint128 storedExecutionFees1, ) = executionManager
+            .totalExecutionAndTransmissionFees(bChainSlug);
+
+        executionManager.withdrawExecutionFees(
+            bChainSlug,
+            amount,
+            _feesWithdrawer
+        );
+
+        (uint128 storedExecutionFees2, ) = executionManager
+            .totalExecutionAndTransmissionFees(bChainSlug);
+
+        assertEq(_feesWithdrawer.balance, amount);
+        assertEq(storedExecutionFees2, storedExecutionFees1 - amount);
+    }
+
+    function testWithdrawTransmissionFees() public {
+        sendFeesToExecutionManager();
+
+        uint128 amount = 100;
+
+        vm.expectRevert(ExecutionManager.InsufficientFees.selector);
+        executionManager.withdrawTransmissionFees(
+            bChainSlug,
+            type(uint128).max
+        );
+
+        (, uint128 storedTransmissionFees1) = executionManager
+            .totalExecutionAndTransmissionFees(bChainSlug);
+
+        executionManager.withdrawTransmissionFees(bChainSlug, amount);
+
+        (, uint128 storedTransmissionFees2) = executionManager
+            .totalExecutionAndTransmissionFees(bChainSlug);
+
+        assertEq(storedTransmissionFees2, storedTransmissionFees1 - amount);
+        assertEq(address(_a.transmitManager__).balance, amount);
+    }
+
+    function testWithdrawSwitchboardFees() public {
+        sendFeesToExecutionManager();
+
+        uint128 amount = 100;
+
+        vm.expectRevert(ExecutionManager.InsufficientFees.selector);
+        executionManager.withdrawSwitchboardFees(
+            bChainSlug,
+            _socketOwner,
+            amount
+        );
+
+        uint128 storedSwitchboardFees1 = executionManager.totalSwitchboardFees(
+            address(_a.configs__[0].switchboard__),
+            bChainSlug
+        );
+
+        executionManager.withdrawSwitchboardFees(
+            bChainSlug,
+            address(_a.configs__[0].switchboard__),
+            amount
+        );
+
+        uint128 storedSwitchboardFees2 = executionManager.totalSwitchboardFees(
+            address(_a.configs__[0].switchboard__),
+            bChainSlug
+        );
+
+        assertEq(address(_a.configs__[0].switchboard__).balance, amount);
+        assertEq(storedSwitchboardFees2, storedSwitchboardFees1 - amount);
+    }
+
+    function sendFeesToExecutionManager() internal {
+        uint256 minMsgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        bytes32 executionParams = bytes32(0);
+
+        uint256 totalFees = _transmissionFees +
+            _executionFees +
+            _switchboardFees +
+            _verificationFees;
+
+        _a.executionManager__.payAndCheckFees{value: totalFees}(
+            minMsgGasLimit,
+            payloadSize,
+            executionParams,
+            _transmissionParams,
+            _b.chainSlug,
+            _switchboardFees,
+            _verificationFees,
+            address(_a.transmitManager__),
+            address(_a.configs__[0].switchboard__),
+            1
+        );
+
+        assertEq(address(executionManager).balance, totalFees);
     }
 
     function testRescueNativeFunds() public {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.20;
 
 import "../interfaces/IPlug.sol";
 import "./SocketBase.sol";
@@ -44,21 +44,26 @@ abstract contract SocketDst is SocketBase {
      * @dev Error emitted when source slugs deduced from packet id and msg id don't match
      */
     error ErrInSourceValidation();
+    /**
+     * @dev Error emitted when less gas limit is provided for execution than expected
+     */
+    error LowGasLimit();
 
     /**
      * @dev msgId => message status mapping
      */
     mapping(bytes32 => bool) public messageExecuted;
     /**
-     * @dev capacitorAddr|chainSlug|packetId => proposalCount => packetIdRoots
+     * @dev capacitorAddr|chainSlug|packetId => proposalCount => switchboard => packetIdRoots
      */
-    mapping(bytes32 => mapping(uint256 => bytes32))
+    mapping(bytes32 => mapping(uint256 => mapping(address => bytes32)))
         public
         override packetIdRoots;
     /**
-     * @dev packetId => proposalCount => proposalTimestamp
+     * @dev packetId => proposalCount => switchboard => proposalTimestamp
      */
-    mapping(bytes32 => mapping(uint256 => uint256)) public rootProposedAt;
+    mapping(bytes32 => mapping(uint256 => mapping(address => uint256)))
+        public rootProposedAt;
 
     /**
      * @dev packetId => proposalCount
@@ -76,29 +81,24 @@ abstract contract SocketDst is SocketBase {
         address indexed transmitter,
         bytes32 indexed packetId,
         uint256 proposalCount,
-        bytes32 root
+        bytes32 root,
+        address switchboard
     );
-
-    /**
-     * @notice emits the root details when root is replaced by owner
-     * @param packetId packet id
-     * @param oldRoot old root
-     * @param newRoot old root
-     */
-    event PacketRootUpdated(bytes32 packetId, bytes32 oldRoot, bytes32 newRoot);
 
     /**
      * @dev Function to propose a packet
      * @notice the signature is validated if it belongs to transmitter or not
      * @param packetId_ packet id
      * @param root_ packet root
+     * @param switchboard_ The address of switchboard for which this packet is proposed
      * @param signature_ signature
      */
-    function propose(
+    function proposeForSwitchboard(
         bytes32 packetId_,
         bytes32 root_,
+        address switchboard_,
         bytes calldata signature_
-    ) external override {
+    ) external payable override {
         if (packetId_ == bytes32(0)) revert InvalidPacketId();
 
         (address transmitter, bool isTransmitter) = transmitManager__
@@ -110,39 +110,43 @@ abstract contract SocketDst is SocketBase {
 
         if (!isTransmitter) revert InvalidTransmitter();
 
-        packetIdRoots[packetId_][proposalCount[packetId_]] = root_;
-        rootProposedAt[packetId_][proposalCount[packetId_]] = block.timestamp;
+        packetIdRoots[packetId_][proposalCount[packetId_]][
+            switchboard_
+        ] = root_;
+        rootProposedAt[packetId_][proposalCount[packetId_]][
+            switchboard_
+        ] = block.timestamp;
 
         emit PacketProposed(
             transmitter,
             packetId_,
             proposalCount[packetId_]++,
-            root_
+            root_,
+            switchboard_
         );
     }
 
     /**
      * @notice executes a message, fees will go to recovered executor address
-     * @param packetId_ packet id
-     * @param proposalCount_ proposal id
+     * @param executionDetails_ the packet details, proof and signature needed for message execution
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
-        bytes32 packetId_,
-        uint256 proposalCount_,
-        ISocket.MessageDetails calldata messageDetails_,
-        bytes memory signature_
+        ISocket.ExecutionDetails calldata executionDetails_,
+        ISocket.MessageDetails calldata messageDetails_
     ) external payable override {
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
         messageExecuted[messageDetails_.msgId] = true;
 
-        if (packetId_ == bytes32(0)) revert InvalidPacketId();
-        if (packetIdRoots[packetId_][proposalCount_] == bytes32(0))
-            revert PacketNotProposed();
+        if (
+            executionDetails_.executionGasLimit < messageDetails_.minMsgGasLimit
+        ) revert LowGasLimit();
+
+        if (executionDetails_.packetId == bytes32(0)) revert InvalidPacketId();
 
         uint32 remoteSlug = _decodeSlug(messageDetails_.msgId);
-        if (_decodeSlug(packetId_) != remoteSlug)
+        if (_decodeSlug(executionDetails_.packetId) != remoteSlug)
             revert ErrInSourceValidation();
 
         address localPlug = _decodePlug(messageDetails_.msgId);
@@ -155,6 +159,11 @@ abstract contract SocketDst is SocketBase {
         plugConfig.inboundSwitchboard__ = _plugConfigs[localPlug][remoteSlug]
             .inboundSwitchboard__;
 
+        bytes32 packetRoot = packetIdRoots[executionDetails_.packetId][
+            executionDetails_.proposalCount
+        ][address(plugConfig.inboundSwitchboard__)];
+        if (packetRoot == bytes32(0)) revert PacketNotProposed();
+
         bytes32 packedMessage = hasher__.packMessage(
             remoteSlug,
             plugConfig.siblingPlug,
@@ -164,19 +173,26 @@ abstract contract SocketDst is SocketBase {
         );
 
         (address executor, bool isValidExecutor) = executionManager__
-            .isExecutor(packedMessage, signature_);
+            .isExecutor(packedMessage, executionDetails_.signature);
         if (!isValidExecutor) revert NotExecutor();
 
         _verify(
-            packetId_,
-            proposalCount_,
+            executionDetails_.packetId,
+            executionDetails_.proposalCount,
             remoteSlug,
             packedMessage,
+            packetRoot,
             plugConfig,
-            messageDetails_.decapacitorProof,
+            executionDetails_.decapacitorProof,
             messageDetails_.executionParams
         );
-        _execute(executor, localPlug, remoteSlug, messageDetails_);
+        _execute(
+            executor,
+            localPlug,
+            remoteSlug,
+            executionDetails_.executionGasLimit,
+            messageDetails_
+        );
     }
 
     function _verify(
@@ -184,23 +200,26 @@ abstract contract SocketDst is SocketBase {
         uint256 proposalCount_,
         uint32 remoteChainSlug_,
         bytes32 packedMessage_,
+        bytes32 packetRoot_,
         PlugConfig memory plugConfig_,
         bytes memory decapacitorProof_,
         bytes32 executionParams_
-    ) internal view {
+    ) internal {
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
-                packetIdRoots[packetId_][proposalCount_],
+                packetRoot_,
                 packetId_,
                 proposalCount_,
                 uint32(remoteChainSlug_),
-                rootProposedAt[packetId_][proposalCount_]
+                rootProposedAt[packetId_][proposalCount_][
+                    address(plugConfig_.inboundSwitchboard__)
+                ]
             )
         ) revert VerificationFailed();
 
         if (
             !plugConfig_.decapacitor__.verifyMessageInclusion(
-                packetIdRoots[packetId_][proposalCount_],
+                packetRoot_,
                 packedMessage_,
                 decapacitorProof_
             )
@@ -219,55 +238,36 @@ abstract contract SocketDst is SocketBase {
         address executor_,
         address localPlug_,
         uint32 remoteChainSlug_,
+        uint256 executionGasLimit_,
         ISocket.MessageDetails memory messageDetails_
     ) internal {
-        try
-            IPlug(localPlug_).inbound{
-                gas: messageDetails_.msgGasLimit,
-                value: msg.value
-            }(remoteChainSlug_, messageDetails_.payload)
-        {
-            executionManager__.updateExecutionFees(
-                executor_,
-                uint128(messageDetails_.executionFee),
-                messageDetails_.msgId
-            );
-            emit ExecutionSuccess(messageDetails_.msgId);
-        } catch Error(string memory reason) {
-            if (address(this).balance > 0) {
-                (bool success, ) = msg.sender.call{
-                    value: address(this).balance
-                }("");
-                require(success, "Fund Transfer Failed");
-            }
-            // catch failing revert() and require()
-            messageExecuted[messageDetails_.msgId] = false;
-            emit ExecutionFailed(messageDetails_.msgId, reason);
-        } catch (bytes memory reason) {
-            if (address(this).balance > 0) {
-                (bool success, ) = msg.sender.call{
-                    value: address(this).balance
-                }("");
-                require(success, "Fund Transfer Failed");
-            }
-            // catch failing assert()
-            messageExecuted[messageDetails_.msgId] = false;
-            emit ExecutionFailedBytes(messageDetails_.msgId, reason);
-        }
+        IPlug(localPlug_).inbound{gas: executionGasLimit_, value: msg.value}(
+            remoteChainSlug_,
+            messageDetails_.payload
+        );
+
+        executionManager__.updateExecutionFees(
+            executor_,
+            uint128(messageDetails_.executionFee),
+            messageDetails_.msgId
+        );
+        emit ExecutionSuccess(messageDetails_.msgId);
     }
 
     /**
      * @dev Checks whether the specified packet has been proposed.
      * @param packetId_ The ID of the packet to check.
-     * @param packetId_ The proposal ID of the packetId to check.
+     * @param proposalCount_ The proposal ID of the packetId to check.
+     * @param switchboard_ The address of switchboard for which this packet is proposed
      * @return A boolean indicating whether the packet has been proposed or not.
      */
     function isPacketProposed(
         bytes32 packetId_,
-        uint256 proposalCount_
+        uint256 proposalCount_,
+        address switchboard_
     ) external view returns (bool) {
         return
-            packetIdRoots[packetId_][proposalCount_] == bytes32(0)
+            packetIdRoots[packetId_][proposalCount_][switchboard_] == bytes32(0)
                 ? false
                 : true;
     }

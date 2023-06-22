@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.20;
 
 import "forge-std/Test.sol";
 
@@ -33,6 +33,8 @@ contract Setup is Test {
     address immutable _plugOwner = address(uint160(c++));
     address immutable _raju = address(uint160(c++));
     address immutable _fundRescuer = address(uint160(c++));
+    address immutable _feesPayer = address(uint160(c++));
+    address immutable _feesWithdrawer = address(uint160(c++));
 
     address _socketOwner;
 
@@ -48,9 +50,6 @@ contract Setup is Test {
     address _nonWatcher;
     address _nonExecutor;
 
-    address _feesPayer;
-    address _feesWithdrawer;
-
     uint256 immutable _socketOwnerPrivateKey = c++;
     uint256 immutable _transmitterPrivateKey = c++;
     uint256 immutable _watcherPrivateKey = c++;
@@ -64,16 +63,13 @@ contract Setup is Test {
     uint256 immutable _nonWatcherPrivateKey = c++;
     uint256 immutable _nonExecutorPrivateKey = c++;
 
-    uint256 immutable _feesPayerPrivateKey = c++;
-    uint256 immutable _feesWithdrawerPrivateKey = c++;
-
     uint256 _socketOwnerNonce;
 
     uint256 internal _timeoutInSeconds = 0;
     uint256 internal _optimisticTimeoutInSeconds = 1;
 
     uint256 internal _slowCapacitorWaitTime = 300;
-    uint256 internal _msgGasLimit = 30548;
+    uint256 internal _minMsgGasLimit = 30548;
     uint256 internal _sealGasLimit = 150000;
     uint128 internal _transmissionFees = 350000000000;
     uint128 internal _executionFees = 110000000000;
@@ -86,6 +82,8 @@ contract Setup is Test {
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
+
+    bytes32 internal _transmissionParams = bytes32(0);
 
     bool isExecutionOpen = false;
 
@@ -114,7 +112,7 @@ contract Setup is Test {
         bytes32 packetId_;
         uint256 proposalCount_;
         bytes32 msgId_;
-        uint256 msgGasLimit_;
+        uint256 minMsgGasLimit_;
         bytes32 executionParams_;
         uint256 executionFee_;
         bytes32 packedMessage_;
@@ -135,7 +133,7 @@ contract Setup is Test {
     ChainContext _a;
     ChainContext _b;
 
-    function initialise() internal {
+    function initialize() internal {
         _socketOwner = vm.addr(_socketOwnerPrivateKey);
 
         _transmitter = vm.addr(_transmitterPrivateKey);
@@ -149,15 +147,12 @@ contract Setup is Test {
         _watcher = vm.addr(_watcherPrivateKey);
         _altWatcher = vm.addr(_altWatcherPrivateKey);
         _nonWatcher = vm.addr(_nonWatcherPrivateKey);
-
-        _feesPayer = vm.addr(_feesPayerPrivateKey);
-        _feesWithdrawer = vm.addr(_feesWithdrawerPrivateKey);
     }
 
     function _dualChainSetup(
         uint256[] memory transmitterPrivateKeys_
     ) internal {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(aChainSlug));
         _b.chainSlug = uint32(uint256(bChainSlug));
 
@@ -272,7 +267,6 @@ contract Setup is Test {
     ) internal {
         cc_.executionManager__.grantRole(RESCUE_ROLE, _socketOwner);
         cc_.executionManager__.grantRole(WITHDRAW_ROLE, _socketOwner);
-        cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
     }
 
     function _setTransmissionFees(
@@ -531,27 +525,6 @@ contract Setup is Test {
 
         cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
 
-        if (isExecutionOpen_) {
-            cc_.executionManager__ = new OpenExecutionManager(
-                deployer_,
-                cc_.chainSlug,
-                cc_.sigVerifier__
-            );
-        } else {
-            cc_.executionManager__ = new ExecutionManager(
-                deployer_,
-                cc_.chainSlug,
-                cc_.sigVerifier__
-            );
-        }
-
-        cc_.transmitManager__ = new TransmitManager(
-            cc_.sigVerifier__,
-            address(cc_.executionManager__),
-            deployer_,
-            cc_.chainSlug
-        );
-
         cc_.socket__ = new Socket(
             uint32(cc_.chainSlug),
             address(cc_.hasher__),
@@ -562,6 +535,34 @@ contract Setup is Test {
             version
         );
 
+        if (isExecutionOpen_) {
+            cc_.executionManager__ = new OpenExecutionManager(
+                deployer_,
+                cc_.chainSlug,
+                cc_.sigVerifier__,
+                cc_.socket__
+            );
+        } else {
+            cc_.executionManager__ = new ExecutionManager(
+                deployer_,
+                cc_.chainSlug,
+                cc_.sigVerifier__,
+                cc_.socket__
+            );
+            cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
+        }
+
+        cc_.transmitManager__ = new TransmitManager(
+            cc_.sigVerifier__,
+            cc_.socket__,
+            deployer_,
+            cc_.chainSlug
+        );
+
+        cc_.socket__.grantRole(GOVERNANCE_ROLE, _socketOwner);
+        cc_.socket__.setExecutionManager(address(cc_.executionManager__));
+        cc_.socket__.setTransmitManager(address(cc_.transmitManager__));
+
         cc_.socket__.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
         vm.stopPrank();
@@ -570,12 +571,12 @@ contract Setup is Test {
     function _registerSwitchboard(
         ChainContext storage cc_,
         address governance_,
-        address switchBoardAddress_,
+        address switchboardAddress_,
         uint256 nonce_,
         uint32 remoteChainSlug_,
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
-        scc_.switchboard__ = ISwitchboard(switchBoardAddress_);
+        scc_.switchboard__ = ISwitchboard(switchboardAddress_);
 
         hoax(_raju);
         vm.expectRevert(
@@ -587,24 +588,26 @@ contract Setup is Test {
         scc_.switchboard__.registerSiblingSlug(
             uint32(remoteChainSlug_),
             DEFAULT_BATCH_LENGTH,
-            capacitorType_
+            capacitorType_,
+            0
         );
 
         hoax(governance_);
         scc_.switchboard__.registerSiblingSlug(
             uint32(remoteChainSlug_),
             DEFAULT_BATCH_LENGTH,
-            capacitorType_
+            capacitorType_,
+            0
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
         scc_.switchboardNonce = nonce_;
         scc_.capacitor__ = cc_.socket__.capacitors__(
-            switchBoardAddress_,
+            switchboardAddress_,
             remoteChainSlug_
         );
         scc_.decapacitor__ = cc_.socket__.decapacitors__(
-            switchBoardAddress_,
+            switchboardAddress_,
             remoteChainSlug_
         );
     }
@@ -621,7 +624,13 @@ contract Setup is Test {
         );
 
         _sealOnSrc(_a, capacitor, batchSize, sig_);
-        _proposeOnDst(_b, sig_, packetId_, root_);
+        _proposeOnDst(
+            _b,
+            sig_,
+            packetId_,
+            root_,
+            address(_b.configs__[0].switchboard__)
+        );
     }
 
     function _addTransmitters(
@@ -654,7 +663,7 @@ contract Setup is Test {
         address capacitor_,
         uint32 srcChainSlug_,
         uint32 remoteChainSlug_
-    ) internal returns (bytes32 root, bytes32 packetId, bytes memory sig) {
+    ) internal view returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint64 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, srcChainSlug_, id);
@@ -667,7 +676,7 @@ contract Setup is Test {
     function _createSignature(
         bytes32 digest_,
         uint256 privateKey_
-    ) internal returns (bytes memory sig) {
+    ) internal pure returns (bytes memory sig) {
         bytes32 digest = keccak256(
             abi.encodePacked("\x19Ethereum Signed Message:\n32", digest_)
         );
@@ -711,12 +720,23 @@ contract Setup is Test {
         ChainContext storage dst_,
         bytes memory sig_,
         bytes32 packetId_,
-        bytes32 root_
+        bytes32 root_,
+        address switchboard_
     ) internal {
-        dst_.socket__.propose(packetId_, root_, sig_);
+        dst_.socket__.proposeForSwitchboard(
+            packetId_,
+            root_,
+            switchboard_,
+            sig_
+        );
 
         vm.expectRevert(SocketDst.InvalidPacketId.selector);
-        dst_.socket__.propose(bytes32(0), root_, sig_);
+        dst_.socket__.proposeForSwitchboard(
+            bytes32(0),
+            root_,
+            switchboard_,
+            sig_
+        );
     }
 
     function _attestOnDst(
@@ -724,6 +744,7 @@ contract Setup is Test {
         uint32 dstSlug,
         bytes32 packetId_,
         uint256 proposalCount_,
+        bytes32 root_,
         uint256 watcherPrivateKey_
     ) internal {
         bytes32 digest = keccak256(
@@ -740,6 +761,7 @@ contract Setup is Test {
         FastSwitchboard(switchboardAddress).attest(
             packetId_,
             proposalCount_,
+            root_,
             attestSignature
         );
     }
@@ -753,7 +775,13 @@ contract Setup is Test {
             abi.encode(versionHash, cc_.chainSlug, packetId_, root_)
         );
         bytes memory sig_ = _createSignature(digest, _transmitterPrivateKey);
-        _proposeOnDst(cc_, sig_, packetId_, root_);
+        _proposeOnDst(
+            cc_,
+            sig_,
+            packetId_,
+            root_,
+            address(_b.configs__[0].switchboard__)
+        );
     }
 
     function _executePayloadOnDstWithExecutor(
@@ -764,10 +792,9 @@ contract Setup is Test {
         ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
             executionParams.msgId_,
             executionParams.executionFee_,
-            executionParams.msgGasLimit_,
+            executionParams.minMsgGasLimit_,
             executionParams.executionParams_,
-            executionParams.payload_,
-            executionParams.proof_
+            executionParams.payload_
         );
 
         bytes memory sig = _createSignature(
@@ -775,22 +802,24 @@ contract Setup is Test {
             executorPrivateKey_
         );
 
-        (uint8 paramType, uint248 paramValue) = _decodeexecutionParams(
+        (uint8 paramType, uint248 paramValue) = _decodeExecutionParams(
             executionParams.executionParams_
         );
-        if (paramType == 0)
-            dst_.socket__.execute(
+
+        ISocket.ExecutionDetails memory executionDetails = ISocket
+            .ExecutionDetails(
                 executionParams.packetId_,
                 executionParams.proposalCount_,
-                msgDetails,
+                executionParams.minMsgGasLimit_,
+                executionParams.proof_,
                 sig
             );
+
+        if (paramType == 0) dst_.socket__.execute(executionDetails, msgDetails);
         else
             dst_.socket__.execute{value: paramValue}(
-                executionParams.packetId_,
-                executionParams.proposalCount_,
-                msgDetails,
-                sig
+                executionDetails,
+                msgDetails
             );
     }
 
@@ -826,30 +855,30 @@ contract Setup is Test {
     function _packMessageId(
         uint32 srcChainSlug_,
         address siblingPlug_,
-        uint256 messageCount_
+        uint256 globalMessageCount_
     ) internal pure returns (bytes32) {
         return
             bytes32(
                 (uint256(srcChainSlug_) << 224) |
                     (uint256(uint160(siblingPlug_)) << 64) |
-                    messageCount_
+                    globalMessageCount_
             );
     }
 
     function _getPackedId(
         address capacitorAddr_,
-        uint32 chainSlug_,
-        uint256 id_
+        uint32 srcChainSlug_,
+        uint256 packetCount_
     ) internal pure returns (bytes32) {
         return
             bytes32(
-                (uint256(chainSlug_) << 224) |
+                (uint256(srcChainSlug_) << 224) |
                     (uint256(uint160(capacitorAddr_)) << 64) |
-                    id_
+                    packetCount_
             );
     }
 
-    function _decodeexecutionParams(
+    function _decodeExecutionParams(
         bytes32 executionParams_
     ) internal pure returns (uint8 paramType, uint248 paramValue) {
         paramType = uint8(uint256(executionParams_) >> 248);
