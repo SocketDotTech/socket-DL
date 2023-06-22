@@ -202,7 +202,7 @@ abstract contract SocketDst is SocketBase {
         PlugConfig memory plugConfig_,
         bytes memory decapacitorProof_,
         bytes32 executionParams_
-    ) internal view {
+    ) internal {
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
                 packetRoot_,
