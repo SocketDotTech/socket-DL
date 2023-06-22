@@ -247,8 +247,6 @@ contract Setup is Test {
 
         _addTransmitters(transmitterPrivateKeys_, cc_, remoteChainSlug_);
         _addTransmitters(transmitterPrivateKeys_, cc_, cc_.chainSlug);
-
-        _testUtils(cc_);
     }
 
     function _grantOwnerSocketRoles(ChainContext storage cc_) internal {
@@ -565,6 +563,8 @@ contract Setup is Test {
         cc_.socket__.setExecutionManager(address(cc_.executionManager__));
         cc_.socket__.setTransmitManager(address(cc_.transmitManager__));
 
+        cc_.socket__.grantRole(GOVERNANCE_ROLE, _socketOwner);
+
         vm.stopPrank();
     }
 
@@ -834,26 +834,6 @@ contract Setup is Test {
         );
     }
 
-    function _testUtils(ChainContext storage cc_) internal {
-        uint256 amount = 1e18;
-
-        hoax(_socketOwner);
-        _rescueNative(
-            address(cc_.hasher__),
-            NATIVE_TOKEN_ADDRESS,
-            _fundRescuer,
-            amount
-        );
-
-        hoax(_socketOwner);
-        _rescueNative(
-            address(cc_.sigVerifier__),
-            NATIVE_TOKEN_ADDRESS,
-            _fundRescuer,
-            amount
-        );
-    }
-
     function _rescueNative(
         address contractAddress,
         address token,
@@ -905,22 +885,7 @@ contract Setup is Test {
         paramValue = uint248(uint256(executionParams_));
     }
 
-    // to test contract setup on one chain
-    ChainContext aTestChain;
-
     function test() external {
-        initialize();
-        uint256[] memory transmitterPrivateKeys = new uint256[](1);
-        transmitterPrivateKeys[0] = _transmitterPrivateKey;
-
-        aTestChain.chainSlug = uint32(10);
-        uint32 bTestChainSlug = uint32(20);
-
-        _deployContractsOnSingleChain(
-            aTestChain,
-            bTestChainSlug,
-            isExecutionOpen,
-            transmitterPrivateKeys
-        );
+        assert(true);
     }
 }

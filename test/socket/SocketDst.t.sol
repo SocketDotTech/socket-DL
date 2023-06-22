@@ -43,7 +43,8 @@ contract SocketDstTest is Setup {
         address indexed transmitter,
         bytes32 indexed packetId,
         uint256 proposalCount,
-        bytes32 root
+        bytes32 root,
+        address switchboard
     );
 
     event MessageTransmitted(
@@ -85,7 +86,13 @@ contract SocketDstTest is Setup {
 
         uint256 proposalCount = 0;
         vm.expectEmit(false, false, false, true);
-        emit PacketProposed(_transmitter, packetId_, proposalCount, root_);
+        emit PacketProposed(
+            _transmitter,
+            packetId_,
+            proposalCount,
+            root_,
+            address(_b.configs__[0].switchboard__)
+        );
         _proposeOnDst(
             _b,
             sig_,

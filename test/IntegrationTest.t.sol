@@ -185,69 +185,44 @@ contract HappyTest is Setup {
     //         ? address(_b.configs__[0].capacitor__)
     //         : address(_b.configs__[1].capacitor__);
 
-    //     uint256 executionFee;
-    //     {
-    //         (uint256 switchboardFees, uint256 verificationFee) = _b
-    //             .configs__[index]
-    //             .switchboard__
-    //             .getMinFees(_a.chainSlug);
-
-    //         uint256 socketFees = _b.transmitManager__.getMinFees(_a.chainSlug);
-    //         executionFee = _b.executionManager__.getMinFees(
-    //             _minMsgGasLimit,
-    //             100,
-    //             bytes32(0),
-    // _transmissionParams,
-    //             _a.chainSlug
-    //         );
-
-    //         uint256 value = switchboardFees +
-    //             socketFees +
-    //             verificationFee +
-    //             executionFee;
-
-    //         // executionFees to be recomputed which is totalValue - (socketFees + switchboardFees)
-    //         // verificationFees also should go to Executor, hence we do the additional computation below
-    //         executionFee = verificationFee + executionFee;
-    //         hoax(_plugOwner);
-    //         dstCounter__.remoteAddOperation{value: value}(
-    //             _a.chainSlug,
-    //             amount,
-    //             _minMsgGasLimit,
-    //             bytes32(0),
-    // bytes32(0)
-    //         );
-    //     }
+    //     sendOutboundMessage(_b, _a.chainSlug);
     //     (
     //         bytes32 root,
     //         bytes32 packetId,
     //         bytes memory sig
     //     ) = _getLatestSignature(capacitor, _b.chainSlug, _a.chainSlug);
 
-    // _sealOnSrc(_b, capacitor, DEFAULT_BATCH_LENGTH, sig);
-    // _proposeOnDst(_a, sig, packetId, root);
-    // _attestOnDst(
-    //     address(_a.configs__[0].switchboard__),
-    //     _a.chainSlug,
-    //     packetId,
-    //     0,
-    //     _watcherPrivateKey
-    // );
-
-    // _executePayloadOnDst(
-    //     _a,
-    //     ExecutePayloadOnDstParams(
+    //     _sealOnSrc(_b, capacitor, DEFAULT_BATCH_LENGTH, sig);
+    //     _proposeOnDst(
+    //         _a,
+    //         sig,
+    //         packetId,
+    //         root,
+    //         address(_a.configs__[0].switchboard__)
+    //     );
+    //     _attestOnDst(
+    //         address(_a.configs__[0].switchboard__),
+    //         _a.chainSlug,
     //         packetId,
     //         0,
-    //         _packMessageId(_b.chainSlug, address(srcCounter__), 0),
-    //         _minMsgGasLimit,
-    //         bytes32(0),
-    //         executionFee,
     //         root,
-    //         payload,
-    //         proof
-    //     )
-    // );
+    //         _watcherPrivateKey
+    //     );
+
+    //     _executePayloadOnDst(
+    //         _a,
+    //         ExecutePayloadOnDstParams(
+    //             packetId,
+    //             0,
+    //             _packMessageId(_b.chainSlug, address(srcCounter__), 0),
+    //             _minMsgGasLimit,
+    //             bytes32(0),
+    //             _executionFees,
+    //             root,
+    //             payload,
+    //             proof
+    //         )
+    //     );
 
     //     assertEq(srcCounter__.counter(), amount);
     //     assertEq(dstCounter__.counter(), 0);
@@ -408,6 +383,26 @@ contract HappyTest is Setup {
     //     assertEq(srcCounter__.counter(), 0);
     // }
 
+    function testRescueFunds() public {
+        uint256 amount = 1e18;
+
+        hoax(_socketOwner);
+        _rescueNative(
+            address(_a.hasher__),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
+        );
+
+        hoax(_socketOwner);
+        _rescueNative(
+            address(_a.sigVerifier__),
+            NATIVE_TOKEN_ADDRESS,
+            _fundRescuer,
+            amount
+        );
+    }
+
     function _deployPlugContracts() internal {
         vm.startPrank(_plugOwner);
 
@@ -431,6 +426,31 @@ contract HappyTest is Setup {
             _a.chainSlug,
             address(srcCounter__),
             address(_b.configs__[socketConfigIndex].switchboard__)
+        );
+    }
+
+    function sendOutboundMessage(
+        ChainContext storage cc_,
+        uint32 siblingChainSlug_
+    ) internal {
+        uint256 amount = 100;
+
+        uint256 minFees = cc_.socket__.getMinFees(
+            _minMsgGasLimit,
+            1000,
+            bytes32(0),
+            _transmissionParams,
+            siblingChainSlug_,
+            address(srcCounter__)
+        );
+
+        hoax(_plugOwner);
+        srcCounter__.remoteAddOperation{value: minFees}(
+            siblingChainSlug_,
+            amount,
+            _minMsgGasLimit,
+            bytes32(0),
+            bytes32(0)
         );
     }
 }

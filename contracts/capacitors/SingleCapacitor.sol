@@ -31,6 +31,7 @@ contract SingleCapacitor is BaseCapacitor {
      * @param socket_ The address of the socket contract.
      * @param owner_ The address of the owner of the capacitor contract.
      */
+
     constructor(
         address socket_,
         address owner_

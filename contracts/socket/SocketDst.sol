@@ -81,7 +81,8 @@ abstract contract SocketDst is SocketBase {
         address indexed transmitter,
         bytes32 indexed packetId,
         uint256 proposalCount,
-        bytes32 root
+        bytes32 root,
+        address switchboard
     );
 
     /**
@@ -120,7 +121,8 @@ abstract contract SocketDst is SocketBase {
             transmitter,
             packetId_,
             proposalCount[packetId_]++,
-            root_
+            root_,
+            switchboard_
         );
     }
 

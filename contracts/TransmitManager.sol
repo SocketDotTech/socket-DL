@@ -34,6 +34,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param signatureVerifier The address of the new signature verifier contract
      */
     event SignatureVerifierSet(address signatureVerifier);
+    event ExecutionManagerSet(address executionManager);
 
     /**
      * @notice Emitted when the transmissionFees is updated

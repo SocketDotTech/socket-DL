@@ -117,7 +117,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     // transmit manager => chain slug => switchboard fees collected
     mapping(address => mapping(uint32 => uint128)) public transmissionMinFees;
 
-    // destSlug => relativeNativePrice (stores (destNativeTokenPriceUSD*(1e18)/srcNativeTokenPriceUSD))
+    // destSlug => relativeNativePrice (stores (destnativeTokenPriceUSD*(1e18)/srcNativeTokenPriceUSD))
     mapping(uint32 => uint256) public relativeNativeTokenPrice;
 
     // chain slug => min msg value threshold
@@ -228,8 +228,6 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint128 minExecutionFees = minMsgExecutionFees + verificationFees_;
         if (msgValue < transmissionFees + switchboardFees_ + minExecutionFees)
             revert InsufficientFees();
-
-        executionFee;
 
         // any extra fee is considered as executionFee
         executionFee = msgValue - transmissionFees - switchboardFees_;
