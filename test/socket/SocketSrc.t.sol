@@ -206,7 +206,7 @@ contract SocketSrcTest is Setup {
         address capacitor_,
         uint32 remoteChainSlug_,
         uint256 transmitterPrivateKey_
-    ) public returns (bytes32 root, bytes32 packetId, bytes memory sig) {
+    ) public view returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint256 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, src_.chainSlug, id);

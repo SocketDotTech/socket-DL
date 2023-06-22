@@ -663,7 +663,7 @@ contract Setup is Test {
         address capacitor_,
         uint32 srcChainSlug_,
         uint32 remoteChainSlug_
-    ) internal returns (bytes32 root, bytes32 packetId, bytes memory sig) {
+    ) internal view returns (bytes32 root, bytes32 packetId, bytes memory sig) {
         uint64 id;
         (root, id) = ICapacitor(capacitor_).getNextPacketToBeSealed();
         packetId = _getPackedId(capacitor_, srcChainSlug_, id);

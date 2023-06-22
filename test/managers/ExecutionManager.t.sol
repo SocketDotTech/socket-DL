@@ -6,7 +6,6 @@ import "../Setup.t.sol";
 contract ExecutionManagerTest is Setup {
     ExecutionManager internal executionManager;
 
-    error ZeroAddress();
     event FeesWithdrawn(address account_, uint256 value_);
 
     function setUp() public {

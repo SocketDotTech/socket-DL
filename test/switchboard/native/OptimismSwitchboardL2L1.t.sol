@@ -40,7 +40,7 @@ contract OptimismSwitchboardL2L1Test is Setup {
         _chainSetup(transmitterPrivateKeys);
     }
 
-    function testInitateNativeConfirmation() public {
+    function testInitiateNativeConfirmation() public {
         address socketAddress = address(_a.socket__);
 
         vm.startPrank(socketAddress);
