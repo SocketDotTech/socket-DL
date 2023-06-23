@@ -69,22 +69,31 @@ export const main = async () => {
           socketSigner
         );
 
-        const socket = await getInstance(CORE_CONTRACTS.Socket, addr.Socket);
-        let tx = await socket
-          .connect(socketSigner)
-          .updateExecutionManager(addr.ExecutionManager, {
-            ...overrides[await socketSigner.getChainId()],
-          });
-        console.log("updateExecutionManager", tx.hash);
-        await tx.wait();
+        const socket = (
+          await getInstance(CORE_CONTRACTS.Socket, addr.Socket)
+        ).connect(socketSigner);
 
-        tx = await socket
-          .connect(socketSigner)
-          .updateTransmitManager(addr.TransmitManager, {
+        let tx;
+        const currentEM = await socket.executionManager__();
+        if (
+          currentEM.toLowerCase() !==
+          addr[executionManagerVersion]?.toLowerCase()
+        ) {
+          tx = await socket.setExecutionManager(addr[executionManagerVersion], {
             ...overrides[await socketSigner.getChainId()],
           });
-        console.log("updateTransmitManager", tx.hash);
-        await tx.wait();
+          console.log("updateExecutionManager", tx.hash);
+          await tx.wait();
+        }
+
+        const currentTM = await socket.transmitManager__();
+        if (currentTM.toLowerCase() !== addr.TransmitManager?.toLowerCase()) {
+          tx = await socket.setTransmitManager(addr.TransmitManager, {
+            ...overrides[await socketSigner.getChainId()],
+          });
+          console.log("updateTransmitManager", tx.hash);
+          await tx.wait();
+        }
 
         if (!addr["integrations"]) return;
 

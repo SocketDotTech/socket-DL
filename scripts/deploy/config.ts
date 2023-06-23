@@ -45,6 +45,7 @@ export const filterChains: number[] = chains;
 
 export const capacitorType = 1;
 export const maxPacketLength = 1;
+export const initialPacketCount = 0;
 
 export const gasLimit = undefined;
 export const gasPrice = undefined;
@@ -94,9 +95,9 @@ export const overrides: {
     gasPrice,
   },
   [ChainSlug.ARBITRUM_GOERLI]: {
-    type,
-    gasLimit: 20_000_000,
-    gasPrice,
+    // type,
+    // gasLimit: 20_000_000,
+    // gasPrice,
   },
   [ChainSlug.OPTIMISM]: {
     type,
@@ -104,9 +105,9 @@ export const overrides: {
     gasPrice,
   },
   [ChainSlug.OPTIMISM_GOERLI]: {
-    type,
-    gasLimit: 20_000_000,
-    gasPrice,
+    // type,
+    // gasLimit: 20_000_000,
+    // gasPrice,
   },
   [ChainSlug.BSC]: {
     type,
