@@ -12,16 +12,17 @@ There are three different modes for deployment (prod, dev, and surge) which are 
 
 ### Set up .env
 
-- Update .env file.  See [.example.env](../.env.example).
-- Check the following (important) - 
+- Update .env file. See [.example.env](../.env.example).
+- Check the following (important) -
   - deployment mode (dev,surge,prod)
   - socket signer private key (deployer)
-  - socket owner address 
+  - socket owner address
   - RPCs
-  - etherscan API keys (used for verification) 
+  - etherscan API keys (used for verification)
 - Check if the blockchain is configured in `hardhat.config.ts`, if not add it.
 
-### Setup overrides 
+### Setup overrides
+
 Each blockchain have separate nuances when sending transaction. For example, ethers don't have proper gas estimation for type 2 transactions on polygon. Arbitrum have inconsistent gas limits. To add any overrides for these properties, add them in overrides onject in `config.ts`.
 
 ### Deploy Socket
@@ -29,7 +30,7 @@ Each blockchain have separate nuances when sending transaction. For example, eth
 - Go to [config.ts](./config.ts) and configure:
 
   - The chains you want to deploy on in the `chains` array
-  - The script checks the existing addresses in the `${mode}_addresses.json` file and deploys only if missing. Hence, clear the existing address if you want to redeploy. If deploying all the contracts again, replace current addresses with just empty json object ({}) in both `${mode}_addresses.json` and `${mode}_verification.json`.  
+  - The script checks the existing addresses in the `${mode}_addresses.json` file and deploys only if missing. Hence, clear the existing address if you want to redeploy. If deploying all the contracts again, replace current addresses with just empty json object ({}) in both `${mode}_addresses.json` and `${mode}_verification.json`.
 
 - Run the script with the command:
   `npx hardhat run scripts/deploy/index.ts`

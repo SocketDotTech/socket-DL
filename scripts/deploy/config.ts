@@ -13,7 +13,8 @@ export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
 
-if (!process.env.SOCKET_OWNER_ADDRESS) throw Error("Socket owner address not present");
+if (!process.env.SOCKET_OWNER_ADDRESS)
+  throw Error("Socket owner address not present");
 export const socketOwner = process.env.SOCKET_OWNER_ADDRESS;
 
 console.log("========================================================");
@@ -25,20 +26,20 @@ console.log(`Owner address configured to ${socketOwner}`);
 console.log("========================================================");
 
 export const chains: Array<ChainSlug> = [
-  ChainSlug.GOERLI,
+  // ChainSlug.GOERLI,
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.OPTIMISM_GOERLI,
-  ChainSlug.POLYGON_MUMBAI,
-  ChainSlug.BSC_TESTNET,
-  ChainSlug.MAINNET,
-  ChainSlug.ARBITRUM,
-  ChainSlug.OPTIMISM,
-  ChainSlug.BSC,
-  ChainSlug.POLYGON_MAINNET,
+  // ChainSlug.POLYGON_MUMBAI,
+  // ChainSlug.BSC_TESTNET,
+  // ChainSlug.MAINNET,
+  // ChainSlug.ARBITRUM,
+  // ChainSlug.OPTIMISM,
+  // ChainSlug.BSC,
+  // ChainSlug.POLYGON_MAINNET,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.OpenExecutionManager;
-export const sendTransaction = false;
+export const sendTransaction = true;
 export const newRoleStatus = true;
 export const filterChains: number[] = chains;
 
@@ -104,7 +105,7 @@ export const overrides: {
   },
   [ChainSlug.OPTIMISM_GOERLI]: {
     type,
-    gasLimit: 2_000_000,
+    gasLimit: 20_000_000,
     gasPrice,
   },
   [ChainSlug.BSC]: {

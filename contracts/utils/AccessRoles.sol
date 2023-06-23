@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 // contains role hashes used in socket dl for various different operations
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import "../Setup.t.sol";
 import {ERC20PresetFixedSupply} from "lib/openzeppelin-contracts/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
