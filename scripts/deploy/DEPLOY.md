@@ -12,16 +12,24 @@ There are three different modes for deployment (prod, dev, and surge) which are 
 
 ### Set up .env
 
-- Update .env file with private key and any API keys. See [.example.env](../.env.example).
+- Update .env file.  See [.example.env](../.env.example).
+- Check the following (important) - 
+  - deployment mode (dev,surge,prod)
+  - socket signer private key (deployer)
+  - socket owner address 
+  - RPCs
+  - etherscan API keys (used for verification) 
 - Check if the blockchain is configured in `hardhat.config.ts`, if not add it.
+
+### Setup overrides 
+Each blockchain have separate nuances when sending transaction. For example, ethers don't have proper gas estimation for type 2 transactions on polygon. Arbitrum have inconsistent gas limits. To add any overrides for these properties, add them in overrides onject in `config.ts`.
 
 ### Deploy Socket
 
-- Go to in [config.ts](./config.ts) and configure:
+- Go to [config.ts](./config.ts) and configure:
 
   - The chains you want to deploy on in the `chains` array
-  - Update the `socketOwner` address
-  - The script checks the existing addresses in the `${mode}_addresses.json` file and deploys only if missing. Hence, clear the existing address if you want to redeploy.
+  - The script checks the existing addresses in the `${mode}_addresses.json` file and deploys only if missing. Hence, clear the existing address if you want to redeploy. If deploying all the contracts again, replace current addresses with just empty json object ({}) in both `${mode}_addresses.json` and `${mode}_verification.json`.  
 
 - Run the script with the command:
   `npx hardhat run scripts/deploy/index.ts`
@@ -33,7 +41,7 @@ This script adds the addresses to `${mode}_addresses.json` and verification data
 - For granting roles, the configuration uses the following variables:
   - `sendTransaction`: boolean (if the role is not set, should we send a transaction or not?)
   - `newRoleStatus`: boolean (the expected role status, should be true or false)
-  - `filterChains`: number[] (the chains which you want to check the following roles for)
+  - `filterChains`: ChainSlugs[] (the chains which you want to check/set the following roles for)
 - Check the `mode` set in .env and update all the related addresses in [config.ts](./config.ts):
   - `executorAddresses`
   - `transmitterAddresses`
@@ -50,7 +58,8 @@ This script adds the addresses to `${mode}_addresses.json` and verification data
 This script:
 
 - registers all the switchboards deployed on socket for all the siblings and updates the capacitor and decapacitor addresses in deployments JSON.
-- updates the gas limits wherever necessary
+- updates the msg value min/max thresholds in ExecutionManager
+- updates transmitManager and executionManager address in socket
 - updates the remote switchboard addresses for native switchboards
 
 ### Connect
@@ -63,7 +72,7 @@ This script connects the plugs to their siblings for all the chains that exist i
 
 ### Verify Setup
 
-- To run this script, make sure the contract addresses exist in `${mode}_addresses.json`
+- To run this script, make sure the contract addresses exist in `${mode}_verification.json`
 - Run the script with the command:
   `npx hardhat run scripts/deploy/verifyDeployments.ts`
 

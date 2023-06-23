@@ -13,7 +13,8 @@ export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
 
-export const socketOwner = "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34";
+if (!process.env.SOCKET_OWNER_ADDRESS) throw Error("Socket owner address not present");
+export const socketOwner = process.env.SOCKET_OWNER_ADDRESS;
 
 console.log("========================================================");
 console.log("Deployment started for MODE", mode);

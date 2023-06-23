@@ -4,7 +4,7 @@ export * from "./types";
 export * from "./addresses";
 
 export const version = {
-  [DeploymentMode.DEV]: "GARAM_MASALA",
-  [DeploymentMode.SURGE]: "HING",
+  [DeploymentMode.DEV]: "IMLI",
+  [DeploymentMode.SURGE]: "IMLI",
   [DeploymentMode.PROD]: "FINGERROOT",
 };
