@@ -5,8 +5,9 @@ import { createObj, getInstance } from "../utils";
 import { ChainSlug, ChainSocketAddresses } from "../../../src";
 import { initialPacketCount, overrides } from "../config";
 
-export default async function registerSwitchBoard(
+export default async function registerSwitchboardForSibling(
   switchBoardAddress: string,
+  siblingSwitchBoardAddress: string,
   remoteChainSlug: string | ChainSlug,
   capacitorType: number,
   maxPacketLength: number,
@@ -35,6 +36,7 @@ export default async function registerSwitchBoard(
         maxPacketLength,
         capacitorType,
         initialPacketCount,
+        siblingSwitchBoardAddress,
         {
           ...overrides[await signer.getChainId()],
         }
