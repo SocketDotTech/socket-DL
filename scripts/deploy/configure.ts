@@ -274,7 +274,6 @@ const setupPolygonNativeSwitchboard = async (addresses) => {
       ["5", "1", "80001", "137"].includes(chain)
     );
 
-    console.log(srcChains);
     await Promise.all(
       srcChains.map(async (srcChain) => {
         console.log(`Configuring for ${srcChain}`);

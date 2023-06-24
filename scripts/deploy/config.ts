@@ -38,7 +38,7 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.POLYGON_MAINNET,
 ];
 
-export const executionManagerVersion = CORE_CONTRACTS.OpenExecutionManager;
+export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
 export const sendTransaction = true;
 export const newRoleStatus = true;
 export const filterChains: number[] = chains;
