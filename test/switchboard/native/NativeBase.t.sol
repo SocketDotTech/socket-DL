@@ -49,13 +49,31 @@ contract NativeBaseSwitchboardTest is Setup {
                 GOVERNANCE_ROLE
             )
         );
-        optimismSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 0);
+        optimismSwitchboard.registerSiblingSlug(
+            _b.chainSlug,
+            1,
+            1,
+            0,
+            remoteNativeSwitchboard_
+        );
 
         vm.startPrank(_socketOwner);
-        optimismSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 0);
+        optimismSwitchboard.registerSiblingSlug(
+            _b.chainSlug,
+            1,
+            1,
+            0,
+            remoteNativeSwitchboard_
+        );
 
         vm.expectRevert(NativeSwitchboardBase.AlreadyInitialized.selector);
-        optimismSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 0);
+        optimismSwitchboard.registerSiblingSlug(
+            _b.chainSlug,
+            1,
+            1,
+            0,
+            remoteNativeSwitchboard_
+        );
 
         assertTrue(optimismSwitchboard.isInitialized());
         // assertEq(optimismSwitchboard.maxPacketLength(), 1);

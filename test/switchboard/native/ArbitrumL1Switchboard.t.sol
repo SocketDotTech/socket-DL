@@ -226,7 +226,8 @@ contract ArbitrumL1SwitchboardTest is Setup {
             address(arbitrumL1Switchboard),
             0,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard
         );
         singleCapacitor = scc_.capacitor__;
     }

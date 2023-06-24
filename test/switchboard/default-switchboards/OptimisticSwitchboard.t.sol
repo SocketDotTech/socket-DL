@@ -140,13 +140,31 @@ contract OptimisticSwitchboardTest is Setup {
                 GOVERNANCE_ROLE
             )
         );
-        optimisticSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 0);
+        optimisticSwitchboard.registerSiblingSlug(
+            _b.chainSlug,
+            1,
+            1,
+            0,
+            siblingSwitchboard
+        );
 
         vm.startPrank(_socketOwner);
-        optimisticSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 1);
+        optimisticSwitchboard.registerSiblingSlug(
+            _b.chainSlug,
+            1,
+            1,
+            1,
+            siblingSwitchboard
+        );
 
         vm.expectRevert(SwitchboardExists.selector);
-        optimisticSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 1);
+        optimisticSwitchboard.registerSiblingSlug(
+            _b.chainSlug,
+            1,
+            1,
+            1,
+            siblingSwitchboard
+        );
 
         assertEq(optimisticSwitchboard.initialPacketCount(_b.chainSlug), 1);
 

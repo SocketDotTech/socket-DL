@@ -84,8 +84,9 @@ contract Setup is Test {
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
 
     bytes32 internal _transmissionParams = bytes32(0);
-
     bool isExecutionOpen = false;
+
+    address internal siblingSwitchboard = address(uint160(c++));
 
     struct SocketConfigContext {
         uint32 siblingChainSlug;
@@ -475,7 +476,8 @@ contract Setup is Test {
             address(optimisticSwitchboard),
             nonce,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard
         );
     }
 
@@ -506,7 +508,8 @@ contract Setup is Test {
             address(fastSwitchboard),
             nonce,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard
         );
     }
 
@@ -572,7 +575,8 @@ contract Setup is Test {
         address switchboardAddress_,
         uint256 nonce_,
         uint32 remoteChainSlug_,
-        uint256 capacitorType_
+        uint256 capacitorType_,
+        address siblingSwitchboard_
     ) internal returns (SocketConfigContext memory scc_) {
         scc_.switchboard__ = ISwitchboard(switchboardAddress_);
 
@@ -587,7 +591,8 @@ contract Setup is Test {
             uint32(remoteChainSlug_),
             DEFAULT_BATCH_LENGTH,
             capacitorType_,
-            0
+            0,
+            siblingSwitchboard_
         );
 
         hoax(governance_);
@@ -595,7 +600,8 @@ contract Setup is Test {
             uint32(remoteChainSlug_),
             DEFAULT_BATCH_LENGTH,
             capacitorType_,
-            0
+            0,
+            siblingSwitchboard_
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
@@ -883,7 +889,7 @@ contract Setup is Test {
         paramValue = uint248(uint256(executionParams_));
     }
 
-    function test() external {
+    function test() external pure {
         assert(true);
     }
 }

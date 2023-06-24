@@ -167,7 +167,8 @@ contract OptimismSwitchboardL1L2Test is Setup {
             address(optimismSwitchboard),
             0,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard
         );
 
         singleCapacitor = scc_.capacitor__;

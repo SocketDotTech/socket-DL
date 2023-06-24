@@ -139,7 +139,8 @@ contract PolygonL2SwitchboardTest is Setup {
             address(polygonL2Switchboard),
             0,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard
         );
         singleCapacitor = scc_.capacitor__;
     }
