@@ -281,6 +281,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             siblingChainSlug_,
             siblingSwitchboard_
         );
+
+        remoteNativeSwitchboard = siblingSwitchboard_;
+        emit UpdatedRemoteNativeSwitchboard(siblingSwitchboard_);
     }
 
     /**
@@ -345,19 +348,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         }
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
-    }
-
-    /**
-    @dev Update the address of the remote native switchboard contract.
-    @param remoteNativeSwitchboard_ The address of the new remote native switchboard contract.
-    @notice This function can only be called by an account with the GOVERNANCE_ROLE.
-    @notice Emits an UpdatedRemoteNativeSwitchboard event.
-    */
-    function updateRemoteNativeSwitchboard(
-        address remoteNativeSwitchboard_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }
 
     /**
