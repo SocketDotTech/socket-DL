@@ -178,12 +178,26 @@ interface ISocket {
      * @param siblingChainSlug_ The slug of the sibling chain that the switchboard is registered with.
      * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
      * @param capacitorType_ The type of capacitor that the switchboard uses.
+     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
      */
     function registerSwitchBoard(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
-        uint256 capacitorType_
+        uint256 capacitorType_,
+        address siblingSwitchboard_
     ) external returns (address capacitor, address decapacitor);
+
+    /**
+     * @notice Updates the sibling switchboard for given `siblingChainSlug_`.
+     * @dev This function is expected to be only called by switchboard.
+     * @dev the event emitted is tracked by transmitters to decide which switchboard a packet should be proposed on
+     * @param siblingChainSlug_ The slug of the sibling chain to register switchboard with.
+     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
+     */
+    function updateSiblingSwitchboard(
+        uint32 siblingChainSlug_,
+        address siblingSwitchboard_
+    ) external;
 
     /**
      * @notice Retrieves the packet id roots for a specified packet id.

@@ -50,7 +50,15 @@ abstract contract SocketConfig is ISocket {
         address capacitor,
         address decapacitor,
         uint256 maxPacketLength,
-        uint256 capacitorType
+        uint256 capacitorType,
+        address siblingSwitchboard
+    );
+
+    // Event triggered when a new switchboard is added
+    event SiblingSwitchboardUpdated(
+        address switchboard,
+        uint32 siblingChainSlug,
+        address siblingSwitchboard
     );
 
     // Error triggered when a switchboard already exists
@@ -68,7 +76,8 @@ abstract contract SocketConfig is ISocket {
     function registerSwitchBoard(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
-        uint256 capacitorType_
+        uint256 capacitorType_,
+        address siblingSwitchboard_
     ) external override returns (address capacitor, address decapacitor) {
         address switchboardAddress = msg.sender;
         // only capacitor checked, decapacitor assumed will exist if capacitor does
@@ -99,7 +108,26 @@ abstract contract SocketConfig is ISocket {
             capacitor,
             decapacitor,
             maxPacketLength_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard_
+        );
+    }
+
+    /**
+     * @notice Updates the sibling switchboard for given `siblingChainSlug_`.
+     * @dev This function is expected to be only called by switchboard.
+     * @dev the event emitted is tracked by transmitters to decide which switchboard a packet should be proposed on
+     * @param siblingChainSlug_ The slug of the sibling chain to register switchboard with.
+     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
+     */
+    function updateSiblingSwitchboard(
+        uint32 siblingChainSlug_,
+        address siblingSwitchboard_
+    ) external {
+        emit SiblingSwitchboardUpdated(
+            msg.sender,
+            siblingChainSlug_,
+            siblingSwitchboard_
         );
     }
 
