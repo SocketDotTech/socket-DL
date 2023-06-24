@@ -251,39 +251,40 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 maxPacketLength_,
         uint256 capacitorType_,
         uint256 initialPacketCount_,
-        address siblingSwitchboard_
+        address remoteNativeSwitchboard_
     ) external override onlyRole(GOVERNANCE_ROLE) {
         if (isInitialized) revert AlreadyInitialized();
 
         initialPacketCount = initialPacketCount_;
-        (address capacitor, ) = socket__.registerSwitchBoard(
+        (address capacitor, ) = socket__.registerSwitchboardForSibling(
             siblingChainSlug_,
             maxPacketLength_,
             capacitorType_,
-            siblingSwitchboard_
+            remoteNativeSwitchboard_
         );
 
         isInitialized = true;
         capacitor__ = ICapacitor(capacitor);
+        remoteNativeSwitchboard = remoteNativeSwitchboard_;
     }
 
     /**
      * @notice Updates the sibling switchboard for given `siblingChainSlug_`.
      * @dev This function is expected to be only called by admin
      * @param siblingChainSlug_ The slug of the sibling chain to register switchboard with.
-     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
+     * @param remoteNativeSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
      */
     function updateSibling(
         uint32 siblingChainSlug_,
-        address siblingSwitchboard_
+        address remoteNativeSwitchboard_
     ) external onlyRole(GOVERNANCE_ROLE) {
-        socket__.updateSiblingSwitchboard(
+        socket__.useSiblingSwitchboard(
             siblingChainSlug_,
-            siblingSwitchboard_
+            remoteNativeSwitchboard_
         );
 
-        remoteNativeSwitchboard = siblingSwitchboard_;
-        emit UpdatedRemoteNativeSwitchboard(siblingSwitchboard_);
+        remoteNativeSwitchboard = remoteNativeSwitchboard_;
+        emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }
 
     /**

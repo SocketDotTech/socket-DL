@@ -50,8 +50,7 @@ abstract contract SocketConfig is ISocket {
         address capacitor,
         address decapacitor,
         uint256 maxPacketLength,
-        uint256 capacitorType,
-        address siblingSwitchboard
+        uint256 capacitorType
     );
 
     // Event triggered when a new switchboard is added
@@ -67,13 +66,13 @@ abstract contract SocketConfig is ISocket {
     error InvalidConnection();
 
     /**
-     * @dev Register a switchboard with the given configuration
-     * @dev This function should be called from switchboard
-     * @param maxPacketLength_ The maximum number of messages a packet can support for this switchboard
-     * @param siblingChainSlug_ The sibling chain slug to register the switchboard with
-     * @param capacitorType_ The type of capacitor to use for the switchboard (refer capacitor factory for more)
+     * @notice deploy capacitor and decapacitor for a switchboard with a specified max packet length, sibling chain slug, and capacitor type.
+     * @param siblingChainSlug_ The slug of the sibling chain that the switchboard is registered with.
+     * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
+     * @param capacitorType_ The type of capacitor that the switchboard uses.
+     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
      */
-    function registerSwitchBoard(
+    function registerSwitchboardForSibling(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
         uint256 capacitorType_,
@@ -108,19 +107,24 @@ abstract contract SocketConfig is ISocket {
             capacitor,
             decapacitor,
             maxPacketLength_,
-            capacitorType_,
+            capacitorType_
+        );
+
+        emit SiblingSwitchboardUpdated(
+            switchboardAddress,
+            siblingChainSlug_,
             siblingSwitchboard_
         );
     }
 
     /**
-     * @notice Updates the sibling switchboard for given `siblingChainSlug_`.
+     * @notice Emits the sibling switchboard for given `siblingChainSlug_`.
      * @dev This function is expected to be only called by switchboard.
      * @dev the event emitted is tracked by transmitters to decide which switchboard a packet should be proposed on
-     * @param siblingChainSlug_ The slug of the sibling chain to register switchboard with.
+     * @param siblingChainSlug_ The slug of the sibling chain
      * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
      */
-    function updateSiblingSwitchboard(
+    function useSiblingSwitchboard(
         uint32 siblingChainSlug_,
         address siblingSwitchboard_
     ) external {

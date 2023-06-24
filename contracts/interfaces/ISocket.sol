@@ -174,13 +174,13 @@ interface ISocket {
     ) external;
 
     /**
-     * @notice Registers a switchboard with a specified max packet length, sibling chain slug, and capacitor type.
+     * @notice deploy capacitor and decapacitor for a switchboard with a specified max packet length, sibling chain slug, and capacitor type.
      * @param siblingChainSlug_ The slug of the sibling chain that the switchboard is registered with.
      * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
      * @param capacitorType_ The type of capacitor that the switchboard uses.
      * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
      */
-    function registerSwitchBoard(
+    function registerSwitchboardForSibling(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
         uint256 capacitorType_,
@@ -188,13 +188,13 @@ interface ISocket {
     ) external returns (address capacitor, address decapacitor);
 
     /**
-     * @notice Updates the sibling switchboard for given `siblingChainSlug_`.
+     * @notice Emits the sibling switchboard for given `siblingChainSlug_`.
      * @dev This function is expected to be only called by switchboard.
      * @dev the event emitted is tracked by transmitters to decide which switchboard a packet should be proposed on
-     * @param siblingChainSlug_ The slug of the sibling chain to register switchboard with.
+     * @param siblingChainSlug_ The slug of the sibling chain
      * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
      */
-    function updateSiblingSwitchboard(
+    function useSiblingSwitchboard(
         uint32 siblingChainSlug_,
         address siblingSwitchboard_
     ) external;

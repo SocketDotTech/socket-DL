@@ -116,7 +116,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     ) external override onlyRole(GOVERNANCE_ROLE) {
         initialPacketCount[siblingChainSlug_] = initialPacketCount_;
 
-        socket__.registerSwitchBoard(
+        socket__.registerSwitchboardForSibling(
             siblingChainSlug_,
             maxPacketLength_,
             capacitorType_,
@@ -134,10 +134,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32 siblingChainSlug_,
         address siblingSwitchboard_
     ) external onlyRole(GOVERNANCE_ROLE) {
-        socket__.updateSiblingSwitchboard(
-            siblingChainSlug_,
-            siblingSwitchboard_
-        );
+        socket__.useSiblingSwitchboard(siblingChainSlug_, siblingSwitchboard_);
     }
 
     /**
