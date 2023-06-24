@@ -214,20 +214,16 @@ contract ArbitrumL1SwitchboardTest is Setup {
         );
 
         arbitrumL1Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-
-        arbitrumL1Switchboard.updateRemoteNativeSwitchboard(
-            remoteNativeSwitchboard_
-        );
         vm.stopPrank();
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(arbitrumL1Switchboard),
             0,
             remoteChainSlug_,
             capacitorType_,
-            siblingSwitchboard
+            remoteNativeSwitchboard_
         );
         singleCapacitor = scc_.capacitor__;
     }

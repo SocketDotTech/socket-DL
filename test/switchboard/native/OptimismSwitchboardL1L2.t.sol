@@ -161,7 +161,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
         optimismSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
         vm.stopPrank();
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(optimismSwitchboard),
@@ -172,9 +172,5 @@ contract OptimismSwitchboardL1L2Test is Setup {
         );
 
         singleCapacitor = scc_.capacitor__;
-        hoax(_socketOwner);
-        optimismSwitchboard.updateRemoteNativeSwitchboard(
-            remoteNativeSwitchboard_
-        );
     }
 }

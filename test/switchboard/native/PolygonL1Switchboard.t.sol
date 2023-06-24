@@ -124,7 +124,7 @@ contract PolygonL1SwitchboardTest is Setup {
         polygonL1Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
         vm.stopPrank();
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(polygonL1Switchboard),

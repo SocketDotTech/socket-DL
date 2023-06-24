@@ -470,7 +470,7 @@ contract Setup is Test {
         hoax(_socketOwner);
         optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(optimisticSwitchboard),
@@ -502,7 +502,7 @@ contract Setup is Test {
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
         vm.stopPrank();
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(fastSwitchboard),
@@ -569,7 +569,7 @@ contract Setup is Test {
         vm.stopPrank();
     }
 
-    function _registerSwitchboard(
+    function _registerSwitchboardForSibling(
         ChainContext storage cc_,
         address governance_,
         address switchboardAddress_,
