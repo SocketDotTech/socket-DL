@@ -45,18 +45,13 @@ const createContractAddrArray = (
   let addresses: string[] = [];
 
   addresses.push(chainAddresses.CapacitorFactory);
-
-  // not in fingerroot version
-  // addresses.push(chainAddresses.Hasher)
-  // addresses.push(chainAddresses.SignatureVerifier)
-
+  addresses.push(chainAddresses.Hasher);
+  addresses.push(chainAddresses.SignatureVerifier);
   addresses.push(chainAddresses.Socket);
   addresses.push(chainAddresses.TransmitManager);
   addresses.push(chainAddresses.FastSwitchboard);
   addresses.push(chainAddresses.OptimisticSwitchboard);
 
-  if (chainAddresses.SocketBatcher)
-    addresses.push(chainAddresses.SocketBatcher);
   if (chainAddresses.ExecutionManager)
     addresses.push(chainAddresses.ExecutionManager);
   if (chainAddresses.OpenExecutionManager)
