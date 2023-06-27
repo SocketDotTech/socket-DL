@@ -111,15 +111,30 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
         uint256 capacitorType_,
-        uint256 initialPacketCount_
+        uint256 initialPacketCount_,
+        address siblingSwitchboard_
     ) external override onlyRole(GOVERNANCE_ROLE) {
         initialPacketCount[siblingChainSlug_] = initialPacketCount_;
 
-        socket__.registerSwitchBoard(
+        socket__.registerSwitchboardForSibling(
             siblingChainSlug_,
             maxPacketLength_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard_
         );
+    }
+
+    /**
+     * @notice Updates the sibling switchboard for given `siblingChainSlug_`.
+     * @dev This function is expected to be only called by admin
+     * @param siblingChainSlug_ The slug of the sibling chain to register switchboard with.
+     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
+     */
+    function updateSibling(
+        uint32 siblingChainSlug_,
+        address siblingSwitchboard_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        socket__.useSiblingSwitchboard(siblingChainSlug_, siblingSwitchboard_);
     }
 
     /**

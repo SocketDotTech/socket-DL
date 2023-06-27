@@ -39,7 +39,7 @@ contract NativeBaseSwitchboardTest is Setup {
         _chainSetup(transmitterPrivateKeys);
     }
 
-    function testRegisterSiblingSlug() public {
+    function testregisterSiblingSlug() public {
         assertFalse(optimismSwitchboard.isInitialized());
 
         hoax(_raju);
@@ -49,47 +49,36 @@ contract NativeBaseSwitchboardTest is Setup {
                 GOVERNANCE_ROLE
             )
         );
-        optimismSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 0);
+        optimismSwitchboard.registerSiblingSlug(
+            _b.chainSlug,
+            1,
+            1,
+            0,
+            remoteNativeSwitchboard_
+        );
 
         vm.startPrank(_socketOwner);
-        optimismSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 0);
+        optimismSwitchboard.registerSiblingSlug(
+            _b.chainSlug,
+            1,
+            1,
+            0,
+            remoteNativeSwitchboard_
+        );
 
         vm.expectRevert(NativeSwitchboardBase.AlreadyInitialized.selector);
-        optimismSwitchboard.registerSiblingSlug(_b.chainSlug, 1, 1, 0);
+        optimismSwitchboard.registerSiblingSlug(
+            _b.chainSlug,
+            1,
+            1,
+            0,
+            remoteNativeSwitchboard_
+        );
 
         assertTrue(optimismSwitchboard.isInitialized());
         // assertEq(optimismSwitchboard.maxPacketLength(), 1);
 
         vm.stopPrank();
-    }
-
-    function testUpdateRemoteNativeSwitchboard() public {
-        address newRemoteNativeSwitchboard = address(uint160(c++));
-        assertEq(
-            address(optimismSwitchboard.remoteNativeSwitchboard()),
-            remoteNativeSwitchboard_
-        );
-
-        hoax(_raju);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControl.NoPermit.selector,
-                GOVERNANCE_ROLE
-            )
-        );
-        optimismSwitchboard.updateRemoteNativeSwitchboard(
-            newRemoteNativeSwitchboard
-        );
-
-        hoax(_socketOwner);
-        optimismSwitchboard.updateRemoteNativeSwitchboard(
-            newRemoteNativeSwitchboard
-        );
-
-        assertEq(
-            address(optimismSwitchboard.remoteNativeSwitchboard()),
-            newRemoteNativeSwitchboard
-        );
     }
 
     // function testWithdrawFees() public {
@@ -294,10 +283,5 @@ contract NativeBaseSwitchboardTest is Setup {
         optimismSwitchboard.grantRole(FEES_UPDATER_ROLE, _socketOwner);
 
         vm.stopPrank();
-
-        hoax(_socketOwner);
-        optimismSwitchboard.updateRemoteNativeSwitchboard(
-            remoteNativeSwitchboard_
-        );
     }
 }
