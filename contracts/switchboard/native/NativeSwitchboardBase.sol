@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
@@ -250,19 +250,41 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
         uint256 capacitorType_,
-        uint256 initialPacketCount_
+        uint256 initialPacketCount_,
+        address remoteNativeSwitchboard_
     ) external override onlyRole(GOVERNANCE_ROLE) {
         if (isInitialized) revert AlreadyInitialized();
 
         initialPacketCount = initialPacketCount_;
-        (address capacitor, ) = socket__.registerSwitchBoard(
+        (address capacitor, ) = socket__.registerSwitchboardForSibling(
             siblingChainSlug_,
             maxPacketLength_,
-            capacitorType_
+            capacitorType_,
+            remoteNativeSwitchboard_
         );
 
         isInitialized = true;
         capacitor__ = ICapacitor(capacitor);
+        remoteNativeSwitchboard = remoteNativeSwitchboard_;
+    }
+
+    /**
+     * @notice Updates the sibling switchboard for given `siblingChainSlug_`.
+     * @dev This function is expected to be only called by admin
+     * @param siblingChainSlug_ The slug of the sibling chain to register switchboard with.
+     * @param remoteNativeSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
+     */
+    function updateSibling(
+        uint32 siblingChainSlug_,
+        address remoteNativeSwitchboard_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        socket__.useSiblingSwitchboard(
+            siblingChainSlug_,
+            remoteNativeSwitchboard_
+        );
+
+        remoteNativeSwitchboard = remoteNativeSwitchboard_;
+        emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }
 
     /**
@@ -327,19 +349,6 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         }
         tripGlobalFuse = false;
         emit SwitchboardTripped(false);
-    }
-
-    /**
-    @dev Update the address of the remote native switchboard contract.
-    @param remoteNativeSwitchboard_ The address of the new remote native switchboard contract.
-    @notice This function can only be called by an account with the GOVERNANCE_ROLE.
-    @notice Emits an UpdatedRemoteNativeSwitchboard event.
-    */
-    function updateRemoteNativeSwitchboard(
-        address remoteNativeSwitchboard_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }
 
     /**

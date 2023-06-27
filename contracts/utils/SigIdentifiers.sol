@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 // contains unique identifiers which are hashes of strings, they help in making signature digest unique
 // hence preventing signature replay attacks

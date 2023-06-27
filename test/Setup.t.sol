@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
@@ -84,8 +84,9 @@ contract Setup is Test {
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
 
     bytes32 internal _transmissionParams = bytes32(0);
-
     bool isExecutionOpen = false;
+
+    address internal siblingSwitchboard = address(uint160(c++));
 
     struct SocketConfigContext {
         uint32 siblingChainSlug;
@@ -469,13 +470,14 @@ contract Setup is Test {
         hoax(_socketOwner);
         optimisticSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(optimisticSwitchboard),
             nonce,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard
         );
     }
 
@@ -500,13 +502,14 @@ contract Setup is Test {
         fastSwitchboard.grantWatcherRole(remoteChainSlug_, _watcher);
         vm.stopPrank();
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(fastSwitchboard),
             nonce,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard
         );
     }
 
@@ -528,8 +531,6 @@ contract Setup is Test {
         cc_.socket__ = new Socket(
             uint32(cc_.chainSlug),
             address(cc_.hasher__),
-            address(cc_.transmitManager__),
-            address(cc_.executionManager__),
             address(cc_.capacitorFactory__),
             deployer_,
             version
@@ -539,24 +540,24 @@ contract Setup is Test {
             cc_.executionManager__ = new OpenExecutionManager(
                 deployer_,
                 cc_.chainSlug,
-                cc_.sigVerifier__,
-                cc_.socket__
+                cc_.socket__,
+                cc_.sigVerifier__
             );
         } else {
             cc_.executionManager__ = new ExecutionManager(
                 deployer_,
                 cc_.chainSlug,
-                cc_.sigVerifier__,
-                cc_.socket__
+                cc_.socket__,
+                cc_.sigVerifier__
             );
             cc_.executionManager__.grantRole(EXECUTOR_ROLE, _executor);
         }
 
         cc_.transmitManager__ = new TransmitManager(
-            cc_.sigVerifier__,
-            cc_.socket__,
             deployer_,
-            cc_.chainSlug
+            cc_.chainSlug,
+            cc_.socket__,
+            cc_.sigVerifier__
         );
 
         cc_.socket__.grantRole(GOVERNANCE_ROLE, _socketOwner);
@@ -568,13 +569,14 @@ contract Setup is Test {
         vm.stopPrank();
     }
 
-    function _registerSwitchboard(
+    function _registerSwitchboardForSibling(
         ChainContext storage cc_,
         address governance_,
         address switchboardAddress_,
         uint256 nonce_,
         uint32 remoteChainSlug_,
-        uint256 capacitorType_
+        uint256 capacitorType_,
+        address siblingSwitchboard_
     ) internal returns (SocketConfigContext memory scc_) {
         scc_.switchboard__ = ISwitchboard(switchboardAddress_);
 
@@ -589,7 +591,8 @@ contract Setup is Test {
             uint32(remoteChainSlug_),
             DEFAULT_BATCH_LENGTH,
             capacitorType_,
-            0
+            0,
+            siblingSwitchboard_
         );
 
         hoax(governance_);
@@ -597,7 +600,8 @@ contract Setup is Test {
             uint32(remoteChainSlug_),
             DEFAULT_BATCH_LENGTH,
             capacitorType_,
-            0
+            0,
+            siblingSwitchboard_
         );
 
         scc_.siblingChainSlug = remoteChainSlug_;
@@ -885,7 +889,7 @@ contract Setup is Test {
         paramValue = uint248(uint256(executionParams_));
     }
 
-    function test() external {
+    function test() external pure {
         assert(true);
     }
 }

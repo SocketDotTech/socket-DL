@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import "./ITransmitManager.sol";
 import "./IExecutionManager.sol";
@@ -174,16 +174,30 @@ interface ISocket {
     ) external;
 
     /**
-     * @notice Registers a switchboard with a specified max packet length, sibling chain slug, and capacitor type.
+     * @notice deploy capacitor and decapacitor for a switchboard with a specified max packet length, sibling chain slug, and capacitor type.
      * @param siblingChainSlug_ The slug of the sibling chain that the switchboard is registered with.
      * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
      * @param capacitorType_ The type of capacitor that the switchboard uses.
+     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
      */
-    function registerSwitchBoard(
+    function registerSwitchboardForSibling(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
-        uint256 capacitorType_
+        uint256 capacitorType_,
+        address siblingSwitchboard_
     ) external returns (address capacitor, address decapacitor);
+
+    /**
+     * @notice Emits the sibling switchboard for given `siblingChainSlug_`.
+     * @dev This function is expected to be only called by switchboard.
+     * @dev the event emitted is tracked by transmitters to decide which switchboard a packet should be proposed on
+     * @param siblingChainSlug_ The slug of the sibling chain
+     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
+     */
+    function useSiblingSwitchboard(
+        uint32 siblingChainSlug_,
+        address siblingSwitchboard_
+    ) external;
 
     /**
      * @notice Retrieves the packet id roots for a specified packet id.

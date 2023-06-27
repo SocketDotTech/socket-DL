@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import "../Setup.t.sol";
 
@@ -218,6 +218,32 @@ contract ExecutionManagerTest is Setup {
         uint256 totalFees = _transmissionFees +
             _executionFees +
             type(uint128).max + //_switchboardFees
+            _verificationFees;
+
+        _a.executionManager__.payAndCheckFees{value: totalFees}(
+            minMsgGasLimit,
+            payloadSize,
+            executionParams,
+            _transmissionParams,
+            _b.chainSlug,
+            _switchboardFees,
+            _verificationFees,
+            address(_a.transmitManager__),
+            address(_a.configs__[0].switchboard__),
+            1
+        );
+    }
+
+    function testFailPayAndCheckFeesWithExecutionFeeSetTooHigh() public {
+        uint256 minMsgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        bytes32 executionParams = bytes32(0);
+
+        _setExecutionFees(_a, _b.chainSlug, type(uint128).max);
+
+        uint256 totalFees = _transmissionFees +
+            type(uint128).max +
+            _switchboardFees + //_switchboardFees
             _verificationFees;
 
         _a.executionManager__.payAndCheckFees{value: totalFees}(

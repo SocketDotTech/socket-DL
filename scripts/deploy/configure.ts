@@ -20,7 +20,7 @@ import {
   isTestnet,
   networkToChainSlug,
 } from "../../src";
-import registerSwitchBoard from "./scripts/registerSwitchboard";
+import registerSwitchboardForSibling from "./scripts/registerSwitchboard";
 import { arrayify, defaultAbiCoder, keccak256, id } from "ethers/lib/utils";
 import {
   capacitorType,
@@ -69,6 +69,32 @@ export const main = async () => {
           socketSigner
         );
 
+        const socket = (
+          await getInstance(CORE_CONTRACTS.Socket, addr.Socket)
+        ).connect(socketSigner);
+
+        let tx;
+        const currentEM = await socket.executionManager__();
+        if (
+          currentEM.toLowerCase() !==
+          addr[executionManagerVersion]?.toLowerCase()
+        ) {
+          tx = await socket.setExecutionManager(addr[executionManagerVersion], {
+            ...overrides[await socketSigner.getChainId()],
+          });
+          console.log("updateExecutionManager", tx.hash);
+          await tx.wait();
+        }
+
+        const currentTM = await socket.transmitManager__();
+        if (currentTM.toLowerCase() !== addr.TransmitManager?.toLowerCase()) {
+          tx = await socket.setTransmitManager(addr.TransmitManager, {
+            ...overrides[await socketSigner.getChainId()],
+          });
+          console.log("updateTransmitManager", tx.hash);
+          await tx.wait();
+        }
+
         if (!addr["integrations"]) return;
 
         const integrations = addr["integrations"] ?? {};
@@ -81,8 +107,18 @@ export const main = async () => {
         for (let sibling of integrationList) {
           const config = integrations[sibling][IntegrationTypes.native];
           if (!config) continue;
-          addr = await registerSwitchBoard(
+
+          const siblingSwitchboard = getSwitchboardAddress(
+            chain,
+            IntegrationTypes.native,
+            addresses?.[sibling]
+          );
+
+          if (!siblingSwitchboard) continue;
+
+          addr = await registerSwitchboardForSibling(
             config["switchboard"],
+            siblingSwitchboard,
             sibling,
             capacitorType,
             maxPacketLength,
@@ -94,8 +130,17 @@ export const main = async () => {
 
         // register fast
         for (let sibling of siblingSlugs) {
-          addr = await registerSwitchBoard(
+          const siblingSwitchboard = getSwitchboardAddress(
+            chain,
+            IntegrationTypes.fast,
+            addresses?.[sibling]
+          );
+
+          if (!siblingSwitchboard) continue;
+
+          addr = await registerSwitchboardForSibling(
             addr[CORE_CONTRACTS.FastSwitchboard],
+            siblingSwitchboard,
             sibling,
             capacitorType,
             maxPacketLength,
@@ -106,8 +151,17 @@ export const main = async () => {
         }
         // register optimistic
         for (let sibling of siblingSlugs) {
-          addr = await registerSwitchBoard(
+          const siblingSwitchboard = getSwitchboardAddress(
+            chain,
+            IntegrationTypes.optimistic,
+            addresses?.[sibling]
+          );
+
+          if (!siblingSwitchboard) continue;
+
+          addr = await registerSwitchboardForSibling(
             addr[CORE_CONTRACTS.OptimisticSwitchboard],
+            siblingSwitchboard,
             sibling,
             capacitorType,
             maxPacketLength,
@@ -124,8 +178,7 @@ export const main = async () => {
     );
 
     await storeAllAddresses(addresses, mode);
-
-    await setRemoteSwitchboards(addresses);
+    await setupPolygonNativeSwitchboard(addresses);
   } catch (error) {
     console.log("Error while sending transaction", error);
   }
@@ -215,12 +268,15 @@ const configureExecutionManager = async (
   }
 };
 
-const setRemoteSwitchboards = async (addresses) => {
+const setupPolygonNativeSwitchboard = async (addresses) => {
   try {
-    let srcChains = Object.keys(addresses);
+    let srcChains = Object.keys(addresses).filter((chain) =>
+      ["5", "1", "80001", "137"].includes(chain)
+    );
+
     await Promise.all(
       srcChains.map(async (srcChain) => {
-        console.log(`Configuring remote switchboards for ${srcChain}`);
+        console.log(`Configuring for ${srcChain}`);
 
         const providerInstance = getProviderFromChainName(
           networkToChainSlug[srcChain]
@@ -232,77 +288,60 @@ const setRemoteSwitchboards = async (addresses) => {
 
         for (let dstChain in addresses[srcChain]?.["integrations"]) {
           const dstConfig = addresses[srcChain]["integrations"][dstChain];
+          if (!dstConfig?.[IntegrationTypes.native]) continue;
 
-          if (dstConfig?.[IntegrationTypes.native]) {
-            const srcSwitchboardType =
-              switchboards[networkToChainSlug[srcChain]]?.[
-                networkToChainSlug[dstChain]
-              ]?.["switchboard"];
-            const dstSwitchboardAddress = getSwitchboardAddress(
-              srcChain,
-              IntegrationTypes.native,
-              addresses?.[dstChain]
+          const srcSwitchboardType =
+            switchboards[networkToChainSlug[srcChain]]?.[
+              networkToChainSlug[dstChain]
+            ]?.["switchboard"];
+
+          const dstSwitchboardAddress = getSwitchboardAddress(
+            srcChain,
+            IntegrationTypes.native,
+            addresses?.[dstChain]
+          );
+          if (!dstSwitchboardAddress) continue;
+
+          const srcSwitchboardAddress =
+            dstConfig?.[IntegrationTypes.native]["switchboard"];
+
+          if (srcSwitchboardType === NativeSwitchboard.POLYGON_L1) {
+            const sbContract = (
+              await getInstance("PolygonL1Switchboard", srcSwitchboardAddress)
+            ).connect(socketSigner);
+
+            const fxChild = await sbContract.fxChildTunnel();
+            if (fxChild !== constants.AddressZero) continue;
+            console.log(
+              `Setting ${dstSwitchboardAddress} fx child tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
             );
-            if (!dstSwitchboardAddress) continue;
-
-            const srcSwitchboardAddress =
-              dstConfig?.[IntegrationTypes.native]["switchboard"];
-
-            let functionName, sbContract;
-            if (srcSwitchboardType === NativeSwitchboard.POLYGON_L1) {
-              sbContract = (
-                await getInstance("PolygonL1Switchboard", srcSwitchboardAddress)
-              ).connect(socketSigner);
-
-              const fxChild = await sbContract.fxChildTunnel();
-              if (fxChild !== constants.AddressZero) continue;
-
-              functionName = "setFxChildTunnel";
-              console.log(
-                `Setting ${dstSwitchboardAddress} fx child tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
-              );
-            } else if (srcSwitchboardType === NativeSwitchboard.POLYGON_L2) {
-              sbContract = (
-                await getInstance("PolygonL2Switchboard", srcSwitchboardAddress)
-              ).connect(socketSigner);
-
-              const fxRoot = await sbContract.fxRootTunnel();
-              if (fxRoot !== constants.AddressZero) continue;
-
-              functionName = "setFxRootTunnel";
-              console.log(
-                `Setting ${dstSwitchboardAddress} fx root tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
-              );
-            } else {
-              sbContract = (
-                await getInstance(
-                  "ArbitrumL1Switchboard",
-                  srcSwitchboardAddress
-                )
-              ).connect(socketSigner);
-
-              const remoteNativeSwitchboard =
-                await sbContract.remoteNativeSwitchboard();
-              if (
-                remoteNativeSwitchboard.toLowerCase() ===
-                dstSwitchboardAddress.toLowerCase()
-              )
-                continue;
-
-              functionName = "updateRemoteNativeSwitchboard";
-              console.log(
-                `Setting ${dstSwitchboardAddress} remote switchboard in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
-              );
-            }
 
             const tx = await sbContract
               .connect(socketSigner)
-              [functionName](dstSwitchboardAddress, {
+              .setFxChildTunnel(dstSwitchboardAddress, {
                 ...overrides[await socketSigner.getChainId()],
               });
             console.log(srcChain, tx.hash);
             await tx.wait();
-          }
+          } else if (srcSwitchboardType === NativeSwitchboard.POLYGON_L2) {
+            const sbContract = (
+              await getInstance("PolygonL2Switchboard", srcSwitchboardAddress)
+            ).connect(socketSigner);
+
+            const fxRoot = await sbContract.fxRootTunnel();
+            if (fxRoot !== constants.AddressZero) continue;
+            console.log(
+              `Setting ${dstSwitchboardAddress} fx root tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
+            );
+
+            const tx = await sbContract
+              .connect(socketSigner)
+              .setFxRootTunnel(dstSwitchboardAddress, {
+                ...overrides[await socketSigner.getChainId()],
+              });
+            console.log(srcChain, tx.hash);
+            await tx.wait();
+          } else continue;
         }
 
         console.log(

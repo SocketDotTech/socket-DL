@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import "./interfaces/ISwitchboard.sol";
 import "./interfaces/ISocket.sol";
@@ -152,8 +152,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     constructor(
         address owner_,
         uint32 chainSlug_,
-        ISignatureVerifier signatureVerifier_,
-        ISocket socket_
+        ISocket socket_,
+        ISignatureVerifier signatureVerifier_
     ) AccessControlExtended(owner_) {
         chainSlug = chainSlug_;
         signatureVerifier__ = signatureVerifier_;

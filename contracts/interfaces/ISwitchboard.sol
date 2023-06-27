@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 /**
  * @title ISwitchboard
@@ -14,12 +14,25 @@ interface ISwitchboard {
      * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
      * @param capacitorType_ The type of capacitor that the switchboard uses.
      * @param initialPacketCount_ The packet count at the time of registering switchboard. Packets with packet count below this won't be allowed
+     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
      */
     function registerSiblingSlug(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
         uint256 capacitorType_,
-        uint256 initialPacketCount_
+        uint256 initialPacketCount_,
+        address siblingSwitchboard_
+    ) external;
+
+    /**
+     * @notice Updates the sibling switchboard for given `siblingChainSlug_`.
+     * @dev This function is expected to be only called by admin
+     * @param siblingChainSlug_ The slug of the sibling chain to register switchboard with.
+     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
+     */
+    function updateSibling(
+        uint32 siblingChainSlug_,
+        address siblingSwitchboard_
     ) external;
 
     /**

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import "../../Setup.t.sol";
 import "../../../contracts/switchboard/native/PolygonL2Switchboard.sol";
@@ -133,13 +133,14 @@ contract PolygonL2SwitchboardTest is Setup {
         polygonL2Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
         vm.stopPrank();
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(polygonL2Switchboard),
             0,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard
         );
         singleCapacitor = scc_.capacitor__;
     }

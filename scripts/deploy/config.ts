@@ -13,7 +13,9 @@ export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
 
-export const socketOwner = "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34";
+if (!process.env.SOCKET_OWNER_ADDRESS)
+  throw Error("Socket owner address not present");
+export const socketOwner = process.env.SOCKET_OWNER_ADDRESS;
 
 console.log("========================================================");
 console.log("Deployment started for MODE", mode);
@@ -36,13 +38,14 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.POLYGON_MAINNET,
 ];
 
-export const executionManagerVersion = CORE_CONTRACTS.OpenExecutionManager;
-export const sendTransaction = false;
+export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
+export const sendTransaction = true;
 export const newRoleStatus = true;
 export const filterChains: number[] = chains;
 
 export const capacitorType = 1;
 export const maxPacketLength = 1;
+export const initialPacketCount = 0;
 
 export const gasLimit = undefined;
 export const gasPrice = undefined;
@@ -92,9 +95,9 @@ export const overrides: {
     gasPrice,
   },
   [ChainSlug.ARBITRUM_GOERLI]: {
-    type,
-    gasLimit: 20_000_000,
-    gasPrice,
+    // type,
+    // gasLimit: 20_000_000,
+    // gasPrice,
   },
   [ChainSlug.OPTIMISM]: {
     type,
@@ -102,9 +105,9 @@ export const overrides: {
     gasPrice,
   },
   [ChainSlug.OPTIMISM_GOERLI]: {
-    type,
-    gasLimit: 2_000_000,
-    gasPrice,
+    // type,
+    // gasLimit: 20_000_000,
+    // gasPrice,
   },
   [ChainSlug.BSC]: {
     type,
