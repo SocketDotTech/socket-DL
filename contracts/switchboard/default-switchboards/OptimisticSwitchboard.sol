@@ -54,4 +54,39 @@ contract OptimisticSwitchboard is SwitchboardBase {
         if (block.timestamp - proposeTime_ < timeoutInSeconds) return false;
         return true;
     }
+
+    /**
+     * @inheritdoc ISwitchboard
+     */
+    function setFees(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint128,
+        uint128 verificationFees_,
+        bytes calldata signature_
+    ) external override {
+        address feesUpdater = signatureVerifier__.recoverSigner(
+            keccak256(
+                abi.encode(
+                    FEES_UPDATE_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    0,
+                    verificationFees_
+                )
+            ),
+            signature_
+        );
+
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
+
+        fees[dstChainSlug_].verificationFees = verificationFees_;
+        emit SwitchboardFeesSet(dstChainSlug_, fees[dstChainSlug_]);
+    }
 }

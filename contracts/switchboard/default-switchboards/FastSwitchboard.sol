@@ -124,6 +124,41 @@ contract FastSwitchboard is SwitchboardBase {
     /**
      * @inheritdoc ISwitchboard
      */
+    function setFees(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint128 switchboardFees_,
+        uint128 verificationFees_,
+        bytes calldata signature_
+    ) external override {
+        address feesUpdater = signatureVerifier__.recoverSigner(
+            keccak256(
+                abi.encode(
+                    FEES_UPDATE_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    switchboardFees_,
+                    verificationFees_
+                )
+            ),
+            signature_
+        );
+
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
+
+        fees[dstChainSlug_] = feesObject;
+        emit SwitchboardFeesSet(dstChainSlug_, feesObject);
+    }
+
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function allowPacket(
         bytes32 root_,
         bytes32 packetId_,
