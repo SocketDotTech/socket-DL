@@ -61,7 +61,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
     function setFees(
         uint256 nonce_,
         uint32 dstChainSlug_,
-        uint128,
+        uint128 switchboardFees_,
         uint128 verificationFees_,
         bytes calldata signature_
     ) external override {
@@ -73,7 +73,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
                     chainSlug,
                     dstChainSlug_,
                     nonce_,
-                    0,
+                    switchboardFees_,
                     verificationFees_
                 )
             ),
@@ -86,7 +86,10 @@ contract OptimisticSwitchboard is SwitchboardBase {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
 
-        fees[dstChainSlug_].verificationFees = verificationFees_;
-        emit SwitchboardFeesSet(dstChainSlug_, fees[dstChainSlug_]);
+        Fees storage fee = fees[dstChainSlug_];
+        fee.verificationFees = verificationFees_;
+        fee.switchboardFees = switchboardFees_;
+
+        emit SwitchboardFeesSet(dstChainSlug_, fee);
     }
 }

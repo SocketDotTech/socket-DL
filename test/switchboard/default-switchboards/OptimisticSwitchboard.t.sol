@@ -171,7 +171,7 @@ contract OptimisticSwitchboardTest is Setup {
     }
 
     function testSetFees() external {
-        uint128 switchboardFee = 0;
+        uint128 switchboardFee = 1000;
         uint128 verificationFee = 1000;
         uint256 feeNonce = optimisticSwitchboard.nextNonce(_socketOwner);
 
