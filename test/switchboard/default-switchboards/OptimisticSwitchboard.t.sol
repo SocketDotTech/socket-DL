@@ -132,7 +132,7 @@ contract OptimisticSwitchboardTest is Setup {
         vm.stopPrank();
     }
 
-    function testregisterSiblingSlug() public {
+    function testRegisterSiblingSlug() public {
         hoax(_raju);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -167,12 +167,11 @@ contract OptimisticSwitchboardTest is Setup {
         );
 
         assertEq(optimisticSwitchboard.initialPacketCount(_b.chainSlug), 1);
-
         vm.stopPrank();
     }
 
     function testSetFees() external {
-        uint128 switchboardFee = 1000;
+        uint128 switchboardFee = 0;
         uint128 verificationFee = 1000;
         uint256 feeNonce = optimisticSwitchboard.nextNonce(_socketOwner);
 
