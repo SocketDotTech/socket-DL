@@ -14,21 +14,21 @@
         }
       },
       "421613": {
-        "FAST": {
-          "capacitor": "0xC20Ed2C188C497928B8E9DA5a38aF36F02873190",
-          "decapacitor": "0xBFEc02781b69DC22FceB522dba6CdeB434d315ab",
-          "switchboard": "0xC35b13C34E7c2965e7dd4b07EbF2c2137b346752"
-        },
         "OPTIMISTIC": {
           "capacitor": "0xebe07E8F222C2Fe0FF7053a10325eadf4Cc89B2f",
           "decapacitor": "0xCCE6dc40248066815610800F24571C14CF12af3f",
           "switchboard": "0x14691397792f3Dcd71a1304c0a1A9e13B7358865"
+        },
+        "FAST": {
+          "capacitor": "0x60413884eAAfB704F7Ce7d7b0102D81D6986140c",
+          "decapacitor": "0xA5484e766fDefB4B4CDB47C3ea435006f1Bbc7d9",
+          "switchboard": "0xF5C27105018B110a54332E5B919DcB947E3844DF"
         }
       }
     },
-    "FastSwitchboard": "0xC35b13C34E7c2965e7dd4b07EbF2c2137b346752",
     "OptimisticSwitchboard": "0x14691397792f3Dcd71a1304c0a1A9e13B7358865",
-    "Counter": "0x7e0E5C73bA001B5a8927F408b5132D2a0Ad5b491"
+    "Counter": "0x7e0E5C73bA001B5a8927F408b5132D2a0Ad5b491",
+    "FastSwitchboard": "0xF5C27105018B110a54332E5B919DcB947E3844DF"
   },
   "421613": {
     "SignatureVerifier": "0x1CAC564E411e3EbC326A75796e1D86A3E2c66f82",
@@ -45,20 +45,20 @@
         }
       },
       "420": {
-        "FAST": {
-          "capacitor": "0x600b7d59EB44B74DB329f9Cad20f9DAb7C6015ae",
-          "decapacitor": "0x18cD7c75D11b2B063891d06bFD801D0Bb9C39510",
-          "switchboard": "0x5d3deF66b5F3a8ca3B4E4284f4917da05bB5e71F"
-        },
         "OPTIMISTIC": {
           "capacitor": "0x88677f3068A1a95A23d9A5A0577f2430aecdD944",
           "decapacitor": "0xf6BE7606Ce3B5F1384d760E36459cA907d2b5f7e",
           "switchboard": "0xad934a4B9f05D88E645D8D4FBeBfb2f6728D2c0C"
+        },
+        "FAST": {
+          "capacitor": "0x37F4af46AC4478f5CF03B7bF3D714a5e6014171F",
+          "decapacitor": "0x23450CBe702cFd746eA26E7cD73d75489827Ae6B",
+          "switchboard": "0x65E5C16A2e347bF54585a40148F3421a55871b4b"
         }
       }
     },
-    "FastSwitchboard": "0x5d3deF66b5F3a8ca3B4E4284f4917da05bB5e71F",
     "OptimisticSwitchboard": "0xad934a4B9f05D88E645D8D4FBeBfb2f6728D2c0C",
-    "Counter": "0x1EB4a621070962fFab060Da39df11e0dcB7679AB"
+    "Counter": "0x1EB4a621070962fFab060Da39df11e0dcB7679AB",
+    "FastSwitchboard": "0x65E5C16A2e347bF54585a40148F3421a55871b4b"
   }
 }

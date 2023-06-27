@@ -1,38 +1,7 @@
 {
   "420": [
     [
-      "0x7e0E5C73bA001B5a8927F408b5132D2a0Ad5b491",
-      "Counter",
-      "contracts/examples/Counter.sol",
-      ["0x5445518833dB5461f90070Bfd358394cAcfbDAF5"]
-    ],
-    [
-      "0x4B47F052a9D024de8F111219f742C98902Ba406a",
-      "OptimismSwitchboard",
-      "contracts/switchboard/native/OptimismSwitchboard.sol",
-      [
-        420,
-        300000,
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        "0x5445518833dB5461f90070Bfd358394cAcfbDAF5",
-        "0x4200000000000000000000000000000000000007",
-        "0x1eb50a8B71070b215AcEFF6eFE5956a2B9369862"
-      ]
-    ],
-    [
-      "0x14691397792f3Dcd71a1304c0a1A9e13B7358865",
-      "OptimisticSwitchboard",
-      "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        "0x5445518833dB5461f90070Bfd358394cAcfbDAF5",
-        420,
-        7200,
-        "0x1eb50a8B71070b215AcEFF6eFE5956a2B9369862"
-      ]
-    ],
-    [
-      "0xC35b13C34E7c2965e7dd4b07EbF2c2137b346752",
+      "0xF5C27105018B110a54332E5B919DcB947E3844DF",
       "FastSwitchboard",
       "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
       [
@@ -41,75 +10,12 @@
         420,
         7200,
         "0x1eb50a8B71070b215AcEFF6eFE5956a2B9369862"
-      ]
-    ],
-    [
-      "0x01c2cBbC1DD00fc7eFe769CbE51D2F4c78CE89AB",
-      "TransmitManager",
-      "contracts/TransmitManager.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        420,
-        "0x5445518833dB5461f90070Bfd358394cAcfbDAF5",
-        "0x1eb50a8B71070b215AcEFF6eFE5956a2B9369862"
-      ]
-    ],
-    [
-      "0xCF5482f95D73c6f0aBba58c60fEaeBD75d5Da390",
-      "ExecutionManager",
-      "contracts/ExecutionManager.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        420,
-        "0x5445518833dB5461f90070Bfd358394cAcfbDAF5",
-        "0x1eb50a8B71070b215AcEFF6eFE5956a2B9369862"
-      ]
-    ],
-    [
-      "0x5445518833dB5461f90070Bfd358394cAcfbDAF5",
-      "Socket",
-      "contracts/socket/Socket.sol",
-      [
-        420,
-        "0xC4D43CbEac199e838C114636946BCf6c4Bc05646",
-        "0x25077A746A20d212700195BcDFcbA14CE2B2f10b",
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        "IMLI"
       ]
     ]
   ],
   "421613": [
     [
-      "0x1EB4a621070962fFab060Da39df11e0dcB7679AB",
-      "Counter",
-      "contracts/examples/Counter.sol",
-      ["0xA23A8fd8ff99D4bE2B3F9e2206BEf754dc92AF41"]
-    ],
-    [
-      "0x475F879Ef2bb9D426F73eE498F9271f1d7d218aD",
-      "ArbitrumL2Switchboard",
-      "contracts/switchboard/native/ArbitrumL2Switchboard.sol",
-      [
-        421613,
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        "0xA23A8fd8ff99D4bE2B3F9e2206BEf754dc92AF41",
-        "0x1CAC564E411e3EbC326A75796e1D86A3E2c66f82"
-      ]
-    ],
-    [
-      "0xad934a4B9f05D88E645D8D4FBeBfb2f6728D2c0C",
-      "OptimisticSwitchboard",
-      "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        "0xA23A8fd8ff99D4bE2B3F9e2206BEf754dc92AF41",
-        421613,
-        7200,
-        "0x1CAC564E411e3EbC326A75796e1D86A3E2c66f82"
-      ]
-    ],
-    [
-      "0x5d3deF66b5F3a8ca3B4E4284f4917da05bB5e71F",
+      "0x65E5C16A2e347bF54585a40148F3421a55871b4b",
       "FastSwitchboard",
       "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
       [
@@ -118,40 +24,6 @@
         421613,
         7200,
         "0x1CAC564E411e3EbC326A75796e1D86A3E2c66f82"
-      ]
-    ],
-    [
-      "0xE0FE796720ad6c9e3bA1f2E43b83e11206D69fBd",
-      "TransmitManager",
-      "contracts/TransmitManager.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        421613,
-        "0xA23A8fd8ff99D4bE2B3F9e2206BEf754dc92AF41",
-        "0x1CAC564E411e3EbC326A75796e1D86A3E2c66f82"
-      ]
-    ],
-    [
-      "0xD97b02df88AB0115dAf233Eda6abd5A525f238f4",
-      "ExecutionManager",
-      "contracts/ExecutionManager.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        421613,
-        "0xA23A8fd8ff99D4bE2B3F9e2206BEf754dc92AF41",
-        "0x1CAC564E411e3EbC326A75796e1D86A3E2c66f82"
-      ]
-    ],
-    [
-      "0xA23A8fd8ff99D4bE2B3F9e2206BEf754dc92AF41",
-      "Socket",
-      "contracts/socket/Socket.sol",
-      [
-        421613,
-        "0xEA6516f845439857b84A11E84fDe713cbAE6e8fF",
-        "0x1A7C61a429E88eACfC0890B0A397B1a94B743c38",
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        "IMLI"
       ]
     ]
   ]
