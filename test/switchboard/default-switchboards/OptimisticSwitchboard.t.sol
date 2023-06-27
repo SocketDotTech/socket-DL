@@ -132,7 +132,7 @@ contract OptimisticSwitchboardTest is Setup {
         vm.stopPrank();
     }
 
-    function testregisterSiblingSlug() public {
+    function testRegisterSiblingSlug() public {
         hoax(_raju);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -167,7 +167,6 @@ contract OptimisticSwitchboardTest is Setup {
         );
 
         assertEq(optimisticSwitchboard.initialPacketCount(_b.chainSlug), 1);
-
         vm.stopPrank();
     }
 

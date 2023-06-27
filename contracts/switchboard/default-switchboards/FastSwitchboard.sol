@@ -124,6 +124,46 @@ contract FastSwitchboard is SwitchboardBase {
     /**
      * @inheritdoc ISwitchboard
      */
+    function setFees(
+        uint256 nonce_,
+        uint32 dstChainSlug_,
+        uint128 switchboardFees_,
+        uint128 verificationFees_,
+        bytes calldata signature_
+    ) external override {
+        address feesUpdater = signatureVerifier__.recoverSigner(
+            keccak256(
+                abi.encode(
+                    FEES_UPDATE_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
+                    dstChainSlug_,
+                    nonce_,
+                    switchboardFees_,
+                    verificationFees_
+                )
+            ),
+            signature_
+        );
+
+        _checkRoleWithSlug(FEES_UPDATER_ROLE, dstChainSlug_, feesUpdater);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
+        Fees memory feesObject = Fees({
+            switchboardFees: switchboardFees_ *
+                uint128(totalWatchers[dstChainSlug_]),
+            verificationFees: verificationFees_
+        });
+
+        fees[dstChainSlug_] = feesObject;
+        emit SwitchboardFeesSet(dstChainSlug_, feesObject);
+    }
+
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function allowPacket(
         bytes32 root_,
         bytes32 packetId_,
@@ -157,6 +197,13 @@ contract FastSwitchboard is SwitchboardBase {
             revert WatcherFound();
         _grantRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_);
 
+        Fees storage fees = fees[srcChainSlug_];
+        uint128 watchersBefore = uint128(totalWatchers[srcChainSlug_]);
+        if (watchersBefore != 0 && fees.switchboardFees != 0)
+            fees.switchboardFees =
+                (fees.switchboardFees * (watchersBefore + 1)) /
+                watchersBefore;
+
         ++totalWatchers[srcChainSlug_];
     }
 
@@ -172,6 +219,14 @@ contract FastSwitchboard is SwitchboardBase {
         if (!_hasRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_))
             revert WatcherNotFound();
         _revokeRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_);
+
+        Fees storage fees = fees[srcChainSlug_];
+        uint128 watchersBefore = uint128(totalWatchers[srcChainSlug_]);
+
+        if (watchersBefore > 1 && fees.switchboardFees != 0)
+            fees.switchboardFees =
+                (fees.switchboardFees * (watchersBefore - 1)) /
+                watchersBefore;
 
         totalWatchers[srcChainSlug_]--;
     }
