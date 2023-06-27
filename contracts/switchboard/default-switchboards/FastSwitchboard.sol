@@ -151,6 +151,11 @@ contract FastSwitchboard is SwitchboardBase {
         unchecked {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
+        Fees memory feesObject = Fees({
+            switchboardFees: switchboardFees_ *
+                uint128(totalWatchers[dstChainSlug_]),
+            verificationFees: verificationFees_
+        });
 
         fees[dstChainSlug_] = feesObject;
         emit SwitchboardFeesSet(dstChainSlug_, feesObject);
@@ -192,6 +197,13 @@ contract FastSwitchboard is SwitchboardBase {
             revert WatcherFound();
         _grantRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_);
 
+        Fees storage fees = fees[srcChainSlug_];
+        uint128 watchersBefore = uint128(totalWatchers[srcChainSlug_]);
+        if (watchersBefore != 0 && fees.switchboardFees != 0)
+            fees.switchboardFees =
+                (fees.switchboardFees * (watchersBefore + 1)) /
+                watchersBefore;
+
         ++totalWatchers[srcChainSlug_];
     }
 
@@ -207,6 +219,14 @@ contract FastSwitchboard is SwitchboardBase {
         if (!_hasRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_))
             revert WatcherNotFound();
         _revokeRoleWithSlug(WATCHER_ROLE, srcChainSlug_, watcher_);
+
+        Fees storage fees = fees[srcChainSlug_];
+        uint128 watchersBefore = uint128(totalWatchers[srcChainSlug_]);
+
+        if (watchersBefore > 1 && fees.switchboardFees != 0)
+            fees.switchboardFees =
+                (fees.switchboardFees * (watchersBefore - 1)) /
+                watchersBefore;
 
         totalWatchers[srcChainSlug_]--;
     }
