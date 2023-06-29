@@ -143,6 +143,11 @@ export enum DeploymentMode {
   SURGE = "surge",
 }
 
+export enum CapacitorType {
+  singleCapacitor = 1,
+  hashChainCapacitor = 2
+}
+
 export type Integrations = { [chainSlug in ChainSlug]?: ChainAddresses };
 export type ChainAddresses = { [integration in IntegrationTypes]?: Configs };
 export type Configs = {
