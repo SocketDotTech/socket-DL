@@ -52,9 +52,8 @@ contract SingleCapacitor is BaseCapacitor {
     function addPackedMessage(
         bytes32 packedMessage_
     ) external override onlySocket {
-        uint64 packetCount = _nextPacketCount;
+        uint64 packetCount = _nextPacketCount++;
         _roots[packetCount] = packedMessage_;
-        ++_nextPacketCount;
 
         // as it is a single capacitor, here root and packed message are same
         emit MessageAdded(packedMessage_, packetCount, packedMessage_);
