@@ -19,6 +19,8 @@ contract Counter is IPlug {
     bytes32 public constant OP_SUB = keccak256("OP_SUB");
 
     error OnlyOwner();
+    error OnlySocket();
+    error InvalidAmount();
 
     constructor(address socket_) {
         socket = socket_;
@@ -26,7 +28,7 @@ contract Counter is IPlug {
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "can only be called by owner");
+        if (msg.sender != owner) revert OnlyOwner();
         _;
     }
 
@@ -77,7 +79,7 @@ contract Counter is IPlug {
         uint32,
         bytes calldata payload_
     ) external payable override {
-        require(msg.sender == socket, "Counter: Invalid Socket");
+        if (msg.sender != socket) revert OnlySocket();
         (bytes32 operationType, uint256 amount, ) = abi.decode(
             payload_,
             (bytes32, uint256, address)
@@ -116,7 +118,7 @@ contract Counter is IPlug {
     }
 
     function _subOperation(uint256 amount_) private {
-        require(counter > amount_, "CounterMock: Subtraction Overflow");
+        if (counter < amount_) revert InvalidAmount();
         counter -= amount_;
     }
 

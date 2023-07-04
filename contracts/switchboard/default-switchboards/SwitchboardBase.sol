@@ -74,6 +74,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
 
     error InvalidNonce();
+    error OnlyExecutionManager();
 
     /**
      * @dev Constructor of SwitchboardBase
@@ -334,6 +335,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @inheritdoc ISwitchboard
      */
     function receiveFees(uint32) external payable override {
-        require(msg.sender == address(socket__.executionManager__()));
+        if (msg.sender != address(socket__.executionManager__()))
+            revert OnlyExecutionManager();
     }
 }

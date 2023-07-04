@@ -127,6 +127,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     error OnlySocket();
 
+    error OnlyExecutionManager();
+
     /**
      * @dev Modifier to ensure that a function can only be called by the remote switchboard.
      */
@@ -379,6 +381,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @inheritdoc ISwitchboard
      */
     function receiveFees(uint32) external payable override {
-        require(msg.sender == address(socket__.executionManager__()));
+        if (msg.sender != address(socket__.executionManager__()))
+            revert OnlyExecutionManager();
     }
 }
