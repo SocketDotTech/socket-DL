@@ -14,6 +14,7 @@ abstract contract SocketSrc is SocketBase {
     error InsufficientFees();
     // triggered when an invalid capacitor address is used for sealing
     error InvalidCapacitor();
+    error InvalidSiblingPlug();
 
     /**
      * @notice emits the verification and seal confirmation of a packet
@@ -49,6 +50,8 @@ abstract contract SocketSrc is SocketBase {
 
         plugConfig.siblingPlug = _plugConfigs[msg.sender][siblingChainSlug_]
             .siblingPlug;
+
+        if (plugConfig.siblingPlug == address(0)) revert InvalidSiblingPlug();
         plugConfig.capacitor__ = _plugConfigs[msg.sender][siblingChainSlug_]
             .capacitor__;
         plugConfig.outboundSwitchboard__ = _plugConfigs[msg.sender][
