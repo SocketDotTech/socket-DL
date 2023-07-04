@@ -19,16 +19,4 @@ library AddressAliasHelper {
             l2Address = address(uint160(l1Address_) + _OFFSET);
         }
     }
-
-    /// @notice Utility function that converts the msg.sender viewed in the L2 to the
-    /// address in the L1 that submitted a tx to the inbox
-    /// @param l2Address_ L2 address as viewed in msg.sender
-    /// @return l1Address the address in the L1 that triggered the tx to L2
-    function undoL1ToL2Alias(
-        address l2Address_
-    ) internal pure returns (address l1Address) {
-        unchecked {
-            l1Address = address(uint160(l2Address_) - _OFFSET);
-        }
-    }
 }
