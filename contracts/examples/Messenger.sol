@@ -17,6 +17,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
     bytes32 public constant _PONG = keccak256("PONG");
 
     error NoSocketFee();
+    error NotSocket();
 
     constructor(address socket_, uint256 chainSlug_, uint256 minMsgGasLimit_) {
         _socket__ = ISocket(socket_);
@@ -58,7 +59,7 @@ contract Messenger is IPlug, Ownable(msg.sender) {
         uint32,
         bytes calldata payload_
     ) external payable override {
-        require(msg.sender == address(_socket__), "Counter: Invalid Socket");
+        if (msg.sender != address(_socket__)) revert NotSocket();
         (uint32 remoteChainSlug, bytes32 msgDecoded) = abi.decode(
             payload_,
             (uint32, bytes32)

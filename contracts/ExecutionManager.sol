@@ -142,6 +142,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     // triggered when fees exceeds uint128 max value
     error FeesTooHigh();
 
+    error OnlySocket();
+
     /**
      * @dev Constructor for ExecutionManager contract
      * @param owner_ address of the contract owner
@@ -191,7 +193,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint128,
         bytes32
     ) external view override {
-        require(msg.sender == address(socket__));
+        if (msg.sender != address(socket__)) revert OnlySocket();
     }
 
     /// @inheritdoc IExecutionManager

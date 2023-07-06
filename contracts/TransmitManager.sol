@@ -28,6 +28,7 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
     // triggered when nonce is not as expected for feeUpdater recovered from sig
     error InvalidNonce();
+    error OnlyExecutionManager();
 
     /**
      * @notice Emitted when a new signature verifier contract is set
@@ -123,7 +124,8 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
 
     /// @inheritdoc ITransmitManager
     function receiveFees(uint32) external payable override {
-        require(msg.sender == address(socket__.executionManager__()));
+        if (msg.sender != address(socket__.executionManager__()))
+            revert OnlyExecutionManager();
     }
 
     /**
