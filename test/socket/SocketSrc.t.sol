@@ -18,6 +18,7 @@ contract SocketSrcTest is Setup {
     event PacketVerifiedAndSealed(
         address indexed transmitter,
         bytes32 indexed packetId,
+        uint256 batchSize,
         bytes32 root,
         bytes signature
     );
@@ -145,7 +146,13 @@ contract SocketSrcTest is Setup {
                 );
 
             vm.expectEmit(false, false, false, true);
-            emit PacketVerifiedAndSealed(_transmitter, packetId_, root_, sig_);
+            emit PacketVerifiedAndSealed(
+                _transmitter,
+                packetId_,
+                DEFAULT_BATCH_LENGTH,
+                root_,
+                sig_
+            );
 
             _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
         }
