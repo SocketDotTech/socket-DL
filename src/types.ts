@@ -144,8 +144,8 @@ export enum DeploymentMode {
 }
 
 export enum CapacitorType {
-  singleCapacitor = 1,
-  hashChainCapacitor = 2,
+  singleCapacitor = "1",
+  hashChainCapacitor = "2",
 }
 
 export type Integrations = { [chainSlug in ChainSlug]?: ChainAddresses };
