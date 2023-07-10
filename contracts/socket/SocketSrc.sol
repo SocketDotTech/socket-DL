@@ -169,7 +169,7 @@ abstract contract SocketSrc is SocketBase {
     ) internal returns (ISocket.Fees memory fees) {
         uint128 verificationFeePerMessage;
         // switchboard is plug configured and this is an external untrusted call
-        (fees.switchboardFees, verificationGasOverhead) = _getSwitchboardMinFees(
+        (fees.switchboardFees, verificationFeePerMessage) = _getSwitchboardMinFees(
             siblingChainSlug_,
             switchboard_
         );
