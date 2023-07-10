@@ -5,9 +5,9 @@ import "./SocketBase.sol";
 
 /**
  * @title SocketSrc
- * @dev The SocketSrc contract inherits from SocketBase and handles all the operations that 
+ * @dev The SocketSrc contract inherits from SocketBase and handles all the operations that
  * happen on the source side. Provides the following functions
- * 1. Sending messages from the local chain to a remote chain 
+ * 1. Sending messages from the local chain to a remote chain
  * 2. Estimating minFees for message transmission, verification and execution
  * 3. Sealing packets and making them ready to be transmitted
  */
@@ -22,7 +22,7 @@ abstract contract SocketSrc is SocketBase {
     error InvalidCapacitorAddress();
 
     /**
-     * @dev Error triggerred when siblingPlug is not found 
+     * @dev Error triggerred when siblingPlug is not found
      */
     error PlugDisconnected();
 
@@ -35,7 +35,7 @@ abstract contract SocketSrc is SocketBase {
      * @param transmitter address of transmitter that sealed this packet(recovered from sig)
      * @param packetId packed-packet id
      * @param root root of the packet
-     * @param signature signature of transmitter 
+     * @param signature signature of transmitter
      */
     event Sealed(
         address indexed transmitter,
@@ -90,7 +90,7 @@ abstract contract SocketSrc is SocketBase {
 
         // if no sibling plug is found for the given chain slug, revert
         if (plugConfig.siblingPlug == address(0)) revert PlugDisconnected();
-        
+
         // fetches auxillary details for the message from the plug config
         plugConfig.capacitor__ = _plugConfigs[msg.sender][siblingChainSlug_]
             .capacitor__;
@@ -122,7 +122,7 @@ abstract contract SocketSrc is SocketBase {
         });
 
         // create a compressed data-struct called PackedMessage
-        // which has the message payload and some configuration details 
+        // which has the message payload and some configuration details
         bytes32 packedMessage = hasher__.packMessage(
             chainSlug,
             msg.sender,
@@ -169,10 +169,10 @@ abstract contract SocketSrc is SocketBase {
     ) internal returns (ISocket.Fees memory fees) {
         uint128 verificationFeePerMessage;
         // switchboard is plug configured and this is an external untrusted call
-        (fees.switchboardFees, verificationFeePerMessage) = _getSwitchboardMinFees(
-            siblingChainSlug_,
-            switchboard_
-        );
+        (
+            fees.switchboardFees,
+            verificationFeePerMessage
+        ) = _getSwitchboardMinFees(siblingChainSlug_, switchboard_);
 
         // deposits msg.value to execution manager and checks if enough fees is provided
         (fees.executionFee, fees.transmissionFees) = executionManager__
@@ -230,7 +230,7 @@ abstract contract SocketSrc is SocketBase {
      * @notice Retrieves the minimum fees required for switchboard.
      * @param siblingChainSlug_ The slug of the destination chain for the message.
      * @param switchboard__ The switchboard address for which fees is retrieved.
-     * @return switchboardFees fees required for message verification 
+     * @return switchboardFees fees required for message verification
      */
     function _getSwitchboardMinFees(
         uint32 siblingChainSlug_,

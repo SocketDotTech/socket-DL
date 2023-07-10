@@ -95,7 +95,10 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param switchboardFees switchboardFees
      * @param verificationGasOverhead verificationGasOverhead
      */
-    event SwitchboardFeesSet(uint256 switchboardFees, uint256 verificationGasOverhead);
+    event SwitchboardFeesSet(
+        uint256 switchboardFees,
+        uint256 verificationGasOverhead
+    );
 
     /**
      * @dev Error thrown when the fees provided are not enough to execute the transaction.
@@ -358,7 +361,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param withdrawTo_ The address of the account to withdraw fees to.
      * @dev The caller must have the WITHDRAW_ROLE.
      */
-    function withdrawFees(address withdrawTo_) external onlyRole(WITHDRAW_ROLE) {
+    function withdrawFees(
+        address withdrawTo_
+    ) external onlyRole(WITHDRAW_ROLE) {
         if (withdrawTo_ == address(0)) revert ZeroAddress();
         SafeTransferLib.safeTransferETH(withdrawTo_, address(this).balance);
     }

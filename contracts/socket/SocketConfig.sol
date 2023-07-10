@@ -44,7 +44,6 @@ abstract contract SocketConfig is ISocket {
     // switchboard => siblingChainSlug => IDecapacitor
     mapping(address => mapping(uint32 => IDecapacitor)) public decapacitors__;
 
-
     // Event triggered when a new switchboard is added
     event SwitchboardAdded(
         address switchboard,

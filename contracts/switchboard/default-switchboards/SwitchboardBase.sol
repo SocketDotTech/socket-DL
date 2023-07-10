@@ -312,7 +312,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
      * @notice Withdraw fees from the contract to an account.
      * @param withdrawTo_ The address where we should send the fees.
      */
-    function withdrawFees(address withdrawTo_) external onlyRole(WITHDRAW_ROLE) {
+    function withdrawFees(
+        address withdrawTo_
+    ) external onlyRole(WITHDRAW_ROLE) {
         if (withdrawTo_ == address(0)) revert ZeroAddress();
         SafeTransferLib.safeTransferETH(withdrawTo_, address(this).balance);
     }

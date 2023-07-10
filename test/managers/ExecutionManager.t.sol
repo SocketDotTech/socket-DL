@@ -200,7 +200,10 @@ contract ExecutionManagerTest is Setup {
         ) = executionManager.totalExecutionAndTransmissionFees(bChainSlug);
 
         assertEq(storedTransmissionFees, _transmissionFees);
-        assertEq(storedExecutionFees, _executionFees + _verificationGasOverhead);
+        assertEq(
+            storedExecutionFees,
+            _executionFees + _verificationGasOverhead
+        );
         assertEq(
             executionManager.totalSwitchboardFees(
                 address(_a.configs__[0].switchboard__),

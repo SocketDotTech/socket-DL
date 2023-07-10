@@ -60,7 +60,10 @@ interface ISwitchboard {
      */
     function getMinFees(
         uint32 dstChainSlug
-    ) external view returns (uint128 switchboardFee, uint128 verificationGasOverhead);
+    )
+        external
+        view
+        returns (uint128 switchboardFee, uint128 verificationGasOverhead);
 
     /**
      * @notice Receives the fees for processing of packet.

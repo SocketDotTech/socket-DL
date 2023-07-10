@@ -19,7 +19,7 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     // ChainSlug for this deployed socket instance
     uint32 public immutable chainSlug;
     // Counter for messages giong outbound from current chain
-    uint64 public globalMessageCount=0;
+    uint64 public globalMessageCount = 0;
 
     /**
      * @dev constructs a new Socket contract instance.
@@ -30,11 +30,11 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
         chainSlug = chainSlug_;
         version = keccak256(bytes(version_));
     }
-    
+
     ////////////////////////////////////////////////////////
     //////////// PERIPHERY CONTRACT CONNECTORS ////////////
     ////////////////////////////////////////////////////////
-    
+
     // Hasher contract
     IHasher public hasher__;
     // Transmit Manager contract
@@ -133,7 +133,7 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     /////////////////////////////////////////////
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them. This contract does not 
+     * @notice Rescues funds from a contract that has lost access to them. This contract does not
      * theoretically need this function but it is added for safety.
      * @param token_ The address of the token contract.
      * @param userAddress_ The address of the user who lost access to the funds.

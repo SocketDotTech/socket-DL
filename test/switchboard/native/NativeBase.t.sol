@@ -18,7 +18,10 @@ contract NativeBaseSwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     event SwitchboardTripped(bool tripGlobalFuse_);
-    event SwitchboardFeesSet(uint256 switchboardFees, uint256 verificationGasOverhead);
+    event SwitchboardFeesSet(
+        uint256 switchboardFees,
+        uint256 verificationGasOverhead
+    );
 
     function setUp() external {
         initialize();

@@ -133,7 +133,9 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @dev caller needs withdraw role
      * @param withdrawTo_ withdraw fees to
      */
-    function withdrawFees(address withdrawTo_) external onlyRole(WITHDRAW_ROLE) {
+    function withdrawFees(
+        address withdrawTo_
+    ) external onlyRole(WITHDRAW_ROLE) {
         if (withdrawTo_ == address(0)) revert ZeroAddress();
         SafeTransferLib.safeTransferETH(withdrawTo_, address(this).balance);
     }

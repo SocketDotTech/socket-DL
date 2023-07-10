@@ -227,7 +227,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             siblingChainSlug_
         );
 
-        uint128 minExecutionFees = minMsgExecutionFees + verificationGasOverhead_;
+        uint128 minExecutionFees = minMsgExecutionFees +
+            verificationGasOverhead_;
         if (msgValue < transmissionFees + switchboardFees_ + minExecutionFees)
             revert InsufficientFees();
 
@@ -529,7 +530,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     function withdrawExecutionFees(
         uint32 siblingChainSlug_,
         uint128 amount_,
-        address withdrawTo_ 
+        address withdrawTo_
     ) external onlyRole(WITHDRAW_ROLE) {
         if (withdrawTo_ == address(0)) revert ZeroAddress();
         if (
