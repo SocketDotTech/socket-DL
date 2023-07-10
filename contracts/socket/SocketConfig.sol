@@ -12,26 +12,6 @@ import "../interfaces/ISwitchboard.sol";
  * @dev This contract is meant to be inherited by other contracts that require socket configuration functionality
  */
 abstract contract SocketConfig is ISocket {
-    /**
-     * @notice emits the config set by a plug for a remoteChainSlug
-     * @param plug address of plug on current chain
-     * @param siblingChainSlug sibling chain slug
-     * @param siblingPlug address of plug on sibling chain
-     * @param inboundSwitchboard inbound switchboard (select from registered options)
-     * @param outboundSwitchboard outbound switchboard (select from registered options)
-     * @param capacitor capacitor selected based on outbound switchboard
-     * @param decapacitor decapacitor selected based on inbound switchboard
-     */
-    event PlugConnected(
-        address plug,
-        uint32 siblingChainSlug,
-        address siblingPlug,
-        address inboundSwitchboard,
-        address outboundSwitchboard,
-        address capacitor,
-        address decapacitor
-    );
-
     // factory contract that can deploy capacitors and decapacitors
     ICapacitorFactory public capacitorFactory__;
 
