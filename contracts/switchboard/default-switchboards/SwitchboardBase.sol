@@ -20,7 +20,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     bool public tripGlobalFuse;
     struct Fees {
         uint128 switchboardFees;
-        uint128 verificationFees;
+        uint128 verificationGasOverhead;
     }
 
     // sourceChain => isPaused
@@ -32,7 +32,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
 
-    // destinationChainSlug => fees-struct with verificationFees and switchboardFees
+    // destinationChainSlug => fees-struct with verificationGasOverhead and switchboardFees
     mapping(uint32 => Fees) public fees;
 
     // destinationChainSlug => initialPacketCount - packets with  packetCount after this will be accepted at the switchboard.
@@ -69,7 +69,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Emitted when a fees is set for switchboard
      * @param siblingChainSlug Chain slug of the sibling chain
-     * @param fees fees struct with verificationFees and switchboardFees
+     * @param fees fees struct with verificationGasOverhead and switchboardFees
      */
     event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
 
@@ -102,7 +102,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32 dstChainSlug_
     ) external view override returns (uint128, uint128) {
         Fees memory minFees = fees[dstChainSlug_];
-        return (minFees.switchboardFees, minFees.verificationFees);
+        return (minFees.switchboardFees, minFees.verificationGasOverhead);
     }
 
     /**
@@ -310,11 +310,11 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
 
     /**
      * @notice Withdraw fees from the contract to an account.
-     * @param account_ The address where we should send the fees.
+     * @param withdrawTo_ The address where we should send the fees.
      */
-    function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        if (account_ == address(0)) revert ZeroAddress();
-        SafeTransferLib.safeTransferETH(account_, address(this).balance);
+    function withdrawFees(address withdrawTo_) external onlyRole(WITHDRAW_ROLE) {
+        if (withdrawTo_ == address(0)) revert ZeroAddress();
+        SafeTransferLib.safeTransferETH(withdrawTo_, address(this).balance);
     }
 
     /**

@@ -204,7 +204,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         bytes32,
         uint32 siblingChainSlug_,
         uint128 switchboardFees_,
-        uint128 verificationFees_,
+        uint128 verificationGasOverhead_,
         address transmitManager_,
         address switchboard_,
         uint256 maxPacketLength_
@@ -227,7 +227,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             siblingChainSlug_
         );
 
-        uint128 minExecutionFees = minMsgExecutionFees + verificationFees_;
+        uint128 minExecutionFees = minMsgExecutionFees + verificationGasOverhead_;
         if (msgValue < transmissionFees + switchboardFees_ + minExecutionFees)
             revert InsufficientFees();
 
@@ -521,17 +521,17 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     }
 
     /**
-     * @notice withdraws fees from contract
+     * @notice withdraws fees for execution from contract
      * @param siblingChainSlug_ withdraw fees corresponding to this slug
      * @param amount_ withdraw amount
-     * @param account_ withdraw fees to
+     * @param withdrawTo_ withdraw fees to the provided address
      */
     function withdrawExecutionFees(
         uint32 siblingChainSlug_,
         uint128 amount_,
-        address account_
+        address withdrawTo_ 
     ) external onlyRole(WITHDRAW_ROLE) {
-        if (account_ == address(0)) revert ZeroAddress();
+        if (withdrawTo_ == address(0)) revert ZeroAddress();
         if (
             totalExecutionAndTransmissionFees[siblingChainSlug_]
                 .totalExecutionFees < amount_
@@ -540,8 +540,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         totalExecutionAndTransmissionFees[siblingChainSlug_]
             .totalExecutionFees -= amount_;
 
-        SafeTransferLib.safeTransferETH(account_, amount_);
-        emit ExecutionFeesWithdrawn(account_, siblingChainSlug_, amount_);
+        SafeTransferLib.safeTransferETH(withdrawTo_, amount_);
+        emit ExecutionFeesWithdrawn(withdrawTo_, siblingChainSlug_, amount_);
     }
 
     /**

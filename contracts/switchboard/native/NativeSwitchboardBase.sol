@@ -25,7 +25,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     uint32 public immutable chainSlug;
 
     uint128 public switchboardFees;
-    uint128 public verificationFees;
+    uint128 public verificationGasOverhead;
 
     /**
      * @dev Flag that indicates if the global fuse is tripped, meaning no more packets can be sent.
@@ -93,9 +93,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Emitted when a fees is set for switchboard
      * @param switchboardFees switchboardFees
-     * @param verificationFees verificationFees
+     * @param verificationGasOverhead verificationGasOverhead
      */
-    event SwitchboardFeesSet(uint256 switchboardFees, uint256 verificationFees);
+    event SwitchboardFeesSet(uint256 switchboardFees, uint256 verificationGasOverhead);
 
     /**
      * @dev Error thrown when the fees provided are not enough to execute the transaction.
@@ -207,7 +207,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         override
         returns (uint128 switchboardFee_, uint128 verificationFee_)
     {
-        return (switchboardFees, verificationFees);
+        return (switchboardFees, verificationGasOverhead);
     }
 
     /**
@@ -217,7 +217,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 nonce_,
         uint32,
         uint128 switchboardFees_,
-        uint128 verificationFees_,
+        uint128 verificationGasOverhead_,
         bytes calldata signature_
     ) external override {
         address feesUpdater = signatureVerifier__.recoverSigner(
@@ -228,7 +228,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
                     chainSlug,
                     nonce_,
                     switchboardFees_,
-                    verificationFees_
+                    verificationGasOverhead_
                 )
             ),
             signature_
@@ -240,9 +240,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
         switchboardFees = switchboardFees_;
-        verificationFees = verificationFees_;
+        verificationGasOverhead = verificationGasOverhead_;
 
-        emit SwitchboardFeesSet(switchboardFees, verificationFees);
+        emit SwitchboardFeesSet(switchboardFees, verificationGasOverhead);
     }
 
     /**
@@ -355,12 +355,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
 
     /**
      * @notice Allows the withdrawal of fees by the account with the specified address.
-     * @param account_ The address of the account to withdraw fees to.
+     * @param withdrawTo_ The address of the account to withdraw fees to.
      * @dev The caller must have the WITHDRAW_ROLE.
      */
-    function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        if (account_ == address(0)) revert ZeroAddress();
-        SafeTransferLib.safeTransferETH(account_, address(this).balance);
+    function withdrawFees(address withdrawTo_) external onlyRole(WITHDRAW_ROLE) {
+        if (withdrawTo_ == address(0)) revert ZeroAddress();
+        SafeTransferLib.safeTransferETH(withdrawTo_, address(this).balance);
     }
 
     /**

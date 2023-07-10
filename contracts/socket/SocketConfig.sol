@@ -13,6 +13,29 @@ import "../interfaces/ISwitchboard.sol";
  */
 abstract contract SocketConfig is ISocket {
     /**
+     * @notice emits the config set by a plug for a remoteChainSlug
+     * @param plug address of plug on current chain
+     * @param siblingChainSlug sibling chain slug
+     * @param siblingPlug address of plug on sibling chain
+     * @param inboundSwitchboard inbound switchboard (select from registered options)
+     * @param outboundSwitchboard outbound switchboard (select from registered options)
+     * @param capacitor capacitor selected based on outbound switchboard
+     * @param decapacitor decapacitor selected based on inbound switchboard
+     */
+    event PlugConnected(
+        address plug,
+        uint32 siblingChainSlug,
+        address siblingPlug,
+        address inboundSwitchboard,
+        address outboundSwitchboard,
+        address capacitor,
+        address decapacitor
+    );
+
+    // factory contract that can deploy capacitors and decapacitors
+    ICapacitorFactory public capacitorFactory__;
+
+    /**
      * @dev Struct to store the configuration for a plug connection
      */
     struct PlugConfig {
@@ -28,20 +51,19 @@ abstract contract SocketConfig is ISocket {
         ISwitchboard outboundSwitchboard__;
     }
 
-    // Capacitor factory contract
-    ICapacitorFactory public capacitorFactory__;
+    // plug => remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
+    mapping(address => mapping(uint32 => PlugConfig)) internal _plugConfigs;
 
-    // capacitor address => siblingChainSlug
     // It is used to maintain record of capacitors in the system registered for a slug and also used in seal for verification
+    // capacitor address => siblingChainSlug
     mapping(address => uint32) public capacitorToSlug;
 
     // switchboard => siblingChainSlug => ICapacitor
     mapping(address => mapping(uint32 => ICapacitor)) public capacitors__;
+
     // switchboard => siblingChainSlug => IDecapacitor
     mapping(address => mapping(uint32 => IDecapacitor)) public decapacitors__;
 
-    // plug => remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
-    mapping(address => mapping(uint32 => PlugConfig)) internal _plugConfigs;
 
     // Event triggered when a new switchboard is added
     event SwitchboardAdded(

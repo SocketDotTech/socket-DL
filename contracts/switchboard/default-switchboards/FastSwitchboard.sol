@@ -128,7 +128,7 @@ contract FastSwitchboard is SwitchboardBase {
         uint256 nonce_,
         uint32 dstChainSlug_,
         uint128 switchboardFees_,
-        uint128 verificationFees_,
+        uint128 verificationGasOverhead_,
         bytes calldata signature_
     ) external override {
         address feesUpdater = signatureVerifier__.recoverSigner(
@@ -140,7 +140,7 @@ contract FastSwitchboard is SwitchboardBase {
                     dstChainSlug_,
                     nonce_,
                     switchboardFees_,
-                    verificationFees_
+                    verificationGasOverhead_
                 )
             ),
             signature_
@@ -154,7 +154,7 @@ contract FastSwitchboard is SwitchboardBase {
         Fees memory feesObject = Fees({
             switchboardFees: switchboardFees_ *
                 uint128(totalWatchers[dstChainSlug_]),
-            verificationFees: verificationFees_
+            verificationGasOverhead: verificationGasOverhead_
         });
 
         fees[dstChainSlug_] = feesObject;

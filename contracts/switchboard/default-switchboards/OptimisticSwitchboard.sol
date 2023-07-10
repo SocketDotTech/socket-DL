@@ -62,7 +62,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
         uint256 nonce_,
         uint32 dstChainSlug_,
         uint128 switchboardFees_,
-        uint128 verificationFees_,
+        uint128 verificationGasOverhead_,
         bytes calldata signature_
     ) external override {
         address feesUpdater = signatureVerifier__.recoverSigner(
@@ -74,7 +74,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
                     dstChainSlug_,
                     nonce_,
                     switchboardFees_,
-                    verificationFees_
+                    verificationGasOverhead_
                 )
             ),
             signature_
@@ -87,7 +87,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
         }
 
         Fees storage fee = fees[dstChainSlug_];
-        fee.verificationFees = verificationFees_;
+        fee.verificationGasOverhead = verificationGasOverhead_;
         fee.switchboardFees = switchboardFees_;
 
         emit SwitchboardFeesSet(dstChainSlug_, fee);

@@ -60,53 +60,12 @@ interface ISocket {
     }
 
     /**
-     * @notice emits the message details when a new message arrives at outbound
-     * @param localChainSlug local chain slug
-     * @param localPlug local plug address
-     * @param dstChainSlug remote chain slug
-     * @param dstPlug remote plug address
-     * @param msgId message id packed with remoteChainSlug and nonce
-     * @param minMsgGasLimit gas limit needed to execute the inbound at remote
-     * @param payload the data which will be used by inbound at remote
-     */
-    event MessageOutbound(
-        uint32 localChainSlug,
-        address localPlug,
-        uint32 dstChainSlug,
-        address dstPlug,
-        bytes32 msgId,
-        uint256 minMsgGasLimit,
-        bytes32 executionParams,
-        bytes32 transmissionParams,
-        bytes payload,
-        Fees fees
-    );
-
-    /**
      * @notice emits the status of message after inbound call
      * @param msgId msg id which is executed
      */
     event ExecutionSuccess(bytes32 msgId);
 
-    /**
-     * @notice emits the config set by a plug for a remoteChainSlug
-     * @param plug address of plug on current chain
-     * @param siblingChainSlug sibling chain slug
-     * @param siblingPlug address of plug on sibling chain
-     * @param inboundSwitchboard inbound switchboard (select from registered options)
-     * @param outboundSwitchboard outbound switchboard (select from registered options)
-     * @param capacitor capacitor selected based on outbound switchboard
-     * @param decapacitor decapacitor selected based on inbound switchboard
-     */
-    event PlugConnected(
-        address plug,
-        uint32 siblingChainSlug,
-        address siblingPlug,
-        address inboundSwitchboard,
-        address outboundSwitchboard,
-        address capacitor,
-        address decapacitor
-    );
+   
 
     /**
      * @notice registers a message
