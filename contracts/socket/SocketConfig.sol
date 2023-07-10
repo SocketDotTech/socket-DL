@@ -150,6 +150,7 @@ abstract contract SocketConfig is ISocket {
         address outboundSwitchboard_
     ) external override {
         // only capacitor checked, decapacitor assumed will exist if capacitor does
+        // as they both are deployed together always
         if (
             address(capacitors__[inboundSwitchboard_][siblingChainSlug_]) ==
             address(0) ||

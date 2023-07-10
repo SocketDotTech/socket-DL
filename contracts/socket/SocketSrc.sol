@@ -10,20 +10,28 @@ import "./SocketBase.sol";
  * and allow transmitters to seal packets for a path.
  */
 abstract contract SocketSrc is SocketBase {
+    ////////////////////////////////////////////////////////
+    ////////////////////// ERRORS //////////////////////////
+    ////////////////////////////////////////////////////////
     // triggered when fees is not sufficient at outbound
     error InsufficientFees();
     // triggered when an invalid capacitor address is used for sealing
     error InvalidCapacitor();
     error InvalidSiblingPlug();
 
+
+    ////////////////////////////////////////////////////////
+    ////////////////////// EVENTS //////////////////////////
+    ////////////////////////////////////////////////////////
+
     /**
-     * @notice emits the verification and seal confirmation of a packet
+     * @notice Emits as soon as a capacitor is sealed
      * @param transmitter address of transmitter recovered from sig
      * @param packetId packed packet id
      * @param root root
      * @param signature signature of attester
      */
-    event PacketVerifiedAndSealed(
+    event Sealed(
         address indexed transmitter,
         bytes32 indexed packetId,
         bytes32 root,
@@ -31,8 +39,7 @@ abstract contract SocketSrc is SocketBase {
     );
 
     /**
-     * @notice registers a message
-     * @dev Packs the message and includes it in a packet with capacitor
+     * @notice Singular function to send message to remote chain
      * @param siblingChainSlug_ the remote chain slug
      * @param minMsgGasLimit_ the gas limit needed to execute the payload on remote
      * @param executionParams_ a 32 bytes param to add extra details for execution
@@ -278,7 +285,7 @@ abstract contract SocketSrc is SocketBase {
             );
 
         if (!isTransmitter) revert InvalidTransmitter();
-        emit PacketVerifiedAndSealed(transmitter, packetId, root, signature_);
+        emit Sealed(transmitter, packetId, root, signature_);
     }
 
     // Packs the local plug, local chain slug, remote chain slug and nonce

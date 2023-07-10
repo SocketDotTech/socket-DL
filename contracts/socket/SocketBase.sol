@@ -14,19 +14,12 @@ import "./SocketConfig.sol";
  * setters and inherits SocketConfig
  */
 abstract contract SocketBase is SocketConfig, AccessControlExtended {
-    // Hasher contract
-    IHasher public hasher__;
-    // Transmit Manager contract
-    ITransmitManager public override transmitManager__;
-    // Execution Manager contract
-    IExecutionManager public override executionManager__;
-
-    // chain slug
-    uint32 public immutable chainSlug;
-    // incrementing counter for messages going out of current chain
-    uint64 public globalMessageCount;
-    // current version
+    // Version string for this socket instance
     bytes32 public immutable version;
+    // ChainSlug for this deployed socket instance
+    uint32 public immutable chainSlug;
+    // Counter for messages giong outbound from current chain
+    uint64 public globalMessageCount=0;
 
     /**
      * @dev constructs a new Socket contract instance.
@@ -37,11 +30,30 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
         chainSlug = chainSlug_;
         version = keccak256(bytes(version_));
     }
+    
+    ////////////////////////////////////////////////////////
+    //////////// PERIPHERY CONTRACT CONNECTORS ////////////
+    ////////////////////////////////////////////////////////
+    
+    // Hasher contract
+    IHasher public hasher__;
+    // Transmit Manager contract
+    ITransmitManager public override transmitManager__;
+    // Execution Manager contract
+    IExecutionManager public override executionManager__;
+
+    ////////////////////////////////////////////////////////
+    ////////////////////// ERRORS //////////////////////////
+    ////////////////////////////////////////////////////////
 
     /**
-     * @dev An error that is thrown when an invalid signer tries to seal or propose.
+     * @dev Error thrown when non-transmitter tries to seal/propose
      */
     error InvalidTransmitter();
+
+    ////////////////////////////////////////////////////////
+    ////////////////////// EVENTS //////////////////////////
+    ////////////////////////////////////////////////////////
 
     /**
      * @notice An event that is emitted when the capacitor factory is updated.
@@ -63,6 +75,10 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
      * @param transmitManager address of new transmitManager contract
      */
     event TransmitManagerSet(address transmitManager);
+
+    //////////////////////////////////////////////////
+    //////////// GOV Permissioned setters ////////////
+    //////////////////////////////////////////////////
 
     /**
      * @dev Set the capacitor factory contract
@@ -112,8 +128,13 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
         emit TransmitManagerSet(transmitManager_);
     }
 
+    //////////////////////////////////////////////
+    //////////// Rescue role actions ////////////
+    /////////////////////////////////////////////
+
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from a contract that has lost access to them. This contract does not 
+     * theoretically need this function but it is added for safety.
      * @param token_ The address of the token contract.
      * @param userAddress_ The address of the user who lost access to the funds.
      * @param amount_ The amount of tokens to be rescued.
