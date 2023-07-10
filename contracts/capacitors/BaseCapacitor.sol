@@ -12,16 +12,16 @@ import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
  * access control.
  */
 abstract contract BaseCapacitor is ICapacitor, AccessControl {
-    /// an incrementing count for each new packet created
+    /// an incrementing count for the next packet that is being created
     uint64 internal _nextPacketCount;
 
-    /// tracks the last packet sealed
+    /// tracks the count of next packet that will be sealed
     uint64 internal _nextSealCount;
 
     /// address of socket
     address public immutable socket;
 
-    /// maps the packet count with the root hash generated while adding message
+    /// maps the packet count with the root hash of that packet
     mapping(uint64 => bytes32) internal _roots;
 
     // Error triggered when not called by socket
@@ -46,10 +46,15 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl {
     }
 
     /**
-     * @dev Returns the count of the latest packet.
-     * @return The count of the latest packet.
+     * @dev Returns the count of the latest packet that finished filling.
+     * @dev Returns 0 in case no packets are filled.
+     * @return lastFilledPacket count of the latest packet.
      */
-    function getLatestPacketCount() external view returns (uint256) {
+    function getLastFilledPacket()
+        external
+        view
+        returns (uint256 lastFilledPacket)
+    {
         return _nextPacketCount == 0 ? 0 : _nextPacketCount - 1;
     }
 

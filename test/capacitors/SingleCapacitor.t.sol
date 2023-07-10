@@ -57,7 +57,7 @@ contract SingleCapacitorTest is Setup {
         _addPackedMessage(_message_1);
         _addPackedMessage(_message_2);
 
-        assertEq(_sa.getLatestPacketCount(), 2);
+        assertEq(_sa.getLastFilledPacket(), 2);
         (, uint256 packetToSeal) = _sa.getNextPacketToBeSealed();
         assertEq(packetToSeal, 0);
 
@@ -123,7 +123,7 @@ contract SingleCapacitorTest is Setup {
     }
 
     function _assertNextPacket(bytes32 root_, uint256 packetId_) private {
-        uint64 nextPacketId = uint64(_sa.getLatestPacketCount() + 1);
+        uint64 nextPacketId = uint64(_sa.getLastFilledPacket() + 1);
         bytes32 root = _sa.getRootByCount(nextPacketId);
         assertEq(root, root_, "Root Invalid");
         assertEq(nextPacketId, packetId_, "packetId Invalid");
