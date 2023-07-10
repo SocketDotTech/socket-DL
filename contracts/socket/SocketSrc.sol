@@ -26,6 +26,7 @@ abstract contract SocketSrc is SocketBase {
     event PacketVerifiedAndSealed(
         address indexed transmitter,
         bytes32 indexed packetId,
+        uint256 batchSize,
         bytes32 root,
         bytes signature
     );
@@ -278,7 +279,13 @@ abstract contract SocketSrc is SocketBase {
             );
 
         if (!isTransmitter) revert InvalidTransmitter();
-        emit PacketVerifiedAndSealed(transmitter, packetId, root, signature_);
+        emit PacketVerifiedAndSealed(
+            transmitter,
+            packetId,
+            batchSize_,
+            root,
+            signature_
+        );
     }
 
     // Packs the local plug, local chain slug, remote chain slug and nonce
