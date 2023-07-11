@@ -143,8 +143,8 @@ export const overrides: {
     gasPrice,
   },
   [ChainSlug.AEVO_TESTNET]: {
-    type,
-    gasLimit,
-    gasPrice,
+    type: 2,
+    // gasLimit,
+    // gasPrice,
   },
 };
