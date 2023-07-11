@@ -79,6 +79,7 @@ const config: HardhatUserConfig = {
       bscTestnet: process.env.BSCSCAN_API_KEY || "",
       goerli: process.env.ETHERSCAN_API_KEY || "",
       mainnet: process.env.ETHERSCAN_API_KEY || "",
+      sepolia: process.env.ETHERSCAN_API_KEY || "",
       optimisticEthereum: process.env.OPTIMISM_API_KEY || "",
       optimisticTestnet: process.env.OPTIMISM_API_KEY || "",
       polygon: process.env.POLYGONSCAN_API_KEY || "",
@@ -88,7 +89,7 @@ const config: HardhatUserConfig = {
     customChains: [
       {
         network: "optimisticTestnet",
-        chainId: chainKeyToSlug["optimism-goerli"],
+        chainId: chainKeyToSlug[ChainKey.OPTIMISM_GOERLI],
         urls: {
           apiURL: "https://api-goerli-optimistic.etherscan.io/api",
           browserURL: "https://goerli-optimism.etherscan.io/",
@@ -96,10 +97,18 @@ const config: HardhatUserConfig = {
       },
       {
         network: "arbitrumTestnet",
-        chainId: chainKeyToSlug["arbitrum-goerli"],
+        chainId: chainKeyToSlug[ChainKey.ARBITRUM_GOERLI],
         urls: {
           apiURL: "https://api-goerli.arbiscan.io/api",
           browserURL: "https://goerli.arbiscan.io/",
+        },
+      },
+      {
+        network: "aevoTestnet",
+        chainId: chainKeyToSlug[ChainKey.AEVO_TESTNET],
+        urls: {
+          apiURL: "",
+          browserURL: "https://explorer-testnet.aevo.xyz/",
         },
       },
     ],
