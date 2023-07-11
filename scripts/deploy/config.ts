@@ -1,13 +1,7 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import {
-  ChainKey,
-  ChainSlug,
-  DeploymentMode,
-  TestnetIds,
-  CORE_CONTRACTS,
-} from "../../src";
+import { ChainSlug, DeploymentMode, CORE_CONTRACTS } from "../../src";
 import { BigNumberish, utils } from "ethers";
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
@@ -31,6 +25,8 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.POLYGON_MUMBAI,
   ChainSlug.BSC_TESTNET,
+  ChainSlug.SEPOLIA,
+  ChainSlug.AEVO_TESTNET,
   ChainSlug.MAINNET,
   ChainSlug.ARBITRUM,
   ChainSlug.OPTIMISM,
@@ -57,11 +53,13 @@ export const msgValueMaxThreshold: { [chain in ChainSlug]?: BigNumberish } = {
   [ChainSlug.POLYGON_MUMBAI]: utils.parseEther("0.1"),
   [ChainSlug.BSC_TESTNET]: utils.parseEther("0.001"),
   [ChainSlug.GOERLI]: utils.parseEther("0.001"),
+  [ChainSlug.SEPOLIA]: utils.parseEther("0.001"),
   [ChainSlug.ARBITRUM]: utils.parseEther("0.001"),
   [ChainSlug.OPTIMISM]: utils.parseEther("0.001"),
   [ChainSlug.POLYGON_MAINNET]: utils.parseEther("0.1"),
   [ChainSlug.BSC]: utils.parseEther("0.001"),
   [ChainSlug.MAINNET]: utils.parseEther("0.001"),
+  [ChainSlug.AEVO_TESTNET]: utils.parseEther("0.001"),
 };
 
 export const transmitterAddresses = {
@@ -138,5 +136,15 @@ export const overrides: {
     type: 0,
     gasLimit: 2_000_000,
     gasPrice,
+  },
+  [ChainSlug.SEPOLIA]: {
+    type,
+    gasLimit,
+    gasPrice,
+  },
+  [ChainSlug.AEVO_TESTNET]: {
+    type: 2,
+    // gasLimit,
+    // gasPrice,
   },
 };
