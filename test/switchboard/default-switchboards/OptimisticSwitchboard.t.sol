@@ -11,8 +11,8 @@ contract OptimisticSwitchboardTest is Setup {
     address watcher;
     uint256 nonce;
 
-    event SwitchboardTripped(bool tripGlobalFuse_);
-    event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
+    event GlobalTripChanged(bool isGlobalTipped_);
+    event PathTripChanged(uint32 srcChainSlug, bool isPathTripped);
 
     error WatcherFound();
     error WatcherNotFound();
@@ -93,7 +93,7 @@ contract OptimisticSwitchboardTest is Setup {
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         vm.expectEmit(false, false, false, true);
-        emit PathTripped(srcChainSlug, true);
+        emit PathTripChanged(srcChainSlug, true);
         optimisticSwitchboard.tripPath(nonce++, srcChainSlug, sig);
 
         bool isAllowed = optimisticSwitchboard.allowPacket(

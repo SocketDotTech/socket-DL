@@ -30,7 +30,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Flag that indicates if the global fuse is tripped, meaning no more packets can be sent.
      */
-    bool public tripGlobalFuse;
+    bool public isGlobalTipped;
 
     /**
      * @dev The capacitor contract that holds packets for the native bridge.
@@ -62,7 +62,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Event emitted when the switchboard is tripped.
      */
-    event SwitchboardTripped(bool tripGlobalFuse);
+    event GlobalTripChanged(bool isGlobalTipped);
 
     /**
      * @dev Event emitted when the capacitor address is set.
@@ -190,7 +190,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     ) external view override returns (bool) {
         uint64 packetCount = uint64(uint256(packetId_));
 
-        if (tripGlobalFuse) return false;
+        if (isGlobalTipped) return false;
         if (packetCount < initialPacketCount) return false;
         if (packetIdToRoot[packetId_] != root_) return false;
 
@@ -297,7 +297,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev The function recovers the signer from the given signature and verifies if the signer has the TRIP_ROLE.
      *      The nonce must be equal to the next nonce of the caller. If the caller doesn't have the TRIP_ROLE or the nonce
      *      is incorrect, it will revert.
-     *       Once the function is successful, the tripGlobalFuse variable is set to true and the SwitchboardTripped event is emitted.
+     *       Once the function is successful, the isGlobalTipped variable is set to true and the GlobalTripChanged event is emitted.
      * @param nonce_ The nonce of the caller.
      * @param signature_ The signature of the message
      */
@@ -321,8 +321,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         unchecked {
             if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
         }
-        tripGlobalFuse = true;
-        emit SwitchboardTripped(true);
+        isGlobalTipped = true;
+        emit GlobalTripChanged(true);
     }
 
     /**
@@ -352,8 +352,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         unchecked {
             if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
         }
-        tripGlobalFuse = false;
-        emit SwitchboardTripped(false);
+        isGlobalTipped = false;
+        emit GlobalTripChanged(false);
     }
 
     /**

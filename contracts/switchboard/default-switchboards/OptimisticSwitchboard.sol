@@ -46,8 +46,8 @@ contract OptimisticSwitchboard is SwitchboardBase {
         uint64 packetCount = uint64(uint256(packetId_));
 
         if (
-            tripGlobalFuse ||
-            tripSinglePath[srcChainSlug_] ||
+            isGlobalTipped ||
+            isPathTripped[srcChainSlug_] ||
             isProposalTripped[packetId_][proposalCount_] ||
             packetCount < initialPacketCount[srcChainSlug_]
         ) return false;

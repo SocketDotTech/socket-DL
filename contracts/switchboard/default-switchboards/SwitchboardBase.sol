@@ -20,24 +20,33 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     // chain slug of deployed chain
     uint32 public immutable chainSlug;
 
-    // timeout after which packets become valid even if all watchers have not attested it
-    // this is only applicable if the proposal has not been tripped
-    // used to make the system work when watcher is inactive due to infra etc problems
+    // timeout after which packets become valid
+    // optimistic switchboard: this is the wait time to validate packet
+    // fast switchboard: this makes packets valid even if all watchers have not attested
+    //      used to make the system work when watchers are inactive due to infra etc problems
+    // this is only applicable if none of the trips are triggered
     uint256 public immutable timeoutInSeconds;
 
     // variable to pause the switchboard completely, to be used only in case of smart contract bug
-    bool public tripGlobalFuse;
+    // trip can be done by TRIP_ROLE holders
+    // untrip can be done by UN_TRIP_ROLE holders
+    bool public isGlobalTipped;
 
     // pause all proposals coming from given chain.
     // to be used if a transmitter has gone rogue and needs to be kicked to resume normal functioning
+    // trip can be done by WATCHER_ROLE holders
+    // untrip can be done by UN_TRIP_ROLE holders
     // sourceChain => isPaused
-    mapping(uint32 => bool) public tripSinglePath;
+    mapping(uint32 => bool) public isPathTripped;
 
     // block execution of single proposal
     // to be used if transmitter proposes wrong packet root single time
+    // trip can be done by WATCHER_ROLE holders
+    // untrip not possible, but same root can be proposed again at next proposalCount
     // isProposalTripped(packetId => proposalCount => isTripped)
     mapping(bytes32 => mapping(uint256 => bool)) public isProposalTripped;
 
+    // incrementing nonce for each signer
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
 
@@ -53,11 +62,17 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     mapping(uint32 => uint256) public initialPacketCount;
 
     /**
-     * @dev Emitted when a path is tripped
-     * @param srcChainSlug Chain slug of the source chain
-     * @param tripSinglePath New trip status of the path
+     * @dev Emitted when global trip status changes
+     * @param isGlobalTipped New trip status of the contract
      */
-    event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
+    event GlobalTripChanged(bool isGlobalTipped);
+
+    /**
+     * @dev Emitted when path trip status changes
+     * @param srcChainSlug Chain slug of the source chain
+     * @param isPathTripped New trip status of the path
+     */
+    event PathTripChanged(uint32 srcChainSlug, bool isPathTripped);
 
     /**
      * @dev Emitted when a proposal for a packetId is tripped
@@ -67,26 +82,16 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     event ProposalTripped(bytes32 packetId, uint256 proposalCount);
 
     /**
-     * @dev Emitted when Switchboard contract is tripped globally
-     * @param tripGlobalFuse New trip status of the contract
-     */
-
-    event SwitchboardTripped(bool tripGlobalFuse);
-    /**
-     * @dev Emitted when execution overhead is set for a destination chain
-     * @param dstChainSlug Chain slug of the destination chain
-     * @param executionOverhead New execution overhead
-     */
-    event ExecutionOverheadSet(uint32 dstChainSlug, uint256 executionOverhead);
-
-    /**
      * @dev Emitted when a fees is set for switchboard
      * @param siblingChainSlug Chain slug of the sibling chain
-     * @param fees fees struct with verificationOverheadFees and switchboardFees
+     * @param fees Fees struct with verificationOverheadFees and switchboardFees
      */
     event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
 
+    // Error hit when a signature with unexpected nonce is received
     error InvalidNonce();
+
+    // Error hit when tx from invalid ExecutionManager is received
     error OnlyExecutionManager();
 
     /**
@@ -184,8 +189,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
         }
         //source chain based tripping
-        tripSinglePath[srcChainSlug_] = true;
-        emit PathTripped(srcChainSlug_, true);
+        isPathTripped[srcChainSlug_] = true;
+        emit PathTripChanged(srcChainSlug_, true);
     }
 
     /**
@@ -252,8 +257,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         unchecked {
             if (nonce_ != nextNonce[tripper]++) revert InvalidNonce();
         }
-        tripGlobalFuse = true;
-        emit SwitchboardTripped(true);
+        isGlobalTipped = true;
+        emit GlobalTripChanged(true);
     }
 
     /**
@@ -287,8 +292,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         unchecked {
             if (nonce_ != nextNonce[unTripper]++) revert InvalidNonce();
         }
-        tripSinglePath[srcChainSlug_] = false;
-        emit PathTripped(srcChainSlug_, false);
+        isPathTripped[srcChainSlug_] = false;
+        emit PathTripChanged(srcChainSlug_, false);
     }
 
     /**
@@ -317,8 +322,8 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         unchecked {
             if (nonce_ != nextNonce[unTripper]++) revert InvalidNonce();
         }
-        tripGlobalFuse = false;
-        emit SwitchboardTripped(false);
+        isGlobalTipped = false;
+        emit GlobalTripChanged(false);
     }
 
     /**
