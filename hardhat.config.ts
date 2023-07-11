@@ -48,17 +48,19 @@ function getRemappings() {
 let liveNetworks = {};
 if (isProduction) {
   liveNetworks = {
-    "arbitrum-goerli": getChainConfig(ChainKey.ARBITRUM_GOERLI),
-    "optimism-goerli": getChainConfig(ChainKey.OPTIMISM_GOERLI),
-    "polygon-mainnet": getChainConfig(ChainKey.POLYGON_MAINNET),
-    arbitrum: getChainConfig(ChainKey.ARBITRUM),
-    avalanche: getChainConfig(ChainKey.AVALANCHE),
-    bsc: getChainConfig(ChainKey.BSC),
-    goerli: getChainConfig(ChainKey.GOERLI),
-    mainnet: getChainConfig(ChainKey.MAINNET),
-    optimism: getChainConfig(ChainKey.OPTIMISM),
-    "polygon-mumbai": getChainConfig(ChainKey.POLYGON_MUMBAI),
-    "bsc-testnet": getChainConfig(ChainKey.BSC_TESTNET),
+    [ChainKey.ARBITRUM_GOERLI]: getChainConfig(ChainKey.ARBITRUM_GOERLI),
+    [ChainKey.OPTIMISM_GOERLI]: getChainConfig(ChainKey.OPTIMISM_GOERLI),
+    [ChainKey.POLYGON_MAINNET]: getChainConfig(ChainKey.POLYGON_MAINNET),
+    [ChainKey.ARBITRUM]: getChainConfig(ChainKey.ARBITRUM),
+    [ChainKey.AVALANCHE]: getChainConfig(ChainKey.AVALANCHE),
+    [ChainKey.BSC]: getChainConfig(ChainKey.BSC),
+    [ChainKey.GOERLI]: getChainConfig(ChainKey.GOERLI),
+    [ChainKey.MAINNET]: getChainConfig(ChainKey.MAINNET),
+    [ChainKey.OPTIMISM]: getChainConfig(ChainKey.OPTIMISM),
+    [ChainKey.POLYGON_MUMBAI]: getChainConfig(ChainKey.POLYGON_MUMBAI),
+    [ChainKey.BSC_TESTNET]: getChainConfig(ChainKey.BSC_TESTNET),
+    [ChainKey.SEPOLIA]: getChainConfig(ChainKey.SEPOLIA),
+    [ChainKey.AEVO_TESTNET]: getChainConfig(ChainKey.AEVO_TESTNET),
   };
 }
 
@@ -81,6 +83,7 @@ const config: HardhatUserConfig = {
       optimisticTestnet: process.env.OPTIMISM_API_KEY || "",
       polygon: process.env.POLYGONSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
+      aevoTestnet: process.env.AEVO_API_KEY || "",
     },
     customChains: [
       {

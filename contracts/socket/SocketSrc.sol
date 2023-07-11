@@ -40,6 +40,7 @@ abstract contract SocketSrc is SocketBase {
     event Sealed(
         address indexed transmitter,
         bytes32 indexed packetId,
+        uint256 batchSize,
         bytes32 root,
         bytes signature
     );
@@ -319,7 +320,7 @@ abstract contract SocketSrc is SocketBase {
             );
 
         if (!isTransmitter) revert InvalidTransmitter();
-        emit Sealed(transmitter, packetId, root, signature_);
+        emit Sealed(transmitter, packetId, batchSize_, root, signature_);
     }
 
     // Packs the local plug, local chain slug, remote chain slug and nonce
