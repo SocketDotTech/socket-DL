@@ -22,16 +22,15 @@ contract SingleDecapacitor is IDecapacitor, AccessControl {
     }
 
     /**
-     * @notice Returns true if the packed message is equal to the root, indicating that it is part of the packet.
-     * @param root_ The packet root
-     * @param packedMessage_ The packed message to be verified
-     * @return A boolean indicating whether the message is included in the packet or not.
+     * @inheritdoc IDecapacitor
+     * @dev Just checks if root equals packed message since each packet has single message.
+     * @dev Proof is ignored in this capacitor.
      */
     function verifyMessageInclusion(
         bytes32 root_,
         bytes32 packedMessage_,
-        bytes calldata
-    ) external pure override returns (bool) {
+        bytes calldata /* proof */
+    ) external pure override returns (bool isIncluded) {
         return root_ == packedMessage_;
     }
 

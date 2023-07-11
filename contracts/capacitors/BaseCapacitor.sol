@@ -12,14 +12,14 @@ import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
  * access control.
  */
 abstract contract BaseCapacitor is ICapacitor, AccessControl {
+    /// address of socket
+    address public immutable socket;
+
     /// an incrementing count for the next packet that is being created
     uint64 internal _nextPacketCount;
 
     /// tracks the count of next packet that will be sealed
     uint64 internal _nextSealCount;
-
-    /// address of socket
-    address public immutable socket;
 
     /// maps the packet count with the root hash of that packet
     mapping(uint64 => bytes32) internal _roots;
