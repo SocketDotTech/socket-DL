@@ -25,7 +25,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     uint32 public immutable chainSlug;
 
     uint128 public switchboardFees;
-    uint128 public verificationGasOverhead;
+    uint128 public verificationOverheadFees;
 
     /**
      * @dev Flag that indicates if the global fuse is tripped, meaning no more packets can be sent.
@@ -93,11 +93,11 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Emitted when a fees is set for switchboard
      * @param switchboardFees switchboardFees
-     * @param verificationGasOverhead verificationGasOverhead
+     * @param verificationOverheadFees verificationOverheadFees
      */
     event SwitchboardFeesSet(
         uint256 switchboardFees,
-        uint256 verificationGasOverhead
+        uint256 verificationOverheadFees
     );
 
     /**
@@ -210,7 +210,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         override
         returns (uint128 switchboardFee_, uint128 verificationFee_)
     {
-        return (switchboardFees, verificationGasOverhead);
+        return (switchboardFees, verificationOverheadFees);
     }
 
     /**
@@ -220,7 +220,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint256 nonce_,
         uint32,
         uint128 switchboardFees_,
-        uint128 verificationGasOverhead_,
+        uint128 verificationOverheadFees_,
         bytes calldata signature_
     ) external override {
         address feesUpdater = signatureVerifier__.recoverSigner(
@@ -231,7 +231,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
                     chainSlug,
                     nonce_,
                     switchboardFees_,
-                    verificationGasOverhead_
+                    verificationOverheadFees_
                 )
             ),
             signature_
@@ -243,9 +243,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
         switchboardFees = switchboardFees_;
-        verificationGasOverhead = verificationGasOverhead_;
+        verificationOverheadFees = verificationOverheadFees_;
 
-        emit SwitchboardFeesSet(switchboardFees, verificationGasOverhead);
+        emit SwitchboardFeesSet(switchboardFees, verificationOverheadFees);
     }
 
     /**

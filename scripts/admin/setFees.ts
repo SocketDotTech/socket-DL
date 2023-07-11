@@ -15,7 +15,7 @@ const chain = ChainSlug.OPTIMISM_GOERLI;
 const siblingChain = ChainSlug.ARBITRUM_GOERLI;
 const integrationType = IntegrationTypes.fast;
 const switchboardFees = "1000000000000000";
-const verificationGasOverhead = "1000000000000000";
+const verificationOverheadFees = "1000000000000000";
 
 // before running the script check all the constants above
 const main = async () => {
@@ -34,7 +34,7 @@ const main = async () => {
     siblingChain,
     integrationType,
     switchboardFees,
-    verificationGasOverhead
+    verificationOverheadFees
   );
 
   const nonce = await switchboard.nextNonce(switchboard.signer.getAddress());
@@ -56,7 +56,7 @@ const main = async () => {
         siblingChain,
         nonce,
         switchboardFees,
-        verificationGasOverhead,
+        verificationOverheadFees,
       ]
     )
   );
@@ -67,7 +67,7 @@ const main = async () => {
     nonce,
     siblingChain,
     switchboardFees,
-    verificationGasOverhead,
+    verificationOverheadFees,
     signature,
     { ...overrides[chain] }
   );

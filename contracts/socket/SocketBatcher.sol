@@ -101,14 +101,14 @@ contract SocketBatcher is AccessControl {
      * @param nonce The nonce of fee setter address
      * @param dstChainSlug The sibling chain identifier
      * @param switchboardFees The fees needed by switchboard
-     * @param verificationGasOverhead The fees needed for calling allowPacket while executing
+     * @param verificationOverheadFees The fees needed for calling allowPacket while executing
      * @param signature The signature of the packet data.
      */
     struct SwitchboardSetFeesRequest {
         uint256 nonce;
         uint32 dstChainSlug;
         uint128 switchboardFees;
-        uint128 verificationGasOverhead;
+        uint128 verificationOverheadFees;
         bytes signature;
     }
 
@@ -142,7 +142,7 @@ contract SocketBatcher is AccessControl {
                 switchboardSetFeesRequest_[index].nonce,
                 switchboardSetFeesRequest_[index].dstChainSlug,
                 switchboardSetFeesRequest_[index].switchboardFees,
-                switchboardSetFeesRequest_[index].verificationGasOverhead,
+                switchboardSetFeesRequest_[index].verificationOverheadFees,
                 switchboardSetFeesRequest_[index].signature
             );
             unchecked {

@@ -20,7 +20,7 @@ contract NativeBaseSwitchboardTest is Setup {
     event SwitchboardTripped(bool tripGlobalFuse_);
     event SwitchboardFeesSet(
         uint256 switchboardFees,
-        uint256 verificationGasOverhead
+        uint256 verificationOverheadFees
     );
 
     function setUp() external {
@@ -223,7 +223,7 @@ contract NativeBaseSwitchboardTest is Setup {
         uint128 verificationFee = 1000;
         uint256 feeNonce = optimismSwitchboard.nextNonce(_socketOwner);
         assertEq(optimismSwitchboard.switchboardFees(), 0);
-        assertEq(optimismSwitchboard.verificationGasOverhead(), 0);
+        assertEq(optimismSwitchboard.verificationOverheadFees(), 0);
 
         bytes32 digest = keccak256(
             abi.encode(

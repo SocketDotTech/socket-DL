@@ -171,7 +171,7 @@ contract ExecutionManagerTest is Setup {
         uint256 totalFees = transmissionFees +
             executionFees +
             _switchboardFees +
-            _verificationGasOverhead; //
+            _verificationOverheadFees; //
         deal(_feesPayer, totalFees);
 
         assertEq(address(executionManager).balance, 0);
@@ -184,7 +184,7 @@ contract ExecutionManagerTest is Setup {
             _transmissionParams,
             _b.chainSlug,
             _switchboardFees,
-            _verificationGasOverhead,
+            _verificationOverheadFees,
             address(_a.transmitManager__),
             address(_a.configs__[0].switchboard__),
             1
@@ -202,7 +202,7 @@ contract ExecutionManagerTest is Setup {
         assertEq(storedTransmissionFees, _transmissionFees);
         assertEq(
             storedExecutionFees,
-            _executionFees + _verificationGasOverhead
+            _executionFees + _verificationOverheadFees
         );
         assertEq(
             executionManager.totalSwitchboardFees(
@@ -221,7 +221,7 @@ contract ExecutionManagerTest is Setup {
         uint256 totalFees = _transmissionFees +
             _executionFees +
             type(uint128).max + //_switchboardFees
-            _verificationGasOverhead;
+            _verificationOverheadFees;
 
         _a.executionManager__.payAndCheckFees{value: totalFees}(
             minMsgGasLimit,
@@ -230,7 +230,7 @@ contract ExecutionManagerTest is Setup {
             _transmissionParams,
             _b.chainSlug,
             _switchboardFees,
-            _verificationGasOverhead,
+            _verificationOverheadFees,
             address(_a.transmitManager__),
             address(_a.configs__[0].switchboard__),
             1
@@ -247,7 +247,7 @@ contract ExecutionManagerTest is Setup {
         uint256 totalFees = _transmissionFees +
             type(uint128).max +
             _switchboardFees + //_switchboardFees
-            _verificationGasOverhead;
+            _verificationOverheadFees;
 
         _a.executionManager__.payAndCheckFees{value: totalFees}(
             minMsgGasLimit,
@@ -256,7 +256,7 @@ contract ExecutionManagerTest is Setup {
             _transmissionParams,
             _b.chainSlug,
             _switchboardFees,
-            _verificationGasOverhead,
+            _verificationOverheadFees,
             address(_a.transmitManager__),
             address(_a.configs__[0].switchboard__),
             1
@@ -277,7 +277,7 @@ contract ExecutionManagerTest is Setup {
             _transmissionParams,
             _b.chainSlug,
             _switchboardFees,
-            _verificationGasOverhead,
+            _verificationOverheadFees,
             address(_a.transmitManager__),
             address(_a.configs__[0].switchboard__),
             1
@@ -397,7 +397,7 @@ contract ExecutionManagerTest is Setup {
         uint256 totalFees = _transmissionFees +
             _executionFees +
             _switchboardFees +
-            _verificationGasOverhead;
+            _verificationOverheadFees;
 
         _a.executionManager__.payAndCheckFees{value: totalFees}(
             minMsgGasLimit,
@@ -406,7 +406,7 @@ contract ExecutionManagerTest is Setup {
             _transmissionParams,
             _b.chainSlug,
             _switchboardFees,
-            _verificationGasOverhead,
+            _verificationOverheadFees,
             address(_a.transmitManager__),
             address(_a.configs__[0].switchboard__),
             1

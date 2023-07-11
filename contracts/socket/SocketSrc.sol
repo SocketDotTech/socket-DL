@@ -239,9 +239,9 @@ abstract contract SocketSrc is SocketBase {
     )
         internal
         view
-        returns (uint128 switchboardFees, uint128 verificationGasOverhead)
+        returns (uint128 switchboardFees, uint128 verificationOverheadFees)
     {
-        (switchboardFees, verificationGasOverhead) = switchboard__.getMinFees(
+        (switchboardFees, verificationOverheadFees) = switchboard__.getMinFees(
             siblingChainSlug_
         );
     }
@@ -271,9 +271,9 @@ abstract contract SocketSrc is SocketBase {
             uint128 executionFees
         )
     {
-        uint128 verificationGasOverhead;
+        uint128 verificationOverheadFees;
         uint128 msgExecutionFee;
-        (switchboardFees, verificationGasOverhead) = _getSwitchboardMinFees(
+        (switchboardFees, verificationOverheadFees) = _getSwitchboardMinFees(
             siblingChainSlug_,
             switchboard__
         );
@@ -289,7 +289,7 @@ abstract contract SocketSrc is SocketBase {
             );
 
         transmissionFees /= uint128(maxPacketLength_);
-        executionFees = msgExecutionFee + verificationGasOverhead;
+        executionFees = msgExecutionFee + verificationOverheadFees;
     }
 
     /**

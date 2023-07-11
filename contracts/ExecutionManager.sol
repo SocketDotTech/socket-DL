@@ -204,7 +204,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         bytes32,
         uint32 siblingChainSlug_,
         uint128 switchboardFees_,
-        uint128 verificationGasOverhead_,
+        uint128 verificationOverheadFees_,
         address transmitManager_,
         address switchboard_,
         uint256 maxPacketLength_
@@ -228,7 +228,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         );
 
         uint128 minExecutionFees = minMsgExecutionFees +
-            verificationGasOverhead_;
+            verificationOverheadFees_;
         if (msgValue < transmissionFees + switchboardFees_ + minExecutionFees)
             revert InsufficientFees();
 

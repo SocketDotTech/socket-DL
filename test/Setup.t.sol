@@ -74,7 +74,7 @@ contract Setup is Test {
     uint128 internal _transmissionFees = 350000000000;
     uint128 internal _executionFees = 110000000000;
     uint128 internal _switchboardFees = 100000;
-    uint128 internal _verificationGasOverhead = 100000;
+    uint128 internal _verificationOverheadFees = 100000;
     uint256 internal _msgValueMaxThreshold = 1000;
     uint256 internal _msgValueMinThreshold = 10;
     uint256 internal _relativeNativeTokenPrice = 1000 * 1e18;
@@ -240,7 +240,7 @@ contract Setup is Test {
             cc_,
             remoteChainSlug_,
             _switchboardFees,
-            _verificationGasOverhead,
+            _verificationOverheadFees,
             0
         );
         scc_ = _addOptimisticSwitchboard(cc_, remoteChainSlug_, _capacitorType);
@@ -333,7 +333,7 @@ contract Setup is Test {
         ChainContext storage cc_,
         uint32 dstChainSlug_,
         uint128 switchboardFees_,
-        uint128 verificationGasOverhead_,
+        uint128 verificationOverheadFees_,
         uint256 switchboardIndex
     ) internal {
         //set ExecutionFees for remoteChainSlug
@@ -345,7 +345,7 @@ contract Setup is Test {
                 dstChainSlug_,
                 cc_.configs__[switchboardIndex].switchboardNonce,
                 switchboardFees_,
-                verificationGasOverhead_
+                verificationOverheadFees_
             )
         );
 
@@ -358,7 +358,7 @@ contract Setup is Test {
             cc_.configs__[switchboardIndex].switchboardNonce++,
             dstChainSlug_,
             switchboardFees_,
-            verificationGasOverhead_,
+            verificationOverheadFees_,
             feesUpdateSignature
         );
     }

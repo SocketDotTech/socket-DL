@@ -11,28 +11,41 @@ import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UN_TRIP_ROLE, WA
 import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, TRIP_PROPOSAL_SIG_IDENTIFIER, UN_TRIP_PATH_SIG_IDENTIFIER, UN_TRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
+    // signature verifier contract
     ISignatureVerifier public immutable signatureVerifier__;
+
+    // socket contract
     ISocket public immutable socket__;
 
+    // chain slug of deployed chain
     uint32 public immutable chainSlug;
+
+    // timeout after which packets become valid even if all watchers have not attested it
+    // this is only applicable if the proposal has not been tripped
+    // used to make the system work when watcher is inactive due to infra etc problems
     uint256 public immutable timeoutInSeconds;
 
+    // variable to pause the switchboard completely, to be used only in case of smart contract bug
     bool public tripGlobalFuse;
-    struct Fees {
-        uint128 switchboardFees;
-        uint128 verificationGasOverhead;
-    }
 
+    // pause all proposals coming from given chain.
+    // to be used if a transmitter has gone rogue and needs to be kicked to resume normal functioning
     // sourceChain => isPaused
     mapping(uint32 => bool) public tripSinglePath;
 
+    // block execution of single proposal
+    // to be used if transmitter proposes wrong packet root single time
     // isProposalTripped(packetId => proposalCount => isTripped)
     mapping(bytes32 => mapping(uint256 => bool)) public isProposalTripped;
 
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
 
-    // destinationChainSlug => fees-struct with verificationGasOverhead and switchboardFees
+    struct Fees {
+        uint128 switchboardFees;
+        uint128 verificationOverheadFees;
+    }
+    // destinationChainSlug => fees-struct with verificationOverheadFees and switchboardFees
     mapping(uint32 => Fees) public fees;
 
     // destinationChainSlug => initialPacketCount - packets with  packetCount after this will be accepted at the switchboard.
@@ -69,7 +82,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Emitted when a fees is set for switchboard
      * @param siblingChainSlug Chain slug of the sibling chain
-     * @param fees fees struct with verificationGasOverhead and switchboardFees
+     * @param fees fees struct with verificationOverheadFees and switchboardFees
      */
     event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
 
@@ -102,7 +115,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32 dstChainSlug_
     ) external view override returns (uint128, uint128) {
         Fees memory minFees = fees[dstChainSlug_];
-        return (minFees.switchboardFees, minFees.verificationGasOverhead);
+        return (minFees.switchboardFees, minFees.verificationOverheadFees);
     }
 
     /**
