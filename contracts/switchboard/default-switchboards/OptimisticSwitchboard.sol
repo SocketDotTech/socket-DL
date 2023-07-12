@@ -14,7 +14,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
      * @param owner_ The address of the contract owner.
      * @param socket_ The address of the socket contract.
      * @param chainSlug_ The chain slug.
-     * @param timeoutInSeconds_ The timeout period in seconds.
+     * @param timeoutInSeconds_ The timeout period in seconds after which proposals become valid if not tripped.
      * @param signatureVerifier_ The address of the signature verifier contract
      */
     constructor(
@@ -45,13 +45,18 @@ contract OptimisticSwitchboard is SwitchboardBase {
     ) external view override returns (bool) {
         uint64 packetCount = uint64(uint256(packetId_));
 
+        // any relevant trips triggered or invalid packet count.
         if (
-            tripGlobalFuse ||
-            tripSinglePath[srcChainSlug_] ||
+            isGlobalTipped ||
+            isPathTripped[srcChainSlug_] ||
             isProposalTripped[packetId_][proposalCount_] ||
             packetCount < initialPacketCount[srcChainSlug_]
         ) return false;
+
+        // time to detect and call trip is not over.
         if (block.timestamp - proposeTime_ < timeoutInSeconds) return false;
+
+        // enough time has passed without trip
         return true;
     }
 
@@ -62,7 +67,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
         uint256 nonce_,
         uint32 dstChainSlug_,
         uint128 switchboardFees_,
-        uint128 verificationFees_,
+        uint128 verificationOverheadFees_,
         bytes calldata signature_
     ) external override {
         address feesUpdater = signatureVerifier__.recoverSigner(
@@ -74,7 +79,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
                     dstChainSlug_,
                     nonce_,
                     switchboardFees_,
-                    verificationFees_
+                    verificationOverheadFees_
                 )
             ),
             signature_
@@ -87,7 +92,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
         }
 
         Fees storage fee = fees[dstChainSlug_];
-        fee.verificationFees = verificationFees_;
+        fee.verificationOverheadFees = verificationOverheadFees_;
         fee.switchboardFees = switchboardFees_;
 
         emit SwitchboardFeesSet(dstChainSlug_, fee);

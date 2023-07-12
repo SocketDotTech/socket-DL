@@ -5,10 +5,12 @@ import "./BaseCapacitor.sol";
 
 /**
  * @title HashChainCapacitor
- * @dev A contract that implements ICapacitor and stores packed messages in a hash chain.
- * The hash chain is made of packets, each packet contains a capped number of messages.
- * Each new message added to the chain is hashed with the previous root to create a new root.
- * When a packet is full, a new packet is created and the root of the last packet is sealed.
+ * @notice This is an experimental capacitor to make sure Socket can work with batches, proofs etc.
+ * @notice When Socket needs batches with more than one packet, we will likely implement something like Merkle capacitor.
+ * @dev A contract that stores packed messages in a hash chain.
+ *      The hash chain is made of packets, each packet contains a capped number of messages.
+ *      Each new message added to the chain is hashed with the previous root to create a new root.
+ *      When a packet is full, a new packet is created and the root of the last packet is sealed.
  */
 contract HashChainCapacitor is BaseCapacitor {
     uint256 private constant MAX_LEN = 10;
@@ -56,8 +58,6 @@ contract HashChainCapacitor is BaseCapacitor {
         address owner_,
         uint256 maxPacketLength_
     ) BaseCapacitor(socket_, owner_) {
-        _grantRole(RESCUE_ROLE, owner_);
-
         if (maxPacketLength > MAX_LEN) revert InvalidPacketLength();
         maxPacketLength = maxPacketLength_;
     }

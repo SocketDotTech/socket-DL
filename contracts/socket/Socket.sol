@@ -6,7 +6,7 @@ import {SocketSrc} from "./SocketSrc.sol";
 
 /**
  * @title Socket
- * @notice A contract that acts as both a source and destination for cross-chain transactions.
+ * @notice Core-contract containing all the core-socket utilities.
  * @dev This contract inherits from SocketSrc and SocketDst
  */
 contract Socket is SocketSrc, SocketDst {

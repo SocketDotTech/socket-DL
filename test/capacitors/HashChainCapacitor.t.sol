@@ -63,7 +63,7 @@ contract HashChainCapacitorTest is Setup {
         _addPackedMessage(_message_1);
         _addPackedMessage(_message_2);
 
-        assertEq(_hcCapacitor.getLatestPacketCount(), 0);
+        assertEq(_hcCapacitor.getLastFilledPacket(), 0);
         (, uint256 packetToSeal) = _hcCapacitor.getNextPacketToBeSealed();
         assertEq(packetToSeal, 0);
 
@@ -138,7 +138,7 @@ contract HashChainCapacitorTest is Setup {
     }
 
     function _assertNextPacket(bytes32 root_, uint256 packetId_) private {
-        uint64 nextPacketId = uint64(_hcCapacitor.getLatestPacketCount() + 1);
+        uint64 nextPacketId = uint64(_hcCapacitor.getLastFilledPacket() + 1);
         bytes32 root = _hcCapacitor.getRootByCount(nextPacketId);
         assertEq(root, root_, "Root Invalid");
         assertEq(nextPacketId, packetId_, "packetId Invalid");

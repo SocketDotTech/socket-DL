@@ -17,8 +17,11 @@ contract NativeBaseSwitchboardTest is Setup {
     OptimismSwitchboard optimismSwitchboard;
     ICapacitor singleCapacitor;
 
-    event SwitchboardTripped(bool tripGlobalFuse_);
-    event SwitchboardFeesSet(uint256 switchboardFees, uint256 verificationFees);
+    event GlobalTripChanged(bool isGlobalTipped_);
+    event SwitchboardFeesSet(
+        uint256 switchboardFees,
+        uint256 verificationOverheadFees
+    );
 
     function setUp() external {
         initialize();
@@ -126,7 +129,7 @@ contract NativeBaseSwitchboardTest is Setup {
 
     function testTripGlobal() external {
         uint256 tripNonce = optimismSwitchboard.nextNonce(_socketOwner);
-        assertFalse(optimismSwitchboard.tripGlobalFuse());
+        assertFalse(optimismSwitchboard.isGlobalTipped());
 
         vm.startPrank(_socketOwner);
 
@@ -149,11 +152,11 @@ contract NativeBaseSwitchboardTest is Setup {
         optimismSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
         vm.expectEmit(false, false, false, true);
-        emit SwitchboardTripped(true);
+        emit GlobalTripChanged(true);
         optimismSwitchboard.tripGlobal(tripNonce, sig);
         vm.stopPrank();
 
-        assertTrue(optimismSwitchboard.tripGlobalFuse());
+        assertTrue(optimismSwitchboard.isGlobalTipped());
 
         vm.expectRevert(NativeSwitchboardBase.InvalidNonce.selector);
         optimismSwitchboard.tripGlobal(tripNonce, sig);
@@ -178,7 +181,7 @@ contract NativeBaseSwitchboardTest is Setup {
             optimismSwitchboard.nextNonce(_socketOwner),
             sig
         );
-        assertTrue(optimismSwitchboard.tripGlobalFuse());
+        assertTrue(optimismSwitchboard.isGlobalTipped());
 
         // unTrip
         uint256 unTripNonce = optimismSwitchboard.nextNonce(_socketOwner);
@@ -204,12 +207,12 @@ contract NativeBaseSwitchboardTest is Setup {
         optimismSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
 
         vm.expectEmit(false, false, false, true);
-        emit SwitchboardTripped(false);
+        emit GlobalTripChanged(false);
         optimismSwitchboard.unTrip(unTripNonce, sig);
 
         vm.stopPrank();
 
-        assertFalse(optimismSwitchboard.tripGlobalFuse());
+        assertFalse(optimismSwitchboard.isGlobalTipped());
 
         vm.expectRevert(NativeSwitchboardBase.InvalidNonce.selector);
         optimismSwitchboard.unTrip(unTripNonce, sig);
@@ -220,7 +223,7 @@ contract NativeBaseSwitchboardTest is Setup {
         uint128 verificationFee = 1000;
         uint256 feeNonce = optimismSwitchboard.nextNonce(_socketOwner);
         assertEq(optimismSwitchboard.switchboardFees(), 0);
-        assertEq(optimismSwitchboard.verificationFees(), 0);
+        assertEq(optimismSwitchboard.verificationOverheadFees(), 0);
 
         bytes32 digest = keccak256(
             abi.encode(

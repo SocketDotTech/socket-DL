@@ -11,40 +11,68 @@ import {GOVERNANCE_ROLE, WITHDRAW_ROLE, RESCUE_ROLE, TRIP_ROLE, UN_TRIP_ROLE, WA
 import {TRIP_PATH_SIG_IDENTIFIER, TRIP_GLOBAL_SIG_IDENTIFIER, TRIP_PROPOSAL_SIG_IDENTIFIER, UN_TRIP_PATH_SIG_IDENTIFIER, UN_TRIP_GLOBAL_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
+    // signature verifier contract
     ISignatureVerifier public immutable signatureVerifier__;
+
+    // socket contract
     ISocket public immutable socket__;
 
+    // chain slug of deployed chain
     uint32 public immutable chainSlug;
+
+    // timeout after which packets become valid
+    // optimistic switchboard: this is the wait time to validate packet
+    // fast switchboard: this makes packets valid even if all watchers have not attested
+    //      used to make the system work when watchers are inactive due to infra etc problems
+    // this is only applicable if none of the trips are triggered
     uint256 public immutable timeoutInSeconds;
 
-    bool public tripGlobalFuse;
-    struct Fees {
-        uint128 switchboardFees;
-        uint128 verificationFees;
-    }
+    // variable to pause the switchboard completely, to be used only in case of smart contract bug
+    // trip can be done by TRIP_ROLE holders
+    // untrip can be done by UN_TRIP_ROLE holders
+    bool public isGlobalTipped;
 
+    // pause all proposals coming from given chain.
+    // to be used if a transmitter has gone rogue and needs to be kicked to resume normal functioning
+    // trip can be done by WATCHER_ROLE holders
+    // untrip can be done by UN_TRIP_ROLE holders
     // sourceChain => isPaused
-    mapping(uint32 => bool) public tripSinglePath;
+    mapping(uint32 => bool) public isPathTripped;
 
+    // block execution of single proposal
+    // to be used if transmitter proposes wrong packet root single time
+    // trip can be done by WATCHER_ROLE holders
+    // untrip not possible, but same root can be proposed again at next proposalCount
     // isProposalTripped(packetId => proposalCount => isTripped)
     mapping(bytes32 => mapping(uint256 => bool)) public isProposalTripped;
 
+    // incrementing nonce for each signer
     // watcher => nextNonce
     mapping(address => uint256) public nextNonce;
 
-    // destinationChainSlug => fees-struct with verificationFees and switchboardFees
+    struct Fees {
+        uint128 switchboardFees; // Fees paid to Switchboard per packet
+        uint128 verificationOverheadFees; // Fees paid to executor per message
+    }
+    // destinationChainSlug => fees-struct with verificationOverheadFees and switchboardFees
     mapping(uint32 => Fees) public fees;
 
-    // destinationChainSlug => initialPacketCount - packets with  packetCount after this will be accepted at the switchboard.
+    // destinationChainSlug => initialPacketCount - packets with packetCount after this will be accepted at the switchboard.
     // This is to prevent attacks with sending messages for chain slugs before the switchboard is registered for them.
     mapping(uint32 => uint256) public initialPacketCount;
 
     /**
-     * @dev Emitted when a path is tripped
-     * @param srcChainSlug Chain slug of the source chain
-     * @param tripSinglePath New trip status of the path
+     * @dev Emitted when global trip status changes
+     * @param isGlobalTipped New trip status of the contract
      */
-    event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
+    event GlobalTripChanged(bool isGlobalTipped);
+
+    /**
+     * @dev Emitted when path trip status changes
+     * @param srcChainSlug Chain slug of the source chain
+     * @param isPathTripped New trip status of the path
+     */
+    event PathTripChanged(uint32 srcChainSlug, bool isPathTripped);
 
     /**
      * @dev Emitted when a proposal for a packetId is tripped
@@ -54,33 +82,23 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     event ProposalTripped(bytes32 packetId, uint256 proposalCount);
 
     /**
-     * @dev Emitted when Switchboard contract is tripped globally
-     * @param tripGlobalFuse New trip status of the contract
-     */
-
-    event SwitchboardTripped(bool tripGlobalFuse);
-    /**
-     * @dev Emitted when execution overhead is set for a destination chain
-     * @param dstChainSlug Chain slug of the destination chain
-     * @param executionOverhead New execution overhead
-     */
-    event ExecutionOverheadSet(uint32 dstChainSlug, uint256 executionOverhead);
-
-    /**
      * @dev Emitted when a fees is set for switchboard
      * @param siblingChainSlug Chain slug of the sibling chain
-     * @param fees fees struct with verificationFees and switchboardFees
+     * @param fees Fees struct with verificationOverheadFees and switchboardFees
      */
     event SwitchboardFeesSet(uint32 siblingChainSlug, Fees fees);
 
+    // Error hit when a signature with unexpected nonce is received
     error InvalidNonce();
+
+    // Error hit when tx from invalid ExecutionManager is received
     error OnlyExecutionManager();
 
     /**
      * @dev Constructor of SwitchboardBase
      * @param socket_ Address of the socket contract
-     * @param chainSlug_ Chain slug of the contract
-     * @param timeoutInSeconds_ Timeout duration of the transactions
+     * @param chainSlug_ Chain slug of deployment chain
+     * @param timeoutInSeconds_ Time after which proposals become valid if not tripped
      * @param signatureVerifier_ signatureVerifier_ contract
      */
     constructor(
@@ -102,7 +120,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32 dstChainSlug_
     ) external view override returns (uint128, uint128) {
         Fees memory minFees = fees[dstChainSlug_];
-        return (minFees.switchboardFees, minFees.verificationFees);
+        return (minFees.switchboardFees, minFees.verificationOverheadFees);
     }
 
     /**
@@ -126,9 +144,9 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice Updates the sibling switchboard for given `siblingChainSlug_`.
-     * @dev This function is expected to be only called by admin
-     * @param siblingChainSlug_ The slug of the sibling chain to register switchboard with.
+     * @notice Signals sibling switchboard for given `siblingChainSlug_`.
+     * @dev This function is expected to be only called by governance
+     * @param siblingChainSlug_ The slug of the sibling chain whos switchboard is being connected.
      * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
      */
     function updateSibling(
@@ -139,10 +157,39 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice Pauses a path.
-     * @param nonce_ The nonce used for the trip transaction.
+     * @notice Pauses this switchboard completely. To be used in case of contract bug.
+     * @param nonce_ The nonce used for signature.
+     * @param signature_ The signature provided to validate the trip.
+     */
+    function tripGlobal(uint256 nonce_, bytes memory signature_) external {
+        address tripper = signatureVerifier__.recoverSigner(
+            // it includes trip status at the end
+            keccak256(
+                abi.encode(
+                    TRIP_GLOBAL_SIG_IDENTIFIER,
+                    address(this),
+                    chainSlug,
+                    nonce_,
+                    true
+                )
+            ),
+            signature_
+        );
+
+        _checkRole(TRIP_ROLE, tripper);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
+        unchecked {
+            if (nonce_ != nextNonce[tripper]++) revert InvalidNonce();
+        }
+        isGlobalTipped = true;
+        emit GlobalTripChanged(true);
+    }
+
+    /**
+     * @notice Pauses a path. To be used when a transmitter goes rogue and needs to be kicked.
+     * @param nonce_ The nonce used for signature.
      * @param srcChainSlug_ The source chain slug of the path to be paused.
-     * @param signature_ The signature provided to validate the trip transaction.
+     * @param signature_ The signature provided to validate the trip.
      */
     function tripPath(
         uint256 nonce_,
@@ -171,16 +218,16 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
             if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
         }
         //source chain based tripping
-        tripSinglePath[srcChainSlug_] = true;
-        emit PathTripped(srcChainSlug_, true);
+        isPathTripped[srcChainSlug_] = true;
+        emit PathTripChanged(srcChainSlug_, true);
     }
 
     /**
-     * @notice Pauses a particular proposal of a packet.
-     * @param nonce_ The nonce used for the trip transaction.
+     * @notice Pauses a particular proposal of a packet. To be used if transmitter proposes wrong root.
+     * @param nonce_ The nonce used for signature.
      * @param packetId_ The ID of the packet.
      * @param proposalCount_ The count of the proposal to be paused.
-     * @param signature_ The signature provided to validate the trip transaction.
+     * @param signature_ The signature provided to validate the trip.
      */
     function tripProposal(
         uint256 nonce_,
@@ -215,39 +262,10 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice Pauses global execution.
-     * @param nonce_ The nonce used for the trip transaction.
-     * @param signature_ The signature provided to validate the trip transaction.
-     */
-    function tripGlobal(uint256 nonce_, bytes memory signature_) external {
-        address tripper = signatureVerifier__.recoverSigner(
-            // it includes trip status at the end
-            keccak256(
-                abi.encode(
-                    TRIP_GLOBAL_SIG_IDENTIFIER,
-                    address(this),
-                    chainSlug,
-                    nonce_,
-                    true
-                )
-            ),
-            signature_
-        );
-
-        _checkRole(TRIP_ROLE, tripper);
-        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
-        unchecked {
-            if (nonce_ != nextNonce[tripper]++) revert InvalidNonce();
-        }
-        tripGlobalFuse = true;
-        emit SwitchboardTripped(true);
-    }
-
-    /**
-     * @notice Unpauses a path.
-     * @param nonce_ The nonce used for the un trip transaction.
+     * @notice Unpauses a path. To be used after bad transmitter has been kicked from system.
+     * @param nonce_ The nonce used for the signature.
      * @param srcChainSlug_ The source chain slug of the path to be unpaused.
-     * @param signature_ The signature provided to validate the un trip transaction.
+     * @param signature_ The signature provided to validate the un trip.
      */
     function unTripPath(
         uint256 nonce_,
@@ -274,14 +292,14 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         unchecked {
             if (nonce_ != nextNonce[unTripper]++) revert InvalidNonce();
         }
-        tripSinglePath[srcChainSlug_] = false;
-        emit PathTripped(srcChainSlug_, false);
+        isPathTripped[srcChainSlug_] = false;
+        emit PathTripChanged(srcChainSlug_, false);
     }
 
     /**
-     * @notice Unpauses global execution.
-     * @param nonce_ The nonce used for the un trip transaction.
-     * @param signature_ The signature provided to validate the un trip transaction.
+     * @notice Unpauses global execution. To be used if contract bug is addressed.
+     * @param nonce_ The nonce used for the signature.
+     * @param signature_ The signature provided to validate the un trip.
      */
     function unTrip(uint256 nonce_, bytes memory signature_) external {
         address unTripper = signatureVerifier__.recoverSigner(
@@ -304,35 +322,40 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
         unchecked {
             if (nonce_ != nextNonce[unTripper]++) revert InvalidNonce();
         }
-        tripGlobalFuse = false;
-        emit SwitchboardTripped(false);
+        isGlobalTipped = false;
+        emit GlobalTripChanged(false);
     }
 
     /**
      * @notice Withdraw fees from the contract to an account.
-     * @param account_ The address where we should send the fees.
+     * @param withdrawTo_ The address where we should send the fees.
      */
-    function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        if (account_ == address(0)) revert ZeroAddress();
-        SafeTransferLib.safeTransferETH(account_, address(this).balance);
+    function withdrawFees(
+        address withdrawTo_
+    ) external onlyRole(WITHDRAW_ROLE) {
+        if (withdrawTo_ == address(0)) revert ZeroAddress();
+        SafeTransferLib.safeTransferETH(withdrawTo_, address(this).balance);
     }
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from the contract if they are locked by mistake.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 
     /**
      * @inheritdoc ISwitchboard
+     * @dev Receiving only allowed from execution manager
+     * @dev Need to receive fees before change in case execution manager
+     *      is being updated on socket.
      */
     function receiveFees(uint32) external payable override {
         if (msg.sender != address(socket__.executionManager__()))

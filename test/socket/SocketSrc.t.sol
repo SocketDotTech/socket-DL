@@ -15,7 +15,7 @@ contract SocketSrcTest is Setup {
 
     error InvalidTransmitter();
     error InsufficientFees();
-    event PacketVerifiedAndSealed(
+    event Sealed(
         address indexed transmitter,
         bytes32 indexed packetId,
         uint256 batchSize,
@@ -146,7 +146,7 @@ contract SocketSrcTest is Setup {
                 );
 
             vm.expectEmit(false, false, false, true);
-            emit PacketVerifiedAndSealed(
+            emit Sealed(
                 _transmitter,
                 packetId_,
                 DEFAULT_BATCH_LENGTH,
