@@ -133,17 +133,17 @@ abstract contract SocketBase is SocketConfig, AccessControlExtended {
     /////////////////////////////////////////////
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them. This contract does not
+     * @notice Rescues funds from the contract if they are locked by mistake. This contract does not
      * theoretically need this function but it is added for safety.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 }

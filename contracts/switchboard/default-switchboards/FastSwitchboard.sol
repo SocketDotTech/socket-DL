@@ -9,40 +9,50 @@ import "./SwitchboardBase.sol";
  * that enables packet attestations and watchers registration.
  */
 contract FastSwitchboard is SwitchboardBase {
-    // mapping to store if root is valid
-    mapping(bytes32 => bool) public isRootValid;
-
-    // dst chain slug => total watchers registered
+    // dstChainSlug => totalWatchers registered
     mapping(uint32 => uint256) public totalWatchers;
 
-    // attester => root => is attested
+    // used to track which watcher have attested a root
+    // watcher => root => isAttested
     mapping(address => mapping(bytes32 => bool)) public isAttested;
 
-    // root => total attestations
-    // @dev : (assuming here that root will be unique across system)
+    // used to detect when enough attestations are reached
+    // root => attestationCount
     mapping(bytes32 => uint256) public attestations;
+
+    // mapping to store if root is valid
+    // marked when all watchers have attested for a root
+    // root => isValid
+    mapping(bytes32 => bool) public isRootValid;
 
     // Event emitted when a new socket is set
     event SocketSet(address newSocket);
-    // Event emitted when a root is attested
+
+    // Event emitted when a proposal is attested
     event ProposalAttested(
         bytes32 packetId,
         uint256 proposalCount,
         bytes32 root,
-        address attester,
+        address watcher,
         uint256 attestationsCount
     );
 
-    // Error emitted when a watcher is found
+    // Error emitted when a watcher already has role while granting
     error WatcherFound();
-    // Error emitted when a watcher is not found
+
+    // Error emitted when a watcher is not found while attesting or while revoking role
     error WatcherNotFound();
-    // Error emitted when a root is already attested
+
+    // Error emitted when a root is already attested by a specific watcher.
+    // This is hit even if they are attesting a new proposalCount with same root.
     error AlreadyAttested();
-    // Error emitted when role is invalid
+
+    // Error emitted if grant/revoke is tried for watcher role using generic grant/revoke functions.
+    // Watcher role is handled seperately bacause totalWatchers and fees need to be updated along with role change.
     error InvalidRole();
 
-    // Error emitted when role is invalid
+    // Error emitted while attesting if root is zero or it doesnt match the root on socket for given proposal
+    // helps in cases where attest tx has been sent but root changes on socket due to reorgs.
     error InvalidRoot();
 
     /**
@@ -50,7 +60,7 @@ contract FastSwitchboard is SwitchboardBase {
      * @param owner_ Address of the owner of the contract
      * @param socket_ Address of the socket contract
      * @param chainSlug_ Chain slug of the chain where the contract is deployed
-     * @param timeoutInSeconds_ Timeout in seconds for the packets
+     * @param timeoutInSeconds_ Timeout in seconds after which proposals become valid if not tripped
      * @param signatureVerifier_ The address of the signature verifier contract
      */
     constructor(
@@ -72,9 +82,9 @@ contract FastSwitchboard is SwitchboardBase {
     /**
      * @dev Function to attest a packet
      * @param packetId_ Packet ID
-     * @param proposalCount_ Proposal ID
+     * @param proposalCount_ Proposal count
      * @param root_ Root of the packet
-     * @param signature_ Signature of the packet
+     * @param signature_ Signature of the watcher
      * @notice we are attesting a root uniquely identified with packetId and proposalCount. However,
      * there can be multiple proposals for same root. To avoid need to re-attest for different proposals
      *  with same root, we are storing attestations against root instead of packetId and proposalCount.
@@ -151,6 +161,10 @@ contract FastSwitchboard is SwitchboardBase {
         unchecked {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
+
+        // switchboardFees_ input is amount needed per watcher, multipled and stored on chain to avoid watcher set tracking offchain.
+        // switchboardFees_ are paid to switchboard per packet
+        // verificationOverheadFees_ are paid to executor per message
         Fees memory feesObject = Fees({
             switchboardFees: switchboardFees_ *
                 uint128(totalWatchers[dstChainSlug_]),
@@ -173,14 +187,22 @@ contract FastSwitchboard is SwitchboardBase {
     ) external view override returns (bool) {
         uint64 packetCount = uint64(uint256(packetId_));
 
+        // any relevant trips triggered or invalid packet count.
         if (
             isGlobalTipped ||
             isPathTripped[srcChainSlug_] ||
             isProposalTripped[packetId_][proposalCount_] ||
             packetCount < initialPacketCount[srcChainSlug_]
         ) return false;
+
+        // root has enough attestations
         if (isRootValid[root_]) return true;
+
+        // this makes packets valid even if all watchers have not attested
+        //      used to make the system work when watchers are inactive due to infra etc problems
         if (block.timestamp - proposeTime_ > timeoutInSeconds) return true;
+
+        // not enough attestations and timeout not hit
         return false;
     }
 
@@ -199,6 +221,8 @@ contract FastSwitchboard is SwitchboardBase {
 
         Fees storage fees = fees[srcChainSlug_];
         uint128 watchersBefore = uint128(totalWatchers[srcChainSlug_]);
+
+        // edge case handled by calling setFees function after boorstrapping is done.
         if (watchersBefore != 0 && fees.switchboardFees != 0)
             fees.switchboardFees =
                 (fees.switchboardFees * (watchersBefore + 1)) /
@@ -223,6 +247,7 @@ contract FastSwitchboard is SwitchboardBase {
         Fees storage fees = fees[srcChainSlug_];
         uint128 watchersBefore = uint128(totalWatchers[srcChainSlug_]);
 
+        // revoking all watchers is an extreme case not expected to be hit after setup is done.
         if (watchersBefore > 1 && fees.switchboardFees != 0)
             fees.switchboardFees =
                 (fees.switchboardFees * (watchersBefore - 1)) /

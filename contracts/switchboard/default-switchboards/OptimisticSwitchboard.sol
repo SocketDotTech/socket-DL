@@ -14,7 +14,7 @@ contract OptimisticSwitchboard is SwitchboardBase {
      * @param owner_ The address of the contract owner.
      * @param socket_ The address of the socket contract.
      * @param chainSlug_ The chain slug.
-     * @param timeoutInSeconds_ The timeout period in seconds.
+     * @param timeoutInSeconds_ The timeout period in seconds after which proposals become valid if not tripped.
      * @param signatureVerifier_ The address of the signature verifier contract
      */
     constructor(
@@ -45,13 +45,18 @@ contract OptimisticSwitchboard is SwitchboardBase {
     ) external view override returns (bool) {
         uint64 packetCount = uint64(uint256(packetId_));
 
+        // any relevant trips triggered or invalid packet count.
         if (
             isGlobalTipped ||
             isPathTripped[srcChainSlug_] ||
             isProposalTripped[packetId_][proposalCount_] ||
             packetCount < initialPacketCount[srcChainSlug_]
         ) return false;
+
+        // time to detect and call trip is not over.
         if (block.timestamp - proposeTime_ < timeoutInSeconds) return false;
+
+        // enough time has passed without trip
         return true;
     }
 

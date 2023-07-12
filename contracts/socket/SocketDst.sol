@@ -36,7 +36,7 @@ abstract contract SocketDst is SocketBase {
      */
     error MessageAlreadyExecuted();
     /**
-     * @dev Error emitted when the attester is not valid
+     * @dev Error emitted when the executor is not valid
      */
     error NotExecutor();
     /**
@@ -57,8 +57,8 @@ abstract contract SocketDst is SocketBase {
     ////////////////////////////////////////////////////////////
 
     /**
-    * @dev keeps track of whether a message has been executed or not using message id
-    */
+     * @dev keeps track of whether a message has been executed or not using message id
+     */
     mapping(bytes32 => bool) public messageExecuted;
 
     /**
@@ -154,7 +154,7 @@ abstract contract SocketDst is SocketBase {
         // make sure message is not executed already
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
-        
+
         // update state to make sure no reentrancy
         messageExecuted[messageDetails_.msgId] = true;
 
@@ -167,7 +167,7 @@ abstract contract SocketDst is SocketBase {
 
         if (executionDetails_.packetId == bytes32(0)) revert InvalidPacketId();
 
-        // extract chain slug from msgID 
+        // extract chain slug from msgID
         uint32 remoteSlug = _decodeChainSlug(messageDetails_.msgId);
 
         // make sure packet and msg are for the same chain
@@ -280,7 +280,7 @@ abstract contract SocketDst is SocketBase {
         uint256 executionGasLimit_,
         ISocket.MessageDetails memory messageDetails_
     ) internal {
-        // NOTE: external un-trusted call 
+        // NOTE: external un-trusted call
         IPlug(localPlug_).inbound{gas: executionGasLimit_, value: msg.value}(
             remoteChainSlug_,
             messageDetails_.payload

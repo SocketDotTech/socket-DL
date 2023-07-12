@@ -25,21 +25,21 @@ library RescueFundsLib {
     /**
      * @dev Rescues funds from a contract.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user.
+     * @param rescueTo_ The address of the user.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) internal {
-        if (userAddress_ == address(0)) revert ZeroAddress();
+        if (rescueTo_ == address(0)) revert ZeroAddress();
 
         if (token_ == ETH_ADDRESS) {
-            SafeTransferLib.safeTransferETH(userAddress_, amount_);
+            SafeTransferLib.safeTransferETH(rescueTo_, amount_);
         } else {
             if (token_.code.length == 0) revert InvalidTokenAddress();
-            SafeTransferLib.safeTransfer(ERC20(token_), userAddress_, amount_);
+            SafeTransferLib.safeTransfer(ERC20(token_), rescueTo_, amount_);
         }
     }
 }

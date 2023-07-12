@@ -22,10 +22,8 @@ of fees, gas limits, and packet validation.
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     ISignatureVerifier public immutable signatureVerifier__;
     ISocket public immutable socket__;
+    ICapacitor public capacitor__;
     uint32 public immutable chainSlug;
-
-    uint128 public switchboardFees;
-    uint128 public verificationOverheadFees;
 
     /**
      * @dev Flag that indicates if the global fuse is tripped, meaning no more packets can be sent.
@@ -33,15 +31,11 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     bool public isGlobalTipped;
 
     /**
-     * @dev The capacitor contract that holds packets for the native bridge.
-     */
-    ICapacitor public capacitor__;
-
-    /**
-     * @dev Flag that indicates if the capacitor has been registered.
+     * @dev Flag that indicates if the switchboard is registered and its capacitor has been assigned.
      */
     bool public isInitialized;
 
+    // This is to prevent attacks with sending messages for chain before the switchboard is registered for them.
     uint256 initialPacketCount;
 
     /**
@@ -49,44 +43,43 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      */
     address public remoteNativeSwitchboard;
 
+    // Per packet fees used to compensate operator to send packets via native bridge.
+    uint128 public switchboardFees;
+
+    // Per message fees paid to executor for verification overhead.
+    uint128 public verificationOverheadFees;
+
     /**
      * @dev Stores the roots received from native bridge.
      */
     mapping(bytes32 => bytes32) public packetIdToRoot;
 
     /**
-     * @dev Transmitter to next nonce.
+     * @dev incrementing nonce used for signatures of fee updater, tripper, untripper
      */
     mapping(address => uint256) public nextNonce;
 
     /**
-     * @dev Event emitted when the switchboard is tripped.
+     * @dev Event emitted when the switchboard trip status changes
      */
     event GlobalTripChanged(bool isGlobalTipped);
 
     /**
-     * @dev Event emitted when the capacitor address is set.
-     * @param capacitor The new capacitor address.
+     * @dev This event is emitted when this switchboard wants to connect with its sibling on other chain.
+     * @param remoteNativeSwitchboard address of switchboard on sibling chain.
      */
-    event CapacitorSet(address capacitor);
+    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
 
     /**
-     * @dev Event emitted when a native confirmation is initiated.
+     * @dev Event emitted when a packet root relay via native bridge is initialised
      * @param packetId The packet ID.
      */
     event InitiatedNativeConfirmation(bytes32 packetId);
 
     /**
-     * @dev This event is emitted when a new capacitor is registered.
-     *     It includes the address of the capacitor and the maximum size of the packet allowed.
-     * @param remoteNativeSwitchboard address of capacitor registered to switchboard
-     */
-    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
-
-    /**
-     * @dev Event emitted when a root hash is received by the contract.
+     * @dev Event emitted when a root is received via native bridge.
      * @param packetId The unique identifier of the packet.
-     * @param root The root hash of the Merkle tree containing the transaction data.
+     * @param root The root hash of the packet.
      */
     event RootReceived(bytes32 packetId, bytes32 root);
 
@@ -111,7 +104,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     error AlreadyInitialized();
 
     /**
-     * @dev Error thrown when the transaction is not sent by a valid sender.
+     * @dev Error thrown when the root receive transaction is not sent by a valid sender. i.e. native bridge contract
      */
     error InvalidSender();
 
@@ -121,15 +114,11 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     error NoRootFound();
 
     /**
-     * @dev Error thrown when the nonce of the transaction is invalid.
+     * @dev Error thrown when the nonce of the signature is invalid.
      */
     error InvalidNonce();
 
-    /**
-     * @dev Error thrown when a function can only be called by the Socket.
-     */
-    error OnlySocket();
-
+    // Error thrown if fees are received from non execution manager.
     error OnlyExecutionManager();
 
     /**
@@ -138,8 +127,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     modifier onlyRemoteSwitchboard() virtual;
 
     /**
-     * @dev Constructor function for the CrossChainReceiver contract.
-     * @param socket_ The address of the remote switchboard.
+     * @dev Constructor function for the Native switchboard contract.
+     * @param socket_ The address of socket.
      * @param chainSlug_ The identifier of the chain the contract is deployed on.
      * @param signatureVerifier_ signatureVerifier instance
      */
@@ -154,9 +143,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice retrieves the Merkle root for a given packet ID
+     * @notice retrieves the root for a given packet ID from capacitor
      * @param packetId_ packet ID
-     * @return root Merkle root associated with the given packet ID
+     * @return root root associated with the given packet ID
      * @dev Reverts with 'NoRootFound' error if no root is found for the given packet ID
      */
     function _getRoot(bytes32 packetId_) internal view returns (bytes32 root) {
@@ -166,9 +155,10 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice records the Merkle root for a given packet ID emitted by a remote switchboard
+     * @notice records the root for a given packet ID sent by a remote switchboard via native bridge
+     * @dev this function is not used by polygon native bridge, it works by calling a different function.
      * @param packetId_ packet ID
-     * @param root_ Merkle root for the given packet ID
+     * @param root_ root for the given packet ID
      */
     function receivePacket(
         bytes32 packetId_,
@@ -283,11 +273,13 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         uint32 siblingChainSlug_,
         address remoteNativeSwitchboard_
     ) external onlyRole(GOVERNANCE_ROLE) {
+        // signal to socket
         socket__.useSiblingSwitchboard(
             siblingChainSlug_,
             remoteNativeSwitchboard_
         );
 
+        // use address while relaying via native bridge
         remoteNativeSwitchboard = remoteNativeSwitchboard_;
         emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }
@@ -302,7 +294,7 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @param signature_ The signature of the message
      */
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
-        address watcher = signatureVerifier__.recoverSigner(
+        address tripper = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
@@ -316,23 +308,23 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRole(TRIP_ROLE, watcher);
+        _checkRole(TRIP_ROLE, tripper);
         // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
-            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+            if (nonce_ != nextNonce[tripper]++) revert InvalidNonce();
         }
         isGlobalTipped = true;
         emit GlobalTripChanged(true);
     }
 
     /**
-     * @notice Allows a watcher to un trip the switchboard by providing a signature and a nonce.
-     * @dev To un trip, the watcher must have the UN_TRIP_ROLE.
+     * @notice Allows a untripper to un trip the switchboard by providing a signature and a nonce.
+     * @dev To un trip, the untripper must have the UN_TRIP_ROLE.
      * @param nonce_ The nonce to prevent replay attacks.
-     * @param signature_ The signature created by the watcher.
+     * @param signature_ The signature created by the untripper.
      */
     function unTrip(uint256 nonce_, bytes memory signature_) external {
-        address watcher = signatureVerifier__.recoverSigner(
+        address untripper = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
@@ -346,11 +338,11 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRole(UN_TRIP_ROLE, watcher);
+        _checkRole(UN_TRIP_ROLE, untripper);
 
         // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
         unchecked {
-            if (nonce_ != nextNonce[watcher]++) revert InvalidNonce();
+            if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
         }
         isGlobalTipped = false;
         emit GlobalTripChanged(false);
@@ -369,17 +361,17 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from the contract if they are locked by mistake.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 
     /**

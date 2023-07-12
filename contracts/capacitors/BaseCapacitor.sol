@@ -61,14 +61,14 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl {
     /**
      * @dev Rescues funds from the contract.
      * @param token_ The address of the token to rescue.
-     * @param userAddress_ The address of the user to rescue tokens for.
+     * @param rescueTo_ The address of the user to rescue tokens for.
      * @param amount_ The amount of tokens to rescue.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 }

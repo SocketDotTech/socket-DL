@@ -16,7 +16,7 @@ contract FastSwitchboardTest is Setup {
         bytes32 packetId,
         uint256 proposalCount,
         bytes32 root,
-        address attester,
+        address watcher,
         uint256 attestationsCount
     );
     event ProposalTripped(bytes32 packetId, uint256 proposalCount);
