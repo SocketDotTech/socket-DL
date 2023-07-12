@@ -7,13 +7,16 @@ import "./SocketBase.sol";
 /**
  * @title SocketDst
  * @dev SocketDst is an abstract contract that inherits from SocketBase and
- * provides additional functionality for message execution, packet proposal, and verification.
+ * provides functionality for message execution, packet proposal, and verification.
  * It manages the mapping of message execution status, packet ID roots, and root proposed
  * timestamps. It emits events for packet proposal and root updates.
- * It also includes functions for message execution and verification, as well as a function
- * to check if a packet has been proposed.
+ * It also includes functions for message execution and verification
  */
 abstract contract SocketDst is SocketBase {
+    ////////////////////////////////////////////////////////
+    ////////////////////// ERRORS //////////////////////////
+    ////////////////////////////////////////////////////////
+
     /*
      * @dev Error emitted when a packet has not been proposed
      */
@@ -49,10 +52,15 @@ abstract contract SocketDst is SocketBase {
      */
     error LowGasLimit();
 
+    ////////////////////////////////////////////////////////////
+    ////////////////////// State Vars //////////////////////////
+    ////////////////////////////////////////////////////////////
+
     /**
-     * @dev msgId => message status mapping
-     */
+    * @dev keeps track of whether a message has been executed or not using message id
+    */
     mapping(bytes32 => bool) public messageExecuted;
+
     /**
      * @dev capacitorAddr|chainSlug|packetId => proposalCount => switchboard => packetIdRoots
      */
@@ -70,6 +78,10 @@ abstract contract SocketDst is SocketBase {
      */
     mapping(bytes32 => uint256) public proposalCount;
 
+    ////////////////////////////////////////////////////////
+    ////////////////////// EVENTS //////////////////////////
+    ////////////////////////////////////////////////////////
+
     /**
      * @notice emits the packet details when proposed at remote
      * @param transmitter address of transmitter
@@ -84,6 +96,10 @@ abstract contract SocketDst is SocketBase {
         bytes32 root,
         address switchboard
     );
+
+    ////////////////////////////////////////////////////////
+    ////////////////////// OPERATIONS //////////////////////////
+    ////////////////////////////////////////////////////////
 
     /**
      * @dev Function to propose a packet
@@ -103,7 +119,7 @@ abstract contract SocketDst is SocketBase {
 
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
-                uint32(_decodeSlug(packetId_)),
+                uint32(_decodeChainSlug(packetId_)),
                 keccak256(abi.encode(version, chainSlug, packetId_, root_)),
                 signature_
             );
@@ -127,30 +143,41 @@ abstract contract SocketDst is SocketBase {
     }
 
     /**
-     * @notice executes a message, fees will go to recovered executor address
-     * @param executionDetails_ the packet details, proof and signature needed for message execution
+     * @notice Executes a message that has been delivered by transmitters and authenticated by switchboards
+     * @param executionDetails_ all inputs needed from the executor for executing this particular message
      * @param messageDetails_ the details needed for message verification
      */
     function execute(
         ISocket.ExecutionDetails calldata executionDetails_,
         ISocket.MessageDetails calldata messageDetails_
     ) external payable override {
+        // make sure message is not executed already
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
+        
+        // update state to make sure no reentrancy
         messageExecuted[messageDetails_.msgId] = true;
 
+        // make sure caller is calling with right gas limits
+        // we also make sure to give executors the ability to execute with higher gas limits
+        // than the minimum required
         if (
             executionDetails_.executionGasLimit < messageDetails_.minMsgGasLimit
         ) revert LowGasLimit();
 
         if (executionDetails_.packetId == bytes32(0)) revert InvalidPacketId();
 
-        uint32 remoteSlug = _decodeSlug(messageDetails_.msgId);
-        if (_decodeSlug(executionDetails_.packetId) != remoteSlug)
+        // extract chain slug from msgID 
+        uint32 remoteSlug = _decodeChainSlug(messageDetails_.msgId);
+
+        // make sure packet and msg are for the same chain
+        if (_decodeChainSlug(executionDetails_.packetId) != remoteSlug)
             revert ErrInSourceValidation();
 
+        // extract plug address from msgID
         address localPlug = _decodePlug(messageDetails_.msgId);
 
+        // fetch required vars from plug config
         PlugConfig memory plugConfig;
         plugConfig.decapacitor__ = _plugConfigs[localPlug][remoteSlug]
             .decapacitor__;
@@ -159,11 +186,13 @@ abstract contract SocketDst is SocketBase {
         plugConfig.inboundSwitchboard__ = _plugConfigs[localPlug][remoteSlug]
             .inboundSwitchboard__;
 
+        // fetch packet root
         bytes32 packetRoot = packetIdRoots[executionDetails_.packetId][
             executionDetails_.proposalCount
         ][address(plugConfig.inboundSwitchboard__)];
         if (packetRoot == bytes32(0)) revert PacketNotProposed();
 
+        // create packed message
         bytes32 packedMessage = hasher__.packMessage(
             remoteSlug,
             plugConfig.siblingPlug,
@@ -172,10 +201,13 @@ abstract contract SocketDst is SocketBase {
             messageDetails_
         );
 
+        // make sure caller is executor
         (address executor, bool isValidExecutor) = executionManager__
             .isExecutor(packedMessage, executionDetails_.signature);
         if (!isValidExecutor) revert NotExecutor();
 
+        // verify message was part of the packet and
+        // authenticated by respective switchboard
         _verify(
             executionDetails_.packetId,
             executionDetails_.proposalCount,
@@ -186,6 +218,8 @@ abstract contract SocketDst is SocketBase {
             executionDetails_.decapacitorProof,
             messageDetails_.executionParams
         );
+
+        // execute message
         _execute(
             executor,
             localPlug,
@@ -194,6 +228,10 @@ abstract contract SocketDst is SocketBase {
             messageDetails_
         );
     }
+
+    ////////////////////////////////////////////////////////
+    ////////////////// INTERNAL FUNCS //////////////////////
+    ////////////////////////////////////////////////////////
 
     function _verify(
         bytes32 packetId_,
@@ -205,6 +243,7 @@ abstract contract SocketDst is SocketBase {
         bytes memory decapacitorProof_,
         bytes32 executionParams_
     ) internal {
+        // NOTE: is the the first un-trusted call in the system, another one is Plug.inbound
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
                 packetRoot_,
@@ -225,6 +264,7 @@ abstract contract SocketDst is SocketBase {
             )
         ) revert InvalidProof();
 
+        // finally make sure executor params were respected by the executor
         executionManager__.verifyParams(executionParams_, msg.value);
     }
 
@@ -232,7 +272,6 @@ abstract contract SocketDst is SocketBase {
      * This function assumes localPlug_ will have code while executing. As the message
      * execution failure is not blocking the system, it is not necessary to check if
      * code exists in the given address.
-     * @dev distribution of msg.value in case of inbound failure is to be decided.
      */
     function _execute(
         address executor_,
@@ -241,6 +280,7 @@ abstract contract SocketDst is SocketBase {
         uint256 executionGasLimit_,
         ISocket.MessageDetails memory messageDetails_
     ) internal {
+        // NOTE: external un-trusted call 
         IPlug(localPlug_).inbound{gas: executionGasLimit_, value: msg.value}(
             remoteChainSlug_,
             messageDetails_.payload
@@ -286,7 +326,7 @@ abstract contract SocketDst is SocketBase {
      * @param id_ The ID of the packet/msg to decode the chain slug from.
      * @return chainSlug_ The chain slug decoded from the packet/message ID.
      */
-    function _decodeSlug(
+    function _decodeChainSlug(
         bytes32 id_
     ) internal pure returns (uint32 chainSlug_) {
         chainSlug_ = uint32(uint256(id_) >> 224);
