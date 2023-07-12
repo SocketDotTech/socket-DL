@@ -11,8 +11,8 @@ import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 /**
  * @title TransmitManager
  * @notice The TransmitManager contract managers transmitter which facilitates communication between chains
- * @dev This contract is responsible for verifying signatures and updating gas limits
- * @dev This contract inherits AccessControlExtended which manages access control
+ * @dev This contract is responsible access control of transmitters and their fees
+ * @dev This contract inherits AccessControlExtended which extends access control
  * @dev The transmission fees is collected in execution manager which can be pulled from it when needed
  */
 contract TransmitManager is ITransmitManager, AccessControlExtended {
@@ -23,11 +23,15 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
     // signature verifier contract
     ISignatureVerifier public signatureVerifier__;
 
+    // nonce used in fee update signatures
     // feeUpdater => nextNonce
     mapping(address => uint256) public nextNonce;
 
     // triggered when nonce is not as expected for feeUpdater recovered from sig
     error InvalidNonce();
+
+    // triggered when fees received from non execution manager.
+    // remember to collect fees beforehand if execution manager is updated on socket.
     error OnlyExecutionManager();
 
     /**
@@ -35,12 +39,11 @@ contract TransmitManager is ITransmitManager, AccessControlExtended {
      * @param signatureVerifier The address of the new signature verifier contract
      */
     event SignatureVerifierSet(address signatureVerifier);
-    event ExecutionManagerSet(address executionManager);
 
     /**
      * @notice Emitted when the transmissionFees is updated
      * @param dstChainSlug The destination chain slug for which the transmissionFees is updated
-     * @param transmissionFees The new transmissionFees
+     * @param transmissionFees The new transmissionFees per packet
      */
     event TransmissionFeesSet(uint256 dstChainSlug, uint256 transmissionFees);
 

@@ -117,28 +117,39 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     // transmit manager => chain slug => switchboard fees collected
     mapping(address => mapping(uint32 => uint128)) public transmissionMinFees;
 
+    // relativeNativeTokenPrice is used to convert fees to destination terms when sending value along with message
     // destSlug => relativeNativePrice (stores (destnativeTokenPriceUSD*(1e18)/srcNativeTokenPriceUSD))
     mapping(uint32 => uint256) public relativeNativeTokenPrice;
 
+    // supported min amount of native value to send with message
     // chain slug => min msg value threshold
     mapping(uint32 => uint256) public msgValueMinThreshold;
+
+    // supported max amount of native value to send with message
     // chain slug => max msg value threshold
     mapping(uint32 => uint256) public msgValueMaxThreshold;
 
-    // triggered when nonce is invalid
+    // triggered when nonce in signature is invalid
     error InvalidNonce();
+
     // triggered when msg value less than min threshold
     error MsgValueTooLow();
+
     // triggered when msg value more than max threshold
     error MsgValueTooHigh();
+
     // triggered when payload is larger than expected limit
     error PayloadTooLarge();
+
     // triggered when msg value is not enough
     error InsufficientMsgValue();
+
     // triggered when fees is not enough
     error InsufficientFees();
+
     // triggered when msg value exceeds uint128 max value
     error InvalidMsgValue();
+
     // triggered when fees exceeds uint128 max value
     error FeesTooHigh();
 
@@ -185,6 +196,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
     /**
      * @notice updates the total fee used by an executor to execute a message
+     * @dev to be used for accounting when onchain fee distribution for individual executors is implemented
      * @dev this function should be called by socket only
      * @inheritdoc IExecutionManager
      */
@@ -216,6 +228,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     {
         if (msg.value >= type(uint128).max) revert InvalidMsgValue();
         uint128 msgValue = uint128(msg.value);
+
+        // transmission fees are per packet, so need to divide by number of messages per packet
         transmissionFees =
             transmissionMinFees[transmitManager_][siblingChainSlug_] /
             uint128(maxPacketLength_);
