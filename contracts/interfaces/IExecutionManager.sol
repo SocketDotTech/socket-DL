@@ -27,7 +27,7 @@ interface IExecutionManager {
      * @param transmissionParams_ Extra params for transmission
      * @param siblingChainSlug_ Sibling chain identifier
      * @param switchboardFees_ fee charged by switchboard for processing transaction
-     * @param verificationFees_ fee charged for verifying transaction
+     * @param verificationOverheadFees_ fee charged for verifying transaction
      * @param transmitManager_ The transmitManager address
      * @param switchboard_ The switchboard address
      * @param maxPacketLength_ The maxPacketLength for the capacitor
@@ -39,7 +39,7 @@ interface IExecutionManager {
         bytes32 transmissionParams_,
         uint32 siblingChainSlug_,
         uint128 switchboardFees_,
-        uint128 verificationFees_,
+        uint128 verificationOverheadFees_,
         address transmitManager_,
         address switchboard_,
         uint256 maxPacketLength_

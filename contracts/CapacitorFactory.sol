@@ -13,9 +13,9 @@ import {RESCUE_ROLE} from "./utils/AccessRoles.sol";
 
 /**
  * @title CapacitorFactory
- * @notice Factory contract for creating capacitor and decapacitor pairs of different types.
- * @dev This contract is modular and can be updated in Socket with more capacitor types.
+ * @notice Factory contract for creating capacitor and decapacitor pairs.
  * @dev The capacitorType_ parameter determines the type of capacitor and decapacitor to deploy.
+ * @dev More types can be introduced by deploying new contract and pointing to it on Socket.
  */
 contract CapacitorFactory is ICapacitorFactory, AccessControl {
     uint256 private constant SINGLE_CAPACITOR = 1;
@@ -31,14 +31,14 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
 
     /**
      * @notice Creates a new capacitor and decapacitor pair based on the given type.
-     * @dev It sets the capacitor factory owner as capacitor and decapacitor's owner.
-     * @dev maxPacketLength is not being used with single capacitor system, will be useful later with batching
-     * @dev siblingChainSlug sibling chain slug can be used for chain specific capacitors
+     * @dev It sets the CapacitorFactory owner as owner of new Capacitor and Decapacitor
      * @param capacitorType_ The type of capacitor to be created. Can be SINGLE_CAPACITOR or HASH_CHAIN_CAPACITOR.
+     * @dev siblingChainSlug_ sibling chain slug can be used for chain specific capacitors, useful while expanding to non-EVM chains.
+     * @param maxPacketLength_ is not being used with single capacitor system, will be useful with batching.
      */
     function deploy(
         uint256 capacitorType_,
-        uint32 /** siblingChainSlug */,
+        uint32 /** siblingChainSlug_ */,
         uint256 maxPacketLength_
     ) external override returns (ICapacitor, IDecapacitor) {
         // fetch the capacitor factory owner
@@ -62,16 +62,16 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
     }
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from the contract if they are locked by mistake.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 }

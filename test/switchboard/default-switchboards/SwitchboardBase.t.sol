@@ -10,13 +10,13 @@ contract SwitchboardBaseTest is Setup {
     bytes32 packetId;
     uint256 nonce;
 
-    event SwitchboardTripped(bool tripGlobalFuse_);
-    event PathTripped(uint32 srcChainSlug, bool tripSinglePath);
+    event GlobalTripChanged(bool isGlobalTipped_);
+    event PathTripChanged(uint32 srcChainSlug, bool isPathTripped);
     event ProposalAttested(
         bytes32 packetId,
         uint256 proposalCount,
         bytes32 root,
-        address attester,
+        address watcher,
         uint256 attestationsCount
     );
     event ProposalTripped(bytes32 packetId, uint256 proposalCount);
@@ -95,14 +95,14 @@ contract SwitchboardBaseTest is Setup {
         nonce = fastSwitchboard.nextNonce(_socketOwner);
 
         vm.expectEmit(false, false, false, true);
-        emit SwitchboardTripped(true);
+        emit GlobalTripChanged(true);
         fastSwitchboard.tripGlobal(nonce, sig);
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
         fastSwitchboard.tripGlobal(nonce, sig);
         vm.stopPrank();
 
-        assertTrue(fastSwitchboard.tripGlobalFuse());
+        assertTrue(fastSwitchboard.isGlobalTipped());
     }
 
     function testUntripGlobal() external {
@@ -123,7 +123,7 @@ contract SwitchboardBaseTest is Setup {
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         fastSwitchboard.tripGlobal(nonce, sig);
-        assertTrue(fastSwitchboard.tripGlobalFuse());
+        assertTrue(fastSwitchboard.isGlobalTipped());
 
         nonce = fastSwitchboard.nextNonce(_socketOwner);
 
@@ -172,7 +172,7 @@ contract SwitchboardBaseTest is Setup {
 
         nonce = fastSwitchboard.nextNonce(_socketOwner);
         vm.expectEmit(false, false, false, true);
-        emit PathTripped(aChainSlug, true);
+        emit PathTripChanged(aChainSlug, true);
         fastSwitchboard.tripPath(nonce, aChainSlug, sig);
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
@@ -180,7 +180,7 @@ contract SwitchboardBaseTest is Setup {
 
         vm.stopPrank();
 
-        assertTrue(fastSwitchboard.tripSinglePath(aChainSlug));
+        assertTrue(fastSwitchboard.isPathTripped(aChainSlug));
     }
 
     function testTripProposal() external {
@@ -286,9 +286,9 @@ contract SwitchboardBaseTest is Setup {
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         vm.expectEmit(false, false, false, true);
-        emit PathTripped(aChainSlug, true);
+        emit PathTripChanged(aChainSlug, true);
         fastSwitchboard.tripPath(nonce, aChainSlug, sig);
-        assertTrue(fastSwitchboard.tripSinglePath(aChainSlug));
+        assertTrue(fastSwitchboard.isPathTripped(aChainSlug));
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
         fastSwitchboard.tripPath(nonce, aChainSlug, sig);
@@ -307,9 +307,9 @@ contract SwitchboardBaseTest is Setup {
         sig = _createSignature(digest, _socketOwnerPrivateKey);
 
         vm.expectEmit(false, false, false, true);
-        emit PathTripped(aChainSlug, false);
+        emit PathTripChanged(aChainSlug, false);
         fastSwitchboard.unTripPath(nonce, aChainSlug, sig);
-        assertFalse(fastSwitchboard.tripSinglePath(aChainSlug));
+        assertFalse(fastSwitchboard.isPathTripped(aChainSlug));
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
         fastSwitchboard.unTripPath(nonce, aChainSlug, sig);

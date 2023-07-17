@@ -117,14 +117,14 @@ contract SocketBatcher is AccessControl {
      * @param nonce The nonce of fee setter address
      * @param dstChainSlug The sibling chain identifier
      * @param switchboardFees The fees needed by switchboard
-     * @param verificationFees The fees needed for calling allowPacket while executing
+     * @param verificationOverheadFees The fees needed for calling allowPacket while executing
      * @param signature The signature of the packet data.
      */
     struct SwitchboardSetFeesRequest {
         uint256 nonce;
         uint32 dstChainSlug;
         uint128 switchboardFees;
-        uint128 verificationFees;
+        uint128 verificationOverheadFees;
         bytes signature;
     }
 
@@ -161,7 +161,7 @@ contract SocketBatcher is AccessControl {
                 switchboardSetFeesRequest_[index].nonce,
                 switchboardSetFeesRequest_[index].dstChainSlug,
                 switchboardSetFeesRequest_[index].switchboardFees,
-                switchboardSetFeesRequest_[index].verificationFees,
+                switchboardSetFeesRequest_[index].verificationOverheadFees,
                 switchboardSetFeesRequest_[index].signature
             );
             unchecked {
@@ -465,16 +465,16 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from the contract if they are locked by mistake.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 }

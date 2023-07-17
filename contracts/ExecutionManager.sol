@@ -117,28 +117,39 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     // transmit manager => chain slug => switchboard fees collected
     mapping(address => mapping(uint32 => uint128)) public transmissionMinFees;
 
+    // relativeNativeTokenPrice is used to convert fees to destination terms when sending value along with message
     // destSlug => relativeNativePrice (stores (destnativeTokenPriceUSD*(1e18)/srcNativeTokenPriceUSD))
     mapping(uint32 => uint256) public relativeNativeTokenPrice;
 
+    // supported min amount of native value to send with message
     // chain slug => min msg value threshold
     mapping(uint32 => uint256) public msgValueMinThreshold;
+
+    // supported max amount of native value to send with message
     // chain slug => max msg value threshold
     mapping(uint32 => uint256) public msgValueMaxThreshold;
 
-    // triggered when nonce is invalid
+    // triggered when nonce in signature is invalid
     error InvalidNonce();
+
     // triggered when msg value less than min threshold
     error MsgValueTooLow();
+
     // triggered when msg value more than max threshold
     error MsgValueTooHigh();
+
     // triggered when payload is larger than expected limit
     error PayloadTooLarge();
+
     // triggered when msg value is not enough
     error InsufficientMsgValue();
+
     // triggered when fees is not enough
     error InsufficientFees();
+
     // triggered when msg value exceeds uint128 max value
     error InvalidMsgValue();
+
     // triggered when fees exceeds uint128 max value
     error FeesTooHigh();
 
@@ -185,6 +196,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
 
     /**
      * @notice updates the total fee used by an executor to execute a message
+     * @dev to be used for accounting when onchain fee distribution for individual executors is implemented
      * @dev this function should be called by socket only
      * @inheritdoc IExecutionManager
      */
@@ -204,7 +216,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         bytes32,
         uint32 siblingChainSlug_,
         uint128 switchboardFees_,
-        uint128 verificationFees_,
+        uint128 verificationOverheadFees_,
         address transmitManager_,
         address switchboard_,
         uint256 maxPacketLength_
@@ -216,6 +228,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     {
         if (msg.value >= type(uint128).max) revert InvalidMsgValue();
         uint128 msgValue = uint128(msg.value);
+
+        // transmission fees are per packet, so need to divide by number of messages per packet
         transmissionFees =
             transmissionMinFees[transmitManager_][siblingChainSlug_] /
             uint128(maxPacketLength_);
@@ -227,7 +241,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
             siblingChainSlug_
         );
 
-        uint128 minExecutionFees = minMsgExecutionFees + verificationFees_;
+        uint128 minExecutionFees = minMsgExecutionFees +
+            verificationOverheadFees_;
         if (msgValue < transmissionFees + switchboardFees_ + minExecutionFees)
             revert InsufficientFees();
 
@@ -521,17 +536,17 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     }
 
     /**
-     * @notice withdraws fees from contract
+     * @notice withdraws fees for execution from contract
      * @param siblingChainSlug_ withdraw fees corresponding to this slug
      * @param amount_ withdraw amount
-     * @param account_ withdraw fees to
+     * @param withdrawTo_ withdraw fees to the provided address
      */
     function withdrawExecutionFees(
         uint32 siblingChainSlug_,
         uint128 amount_,
-        address account_
+        address withdrawTo_
     ) external onlyRole(WITHDRAW_ROLE) {
-        if (account_ == address(0)) revert ZeroAddress();
+        if (withdrawTo_ == address(0)) revert ZeroAddress();
         if (
             totalExecutionAndTransmissionFees[siblingChainSlug_]
                 .totalExecutionFees < amount_
@@ -540,8 +555,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         totalExecutionAndTransmissionFees[siblingChainSlug_]
             .totalExecutionFees -= amount_;
 
-        SafeTransferLib.safeTransferETH(account_, amount_);
-        emit ExecutionFeesWithdrawn(account_, siblingChainSlug_, amount_);
+        SafeTransferLib.safeTransferETH(withdrawTo_, amount_);
+        emit ExecutionFeesWithdrawn(withdrawTo_, siblingChainSlug_, amount_);
     }
 
     /**
@@ -590,16 +605,16 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     }
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from the contract if they are locked by mistake.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 }

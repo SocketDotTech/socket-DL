@@ -23,7 +23,7 @@ const rescueFundsABI = [
       },
       {
         internalType: "address",
-        name: "userAddress_",
+        name: "rescueTo_",
         type: "address",
       },
       {

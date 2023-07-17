@@ -31,7 +31,7 @@ const main = async () => {
           { type: integrationType }
         );
 
-        const tripStatus = await switchboard.tripSinglePath(siblingChain);
+        const tripStatus = await switchboard.isPathTripped(siblingChain);
 
         if (tripStatus === true) {
           console.log(

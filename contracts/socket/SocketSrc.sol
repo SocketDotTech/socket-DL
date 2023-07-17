@@ -5,39 +5,76 @@ import "./SocketBase.sol";
 
 /**
  * @title SocketSrc
- * @dev The SocketSrc contract inherits from SocketBase and provides the functionality
- * to send messages from the local chain to a remote chain via a capacitor, estimate min fees
- * and allow transmitters to seal packets for a path.
+ * @dev The SocketSrc contract inherits from SocketBase and handles all the operations that
+ * happen on the source side. Provides the following functions
+ * 1. Sending messages from the local chain to a remote chain
+ * 2. Estimating minFees for message transmission, verification and execution
+ * 3. Sealing packets and making them ready to be transmitted
  */
 abstract contract SocketSrc is SocketBase {
-    // triggered when fees is not sufficient at outbound
-    error InsufficientFees();
-    // triggered when an invalid capacitor address is used for sealing
-    error InvalidCapacitor();
-    error InvalidSiblingPlug();
+    ////////////////////////////////////////////////////////
+    ////////////////////// ERRORS //////////////////////////
+    ////////////////////////////////////////////////////////
 
     /**
-     * @notice emits the verification and seal confirmation of a packet
-     * @param transmitter address of transmitter recovered from sig
-     * @param packetId packed packet id
-     * @param root root
-     * @param signature signature of attester
+     * @dev Error triggerred when invalid capacitor address is provided
      */
-    event PacketVerifiedAndSealed(
+    error InvalidCapacitorAddress();
+
+    /**
+     * @dev Error triggerred when siblingPlug is not found
+     */
+    error PlugDisconnected();
+
+    ////////////////////////////////////////////////////////
+    ////////////////////// EVENTS //////////////////////////
+    ////////////////////////////////////////////////////////
+
+    /**
+     * @notice Emits as soon as a capacitor is sealed
+     * @param transmitter address of transmitter that sealed this packet(recovered from sig)
+     * @param packetId packed-packet id
+     * @param root root of the packet
+     * @param signature signature of transmitter
+     */
+    event Sealed(
         address indexed transmitter,
         bytes32 indexed packetId,
+        uint256 batchSize,
         bytes32 root,
         bytes signature
     );
 
     /**
-     * @notice registers a message
-     * @dev Packs the message and includes it in a packet with capacitor
+     * @notice emits the message details when a new message arrives at outbound
+     * @param localChainSlug local chain slug
+     * @param localPlug local plug address
+     * @param dstChainSlug remote chain slug
+     * @param dstPlug remote plug address
+     * @param msgId message id packed with remoteChainSlug and nonce
+     * @param minMsgGasLimit gas limit needed to execute the inbound at remote
+     * @param payload the data which will be used by inbound at remote
+     */
+    event MessageOutbound(
+        uint32 localChainSlug,
+        address localPlug,
+        uint32 dstChainSlug,
+        address dstPlug,
+        bytes32 msgId,
+        uint256 minMsgGasLimit,
+        bytes32 executionParams,
+        bytes32 transmissionParams,
+        bytes payload,
+        Fees fees
+    );
+
+    /**
+     * @notice To send message to a connected remote chain. Should only be called by a plug.
      * @param siblingChainSlug_ the remote chain slug
-     * @param minMsgGasLimit_ the gas limit needed to execute the payload on remote
-     * @param executionParams_ a 32 bytes param to add extra details for execution
+     * @param minMsgGasLimit_ the minimum gas-limit needed to execute the payload on remote
+     * @param executionParams_ a 32 bytes param to add details for execution, for eg: fees to be paid for execution
      * @param transmissionParams_ a 32 bytes param to add extra details for transmission
-     * @param payload_ the data which is needed by plug at inbound call on remote
+     * @param payload_ bytes to be delivered to the Plug on the siblingChainSlug_
      */
     function outbound(
         uint32 siblingChainSlug_,
@@ -48,21 +85,25 @@ abstract contract SocketSrc is SocketBase {
     ) external payable override returns (bytes32 msgId) {
         PlugConfig memory plugConfig;
 
+        // looks up the sibling plug address using the msg.sender as the local plug address
         plugConfig.siblingPlug = _plugConfigs[msg.sender][siblingChainSlug_]
             .siblingPlug;
 
-        if (plugConfig.siblingPlug == address(0)) revert InvalidSiblingPlug();
+        // if no sibling plug is found for the given chain slug, revert
+        if (plugConfig.siblingPlug == address(0)) revert PlugDisconnected();
+
+        // fetches auxillary details for the message from the plug config
         plugConfig.capacitor__ = _plugConfigs[msg.sender][siblingChainSlug_]
             .capacitor__;
         plugConfig.outboundSwitchboard__ = _plugConfigs[msg.sender][
             siblingChainSlug_
         ].outboundSwitchboard__;
 
+        // creates a unique ID for the message
         msgId = _encodeMsgId(plugConfig.siblingPlug);
 
-        // all the fees is transferred to execution manager and stored mapped to their addresses
-        // transmit manager and switchboards can pull the fees from there
-        // only external call is where we get min switchboard fees
+        // validate if caller has send enough fees, if yes, send fees to execution manager
+        // for parties to claim later
         ISocket.Fees memory fees = _validateAndSendFees(
             minMsgGasLimit_,
             uint256(payload_.length),
@@ -81,9 +122,8 @@ abstract contract SocketSrc is SocketBase {
             executionFee: fees.executionFee
         });
 
-        // this packed message can be re-created if socket is redeployed with a new version
-        // it is plug's responsibility to have proper checks in functions interacting
-        // with socket to validate who has access to the contract at inbound
+        // create a compressed data-struct called PackedMessage
+        // which has the message payload and some configuration details
         bytes32 packedMessage = hasher__.packMessage(
             chainSlug,
             msg.sender,
@@ -92,6 +132,7 @@ abstract contract SocketSrc is SocketBase {
             messageDetails
         );
 
+        // finally add packedMessage to the capacitor to generate new root
         plugConfig.capacitor__.addPackedMessage(packedMessage);
 
         emit MessageOutbound(
@@ -110,7 +151,7 @@ abstract contract SocketSrc is SocketBase {
 
     /**
      * @notice Validates if enough fee is provided for message execution. If yes, fees is sent and stored in execution manager.
-     * @param minMsgGasLimit_ The gas limit of the message.
+     * @param minMsgGasLimit_ the min gas-limit of the message.
      * @param payloadSize_ The byte length of payload of the message.
      * @param executionParams_ The extraParams required for execution.
      * @param transmissionParams_ The extraParams required for transmission.
@@ -127,13 +168,14 @@ abstract contract SocketSrc is SocketBase {
         uint256 maxPacketLength_,
         uint32 siblingChainSlug_
     ) internal returns (ISocket.Fees memory fees) {
-        uint128 verificationFees;
-        (fees.switchboardFees, verificationFees) = _getSwitchboardMinFees(
-            siblingChainSlug_,
-            switchboard_
-        );
+        uint128 verificationFeePerMessage;
+        // switchboard is plug configured and this is an external untrusted call
+        (
+            fees.switchboardFees,
+            verificationFeePerMessage
+        ) = _getSwitchboardMinFees(siblingChainSlug_, switchboard_);
 
-        // verificationFee is per message, so no need to divide by maxPacketLength
+        // deposits msg.value to execution manager and checks if enough fees is provided
         (fees.executionFee, fees.transmissionFees) = executionManager__
             .payAndCheckFees{value: msg.value}(
             minMsgGasLimit_,
@@ -142,7 +184,7 @@ abstract contract SocketSrc is SocketBase {
             transmissionParams_,
             siblingChainSlug_,
             fees.switchboardFees / uint128(maxPacketLength_),
-            verificationFees,
+            verificationFeePerMessage,
             address(transmitManager__),
             address(switchboard_),
             maxPacketLength_
@@ -189,7 +231,7 @@ abstract contract SocketSrc is SocketBase {
      * @notice Retrieves the minimum fees required for switchboard.
      * @param siblingChainSlug_ The slug of the destination chain for the message.
      * @param switchboard__ The switchboard address for which fees is retrieved.
-     * @return switchboardFees , verificationFees The minimum fees required for message execution
+     * @return switchboardFees fees required for message verification
      */
     function _getSwitchboardMinFees(
         uint32 siblingChainSlug_,
@@ -197,9 +239,9 @@ abstract contract SocketSrc is SocketBase {
     )
         internal
         view
-        returns (uint128 switchboardFees, uint128 verificationFees)
+        returns (uint128 switchboardFees, uint128 verificationOverheadFees)
     {
-        (switchboardFees, verificationFees) = switchboard__.getMinFees(
+        (switchboardFees, verificationOverheadFees) = switchboard__.getMinFees(
             siblingChainSlug_
         );
     }
@@ -229,9 +271,9 @@ abstract contract SocketSrc is SocketBase {
             uint128 executionFees
         )
     {
-        uint128 verificationFees;
+        uint128 verificationOverheadFees;
         uint128 msgExecutionFee;
-        (switchboardFees, verificationFees) = _getSwitchboardMinFees(
+        (switchboardFees, verificationOverheadFees) = _getSwitchboardMinFees(
             siblingChainSlug_,
             switchboard__
         );
@@ -247,7 +289,7 @@ abstract contract SocketSrc is SocketBase {
             );
 
         transmissionFees /= uint128(maxPacketLength_);
-        executionFees = msgExecutionFee + verificationFees;
+        executionFees = msgExecutionFee + verificationOverheadFees;
     }
 
     /**
@@ -262,7 +304,7 @@ abstract contract SocketSrc is SocketBase {
         bytes calldata signature_
     ) external payable override {
         uint32 siblingChainSlug = capacitorToSlug[capacitorAddress_];
-        if (siblingChainSlug == 0) revert InvalidCapacitor();
+        if (siblingChainSlug == 0) revert InvalidCapacitorAddress();
 
         (bytes32 root, uint64 packetCount) = ICapacitor(capacitorAddress_)
             .sealPacket(batchSize_);
@@ -278,7 +320,7 @@ abstract contract SocketSrc is SocketBase {
             );
 
         if (!isTransmitter) revert InvalidTransmitter();
-        emit PacketVerifiedAndSealed(transmitter, packetId, root, signature_);
+        emit Sealed(transmitter, packetId, batchSize_, root, signature_);
     }
 
     // Packs the local plug, local chain slug, remote chain slug and nonce

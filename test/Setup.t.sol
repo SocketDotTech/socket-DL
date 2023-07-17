@@ -74,7 +74,7 @@ contract Setup is Test {
     uint128 internal _transmissionFees = 350000000000;
     uint128 internal _executionFees = 110000000000;
     uint128 internal _switchboardFees = 100000;
-    uint128 internal _verificationFees = 100000;
+    uint128 internal _verificationOverheadFees = 100000;
     uint256 internal _msgValueMaxThreshold = 1000;
     uint256 internal _msgValueMinThreshold = 10;
     uint256 internal _relativeNativeTokenPrice = 1000 * 1e18;
@@ -240,7 +240,7 @@ contract Setup is Test {
             cc_,
             remoteChainSlug_,
             _switchboardFees,
-            _verificationFees,
+            _verificationOverheadFees,
             0
         );
         scc_ = _addOptimisticSwitchboard(cc_, remoteChainSlug_, _capacitorType);
@@ -333,7 +333,7 @@ contract Setup is Test {
         ChainContext storage cc_,
         uint32 dstChainSlug_,
         uint128 switchboardFees_,
-        uint128 verificationFees_,
+        uint128 verificationOverheadFees_,
         uint256 switchboardIndex
     ) internal {
         //set ExecutionFees for remoteChainSlug
@@ -345,7 +345,7 @@ contract Setup is Test {
                 dstChainSlug_,
                 cc_.configs__[switchboardIndex].switchboardNonce,
                 switchboardFees_,
-                verificationFees_
+                verificationOverheadFees_
             )
         );
 
@@ -358,7 +358,7 @@ contract Setup is Test {
             cc_.configs__[switchboardIndex].switchboardNonce++,
             dstChainSlug_,
             switchboardFees_,
-            verificationFees_,
+            verificationOverheadFees_,
             feesUpdateSignature
         );
     }
@@ -716,7 +716,7 @@ contract Setup is Test {
         hoax(address(src_.socket__));
         randomCapacitor__.addPackedMessage(bytes32("random"));
 
-        vm.expectRevert(SocketSrc.InvalidCapacitor.selector);
+        vm.expectRevert(SocketSrc.InvalidCapacitorAddress.selector);
         src_.socket__.seal(batchSize, address(randomCapacitor__), sig_);
     }
 

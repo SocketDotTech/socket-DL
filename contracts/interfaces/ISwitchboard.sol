@@ -56,11 +56,14 @@ interface ISwitchboard {
      * @notice Retrieves the minimum fees required for the destination chain to process the packet.
      * @param dstChainSlug the unique identifier for the destination chain of the packet.
      * @return switchboardFee the switchboard fee required for the destination chain to process the packet.
-     * @return verificationFee the verification fee required for the destination chain to process the packet.
+     * @return verificationOverheadFees the verification fee required for the destination chain to process the packet.
      */
     function getMinFees(
         uint32 dstChainSlug
-    ) external view returns (uint128 switchboardFee, uint128 verificationFee);
+    )
+        external
+        view
+        returns (uint128 switchboardFee, uint128 verificationOverheadFees);
 
     /**
      * @notice Receives the fees for processing of packet.
@@ -73,7 +76,7 @@ interface ISwitchboard {
      * @param nonce_ the nonce of fee Updater to avoid replay.
      * @param dstChainSlug_ the unique identifier for the destination chain.
      * @param switchboardFees_ the switchboard fee required for the destination chain to process the packet.
-     * @param verificationFees_ the verification fee required for the destination chain to process the packet.
+     * @param verificationOverheadFees_ the verification fee required for the destination chain to process the packet.
      * @param signature_ the signature of the request.
      * @dev not important to override in all switchboards
      */
@@ -81,7 +84,7 @@ interface ISwitchboard {
         uint256 nonce_,
         uint32 dstChainSlug_,
         uint128 switchboardFees_,
-        uint128 verificationFees_,
+        uint128 verificationOverheadFees_,
         bytes calldata signature_
     ) external;
 }

@@ -388,7 +388,7 @@ contract SocketDstTest is Setup {
                 executionFee;
 
             // executionFees to be recomputed which is totalValue - (socketFees + switchboardFees)
-            // verificationFees also should go to Executor, hence we do the additional computation below
+            // verificationOverheadFees also should go to Executor, hence we do the additional computation below
             executionFee = verificationFee + executionFee;
 
             hoax(_plugOwner);
@@ -495,7 +495,7 @@ contract SocketDstTest is Setup {
                 executionFee;
 
             // executionFees to be recomputed which is totalValue - (socketFees + switchboardFees)
-            // verificationFees also should go to Executor, hence we do the additional computation below
+            // verificationOverheadFees also should go to Executor, hence we do the additional computation below
             executionFee = verificationFee + executionFee;
 
             hoax(_plugOwner);
@@ -574,7 +574,7 @@ contract SocketDstTest is Setup {
                 executionFee;
 
             // executionFees to be recomputed which is totalValue - (socketFees + switchboardFees)
-            // verificationFees also should go to Executor, hence we do the additional computation below
+            // verificationOverheadFees also should go to Executor, hence we do the additional computation below
             executionFee = verificationFee + executionFee;
 
             hoax(_plugOwner);

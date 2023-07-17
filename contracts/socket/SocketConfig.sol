@@ -12,6 +12,9 @@ import "../interfaces/ISwitchboard.sol";
  * @dev This contract is meant to be inherited by other contracts that require socket configuration functionality
  */
 abstract contract SocketConfig is ISocket {
+    // factory contract that can deploy capacitors and decapacitors
+    ICapacitorFactory public capacitorFactory__;
+
     /**
      * @dev Struct to store the configuration for a plug connection
      */
@@ -28,20 +31,18 @@ abstract contract SocketConfig is ISocket {
         ISwitchboard outboundSwitchboard__;
     }
 
-    // Capacitor factory contract
-    ICapacitorFactory public capacitorFactory__;
+    // plug => remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
+    mapping(address => mapping(uint32 => PlugConfig)) internal _plugConfigs;
 
-    // capacitor address => siblingChainSlug
     // It is used to maintain record of capacitors in the system registered for a slug and also used in seal for verification
+    // capacitor address => siblingChainSlug
     mapping(address => uint32) public capacitorToSlug;
 
     // switchboard => siblingChainSlug => ICapacitor
     mapping(address => mapping(uint32 => ICapacitor)) public capacitors__;
+
     // switchboard => siblingChainSlug => IDecapacitor
     mapping(address => mapping(uint32 => IDecapacitor)) public decapacitors__;
-
-    // plug => remoteChainSlug => (siblingPlug, capacitor__, decapacitor__, inboundSwitchboard__, outboundSwitchboard__)
-    mapping(address => mapping(uint32 => PlugConfig)) internal _plugConfigs;
 
     // Event triggered when a new switchboard is added
     event SwitchboardAdded(
@@ -150,6 +151,7 @@ abstract contract SocketConfig is ISocket {
         address outboundSwitchboard_
     ) external override {
         // only capacitor checked, decapacitor assumed will exist if capacitor does
+        // as they both are deployed together always
         if (
             address(capacitors__[inboundSwitchboard_][siblingChainSlug_]) ==
             address(0) ||

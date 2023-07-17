@@ -34,9 +34,9 @@ interface ISocket {
         bytes32 msgId;
         // The fee to be paid for executing the message.
         uint256 executionFee;
-        // The maximum amount of gas that can be used to execute the message.
+        // The min amount of gas that can be used to execute the message.
         uint256 minMsgGasLimit;
-        // The extra params which provides msg value and additional info needed for message exec
+        // The extra params which might provide msg value and additional info needed for message exec
         bytes32 executionParams;
         // The payload data to be executed in the message.
         bytes payload;
@@ -58,29 +58,6 @@ interface ISocket {
         // signature of executor
         bytes signature;
     }
-
-    /**
-     * @notice emits the message details when a new message arrives at outbound
-     * @param localChainSlug local chain slug
-     * @param localPlug local plug address
-     * @param dstChainSlug remote chain slug
-     * @param dstPlug remote plug address
-     * @param msgId message id packed with remoteChainSlug and nonce
-     * @param minMsgGasLimit gas limit needed to execute the inbound at remote
-     * @param payload the data which will be used by inbound at remote
-     */
-    event MessageOutbound(
-        uint32 localChainSlug,
-        address localPlug,
-        uint32 dstChainSlug,
-        address dstPlug,
-        bytes32 msgId,
-        uint256 minMsgGasLimit,
-        bytes32 executionParams,
-        bytes32 transmissionParams,
-        bytes payload,
-        Fees fees
-    );
 
     /**
      * @notice emits the status of message after inbound call
