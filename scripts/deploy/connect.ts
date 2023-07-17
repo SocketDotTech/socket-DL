@@ -12,7 +12,7 @@ import {
   TestnetIds,
   getAllAddresses,
   isTestnet,
-  networkToChainSlug,
+  ChainSlugToKey,
 } from "../../src";
 import { chains, mode } from "./config";
 import { Contract, Wallet } from "ethers";
@@ -29,7 +29,7 @@ export const main = async () => {
         if (!addresses[chain]) return;
 
         const providerInstance = getProviderFromChainName(
-          networkToChainSlug[chain]
+          ChainSlugToKey[chain]
         );
         const socketSigner: Wallet = new Wallet(
           process.env.SOCKET_SIGNER_KEY as string,
@@ -50,8 +50,8 @@ export const main = async () => {
         const siblingIntegrationtype: IntegrationTypes[] = siblingSlugs.map(
           (chainSlug) => {
             return getDefaultIntegrationType(
-              networkToChainSlug[chain],
-              networkToChainSlug[chainSlug]
+              ChainSlugToKey[chain],
+              ChainSlugToKey[chainSlug]
             );
           }
         );

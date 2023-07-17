@@ -15,7 +15,7 @@ import {
   isMainnet,
   getAddresses,
   chainKeyToSlug,
-  networkToChainSlug,
+  ChainSlugToKey,
 } from "../../src";
 import { getRoleHash, getChainRoleHash } from "./utils";
 import { Contract, Wallet, ethers } from "ethers";
@@ -194,7 +194,7 @@ const executeTransactions = async (
   await Promise.all(
     activeChainSlugs.map(async (chainId) => {
       let provider = getProviderFromChainName(
-        networkToChainSlug[
+        ChainSlugToKey[
           chainId as any as ChainSlug
         ] as keyof typeof chainKeyToSlug
       );
@@ -321,7 +321,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
 
         // console.log(
         //   "============= checking for network: ",
-        //   networkToChainSlug[chainId],
+        //   ChainSlugToKey[chainId],
         //   "================="
         // );
         let addresses: ChainSocketAddresses | undefined;
@@ -333,7 +333,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
 
         if (!addresses) return;
         let provider = getProviderFromChainName(
-          networkToChainSlug[chainId] as keyof typeof chainKeyToSlug
+          ChainSlugToKey[chainId] as keyof typeof chainKeyToSlug
         );
 
         let contractNames = Object.keys(REQUIRED_ROLES);

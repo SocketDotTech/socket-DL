@@ -26,7 +26,7 @@ import {
   NativeSwitchboard,
   chainKeyToSlug,
   getAllAddresses,
-  networkToChainSlug,
+  ChainSlugToKey,
 } from "../../src";
 
 async function checkNative(
@@ -438,8 +438,8 @@ export const main = async () => {
           localConfig,
           remoteConfig,
           getDefaultIntegrationType(
-            networkToChainSlug[chain],
-            networkToChainSlug[remoteConfig]
+            ChainSlugToKey[chain],
+            ChainSlugToKey[remoteConfig]
           )
         );
         console.log("✅ Checked Counter");

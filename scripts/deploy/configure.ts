@@ -18,7 +18,7 @@ import {
   NativeSwitchboard,
   TestnetIds,
   isTestnet,
-  networkToChainSlug,
+  ChainSlugToKey,
 } from "../../src";
 import registerSwitchboardForSibling from "./scripts/registerSwitchboard";
 import { arrayify, defaultAbiCoder, keccak256, id } from "ethers/lib/utils";
@@ -47,7 +47,7 @@ export const main = async () => {
         if (!addresses[chain]) return;
 
         const providerInstance = getProviderFromChainName(
-          networkToChainSlug[chain]
+          ChainSlugToKey[chain]
         );
         const socketSigner: Wallet = new Wallet(
           process.env.SOCKET_SIGNER_KEY as string,
@@ -279,7 +279,7 @@ const setupPolygonNativeSwitchboard = async (addresses) => {
         console.log(`Configuring for ${srcChain}`);
 
         const providerInstance = getProviderFromChainName(
-          networkToChainSlug[srcChain]
+          ChainSlugToKey[srcChain]
         );
         const socketSigner: Wallet = new Wallet(
           process.env.SOCKET_SIGNER_KEY as string,
@@ -291,8 +291,8 @@ const setupPolygonNativeSwitchboard = async (addresses) => {
           if (!dstConfig?.[IntegrationTypes.native]) continue;
 
           const srcSwitchboardType =
-            switchboards[networkToChainSlug[srcChain]]?.[
-              networkToChainSlug[dstChain]
+            switchboards[ChainSlugToKey[srcChain]]?.[
+              ChainSlugToKey[dstChain]
             ]?.["switchboard"];
 
           const dstSwitchboardAddress = getSwitchboardAddress(

@@ -1,12 +1,12 @@
 import { config as dotenvConfig } from "dotenv";
 import { ethers } from "ethers";
 import { resolve } from "path";
-import { ChainKey, ChainSlug, networkToChainSlug } from "../../src";
+import { ChainKey, ChainSlug, ChainSlugToKey } from "../../src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
-export const chainSlugKeys: string[] = Object.values(networkToChainSlug);
+export const chainSlugKeys: string[] = Object.values(ChainSlugToKey);
 
 export function getJsonRpcUrl(chain: ChainKey): string {
   let jsonRpcUrl: string;
@@ -80,5 +80,5 @@ export const getProviderFromChainName = (chainKey: ChainKey) => {
 };
 
 export const getProviderFromChainSlug = (chainSlug: ChainSlug) => {
-  return getProviderFromChainName(networkToChainSlug[chainSlug]);
+  return getProviderFromChainName(ChainSlugToKey[chainSlug]);
 };
