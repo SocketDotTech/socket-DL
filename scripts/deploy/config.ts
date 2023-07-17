@@ -20,18 +20,18 @@ console.log(`Owner address configured to ${socketOwner}`);
 console.log("========================================================");
 
 export const chains: Array<ChainSlug> = [
-  ChainSlug.GOERLI,
+  // ChainSlug.GOERLI,
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.OPTIMISM_GOERLI,
-  ChainSlug.POLYGON_MUMBAI,
-  ChainSlug.BSC_TESTNET,
-  ChainSlug.SEPOLIA,
+  // ChainSlug.POLYGON_MUMBAI,
+  // ChainSlug.BSC_TESTNET,
+  // ChainSlug.SEPOLIA,
   ChainSlug.AEVO_TESTNET,
-  ChainSlug.MAINNET,
-  ChainSlug.ARBITRUM,
-  ChainSlug.OPTIMISM,
-  ChainSlug.BSC,
-  ChainSlug.POLYGON_MAINNET,
+  // ChainSlug.MAINNET,
+  // ChainSlug.ARBITRUM,
+  // ChainSlug.OPTIMISM,
+  // ChainSlug.BSC,
+  // ChainSlug.POLYGON_MAINNET,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
@@ -85,6 +85,7 @@ export const overrides: {
     type?: number | undefined;
     gasLimit?: BigNumberish | undefined;
     gasPrice?: BigNumberish | undefined;
+    gasBumpPercentage?: BigNumberish | undefined;
   };
 } = {
   [ChainSlug.ARBITRUM]: {

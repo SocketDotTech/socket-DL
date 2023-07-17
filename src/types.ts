@@ -55,7 +55,7 @@ export const chainKeyToSlug = {
   [ChainKey.HARDHAT]: 31337,
 };
 
-export const networkToChainSlug = {
+export const ChainSlugToKey = {
   43114: ChainKey.AVALANCHE,
   56: ChainKey.BSC,
   5: ChainKey.GOERLI,

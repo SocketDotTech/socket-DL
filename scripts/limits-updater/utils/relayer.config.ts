@@ -5,7 +5,7 @@ import { resolve } from "path";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { DefenderRelaySigner } from "defender-relay-client/lib/ethers";
 import { getJsonRpcUrl } from "../../constants";
-import { networkToChainSlug } from "../../../src";
+import { ChainSlugToKey } from "../../../src";
 const dotenvConfigPath: string =
   process.env.DOTENV_CONFIG_PATH || "../../../.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -52,7 +52,7 @@ const relayerConfigs: Map<number, RelayerConfig> = loadRelayerConfigs();
 
 export const getRpcProvider = (chainSlug: number) => {
   return new StaticJsonRpcProvider(
-    getJsonRpcUrl(networkToChainSlug[chainSlug])
+    getJsonRpcUrl(ChainSlugToKey[chainSlug])
   );
 };
 

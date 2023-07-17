@@ -9,7 +9,7 @@ import {
   isTestnet,
   isMainnet,
   CORE_CONTRACTS,
-  networkToChainSlug,
+  ChainSlugToKey,
 } from "../../../src";
 import { getAddresses, getRelayUrl, getRelayAPIKEY } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
@@ -132,7 +132,7 @@ export const sendMessagesToAllPaths = async (params: {
         // console.log(" 3 ");
 
         const provider = await getProviderFromChainName(
-          networkToChainSlug[chainSlug]
+          ChainSlugToKey[chainSlug]
         );
         const socket: Contract = new ethers.Contract(
           addresses[CORE_CONTRACTS.Socket],

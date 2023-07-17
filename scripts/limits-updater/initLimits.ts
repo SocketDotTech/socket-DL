@@ -50,7 +50,7 @@ export const setLimitsForAChainSlug = async (
         const chainAddresses: ChainAddresses = values[i];
 
         const chainSlugCode = "optimism-goerli";
-        // networkToChainSlug[dstChainId]
+        // ChainSlugToKey[dstChainId]
       }
 
       console.log(`-------------------------------------\n\n`);
