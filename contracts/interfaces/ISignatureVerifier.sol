@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 /**
  * @title Signature Verifier
@@ -7,23 +7,9 @@ pragma solidity 0.8.7;
  */
 interface ISignatureVerifier {
     /**
-     * @notice returns the address of signer recovered from input signature
-     * @param dstChainSlug_ remote chain slug
-     * @param packetId_ packet id
-     * @param root_ root hash of packet
-     * @param signature_ signature
-     */
-    function recoverSigner(
-        uint32 dstChainSlug_,
-        bytes32 packetId_,
-        bytes32 root_,
-        bytes calldata signature_
-    ) external pure returns (address signer);
-
-    /**
      * @notice returns the address of signer recovered from input signature and digest
      */
-    function recoverSignerFromDigest(
+    function recoverSigner(
         bytes32 digest_,
         bytes memory signature_
     ) external pure returns (address signer);

@@ -71,10 +71,10 @@ async function checkDefault(contractAddr, localChain, remoteChain) {
   assert(hasRole, `❌ Switchboard has wrong TRIP_ROLE ${remoteChain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("UNTRIP_ROLE", chainKeyToSlug[remoteChain]),
+    getChainRoleHash("UN_TRIP_ROLE", chainKeyToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
-  assert(hasRole, `❌ Switchboard has wrong UNTRIP_ROLE ${remoteChain}`);
+  assert(hasRole, `❌ Switchboard has wrong UN_TRIP_ROLE ${remoteChain}`);
 }
 
 async function checkSwitchboardRoles(chain, contractAddr) {
@@ -106,10 +106,10 @@ async function checkSwitchboardRoles(chain, contractAddr) {
   assert(hasRole, `❌ Switchboard has wrong trip role address ${chain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getRoleHash("UNTRIP_ROLE"),
+    getRoleHash("UN_TRIP_ROLE"),
     socketOwner
   );
-  assert(hasRole, `❌ Switchboard has wrong untrip role address ${chain}`);
+  assert(hasRole, `❌ Switchboard has wrong unTrip role address ${chain}`);
 }
 
 async function checkSwitchboardRegistration(

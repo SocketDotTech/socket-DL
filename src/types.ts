@@ -13,8 +13,10 @@ export enum ChainSlug {
   BSC_TESTNET = 97,
   MAINNET = 1,
   GOERLI = 5,
+  SEPOLIA = 11155111,
   POLYGON_MAINNET = 137,
   POLYGON_MUMBAI = 80001,
+  AEVO_TESTNET = 11155112,
   HARDHAT = 31337,
 }
 
@@ -29,8 +31,10 @@ export enum ChainKey {
   BSC_TESTNET = "bsc-testnet",
   MAINNET = "mainnet",
   GOERLI = "goerli",
+  SEPOLIA = "sepolia",
   POLYGON_MAINNET = "polygon-mainnet",
   POLYGON_MUMBAI = "polygon-mumbai",
+  AEVO_TESTNET = "aevo-testnet",
   HARDHAT = "hardhat",
 }
 
@@ -44,8 +48,10 @@ export const chainKeyToSlug = {
   [ChainKey.BSC_TESTNET]: 97,
   [ChainKey.MAINNET]: 1,
   [ChainKey.GOERLI]: 5,
+  [ChainKey.SEPOLIA]: 11155111,
   [ChainKey.POLYGON_MAINNET]: 137,
   [ChainKey.POLYGON_MUMBAI]: 80001,
+  [ChainKey.AEVO_TESTNET]: 11155112,
   [ChainKey.HARDHAT]: 31337,
 };
 
@@ -53,6 +59,7 @@ export const networkToChainSlug = {
   43114: ChainKey.AVALANCHE,
   56: ChainKey.BSC,
   5: ChainKey.GOERLI,
+  11155111: ChainKey.SEPOLIA,
   31337: ChainKey.HARDHAT,
   1: ChainKey.MAINNET,
   97: ChainKey.BSC_TESTNET,
@@ -62,14 +69,17 @@ export const networkToChainSlug = {
   420: ChainKey.OPTIMISM_GOERLI,
   137: ChainKey.POLYGON_MAINNET,
   80001: ChainKey.POLYGON_MUMBAI,
+  11155112: ChainKey.AEVO_TESTNET,
 };
 
 export const TestnetIds: ChainSlug[] = [
   ChainSlug.GOERLI,
+  ChainSlug.SEPOLIA,
   ChainSlug.POLYGON_MUMBAI,
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.BSC_TESTNET,
+  ChainSlug.AEVO_TESTNET,
 ];
 
 export const MainnetIds: ChainSlug[] = [
@@ -134,12 +144,18 @@ export enum IntegrationTypes {
   fast = "FAST",
   optimistic = "OPTIMISTIC",
   native = "NATIVE_BRIDGE",
+  unknown = "UNKNOWN",
 }
 
 export enum DeploymentMode {
   DEV = "dev",
   PROD = "prod",
   SURGE = "surge",
+}
+
+export enum CapacitorType {
+  singleCapacitor = "1",
+  hashChainCapacitor = "2",
 }
 
 export type Integrations = { [chainSlug in ChainSlug]?: ChainAddresses };
@@ -176,7 +192,7 @@ export enum ROLES {
   GOVERNANCE_ROLE = "GOVERNANCE_ROLE",
   EXECUTOR_ROLE = "EXECUTOR_ROLE",
   TRIP_ROLE = "TRIP_ROLE",
-  UNTRIP_ROLE = "UNTRIP_ROLE",
+  UN_TRIP_ROLE = "UN_TRIP_ROLE",
   WATCHER_ROLE = "WATCHER_ROLE",
   FEES_UPDATER_ROLE = "FEES_UPDATER_ROLE",
 }
@@ -217,14 +233,14 @@ export const REQUIRED_ROLES = {
   Socket: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
   FastSwitchboard: [
     ROLES.TRIP_ROLE,
-    ROLES.UNTRIP_ROLE,
+    ROLES.UN_TRIP_ROLE,
     ROLES.GOVERNANCE_ROLE,
     ROLES.WITHDRAW_ROLE,
     ROLES.RESCUE_ROLE,
   ],
   OptimisticSwitchboard: [
     ROLES.TRIP_ROLE,
-    ROLES.UNTRIP_ROLE,
+    ROLES.UN_TRIP_ROLE,
     ROLES.GOVERNANCE_ROLE,
     ROLES.WITHDRAW_ROLE,
     ROLES.RESCUE_ROLE,
@@ -232,7 +248,7 @@ export const REQUIRED_ROLES = {
   NativeSwitchboard: [
     ROLES.FEES_UPDATER_ROLE,
     ROLES.TRIP_ROLE,
-    ROLES.UNTRIP_ROLE,
+    ROLES.UN_TRIP_ROLE,
     ROLES.GOVERNANCE_ROLE,
     ROLES.WITHDRAW_ROLE,
     ROLES.RESCUE_ROLE,

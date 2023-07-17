@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 import "../interfaces/IHasher.sol";
 import "../interfaces/ISocket.sol";
@@ -16,7 +16,7 @@ import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
  */
 contract Hasher is IHasher, AccessControl {
     /**
-     * @notice initialises and grants RESCUE_ROLE to owner.
+     * @notice initializes and grants RESCUE_ROLE to owner.
      * @param owner_ The address of the owner of the contract.
      */
     constructor(address owner_) AccessControl(owner_) {
@@ -39,8 +39,8 @@ contract Hasher is IHasher, AccessControl {
                     dstChainSlug_,
                     dstPlug_,
                     messageDetails_.msgId,
-                    messageDetails_.msgGasLimit,
-                    messageDetails_.extraParams,
+                    messageDetails_.minMsgGasLimit,
+                    messageDetails_.executionParams,
                     messageDetails_.executionFee,
                     messageDetails_.payload
                 )
@@ -48,16 +48,16 @@ contract Hasher is IHasher, AccessControl {
     }
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from the contract if they are locked by mistake.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 }

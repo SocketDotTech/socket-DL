@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 /**
  * @title INativeRelay
  * @notice Interface for the NativeRelay contract which is used to relay packets between two chains.
  * It allows for the reception of messages on the PolygonRootReceiver and the initiation of native confirmations
  * for the given packet ID.
+ * @dev this is only used by SocketBatcher currently
  */
 interface INativeRelay {
     /**
@@ -22,7 +23,7 @@ interface INativeRelay {
      * @param maxSubmissionCost The maximum submission cost of the transaction.
      * @param maxGas The maximum gas limit of the transaction.
      * @param gasPriceBid The gas price bid for the transaction.
-     * @param callValueRefundAddress l2Callvalue gets credited here on L2 if retryable txn times out or gets cancelled
+     * @param callValueRefundAddress l2 call value gets credited here on L2 if retryable txn times out or gets cancelled
      * @param remoteRefundAddress gasLimit x maxFeePerGas - execution cost gets credited here on L2 balance
      */
     function initiateNativeConfirmation(

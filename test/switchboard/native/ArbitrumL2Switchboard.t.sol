@@ -1,13 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "../../Setup.t.sol";
-import "forge-std/Test.sol";
 import "../../../contracts/switchboard/native/ArbitrumL2Switchboard.sol";
-import "../../../contracts/TransmitManager.sol";
-import "../../../contracts/ExecutionManager.sol";
-import "../../../contracts/CapacitorFactory.sol";
-import "../../../contracts/interfaces/ICapacitor.sol";
 
 // Arbitrum Goerli -> Goerli
 contract ArbitrumL2SwitchboardTest is Setup {
@@ -23,15 +18,15 @@ contract ArbitrumL2SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        initialise();
+        initialize();
 
         _a.chainSlug = uint32(uint256(421613));
         _b.chainSlug = uint32(uint256(5));
 
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
-        _chainSetup(transmitterPivateKeys);
+        _chainSetup(transmitterPrivateKeys);
     }
 
     function testInitateNativeConfirmation() public {
@@ -43,7 +38,7 @@ contract ArbitrumL2SwitchboardTest is Setup {
 
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = 0;
-        messageDetails.msgGasLimit = 1000000;
+        messageDetails.minMsgGasLimit = 1000000;
         messageDetails.executionFee = 100;
         messageDetails.payload = abi.encode(msg.sender);
 
@@ -74,10 +69,45 @@ contract ArbitrumL2SwitchboardTest is Setup {
         vm.stopPrank();
     }
 
+    function testReceivePacket() public {
+        bytes32 root = bytes32("RANDOM_ROOT");
+        bytes32 packetId = bytes32("RANDOM_PACKET");
+
+        assertFalse(
+            arbitrumL2Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+
+        vm.expectRevert(NativeSwitchboardBase.InvalidSender.selector);
+        arbitrumL2Switchboard.receivePacket(packetId, root);
+
+        address remoteAlias = AddressAliasHelper.applyL1ToL2Alias(
+            remoteNativeSwitchboard_
+        );
+        hoax(remoteAlias);
+        arbitrumL2Switchboard.receivePacket(packetId, root);
+
+        assertTrue(
+            arbitrumL2Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         SocketConfigContext memory scc_ = addArbitrumL2Switchboard(
@@ -103,19 +133,16 @@ contract ArbitrumL2SwitchboardTest is Setup {
         );
 
         arbitrumL2Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-
-        arbitrumL2Switchboard.updateRemoteNativeSwitchboard(
-            remoteNativeSwitchboard_
-        );
         vm.stopPrank();
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(arbitrumL2Switchboard),
             0,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            remoteNativeSwitchboard_
         );
         singleCapacitor = scc_.capacitor__;
     }

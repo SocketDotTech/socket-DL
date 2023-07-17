@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 /**
  * @title IPlug
@@ -7,8 +7,9 @@ pragma solidity 0.8.7;
  */
 interface IPlug {
     /**
-     * @notice executes the message received from source chain
      * @dev this should be only executable by socket
+     * @notice executes the message received from source chain
+     * @notice It is expected to have original sender checks in the destination plugs using payload
      * @param srcChainSlug_ chain slug of source
      * @param payload_ the data which is needed by plug at inbound call on remote
      */

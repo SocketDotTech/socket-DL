@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 import "./ISocket.sol";
 
@@ -14,6 +14,7 @@ interface IHasher {
      * @param srcPlug address of plug at source
      * @param dstChainSlug remote chain slug
      * @param dstPlug address of plug at remote
+     * @param messageDetails contains message details, see ISocket for more details
      */
     function packMessage(
         uint32 srcChainSlug,

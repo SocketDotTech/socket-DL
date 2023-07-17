@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
@@ -19,6 +19,8 @@ contract Counter is IPlug {
     bytes32 public constant OP_SUB = keccak256("OP_SUB");
 
     error OnlyOwner();
+    error OnlySocket();
+    error InvalidAmount();
 
     constructor(address socket_) {
         socket = socket_;
@@ -26,7 +28,7 @@ contract Counter is IPlug {
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "can only be called by owner");
+        if (msg.sender != owner) revert OnlyOwner();
         _;
     }
 
@@ -41,29 +43,43 @@ contract Counter is IPlug {
     function remoteAddOperation(
         uint32 chainSlug_,
         uint256 amount_,
-        uint256 msgGasLimit_,
-        bytes32 extraParams_
+        uint256 minMsgGasLimit_,
+        bytes32 executionParams_,
+        bytes32 transmissionParams_
     ) external payable {
         bytes memory payload = abi.encode(OP_ADD, amount_, msg.sender);
 
-        _outbound(chainSlug_, msgGasLimit_, extraParams_, payload);
+        _outbound(
+            chainSlug_,
+            minMsgGasLimit_,
+            executionParams_,
+            transmissionParams_,
+            payload
+        );
     }
 
     function remoteSubOperation(
         uint32 chainSlug_,
         uint256 amount_,
-        uint256 msgGasLimit_,
-        bytes32 extraParams_
+        uint256 minMsgGasLimit_,
+        bytes32 executionParams_,
+        bytes32 transmissionParams_
     ) external payable {
         bytes memory payload = abi.encode(OP_SUB, amount_, msg.sender);
-        _outbound(chainSlug_, msgGasLimit_, extraParams_, payload);
+        _outbound(
+            chainSlug_,
+            minMsgGasLimit_,
+            executionParams_,
+            transmissionParams_,
+            payload
+        );
     }
 
     function inbound(
         uint32,
         bytes calldata payload_
     ) external payable override {
-        require(msg.sender == socket, "Counter: Invalid Socket");
+        if (msg.sender != socket) revert OnlySocket();
         (bytes32 operationType, uint256 amount, ) = abi.decode(
             payload_,
             (bytes32, uint256, address)
@@ -80,14 +96,16 @@ contract Counter is IPlug {
 
     function _outbound(
         uint32 targetChain_,
-        uint256 msgGasLimit_,
-        bytes32 extraParams_,
+        uint256 minMsgGasLimit_,
+        bytes32 executionParams_,
+        bytes32 transmissionParams_,
         bytes memory payload_
     ) private {
         ISocket(socket).outbound{value: msg.value}(
             targetChain_,
-            msgGasLimit_,
-            extraParams_,
+            minMsgGasLimit_,
+            executionParams_,
+            transmissionParams_,
             payload_
         );
     }
@@ -100,7 +118,7 @@ contract Counter is IPlug {
     }
 
     function _subOperation(uint256 amount_) private {
-        require(counter > amount_, "CounterMock: Subtraction Overflow");
+        if (counter < amount_) revert InvalidAmount();
         counter -= amount_;
     }
 
@@ -123,16 +141,16 @@ contract Counter is IPlug {
     }
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from the contract if they are locked by mistake.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyOwner {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 }

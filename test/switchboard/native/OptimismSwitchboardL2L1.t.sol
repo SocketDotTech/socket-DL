@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "../../Setup.t.sol";
 import "../../../contracts/switchboard/native/OptimismSwitchboard.sol";
@@ -23,7 +23,7 @@ contract OptimismSwitchboardL2L1Test is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        initialise();
+        initialize();
 
         _a.chainSlug = uint32(uint256(420));
         _b.chainSlug = uint32(uint256(5));
@@ -34,20 +34,20 @@ contract OptimismSwitchboardL2L1Test is Setup {
         );
         vm.selectFork(fork);
 
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
-        _chainSetup(transmitterPivateKeys);
+        _chainSetup(transmitterPrivateKeys);
     }
 
-    function testInitateNativeConfirmation() public {
+    function testInitiateNativeConfirmation() public {
         address socketAddress = address(_a.socket__);
 
         vm.startPrank(socketAddress);
 
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = 0;
-        messageDetails.msgGasLimit = 1000000;
+        messageDetails.minMsgGasLimit = 1000000;
         messageDetails.executionFee = 100;
         messageDetails.payload = abi.encode(msg.sender);
 
@@ -111,10 +111,30 @@ contract OptimismSwitchboardL2L1Test is Setup {
         vm.stopPrank();
     }
 
+    function testUpdateReceiveGasLimit() public {
+        uint256 receiveGasLimit = 1000;
+        assertEq(optimismSwitchboard.receiveGasLimit(), receiveGasLimit_);
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        optimismSwitchboard.updateReceiveGasLimit(receiveGasLimit);
+
+        hoax(_socketOwner);
+        optimismSwitchboard.updateReceiveGasLimit(receiveGasLimit);
+
+        assertEq(optimismSwitchboard.receiveGasLimit(), receiveGasLimit);
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
 
@@ -145,19 +165,15 @@ contract OptimismSwitchboardL2L1Test is Setup {
         optimismSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
         vm.stopPrank();
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(optimismSwitchboard),
             0,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard
         );
         singleCapacitor = scc_.capacitor__;
-
-        hoax(_socketOwner);
-        optimismSwitchboard.updateRemoteNativeSwitchboard(
-            remoteNativeSwitchboard_
-        );
     }
 }

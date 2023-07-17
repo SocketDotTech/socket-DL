@@ -1,14 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "../Setup.t.sol";
-import "../../contracts/CapacitorFactory.sol";
-import {RESCUE_ROLE} from "../../contracts/utils/AccessRoles.sol";
-import "lib/openzeppelin-contracts/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
+import {ERC20PresetFixedSupply} from "lib/openzeppelin-contracts/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 
 contract CapacitorFactoryTest is Setup {
-    address immutable _owner = address(uint160(c++));
-
     uint256 tokenSupply = 10000;
     uint32 siblingChainSlug = 80001;
 
@@ -17,8 +13,14 @@ contract CapacitorFactoryTest is Setup {
     error NoPermit(bytes32 role);
 
     function setUp() external {
-        _cf = new CapacitorFactory(_owner);
-        _token = new ERC20PresetFixedSupply("TEST", "T", tokenSupply, _owner);
+        initialize();
+        _cf = new CapacitorFactory(_socketOwner);
+        _token = new ERC20PresetFixedSupply(
+            "TEST",
+            "T",
+            tokenSupply,
+            _socketOwner
+        );
     }
 
     function testDeploySingleCapacitor() external {
@@ -49,7 +51,7 @@ contract CapacitorFactoryTest is Setup {
         );
     }
 
-    function testDeploy(uint256 capacitorType) external {
+    function testDeployForInvalidCapacitorType(uint256 capacitorType) external {
         if (capacitorType != 1 && capacitorType != 2) {
             vm.expectRevert(ICapacitorFactory.InvalidCapacitorType.selector);
         }
@@ -60,12 +62,11 @@ contract CapacitorFactoryTest is Setup {
     function testRescueFunds() external {
         uint256 amount = 1000;
 
-        vm.startPrank(_owner);
-        _cf.grantRole(RESCUE_ROLE, _owner);
-        vm.stopPrank();
+        vm.startPrank(_socketOwner);
+        _cf.grantRole(RESCUE_ROLE, _socketOwner);
 
-        hoax(_owner);
         _token.transfer(address(_cf), amount);
+        vm.stopPrank();
 
         uint256 initialBalOfOwner = _token.balanceOf(_raju);
 
@@ -75,10 +76,17 @@ contract CapacitorFactoryTest is Setup {
 
         _cf.rescueFunds(address(_token), _raju, amount);
 
-        hoax(_owner);
+        hoax(_socketOwner);
         _cf.rescueFunds(address(_token), _raju, amount);
 
         uint256 finalBalOfOwner = _token.balanceOf(_raju);
         assertEq(finalBalOfOwner - initialBalOfOwner, amount);
+    }
+
+    function testRescueNativeFunds() external {
+        uint256 amount = 1e18;
+
+        hoax(_socketOwner);
+        _rescueNative(address(_cf), NATIVE_TOKEN_ADDRESS, _fundRescuer, amount);
     }
 }

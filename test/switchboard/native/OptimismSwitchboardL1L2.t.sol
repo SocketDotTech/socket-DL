@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "../../Setup.t.sol";
 import "../../../contracts/switchboard/native/OptimismSwitchboard.sol";
@@ -24,7 +24,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        initialise();
+        initialize();
 
         _a.chainSlug = uint32(uint256(5));
         _b.chainSlug = uint32(uint256(420));
@@ -32,10 +32,10 @@ contract OptimismSwitchboardL1L2Test is Setup {
         uint256 fork = vm.createFork(vm.envString("GOERLI_RPC"), 8546564);
         vm.selectFork(fork);
 
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
-        _chainSetup(transmitterPivateKeys);
+        _chainSetup(transmitterPrivateKeys);
     }
 
     function testInitateNativeConfirmation() public {
@@ -45,7 +45,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
 
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = 0;
-        messageDetails.msgGasLimit = 1000000;
+        messageDetails.minMsgGasLimit = 1000000;
         messageDetails.executionFee = 100;
         messageDetails.payload = abi.encode(msg.sender);
 
@@ -68,10 +68,71 @@ contract OptimismSwitchboardL1L2Test is Setup {
         vm.stopPrank();
     }
 
+    function testUpdateReceiveGasLimit() public {
+        uint256 receiveGasLimit = 1000;
+        assertEq(optimismSwitchboard.receiveGasLimit(), receiveGasLimit_);
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        optimismSwitchboard.updateReceiveGasLimit(receiveGasLimit);
+
+        hoax(_socketOwner);
+        optimismSwitchboard.updateReceiveGasLimit(receiveGasLimit);
+
+        assertEq(optimismSwitchboard.receiveGasLimit(), receiveGasLimit);
+    }
+
+    function testReceivePacket() public {
+        bytes32 packetId = bytes32(uint256(100));
+        bytes32 root = bytes32(uint256(200));
+
+        // call is not from crossDomainManagerAddress_
+        vm.expectRevert(NativeSwitchboardBase.InvalidSender.selector);
+        optimismSwitchboard.receivePacket(packetId, root);
+
+        // call from wrong remoteNativeSwitchboard
+        vm.mockCall(
+            crossDomainManagerAddress_,
+            abi.encodeWithSelector(
+                optimismSwitchboard
+                    .crossDomainMessenger__()
+                    .xDomainMessageSender
+                    .selector
+            ),
+            abi.encode(address(1))
+        );
+
+        hoax(crossDomainManagerAddress_);
+        vm.expectRevert(NativeSwitchboardBase.InvalidSender.selector);
+        optimismSwitchboard.receivePacket(packetId, root);
+
+        // correct call
+        vm.mockCall(
+            crossDomainManagerAddress_,
+            abi.encodeWithSelector(
+                optimismSwitchboard
+                    .crossDomainMessenger__()
+                    .xDomainMessageSender
+                    .selector
+            ),
+            abi.encode(optimismSwitchboard.remoteNativeSwitchboard())
+        );
+
+        vm.startPrank(crossDomainManagerAddress_);
+        optimismSwitchboard.receivePacket(packetId, root);
+        vm.stopPrank();
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         SocketConfigContext memory scc_ = addOptimismSwitchboard(
@@ -100,19 +161,16 @@ contract OptimismSwitchboardL1L2Test is Setup {
         optimismSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
         vm.stopPrank();
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(optimismSwitchboard),
             0,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard
         );
 
         singleCapacitor = scc_.capacitor__;
-        hoax(_socketOwner);
-        optimismSwitchboard.updateRemoteNativeSwitchboard(
-            remoteNativeSwitchboard_
-        );
     }
 }

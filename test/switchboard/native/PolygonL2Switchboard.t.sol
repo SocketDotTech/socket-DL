@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "../../Setup.t.sol";
 import "../../../contracts/switchboard/native/PolygonL2Switchboard.sol";
@@ -18,14 +18,14 @@ contract PolygonL2SwitchboardTest is Setup {
     ICapacitor singleCapacitor;
 
     function setUp() external {
-        initialise();
+        initialize();
         _a.chainSlug = uint32(uint256(80001));
         _b.chainSlug = uint32(uint256(5));
 
-        uint256[] memory transmitterPivateKeys = new uint256[](1);
-        transmitterPivateKeys[0] = _transmitterPrivateKey;
+        uint256[] memory transmitterPrivateKeys = new uint256[](1);
+        transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
-        _chainSetup(transmitterPivateKeys);
+        _chainSetup(transmitterPrivateKeys);
     }
 
     function testInitateNativeConfirmation() public {
@@ -35,7 +35,7 @@ contract PolygonL2SwitchboardTest is Setup {
 
         ISocket.MessageDetails memory messageDetails;
         messageDetails.msgId = 0;
-        messageDetails.msgGasLimit = 1000000;
+        messageDetails.minMsgGasLimit = 1000000;
         messageDetails.executionFee = 100;
         messageDetails.payload = abi.encode(msg.sender);
 
@@ -67,6 +67,7 @@ contract PolygonL2SwitchboardTest is Setup {
         _deployContractsOnSingleChain(
             _a,
             _b.chainSlug,
+            isExecutionOpen,
             transmitterPrivateKeys_
         );
         SocketConfigContext memory scc_ = addPolygonL2Switchboard(
@@ -75,6 +76,44 @@ contract PolygonL2SwitchboardTest is Setup {
             _capacitorType
         );
         _a.configs__.push(scc_);
+    }
+
+    function testSetFxRootTunnel() public {
+        address rootTunnel = address(uint160(c++));
+        assertEq(address(polygonL2Switchboard.fxRootTunnel()), address(0));
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        polygonL2Switchboard.setFxRootTunnel(rootTunnel);
+
+        hoax(_socketOwner);
+        polygonL2Switchboard.setFxRootTunnel(rootTunnel);
+
+        assertEq(address(polygonL2Switchboard.fxRootTunnel()), rootTunnel);
+    }
+
+    function testUpdateFxChild() public {
+        address fxChild = address(uint160(c++));
+        assertEq(address(polygonL2Switchboard.fxChild()), fxChild_);
+
+        hoax(_raju);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                GOVERNANCE_ROLE
+            )
+        );
+        polygonL2Switchboard.updateFxChild(fxChild);
+
+        hoax(_socketOwner);
+        polygonL2Switchboard.updateFxChild(fxChild);
+
+        assertEq(address(polygonL2Switchboard.fxChild()), fxChild);
     }
 
     function addPolygonL2Switchboard(
@@ -94,13 +133,14 @@ contract PolygonL2SwitchboardTest is Setup {
         polygonL2Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
         vm.stopPrank();
 
-        scc_ = _registerSwitchboard(
+        scc_ = _registerSwitchboardForSibling(
             cc_,
             _socketOwner,
             address(polygonL2Switchboard),
             0,
             remoteChainSlug_,
-            capacitorType_
+            capacitorType_,
+            siblingSwitchboard
         );
         singleCapacitor = scc_.capacitor__;
     }

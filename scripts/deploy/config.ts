@@ -1,14 +1,15 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import { ChainKey, ChainSlug, DeploymentMode, TestnetIds } from "../../src";
+import { ChainSlug, DeploymentMode, CORE_CONTRACTS } from "../../src";
 import { BigNumberish, utils } from "ethers";
-import { CORE_CONTRACTS } from "@socket.tech/dl-core";
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
 
-export const socketOwner = "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34";
+if (!process.env.SOCKET_OWNER_ADDRESS)
+  throw Error("Socket owner address not present");
+export const socketOwner = process.env.SOCKET_OWNER_ADDRESS;
 
 console.log("========================================================");
 console.log("Deployment started for MODE", mode);
@@ -24,6 +25,8 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.POLYGON_MUMBAI,
   ChainSlug.BSC_TESTNET,
+  ChainSlug.SEPOLIA,
+  ChainSlug.AEVO_TESTNET,
   ChainSlug.MAINNET,
   ChainSlug.ARBITRUM,
   ChainSlug.OPTIMISM,
@@ -31,13 +34,14 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.POLYGON_MAINNET,
 ];
 
-export const executionManagerVersion = CORE_CONTRACTS.OpenExecutionManager;
-export const sendTransaction = false;
+export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
+export const sendTransaction = true;
 export const newRoleStatus = true;
 export const filterChains: number[] = chains;
 
 export const capacitorType = 1;
 export const maxPacketLength = 1;
+export const initialPacketCount = 0;
 
 export const gasLimit = undefined;
 export const gasPrice = undefined;
@@ -49,11 +53,13 @@ export const msgValueMaxThreshold: { [chain in ChainSlug]?: BigNumberish } = {
   [ChainSlug.POLYGON_MUMBAI]: utils.parseEther("0.1"),
   [ChainSlug.BSC_TESTNET]: utils.parseEther("0.001"),
   [ChainSlug.GOERLI]: utils.parseEther("0.001"),
+  [ChainSlug.SEPOLIA]: utils.parseEther("0.001"),
   [ChainSlug.ARBITRUM]: utils.parseEther("0.001"),
   [ChainSlug.OPTIMISM]: utils.parseEther("0.001"),
   [ChainSlug.POLYGON_MAINNET]: utils.parseEther("0.1"),
   [ChainSlug.BSC]: utils.parseEther("0.001"),
   [ChainSlug.MAINNET]: utils.parseEther("0.001"),
+  [ChainSlug.AEVO_TESTNET]: utils.parseEther("0.001"),
 };
 
 export const transmitterAddresses = {
@@ -76,9 +82,9 @@ export const executorAddresses = {
 
 export const overrides: {
   [chain in ChainSlug | number]?: {
-    type: number | undefined;
+    type?: number | undefined;
     gasLimit?: BigNumberish | undefined;
-    gasPrice: BigNumberish | undefined;
+    gasPrice?: BigNumberish | undefined;
   };
 } = {
   [ChainSlug.ARBITRUM]: {
@@ -87,9 +93,9 @@ export const overrides: {
     gasPrice,
   },
   [ChainSlug.ARBITRUM_GOERLI]: {
-    type,
-    gasLimit: 20_000_000,
-    gasPrice,
+    // type,
+    // gasLimit: 20_000_000,
+    // gasPrice,
   },
   [ChainSlug.OPTIMISM]: {
     type,
@@ -97,9 +103,9 @@ export const overrides: {
     gasPrice,
   },
   [ChainSlug.OPTIMISM_GOERLI]: {
-    type,
-    gasLimit: 2_000_000,
-    gasPrice,
+    // type,
+    // gasLimit: 20_000_000,
+    // gasPrice,
   },
   [ChainSlug.BSC]: {
     type,
@@ -130,5 +136,15 @@ export const overrides: {
     type: 0,
     gasLimit: 2_000_000,
     gasPrice,
+  },
+  [ChainSlug.SEPOLIA]: {
+    type,
+    gasLimit,
+    gasPrice,
+  },
+  [ChainSlug.AEVO_TESTNET]: {
+    type: 2,
+    // gasLimit,
+    // gasPrice,
   },
 };

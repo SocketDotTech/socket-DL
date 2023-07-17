@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 import "../interfaces/IDecapacitor.sol";
 import "../libraries/RescueFundsLib.sol";
@@ -37,25 +37,28 @@ contract HashChainDecapacitor is IDecapacitor, AccessControl {
         uint256 len = chain.length;
         bytes32 generatedRoot;
         bool isIncluded;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len; ) {
             generatedRoot = keccak256(abi.encode(generatedRoot, chain[i]));
             if (chain[i] == packedMessage_) isIncluded = true;
+            unchecked {
+                ++i;
+            }
         }
 
         return root_ == generatedRoot && isIncluded;
     }
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from the contract if they are locked by mistake.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 }

@@ -14,12 +14,10 @@ import {
   isTestnet,
   networkToChainSlug,
 } from "../../src";
-import { mode } from "./config";
+import { chains, mode } from "./config";
 import { Contract, Wallet } from "ethers";
 import { getSwitchboardAddress } from "../../src";
 import { overrides } from "./config";
-
-const chains = [...TestnetIds, ...MainnetIds];
 
 export const main = async () => {
   try {
@@ -44,7 +42,9 @@ export const main = async () => {
         const list = isTestnet(chain) ? TestnetIds : MainnetIds;
         const siblingSlugs: ChainSlug[] = list.filter(
           (chainSlug) =>
-            chainSlug !== chain && addresses?.[chainSlug]?.["Counter"]
+            chainSlug !== chain &&
+            addresses?.[chainSlug]?.["Counter"] &&
+            chains.includes(chainSlug)
         );
 
         const siblingIntegrationtype: IntegrationTypes[] = siblingSlugs.map(

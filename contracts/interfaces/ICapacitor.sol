@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 /**
  * @title ICapacitor
@@ -7,21 +7,8 @@ pragma solidity 0.8.7;
  */
 interface ICapacitor {
     /**
-     * @notice emitted when a new message is added to a packet
-     * @param packedMessage the message packed with payload, fees and config
-     * @param packetCount an incremental id assigned to each new packet
-     * @param newRootHash the packed message hash (to be replaced with the root hash of the merkle tree)
-     */
-    event MessageAdded(
-        bytes32 packedMessage,
-        uint64 packetCount,
-        bytes32 newRootHash
-    );
-
-    /**
      * @notice adds the packed message to a packet
      * @dev this should be only executable by socket
-     * @dev it will be later replaced with a function adding each message to a merkle tree
      * @param packedMessage the message packed with payload, fees and config
      */
     function addPackedMessage(bytes32 packedMessage) external;
@@ -44,10 +31,19 @@ interface ICapacitor {
     function getRootByCount(uint64 id) external view returns (bytes32 root);
 
     /**
+     * @notice returns the maxPacketLength
+     * @return maxPacketLength of the capacitor
+     */
+    function getMaxPacketLength()
+        external
+        view
+        returns (uint256 maxPacketLength);
+
+    /**
      * @notice seals the packet
-     * @dev also indicates the packet is ready to be shipped and no more messages can be added now.
-     * @dev this should be executable by socket only
-     * @param batchSize_ later to be used with packet batching capacitors
+     * @dev indicates the packet is ready to be shipped and no more messages can be added now.
+     * @dev this should be called by socket only
+     * @param batchSize_ used with packet batching capacitors
      * @return root root hash of the packet
      * @return packetCount id of the packed sealed
      */

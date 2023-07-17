@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/ICapacitor.sol";
 import "../../interfaces/ISignatureVerifier.sol";
-
+import "../../interfaces/IExecutionManager.sol";
 import "../../libraries/RescueFundsLib.sol";
-import "../../libraries/FeesHelper.sol";
 import "../../utils/AccessControlExtended.sol";
 
-import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UNTRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
-import {TRIP_NATIVE_SIG_IDENTIFIER, UNTRIP_NATIVE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
+import {GOVERNANCE_ROLE, RESCUE_ROLE, WITHDRAW_ROLE, TRIP_ROLE, UN_TRIP_ROLE, FEES_UPDATER_ROLE} from "../../utils/AccessRoles.sol";
+import {TRIP_NATIVE_SIG_IDENTIFIER, UN_TRIP_NATIVE_SIG_IDENTIFIER, FEES_UPDATE_SIG_IDENTIFIER} from "../../utils/SigIdentifiers.sol";
 
 /**
 @title Native Switchboard Base Contract
@@ -23,33 +22,32 @@ of fees, gas limits, and packet validation.
 abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     ISignatureVerifier public immutable signatureVerifier__;
     ISocket public immutable socket__;
+    ICapacitor public capacitor__;
+    uint32 public immutable chainSlug;
 
     /**
      * @dev Flag that indicates if the global fuse is tripped, meaning no more packets can be sent.
      */
-    bool public tripGlobalFuse;
+    bool public isGlobalTipped;
 
     /**
-     * @dev The capacitor contract that holds packets for the native bridge.
+     * @dev Flag that indicates if the switchboard is registered and its capacitor has been assigned.
      */
-    ICapacitor public capacitor__;
+    bool public isInitialized;
 
-    /**
-     * @dev Flag that indicates if the capacitor has been registered.
-     */
-    bool public isInitialised;
-
-    /**
-     * @dev The maximum packet size.
-     */
-    uint256 public maxPacketLength;
+    // This is to prevent attacks with sending messages for chain before the switchboard is registered for them.
+    uint256 initialPacketCount;
 
     /**
      * @dev Address of the remote native switchboard.
      */
     address public remoteNativeSwitchboard;
 
-    uint32 public immutable chainSlug;
+    // Per packet fees used to compensate operator to send packets via native bridge.
+    uint128 public switchboardFees;
+
+    // Per message fees paid to executor for verification overhead.
+    uint128 public verificationOverheadFees;
 
     /**
      * @dev Stores the roots received from native bridge.
@@ -57,63 +55,43 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     mapping(bytes32 => bytes32) public packetIdToRoot;
 
     /**
-     * @dev Transmitter to next nonce.
+     * @dev incrementing nonce used for signatures of fee updater, tripper, untripper
      */
     mapping(address => uint256) public nextNonce;
 
-    uint256 public switchboardFees;
-    uint256 public verificationFees;
-
     /**
-     * @dev Event emitted when the switchboard is tripped.
+     * @dev Event emitted when the switchboard trip status changes
      */
-    event SwitchboardTripped(bool tripGlobalFuse);
+    event GlobalTripChanged(bool isGlobalTipped);
 
     /**
-     * @dev Event emitted when the capacitor address is set.
-     * @param capacitor The new capacitor address.
+     * @dev This event is emitted when this switchboard wants to connect with its sibling on other chain.
+     * @param remoteNativeSwitchboard address of switchboard on sibling chain.
      */
-    event CapacitorSet(address capacitor);
+    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
 
     /**
-     * @dev Event emitted when a native confirmation is initiated.
+     * @dev Event emitted when a packet root relay via native bridge is initialised
      * @param packetId The packet ID.
      */
     event InitiatedNativeConfirmation(bytes32 packetId);
 
     /**
-     * @dev This event is emitted when a new capacitor is registered.
-     *     It includes the address of the capacitor and the maximum size of the packet allowed.
-     * @param siblingChainSlug Chain slug of the sibling chain
-     * @param capacitor address of capacitor registered to switchboard
-     * @param maxPacketLength maximum packets that can be set to capacitor
-     */
-    event SwitchBoardRegistered(
-        uint32 siblingChainSlug,
-        address capacitor,
-        uint256 maxPacketLength
-    );
-
-    /**
-     * @dev This event is emitted when a new capacitor is registered.
-     *     It includes the address of the capacitor and the maximum size of the packet allowed.
-     * @param remoteNativeSwitchboard address of capacitor registered to switchboard
-     */
-    event UpdatedRemoteNativeSwitchboard(address remoteNativeSwitchboard);
-
-    /**
-     * @dev Event emitted when a root hash is received by the contract.
+     * @dev Event emitted when a root is received via native bridge.
      * @param packetId The unique identifier of the packet.
-     * @param root The root hash of the Merkle tree containing the transaction data.
+     * @param root The root hash of the packet.
      */
     event RootReceived(bytes32 packetId, bytes32 root);
 
     /**
      * @dev Emitted when a fees is set for switchboard
      * @param switchboardFees switchboardFees
-     * @param verificationFees verificationFees
+     * @param verificationOverheadFees verificationOverheadFees
      */
-    event SwitchboardFeesSet(uint256 switchboardFees, uint256 verificationFees);
+    event SwitchboardFeesSet(
+        uint256 switchboardFees,
+        uint256 verificationOverheadFees
+    );
 
     /**
      * @dev Error thrown when the fees provided are not enough to execute the transaction.
@@ -123,10 +101,10 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @dev Error thrown when the contract has already been initialized.
      */
-    error AlreadyInitialised();
+    error AlreadyInitialized();
 
     /**
-     * @dev Error thrown when the transaction is not sent by a valid sender.
+     * @dev Error thrown when the root receive transaction is not sent by a valid sender. i.e. native bridge contract
      */
     error InvalidSender();
 
@@ -136,25 +114,21 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     error NoRootFound();
 
     /**
-     * @dev Error thrown when the nonce of the transaction is invalid.
+     * @dev Error thrown when the nonce of the signature is invalid.
      */
     error InvalidNonce();
 
-    /**
-     * @dev Error thrown when a function can only be called by the Socket.
-     */
-    error OnlySocket();
+    // Error thrown if fees are received from non execution manager.
+    error OnlyExecutionManager();
 
     /**
      * @dev Modifier to ensure that a function can only be called by the remote switchboard.
      */
-    modifier onlyRemoteSwitchboard() virtual {
-        _;
-    }
+    modifier onlyRemoteSwitchboard() virtual;
 
     /**
-     * @dev Constructor function for the CrossChainReceiver contract.
-     * @param socket_ The address of the remote switchboard.
+     * @dev Constructor function for the Native switchboard contract.
+     * @param socket_ The address of socket.
      * @param chainSlug_ The identifier of the chain the contract is deployed on.
      * @param signatureVerifier_ signatureVerifier instance
      */
@@ -169,9 +143,9 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice retrieves the Merkle root for a given packet ID
+     * @notice retrieves the root for a given packet ID from capacitor
      * @param packetId_ packet ID
-     * @return root Merkle root associated with the given packet ID
+     * @return root root associated with the given packet ID
      * @dev Reverts with 'NoRootFound' error if no root is found for the given packet ID
      */
     function _getRoot(bytes32 packetId_) internal view returns (bytes32 root) {
@@ -181,9 +155,10 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice records the Merkle root for a given packet ID emitted by a remote switchboard
+     * @notice records the root for a given packet ID sent by a remote switchboard via native bridge
+     * @dev this function is not used by polygon native bridge, it works by calling a different function.
      * @param packetId_ packet ID
-     * @param root_ Merkle root for the given packet ID
+     * @param root_ root for the given packet ID
      */
     function receivePacket(
         bytes32 packetId_,
@@ -194,29 +169,23 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice checks if a packet can be executed
-     * @param root_ Merkle root associated with the packet ID
-     * @param packetId_ packet ID
-     * @return true if the packet satisfies all the checks and can be executed, false otherwise
+     * @inheritdoc ISwitchboard
      */
     function allowPacket(
         bytes32 root_,
         bytes32 packetId_,
+        uint256,
         uint32,
         uint256
     ) external view override returns (bool) {
-        if (tripGlobalFuse) return false;
+        uint64 packetCount = uint64(uint256(packetId_));
+
+        if (isGlobalTipped) return false;
+        if (packetCount < initialPacketCount) return false;
         if (packetIdToRoot[packetId_] != root_) return false;
 
         return true;
     }
-
-    /**
-     * @notice receives fees to be paid to the relayer for executing the packet
-     * @param dstChainSlug_ chain slug of the destination chain
-     * @dev assumes that the amount is paid in the native currency of the destination chain and has 18 decimals
-     */
-    function payFees(uint32 dstChainSlug_) external payable override {}
 
     /**
      * @dev Get the minimum fees for a cross-chain transaction.
@@ -229,19 +198,22 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
         external
         view
         override
-        returns (uint256 switchboardFee_, uint256 verificationFee_)
+        returns (uint128 switchboardFee_, uint128 verificationFee_)
     {
-        return (switchboardFees, verificationFees);
+        return (switchboardFees, verificationOverheadFees);
     }
 
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function setFees(
         uint256 nonce_,
         uint32,
-        uint256 switchboardFees_,
-        uint256 verificationFees_,
+        uint128 switchboardFees_,
+        uint128 verificationOverheadFees_,
         bytes calldata signature_
     ) external override {
-        address feesUpdater = signatureVerifier__.recoverSignerFromDigest(
+        address feesUpdater = signatureVerifier__.recoverSigner(
             keccak256(
                 abi.encode(
                     FEES_UPDATE_SIG_IDENTIFIER,
@@ -249,46 +221,67 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
                     chainSlug,
                     nonce_,
                     switchboardFees_,
-                    verificationFees_
+                    verificationOverheadFees_
                 )
             ),
             signature_
         );
 
         _checkRole(FEES_UPDATER_ROLE, feesUpdater);
-
-        uint256 nonce = nextNonce[feesUpdater]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
+        unchecked {
+            if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
+        }
         switchboardFees = switchboardFees_;
-        verificationFees = verificationFees_;
+        verificationOverheadFees = verificationOverheadFees_;
 
-        emit SwitchboardFeesSet(switchboardFees, verificationFees);
+        emit SwitchboardFeesSet(switchboardFees, verificationOverheadFees);
     }
 
-    /// @inheritdoc ISwitchboard
+    /**
+     * @inheritdoc ISwitchboard
+     */
     function registerSiblingSlug(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
-        uint256 capacitorType_
+        uint256 capacitorType_,
+        uint256 initialPacketCount_,
+        address remoteNativeSwitchboard_
     ) external override onlyRole(GOVERNANCE_ROLE) {
-        if (isInitialised) revert AlreadyInitialised();
+        if (isInitialized) revert AlreadyInitialized();
 
-        address capacitor = socket__.registerSwitchBoard(
+        initialPacketCount = initialPacketCount_;
+        (address capacitor, ) = socket__.registerSwitchboardForSibling(
             siblingChainSlug_,
             maxPacketLength_,
-            capacitorType_
+            capacitorType_,
+            remoteNativeSwitchboard_
         );
 
-        isInitialised = true;
-        maxPacketLength = maxPacketLength_;
+        isInitialized = true;
         capacitor__ = ICapacitor(capacitor);
+        remoteNativeSwitchboard = remoteNativeSwitchboard_;
+    }
 
-        emit SwitchBoardRegistered(
+    /**
+     * @notice Updates the sibling switchboard for given `siblingChainSlug_`.
+     * @dev This function is expected to be only called by admin
+     * @param siblingChainSlug_ The slug of the sibling chain to register switchboard with.
+     * @param remoteNativeSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
+     */
+    function updateSibling(
+        uint32 siblingChainSlug_,
+        address remoteNativeSwitchboard_
+    ) external onlyRole(GOVERNANCE_ROLE) {
+        // signal to socket
+        socket__.useSiblingSwitchboard(
             siblingChainSlug_,
-            capacitor,
-            maxPacketLength_
+            remoteNativeSwitchboard_
         );
+
+        // use address while relaying via native bridge
+        remoteNativeSwitchboard = remoteNativeSwitchboard_;
+        emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
     }
 
     /**
@@ -296,12 +289,12 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
      * @dev The function recovers the signer from the given signature and verifies if the signer has the TRIP_ROLE.
      *      The nonce must be equal to the next nonce of the caller. If the caller doesn't have the TRIP_ROLE or the nonce
      *      is incorrect, it will revert.
-     *       Once the function is successful, the tripGlobalFuse variable is set to true and the SwitchboardTripped event is emitted.
+     *       Once the function is successful, the isGlobalTipped variable is set to true and the GlobalTripChanged event is emitted.
      * @param nonce_ The nonce of the caller.
-     * @param signature_ The signature of the message "TRIP" + chainSlug + nonce_ + true.
+     * @param signature_ The signature of the message
      */
     function tripGlobal(uint256 nonce_, bytes memory signature_) external {
-        address watcher = signatureVerifier__.recoverSignerFromDigest(
+        address tripper = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
@@ -315,26 +308,27 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRole(TRIP_ROLE, watcher);
-        uint256 nonce = nextNonce[watcher]++;
-        if (nonce_ != nonce) revert InvalidNonce();
-
-        tripGlobalFuse = true;
-        emit SwitchboardTripped(true);
+        _checkRole(TRIP_ROLE, tripper);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
+        unchecked {
+            if (nonce_ != nextNonce[tripper]++) revert InvalidNonce();
+        }
+        isGlobalTipped = true;
+        emit GlobalTripChanged(true);
     }
 
     /**
-     * @notice Allows a watcher to untrip the switchboard by providing a signature and a nonce.
-     * @dev To untrip, the watcher must have the UNTRIP_ROLE. The signature must be created by signing the concatenation of the following values: "UNTRIP", the chainSlug, the nonce and false.
+     * @notice Allows a untripper to un trip the switchboard by providing a signature and a nonce.
+     * @dev To un trip, the untripper must have the UN_TRIP_ROLE.
      * @param nonce_ The nonce to prevent replay attacks.
-     * @param signature_ The signature created by the watcher.
+     * @param signature_ The signature created by the untripper.
      */
-    function untrip(uint256 nonce_, bytes memory signature_) external {
-        address watcher = signatureVerifier__.recoverSignerFromDigest(
+    function unTrip(uint256 nonce_, bytes memory signature_) external {
+        address untripper = signatureVerifier__.recoverSigner(
             // it includes trip status at the end
             keccak256(
                 abi.encode(
-                    UNTRIP_NATIVE_SIG_IDENTIFIER,
+                    UN_TRIP_NATIVE_SIG_IDENTIFIER,
                     address(this),
                     chainSlug,
                     nonce_,
@@ -344,47 +338,47 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
             signature_
         );
 
-        _checkRole(UNTRIP_ROLE, watcher);
-        uint256 nonce = nextNonce[watcher]++;
-        if (nonce_ != nonce) revert InvalidNonce();
+        _checkRole(UN_TRIP_ROLE, untripper);
 
-        tripGlobalFuse = false;
-        emit SwitchboardTripped(false);
-    }
-
-    /**
-    @dev Update the address of the remote native switchboard contract.
-    @param remoteNativeSwitchboard_ The address of the new remote native switchboard contract.
-    @notice This function can only be called by an account with the GOVERNANCE_ROLE.
-    @notice Emits an UpdatedRemoteNativeSwitchboard event.
-    */
-    function updateRemoteNativeSwitchboard(
-        address remoteNativeSwitchboard_
-    ) external onlyRole(GOVERNANCE_ROLE) {
-        remoteNativeSwitchboard = remoteNativeSwitchboard_;
-        emit UpdatedRemoteNativeSwitchboard(remoteNativeSwitchboard_);
+        // Nonce is used by gated roles and we don't expect nonce to reach the max value of uint256
+        unchecked {
+            if (nonce_ != nextNonce[untripper]++) revert InvalidNonce();
+        }
+        isGlobalTipped = false;
+        emit GlobalTripChanged(false);
     }
 
     /**
      * @notice Allows the withdrawal of fees by the account with the specified address.
-     * @param account_ The address of the account to withdraw fees to.
+     * @param withdrawTo_ The address of the account to withdraw fees to.
      * @dev The caller must have the WITHDRAW_ROLE.
      */
-    function withdrawFees(address account_) external onlyRole(WITHDRAW_ROLE) {
-        FeesHelper.withdrawFees(account_);
+    function withdrawFees(
+        address withdrawTo_
+    ) external onlyRole(WITHDRAW_ROLE) {
+        if (withdrawTo_ == address(0)) revert ZeroAddress();
+        SafeTransferLib.safeTransferETH(withdrawTo_, address(this).balance);
     }
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from the contract if they are locked by mistake.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
+    }
+
+    /**
+     * @inheritdoc ISwitchboard
+     */
+    function receiveFees(uint32) external payable override {
+        if (msg.sender != address(socket__.executionManager__()))
+            revert OnlyExecutionManager();
     }
 }

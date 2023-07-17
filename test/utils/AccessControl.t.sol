@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
-import "../contracts/mocks/MockAccessControl.sol";
+import "../../contracts/mocks/MockAccessControl.sol";
 
 contract AccessControlTest is Test {
     uint256 internal c = 1;

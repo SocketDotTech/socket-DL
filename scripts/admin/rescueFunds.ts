@@ -6,10 +6,10 @@ import {
   DeploymentAddresses,
   IntegrationTypes,
   networkToChainSlug,
-} from "../../../src";
+} from "../../src";
 import { Contract, Wallet, ethers } from "ethers";
-import { mode, overrides } from "../config";
-import { getProviderFromChainName } from "../../constants";
+import { mode, overrides } from "../deploy/config";
+import { getProviderFromChainName } from "../constants";
 import { getAllAddresses } from "@socket.tech/dl-core";
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -23,7 +23,7 @@ const rescueFundsABI = [
       },
       {
         internalType: "address",
-        name: "userAddress_",
+        name: "rescueTo_",
         type: "address",
       },
       {
@@ -45,18 +45,13 @@ const createContractAddrArray = (
   let addresses: string[] = [];
 
   addresses.push(chainAddresses.CapacitorFactory);
-
-  // not in fingerroot version
-  // addresses.push(chainAddresses.Hasher)
-  // addresses.push(chainAddresses.SignatureVerifier)
-
+  addresses.push(chainAddresses.Hasher);
+  addresses.push(chainAddresses.SignatureVerifier);
   addresses.push(chainAddresses.Socket);
   addresses.push(chainAddresses.TransmitManager);
   addresses.push(chainAddresses.FastSwitchboard);
   addresses.push(chainAddresses.OptimisticSwitchboard);
 
-  if (chainAddresses.SocketBatcher)
-    addresses.push(chainAddresses.SocketBatcher);
   if (chainAddresses.ExecutionManager)
     addresses.push(chainAddresses.ExecutionManager);
   if (chainAddresses.OpenExecutionManager)

@@ -1,7 +1,7 @@
 {
   "name": "@socket.tech/dl-core",
   "license": "UNLICENSED",
-  "version": "2.2.2",
+  "version": "2.4.0-test.2",
   "description": "Smart contracts for socket data layer.",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -52,11 +52,11 @@
     "typescript": "^4.6.4"
   },
   "scripts": {
-    "lint": "prettier \"./**\" --write --ignore-unknown",
+    "lint": "prettier \"./**\" --write",
     "build": "hardhat export-abi && tsc --project lib.tsconfig.json",
     "abi": "hardhat export-abi",
     "compile": "forge build",
-    "test": "forge test"
+    "test": "prettier --write $(git diff --name-only --diff-filter d | xargs) && forge test"
   },
   "pre-commit": [
     "lint",

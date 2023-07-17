@@ -15,7 +15,8 @@ const main = async () => {
   for (const chain of chains) {
     for (const siblingChain of chains) {
       for (const integrationType of Object.values(IntegrationTypes)) {
-        const switchboard = getSwtichboardInstance(
+        if (integrationType === IntegrationTypes.native) continue;
+        const switchboard = getSwitchboardInstance(
           chain,
           siblingChain,
           integrationType,
@@ -29,7 +30,8 @@ const main = async () => {
           { dst: chain },
           { type: integrationType }
         );
-        const tripStatus = await switchboard.tripSinglePath(siblingChain);
+
+        const tripStatus = await switchboard.isPathTripped(siblingChain);
 
         if (tripStatus === true) {
           console.log(
@@ -48,8 +50,8 @@ const main = async () => {
               [
                 utils.id("UNTRIP_PATH"),
                 switchboard.address,
-                chain,
                 siblingChain,
+                chain,
                 nonce,
                 false,
               ]
@@ -60,7 +62,7 @@ const main = async () => {
             arrayify(digest)
           );
 
-          const tx = await switchboard.untripPath(
+          const tx = await switchboard.unTripPath(
             nonce,
             siblingChain,
             signature,
@@ -77,7 +79,7 @@ const main = async () => {
 };
 
 const sbContracts: { [key: string]: Contract } = {};
-const getSwtichboardInstance = (
+const getSwitchboardInstance = (
   chain: ChainSlug,
   siblingChain: ChainSlug,
   integrationType: IntegrationTypes,

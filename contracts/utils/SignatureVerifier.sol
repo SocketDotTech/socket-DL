@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 import "../interfaces/ISignatureVerifier.sol";
-
+import "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 import "../libraries/RescueFundsLib.sol";
-import "../libraries/SignatureVerifierLib.sol";
-
 import "../utils/AccessControl.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
@@ -15,52 +13,47 @@ import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
  * @dev This contract is modular component in socket to support different signing algorithms.
  */
 contract SignatureVerifier is ISignatureVerifier, AccessControl {
+    /*
+     * @dev Error thrown when signature length is invalid
+     */
+    error InvalidSigLength();
+
     /**
-     * @notice initialises and grants RESCUE_ROLE to owner.
+     * @notice initializes and grants RESCUE_ROLE to owner.
      * @param owner_ The address of the owner of the contract.
      */
     constructor(address owner_) AccessControl(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
     }
 
-    /// @inheritdoc ISignatureVerifier
-    function recoverSigner(
-        uint32 dstChainSlug_,
-        bytes32 packetId_,
-        bytes32 root_,
-        bytes calldata signature_
-    ) external pure override returns (address signer) {
-        return
-            SignatureVerifierLib.recoverSigner(
-                dstChainSlug_,
-                packetId_,
-                root_,
-                signature_
-            );
-    }
-
     /**
      * @notice returns the address of signer recovered from input signature and digest
+     * @param digest_ The message digest to be signed
+     * @param signature_ The signature to be verified
+     * @return signer The address of the signer
      */
-    function recoverSignerFromDigest(
+    function recoverSigner(
         bytes32 digest_,
         bytes memory signature_
     ) public pure override returns (address signer) {
-        return
-            SignatureVerifierLib.recoverSignerFromDigest(digest_, signature_);
+        bytes32 digest = keccak256(
+            abi.encodePacked("\x19Ethereum Signed Message:\n32", digest_)
+        );
+        // recovered signer is checked for the valid roles later
+        signer = ECDSA.recover(digest, signature_);
     }
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from the contract if they are locked by mistake.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 }

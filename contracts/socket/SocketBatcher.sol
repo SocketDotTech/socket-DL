@@ -1,16 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 import "../libraries/RescueFundsLib.sol";
 import "../utils/AccessControl.sol";
-
-import {ISocket} from "../interfaces/ISocket.sol";
-import {ITransmitManager} from "../interfaces/ITransmitManager.sol";
-import {IExecutionManager} from "../interfaces/IExecutionManager.sol";
-
-import {FastSwitchboard} from "../switchboard/default-switchboards/FastSwitchboard.sol";
-import {INativeRelay} from "../interfaces/INativeRelay.sol";
-
+import "../interfaces/ISocket.sol";
+import "../switchboard/default-switchboards/FastSwitchboard.sol";
+import "../interfaces/INativeRelay.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
 /**
@@ -44,11 +39,13 @@ contract SocketBatcher is AccessControl {
      * @notice A struct representing a proposal request for a packet.
      * @param packetId The ID of the packet being proposed.
      * @param root The Merkle root of the packet data.
+     * @param switchboard The address of switchboard
      * @param signature The signature of the packet data.
      */
     struct ProposeRequest {
         bytes32 packetId;
         bytes32 root;
+        address switchboard;
         bytes signature;
     }
 
@@ -60,20 +57,19 @@ contract SocketBatcher is AccessControl {
      */
     struct AttestRequest {
         bytes32 packetId;
+        uint256 proposalCount;
+        bytes32 root;
         bytes signature;
     }
 
     /**
      * @notice A struct representing a request to execute a packet.
-     * @param packetId The ID of the packet to be executed.
-     * @param localPlug The address of the local plug contract.
+     * @param executionDetails The execution details.
      * @param messageDetails The message details of the packet.
-     * @param signature The signature of the packet data.
      */
     struct ExecuteRequest {
-        bytes32 packetId;
+        ISocket.ExecutionDetails executionDetails;
         ISocket.MessageDetails messageDetails;
-        bytes signature;
     }
 
     /**
@@ -105,14 +101,14 @@ contract SocketBatcher is AccessControl {
      * @param nonce The nonce of fee setter address
      * @param dstChainSlug The sibling chain identifier
      * @param switchboardFees The fees needed by switchboard
-     * @param verificationFees The fees needed for calling allowPacket while executing
+     * @param verificationOverheadFees The fees needed for calling allowPacket while executing
      * @param signature The signature of the packet data.
      */
     struct SwitchboardSetFeesRequest {
         uint256 nonce;
         uint32 dstChainSlug;
-        uint256 switchboardFees;
-        uint256 verificationFees;
+        uint128 switchboardFees;
+        uint128 verificationOverheadFees;
         bytes signature;
     }
 
@@ -126,7 +122,7 @@ contract SocketBatcher is AccessControl {
     struct SetFeesRequest {
         uint256 nonce;
         uint32 dstChainSlug;
-        uint256 fees;
+        uint128 fees;
         bytes signature;
         bytes4 functionSelector;
     }
@@ -140,13 +136,13 @@ contract SocketBatcher is AccessControl {
         address contractAddress_,
         SwitchboardSetFeesRequest[] calldata switchboardSetFeesRequest_
     ) external {
-        uint256 executeRequestslength = switchboardSetFeesRequest_.length;
-        for (uint256 index = 0; index < executeRequestslength; ) {
+        uint256 executeRequestLength = switchboardSetFeesRequest_.length;
+        for (uint256 index = 0; index < executeRequestLength; ) {
             FastSwitchboard(contractAddress_).setFees(
                 switchboardSetFeesRequest_[index].nonce,
                 switchboardSetFeesRequest_[index].dstChainSlug,
                 switchboardSetFeesRequest_[index].switchboardFees,
-                switchboardSetFeesRequest_[index].verificationFees,
+                switchboardSetFeesRequest_[index].verificationOverheadFees,
                 switchboardSetFeesRequest_[index].signature
             );
             unchecked {
@@ -164,8 +160,8 @@ contract SocketBatcher is AccessControl {
         address contractAddress_,
         SetFeesRequest[] calldata setFeesRequests_
     ) external {
-        uint256 executeRequestslength = setFeesRequests_.length;
-        for (uint256 index = 0; index < executeRequestslength; ) {
+        uint256 feeRequestLength = setFeesRequests_.length;
+        for (uint256 index = 0; index < feeRequestLength; ) {
             ITransmitManager(contractAddress_).setTransmissionFees(
                 setFeesRequests_[index].nonce,
                 setFeesRequests_[index].dstChainSlug,
@@ -187,8 +183,8 @@ contract SocketBatcher is AccessControl {
         address contractAddress_,
         SetFeesRequest[] calldata setFeesRequests_
     ) external {
-        uint256 executeRequestslength = setFeesRequests_.length;
-        for (uint256 index = 0; index < executeRequestslength; ) {
+        uint256 feeRequestLength = setFeesRequests_.length;
+        for (uint256 index = 0; index < feeRequestLength; ) {
             if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setExecutionFees.selector
@@ -248,8 +244,8 @@ contract SocketBatcher is AccessControl {
         address socketAddress_,
         SealRequest[] calldata sealRequests_
     ) external {
-        uint256 sealRequestslength = sealRequests_.length;
-        for (uint256 index = 0; index < sealRequestslength; ) {
+        uint256 sealRequestLength = sealRequests_.length;
+        for (uint256 index = 0; index < sealRequestLength; ) {
             ISocket(socketAddress_).seal(
                 sealRequests_[index].batchSize,
                 sealRequests_[index].capacitorAddress,
@@ -270,11 +266,12 @@ contract SocketBatcher is AccessControl {
         address socketAddress_,
         ProposeRequest[] calldata proposeRequests_
     ) external {
-        uint256 proposeRequestslength = proposeRequests_.length;
-        for (uint256 index = 0; index < proposeRequestslength; ) {
-            ISocket(socketAddress_).propose(
+        uint256 proposeRequestLength = proposeRequests_.length;
+        for (uint256 index = 0; index < proposeRequestLength; ) {
+            ISocket(socketAddress_).proposeForSwitchboard(
                 proposeRequests_[index].packetId,
                 proposeRequests_[index].root,
+                proposeRequests_[index].switchboard,
                 proposeRequests_[index].signature
             );
             unchecked {
@@ -285,17 +282,19 @@ contract SocketBatcher is AccessControl {
 
     /**
      * @notice attests a batch of Packets
-     * @param switchBoardAddress_ address of switchboard
+     * @param switchboardAddress_ address of switchboard
      * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
      */
     function attestBatch(
-        address switchBoardAddress_,
+        address switchboardAddress_,
         AttestRequest[] calldata attestRequests_
     ) external {
-        uint256 attestRequestslength = attestRequests_.length;
-        for (uint256 index = 0; index < attestRequestslength; ) {
-            FastSwitchboard(switchBoardAddress_).attest(
+        uint256 attestRequestLength = attestRequests_.length;
+        for (uint256 index = 0; index < attestRequestLength; ) {
+            FastSwitchboard(switchboardAddress_).attest(
                 attestRequests_[index].packetId,
+                attestRequests_[index].proposalCount,
+                attestRequests_[index].root,
                 attestRequests_[index].signature
             );
             unchecked {
@@ -313,17 +312,18 @@ contract SocketBatcher is AccessControl {
         address socketAddress_,
         ExecuteRequest[] calldata executeRequests_
     ) external payable {
-        uint256 executeRequestslength = executeRequests_.length;
-        for (uint256 index = 0; index < executeRequestslength; ) {
-            bytes32 extraParams = executeRequests_[index]
+        uint256 executeRequestLength = executeRequests_.length;
+        for (uint256 index = 0; index < executeRequestLength; ) {
+            bytes32 executionParams = executeRequests_[index]
                 .messageDetails
-                .extraParams;
-            uint256 msgValue = uint256(uint224(uint256(extraParams)));
+                .executionParams;
+            uint8 paramType = uint8(uint256(executionParams) >> 248);
+            uint256 msgValue = uint256(uint248(uint256(executionParams)));
+            if (paramType == 0) msgValue = 0;
 
             ISocket(socketAddress_).execute{value: msgValue}(
-                executeRequests_[index].packetId,
-                executeRequests_[index].messageDetails,
-                executeRequests_[index].signature
+                executeRequests_[index].executionDetails,
+                executeRequests_[index].messageDetails
             );
             unchecked {
                 ++index;
@@ -332,7 +332,7 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
-     * @notice invoke receieve Message on PolygonRootReceiver for a batch of messages in loop
+     * @notice invoke receive Message on PolygonRootReceiver for a batch of messages in loop
      * @param polygonRootReceiverAddress_ address of polygonRootReceiver
      * @param receivePacketProofs_ the list of receivePacketProofs to be sent to receiveHook of polygonRootReceiver
      */
@@ -385,8 +385,13 @@ contract SocketBatcher is AccessControl {
             }
         }
 
-        if (address(this).balance > 0)
-            callValueRefundAddress_.call{value: address(this).balance}("");
+        if (address(this).balance > 0) {
+            if (callValueRefundAddress_ == address(0)) revert ZeroAddress();
+            SafeTransferLib.safeTransferETH(
+                callValueRefundAddress_,
+                address(this).balance
+            );
+        }
     }
 
     /**
@@ -410,16 +415,16 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
-     * @notice Rescues funds from a contract that has lost access to them.
+     * @notice Rescues funds from the contract if they are locked by mistake.
      * @param token_ The address of the token contract.
-     * @param userAddress_ The address of the user who lost access to the funds.
+     * @param rescueTo_ The address where rescued tokens need to be sent.
      * @param amount_ The amount of tokens to be rescued.
      */
     function rescueFunds(
         address token_,
-        address userAddress_,
+        address rescueTo_,
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
-        RescueFundsLib.rescueFunds(token_, userAddress_, amount_);
+        RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
     }
 }

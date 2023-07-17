@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 import "./ITransmitManager.sol";
 import "./IExecutionManager.sol";
@@ -20,9 +20,9 @@ interface ISocket {
      * @param executionFee fees needed for execution
      */
     struct Fees {
-        uint256 transmissionFees;
-        uint256 switchboardFees;
-        uint256 executionFee;
+        uint128 transmissionFees;
+        uint128 executionFee;
+        uint128 switchboardFees;
     }
 
     /**
@@ -34,56 +34,36 @@ interface ISocket {
         bytes32 msgId;
         // The fee to be paid for executing the message.
         uint256 executionFee;
-        // The maximum amount of gas that can be used to execute the message.
-        uint256 msgGasLimit;
-        bytes32 extraParams;
+        // The min amount of gas that can be used to execute the message.
+        uint256 minMsgGasLimit;
+        // The extra params which might provide msg value and additional info needed for message exec
+        bytes32 executionParams;
         // The payload data to be executed in the message.
         bytes payload;
-        // The proof data required by the Decapacitor contract to verify the message's authenticity.
-        bytes decapacitorProof;
     }
 
     /**
-     * @notice emits the message details when a new message arrives at outbound
-     * @param localChainSlug local chain slug
-     * @param localPlug local plug address
-     * @param dstChainSlug remote chain slug
-     * @param dstPlug remote plug address
-     * @param msgId message id packed with remoteChainSlug and nonce
-     * @param msgGasLimit gas limit needed to execute the inbound at remote
-     * @param payload the data which will be used by inbound at remote
+     * @title ExecutionDetails
+     * @dev This struct defines the execution details
      */
-    event MessageOutbound(
-        uint32 localChainSlug,
-        address localPlug,
-        uint32 dstChainSlug,
-        address dstPlug,
-        bytes32 msgId,
-        uint256 msgGasLimit,
-        bytes32 extraParams,
-        bytes payload,
-        Fees fees
-    );
+    struct ExecutionDetails {
+        // packet id
+        bytes32 packetId;
+        // proposal count
+        uint256 proposalCount;
+        // gas limit needed to execute inbound
+        uint256 executionGasLimit;
+        // proof data required by the Decapacitor contract to verify the message's authenticity
+        bytes decapacitorProof;
+        // signature of executor
+        bytes signature;
+    }
 
     /**
      * @notice emits the status of message after inbound call
      * @param msgId msg id which is executed
      */
     event ExecutionSuccess(bytes32 msgId);
-
-    /**
-     * @notice emits the status of message after inbound call
-     * @param msgId msg id which is executed
-     * @param result if message reverts, returns the revert message
-     */
-    event ExecutionFailed(bytes32 msgId, string result);
-
-    /**
-     * @notice emits the error message in bytes after inbound call
-     * @param msgId msg id which is executed
-     * @param result if message reverts, returns the revert message in bytes
-     */
-    event ExecutionFailedBytes(bytes32 msgId, bytes result);
 
     /**
      * @notice emits the config set by a plug for a remoteChainSlug
@@ -106,38 +86,32 @@ interface ISocket {
     );
 
     /**
-     * @notice emits when a new transmitManager contract is set
-     * @param transmitManager address of new transmitManager contract
-     */
-    event TransmitManagerSet(address transmitManager);
-
-    /**
      * @notice registers a message
      * @dev Packs the message and includes it in a packet with capacitor
      * @param remoteChainSlug_ the remote chain slug
-     * @param msgGasLimit_ the gas limit needed to execute the payload on remote
+     * @param minMsgGasLimit_ the gas limit needed to execute the payload on remote
      * @param payload_ the data which is needed by plug at inbound call on remote
      */
     function outbound(
         uint32 remoteChainSlug_,
-        uint256 msgGasLimit_,
-        bytes32 extraParams_,
+        uint256 minMsgGasLimit_,
+        bytes32 executionParams_,
+        bytes32 transmissionParams_,
         bytes calldata payload_
     ) external payable returns (bytes32 msgId);
 
     /**
      * @notice executes a message
-     * @param packetId packet id
-     * @param messageDetails_ the details needed for message verification
+     * @param executionDetails_ the packet details, proof and signature needed for message execution
+     * @param messageDetails_ the message details
      */
     function execute(
-        bytes32 packetId,
-        ISocket.MessageDetails calldata messageDetails_,
-        bytes memory signature
+        ISocket.ExecutionDetails calldata executionDetails_,
+        ISocket.MessageDetails calldata messageDetails_
     ) external payable;
 
     /**
-     * @notice seals data in capacitor for specific batchSizr
+     * @notice seals data in capacitor for specific batchSize
      * @param batchSize_ size of batch to be sealed
      * @param capacitorAddress_ address of capacitor
      * @param signature_ signed Data needed for verification
@@ -152,13 +126,15 @@ interface ISocket {
      * @notice proposes a packet
      * @param packetId_ packet id
      * @param root_ root data
+     * @param switchboard_ The address of switchboard for which this packet is proposed
      * @param signature_ signed Data needed for verification
      */
-    function propose(
+    function proposeForSwitchboard(
         bytes32 packetId_,
         bytes32 root_,
+        address switchboard_,
         bytes calldata signature_
-    ) external;
+    ) external payable;
 
     /**
      * @notice sets the config specific to the plug
@@ -175,36 +151,63 @@ interface ISocket {
     ) external;
 
     /**
-     * @notice Registers a switchboard with a specified max packet length, sibling chain slug, and capacitor type.
+     * @notice deploy capacitor and decapacitor for a switchboard with a specified max packet length, sibling chain slug, and capacitor type.
      * @param siblingChainSlug_ The slug of the sibling chain that the switchboard is registered with.
      * @param maxPacketLength_ The maximum length of a packet allowed by the switchboard.
      * @param capacitorType_ The type of capacitor that the switchboard uses.
+     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
      */
-    function registerSwitchBoard(
+    function registerSwitchboardForSibling(
         uint32 siblingChainSlug_,
         uint256 maxPacketLength_,
-        uint256 capacitorType_
-    ) external returns (address capacitor);
+        uint256 capacitorType_,
+        address siblingSwitchboard_
+    ) external returns (address capacitor, address decapacitor);
+
+    /**
+     * @notice Emits the sibling switchboard for given `siblingChainSlug_`.
+     * @dev This function is expected to be only called by switchboard.
+     * @dev the event emitted is tracked by transmitters to decide which switchboard a packet should be proposed on
+     * @param siblingChainSlug_ The slug of the sibling chain
+     * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
+     */
+    function useSiblingSwitchboard(
+        uint32 siblingChainSlug_,
+        address siblingSwitchboard_
+    ) external;
 
     /**
      * @notice Retrieves the packet id roots for a specified packet id.
-     * @param packetId_ The packet id for which to retrieve the packet id roots.
+     * @param packetId_ The packet id for which to retrieve the root.
+     * @param proposalCount_ The proposal id for packetId_ for which to retrieve the root.
+     * @param switchboard_ The address of switchboard for which this packet is proposed
      * @return The packet id roots for the specified packet id.
      */
-    function packetIdRoots(bytes32 packetId_) external view returns (bytes32);
+    function packetIdRoots(
+        bytes32 packetId_,
+        uint256 proposalCount_,
+        address switchboard_
+    ) external view returns (bytes32);
 
     /**
      * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
-     * @param msgGasLimit_ The gas limit of the message.
+     * @param minMsgGasLimit_ The gas limit of the message.
      * @param remoteChainSlug_ The slug of the destination chain for the message.
      * @param plug_ The address of the plug through which the message is sent.
      * @return totalFees The minimum fees required for the specified message.
      */
     function getMinFees(
-        uint256 msgGasLimit_,
+        uint256 minMsgGasLimit_,
         uint256 payloadSize_,
-        bytes32 extraParams_,
+        bytes32 executionParams_,
+        bytes32 transmissionParams_,
         uint32 remoteChainSlug_,
         address plug_
     ) external view returns (uint256 totalFees);
+
+    /// return instance of transmit manager
+    function transmitManager__() external view returns (ITransmitManager);
+
+    /// return instance of execution manager
+    function executionManager__() external view returns (IExecutionManager);
 }
