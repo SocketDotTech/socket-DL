@@ -50,6 +50,22 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
+     * @notice A struct representing a proposal trip request.
+     * @param switchboard The address of switchboard
+     * @param nonce The nonce of watcher for this request.
+     * @param packetId The ID of the packet being proposed.
+     * @param proposalCount The proposal Count for the proposal.
+     * @param signature The signature of the packet data.
+     */
+    struct ProposalTripRequest {
+        address switchboard;
+        uint256 nonce;
+        bytes32 packetId;
+        uint256 proposalCount;
+        bytes signature;
+    }
+
+    /**
      * @notice A struct representing an attestation request for a packet.
      * @param packetId The ID of the packet being attested.
      * @param srcChainSlug The slug of the source chain.
@@ -126,6 +142,9 @@ contract SocketBatcher is AccessControl {
         bytes signature;
         bytes4 functionSelector;
     }
+
+    event FailedLogBytes(bytes reason);
+    event FailedLog(string reason);
 
     /**
      * @notice sets fees in batch for switchboards
@@ -297,6 +316,37 @@ contract SocketBatcher is AccessControl {
                 attestRequests_[index].root,
                 attestRequests_[index].signature
             );
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    /**
+     * @notice trip a batch of Proposals
+     * @param proposalTripRequests_ the list of requests for tripping proposals
+     */
+    function proposalTripBatch(
+        ProposalTripRequest[] calldata proposalTripRequests_
+    ) external {
+        uint256 proposalTripRequestLength = proposalTripRequests_.length;
+        for (uint256 index = 0; index < proposalTripRequestLength; ) {
+            try
+                FastSwitchboard(proposalTripRequests_[index].switchboard)
+                    .tripProposal(
+                        proposalTripRequests_[index].nonce,
+                        proposalTripRequests_[index].packetId,
+                        proposalTripRequests_[index].proposalCount,
+                        proposalTripRequests_[index].signature
+                    )
+            {} catch Error(string memory reason) {
+                // catch failing revert() and require()
+                emit FailedLog(reason);
+            } catch (bytes memory reason) {
+                // catch failing assert()
+                emit FailedLogBytes(reason);
+            }
+
             unchecked {
                 ++index;
             }
