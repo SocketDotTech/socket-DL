@@ -329,6 +329,10 @@ contract SocketBatcher is AccessControl {
                 ++index;
             }
         }
+
+        if (address(this).balance > 0) {
+            SafeTransferLib.safeTransferETH(msg.sender, address(this).balance);
+        }
     }
 
     /**
