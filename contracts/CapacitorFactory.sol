@@ -19,14 +19,20 @@ import {RESCUE_ROLE} from "./utils/AccessRoles.sol";
  */
 contract CapacitorFactory is ICapacitorFactory, AccessControl {
     uint256 private constant SINGLE_CAPACITOR = 1;
-    uint256 private constant HASH_CHAIN_CAPACITOR = 2;
+
+    // admin initialized max value for max packet length
+    uint256 public immutable maxAllowedPacketLength;
+
+    error PacketLengthNotAllowed();
 
     /**
      * @notice initializes and grants RESCUE_ROLE to owner.
      * @param owner_ The address of the owner of the contract.
+     * @param maxAllowedPacketLength_ The max length allowed for capacitors
      */
-    constructor(address owner_) AccessControl(owner_) {
+    constructor(address owner_, uint256 maxAllowedPacketLength_) AccessControl(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
+        maxAllowedPacketLength = maxAllowedPacketLength_;
     }
 
     /**
@@ -41,6 +47,7 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
         uint32 /** siblingChainSlug_ */,
         uint256 maxPacketLength_
     ) external override returns (ICapacitor, IDecapacitor) {
+        if(maxPacketLength_ > maxAllowedPacketLength) revert PacketLengthNotAllowed();
         // fetch the capacitor factory owner
         address owner = this.owner();
 
