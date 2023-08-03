@@ -14,7 +14,7 @@ contract CapacitorFactoryTest is Setup {
 
     function setUp() external {
         initialize();
-        _cf = new CapacitorFactory(_socketOwner);
+        _cf = new CapacitorFactory(_socketOwner, maxAllowedPacketLength);
         _token = new ERC20PresetFixedSupply(
             "TEST",
             "T",
@@ -37,22 +37,8 @@ contract CapacitorFactoryTest is Setup {
         );
     }
 
-    function testDeployHashChainCapacitor() external {
-        (ICapacitor singleCapacitor, IDecapacitor singleDecapacitor) = _cf
-            .deploy(2, siblingChainSlug, DEFAULT_BATCH_LENGTH);
-
-        assertEq(
-            address(singleCapacitor),
-            0x104fBc016F4bb334D775a19E8A6510109AC63E00
-        );
-        assertEq(
-            address(singleDecapacitor),
-            0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3
-        );
-    }
-
     function testDeployForInvalidCapacitorType(uint256 capacitorType) external {
-        if (capacitorType != 1 && capacitorType != 2) {
+        if (capacitorType != 1) {
             vm.expectRevert(ICapacitorFactory.InvalidCapacitorType.selector);
         }
 
