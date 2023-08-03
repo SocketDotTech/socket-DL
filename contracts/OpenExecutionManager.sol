@@ -23,7 +23,7 @@ contract OpenExecutionManager is ExecutionManager {
 
     /**
      * @notice This function allows all executors
-     * @notice The executor recovered here can be a random address hence should not be used for fee accounting
+     * @notice As executor recovered here is used for fee accounting, it is critical to provide a valid signature else can lead to loss of funds
      * @param packedMessage Packed message to be executed
      * @param sig Signature of the message
      * @return executor Address of the executor
