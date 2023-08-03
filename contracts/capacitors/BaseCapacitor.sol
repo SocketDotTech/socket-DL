@@ -47,7 +47,7 @@ abstract contract BaseCapacitor is ICapacitor, AccessControl {
 
     /**
      * @dev Returns the count of the latest packet that finished filling.
-     * @dev Returns 0 in case no packets are filled.
+     * @dev Returns 0 in case 0 or 1 packets are filled, hence this case should be considered by the caller
      * @return lastFilledPacket count of the latest packet.
      */
     function getLastFilledPacket()
