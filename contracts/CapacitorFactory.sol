@@ -3,9 +3,7 @@ pragma solidity 0.8.19;
 
 import "./interfaces/ICapacitorFactory.sol";
 import "./capacitors/SingleCapacitor.sol";
-import "./capacitors/HashChainCapacitor.sol";
 import "./decapacitors/SingleDecapacitor.sol";
-import "./decapacitors/HashChainDecapacitor.sol";
 
 import "./libraries/RescueFundsLib.sol";
 import "./utils/AccessControl.sol";
@@ -56,13 +54,6 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
                 // msg.sender is socket address
                 new SingleCapacitor(msg.sender, owner),
                 new SingleDecapacitor(owner)
-            );
-        }
-        if (capacitorType_ == HASH_CHAIN_CAPACITOR) {
-            return (
-                // msg.sender is socket address
-                new HashChainCapacitor(msg.sender, owner, maxPacketLength_),
-                new HashChainDecapacitor(owner)
             );
         }
         revert InvalidCapacitorType();
