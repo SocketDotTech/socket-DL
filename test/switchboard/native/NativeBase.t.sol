@@ -14,7 +14,7 @@ contract NativeBaseSwitchboardTest is Setup {
     address crossDomainManagerAddress_ =
         0x4200000000000000000000000000000000000007;
 
-    OptimismSwitchboard optimismSwitchboard;
+    OptimismSwitchboard nativeSwitchboard;
     ICapacitor singleCapacitor;
 
     event GlobalTripChanged(bool isGlobalTipped_);
@@ -43,7 +43,7 @@ contract NativeBaseSwitchboardTest is Setup {
     }
 
     function testRegisterSiblingSlug() public {
-        assertFalse(optimismSwitchboard.isInitialized());
+        assertFalse(nativeSwitchboard.isInitialized());
 
         hoax(_raju);
         vm.expectRevert(
@@ -52,7 +52,7 @@ contract NativeBaseSwitchboardTest is Setup {
                 GOVERNANCE_ROLE
             )
         );
-        optimismSwitchboard.registerSiblingSlug(
+        nativeSwitchboard.registerSiblingSlug(
             _b.chainSlug,
             1,
             1,
@@ -61,7 +61,7 @@ contract NativeBaseSwitchboardTest is Setup {
         );
 
         vm.startPrank(_socketOwner);
-        optimismSwitchboard.registerSiblingSlug(
+        nativeSwitchboard.registerSiblingSlug(
             _b.chainSlug,
             1,
             1,
@@ -70,7 +70,7 @@ contract NativeBaseSwitchboardTest is Setup {
         );
 
         vm.expectRevert(NativeSwitchboardBase.AlreadyInitialized.selector);
-        optimismSwitchboard.registerSiblingSlug(
+        nativeSwitchboard.registerSiblingSlug(
             _b.chainSlug,
             1,
             1,
@@ -78,49 +78,39 @@ contract NativeBaseSwitchboardTest is Setup {
             remoteNativeSwitchboard_
         );
 
-        assertTrue(optimismSwitchboard.isInitialized());
-        // assertEq(optimismSwitchboard.maxPacketLength(), 1);
-
+        assertTrue(nativeSwitchboard.isInitialized());
         vm.stopPrank();
     }
 
-    // function testWithdrawFees() public {
-    //     (uint256 minFees, ) = optimismSwitchboard.getMinFees(bChainSlug);
-    //     deal(_feesPayer, minFees);
+    function testWithdrawFees() public {
+        uint256 amount = 1e18;
 
-    //     assertEq(address(optimismSwitchboard).balance, 0);
-    //     assertEq(_feesPayer.balance, minFees);
+        vm.startPrank(_socketOwner);
+        nativeSwitchboard.grantRole(WITHDRAW_ROLE, _socketOwner);
+        vm.deal(address(nativeSwitchboard), amount);
+        uint256 initialBal = _fundRescuer.balance;
 
-    //     vm.startPrank(_feesPayer);
-    //     optimismSwitchboard.receiveFees{value: minFees}(bChainSlug);
-    //     vm.stopPrank();
+        vm.expectRevert(ZeroAddress.selector);
+        nativeSwitchboard.withdrawFees(address(0));
 
-    //     assertEq(_feesWithdrawer.balance, 0);
+        nativeSwitchboard.withdrawFees(_fundRescuer);
 
-    //     hoax(_raju);
-    //     vm.expectRevert();
-    //     optimismSwitchboard.withdrawFees(_feesWithdrawer);
+        assertEq(address(nativeSwitchboard).balance, 0);
+        assertEq(_fundRescuer.balance, initialBal + amount);
 
-    //     hoax(_socketOwner);
-    //     optimismSwitchboard.withdrawFees(_feesWithdrawer);
-
-    //     assertEq(_feesWithdrawer.balance, minFees);
-    // }
+        vm.stopPrank();
+    }
 
     function testRescueNativeFunds() public {
         uint256 amount = 1e18;
 
         hoax(_socketOwner);
         vm.expectRevert();
-        optimismSwitchboard.rescueFunds(
-            NATIVE_TOKEN_ADDRESS,
-            address(0),
-            amount
-        );
+        nativeSwitchboard.rescueFunds(NATIVE_TOKEN_ADDRESS, address(0), amount);
 
         hoax(_socketOwner);
         _rescueNative(
-            address(optimismSwitchboard),
+            address(nativeSwitchboard),
             NATIVE_TOKEN_ADDRESS,
             _feesWithdrawer,
             amount
@@ -128,15 +118,15 @@ contract NativeBaseSwitchboardTest is Setup {
     }
 
     function testTripGlobal() external {
-        uint256 tripNonce = optimismSwitchboard.nextNonce(_socketOwner);
-        assertFalse(optimismSwitchboard.isGlobalTipped());
+        uint256 tripNonce = nativeSwitchboard.nextNonce(_socketOwner);
+        assertFalse(nativeSwitchboard.isGlobalTipped());
 
         vm.startPrank(_socketOwner);
 
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_NATIVE_SIG_IDENTIFIER,
-                address(optimismSwitchboard),
+                address(nativeSwitchboard),
                 _a.chainSlug,
                 tripNonce,
                 true
@@ -147,20 +137,24 @@ contract NativeBaseSwitchboardTest is Setup {
         vm.expectRevert(
             abi.encodeWithSelector(AccessControl.NoPermit.selector, TRIP_ROLE)
         );
-        optimismSwitchboard.tripGlobal(tripNonce, sig);
+        nativeSwitchboard.tripGlobal(tripNonce, sig);
 
-        optimismSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
+        nativeSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
         vm.expectEmit(false, false, false, true);
         emit GlobalTripChanged(true);
-        optimismSwitchboard.tripGlobal(tripNonce, sig);
+        nativeSwitchboard.tripGlobal(tripNonce, sig);
         vm.stopPrank();
 
-        assertTrue(optimismSwitchboard.isGlobalTipped());
+        assertTrue(nativeSwitchboard.isGlobalTipped());
+
+        bytes32 packetId = bytes32("RANDOM_PACKET");
+        bytes32 root = bytes32("RANDOM_ROOT");
+
         assertFalse(
-            optimismSwitchboard.allowPacket(
-                bytes32(0),
-                bytes32(0),
+            nativeSwitchboard.allowPacket(
+                packetId,
+                root,
                 uint256(0),
                 uint32(0),
                 uint256(0)
@@ -168,36 +162,36 @@ contract NativeBaseSwitchboardTest is Setup {
         );
 
         vm.expectRevert(NativeSwitchboardBase.InvalidNonce.selector);
-        optimismSwitchboard.tripGlobal(tripNonce, sig);
+        nativeSwitchboard.tripGlobal(tripNonce, sig);
     }
 
     function testUntrip() external {
         vm.startPrank(_socketOwner);
-        optimismSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
+        nativeSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_NATIVE_SIG_IDENTIFIER,
-                address(optimismSwitchboard),
+                address(nativeSwitchboard),
                 _a.chainSlug,
-                optimismSwitchboard.nextNonce(_socketOwner),
+                nativeSwitchboard.nextNonce(_socketOwner),
                 true
             )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
-        optimismSwitchboard.tripGlobal(
-            optimismSwitchboard.nextNonce(_socketOwner),
+        nativeSwitchboard.tripGlobal(
+            nativeSwitchboard.nextNonce(_socketOwner),
             sig
         );
-        assertTrue(optimismSwitchboard.isGlobalTipped());
+        assertTrue(nativeSwitchboard.isGlobalTipped());
 
         // unTrip
-        uint256 unTripNonce = optimismSwitchboard.nextNonce(_socketOwner);
+        uint256 unTripNonce = nativeSwitchboard.nextNonce(_socketOwner);
         digest = keccak256(
             abi.encode(
                 UN_TRIP_NATIVE_SIG_IDENTIFIER,
-                address(optimismSwitchboard),
+                address(nativeSwitchboard),
                 _a.chainSlug,
                 unTripNonce,
                 false
@@ -211,33 +205,33 @@ contract NativeBaseSwitchboardTest is Setup {
                 UN_TRIP_ROLE
             )
         );
-        optimismSwitchboard.unTrip(unTripNonce, sig);
+        nativeSwitchboard.unTrip(unTripNonce, sig);
 
-        optimismSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
+        nativeSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
 
         vm.expectEmit(false, false, false, true);
         emit GlobalTripChanged(false);
-        optimismSwitchboard.unTrip(unTripNonce, sig);
+        nativeSwitchboard.unTrip(unTripNonce, sig);
 
         vm.stopPrank();
 
-        assertFalse(optimismSwitchboard.isGlobalTipped());
+        assertFalse(nativeSwitchboard.isGlobalTipped());
 
         vm.expectRevert(NativeSwitchboardBase.InvalidNonce.selector);
-        optimismSwitchboard.unTrip(unTripNonce, sig);
+        nativeSwitchboard.unTrip(unTripNonce, sig);
     }
 
     function testSetFees() external {
         uint128 switchboardFee = 1000;
         uint128 verificationFee = 1000;
-        uint256 feeNonce = optimismSwitchboard.nextNonce(_socketOwner);
-        assertEq(optimismSwitchboard.switchboardFees(), 0);
-        assertEq(optimismSwitchboard.verificationOverheadFees(), 0);
+        uint256 feeNonce = nativeSwitchboard.nextNonce(_socketOwner);
+        assertEq(nativeSwitchboard.switchboardFees(), 0);
+        assertEq(nativeSwitchboard.verificationOverheadFees(), 0);
 
         bytes32 digest = keccak256(
             abi.encode(
                 FEES_UPDATE_SIG_IDENTIFIER,
-                address(optimismSwitchboard),
+                address(nativeSwitchboard),
                 _a.chainSlug,
                 feeNonce,
                 switchboardFee,
@@ -248,7 +242,7 @@ contract NativeBaseSwitchboardTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit SwitchboardFeesSet(switchboardFee, verificationFee);
-        optimismSwitchboard.setFees(
+        nativeSwitchboard.setFees(
             feeNonce,
             _b.chainSlug,
             switchboardFee,
@@ -257,7 +251,7 @@ contract NativeBaseSwitchboardTest is Setup {
         );
 
         vm.expectRevert(NativeSwitchboardBase.InvalidNonce.selector);
-        optimismSwitchboard.setFees(
+        nativeSwitchboard.setFees(
             feeNonce,
             _b.chainSlug,
             switchboardFee,
@@ -280,7 +274,7 @@ contract NativeBaseSwitchboardTest is Setup {
     function addOptimismSwitchboard(ChainContext storage cc_) internal {
         vm.startPrank(_socketOwner);
 
-        optimismSwitchboard = new OptimismSwitchboard(
+        nativeSwitchboard = new OptimismSwitchboard(
             cc_.chainSlug,
             receiveGasLimit_,
             _socketOwner,
@@ -289,10 +283,10 @@ contract NativeBaseSwitchboardTest is Setup {
             cc_.sigVerifier__
         );
 
-        optimismSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
-        optimismSwitchboard.grantRole(WITHDRAW_ROLE, _feesWithdrawer);
-        optimismSwitchboard.grantRole(RESCUE_ROLE, _socketOwner);
-        optimismSwitchboard.grantRole(FEES_UPDATER_ROLE, _socketOwner);
+        nativeSwitchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+        nativeSwitchboard.grantRole(WITHDRAW_ROLE, _feesWithdrawer);
+        nativeSwitchboard.grantRole(RESCUE_ROLE, _socketOwner);
+        nativeSwitchboard.grantRole(FEES_UPDATER_ROLE, _socketOwner);
 
         vm.stopPrank();
     }
