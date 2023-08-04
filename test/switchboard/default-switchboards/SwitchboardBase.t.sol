@@ -235,6 +235,7 @@ contract SwitchboardBaseTest is Setup {
         emit ProposalTripped(packetId, proposalCount);
         fastSwitchboard.tripProposal(nonce, packetId, proposalCount, sig);
 
+        // return false if the specific packet proposal is tripped
         assertFalse(
             fastSwitchboard.allowPacket(
                 root,
@@ -244,6 +245,7 @@ contract SwitchboardBaseTest is Setup {
                 block.timestamp
             )
         );
+
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
         fastSwitchboard.tripProposal(nonce, packetId, proposalCount, sig);
         assertTrue(fastSwitchboard.isProposalTripped(packetId, proposalCount));
