@@ -42,7 +42,7 @@ contract NativeBaseSwitchboardTest is Setup {
         _chainSetup(transmitterPrivateKeys);
     }
 
-    function testregisterSiblingSlug() public {
+    function testRegisterSiblingSlug() public {
         assertFalse(optimismSwitchboard.isInitialized());
 
         hoax(_raju);
@@ -157,6 +157,15 @@ contract NativeBaseSwitchboardTest is Setup {
         vm.stopPrank();
 
         assertTrue(optimismSwitchboard.isGlobalTipped());
+        assertFalse(
+            optimismSwitchboard.allowPacket(
+                bytes32(0),
+                bytes32(0),
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
 
         vm.expectRevert(NativeSwitchboardBase.InvalidNonce.selector);
         optimismSwitchboard.tripGlobal(tripNonce, sig);
