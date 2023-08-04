@@ -299,6 +299,8 @@ contract FastSwitchboardTest is Setup {
     }
 
     function testIsAllowed() external {
+        uint256 proposeTime = block.timestamp;
+
         _attestOnDst(
             address(fastSwitchboard),
             _b.chainSlug,
@@ -308,6 +310,16 @@ contract FastSwitchboardTest is Setup {
             _watcherPrivateKey
         );
         assertEq(fastSwitchboard.attestations(root), 1);
+
+        bool isAllowed = fastSwitchboard.allowPacket(
+            root,
+            packetId,
+            0,
+            _a.chainSlug,
+            proposeTime
+        );
+
+        assertFalse(isAllowed);
 
         _attestOnDst(
             address(fastSwitchboard),
@@ -319,9 +331,7 @@ contract FastSwitchboardTest is Setup {
         );
         assertEq(fastSwitchboard.attestations(root), 2);
 
-        uint256 proposeTime = block.timestamp;
-
-        bool isAllowed = fastSwitchboard.allowPacket(
+        isAllowed = fastSwitchboard.allowPacket(
             root,
             packetId,
             0,
