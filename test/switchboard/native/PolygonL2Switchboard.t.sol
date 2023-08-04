@@ -59,7 +59,7 @@ contract PolygonL2SwitchboardTest is Setup {
     }
 
     function testNonBridgeReceivePacketCall() public {
-        vm.expectRevert(bytes("ONLY_FX_CHILD"));
+        vm.expectRevert(bytes("ONLY_FX_ROOT"));
         polygonL2Switchboard.receivePacket(bytes32(0), bytes32(0));
     }
 
