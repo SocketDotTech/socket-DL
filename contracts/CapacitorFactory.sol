@@ -28,7 +28,10 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
      * @param owner_ The address of the owner of the contract.
      * @param maxAllowedPacketLength_ The max length allowed for capacitors
      */
-    constructor(address owner_, uint256 maxAllowedPacketLength_) AccessControl(owner_) {
+    constructor(
+        address owner_,
+        uint256 maxAllowedPacketLength_
+    ) AccessControl(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
         maxAllowedPacketLength = maxAllowedPacketLength_;
     }
@@ -45,7 +48,8 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
         uint32 /** siblingChainSlug_ */,
         uint256 maxPacketLength_
     ) external override returns (ICapacitor, IDecapacitor) {
-        if(maxPacketLength_ > maxAllowedPacketLength) revert PacketLengthNotAllowed();
+        if (maxPacketLength_ > maxAllowedPacketLength)
+            revert PacketLengthNotAllowed();
         // fetch the capacitor factory owner
         address owner = this.owner();
 
