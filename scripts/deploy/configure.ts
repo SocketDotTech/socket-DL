@@ -1,5 +1,5 @@
 import fs from "fs";
-import { BigNumberish, Wallet, constants, ethers } from "ethers";
+import { Wallet, constants } from "ethers";
 
 import { getProviderFromChainName, switchboards } from "../constants";
 import {
