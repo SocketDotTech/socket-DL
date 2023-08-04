@@ -355,6 +355,12 @@ contract ExecutionManagerTest is Setup {
 
         assertEq(storedTransmissionFees2, storedTransmissionFees1 - amount);
         assertEq(address(_a.transmitManager__).balance, amount);
+
+        hoax(_socketOwner);
+        _a.socket__.setExecutionManager(address(uint160(c++)));
+
+        vm.expectRevert(TransmitManager.OnlyExecutionManager.selector);
+        executionManager.withdrawTransmissionFees(bChainSlug, 100);
     }
 
     function testWithdrawSwitchboardFees() public {
