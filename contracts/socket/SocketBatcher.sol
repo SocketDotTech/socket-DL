@@ -313,13 +313,17 @@ contract SocketBatcher is AccessControl {
         ExecuteRequest[] calldata executeRequests_
     ) external payable {
         uint256 executeRequestLength = executeRequests_.length;
+        uint256 totalMsgValue = msg.value;
         for (uint256 index = 0; index < executeRequestLength; ) {
             bytes32 executionParams = executeRequests_[index]
                 .messageDetails
                 .executionParams;
             uint8 paramType = uint8(uint256(executionParams) >> 248);
             uint256 msgValue = uint256(uint248(uint256(executionParams)));
-            if (paramType == 0) msgValue = 0;
+
+            if (paramType == 0) {
+                msgValue = 0;
+            } else totalMsgValue -= msgValue;
 
             ISocket(socketAddress_).execute{value: msgValue}(
                 executeRequests_[index].executionDetails,
@@ -328,6 +332,10 @@ contract SocketBatcher is AccessControl {
             unchecked {
                 ++index;
             }
+        }
+
+        if (totalMsgValue > 0) {
+            SafeTransferLib.safeTransferETH(msg.sender, totalMsgValue);
         }
     }
 
@@ -365,11 +373,14 @@ contract SocketBatcher is AccessControl {
     ) external payable {
         uint256 arbitrumNativeInitiatorRequestsLength = arbitrumNativeInitiatorRequests_
                 .length;
+        uint256 totalMsgValue = msg.value;
+
         for (
             uint256 index = 0;
             index < arbitrumNativeInitiatorRequestsLength;
 
         ) {
+            totalMsgValue -= arbitrumNativeInitiatorRequests_[index].callValue;
             INativeRelay(switchboardAddress_).initiateNativeConfirmation{
                 value: arbitrumNativeInitiatorRequests_[index].callValue
             }(
@@ -385,11 +396,11 @@ contract SocketBatcher is AccessControl {
             }
         }
 
-        if (address(this).balance > 0) {
+        if (totalMsgValue > 0) {
             if (callValueRefundAddress_ == address(0)) revert ZeroAddress();
             SafeTransferLib.safeTransferETH(
                 callValueRefundAddress_,
-                address(this).balance
+                totalMsgValue
             );
         }
     }
