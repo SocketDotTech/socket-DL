@@ -103,6 +103,13 @@ contract SwitchboardBaseTest is Setup {
         vm.stopPrank();
 
         assertTrue(fastSwitchboard.isGlobalTipped());
+        assertFalse(fastSwitchboard.allowPacket(
+            root,
+            packetId,
+            0,
+            _a.chainSlug,
+            100
+        ));
     }
 
     function testUntripGlobal() external {
