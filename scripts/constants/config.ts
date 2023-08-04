@@ -1,5 +1,7 @@
 import { ChainKey, IntegrationTypes, NativeSwitchboard } from "../../src/types";
 
+export const maxAllowedPacketLength = 10;
+
 export const timeout: {
   [key: string]: number;
 } = {
