@@ -272,6 +272,31 @@ contract ExecutionManagerTest is Setup {
         );
     }
 
+    function testPayAndCheckFeesWithExecutionFeeSetTooHigh() public {
+        uint256 minMsgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        uint256 msgValue = 1000;
+        uint8 paramType = 1;
+        bytes32 executionParams = bytes32(
+            uint256((uint256(paramType) << 248) | uint248(msgValue))
+        );
+
+        _setExecutionFees(_a, _b.chainSlug, type(uint128).max);
+        _setRelativeNativeTokenPrice(
+            _a,
+            _b.chainSlug,
+            _relativeNativeTokenPrice
+        );
+
+        vm.expectRevert(ExecutionManager.FeesTooHigh.selector);
+        _a.executionManager__.getMinFees(
+            minMsgGasLimit,
+            payloadSize,
+            executionParams,
+            _b.chainSlug
+        );
+    }
+
     function testPayAndCheckFeesWithMsgValueTooHigh() public {
         uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
