@@ -117,6 +117,22 @@ contract NativeBaseSwitchboardTest is Setup {
         );
     }
 
+    // should return false if packet not received from native bridge (default case)
+     function testAllowPacket() external {
+        bytes32 packetId = bytes32("RANDOM_PACKET");
+        bytes32 root = bytes32("RANDOM_ROOT");
+
+        assertFalse(
+            nativeSwitchboard.allowPacket(
+                packetId,
+                root,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+    }
+
     function testTripGlobal() external {
         uint256 tripNonce = nativeSwitchboard.nextNonce(_socketOwner);
         assertFalse(nativeSwitchboard.isGlobalTipped());
