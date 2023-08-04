@@ -93,6 +93,15 @@ contract ExecutionManagerTest is Setup {
             executionParams,
             bChainSlug
         );
+
+        // also reverts if an unknown sibling slug is used
+        vm.expectRevert(ExecutionManager.MsgValueTooHigh.selector);
+        executionManager.getMinFees(
+            minMsgGasLimit,
+            payloadSize,
+            executionParams,
+            uint32(c++)
+        );
     }
 
     function testGetMinFeesWithMsgValueTooLow() public {
