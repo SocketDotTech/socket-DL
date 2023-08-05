@@ -492,4 +492,50 @@ contract FastSwitchboardTest is Setup {
             _watcherPrivateKey
         );
     }
+
+    function testInvalidPacketCount() external {
+        uint32 newSibling = uint32(c++);
+
+        uint256 initialPacketCount = 100;
+        bytes32 invalidPacketId = bytes32(
+            (uint256(newSibling) << 224) | (uint256(uint160(c++)) << 64) | 1
+        );
+        bytes32 validPacketId = bytes32(
+            (uint256(newSibling) << 224) |
+                (uint256(uint160(c++)) << 64) |
+                (initialPacketCount + 1)
+        );
+
+        skip(100);
+        uint256 proposeTime = block.timestamp - 10;
+
+        hoax(_socketOwner);
+        fastSwitchboard.registerSiblingSlug(
+            newSibling,
+            DEFAULT_BATCH_LENGTH,
+            1,
+            initialPacketCount,
+            address(uint160(c++))
+        );
+
+        bool isAllowed = fastSwitchboard.allowPacket(
+            root,
+            invalidPacketId,
+            0,
+            newSibling,
+            proposeTime
+        );
+
+        assertFalse(isAllowed);
+
+        isAllowed = fastSwitchboard.allowPacket(
+            root,
+            validPacketId,
+            0,
+            newSibling,
+            proposeTime
+        );
+
+        assertTrue(isAllowed);
+    }
 }

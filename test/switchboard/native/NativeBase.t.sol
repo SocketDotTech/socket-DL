@@ -276,6 +276,43 @@ contract NativeBaseSwitchboardTest is Setup {
         );
     }
 
+    function testInvalidPacketCount() external {
+        uint32 newSibling = uint32(c++);
+        bytes32 root = bytes32("RANDOM_ROOT");
+
+        uint256 initialPacketCount = 100;
+        bytes32 invalidPacketId = bytes32(
+            (uint256(newSibling) << 224) | (uint256(uint160(c++)) << 64) | 1
+        );
+        bytes32 validPacketId = bytes32(
+            (uint256(newSibling) << 224) |
+                (uint256(uint160(c++)) << 64) |
+                (initialPacketCount + 1)
+        );
+
+        skip(100);
+        uint256 proposeTime = block.timestamp - 10;
+
+        hoax(_socketOwner);
+        nativeSwitchboard.registerSiblingSlug(
+            newSibling,
+            DEFAULT_BATCH_LENGTH,
+            1,
+            initialPacketCount,
+            address(uint160(c++))
+        );
+
+        bool isAllowed = nativeSwitchboard.allowPacket(
+            root,
+            invalidPacketId,
+            0,
+            newSibling,
+            proposeTime
+        );
+
+        assertFalse(isAllowed);
+    }
+
     function _chainSetup(uint256[] memory transmitterPrivateKeys_) internal {
         _deployContractsOnSingleChain(
             _a,
