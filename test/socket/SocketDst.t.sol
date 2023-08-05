@@ -22,7 +22,6 @@ contract SocketDstTest is Setup {
     error AlreadyAttested();
     error InvalidTransmitter();
     error InsufficientFees();
-    error InvalidProof();
     error NotExecutor();
     event ExecutionSuccess(bytes32 msgId);
     event ExecutionFailed(bytes32 msgId, string result);
@@ -695,6 +694,29 @@ contract SocketDstTest is Setup {
             )
         );
 
+        // not attested
+        _proposeOnDst(
+            _b,
+            sig_,
+            packetId,
+            root,
+            address(_b.configs__[0].switchboard__)
+        );
+        vm.expectRevert(SocketDst.VerificationFailed.selector);
+        _executePayloadOnDst(
+            _b,
+            ExecutePayloadOnDstParams(
+                packetId,
+                proposalCount,
+                msgId,
+                _minMsgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
+        );
     }
 
     function getLatestSignature(
