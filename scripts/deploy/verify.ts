@@ -3,7 +3,7 @@ import fs from "fs";
 
 import { deploymentsPath, verify } from "./utils/utils";
 import { mode } from "./config";
-import { ChainKey, networkToChainSlug } from "../../src";
+import { ChainKey, ChainSlugToKey } from "../../src";
 
 export type VerifyParams = {
   [chain in ChainKey]?: VerifyArgs[];
@@ -29,7 +29,7 @@ export const main = async () => {
     for (let chainIndex = 0; chainIndex < chains.length; chainIndex++) {
       const chain = chains[chainIndex];
 
-      hre.changeNetwork(networkToChainSlug[chain]);
+      hre.changeNetwork(ChainSlugToKey[chain]);
       const chainParams: VerifyArgs[] = verificationParams[chain];
       if (chainParams.length) {
         const len = chainParams.length;

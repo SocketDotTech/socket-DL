@@ -5,7 +5,7 @@ import {
   ChainSocketAddresses,
   DeploymentAddresses,
   IntegrationTypes,
-  networkToChainSlug,
+  ChainSlugToKey,
 } from "../../src";
 import { Contract, Wallet, ethers } from "ethers";
 import { mode, overrides } from "../deploy/config";
@@ -90,7 +90,7 @@ export const main = async () => {
       }
 
       const providerInstance = getProviderFromChainName(
-        networkToChainSlug[chainSlug]
+        ChainSlugToKey[chainSlug]
       );
       const signer: Wallet = new ethers.Wallet(
         process.env.SOCKET_SIGNER_KEY as string,

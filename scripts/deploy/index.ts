@@ -7,7 +7,7 @@ import {
   ChainSocketAddresses,
   DeploymentAddresses,
   getAllAddresses,
-  networkToChainSlug,
+  ChainSlugToKey,
 } from "../../src";
 import { chains, mode } from "./config";
 
@@ -26,7 +26,7 @@ export const main = async () => {
     await Promise.all(
       chains.map(async (chain: ChainSlug) => {
         let allDeployed = false;
-        const network = networkToChainSlug[chain];
+        const network = ChainSlugToKey[chain];
 
         const providerInstance = getProviderFromChainName(network);
         const signer: Wallet = new ethers.Wallet(

@@ -4,6 +4,7 @@ out/
 node_modules/
 scratchpad/
 
+scripts/scratchpad/
 #Hardhat files
 cache_hardhat/
 artifacts/

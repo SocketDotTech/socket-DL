@@ -5,7 +5,7 @@ import {
   CORE_CONTRACTS,
   ChainSocketAddresses,
   DeploymentMode,
-  networkToChainSlug,
+  ChainSlugToKey,
   version,
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
@@ -96,7 +96,7 @@ export const deploySocket = async (
 
     // switchboards deploy
     deployUtils.addresses = await deploySwitchboards(
-      networkToChainSlug[chainSlug],
+      ChainSlugToKey[chainSlug],
       socketSigner,
       deployUtils.addresses,
       currentMode
