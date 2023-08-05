@@ -35,6 +35,23 @@ contract SocketSrcTest is Setup {
         bytes payload
     );
 
+    // Event triggered when a new switchboard is added
+    event SwitchboardAdded(
+        address switchboard,
+        uint32 siblingChainSlug,
+        address capacitor,
+        address decapacitor,
+        uint256 maxPacketLength,
+        uint256 capacitorType
+    );
+
+    // Event triggered when a new switchboard is added
+    event SiblingSwitchboardUpdated(
+        address switchboard,
+        uint32 siblingChainSlug,
+        address siblingSwitchboard
+    );
+
     function setUp() external {
         uint256[] memory transmitterPrivateKeys = new uint256[](1);
         transmitterPrivateKeys[0] = _transmitterPrivateKey;
@@ -44,6 +61,37 @@ contract SocketSrcTest is Setup {
 
         uint256 index = isFast ? 0 : 1;
         _configPlugContracts(index);
+    }
+
+    function testRegisterSwitchboardForSibling() external {
+        uint32 siblingChainSlug_ = uint32(c++);
+        uint256 maxPacketLength_ = DEFAULT_BATCH_LENGTH;
+        uint256 capacitorType_ = 1;
+        address switchboard = address(uint160(c++));
+        address siblingSwitchboard_ = address(uint160(c++));
+
+        hoax(switchboard);
+        vm.expectEmit(false, false, false, true);
+        emit SwitchboardAdded(
+            switchboard,
+            siblingChainSlug_,
+            address(0xC03b41d3947f3974978680061B15a736DF5346Cf),
+            address(0xf787702c0F39b8A70d4F8A6C99C3dB0a87275087),
+            DEFAULT_BATCH_LENGTH,
+            capacitorType_
+        );
+        vm.expectEmit(false, false, false, true);
+        emit SiblingSwitchboardUpdated(
+            switchboard,
+            siblingChainSlug_,
+            siblingSwitchboard_
+        );
+        _a.socket__.registerSwitchboardForSibling(
+            siblingChainSlug_,
+            maxPacketLength_,
+            capacitorType_,
+            siblingSwitchboard_
+        );
     }
 
     function testPlugConfiguration() external {
@@ -335,19 +383,19 @@ contract SocketSrcTest is Setup {
     }
 
     function _configPlugContracts(uint256 socketConfigIndex) internal {
-        hoax(_plugOwner);
+        vm.startPrank(_plugOwner);
         srcCounter__.setSocketConfig(
             _b.chainSlug,
             address(dstCounter__),
             address(_a.configs__[socketConfigIndex].switchboard__)
         );
 
-        hoax(_plugOwner);
         dstCounter__.setSocketConfig(
             _a.chainSlug,
             address(srcCounter__),
             address(_b.configs__[socketConfigIndex].switchboard__)
         );
+        vm.stopPrank();
     }
 
     function sendOutboundMessage() internal {
