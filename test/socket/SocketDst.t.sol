@@ -677,6 +677,23 @@ contract SocketDstTest is Setup {
         _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
         uint256 proposalCount;
 
+        // invalid packet id
+        vm.expectRevert(SocketDst.InvalidPacketId.selector);
+        _executePayloadOnDst(
+            _b,
+            ExecutePayloadOnDstParams(
+                bytes32(0),
+                proposalCount,
+                msgId,
+                _minMsgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
+        );
+
         // not proposed
         vm.expectRevert(SocketDst.PacketNotProposed.selector);
         _executePayloadOnDst(
