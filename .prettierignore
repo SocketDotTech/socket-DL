@@ -22,3 +22,5 @@ remappings.txt
 yarn.lock
 .github/*
 .prettierrc
+scratchpad
+lcov.info

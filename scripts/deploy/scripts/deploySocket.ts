@@ -10,8 +10,8 @@ import {
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { socketOwner, executionManagerVersion, mode } from "../config";
-import { overrides } from "../config";
+import { socketOwner, executionManagerVersion } from "../config";
+import { maxAllowedPacketLength } from "../../constants";
 
 let allDeployed = false;
 
@@ -57,7 +57,7 @@ export const deploySocket = async (
     const capacitorFactory: Contract = await getOrDeploy(
       CORE_CONTRACTS.CapacitorFactory,
       "contracts/CapacitorFactory.sol",
-      [socketOwner],
+      [socketOwner, maxAllowedPacketLength],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.CapacitorFactory] =

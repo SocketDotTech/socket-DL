@@ -531,7 +531,10 @@ contract Setup is Test {
         cc_.sigVerifier__ = new SignatureVerifier(deployer_);
         cc_.sigVerifier__.grantRole(RESCUE_ROLE, deployer_);
 
-        cc_.capacitorFactory__ = new CapacitorFactory(deployer_, maxAllowedPacketLength);
+        cc_.capacitorFactory__ = new CapacitorFactory(
+            deployer_,
+            maxAllowedPacketLength
+        );
 
         cc_.socket__ = new Socket(
             uint32(cc_.chainSlug),
