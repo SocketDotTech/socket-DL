@@ -44,19 +44,24 @@ contract SocketSrcTest is Setup {
 
         uint256 index = isFast ? 0 : 1;
         _configPlugContracts(index);
+    }
 
-        // _a.executionManager__.payAndCheckFees{value: 10000000000000}(
-        //     100000,
-        //     1000,
-        //     bytes32(0),
-        //     _transmissionParams,
-        //     _b.chainSlug,
-        //     100,
-        //     100,
-        //     address(_a.transmitManager__),
-        //     address(_a.configs__[0].switchboard__),
-        //     1
-        // );
+    function testPlugConfiguration() external {
+        uint256 index = isFast ? 0 : 1;
+
+        (
+            address siblingPlug,
+            address inboundSwitchboard__,
+            address outboundSwitchboard__,
+            address capacitor__,
+            address decapacitor__
+        ) = _a.socket__.getPlugConfig(address(srcCounter__), _b.chainSlug);
+
+        assertEq(siblingPlug, address(dstCounter__));
+        assertEq(inboundSwitchboard__, address(_a.configs__[index].switchboard__));
+        assertEq(outboundSwitchboard__, address(_a.configs__[index].switchboard__));
+        assertEq(capacitor__, address(_a.configs__[index].capacitor__));
+        assertEq(decapacitor__, address(_a.configs__[index].decapacitor__));
     }
 
     function testGetMinFeesOnSocketSrc() external {
