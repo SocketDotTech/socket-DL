@@ -846,6 +846,45 @@ contract Setup is Test {
         );
     }
 
+    function _executePayloadOnDstWithDiffLimit(
+        uint256 executionMsgGasLimit_,
+        ChainContext storage dst_,
+        ExecutePayloadOnDstParams memory executionParams
+    ) internal {
+        ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
+            executionParams.msgId_,
+            executionParams.executionFee_,
+            executionParams.minMsgGasLimit_,
+            executionParams.executionParams_,
+            executionParams.payload_
+        );
+
+        bytes memory sig = _createSignature(
+            executionParams.packedMessage_,
+            _executorPrivateKey
+        );
+
+        (uint8 paramType, uint248 paramValue) = _decodeExecutionParams(
+            executionParams.executionParams_
+        );
+
+        ISocket.ExecutionDetails memory executionDetails = ISocket
+            .ExecutionDetails(
+                executionParams.packetId_,
+                executionParams.proposalCount_,
+                executionMsgGasLimit_,
+                executionParams.proof_,
+                sig
+            );
+
+        if (paramType == 0) dst_.socket__.execute(executionDetails, msgDetails);
+        else
+            dst_.socket__.execute{value: paramValue}(
+                executionDetails,
+                msgDetails
+            );
+    }
+
     function _rescueNative(
         address contractAddress,
         address token,

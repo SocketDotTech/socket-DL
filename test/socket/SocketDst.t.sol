@@ -677,6 +677,25 @@ contract SocketDstTest is Setup {
         _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
         uint256 proposalCount;
 
+        // low gas limit
+        uint256 executionGasLimit = 0;
+        vm.expectRevert(SocketDst.LowGasLimit.selector);
+        _executePayloadOnDstWithDiffLimit(
+            executionGasLimit,
+            _b,
+            ExecutePayloadOnDstParams(
+                packetId,
+                proposalCount,
+                msgId,
+                _minMsgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
+        );
+
         // invalid packet id
         vm.expectRevert(SocketDst.InvalidPacketId.selector);
         _executePayloadOnDst(
