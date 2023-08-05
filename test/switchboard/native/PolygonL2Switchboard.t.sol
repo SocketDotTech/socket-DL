@@ -75,6 +75,8 @@ contract PolygonL2SwitchboardTest is Setup {
 
         bytes memory data = abi.encode(packetId, root);
 
+        vm.expectRevert(bytes("FxBaseChildTunnel: INVALID_SENDER_FROM_ROOT"));
+        polygonL2Switchboard.receivePacket(0, address(uint160(c++)), data);
 
         polygonL2Switchboard.receivePacket(0, rootTunnel, data);
 
