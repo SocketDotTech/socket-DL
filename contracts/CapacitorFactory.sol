@@ -3,9 +3,7 @@ pragma solidity 0.8.19;
 
 import "./interfaces/ICapacitorFactory.sol";
 import "./capacitors/SingleCapacitor.sol";
-import "./capacitors/HashChainCapacitor.sol";
 import "./decapacitors/SingleDecapacitor.sol";
-import "./decapacitors/HashChainDecapacitor.sol";
 
 import "./libraries/RescueFundsLib.sol";
 import "./utils/AccessControl.sol";
@@ -19,14 +17,26 @@ import {RESCUE_ROLE} from "./utils/AccessRoles.sol";
  */
 contract CapacitorFactory is ICapacitorFactory, AccessControl {
     uint256 private constant SINGLE_CAPACITOR = 1;
-    uint256 private constant HASH_CHAIN_CAPACITOR = 2;
+
+    // min packet length to avoid div by 0 in fee calculations
+    uint256 public constant minAllowedPacketLength = 1;
+
+    // admin initialized max value for max packet length
+    uint256 public immutable maxAllowedPacketLength;
+
+    error PacketLengthNotAllowed();
 
     /**
      * @notice initializes and grants RESCUE_ROLE to owner.
      * @param owner_ The address of the owner of the contract.
+     * @param maxAllowedPacketLength_ The max length allowed for capacitors
      */
-    constructor(address owner_) AccessControl(owner_) {
+    constructor(
+        address owner_,
+        uint256 maxAllowedPacketLength_
+    ) AccessControl(owner_) {
         _grantRole(RESCUE_ROLE, owner_);
+        maxAllowedPacketLength = maxAllowedPacketLength_;
     }
 
     /**
@@ -41,6 +51,11 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
         uint32 /** siblingChainSlug_ */,
         uint256 maxPacketLength_
     ) external override returns (ICapacitor, IDecapacitor) {
+        if (
+            maxPacketLength_ < minAllowedPacketLength ||
+            maxPacketLength_ > maxAllowedPacketLength
+        ) revert PacketLengthNotAllowed();
+
         // fetch the capacitor factory owner
         address owner = this.owner();
 
@@ -49,13 +64,6 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
                 // msg.sender is socket address
                 new SingleCapacitor(msg.sender, owner),
                 new SingleDecapacitor(owner)
-            );
-        }
-        if (capacitorType_ == HASH_CHAIN_CAPACITOR) {
-            return (
-                // msg.sender is socket address
-                new HashChainCapacitor(msg.sender, owner, maxPacketLength_),
-                new HashChainDecapacitor(owner)
             );
         }
         revert InvalidCapacitorType();

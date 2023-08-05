@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "../../Setup.t.sol";
-import "../../../contracts/switchboard/native/PolygonL2Switchboard.sol";
+import "../../../contracts/mocks/MockPolygonL2Switchboard.sol";
 
 // Goerli -> mumbai
 contract PolygonL2SwitchboardTest is Setup {
@@ -13,8 +13,9 @@ contract PolygonL2SwitchboardTest is Setup {
     uint256 initiateGasLimit_ = 300000;
     uint256 executionOverhead_ = 300000;
     address fxChild_ = 0xCf73231F28B7331BBe3124B907840A94851f9f11;
+    address rootTunnel = address(uint160(c++));
 
-    PolygonL2Switchboard polygonL2Switchboard;
+    MockPolygonL2Switchboard polygonL2Switchboard;
     ICapacitor singleCapacitor;
 
     function setUp() external {
@@ -58,6 +59,38 @@ contract PolygonL2SwitchboardTest is Setup {
         vm.stopPrank();
     }
 
+    function testReceivePacket() public {
+        bytes32 root = bytes32("RANDOM_ROOT");
+        bytes32 packetId = bytes32("RANDOM_PACKET");
+
+        assertFalse(
+            polygonL2Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+
+        bytes memory data = abi.encode(packetId, root);
+
+        vm.expectRevert(bytes("FxBaseChildTunnel: INVALID_SENDER_FROM_ROOT"));
+        polygonL2Switchboard.receivePacket(0, address(uint160(c++)), data);
+
+        polygonL2Switchboard.receivePacket(0, rootTunnel, data);
+
+        assertTrue(
+            polygonL2Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+    }
+
     function testNonBridgeReceivePacketCall() public {
         vm.expectRevert(bytes("ONLY_FX_ROOT"));
         polygonL2Switchboard.receivePacket(bytes32(0), bytes32(0));
@@ -79,9 +112,9 @@ contract PolygonL2SwitchboardTest is Setup {
     }
 
     function testSetFxRootTunnel() public {
-        address rootTunnel = address(uint160(c++));
-        assertEq(address(polygonL2Switchboard.fxRootTunnel()), address(0));
+        assertEq(address(polygonL2Switchboard.fxRootTunnel()), rootTunnel);
 
+        address newRootTunnel = address(uint160(c++));
         hoax(_raju);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -89,12 +122,12 @@ contract PolygonL2SwitchboardTest is Setup {
                 GOVERNANCE_ROLE
             )
         );
-        polygonL2Switchboard.setFxRootTunnel(rootTunnel);
+        polygonL2Switchboard.setFxRootTunnel(newRootTunnel);
 
         hoax(_socketOwner);
-        polygonL2Switchboard.setFxRootTunnel(rootTunnel);
+        polygonL2Switchboard.setFxRootTunnel(newRootTunnel);
 
-        assertEq(address(polygonL2Switchboard.fxRootTunnel()), rootTunnel);
+        assertEq(address(polygonL2Switchboard.fxRootTunnel()), newRootTunnel);
     }
 
     function testUpdateFxChild() public {
@@ -122,7 +155,7 @@ contract PolygonL2SwitchboardTest is Setup {
         uint256 capacitorType_
     ) internal returns (SocketConfigContext memory scc_) {
         vm.startPrank(_socketOwner);
-        polygonL2Switchboard = new PolygonL2Switchboard(
+        polygonL2Switchboard = new MockPolygonL2Switchboard(
             cc_.chainSlug,
             fxChild_,
             _socketOwner,
@@ -131,6 +164,7 @@ contract PolygonL2SwitchboardTest is Setup {
         );
 
         polygonL2Switchboard.grantRole(GOVERNANCE_ROLE, _socketOwner);
+        polygonL2Switchboard.setFxRootTunnel(rootTunnel);
         vm.stopPrank();
 
         scc_ = _registerSwitchboardForSibling(

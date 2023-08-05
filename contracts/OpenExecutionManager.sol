@@ -22,8 +22,9 @@ contract OpenExecutionManager is ExecutionManager {
     ) ExecutionManager(owner_, chainSlug_, socket_, signatureVerifier_) {}
 
     /**
-     * @notice This function allows all executors
-     * @notice The executor recovered here can be a random address hence should not be used for fee accounting
+     * @notice This function allows all executors.
+     * @notice As executor recovered here is used for fee accounting, it is critical to provide a valid
+     * signature else it can deprive the executor of their payout
      * @param packedMessage Packed message to be executed
      * @param sig Signature of the message
      * @return executor Address of the executor

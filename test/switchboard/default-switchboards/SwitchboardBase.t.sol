@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import "../../Setup.t.sol";
 
+// covers tests for both fast and optimistic switchboard
 contract SwitchboardBaseTest is Setup {
     bool isFast = true;
     bytes32 root = bytes32("RANDOM_ROOT");
@@ -27,7 +28,7 @@ contract SwitchboardBaseTest is Setup {
     error InvalidSigLength();
     error InvalidRoot();
     error NoPermit(bytes32 role);
-    FastSwitchboard fastSwitchboard;
+    FastSwitchboard defaultSwitchboard;
 
     function setUp() external {
         initialize();
@@ -43,12 +44,12 @@ contract SwitchboardBaseTest is Setup {
             transmitterPrivateKeys
         );
 
-        fastSwitchboard = FastSwitchboard(
+        defaultSwitchboard = FastSwitchboard(
             address(_b.configs__[0].switchboard__)
         );
 
         hoax(_socketOwner);
-        fastSwitchboard.grantWatcherRole(aChainSlug, _altWatcher);
+        defaultSwitchboard.grantWatcherRole(aChainSlug, _altWatcher);
 
         packetId = _getPackedId(address(uint160(c++)), aChainSlug, 0);
         _signAndPropose(_b, packetId, root);
@@ -56,7 +57,7 @@ contract SwitchboardBaseTest is Setup {
 
     function testIsAllowedWhenProposedAfterTimeout() external {
         uint256 proposeTime = block.timestamp;
-        bool isAllowed = fastSwitchboard.allowPacket(
+        bool isAllowed = defaultSwitchboard.allowPacket(
             0,
             0,
             0,
@@ -65,9 +66,12 @@ contract SwitchboardBaseTest is Setup {
         );
         assertFalse(isAllowed);
 
-        proposeTime = block.timestamp - fastSwitchboard.timeoutInSeconds() - 1;
+        proposeTime =
+            block.timestamp -
+            defaultSwitchboard.timeoutInSeconds() -
+            1;
 
-        isAllowed = fastSwitchboard.allowPacket(
+        isAllowed = defaultSwitchboard.allowPacket(
             0,
             0,
             0,
@@ -79,42 +83,45 @@ contract SwitchboardBaseTest is Setup {
 
     function testTripGlobal() external {
         vm.startPrank(_socketOwner);
-        fastSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
+        defaultSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_GLOBAL_SIG_IDENTIFIER,
-                address(fastSwitchboard),
+                address(defaultSwitchboard),
                 _b.chainSlug,
-                fastSwitchboard.nextNonce(_socketOwner),
+                defaultSwitchboard.nextNonce(_socketOwner),
                 true
             )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
-        nonce = fastSwitchboard.nextNonce(_socketOwner);
+        nonce = defaultSwitchboard.nextNonce(_socketOwner);
 
         vm.expectEmit(false, false, false, true);
         emit GlobalTripChanged(true);
-        fastSwitchboard.tripGlobal(nonce, sig);
+        defaultSwitchboard.tripGlobal(nonce, sig);
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
-        fastSwitchboard.tripGlobal(nonce, sig);
+        defaultSwitchboard.tripGlobal(nonce, sig);
         vm.stopPrank();
 
-        assertTrue(fastSwitchboard.isGlobalTipped());
+        assertTrue(defaultSwitchboard.isGlobalTipped());
+        assertFalse(
+            defaultSwitchboard.allowPacket(root, packetId, 0, _a.chainSlug, 100)
+        );
     }
 
     function testUntripGlobal() external {
         hoax(_socketOwner);
-        fastSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
+        defaultSwitchboard.grantRole(TRIP_ROLE, _socketOwner);
 
-        nonce = fastSwitchboard.nextNonce(_socketOwner);
+        nonce = defaultSwitchboard.nextNonce(_socketOwner);
 
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_GLOBAL_SIG_IDENTIFIER,
-                address(fastSwitchboard),
+                address(defaultSwitchboard),
                 _b.chainSlug,
                 nonce,
                 true
@@ -122,15 +129,15 @@ contract SwitchboardBaseTest is Setup {
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
-        fastSwitchboard.tripGlobal(nonce, sig);
-        assertTrue(fastSwitchboard.isGlobalTipped());
+        defaultSwitchboard.tripGlobal(nonce, sig);
+        assertTrue(defaultSwitchboard.isGlobalTipped());
 
-        nonce = fastSwitchboard.nextNonce(_socketOwner);
+        nonce = defaultSwitchboard.nextNonce(_socketOwner);
 
         digest = keccak256(
             abi.encode(
                 UN_TRIP_GLOBAL_SIG_IDENTIFIER,
-                address(fastSwitchboard),
+                address(defaultSwitchboard),
                 _b.chainSlug,
                 nonce,
                 false
@@ -144,49 +151,52 @@ contract SwitchboardBaseTest is Setup {
                 UN_TRIP_ROLE
             )
         );
-        fastSwitchboard.unTrip(nonce, sig);
+        defaultSwitchboard.unTrip(nonce, sig);
 
         hoax(_socketOwner);
-        fastSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
-        fastSwitchboard.unTrip(nonce, sig);
+        defaultSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
+        defaultSwitchboard.unTrip(nonce, sig);
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
-        fastSwitchboard.unTrip(nonce, sig);
+        defaultSwitchboard.unTrip(nonce, sig);
     }
 
     function testTripPath() external {
         vm.startPrank(_socketOwner);
 
-        fastSwitchboard.grantWatcherRole(aChainSlug, _socketOwner);
+        defaultSwitchboard.grantWatcherRole(aChainSlug, _socketOwner);
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
-                address(fastSwitchboard),
+                address(defaultSwitchboard),
                 _a.chainSlug,
                 bChainSlug,
-                fastSwitchboard.nextNonce(_socketOwner),
+                defaultSwitchboard.nextNonce(_socketOwner),
                 true
             )
         );
         bytes memory sig = _createSignature(digest, _socketOwnerPrivateKey);
 
-        nonce = fastSwitchboard.nextNonce(_socketOwner);
+        nonce = defaultSwitchboard.nextNonce(_socketOwner);
         vm.expectEmit(false, false, false, true);
         emit PathTripChanged(aChainSlug, true);
-        fastSwitchboard.tripPath(nonce, aChainSlug, sig);
+        defaultSwitchboard.tripPath(nonce, aChainSlug, sig);
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
-        fastSwitchboard.tripPath(nonce, aChainSlug, sig);
+        defaultSwitchboard.tripPath(nonce, aChainSlug, sig);
 
         vm.stopPrank();
 
-        assertTrue(fastSwitchboard.isPathTripped(aChainSlug));
+        assertTrue(defaultSwitchboard.isPathTripped(aChainSlug));
+        assertFalse(
+            defaultSwitchboard.allowPacket(root, packetId, 0, _a.chainSlug, 100)
+        );
     }
 
     function testTripProposal() external {
         uint256 proposalCount;
         _attestOnDst(
-            address(fastSwitchboard),
+            address(defaultSwitchboard),
             _b.chainSlug,
             packetId,
             proposalCount,
@@ -194,7 +204,7 @@ contract SwitchboardBaseTest is Setup {
             _watcherPrivateKey
         );
         _attestOnDst(
-            address(fastSwitchboard),
+            address(defaultSwitchboard),
             _b.chainSlug,
             packetId,
             proposalCount,
@@ -203,7 +213,7 @@ contract SwitchboardBaseTest is Setup {
         );
 
         assertTrue(
-            fastSwitchboard.allowPacket(
+            defaultSwitchboard.allowPacket(
                 root,
                 packetId,
                 proposalCount,
@@ -211,11 +221,11 @@ contract SwitchboardBaseTest is Setup {
                 block.timestamp
             )
         );
-        nonce = fastSwitchboard.nextNonce(_watcher);
+        nonce = defaultSwitchboard.nextNonce(_watcher);
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PROPOSAL_SIG_IDENTIFIER,
-                address(fastSwitchboard),
+                address(defaultSwitchboard),
                 _a.chainSlug,
                 bChainSlug,
                 nonce,
@@ -227,10 +237,11 @@ contract SwitchboardBaseTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit ProposalTripped(packetId, proposalCount);
-        fastSwitchboard.tripProposal(nonce, packetId, proposalCount, sig);
+        defaultSwitchboard.tripProposal(nonce, packetId, proposalCount, sig);
 
+        // return false if the specific packet proposal is tripped
         assertFalse(
-            fastSwitchboard.allowPacket(
+            defaultSwitchboard.allowPacket(
                 root,
                 packetId,
                 proposalCount,
@@ -238,17 +249,20 @@ contract SwitchboardBaseTest is Setup {
                 block.timestamp
             )
         );
+
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
-        fastSwitchboard.tripProposal(nonce, packetId, proposalCount, sig);
-        assertTrue(fastSwitchboard.isProposalTripped(packetId, proposalCount));
+        defaultSwitchboard.tripProposal(nonce, packetId, proposalCount, sig);
+        assertTrue(
+            defaultSwitchboard.isProposalTripped(packetId, proposalCount)
+        );
     }
 
     function testNonWatcherToTripPath() external {
-        nonce = fastSwitchboard.nextNonce(_socketOwner);
+        nonce = defaultSwitchboard.nextNonce(_socketOwner);
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
-                address(fastSwitchboard),
+                address(defaultSwitchboard),
                 _a.chainSlug,
                 bChainSlug,
                 nonce,
@@ -263,20 +277,20 @@ contract SwitchboardBaseTest is Setup {
                 keccak256(abi.encode(WATCHER_ROLE, _a.chainSlug))
             )
         );
-        fastSwitchboard.tripPath(nonce, _a.chainSlug, sig);
+        defaultSwitchboard.tripPath(nonce, _a.chainSlug, sig);
     }
 
     function testUnTripAfterTripSingle() external {
         vm.startPrank(_socketOwner);
-        fastSwitchboard.grantWatcherRole(aChainSlug, _socketOwner);
-        fastSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
+        defaultSwitchboard.grantWatcherRole(aChainSlug, _socketOwner);
+        defaultSwitchboard.grantRole(UN_TRIP_ROLE, _socketOwner);
         vm.stopPrank();
 
-        nonce = fastSwitchboard.nextNonce(_socketOwner);
+        nonce = defaultSwitchboard.nextNonce(_socketOwner);
         bytes32 digest = keccak256(
             abi.encode(
                 TRIP_PATH_SIG_IDENTIFIER,
-                address(fastSwitchboard),
+                address(defaultSwitchboard),
                 _a.chainSlug,
                 bChainSlug,
                 nonce,
@@ -287,17 +301,17 @@ contract SwitchboardBaseTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit PathTripChanged(aChainSlug, true);
-        fastSwitchboard.tripPath(nonce, aChainSlug, sig);
-        assertTrue(fastSwitchboard.isPathTripped(aChainSlug));
+        defaultSwitchboard.tripPath(nonce, aChainSlug, sig);
+        assertTrue(defaultSwitchboard.isPathTripped(aChainSlug));
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
-        fastSwitchboard.tripPath(nonce, aChainSlug, sig);
+        defaultSwitchboard.tripPath(nonce, aChainSlug, sig);
 
-        nonce = fastSwitchboard.nextNonce(_socketOwner);
+        nonce = defaultSwitchboard.nextNonce(_socketOwner);
         digest = keccak256(
             abi.encode(
                 UN_TRIP_PATH_SIG_IDENTIFIER,
-                address(fastSwitchboard),
+                address(defaultSwitchboard),
                 _a.chainSlug,
                 bChainSlug,
                 nonce,
@@ -308,18 +322,18 @@ contract SwitchboardBaseTest is Setup {
 
         vm.expectEmit(false, false, false, true);
         emit PathTripChanged(aChainSlug, false);
-        fastSwitchboard.unTripPath(nonce, aChainSlug, sig);
-        assertFalse(fastSwitchboard.isPathTripped(aChainSlug));
+        defaultSwitchboard.unTripPath(nonce, aChainSlug, sig);
+        assertFalse(defaultSwitchboard.isPathTripped(aChainSlug));
 
         vm.expectRevert(SwitchboardBase.InvalidNonce.selector);
-        fastSwitchboard.unTripPath(nonce, aChainSlug, sig);
+        defaultSwitchboard.unTripPath(nonce, aChainSlug, sig);
     }
 
     function testRescueNativeFunds() public {
         uint256 amount = 1e18;
         hoax(_socketOwner);
         _rescueNative(
-            address(fastSwitchboard),
+            address(defaultSwitchboard),
             NATIVE_TOKEN_ADDRESS,
             _fundRescuer,
             amount
@@ -330,15 +344,15 @@ contract SwitchboardBaseTest is Setup {
         uint256 amount = 1e18;
 
         vm.startPrank(_socketOwner);
-        vm.deal(address(fastSwitchboard), amount);
+        vm.deal(address(defaultSwitchboard), amount);
         uint256 initialBal = _fundRescuer.balance;
 
         vm.expectRevert(ZeroAddress.selector);
-        fastSwitchboard.withdrawFees(address(0));
+        defaultSwitchboard.withdrawFees(address(0));
 
-        fastSwitchboard.withdrawFees(_fundRescuer);
+        defaultSwitchboard.withdrawFees(_fundRescuer);
 
-        assertEq(address(fastSwitchboard).balance, 0);
+        assertEq(address(defaultSwitchboard).balance, 0);
         assertEq(_fundRescuer.balance, initialBal + amount);
 
         vm.stopPrank();

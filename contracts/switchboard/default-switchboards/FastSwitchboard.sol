@@ -199,7 +199,7 @@ contract FastSwitchboard is SwitchboardBase {
         if (isRootValid[root_]) return true;
 
         // this makes packets valid even if all watchers have not attested
-        //      used to make the system work when watchers are inactive due to infra etc problems
+        // used to make the system work when watchers are inactive due to infra etc problems
         if (block.timestamp - proposeTime_ > timeoutInSeconds) return true;
 
         // not enough attestations and timeout not hit

@@ -18,6 +18,9 @@ import "../contracts/CapacitorFactory.sol";
 import "../contracts/utils/AccessRoles.sol";
 import "../contracts/utils/SigIdentifiers.sol";
 
+import "../contracts/capacitors/HashChainCapacitor.sol";
+import "../contracts/decapacitors/HashChainDecapacitor.sol";
+
 contract Setup is Test {
     uint256 internal c = 1;
     uint32 internal aChainSlug = uint32(uint256(0x2013AA262));
@@ -85,6 +88,8 @@ contract Setup is Test {
 
     bytes32 internal _transmissionParams = bytes32(0);
     bool isExecutionOpen = false;
+
+    uint256 maxAllowedPacketLength = 10;
 
     address internal siblingSwitchboard = address(uint160(c++));
 
@@ -526,7 +531,10 @@ contract Setup is Test {
         cc_.sigVerifier__ = new SignatureVerifier(deployer_);
         cc_.sigVerifier__.grantRole(RESCUE_ROLE, deployer_);
 
-        cc_.capacitorFactory__ = new CapacitorFactory(deployer_);
+        cc_.capacitorFactory__ = new CapacitorFactory(
+            deployer_,
+            maxAllowedPacketLength
+        );
 
         cc_.socket__ = new Socket(
             uint32(cc_.chainSlug),
@@ -836,6 +844,45 @@ contract Setup is Test {
             _executorPrivateKey,
             executionParams
         );
+    }
+
+    function _executePayloadOnDstWithDiffLimit(
+        uint256 executionMsgGasLimit_,
+        ChainContext storage dst_,
+        ExecutePayloadOnDstParams memory executionParams
+    ) internal {
+        ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
+            executionParams.msgId_,
+            executionParams.executionFee_,
+            executionParams.minMsgGasLimit_,
+            executionParams.executionParams_,
+            executionParams.payload_
+        );
+
+        bytes memory sig = _createSignature(
+            executionParams.packedMessage_,
+            _executorPrivateKey
+        );
+
+        (uint8 paramType, uint248 paramValue) = _decodeExecutionParams(
+            executionParams.executionParams_
+        );
+
+        ISocket.ExecutionDetails memory executionDetails = ISocket
+            .ExecutionDetails(
+                executionParams.packetId_,
+                executionParams.proposalCount_,
+                executionMsgGasLimit_,
+                executionParams.proof_,
+                sig
+            );
+
+        if (paramType == 0) dst_.socket__.execute(executionDetails, msgDetails);
+        else
+            dst_.socket__.execute{value: paramValue}(
+                executionDetails,
+                msgDetails
+            );
     }
 
     function _rescueNative(

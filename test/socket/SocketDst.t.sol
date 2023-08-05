@@ -22,7 +22,6 @@ contract SocketDstTest is Setup {
     error AlreadyAttested();
     error InvalidTransmitter();
     error InsufficientFees();
-    error InvalidProof();
     error NotExecutor();
     event ExecutionSuccess(bytes32 msgId);
     event ExecutionFailed(bytes32 msgId, string result);
@@ -618,6 +617,183 @@ contract SocketDstTest is Setup {
                 proof
             )
         );
+    }
+
+    function testExecuteVerification() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+        bytes memory proof = abi.encode(0);
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        uint256 executionFee;
+        {
+            (uint256 switchboardFees, uint256 verificationFee) = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_b.chainSlug);
+
+            uint256 socketFees;
+            (executionFee, socketFees) = _a
+                .executionManager__
+                .getExecutionTransmissionMinFees(
+                    _minMsgGasLimit,
+                    100,
+                    bytes32(0),
+                    _transmissionParams,
+                    _b.chainSlug,
+                    address(_a.transmitManager__)
+                );
+
+            uint256 value = switchboardFees +
+                socketFees +
+                verificationFee +
+                executionFee;
+
+            // executionFees to be recomputed which is totalValue - (socketFees + switchboardFees)
+            // verificationOverheadFees also should go to Executor, hence we do the additional computation below
+            executionFee = verificationFee + executionFee;
+
+            hoax(_plugOwner);
+            srcCounter__.remoteAddOperation{value: value}(
+                _b.chainSlug,
+                amount,
+                _minMsgGasLimit,
+                bytes32(0),
+                bytes32(0)
+            );
+        }
+
+        bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
+        (
+            bytes32 root,
+            bytes32 packetId,
+            bytes memory sig_
+        ) = _getLatestSignature(capacitor, _a.chainSlug, _b.chainSlug);
+
+        _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
+        uint256 proposalCount;
+
+        // low gas limit
+        uint256 executionGasLimit = 0;
+        vm.expectRevert(SocketDst.LowGasLimit.selector);
+        _executePayloadOnDstWithDiffLimit(
+            executionGasLimit,
+            _b,
+            ExecutePayloadOnDstParams(
+                packetId,
+                proposalCount,
+                msgId,
+                _minMsgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
+        );
+
+        // invalid packet id
+        vm.expectRevert(SocketDst.InvalidPacketId.selector);
+        _executePayloadOnDst(
+            _b,
+            ExecutePayloadOnDstParams(
+                bytes32(0),
+                proposalCount,
+                msgId,
+                _minMsgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
+        );
+
+        // not proposed
+        vm.expectRevert(SocketDst.PacketNotProposed.selector);
+        _executePayloadOnDst(
+            _b,
+            ExecutePayloadOnDstParams(
+                packetId,
+                proposalCount,
+                msgId,
+                _minMsgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
+        );
+
+        // not attested
+        _proposeOnDst(
+            _b,
+            sig_,
+            packetId,
+            root,
+            address(_b.configs__[0].switchboard__)
+        );
+        vm.expectRevert(SocketDst.VerificationFailed.selector);
+        _executePayloadOnDst(
+            _b,
+            ExecutePayloadOnDstParams(
+                packetId,
+                proposalCount,
+                msgId,
+                _minMsgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
+        );
+
+        // invalid proof
+        _attestOnDst(
+            address(_b.configs__[index].switchboard__),
+            _b.chainSlug,
+            packetId,
+            proposalCount,
+            root,
+            _watcherPrivateKey
+        );
+
+        ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
+            msgId,
+            executionFee,
+            _minMsgGasLimit + 100,
+            bytes32(0),
+            payload
+        );
+
+        bytes memory sig = _createSignature(
+            _b.hasher__.packMessage(
+                _a.chainSlug,
+                address(srcCounter__),
+                _b.chainSlug,
+                address(dstCounter__),
+                msgDetails
+            ),
+            _executorPrivateKey
+        );
+
+        ISocket.ExecutionDetails memory executionDetails = ISocket
+            .ExecutionDetails(
+                packetId,
+                proposalCount,
+                _minMsgGasLimit + 100,
+                proof,
+                sig
+            );
+
+        vm.expectRevert(SocketDst.InvalidProof.selector);
+        _b.socket__.execute(executionDetails, msgDetails);
     }
 
     function getLatestSignature(
