@@ -35,6 +35,23 @@ contract SocketSrcTest is Setup {
         bytes payload
     );
 
+    // Event triggered when a new switchboard is added
+    event SwitchboardAdded(
+        address switchboard,
+        uint32 siblingChainSlug,
+        address capacitor,
+        address decapacitor,
+        uint256 maxPacketLength,
+        uint256 capacitorType
+    );
+
+    // Event triggered when a new switchboard is added
+    event SiblingSwitchboardUpdated(
+        address switchboard,
+        uint32 siblingChainSlug,
+        address siblingSwitchboard
+    );
+
     function setUp() external {
         uint256[] memory transmitterPrivateKeys = new uint256[](1);
         transmitterPrivateKeys[0] = _transmitterPrivateKey;
@@ -44,19 +61,73 @@ contract SocketSrcTest is Setup {
 
         uint256 index = isFast ? 0 : 1;
         _configPlugContracts(index);
+    }
 
-        // _a.executionManager__.payAndCheckFees{value: 10000000000000}(
-        //     100000,
-        //     1000,
-        //     bytes32(0),
-        //     _transmissionParams,
-        //     _b.chainSlug,
-        //     100,
-        //     100,
-        //     address(_a.transmitManager__),
-        //     address(_a.configs__[0].switchboard__),
-        //     1
-        // );
+    function testRegisterSwitchboardForSibling() external {
+        uint32 siblingChainSlug_ = uint32(c++);
+        uint256 maxPacketLength_ = DEFAULT_BATCH_LENGTH;
+        uint256 capacitorType_ = 1;
+        address switchboard = address(uint160(c++));
+        address siblingSwitchboard_ = address(uint160(c++));
+
+        address expectedCapacitor = 0xC03b41d3947f3974978680061B15a736DF5346Cf;
+        address expectedDecapacitor = 0xf787702c0F39b8A70d4F8A6C99C3dB0a87275087;
+
+        hoax(switchboard);
+        vm.expectEmit(false, false, false, true);
+        emit SwitchboardAdded(
+            switchboard,
+            siblingChainSlug_,
+            expectedCapacitor,
+            expectedDecapacitor,
+            DEFAULT_BATCH_LENGTH,
+            capacitorType_
+        );
+        vm.expectEmit(false, false, false, true);
+        emit SiblingSwitchboardUpdated(
+            switchboard,
+            siblingChainSlug_,
+            siblingSwitchboard_
+        );
+        _a.socket__.registerSwitchboardForSibling(
+            siblingChainSlug_,
+            maxPacketLength_,
+            capacitorType_,
+            siblingSwitchboard_
+        );
+
+        assertEq(
+            expectedCapacitor,
+            address(_a.socket__.capacitors__(switchboard, siblingChainSlug_))
+        );
+        assertEq(
+            expectedDecapacitor,
+            address(_a.socket__.decapacitors__(switchboard, siblingChainSlug_))
+        );
+    }
+
+    function testPlugConfiguration() external {
+        uint256 index = isFast ? 0 : 1;
+
+        (
+            address siblingPlug,
+            address inboundSwitchboard__,
+            address outboundSwitchboard__,
+            address capacitor__,
+            address decapacitor__
+        ) = _a.socket__.getPlugConfig(address(srcCounter__), _b.chainSlug);
+
+        assertEq(siblingPlug, address(dstCounter__));
+        assertEq(
+            inboundSwitchboard__,
+            address(_a.configs__[index].switchboard__)
+        );
+        assertEq(
+            outboundSwitchboard__,
+            address(_a.configs__[index].switchboard__)
+        );
+        assertEq(capacitor__, address(_a.configs__[index].capacitor__));
+        assertEq(decapacitor__, address(_a.configs__[index].decapacitor__));
     }
 
     function testGetMinFeesOnSocketSrc() external {
@@ -98,6 +169,74 @@ contract SocketSrcTest is Setup {
 
             assertEq(minFeesActual, minFeesExpected);
         }
+
+        // revert on wrong inputs
+
+        // wrong payload size
+        vm.expectRevert(ExecutionManager.PayloadTooLarge.selector);
+        _a.socket__.getMinFees(
+            _minMsgGasLimit,
+            4000,
+            bytes32(0),
+            _transmissionParams,
+            _b.chainSlug,
+            address(srcCounter__)
+        );
+
+        // wrong sibling slug, revert because capacitor is address(0)
+        vm.expectRevert();
+        _a.socket__.getMinFees(
+            _minMsgGasLimit,
+            1000,
+            bytes32(0),
+            _transmissionParams,
+            uint32(c++),
+            address(srcCounter__)
+        );
+
+        // msg value not in range
+        uint256 msgValue = _msgValueMaxThreshold + 100;
+        bytes32 executionParams = bytes32(
+            uint256((uint256(1) << 248) | uint248(msgValue))
+        );
+        vm.expectRevert(ExecutionManager.MsgValueTooHigh.selector);
+        _a.socket__.getMinFees(
+            _minMsgGasLimit,
+            1000,
+            executionParams,
+            _transmissionParams,
+            _b.chainSlug,
+            address(srcCounter__)
+        );
+
+        msgValue = 1;
+        executionParams = bytes32(
+            uint256((uint256(1) << 248) | uint248(msgValue))
+        );
+        vm.expectRevert(ExecutionManager.MsgValueTooLow.selector);
+        _a.socket__.getMinFees(
+            _minMsgGasLimit,
+            1000,
+            executionParams,
+            _transmissionParams,
+            _b.chainSlug,
+            address(srcCounter__)
+        );
+
+        // Revert if msg.value is greater than the maximum uint128 value.
+        msgValue = type(uint136).max;
+        executionParams = bytes32(
+            uint256((uint256(1) << 248) | uint248(msgValue))
+        );
+        vm.expectRevert();
+        _a.socket__.getMinFees(
+            _minMsgGasLimit,
+            1000,
+            executionParams,
+            _transmissionParams,
+            _b.chainSlug,
+            address(srcCounter__)
+        );
     }
 
     function testOutboundFromSocketSrc() external {
@@ -121,6 +260,27 @@ contract SocketSrcTest is Setup {
 
         _a.socket__.outbound{value: minFees}(
             _b.chainSlug,
+            _minMsgGasLimit,
+            bytes32(0),
+            _transmissionParams,
+            payload
+        );
+    }
+
+    function testOutboundForUnregisteredSibling() external {
+        uint32 unknownSlug = uint32(c++);
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+
+        // revert if no sibling plug is found for the given chain
+        vm.expectRevert(SocketSrc.PlugDisconnected.selector);
+        hoax(address(srcCounter__));
+        _a.socket__.outbound{value: 100}(
+            unknownSlug,
             _minMsgGasLimit,
             bytes32(0),
             _transmissionParams,

@@ -93,6 +93,15 @@ contract ExecutionManagerTest is Setup {
             executionParams,
             bChainSlug
         );
+
+        // also reverts if an unknown sibling slug is used
+        vm.expectRevert(ExecutionManager.MsgValueTooHigh.selector);
+        executionManager.getMinFees(
+            minMsgGasLimit,
+            payloadSize,
+            executionParams,
+            uint32(c++)
+        );
     }
 
     function testGetMinFeesWithMsgValueTooLow() public {
@@ -263,6 +272,31 @@ contract ExecutionManagerTest is Setup {
         );
     }
 
+    function testPayAndCheckFeesWithExecutionFeeSetTooHigh() public {
+        uint256 minMsgGasLimit = 100000;
+        uint256 payloadSize = 1000;
+        uint256 msgValue = 1000;
+        uint8 paramType = 1;
+        bytes32 executionParams = bytes32(
+            uint256((uint256(paramType) << 248) | uint248(msgValue))
+        );
+
+        _setExecutionFees(_a, _b.chainSlug, type(uint128).max);
+        _setRelativeNativeTokenPrice(
+            _a,
+            _b.chainSlug,
+            _relativeNativeTokenPrice
+        );
+
+        vm.expectRevert(ExecutionManager.FeesTooHigh.selector);
+        _a.executionManager__.getMinFees(
+            minMsgGasLimit,
+            payloadSize,
+            executionParams,
+            _b.chainSlug
+        );
+    }
+
     function testPayAndCheckFeesWithMsgValueTooHigh() public {
         uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
@@ -355,6 +389,12 @@ contract ExecutionManagerTest is Setup {
 
         assertEq(storedTransmissionFees2, storedTransmissionFees1 - amount);
         assertEq(address(_a.transmitManager__).balance, amount);
+
+        hoax(_socketOwner);
+        _a.socket__.setExecutionManager(address(uint160(c++)));
+
+        vm.expectRevert(TransmitManager.OnlyExecutionManager.selector);
+        executionManager.withdrawTransmissionFees(bChainSlug, 100);
     }
 
     function testWithdrawSwitchboardFees() public {
