@@ -118,7 +118,7 @@ contract NativeBaseSwitchboardTest is Setup {
     }
 
     // should return false if packet not received from native bridge (default case)
-     function testAllowPacket() external {
+    function testAllowPacket() external {
         bytes32 packetId = bytes32("RANDOM_PACKET");
         bytes32 root = bytes32("RANDOM_ROOT");
 

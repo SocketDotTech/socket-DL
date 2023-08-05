@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "../../Setup.t.sol";
-import "../../../contracts/switchboard/native/PolygonL1Switchboard.sol";
+import "../../../contracts/mocks/MockPolygonL1Switchboard.sol";
 
 // Goerli -> mumbai
 // Switchboard on Goerli (5) for mumbai-testnet (80001) as remote is: 0xDe5c161D61D069B0F2069518BB4110568D465465
@@ -18,7 +18,7 @@ contract PolygonL1SwitchboardTest is Setup {
     address remoteNativeSwitchboard_ =
         0x029ce68B3A6B3B3713CaC23a39c9096f279c8Ad2;
 
-    PolygonL1Switchboard polygonL1Switchboard;
+    MockPolygonL1Switchboard polygonL1Switchboard;
     ICapacitor singleCapacitor;
 
     function setUp() external {
@@ -64,6 +64,34 @@ contract PolygonL1SwitchboardTest is Setup {
         );
         polygonL1Switchboard.initiateNativeConfirmation(packetId);
         vm.stopPrank();
+    }
+
+    function testReceivePacket() public {
+        bytes32 root = bytes32("RANDOM_ROOT");
+        bytes32 packetId = bytes32("RANDOM_PACKET");
+
+        assertFalse(
+            polygonL1Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
+
+        bytes memory data = abi.encode(packetId, root);
+        polygonL1Switchboard.receivePacket(data);
+
+        assertTrue(
+            polygonL1Switchboard.allowPacket(
+                root,
+                packetId,
+                uint256(0),
+                uint32(0),
+                uint256(0)
+            )
+        );
     }
 
     function testNonBridgeReceivePacketCall() public {
@@ -112,7 +140,7 @@ contract PolygonL1SwitchboardTest is Setup {
     ) internal returns (SocketConfigContext memory scc_) {
         vm.startPrank(_socketOwner);
 
-        polygonL1Switchboard = new PolygonL1Switchboard(
+        polygonL1Switchboard = new MockPolygonL1Switchboard(
             cc_.chainSlug,
             checkpointManager_,
             fxRoot_,
