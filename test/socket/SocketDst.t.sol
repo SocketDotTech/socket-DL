@@ -753,6 +753,47 @@ contract SocketDstTest is Setup {
                 proof
             )
         );
+
+        // invalid proof
+        _attestOnDst(
+            address(_b.configs__[index].switchboard__),
+            _b.chainSlug,
+            packetId,
+            proposalCount,
+            root,
+            _watcherPrivateKey
+        );
+
+        ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
+            msgId,
+            executionFee,
+            _minMsgGasLimit + 100,
+            bytes32(0),
+            payload
+        );
+
+        bytes memory sig = _createSignature(
+            _b.hasher__.packMessage(
+                _a.chainSlug,
+                address(srcCounter__),
+                _b.chainSlug,
+                address(dstCounter__),
+                msgDetails
+            ),
+            _executorPrivateKey
+        );
+
+        ISocket.ExecutionDetails memory executionDetails = ISocket
+            .ExecutionDetails(
+                packetId,
+                proposalCount,
+                _minMsgGasLimit + 100,
+                proof,
+                sig
+            );
+
+        vm.expectRevert(SocketDst.InvalidProof.selector);
+        _b.socket__.execute(executionDetails, msgDetails);
     }
 
     function getLatestSignature(
