@@ -70,13 +70,16 @@ contract SocketSrcTest is Setup {
         address switchboard = address(uint160(c++));
         address siblingSwitchboard_ = address(uint160(c++));
 
+        address expectedCapacitor = 0xC03b41d3947f3974978680061B15a736DF5346Cf;
+        address expectedDecapacitor = 0xf787702c0F39b8A70d4F8A6C99C3dB0a87275087;
+
         hoax(switchboard);
         vm.expectEmit(false, false, false, true);
         emit SwitchboardAdded(
             switchboard,
             siblingChainSlug_,
-            address(0xC03b41d3947f3974978680061B15a736DF5346Cf),
-            address(0xf787702c0F39b8A70d4F8A6C99C3dB0a87275087),
+            expectedCapacitor,
+            expectedDecapacitor,
             DEFAULT_BATCH_LENGTH,
             capacitorType_
         );
@@ -91,6 +94,15 @@ contract SocketSrcTest is Setup {
             maxPacketLength_,
             capacitorType_,
             siblingSwitchboard_
+        );
+
+        assertEq(
+            expectedCapacitor,
+            address(_a.socket__.capacitors__(switchboard, siblingChainSlug_))
+        );
+        assertEq(
+            expectedDecapacitor,
+            address(_a.socket__.decapacitors__(switchboard, siblingChainSlug_))
         );
     }
 
@@ -383,19 +395,19 @@ contract SocketSrcTest is Setup {
     }
 
     function _configPlugContracts(uint256 socketConfigIndex) internal {
-        vm.startPrank(_plugOwner);
+        hoax(_plugOwner);
         srcCounter__.setSocketConfig(
             _b.chainSlug,
             address(dstCounter__),
             address(_a.configs__[socketConfigIndex].switchboard__)
         );
 
+        hoax(_plugOwner);
         dstCounter__.setSocketConfig(
             _a.chainSlug,
             address(srcCounter__),
             address(_b.configs__[socketConfigIndex].switchboard__)
         );
-        vm.stopPrank();
     }
 
     function sendOutboundMessage() internal {
