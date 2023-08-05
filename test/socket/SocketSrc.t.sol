@@ -109,6 +109,45 @@ contract SocketSrcTest is Setup {
 
             assertEq(minFeesActual, minFeesExpected);
         }
+
+        // revert on wrong inputs
+
+        // wrong payload size
+        vm.expectRevert(ExecutionManager.PayloadTooLarge.selector);
+        _a.socket__.getMinFees(
+            _minMsgGasLimit,
+            4000,
+            bytes32(0),
+            _transmissionParams,
+            _b.chainSlug,
+            address(srcCounter__)
+        );
+
+        // wrong sibling slug, revert because capacitor is address(0)
+        vm.expectRevert();
+        _a.socket__.getMinFees(
+            _minMsgGasLimit,
+            1000,
+            bytes32(0),
+            _transmissionParams,
+            uint32(c++),
+            address(srcCounter__)
+        );
+
+        // msg value not in range
+        uint256 msgValue = _msgValueMaxThreshold + 100;
+        bytes32 executionParams = bytes32(
+            uint256((uint256(1) << 248) | uint248(msgValue))
+        );
+        vm.expectRevert(ExecutionManager.MsgValueTooHigh.selector);
+        _a.socket__.getMinFees(
+            _minMsgGasLimit,
+            1000,
+            executionParams,
+            _transmissionParams,
+            _b.chainSlug,
+            address(srcCounter__)
+        );
     }
 
     function testOutboundFromSocketSrc() external {
