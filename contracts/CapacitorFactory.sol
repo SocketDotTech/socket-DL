@@ -18,6 +18,9 @@ import {RESCUE_ROLE} from "./utils/AccessRoles.sol";
 contract CapacitorFactory is ICapacitorFactory, AccessControl {
     uint256 private constant SINGLE_CAPACITOR = 1;
 
+    // min packet length to avoid div by 0 in fee calculations
+    uint256 public constant minAllowedPacketLength = 1;
+
     // admin initialized max value for max packet length
     uint256 public immutable maxAllowedPacketLength;
 
@@ -48,8 +51,11 @@ contract CapacitorFactory is ICapacitorFactory, AccessControl {
         uint32 /** siblingChainSlug_ */,
         uint256 maxPacketLength_
     ) external override returns (ICapacitor, IDecapacitor) {
-        if (maxPacketLength_ > maxAllowedPacketLength)
-            revert PacketLengthNotAllowed();
+        if (
+            maxPacketLength_ < minAllowedPacketLength ||
+            maxPacketLength_ > maxAllowedPacketLength
+        ) revert PacketLengthNotAllowed();
+
         // fetch the capacitor factory owner
         address owner = this.owner();
 
