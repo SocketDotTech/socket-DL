@@ -148,6 +148,35 @@ contract SocketSrcTest is Setup {
             _b.chainSlug,
             address(srcCounter__)
         );
+
+        msgValue = 1;
+        executionParams = bytes32(
+            uint256((uint256(1) << 248) | uint248(msgValue))
+        );
+        vm.expectRevert(ExecutionManager.MsgValueTooLow.selector);
+        _a.socket__.getMinFees(
+            _minMsgGasLimit,
+            1000,
+            executionParams,
+            _transmissionParams,
+            _b.chainSlug,
+            address(srcCounter__)
+        );
+
+        // Revert if msg.value is greater than the maximum uint128 value.
+        msgValue = type(uint136).max;
+        executionParams = bytes32(
+            uint256((uint256(1) << 248) | uint248(msgValue))
+        );
+        vm.expectRevert();
+        _a.socket__.getMinFees(
+            _minMsgGasLimit,
+            1000,
+            executionParams,
+            _transmissionParams,
+            _b.chainSlug,
+            address(srcCounter__)
+        );
     }
 
     function testOutboundFromSocketSrc() external {
@@ -187,6 +216,7 @@ contract SocketSrcTest is Setup {
             _plugOwner
         );
 
+        // revert if no sibling plug is found for the given chain
         vm.expectRevert(SocketSrc.PlugDisconnected.selector);
         hoax(address(srcCounter__));
         _a.socket__.outbound{value: 100}(
