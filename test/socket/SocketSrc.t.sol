@@ -58,8 +58,14 @@ contract SocketSrcTest is Setup {
         ) = _a.socket__.getPlugConfig(address(srcCounter__), _b.chainSlug);
 
         assertEq(siblingPlug, address(dstCounter__));
-        assertEq(inboundSwitchboard__, address(_a.configs__[index].switchboard__));
-        assertEq(outboundSwitchboard__, address(_a.configs__[index].switchboard__));
+        assertEq(
+            inboundSwitchboard__,
+            address(_a.configs__[index].switchboard__)
+        );
+        assertEq(
+            outboundSwitchboard__,
+            address(_a.configs__[index].switchboard__)
+        );
         assertEq(capacitor__, address(_a.configs__[index].capacitor__));
         assertEq(decapacitor__, address(_a.configs__[index].decapacitor__));
     }
@@ -126,6 +132,26 @@ contract SocketSrcTest is Setup {
 
         _a.socket__.outbound{value: minFees}(
             _b.chainSlug,
+            _minMsgGasLimit,
+            bytes32(0),
+            _transmissionParams,
+            payload
+        );
+    }
+
+    function testOutboundForUnregisteredSibling() external {
+        uint32 unknownSlug = uint32(c++);
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+
+        vm.expectRevert(SocketSrc.PlugDisconnected.selector);
+        hoax(address(srcCounter__));
+        _a.socket__.outbound{value: 100}(
+            unknownSlug,
             _minMsgGasLimit,
             bytes32(0),
             _transmissionParams,
