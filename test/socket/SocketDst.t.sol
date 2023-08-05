@@ -620,6 +620,83 @@ contract SocketDstTest is Setup {
         );
     }
 
+    function testExecuteVerification() external {
+        uint256 amount = 100;
+        bytes memory payload = abi.encode(
+            keccak256("OP_ADD"),
+            amount,
+            _plugOwner
+        );
+        bytes memory proof = abi.encode(0);
+        address capacitor = address(_a.configs__[index].capacitor__);
+
+        uint256 executionFee;
+        {
+            (uint256 switchboardFees, uint256 verificationFee) = _a
+                .configs__[index]
+                .switchboard__
+                .getMinFees(_b.chainSlug);
+
+            uint256 socketFees;
+            (executionFee, socketFees) = _a
+                .executionManager__
+                .getExecutionTransmissionMinFees(
+                    _minMsgGasLimit,
+                    100,
+                    bytes32(0),
+                    _transmissionParams,
+                    _b.chainSlug,
+                    address(_a.transmitManager__)
+                );
+
+            uint256 value = switchboardFees +
+                socketFees +
+                verificationFee +
+                executionFee;
+
+            // executionFees to be recomputed which is totalValue - (socketFees + switchboardFees)
+            // verificationOverheadFees also should go to Executor, hence we do the additional computation below
+            executionFee = verificationFee + executionFee;
+
+            hoax(_plugOwner);
+            srcCounter__.remoteAddOperation{value: value}(
+                _b.chainSlug,
+                amount,
+                _minMsgGasLimit,
+                bytes32(0),
+                bytes32(0)
+            );
+        }
+
+        bytes32 msgId = _packMessageId(_a.chainSlug, address(dstCounter__), 0);
+        (
+            bytes32 root,
+            bytes32 packetId,
+            bytes memory sig_
+        ) = _getLatestSignature(capacitor, _a.chainSlug, _b.chainSlug);
+
+        _sealOnSrc(_a, capacitor, DEFAULT_BATCH_LENGTH, sig_);
+        uint256 proposalCount;
+
+        // not proposed
+        vm.expectRevert(SocketDst.PacketNotProposed.selector);
+        _executePayloadOnDst(
+            _b,
+            ExecutePayloadOnDstParams(
+                packetId,
+                proposalCount,
+                msgId,
+                _minMsgGasLimit,
+                bytes32(0),
+                executionFee,
+                root,
+                payload,
+                proof
+            )
+        );
+
+    }
+
     function getLatestSignature(
         ChainContext memory src_,
         address capacitor_,
