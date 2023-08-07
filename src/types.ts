@@ -17,6 +17,7 @@ export enum ChainSlug {
   POLYGON_MAINNET = 137,
   POLYGON_MUMBAI = 80001,
   AEVO_TESTNET = 11155112,
+  AEVO = 2999,
   HARDHAT = 31337,
 }
 
@@ -35,6 +36,7 @@ export enum ChainKey {
   POLYGON_MAINNET = "polygon-mainnet",
   POLYGON_MUMBAI = "polygon-mumbai",
   AEVO_TESTNET = "aevo-testnet",
+  AEVO = "aevo",
   HARDHAT = "hardhat",
 }
 
@@ -52,6 +54,7 @@ export const chainKeyToSlug = {
   [ChainKey.POLYGON_MAINNET]: 137,
   [ChainKey.POLYGON_MUMBAI]: 80001,
   [ChainKey.AEVO_TESTNET]: 11155112,
+  [ChainKey.AEVO]: 2999,
   [ChainKey.HARDHAT]: 31337,
 };
 
@@ -70,6 +73,7 @@ export const ChainSlugToKey = {
   137: ChainKey.POLYGON_MAINNET,
   80001: ChainKey.POLYGON_MUMBAI,
   11155112: ChainKey.AEVO_TESTNET,
+  2999: ChainKey.AEVO,
 };
 
 export const TestnetIds: ChainSlug[] = [
@@ -88,6 +92,7 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.ARBITRUM,
   ChainSlug.OPTIMISM,
   ChainSlug.BSC,
+  ChainSlug.AEVO,
 ];
 
 export const L1Ids: ChainSlug[] = [ChainSlug.MAINNET, ChainSlug.GOERLI];

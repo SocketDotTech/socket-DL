@@ -18,6 +18,7 @@ export const timeout: {
   [ChainKey.MAINNET]: 7200,
   [ChainKey.SEPOLIA]: 7200,
   [ChainKey.AEVO_TESTNET]: 7200,
+  [ChainKey.AEVO]: 7200,
 };
 
 export const attestGasLimit: {
@@ -36,6 +37,7 @@ export const attestGasLimit: {
   [ChainKey.MAINNET]: 80000,
   [ChainKey.SEPOLIA]: 80000,
   [ChainKey.AEVO_TESTNET]: 80000,
+  [ChainKey.AEVO]: 80000,
 };
 
 export const executionOverhead: {
@@ -54,6 +56,7 @@ export const executionOverhead: {
   [ChainKey.MAINNET]: 40000,
   [ChainKey.SEPOLIA]: 40000,
   [ChainKey.AEVO_TESTNET]: 40000,
+  [ChainKey.AEVO]: 40000,
 };
 
 export const getDefaultIntegrationType = (

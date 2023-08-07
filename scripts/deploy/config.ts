@@ -35,6 +35,7 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.BSC_TESTNET,
   ChainSlug.SEPOLIA,
   ChainSlug.AEVO_TESTNET,
+  ChainSlug.AEVO,
   ChainSlug.MAINNET,
   ChainSlug.ARBITRUM,
   ChainSlug.OPTIMISM,
@@ -68,6 +69,7 @@ export const msgValueMaxThreshold: { [chain in ChainSlug]?: BigNumberish } = {
   [ChainSlug.BSC]: utils.parseEther("0.001"),
   [ChainSlug.MAINNET]: utils.parseEther("0.001"),
   [ChainSlug.AEVO_TESTNET]: utils.parseEther("0.001"),
+  [ChainSlug.AEVO]: utils.parseEther("0.001"),
 };
 
 export const transmitterAddresses = {
@@ -154,5 +156,10 @@ export const overrides: {
     type: 2,
     // gasLimit,
     // gasPrice,
+  },
+  [ChainSlug.AEVO]: {
+    type: 1,
+    // gasLimit,
+    gasPrice: 100_000_000,
   },
 };
