@@ -118,4 +118,28 @@ contract AccessControlTest is Test {
         hoax(_owner);
         _mac.revokeRole(role, user);
     }
+
+    function testGrantRoleToGovernance() external {
+        address nominee = _mac.nominee();
+        assertEq(nominee, address(0));
+
+        // do not nominate if other role
+        _grant(ROLE_GIRAFFE, _giraffe_0);
+
+        nominee = _mac.nominee();
+        assertEq(nominee, address(0));
+
+        // nominate if governance role
+        _grant(GOVERNANCE_ROLE, _giraffe_0);
+
+        nominee = _mac.nominee();
+        assertEq(nominee, _giraffe_0);
+
+        // should be able to claim ownership
+        hoax(_giraffe_0);
+        _mac.claimOwner();
+
+        address owner = _mac.owner();
+        assertEq(owner, _giraffe_0);
+    }
 }
