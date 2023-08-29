@@ -77,6 +77,9 @@ abstract contract Ownable {
         emit OwnerClaimed(claimer_);
     }
 
+    /**
+     * @dev Internal function that sets the nominee of the contract to the specified address
+     */
     function _nominateOwner(address nominee_) internal {
         _nominee = nominee_;
         emit OwnerNominated(nominee_);
