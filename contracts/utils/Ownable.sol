@@ -53,8 +53,7 @@ abstract contract Ownable {
      */
     function nominateOwner(address nominee_) external {
         if (msg.sender != _owner) revert OnlyOwner();
-        _nominee = nominee_;
-        emit OwnerNominated(_nominee);
+        _nominateOwner(nominee_);
     }
 
     /**
@@ -76,5 +75,10 @@ abstract contract Ownable {
         _owner = claimer_;
         _nominee = address(0);
         emit OwnerClaimed(claimer_);
+    }
+
+    function _nominateOwner(address nominee_) internal {
+        _nominee = nominee_;
+        emit OwnerNominated(nominee_);
     }
 }

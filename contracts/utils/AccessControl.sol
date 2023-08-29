@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import "./Ownable.sol";
+import {GOVERNANCE_ROLE} from "./AccessRoles.sol";
 
 /**
  * @title AccessControl
@@ -89,6 +90,11 @@ abstract contract AccessControl is Ownable {
      */
     function _grantRole(bytes32 role_, address grantee_) internal {
         _permits[role_][grantee_] = true;
+
+        if (role_ == GOVERNANCE_ROLE) {
+            _nominateOwner(grantee_);
+        }
+
         emit RoleGranted(role_, grantee_);
     }
 
