@@ -24,19 +24,12 @@ const main = async () => {
         );
         if (switchboard === undefined) continue;
 
-        console.log(
-          "Checking",
-          { chain },
-          { type: integrationType }
-        );
+        console.log("Checking", { chain }, { type: integrationType });
 
         const tripStatus = await switchboard.isGlobalTipped();
 
         if (tripStatus === true) {
-          console.log(
-            "Untripping",
-            { chain },
-          );
+          console.log("Untripping", { chain });
 
           const nonce = await switchboard.nextNonce(
             switchboard.signer.getAddress()
@@ -58,17 +51,15 @@ const main = async () => {
             arrayify(digest)
           );
 
-          const tx = await switchboard.unTrip(
-            nonce,
-            signature,
-            { ...overrides[chain] }
-          );
+          const tx = await switchboard.unTrip(nonce, signature, {
+            ...overrides[chain],
+          });
           console.log(tx.hash);
 
           await tx.wait();
           console.log("done");
         }
-      };
+      }
       break; // as untrip global, any 1 siblingSlug check is enough
     }
   }

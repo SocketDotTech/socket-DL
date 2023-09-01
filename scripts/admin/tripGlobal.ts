@@ -11,11 +11,9 @@ import { getABI } from "../deploy/scripts/getABIs";
 import { getProviderFromChainSlug } from "../constants";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 
-const main = async (chainToBeTripped:ChainSlug) => {
-
+const main = async (chainToBeTripped: ChainSlug) => {
   for (const chain of chains) {
-
-    if (chainToBeTripped!=chain) continue;
+    if (chainToBeTripped != chain) continue;
 
     for (const siblingChain of chains) {
       for (const integrationType of Object.values(IntegrationTypes)) {
@@ -28,59 +26,43 @@ const main = async (chainToBeTripped:ChainSlug) => {
         );
         if (switchboard === undefined) continue;
 
-        console.log(
-          "Checking",
-          { dst: chain },
-          { type: integrationType }
-        );
+        console.log("Checking", { dst: chain }, { type: integrationType });
 
         const tripStatus = await switchboard.isGlobalTipped();
 
-        if (tripStatus==true) {
+        if (tripStatus == true) {
           console.log("already tripped, continue");
           continue;
         }
 
-          console.log(
-            "tripping",
-            { chain },
-          );
+        console.log("tripping", { chain });
 
-          const nonce = await switchboard.nextNonce(
-            switchboard.signer.getAddress()
-          );
-          const digest = keccak256(
-            defaultAbiCoder.encode(
-              ["bytes32", "address", "uint32", "uint256", "bool"],
-              [
-                utils.id("TRIP_GLOBAL"),
-                switchboard.address,
-                chain,
-                nonce,
-                true,
-              ]
-            )
-          );
+        const nonce = await switchboard.nextNonce(
+          switchboard.signer.getAddress()
+        );
+        const digest = keccak256(
+          defaultAbiCoder.encode(
+            ["bytes32", "address", "uint32", "uint256", "bool"],
+            [utils.id("TRIP_GLOBAL"), switchboard.address, chain, nonce, true]
+          )
+        );
 
-          const signature = await switchboard.signer.signMessage(
-            arrayify(digest)
-          );
+        const signature = await switchboard.signer.signMessage(
+          arrayify(digest)
+        );
 
-          const tx = await switchboard.tripGlobal(
-            nonce,
-            signature,
-            { ...overrides[chain] }
-          );
-          console.log(tx.hash);
+        const tx = await switchboard.tripGlobal(nonce, signature, {
+          ...overrides[chain],
+        });
+        console.log(tx.hash);
 
-          await tx.wait();
-          console.log("done");
-        };
-        break; // as global trip, check for a single siblingChain is enough
+        await tx.wait();
+        console.log("done");
       }
+      break; // as global trip, check for a single siblingChain is enough
     }
   }
-
+};
 
 const sbContracts: { [key: string]: Contract } = {};
 const getSwitchboardInstance = (
@@ -116,9 +98,7 @@ const getSwitchboardInstance = (
   return sbContracts[`${chain}${siblingChain}${switchboardAddress}`];
 };
 
-
 const chainToBeTripped = ChainSlug.OPTIMISM_GOERLI;
-
 
 main(chainToBeTripped)
   .then(() => process.exit(0))
