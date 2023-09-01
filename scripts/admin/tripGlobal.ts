@@ -11,8 +11,12 @@ import { getABI } from "../deploy/scripts/getABIs";
 import { getProviderFromChainSlug } from "../constants";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 
-const main = async () => {
+const main = async (chainToBeTripped:ChainSlug) => {
+
   for (const chain of chains) {
+
+    if (chainToBeTripped!=chain) continue;
+
     for (const siblingChain of chains) {
       for (const integrationType of Object.values(IntegrationTypes)) {
         if (integrationType === IntegrationTypes.native) continue;
@@ -26,19 +30,20 @@ const main = async () => {
 
         console.log(
           "Checking",
-          { src: siblingChain },
           { dst: chain },
           { type: integrationType }
         );
 
-        const tripStatus = await switchboard.isPathTripped(siblingChain);
+        const tripStatus = await switchboard.isGlobalTipped();
 
-        if (tripStatus === true) {
+        if (tripStatus==true) {
+          console.log("already tripped, continue");
+          continue;
+        }
+
           console.log(
-            "Untripping",
-            { src: siblingChain },
-            { dst: chain },
-            { type: integrationType }
+            "tripping",
+            { chain },
           );
 
           const nonce = await switchboard.nextNonce(
@@ -46,14 +51,13 @@ const main = async () => {
           );
           const digest = keccak256(
             defaultAbiCoder.encode(
-              ["bytes32", "address", "uint32", "uint32", "uint256", "bool"],
+              ["bytes32", "address", "uint32", "uint256", "bool"],
               [
-                utils.id("UNTRIP_PATH"),
+                utils.id("TRIP_GLOBAL"),
                 switchboard.address,
-                siblingChain,
                 chain,
                 nonce,
-                false,
+                true,
               ]
             )
           );
@@ -62,9 +66,8 @@ const main = async () => {
             arrayify(digest)
           );
 
-          const tx = await switchboard.unTripPath(
+          const tx = await switchboard.tripGlobal(
             nonce,
-            siblingChain,
             signature,
             { ...overrides[chain] }
           );
@@ -72,11 +75,12 @@ const main = async () => {
 
           await tx.wait();
           console.log("done");
-        }
+        };
+        break; // as global trip, check for a single siblingChain is enough
       }
     }
   }
-};
+
 
 const sbContracts: { [key: string]: Contract } = {};
 const getSwitchboardInstance = (
@@ -112,7 +116,11 @@ const getSwitchboardInstance = (
   return sbContracts[`${chain}${siblingChain}${switchboardAddress}`];
 };
 
-main()
+
+const chainToBeTripped = ChainSlug.OPTIMISM_GOERLI;
+
+
+main(chainToBeTripped)
   .then(() => process.exit(0))
   .catch((error: Error) => {
     console.error(error);
