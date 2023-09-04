@@ -206,6 +206,12 @@ abstract contract SocketDst is SocketBase {
             .isExecutor(packedMessage, executionDetails_.signature);
         if (!isValidExecutor) revert NotExecutor();
 
+        // finally make sure executor params were respected by the executor
+        executionManager__.verifyParams(
+            messageDetails_.executionParams,
+            msg.value
+        );
+
         // verify message was part of the packet and
         // authenticated by respective switchboard
         _verify(
@@ -215,8 +221,7 @@ abstract contract SocketDst is SocketBase {
             packedMessage,
             packetRoot,
             plugConfig,
-            executionDetails_.decapacitorProof,
-            messageDetails_.executionParams
+            executionDetails_.decapacitorProof
         );
 
         // execute message
@@ -240,8 +245,7 @@ abstract contract SocketDst is SocketBase {
         bytes32 packedMessage_,
         bytes32 packetRoot_,
         PlugConfig memory plugConfig_,
-        bytes memory decapacitorProof_,
-        bytes32 executionParams_
+        bytes memory decapacitorProof_
     ) internal {
         // NOTE: is the the first un-trusted call in the system, another one is Plug.inbound
         if (
@@ -263,9 +267,6 @@ abstract contract SocketDst is SocketBase {
                 decapacitorProof_
             )
         ) revert InvalidProof();
-
-        // finally make sure executor params were respected by the executor
-        executionManager__.verifyParams(executionParams_, msg.value);
     }
 
     /**
