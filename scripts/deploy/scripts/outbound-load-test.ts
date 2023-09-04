@@ -60,6 +60,9 @@ const helperABI = [
   },
 ];
 
+const WAIT_FOR_TX = false;
+const totalIterations = 10;
+
 // usage:
 // npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain optimism-goerli --remoteChain arbitrum-goerli --numOfRequests 10 --waitTime 6
 
@@ -142,37 +145,30 @@ export const main = async () => {
       counterAddress
     );
 
-    const nonce = await signer.getTransactionCount();
-
-    for (let i = 0; i < 12; i++) {
-      const tx = await helper
-        .connect(signer)
-        .remoteAddOperationBatch(
-          remoteChainSlug,
-          amount,
-          msgGasLimit,
-          numOfRequests,
-          {
-            value: BigNumber.from(value).mul(numOfRequests),
-          }
-        );
-
-      console.log(
-        `remoteAddOperation-tx with hash: ${
-          tx.hash
-        } was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}, value: ${
-          value * numOfRequests
-        }`
+    if (WAIT_FOR_TX) {
+      await confirmAndWait(
+        signer,
+        helper,
+        remoteChainSlug,
+        amount,
+        msgGasLimit,
+        numOfRequests,
+        value,
+        waitTime,
+        chainSlug
       );
-      console.log(
-        `Track here: https://6il289myzb.execute-api.us-east-1.amazonaws.com/dev/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${tx.hash
-          .toString()
-          .toLowerCase()}`
+    } else {
+      await sendAndWait(
+        signer,
+        helper,
+        remoteChainSlug,
+        amount,
+        msgGasLimit,
+        numOfRequests,
+        value,
+        waitTime,
+        chainSlug
       );
-
-      if (waitTime && waitTime > 0) {
-        await sleep(waitTime);
-      }
     }
   } catch (error) {
     console.log(
@@ -180,6 +176,96 @@ export const main = async () => {
     );
     console.error("Error while sending transaction", error);
     throw error;
+  }
+};
+
+const sendAndWait = async (
+  signer,
+  helper,
+  remoteChainSlug,
+  amount,
+  msgGasLimit,
+  numOfRequests,
+  value,
+  waitTime,
+  chainSlug
+) => {
+  const nonce = await signer.getTransactionCount();
+
+  for (let index = 0; index < totalIterations; index++) {
+    const tx = await helper
+      .connect(signer)
+      .remoteAddOperationBatch(
+        remoteChainSlug,
+        amount,
+        msgGasLimit,
+        numOfRequests,
+        {
+          value: BigNumber.from(value).mul(numOfRequests),
+          nonce: nonce + index,
+        }
+      );
+
+    console.log(
+      `remoteAddOperation-tx with hash: ${
+        tx.hash
+      } was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}, value: ${
+        value * numOfRequests
+      }`
+    );
+    console.log(
+      `Track here: https://6il289myzb.execute-api.us-east-1.amazonaws.com/dev/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${tx.hash
+        .toString()
+        .toLowerCase()}`
+    );
+
+    if (waitTime && waitTime > 0) {
+      await sleep(waitTime);
+    }
+  }
+};
+
+const confirmAndWait = async (
+  signer,
+  helper,
+  remoteChainSlug,
+  amount,
+  msgGasLimit,
+  numOfRequests,
+  value,
+  waitTime,
+  chainSlug
+) => {
+  for (let i = 0; i < totalIterations; i++) {
+    const tx = await helper
+      .connect(signer)
+      .remoteAddOperationBatch(
+        remoteChainSlug,
+        amount,
+        msgGasLimit,
+        numOfRequests,
+        {
+          value: BigNumber.from(value).mul(numOfRequests),
+        }
+      );
+
+    await tx.wait();
+    console.log(
+      `remoteAddOperation-tx with hash: ${
+        tx.hash
+      } was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}, value: ${
+        value * numOfRequests
+      }`
+    );
+    console.log(
+      `Track here: https://6il289myzb.execute-api.us-east-1.amazonaws.com/dev/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${tx.hash
+        .toString()
+        .toLowerCase()}`
+    );
+
+    if (waitTime && waitTime > 0) {
+      await sleep(waitTime);
+    }
   }
 };
 
