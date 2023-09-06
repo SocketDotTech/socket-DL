@@ -70,8 +70,6 @@ export const transmitterAddresses = {
 };
 
 export const watcherAddresses = {
-
-  
   [DeploymentMode.DEV]: "0xdf270a879fa6cb8e36c7966766aacf91fe86f7c0",
   // [DeploymentMode.DEV]: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
   [DeploymentMode.SURGE]: "0xD7Ab0e4c8c31A91fb26552F7Ad3E91E169B86225",
