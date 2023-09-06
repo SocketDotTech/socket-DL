@@ -61,6 +61,8 @@ if (isProduction) {
     [ChainKey.BSC_TESTNET]: getChainConfig(ChainKey.BSC_TESTNET),
     [ChainKey.SEPOLIA]: getChainConfig(ChainKey.SEPOLIA),
     [ChainKey.AEVO_TESTNET]: getChainConfig(ChainKey.AEVO_TESTNET),
+    [ChainKey.AEVO]:getChainConfig(ChainKey.AEVO),
+    [ChainKey.LYRA_TESTNET]:getChainConfig(ChainKey.LYRA_TESTNET)
   };
 }
 

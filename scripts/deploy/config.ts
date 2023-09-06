@@ -20,23 +20,24 @@ console.log(`Owner address configured to ${socketOwner}`);
 console.log("========================================================");
 
 export const chains: Array<ChainSlug> = [
-  ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_GOERLI,
-  ChainSlug.OPTIMISM_GOERLI,
-  ChainSlug.POLYGON_MUMBAI,
-  ChainSlug.BSC_TESTNET,
-  ChainSlug.SEPOLIA,
-  ChainSlug.AEVO_TESTNET,
-  ChainSlug.MAINNET,
+  // ChainSlug.GOERLI,
+  // ChainSlug.ARBITRUM_GOERLI,
+  // ChainSlug.OPTIMISM_GOERLI,
+  // ChainSlug.POLYGON_MUMBAI,
+  // ChainSlug.BSC_TESTNET,
+  // ChainSlug.SEPOLIA,
+  // ChainSlug.AEVO_TESTNET,
+  ChainSlug.AEVO,
+  // ChainSlug.MAINNET,
   ChainSlug.ARBITRUM,
   ChainSlug.OPTIMISM,
-  ChainSlug.BSC,
-  ChainSlug.POLYGON_MAINNET,
+  // ChainSlug.BSC,
+  // ChainSlug.POLYGON_MAINNET,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
 export const sendTransaction = true;
-export const newRoleStatus = true;
+export const newRoleStatus = false;
 export const filterChains: number[] = chains;
 
 export const capacitorType = 1;
@@ -69,7 +70,10 @@ export const transmitterAddresses = {
 };
 
 export const watcherAddresses = {
-  [DeploymentMode.DEV]: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+
+  
+  [DeploymentMode.DEV]: "0xdf270a879fa6cb8e36c7966766aacf91fe86f7c0",
+  // [DeploymentMode.DEV]: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
   [DeploymentMode.SURGE]: "0xD7Ab0e4c8c31A91fb26552F7Ad3E91E169B86225",
   [DeploymentMode.PROD]: "0x806b72358b37391cA4220d705d225d85dc74EBc1",
 };

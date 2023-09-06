@@ -97,13 +97,14 @@ const relayTx = async (params: RequestObj) => {
 export const sendMessagesToAllPaths = async (params: {
   senderChains: ChainSlug[];
   receiverChains: ChainSlug[];
+  count:number
 }) => {
   const amount = 100;
-  const msgGasLimit = "100000";
+  const msgGasLimit = "1000000"; // update this when add fee logic for dst gas limit 
   let gasLimit: number | undefined = 185766;
 
   try {
-    let { senderChains, receiverChains } = params;
+    let { senderChains, receiverChains, count } = params;
 
     console.log("================= checking for : ", params);
     let activeChainSlugs =
@@ -186,17 +187,23 @@ export const sendMessagesToAllPaths = async (params: {
               chainSlug === ChainSlug.ARBITRUM_GOERLI
                 ? undefined
                 : gasLimit;
-            let response = await relayTx({
-              to,
-              data,
-              value,
-              gasLimit,
-              chainSlug,
-            });
-            console.log(
-              `Tx sent : ${chainSlug} -> ${siblingSlug} hash: `,
-              response?.hash
-            );
+            
+            let tempArray = (new Array(count)).fill(1);
+            await Promise.all( tempArray.map(async (c) => {
+              // console.log(c)
+              let response = await relayTx({
+                to,
+                data,
+                value,
+                gasLimit,
+                chainSlug,
+              });
+              console.log(
+                `Tx sent : ${chainSlug} -> ${siblingSlug} hash: `,
+                response?.hash
+              );
+            }));
+            
           })
         );
       })
@@ -207,9 +214,10 @@ export const sendMessagesToAllPaths = async (params: {
 };
 
 const main = async () => {
-  let senderChains = chains;
-  let receiverChains = chains;
-  await sendMessagesToAllPaths({ senderChains, receiverChains });
+  let senderChains = [ChainSlug.OPTIMISM_GOERLI];
+  let receiverChains = [ChainSlug.ARBITRUM_GOERLI ];
+  let count = 1;
+  await sendMessagesToAllPaths({ senderChains, receiverChains, count });
 };
 
 main()
