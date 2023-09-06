@@ -63,6 +63,10 @@ export function getJsonRpcUrl(chain: ChainKey): string {
       jsonRpcUrl = process.env.AEVO_TESTNET_RPC as string;
       break;
 
+    case ChainKey.AEVO:
+      jsonRpcUrl = process.env.AEVO_RPC as string;
+      break;
+
     case ChainKey.HARDHAT:
       jsonRpcUrl = "http://127.0.0.1:8545/";
       break;

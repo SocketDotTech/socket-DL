@@ -113,6 +113,14 @@ const config: HardhatUserConfig = {
           browserURL: "https://explorer-testnet.aevo.xyz/",
         },
       },
+      {
+        network: "aevo",
+        chainId: chainKeyToSlug[ChainKey.AEVO],
+        urls: {
+          apiURL: "",
+          browserURL: "https://explorer-testnet.aevo.xyz/",
+        },
+      },
     ],
   },
   networks: {

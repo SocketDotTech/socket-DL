@@ -17,8 +17,8 @@ export enum ChainSlug {
   POLYGON_MAINNET = 137,
   POLYGON_MUMBAI = 80001,
   AEVO_TESTNET = 11155112,
-  HARDHAT = 31337,
   AEVO = 2999,
+  HARDHAT = 31337,
   LYRA_TESTNET = 901,
 }
 
@@ -76,8 +76,8 @@ export const ChainSlugToKey = {
   137: ChainKey.POLYGON_MAINNET,
   80001: ChainKey.POLYGON_MUMBAI,
   11155112: ChainKey.AEVO_TESTNET,
-  [ChainSlug.AEVO]: ChainKey.AEVO,
   [ChainSlug.LYRA_TESTNET]: ChainKey.LYRA_TESTNET,
+  2999: ChainKey.AEVO,
 };
 
 export const TestnetIds: ChainSlug[] = [
