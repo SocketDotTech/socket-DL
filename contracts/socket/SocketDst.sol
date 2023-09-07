@@ -119,7 +119,7 @@ abstract contract SocketDst is SocketBase {
 
         (address transmitter, bool isTransmitter) = transmitManager__
             .checkTransmitter(
-                uint32(_decodeChainSlug(packetId_)),
+                _decodeChainSlug(packetId_),
                 keccak256(abi.encode(version, chainSlug, packetId_, root_)),
                 signature_
             );
@@ -253,7 +253,7 @@ abstract contract SocketDst is SocketBase {
                 packetRoot_,
                 packetId_,
                 proposalCount_,
-                uint32(remoteChainSlug_),
+                remoteChainSlug_,
                 rootProposedAt[packetId_][proposalCount_][
                     address(plugConfig_.inboundSwitchboard__)
                 ]
