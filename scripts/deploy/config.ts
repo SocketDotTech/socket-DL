@@ -33,9 +33,9 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.BSC_TESTNET,
-  ChainSlug.SEPOLIA,
   ChainSlug.AEVO_TESTNET,
   ChainSlug.LYRA_TESTNET,
+  // ChainSlug.SEPOLIA,
   // ChainSlug.AEVO,
   // ChainSlug.MAINNET,
   // ChainSlug.ARBITRUM,
@@ -48,7 +48,7 @@ export const chains: Array<ChainSlug> = [
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
 export const sendTransaction = true;
 export const newRoleStatus = true;
-export const filterChains: number[] = [ChainSlug.LYRA_TESTNET];
+export const filterChains: number[] = chains;
 export const filterSiblingChains: number[] = chains;
 export const capacitorType = 1;
 export const maxPacketLength = 1;
@@ -83,8 +83,7 @@ export const transmitterAddresses = {
 };
 
 export const watcherAddresses = {
-  [DeploymentMode.DEV]: "0xdf270a879fa6cb8e36c7966766aacf91fe86f7c0",
-  // [DeploymentMode.DEV]: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
+  [DeploymentMode.DEV]: "0xBe6fC90D42bED21d722D5698aF2916C3a3b1393D",
   [DeploymentMode.SURGE]: "0xD7Ab0e4c8c31A91fb26552F7Ad3E91E169B86225",
   [DeploymentMode.PROD]: "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
 };

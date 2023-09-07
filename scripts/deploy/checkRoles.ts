@@ -527,7 +527,7 @@ const main = async () => {
   let transmitterAddress = transmitterAddresses[mode];
   let watcherAddress = watcherAddresses[mode];
 
-  // // Grant rescue,withdraw and governance role for Execution Manager to owner
+  // Grant rescue,withdraw and governance role for Execution Manager to owner
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
@@ -579,7 +579,7 @@ const main = async () => {
     newRoleStatus,
   });
 
-  // // Grant owner roles in socket
+  // Grant owner roles in socket
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
