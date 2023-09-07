@@ -19,6 +19,8 @@ export const timeout: {
   [ChainKey.SEPOLIA]: 7200,
   [ChainKey.AEVO_TESTNET]: 7200,
   [ChainKey.AEVO]: 7200,
+  [ChainKey.LYRA_TESTNET]: 7200,
+  [ChainKey.LYRA]: 7200,
 };
 
 export const attestGasLimit: {
@@ -38,6 +40,10 @@ export const attestGasLimit: {
   [ChainKey.SEPOLIA]: 80000,
   [ChainKey.AEVO_TESTNET]: 80000,
   [ChainKey.AEVO]: 80000,
+  [ChainKey.LYRA_TESTNET]: 80000,
+  [ChainKey.LYRA]: 80000,
+
+  // [ChainKey.LYRA]: 80000,
 };
 
 export const executionOverhead: {
@@ -57,6 +63,8 @@ export const executionOverhead: {
   [ChainKey.SEPOLIA]: 40000,
   [ChainKey.AEVO_TESTNET]: 40000,
   [ChainKey.AEVO]: 40000,
+  [ChainKey.LYRA_TESTNET]: 40000,
+  [ChainKey.LYRA]: 40000,
 };
 
 export const getDefaultIntegrationType = (

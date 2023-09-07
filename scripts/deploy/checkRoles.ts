@@ -24,6 +24,7 @@ import { getProviderFromChainName } from "../constants";
 import {
   executorAddresses,
   filterChains,
+  filterSiblingChains,
   mode,
   newRoleStatus,
   sendTransaction,
@@ -39,6 +40,7 @@ let roleStatus: any = {};
 interface checkAndUpdateRolesObj {
   userSpecificRoles: { userAddress: string; filterRoles: ROLES[] }[];
   filterChains: ChainSlug[];
+  filterSiblingChains: ChainSlug[];
   contractName: CORE_CONTRACTS;
   newRoleStatus: boolean;
   sendTransaction: boolean;
@@ -299,6 +301,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
     let {
       sendTransaction,
       filterChains,
+      filterSiblingChains,
       contractName,
       userSpecificRoles,
       newRoleStatus,
@@ -421,8 +424,8 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
             await Promise.all(
               siblingSlugs.map(async (siblingSlug) => {
                 if (
-                  filterChains.length > 0 &&
-                  !filterChains.includes(siblingSlug)
+                  filterSiblingChains.length > 0 &&
+                  !filterSiblingChains.includes(siblingSlug)
                 )
                   return;
 
@@ -547,6 +550,7 @@ const main = async () => {
     ],
     contractName: executionManagerVersion,
     filterChains,
+    filterSiblingChains,
     sendTransaction,
     newRoleStatus,
   });
@@ -570,6 +574,7 @@ const main = async () => {
     ],
     contractName: CORE_CONTRACTS.TransmitManager,
     filterChains,
+    filterSiblingChains,
     sendTransaction,
     newRoleStatus,
   });
@@ -584,6 +589,7 @@ const main = async () => {
     ],
     contractName: CORE_CONTRACTS.Socket,
     filterChains,
+    filterSiblingChains,
     sendTransaction,
     newRoleStatus,
   });
@@ -614,6 +620,7 @@ const main = async () => {
 
     contractName: CORE_CONTRACTS.FastSwitchboard,
     filterChains,
+    filterSiblingChains,
     sendTransaction,
     newRoleStatus,
   });
@@ -642,6 +649,7 @@ const main = async () => {
     ],
     contractName: CORE_CONTRACTS.OptimisticSwitchboard,
     filterChains,
+    filterSiblingChains,
     sendTransaction,
     newRoleStatus,
   });
@@ -667,6 +675,7 @@ const main = async () => {
     ],
     contractName: CORE_CONTRACTS.NativeSwitchboard,
     filterChains,
+    filterSiblingChains,
     sendTransaction,
     newRoleStatus,
   });

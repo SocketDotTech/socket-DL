@@ -20,6 +20,7 @@ export enum ChainSlug {
   AEVO = 2999,
   HARDHAT = 31337,
   LYRA_TESTNET = 901,
+  LYRA = 0, // update this
 }
 
 export enum ChainKey {
@@ -39,6 +40,7 @@ export enum ChainKey {
   AEVO_TESTNET = "aevo-testnet",
   AEVO = "aevo",
   LYRA_TESTNET = "lyra-testnet",
+  LYRA = "lyra",
   HARDHAT = "hardhat",
 }
 
@@ -58,6 +60,7 @@ export const chainKeyToSlug = {
   [ChainKey.AEVO_TESTNET]: 11155112,
   [ChainKey.AEVO]: ChainSlug.AEVO,
   [ChainKey.LYRA_TESTNET]: ChainSlug.LYRA_TESTNET,
+  [ChainKey.LYRA]: ChainSlug.LYRA,
   [ChainKey.HARDHAT]: 31337,
 };
 
@@ -77,6 +80,7 @@ export const ChainSlugToKey = {
   80001: ChainKey.POLYGON_MUMBAI,
   11155112: ChainKey.AEVO_TESTNET,
   [ChainSlug.LYRA_TESTNET]: ChainKey.LYRA_TESTNET,
+  [ChainSlug.LYRA]: ChainKey.LYRA,
   2999: ChainKey.AEVO,
 };
 
@@ -98,6 +102,7 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.OPTIMISM,
   ChainSlug.BSC,
   ChainSlug.AEVO,
+  ChainSlug.LYRA
 ];
 
 export const L1Ids: ChainSlug[] = [ChainSlug.MAINNET, ChainSlug.GOERLI];
@@ -112,6 +117,7 @@ export const L2Ids: ChainSlug[] = [
   ChainSlug.AEVO,
   ChainSlug.AEVO_TESTNET,
   ChainSlug.LYRA_TESTNET,
+  ChainSlug.LYRA
 ];
 
 export enum NativeSwitchboard {

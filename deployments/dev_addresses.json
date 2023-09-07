@@ -167,6 +167,19 @@
     "SocketBatcher": "0x998C12F1F4C7c2C8D65aF394651aEB2f1397f145",
     "Counter": "0xE89A18D6eB897236BEd71e5975940DA603d80084"
   },
+  "901": {
+    "SignatureVerifier": "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A",
+    "Hasher": "0x9814d1E6751ADAE2D60fF16f987ae02a25C87224",
+    "CapacitorFactory": "0x98472CDb864DedcF13a560Ec2b79745a6063A3aC",
+    "Socket": "0xa5b593aE839b3fe47983Fc28da602a6dEEfBBc9D",
+    "ExecutionManager": "0xe804b3f393EC5D2D04bac6DeED7744beB243E763",
+    "TransmitManager": "0x61d921aBcaE610E38fb6e5F12aC6b7337e42F2bD",
+    "integrations": {},
+    "FastSwitchboard": "0xA418D0cCFB62FE888aCf655e54d88E09059bD6c8",
+    "OptimisticSwitchboard": "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
+    "SocketBatcher": "0x323684c3556480F94F9232A1525eAD02fde4F0d1",
+    "Counter": "0x571614C396B5E95Bc3373b7cC61C8e770443A0A4"
+  },
   "80001": {
     "SignatureVerifier": "0x79Dc67853cab8FB77f14A76116cAa7B4478B53Da",
     "Hasher": "0x0e0CD33ed677a14CB134C9048a59Fc3799312404",

@@ -87,6 +87,7 @@ const config: HardhatUserConfig = {
       polygon: process.env.POLYGONSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       aevoTestnet: process.env.AEVO_API_KEY || "",
+      lyraTestnet: process.env.LYRA_API_KEY || "",
     },
     customChains: [
       {
