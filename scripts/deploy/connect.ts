@@ -84,7 +84,7 @@ export const main = async () => {
               switchboard.toLowerCase()
           ) {
             console.log("Config already set!");
-            return;
+            continue;
           }
 
           const tx = await counter.setSocketConfig(

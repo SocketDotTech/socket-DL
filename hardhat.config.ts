@@ -61,6 +61,7 @@ if (isProduction) {
     [ChainKey.BSC_TESTNET]: getChainConfig(ChainKey.BSC_TESTNET),
     [ChainKey.SEPOLIA]: getChainConfig(ChainKey.SEPOLIA),
     [ChainKey.AEVO_TESTNET]: getChainConfig(ChainKey.AEVO_TESTNET),
+    [ChainKey.AEVO]: getChainConfig(ChainKey.AEVO),
   };
 }
 
@@ -106,6 +107,14 @@ const config: HardhatUserConfig = {
       {
         network: "aevoTestnet",
         chainId: chainKeyToSlug[ChainKey.AEVO_TESTNET],
+        urls: {
+          apiURL: "",
+          browserURL: "https://explorer-testnet.aevo.xyz/",
+        },
+      },
+      {
+        network: "aevo",
+        chainId: chainKeyToSlug[ChainKey.AEVO],
         urls: {
           apiURL: "",
           browserURL: "https://explorer-testnet.aevo.xyz/",
