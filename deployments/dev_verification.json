@@ -234,6 +234,12 @@
   ],
   "901": [
     [
+      "0x38CbBc8F45A350aAcaf8c1bb680633149604cca3",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ],
+    [
       "0x571614C396B5E95Bc3373b7cC61C8e770443A0A4",
       "Counter",
       "contracts/examples/Counter.sol",
