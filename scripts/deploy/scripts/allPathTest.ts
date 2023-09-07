@@ -215,8 +215,8 @@ export const sendMessagesToAllPaths = async (params: {
 };
 
 const main = async () => {
-  let senderChains = [ChainSlug.OPTIMISM_GOERLI];
-  let receiverChains = [ChainSlug.ARBITRUM_GOERLI];
+  let senderChains = chains;
+  let receiverChains = chains;
   let count = 1;
   await sendMessagesToAllPaths({ senderChains, receiverChains, count });
 };
