@@ -1,6 +1,6 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
-import { utils, constants } from "ethers";
+import { BigNumber, constants } from "ethers";
 
 import fs from "fs";
 import { ethers } from "ethers";
@@ -8,24 +8,67 @@ import { Contract } from "ethers";
 require("dotenv").config();
 import yargs from "yargs";
 import { getProviderFromChainName } from "../../constants";
-import CounterABI from "@socket.tech/dl-core/artifacts/abi/Counter.json";
+import SocketABI from "../../../out/Socket.sol/Socket.json";
+
 import path from "path";
 import { mode } from "../config";
-import { chainKeyToSlug } from "../../../src";
+import { CORE_CONTRACTS, chainKeyToSlug } from "../../../src";
 
 const deployedAddressPath = path.join(
   __dirname,
   `/../../../deployments/${mode}_addresses.json`
 );
 
-// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain polygon-mumbai --remoteChain optimism-goerli --numOfRequests 10 --waitTime 100
+// batch outbound contract:
+const helperContractAddress = {
+  11155112: "0xF76E77186Ae85Fa0D5fce51D03e59b964fe7717A",
+  11155111: "0x91C27Cad374246314E756f8Aa2f62F433d6F102C",
+  80001: "0x7d96De5fa59F61457da325649bcF2B4e500055Ad",
+  421613: "0x60c3A0bCEa43F5aaf8743a41351C0a7b982aE01E",
+  420: "0xD21e53E568FD904c2599E41aFC2434ea11b38A2e",
+  5: "0x28f26c101e3F694f1d03D477b4f34F8835141611",
+};
+
+const helperABI = [
+  {
+    inputs: [
+      {
+        internalType: "uint32",
+        name: "chainSlug_",
+        type: "uint32",
+      },
+      {
+        internalType: "uint256",
+        name: "amount_",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "msgGasLimit_",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "totalMsgs_",
+        type: "uint256",
+      },
+    ],
+    name: "remoteAddOperationBatch",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+];
+
+const WAIT_FOR_TX = false;
+const totalIterations = 10;
 
 // usage:
-// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain optimism --remoteChain polygon-mainnet --numOfRequests 50 --waitTime 100
+// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain optimism-goerli --remoteChain arbitrum-goerli --numOfRequests 10 --waitTime 6
+
 export const main = async () => {
   const amount = 100;
   const msgGasLimit = "100000";
-  const gasLimit = 185766;
   let remoteChainSlug;
 
   try {
@@ -65,7 +108,7 @@ export const main = async () => {
     const providerInstance = getProviderFromChainName(chain);
 
     const signer = new ethers.Wallet(
-      process.env.LOAD_TEST_PRIVATE_KEY as string,
+      process.env.SOCKET_SIGNER_KEY as string,
       providerInstance
     );
 
@@ -79,42 +122,53 @@ export const main = async () => {
       fs.readFileSync(deployedAddressPath, "utf-8")
     );
 
-    // const counterAddress = config[chainSlug]["Counter"];
-    const counterAddress = "0xefc0c02abca8dda7d2b399d5c41358cc8ff0a183";
+    const counterAddress = config[chainSlug]["Counter"];
 
-    const counter: Contract = new ethers.Contract(
-      counterAddress,
-      CounterABI,
+    const helper: Contract = new ethers.Contract(
+      helperContractAddress[chainSlug],
+      helperABI,
       signer
     );
 
-    for (let i = 0; i < numOfRequests; i++) {
-      const tx = await counter
-        .connect(signer)
-        .remoteAddOperation(
-          remoteChainSlug,
-          amount,
-          msgGasLimit,
-          constants.HashZero,
-          {
-            gasLimit,
-            value: ethers.utils.parseUnits("30000", "gwei").toNumber(),
-          }
-        );
+    const socket: Contract = new ethers.Contract(
+      config[chainSlug][CORE_CONTRACTS.Socket],
+      SocketABI.abi,
+      signer
+    );
 
-      console.log();
+    const value = await socket.getMinFees(
+      msgGasLimit,
+      100, // payload size
+      constants.HashZero,
+      constants.HashZero,
+      remoteChainSlug,
+      counterAddress
+    );
 
-      await tx.wait();
-
-      console.log(
-        `remoteAddOperation-tx with hash: ${JSON.stringify(
-          tx.hash
-        )} was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}`
+    if (WAIT_FOR_TX) {
+      await confirmAndWait(
+        signer,
+        helper,
+        remoteChainSlug,
+        amount,
+        msgGasLimit,
+        numOfRequests,
+        value,
+        waitTime,
+        chainSlug
       );
-
-      if (waitTime && waitTime > 0) {
-        await sleep(waitTime);
-      }
+    } else {
+      await sendAndWait(
+        signer,
+        helper,
+        remoteChainSlug,
+        amount,
+        msgGasLimit,
+        numOfRequests,
+        value,
+        waitTime,
+        chainSlug
+      );
     }
   } catch (error) {
     console.log(
@@ -122,6 +176,96 @@ export const main = async () => {
     );
     console.error("Error while sending transaction", error);
     throw error;
+  }
+};
+
+const sendAndWait = async (
+  signer,
+  helper,
+  remoteChainSlug,
+  amount,
+  msgGasLimit,
+  numOfRequests,
+  value,
+  waitTime,
+  chainSlug
+) => {
+  const nonce = await signer.getTransactionCount();
+
+  for (let index = 0; index < totalIterations; index++) {
+    const tx = await helper
+      .connect(signer)
+      .remoteAddOperationBatch(
+        remoteChainSlug,
+        amount,
+        msgGasLimit,
+        numOfRequests,
+        {
+          value: BigNumber.from(value).mul(numOfRequests),
+          nonce: nonce + index,
+        }
+      );
+
+    console.log(
+      `remoteAddOperation-tx with hash: ${
+        tx.hash
+      } was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}, value: ${
+        value * numOfRequests
+      }`
+    );
+    console.log(
+      `Track here: https://6il289myzb.execute-api.us-east-1.amazonaws.com/dev/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${tx.hash
+        .toString()
+        .toLowerCase()}`
+    );
+
+    if (waitTime && waitTime > 0) {
+      await sleep(waitTime);
+    }
+  }
+};
+
+const confirmAndWait = async (
+  signer,
+  helper,
+  remoteChainSlug,
+  amount,
+  msgGasLimit,
+  numOfRequests,
+  value,
+  waitTime,
+  chainSlug
+) => {
+  for (let i = 0; i < totalIterations; i++) {
+    const tx = await helper
+      .connect(signer)
+      .remoteAddOperationBatch(
+        remoteChainSlug,
+        amount,
+        msgGasLimit,
+        numOfRequests,
+        {
+          value: BigNumber.from(value).mul(numOfRequests),
+        }
+      );
+
+    await tx.wait();
+    console.log(
+      `remoteAddOperation-tx with hash: ${
+        tx.hash
+      } was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}, value: ${
+        value * numOfRequests
+      }`
+    );
+    console.log(
+      `Track here: https://6il289myzb.execute-api.us-east-1.amazonaws.com/dev/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${tx.hash
+        .toString()
+        .toLowerCase()}`
+    );
+
+    if (waitTime && waitTime > 0) {
+      await sleep(waitTime);
+    }
   }
 };
 
