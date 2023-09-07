@@ -70,7 +70,7 @@ export function getJsonRpcUrl(chain: ChainKey): string {
     case ChainKey.LYRA_TESTNET:
       jsonRpcUrl = process.env.LYRA_TESTNET_RPC as string;
       break;
-      
+
     case ChainKey.LYRA:
       jsonRpcUrl = process.env.LYRA_RPC as string;
       break;

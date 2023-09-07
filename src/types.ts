@@ -102,7 +102,7 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.OPTIMISM,
   ChainSlug.BSC,
   ChainSlug.AEVO,
-  ChainSlug.LYRA
+  ChainSlug.LYRA,
 ];
 
 export const L1Ids: ChainSlug[] = [ChainSlug.MAINNET, ChainSlug.GOERLI];
@@ -117,7 +117,7 @@ export const L2Ids: ChainSlug[] = [
   ChainSlug.AEVO,
   ChainSlug.AEVO_TESTNET,
   ChainSlug.LYRA_TESTNET,
-  ChainSlug.LYRA
+  ChainSlug.LYRA,
 ];
 
 export enum NativeSwitchboard {
