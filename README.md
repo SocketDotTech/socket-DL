@@ -104,6 +104,50 @@ It is recommended to setup the ide to work with solidity development. In case of
 }
 ```
 
+## Error Signatures 
+
+| Error                       | Signature  |
+| --------------------------- | ---------- |
+| OnlyOwner()                 | 0x5fc483c5 |
+| OnlyNominee()               | 0x7c91ccdd |
+| PacketNotProposed()         | 0x1c936052 |
+| InvalidPacketId()           | 0xb21147c1 |
+| InvalidProof()              | 0x09bde339 |
+| MessageAlreadyExecuted()    | 0x7448c64c |
+| NotExecutor()               | 0xc32d1d76 |
+| VerificationFailed()        | 0x439cc0cd |
+| ErrInSourceValidation()     | 0xb39fb5d5 |
+| LowGasLimit()               | 0xd38edae0 |
+| InvalidTransmitter()        | 0x58a70a0a |
+| SwitchboardExists()         | 0x2dff8555 |
+| InvalidConnection()         | 0x63228f29 |
+| NoPermit(bytes32)           | 0x962f6333 |
+| InvalidSigLength()          | 0xd2453293 |
+| ZeroAddress()               | 0xd92e233d |
+| InvalidTokenAddress()       | 0x1eb00b06 |
+| OnlySocket()                | 0x503284dc |
+| InvalidNonce()              | 0x756688fe |
+| MsgValueTooLow()            | 0x508aaf00 |
+| InvalidBatchSize()          | 0x7862e959 |
+| InsufficientMessageLength() | 0xbcfdc01d |
+| InvalidPacketLength()       | 0x5a375a8e |
+| PacketLengthNotAllowed()    | 0x83d360ad |
+| WatcherFound()              | 0xa080b558 |
+| WatcherNotFound()           | 0xa278e4ad |
+| AlreadyAttested()           | 0x35d90805 |
+| InvalidRole()               | 0xd954416a |
+| InvalidRoot()               | 0x504570e3 |
+| UnequalArrayLengths()       | 0x11e86f73 |
+| InvalidCapacitorType()      | 0x39354089 |
+| OnlyExecutionManager()      | 0x03c377c5 |
+| InvalidCapacitorAddress()   | 0x73d817fb |
+| PlugDisconnected()          | 0xe741bafb |
+| NoPendingPacket()           | 0xa9023923 |
+| FeesNotEnough()             | 0x217b529e |
+| AlreadyInitialized()        | 0x0dc149f0 |
+| InvalidSender()             | 0xddb5de5e |
+| NoRootFound()               | 0x849713b0 |
+
 ## Contributing
 
 We really appreciate and value any form of contribution to Socket Data Layer Contracts. As a contributor, you are expected to fork this repository, work on your own fork and then submit pull requests. The PRs are expected to have a proper description to make reviewing easy. The code is expected to be properly linted and tested.
