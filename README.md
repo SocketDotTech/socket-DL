@@ -128,6 +128,12 @@ It is recommended to setup the ide to work with solidity development. In case of
 | OnlySocket()                | 0x503284dc |
 | InvalidNonce()              | 0x756688fe |
 | MsgValueTooLow()            | 0x508aaf00 |
+| MsgValueTooHigh()           | 0x5dffc92f |
+| PayloadTooLarge()           | 0x492f620d |
+| InsufficientMsgValue()      | 0x78f38f76 |
+| InsufficientFees()          | 0x8d53e553 |
+| InvalidMsgValue()           | 0x1841b4e1 |
+| FeesTooHigh()               | 0xc9034e18 |
 | InvalidBatchSize()          | 0x7862e959 |
 | InsufficientMessageLength() | 0xbcfdc01d |
 | InvalidPacketLength()       | 0x5a375a8e |
