@@ -760,7 +760,7 @@ contract Setup is Test {
         uint256 watcherPrivateKey_
     ) internal {
         bytes32 digest = keccak256(
-            abi.encode(switchboardAddress, dstSlug, packetId_, proposalCount_)
+            abi.encode(switchboardAddress, dstSlug, packetId_, proposalCount_, root_)
         );
 
         // generate attest-signature
