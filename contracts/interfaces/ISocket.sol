@@ -189,6 +189,16 @@ interface ISocket {
         address switchboard_
     ) external view returns (bytes32);
 
+
+    /**
+     * @notice Retrieves the latest proposalCount for a packet id.
+     * @return The proposal count for the specified packet id.
+     */
+    function proposalCount(
+        bytes32 packetId_
+    ) external view returns (uint256);
+
+
     /**
      * @notice Retrieves the minimum fees required for a message with a specified gas limit and destination chain.
      * @param minMsgGasLimit_ The gas limit of the message.
