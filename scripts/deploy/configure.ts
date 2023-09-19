@@ -149,6 +149,30 @@ export const main = async () => {
             addr
           );
         }
+
+        // register fast2
+        for (let sibling of siblingSlugs) {
+          const siblingSwitchboard = getSwitchboardAddress(
+            chain,
+            IntegrationTypes.fast2,
+            addresses?.[sibling]
+          );
+
+          if (!siblingSwitchboard || !addr[CORE_CONTRACTS.FastSwitchboard2])
+            continue;
+
+          addr = await registerSwitchboardForSibling(
+            addr[CORE_CONTRACTS.FastSwitchboard2],
+            siblingSwitchboard,
+            sibling,
+            capacitorType,
+            maxPacketLength,
+            socketSigner,
+            IntegrationTypes.fast2,
+            addr
+          );
+        }
+
         // register optimistic
         for (let sibling of siblingSlugs) {
           const siblingSwitchboard = getSwitchboardAddress(
@@ -206,7 +230,7 @@ const configureExecutionManager = async (
     let nextNonce = (
       await executionManagerContract.nextNonce(socketSigner.address)
     ).toNumber();
-    console.log({ nextNonce });
+    // console.log({ nextNonce });
 
     let requests: any = [];
 
@@ -220,7 +244,7 @@ const configureExecutionManager = async (
           currentValue.toString() ==
           msgValueMaxThreshold[siblingSlug]?.toString()
         ) {
-          console.log("already set, returning ", { currentValue });
+          // console.log("already set, returning ", { currentValue });
           return;
         }
 

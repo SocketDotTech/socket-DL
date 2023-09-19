@@ -26,6 +26,13 @@ export const getSwitchboardDeployData = (
       sigVerifierAddress,
       signerAddress
     );
+  } else if (integrationType === IntegrationTypes.fast2) {
+    return fastSwitchboard(
+      localChain,
+      socketAddress,
+      sigVerifierAddress,
+      signerAddress
+    );
   } else if (integrationType === IntegrationTypes.optimistic) {
     return optimisticSwitchboard(
       localChain,

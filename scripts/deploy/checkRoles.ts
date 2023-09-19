@@ -452,7 +452,8 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                     // If Watcher role in FastSwitchboard, have to call another function
                     // to set the role
                     if (
-                      contractName === CORE_CONTRACTS.FastSwitchboard &&
+                      (contractName === CORE_CONTRACTS.FastSwitchboard ||
+                        contractName === CORE_CONTRACTS.FastSwitchboard2) &&
                       role === ROLES.WATCHER_ROLE &&
                       isRoleChanged(hasRole, newRoleStatus)
                     ) {
@@ -613,6 +614,36 @@ const main = async () => {
     ],
 
     contractName: CORE_CONTRACTS.FastSwitchboard,
+    filterChains,
+    sendTransaction,
+    newRoleStatus,
+  });
+
+  // Setup Fast Switchboard2 roles except WATCHER
+  await checkAndUpdateRoles({
+    userSpecificRoles: [
+      {
+        userAddress: ownerAddress,
+        filterRoles: [
+          ROLES.RESCUE_ROLE,
+          ROLES.GOVERNANCE_ROLE,
+          ROLES.TRIP_ROLE,
+          ROLES.UN_TRIP_ROLE,
+          ROLES.WITHDRAW_ROLE,
+          ROLES.FEES_UPDATER_ROLE,
+        ],
+      },
+      {
+        userAddress: transmitterAddress,
+        filterRoles: [ROLES.FEES_UPDATER_ROLE],
+      },
+      {
+        userAddress: watcherAddress,
+        filterRoles: [ROLES.WATCHER_ROLE],
+      },
+    ],
+
+    contractName: CORE_CONTRACTS.FastSwitchboard2,
     filterChains,
     sendTransaction,
     newRoleStatus,

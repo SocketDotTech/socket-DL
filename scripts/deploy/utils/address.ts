@@ -7,6 +7,8 @@ function getSwitchboardAddress(
 ) {
   if (integrationType === IntegrationTypes.fast) {
     return config?.["FastSwitchboard"];
+  } else if (integrationType === IntegrationTypes.fast2) {
+    return config?.["FastSwitchboard2"];
   } else if (integrationType === IntegrationTypes.optimistic) {
     return config?.["OptimisticSwitchboard"];
   } else

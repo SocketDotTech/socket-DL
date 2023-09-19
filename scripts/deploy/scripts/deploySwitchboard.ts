@@ -32,6 +32,16 @@ export default async function deploySwitchboards(
       mode
     );
 
+  if (!sourceConfig.FastSwitchboard2)
+    updatedConfig = await deploySwitchboard(
+      IntegrationTypes.fast2,
+      network,
+      "",
+      signer,
+      updatedConfig,
+      mode
+    );
+
   if (!sourceConfig.OptimisticSwitchboard)
     updatedConfig = await deploySwitchboard(
       IntegrationTypes.optimistic,
@@ -113,6 +123,9 @@ async function deploySwitchboard(
     }
     if (integrationType === IntegrationTypes.fast) {
       sourceConfig[CORE_CONTRACTS.FastSwitchboard] = switchboard.address;
+    }
+    if (integrationType === IntegrationTypes.fast2) {
+      sourceConfig[CORE_CONTRACTS.FastSwitchboard2] = switchboard.address;
     }
   } catch (error) {
     console.log("Error in deploying switchboard", error);
