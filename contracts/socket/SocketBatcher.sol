@@ -482,13 +482,12 @@ contract SocketBatcher is AccessControl {
     /**
      * @notice returns latest proposalCounts for list of packetIds
      * @param socketAddress_ address of socket
-     * @param packetIds_ the list of packetIds 
+     * @param packetIds_ the list of packetIds
      */
     function getProposalCountBatch(
         address socketAddress_,
         bytes32[] calldata packetIds_
     ) external view returns (uint256[] memory) {
-
         uint256 packetIdsLength = packetIds_.length;
 
         uint256[] memory proposalCounts = new uint256[](packetIdsLength);
