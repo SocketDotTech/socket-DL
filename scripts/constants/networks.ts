@@ -67,6 +67,14 @@ export function getJsonRpcUrl(chain: ChainKey): string {
       jsonRpcUrl = process.env.AEVO_RPC as string;
       break;
 
+    case ChainKey.LYRA_TESTNET:
+      jsonRpcUrl = process.env.LYRA_TESTNET_RPC as string;
+      break;
+
+    case ChainKey.LYRA:
+      jsonRpcUrl = process.env.LYRA_RPC as string;
+      break;
+
     case ChainKey.HARDHAT:
       jsonRpcUrl = "http://127.0.0.1:8545/";
       break;
