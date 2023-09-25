@@ -1,6 +1,12 @@
 {
   "5": [
     [
+      "0xe8E2409a355328CE99eAE1De3f0583136c909f42",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ],
+    [
       "0x97d796C3B7A4D7f31408B798452da6ed835358F5",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -131,6 +137,12 @@
   ],
   "420": [
     [
+      "0xEe391E4a214E6312B42BF5FAcA9Bd214e8ebd206",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ],
+    [
       "0xE89A18D6eB897236BEd71e5975940DA603d80084",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -234,6 +246,12 @@
   ],
   "80001": [
     [
+      "0x50E32b5595d31dFBA53E189513718412EA42c804",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ],
+    [
       "0x154425b14538ca5dCE77357133CEA76DDc6650EA",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -336,6 +354,12 @@
   ],
   "421613": [
     [
+      "0x93D246a24B032C101c0858354dC5FbB7A113d500",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ],
+    [
       "0xc8dD08F4f7392b4577f4D6499233792d163DA5Ee",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -437,6 +461,12 @@
   ],
   "11155111": [
     [
+      "0xec7A753bc2D4Fab9Fcc459B7205d2FCa96b6c622",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ],
+    [
       "0x918ECe20236B9d8C2AA1742540246D6F9a9eB081",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -526,6 +556,12 @@
     ]
   ],
   "11155112": [
+    [
+      "0x06845FE0597cD0027df2d62B152B17E5eBaE22DB",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ],
     [
       "0xAE9bE0eA6DD7B53C88665Cb2EFf7d40dFD51cf91",
       "Counter",

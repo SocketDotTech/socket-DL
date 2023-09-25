@@ -284,7 +284,7 @@ contract SocketBatcher is AccessControl {
     function proposeBatch(
         address socketAddress_,
         ProposeRequest[] calldata proposeRequests_
-    ) external {
+    ) public {
         uint256 proposeRequestLength = proposeRequests_.length;
         for (uint256 index = 0; index < proposeRequestLength; ) {
             ISocket(socketAddress_).proposeForSwitchboard(
@@ -307,7 +307,7 @@ contract SocketBatcher is AccessControl {
     function attestBatch(
         address switchboardAddress_,
         AttestRequest[] calldata attestRequests_
-    ) external {
+    ) public {
         uint256 attestRequestLength = attestRequests_.length;
         for (uint256 index = 0; index < attestRequestLength; ) {
             FastSwitchboard(switchboardAddress_).attest(
@@ -320,6 +320,26 @@ contract SocketBatcher is AccessControl {
                 ++index;
             }
         }
+    }
+
+    /**
+     * @notice send a batch of propose, attest and execute transactions
+     * @param socketAddress_ address of socket
+     * @param switchboardAddress_ address of switchboard
+     * @param proposeRequests_ the list of requests with packets to be proposed
+     * @param attestRequests_ the list of requests with packets to be attested by switchboard
+     * @param executeRequests_ the list of requests with messages to be executed
+     */
+    function sendBatch(
+        address socketAddress_,
+        address switchboardAddress_,
+        ProposeRequest[] calldata proposeRequests_,
+        AttestRequest[] calldata attestRequests_,
+        ExecuteRequest[] calldata executeRequests_
+    ) external {
+        proposeBatch(socketAddress_, proposeRequests_);
+        attestBatch(switchboardAddress_, attestRequests_);
+        executeBatch(socketAddress_, executeRequests_);
     }
 
     /**
@@ -361,7 +381,7 @@ contract SocketBatcher is AccessControl {
     function executeBatch(
         address socketAddress_,
         ExecuteRequest[] calldata executeRequests_
-    ) external payable {
+    ) public payable {
         uint256 executeRequestLength = executeRequests_.length;
         uint256 totalMsgValue = msg.value;
         for (uint256 index = 0; index < executeRequestLength; ) {
