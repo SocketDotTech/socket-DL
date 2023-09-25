@@ -62,6 +62,7 @@ if (isProduction) {
     [ChainKey.SEPOLIA]: getChainConfig(ChainKey.SEPOLIA),
     [ChainKey.AEVO_TESTNET]: getChainConfig(ChainKey.AEVO_TESTNET),
     [ChainKey.AEVO]: getChainConfig(ChainKey.AEVO),
+    [ChainKey.LYRA_TESTNET]: getChainConfig(ChainKey.LYRA_TESTNET),
   };
 }
 
@@ -86,6 +87,7 @@ const config: HardhatUserConfig = {
       polygon: process.env.POLYGONSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       aevoTestnet: process.env.AEVO_API_KEY || "",
+      lyraTestnet: process.env.LYRA_API_KEY || "",
     },
     customChains: [
       {
