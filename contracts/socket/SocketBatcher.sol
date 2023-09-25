@@ -259,10 +259,10 @@ contract SocketBatcher is AccessControl {
      * @param socketAddress_ address of socket
      * @param sealRequests_ the list of requests with packets to be sealed on sourceChain
      */
-    function sealBatch(
+    function _sealBatch(
         address socketAddress_,
         SealRequest[] calldata sealRequests_
-    ) external {
+    ) internal {
         uint256 sealRequestLength = sealRequests_.length;
         for (uint256 index = 0; index < sealRequestLength; ) {
             ISocket(socketAddress_).seal(
@@ -277,14 +277,26 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
+     * @notice seal a batch of packets from capacitor on sourceChain mentioned in sealRequests
+     * @param socketAddress_ address of socket
+     * @param sealRequests_ the list of requests with packets to be sealed on sourceChain
+     */
+    function sealBatch(
+        address socketAddress_,
+        SealRequest[] calldata sealRequests_
+    ) external {
+        _sealBatch(socketAddress_, sealRequests_);
+    }
+
+    /**
      * @notice propose a batch of packets sequentially by socketDestination
      * @param socketAddress_ address of socket
      * @param proposeRequests_ the list of requests with packets to be proposed by socketDestination
      */
-    function proposeBatch(
+    function _proposeBatch(
         address socketAddress_,
         ProposeRequest[] calldata proposeRequests_
-    ) public {
+    ) internal {
         uint256 proposeRequestLength = proposeRequests_.length;
         for (uint256 index = 0; index < proposeRequestLength; ) {
             ISocket(socketAddress_).proposeForSwitchboard(
@@ -300,14 +312,26 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
+     * @notice propose a batch of packets sequentially by socketDestination
+     * @param socketAddress_ address of socket
+     * @param proposeRequests_ the list of requests with packets to be proposed by socketDestination
+     */
+    function proposeBatch(
+        address socketAddress_,
+        ProposeRequest[] calldata proposeRequests_
+    ) external {
+        _proposeBatch(socketAddress_, proposeRequests_);
+    }
+
+    /**
      * @notice attests a batch of Packets
      * @param switchboardAddress_ address of switchboard
      * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
      */
-    function attestBatch(
+    function _attestBatch(
         address switchboardAddress_,
         AttestRequest[] calldata attestRequests_
-    ) public {
+    ) internal {
         uint256 attestRequestLength = attestRequests_.length;
         for (uint256 index = 0; index < attestRequestLength; ) {
             FastSwitchboard(switchboardAddress_).attest(
@@ -323,6 +347,18 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
+     * @notice attests a batch of Packets
+     * @param switchboardAddress_ address of switchboard
+     * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
+     */
+    function attestBatch(
+        address switchboardAddress_,
+        AttestRequest[] calldata attestRequests_
+    ) external {
+        _attestBatch(switchboardAddress_, attestRequests_);
+    }
+
+    /**
      * @notice send a batch of propose, attest and execute transactions
      * @param socketAddress_ address of socket
      * @param switchboardAddress_ address of switchboard
@@ -333,13 +369,15 @@ contract SocketBatcher is AccessControl {
     function sendBatch(
         address socketAddress_,
         address switchboardAddress_,
+        SealRequest[] calldata sealRequests_,
         ProposeRequest[] calldata proposeRequests_,
         AttestRequest[] calldata attestRequests_,
         ExecuteRequest[] calldata executeRequests_
-    ) external {
-        proposeBatch(socketAddress_, proposeRequests_);
-        attestBatch(switchboardAddress_, attestRequests_);
-        executeBatch(socketAddress_, executeRequests_);
+    ) external payable {
+        _sealBatch(socketAddress_, sealRequests_);
+        _proposeBatch(socketAddress_, proposeRequests_);
+        _attestBatch(switchboardAddress_, attestRequests_);
+        _executeBatch(socketAddress_, executeRequests_);
     }
 
     /**
@@ -378,10 +416,10 @@ contract SocketBatcher is AccessControl {
      * @param socketAddress_ address of socket
      * @param executeRequests_ the list of requests with messages to be executed in sequence
      */
-    function executeBatch(
+    function _executeBatch(
         address socketAddress_,
         ExecuteRequest[] calldata executeRequests_
-    ) public payable {
+    ) internal {
         uint256 executeRequestLength = executeRequests_.length;
         uint256 totalMsgValue = msg.value;
         for (uint256 index = 0; index < executeRequestLength; ) {
@@ -410,6 +448,18 @@ contract SocketBatcher is AccessControl {
     }
 
     /**
+     * @notice executes a batch of messages
+     * @param socketAddress_ address of socket
+     * @param executeRequests_ the list of requests with messages to be executed in sequence
+     */
+    function executeBatch(
+        address socketAddress_,
+        ExecuteRequest[] calldata executeRequests_
+    ) external payable {
+        _executeBatch(socketAddress_, executeRequests_);
+    }
+
+    /**
      * @notice invoke receive Message on PolygonRootReceiver for a batch of messages in loop
      * @param polygonRootReceiverAddress_ address of polygonRootReceiver
      * @param receivePacketProofs_ the list of receivePacketProofs to be sent to receiveHook of polygonRootReceiver
@@ -427,6 +477,31 @@ contract SocketBatcher is AccessControl {
                 ++index;
             }
         }
+    }
+
+    /**
+     * @notice returns latest proposalCounts for list of packetIds
+     * @param socketAddress_ address of socket
+     * @param packetIds_ the list of packetIds
+     */
+    function getProposalCountBatch(
+        address socketAddress_,
+        bytes32[] calldata packetIds_
+    ) external view returns (uint256[] memory) {
+        uint256 packetIdsLength = packetIds_.length;
+
+        uint256[] memory proposalCounts = new uint256[](packetIdsLength);
+
+        for (uint256 index = 0; index < packetIdsLength; ) {
+            uint256 proposalCount = ISocket(socketAddress_).proposalCount(
+                packetIds_[index]
+            );
+            proposalCounts[index] = proposalCount;
+            unchecked {
+                ++index;
+            }
+        }
+        return proposalCounts;
     }
 
     /**

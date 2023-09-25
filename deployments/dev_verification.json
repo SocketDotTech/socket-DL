@@ -137,6 +137,18 @@
   ],
   "420": [
     [
+      "0x7E7735e77574228C4F55d4B2F96Fe586dF10104e",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
+        "0xD97B9F7fF00E252C0abAa6ce0E13B5F6d9185202",
+        420,
+        7200,
+        "0x1B458A51D91f179DBbBb6C43d7962Ba17CC84628"
+      ]
+    ],
+    [
       "0xEe391E4a214E6312B42BF5FAcA9Bd214e8ebd206",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
@@ -350,6 +362,18 @@
   ],
   "80001": [
     [
+      "0x0dD648cdF51b7f7AdA68F84BB245D52172199F0d",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
+        "0x718826B533DF29C30f2d3f30E585e405eeF22784",
+        80001,
+        7200,
+        "0x79Dc67853cab8FB77f14A76116cAa7B4478B53Da"
+      ]
+    ],
+    [
       "0x50E32b5595d31dFBA53E189513718412EA42c804",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
@@ -458,6 +482,18 @@
   ],
   "421613": [
     [
+      "0xFD468fc7d23dA3e7466EE78327D4db5FcA232B2d",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
+        "0x5a90a285ab72393B2c47168374895a5C8101012c",
+        421613,
+        7200,
+        "0x353287093b3C9f5842396a6fc9704766aA5409c7"
+      ]
+    ],
+    [
       "0x93D246a24B032C101c0858354dC5FbB7A113d500",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
@@ -565,6 +601,18 @@
   ],
   "11155111": [
     [
+      "0xb2dA552c9Baa0e15b13302aBBF7B555aBc8eE4E8",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
+        "0xEDF6dB2f3BC8deE014762e0141EE4CA19d685dBd",
+        11155111,
+        7200,
+        "0x6f6f4C24bE59c42F524b133d623170376b8Eed64"
+      ]
+    ],
+    [
       "0xec7A753bc2D4Fab9Fcc459B7205d2FCa96b6c622",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
@@ -660,6 +708,18 @@
     ]
   ],
   "11155112": [
+    [
+      "0x10cfBbFaF37AD46aDF4F783D02Ac57806eaD620b",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
+        "0x66ffe416eB16D879EcE55B1d50C34789CB4Ab80a",
+        11155112,
+        7200,
+        "0x1d7C105919E4D75e30581D4a5B3724F8D6159251"
+      ]
+    ],
     [
       "0x06845FE0597cD0027df2d62B152B17E5eBaE22DB",
       "SocketBatcher",

@@ -137,10 +137,12 @@ contract SocketBatcherTest is Setup {
                 memory attestRequests = new SocketBatcher.AttestRequest[](1);
             attestRequests[0] = attestRequest;
             SocketBatcher.ExecuteRequest[] memory executeRequests;
+            SocketBatcher.SealRequest[] memory sealRequests;
 
             batcher__.sendBatch(
                 address(_b.socket__),
                 address(_b.configs__[0].switchboard__),
+                sealRequests,
                 proposeRequests,
                 attestRequests,
                 executeRequests

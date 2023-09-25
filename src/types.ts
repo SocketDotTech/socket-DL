@@ -160,6 +160,7 @@ export const isNonNativeChain = (chainSlug: ChainSlug) => {
 };
 
 export enum IntegrationTypes {
+  fast2 = "FAST2",
   fast = "FAST",
   optimistic = "OPTIMISTIC",
   native = "NATIVE_BRIDGE",
@@ -194,6 +195,7 @@ export interface ChainSocketAddresses {
   Socket: string;
   TransmitManager: string;
   FastSwitchboard: string;
+  FastSwitchboard2?: string;
   OptimisticSwitchboard: string;
   SocketBatcher: string;
   integrations?: Integrations;
@@ -226,6 +228,7 @@ export enum CORE_CONTRACTS {
   Socket = "Socket",
   SocketBatcher = "SocketBatcher",
   FastSwitchboard = "FastSwitchboard",
+  FastSwitchboard2 = "FastSwitchboard2",
   OptimisticSwitchboard = "OptimisticSwitchboard",
   NativeSwitchboard = "NativeSwitchboard",
 }
@@ -257,6 +260,13 @@ export const REQUIRED_ROLES = {
     ROLES.WITHDRAW_ROLE,
     ROLES.RESCUE_ROLE,
   ],
+  FastSwitchboard2: [
+    ROLES.TRIP_ROLE,
+    ROLES.UN_TRIP_ROLE,
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+  ],
   OptimisticSwitchboard: [
     ROLES.TRIP_ROLE,
     ROLES.UN_TRIP_ROLE,
@@ -279,5 +289,6 @@ export const REQUIRED_CHAIN_ROLES = {
   [CORE_CONTRACTS.ExecutionManager]: [ROLES.FEES_UPDATER_ROLE],
   [CORE_CONTRACTS.OpenExecutionManager]: [ROLES.FEES_UPDATER_ROLE],
   FastSwitchboard: [ROLES.WATCHER_ROLE, ROLES.FEES_UPDATER_ROLE],
+  FastSwitchboard2: [ROLES.WATCHER_ROLE, ROLES.FEES_UPDATER_ROLE],
   OptimisticSwitchboard: [ROLES.WATCHER_ROLE, ROLES.FEES_UPDATER_ROLE],
 };

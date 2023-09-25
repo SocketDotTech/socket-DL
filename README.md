@@ -104,7 +104,7 @@ It is recommended to setup the ide to work with solidity development. In case of
 }
 ```
 
-## Error Signatures 
+## Error Signatures
 
 | Error                       | Signature  |
 | --------------------------- | ---------- |
