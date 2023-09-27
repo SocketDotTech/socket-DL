@@ -24,16 +24,21 @@ import {
  *                  Default is only check balance.
  *                  Eg. npx --sendtx ts-node scripts/admin/rescueFunds.ts
  *
+ * --amount         Specify amount to rescue, can be used only with --sendtx
+ *                  If this much is not available then less is rescued.
+ *                  Full amount is rescued if not mentioned.
+ *                  Eg. npx --chains=2999 --sendtx --amount=0.2 ts-node scripts/admin/rescueFunds.ts
+ *
  * --chains         Run only for specified chains.
  *                  Default is all chains.
  *                  Eg. npx --chains=10,2999 ts-node scripts/admin/rescueFunds.ts
  */
 
-const maxRescueAmounts = {
-  [ChainSlug.OPTIMISM]: ethers.utils.parseEther("0.2"),
-  [ChainSlug.ARBITRUM]: ethers.utils.parseEther("0"),
-  [ChainSlug.AEVO]: ethers.utils.parseEther("0.3"),
-};
+// const maxRescueAmounts = {
+//   [ChainSlug.OPTIMISM]: ethers.utils.parseEther("0.2"),
+//   [ChainSlug.ARBITRUM]: ethers.utils.parseEther("0"),
+//   [ChainSlug.AEVO]: ethers.utils.parseEther("0.3"),
+// };
 
 const addresses: DeploymentAddresses = getAllAddresses(mode);
 const activeChainSlugs = Object.keys(addresses);
@@ -43,6 +48,9 @@ const sendTx = process.env.npm_config_sendtx == "true";
 const filterChains = process.env.npm_config_chains
   ? process.env.npm_config_chains.split(",")
   : activeChainSlugs;
+const maxRescueAmount = ethers.utils.parseEther(
+  process.env.npm_config_amount || "0"
+);
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const rescueFundsABI = [
@@ -139,10 +147,9 @@ export const main = async () => {
           );
 
           const rescueAmount =
-            !maxRescueAmounts[chainSlug] ||
-            amount.lt(maxRescueAmounts[chainSlug])
+            maxRescueAmount.eq(0) || amount.lt(maxRescueAmount)
               ? amount
-              : maxRescueAmounts[chainSlug];
+              : maxRescueAmount;
           if (rescueAmount.toString() === "0") continue;
 
           const contractInstance: Contract = new ethers.Contract(
