@@ -1,7 +1,7 @@
 {
   "name": "@socket.tech/dl-core",
   "license": "UNLICENSED",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "description": "Smart contracts for socket data layer.",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
