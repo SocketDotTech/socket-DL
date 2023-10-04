@@ -278,3 +278,9 @@ export const createObj = function (
   }
   return obj;
 };
+
+
+export const toLowerCase = (str?: string) => {
+  if (!str) return "";
+  return str.toLowerCase();
+}
