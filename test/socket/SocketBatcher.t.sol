@@ -127,6 +127,7 @@ contract SocketBatcherTest is Setup {
 
             SocketBatcher.AttestRequest memory attestRequest = SocketBatcher
                 .AttestRequest({
+                    switchboard: address(_b.configs__[0].switchboard__),
                     packetId: packetId,
                     proposalCount: 0,
                     root: root,
@@ -141,7 +142,6 @@ contract SocketBatcherTest is Setup {
 
             batcher__.sendBatch(
                 address(_b.socket__),
-                address(_b.configs__[0].switchboard__),
                 sealRequests,
                 proposeRequests,
                 attestRequests,

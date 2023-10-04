@@ -72,6 +72,7 @@ contract SocketBatcher is AccessControl {
      * @param signature The signature of the packet data.
      */
     struct AttestRequest {
+        address switchboard;
         bytes32 packetId;
         uint256 proposalCount;
         bytes32 root;
@@ -325,16 +326,12 @@ contract SocketBatcher is AccessControl {
 
     /**
      * @notice attests a batch of Packets
-     * @param switchboardAddress_ address of switchboard
      * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
      */
-    function _attestBatch(
-        address switchboardAddress_,
-        AttestRequest[] calldata attestRequests_
-    ) internal {
+    function _attestBatch(AttestRequest[] calldata attestRequests_) internal {
         uint256 attestRequestLength = attestRequests_.length;
         for (uint256 index = 0; index < attestRequestLength; ) {
-            FastSwitchboard(switchboardAddress_).attest(
+            FastSwitchboard(attestRequests_[index].switchboard).attest(
                 attestRequests_[index].packetId,
                 attestRequests_[index].proposalCount,
                 attestRequests_[index].root,
@@ -348,27 +345,21 @@ contract SocketBatcher is AccessControl {
 
     /**
      * @notice attests a batch of Packets
-     * @param switchboardAddress_ address of switchboard
      * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
      */
-    function attestBatch(
-        address switchboardAddress_,
-        AttestRequest[] calldata attestRequests_
-    ) external {
-        _attestBatch(switchboardAddress_, attestRequests_);
+    function attestBatch(AttestRequest[] calldata attestRequests_) external {
+        _attestBatch(attestRequests_);
     }
 
     /**
      * @notice send a batch of propose, attest and execute transactions
      * @param socketAddress_ address of socket
-     * @param switchboardAddress_ address of switchboard
      * @param proposeRequests_ the list of requests with packets to be proposed
      * @param attestRequests_ the list of requests with packets to be attested by switchboard
      * @param executeRequests_ the list of requests with messages to be executed
      */
     function sendBatch(
         address socketAddress_,
-        address switchboardAddress_,
         SealRequest[] calldata sealRequests_,
         ProposeRequest[] calldata proposeRequests_,
         AttestRequest[] calldata attestRequests_,
@@ -376,7 +367,7 @@ contract SocketBatcher is AccessControl {
     ) external payable {
         _sealBatch(socketAddress_, sealRequests_);
         _proposeBatch(socketAddress_, proposeRequests_);
-        _attestBatch(switchboardAddress_, attestRequests_);
+        _attestBatch(attestRequests_);
         _executeBatch(socketAddress_, executeRequests_);
     }
 
