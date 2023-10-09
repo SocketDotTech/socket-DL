@@ -100,7 +100,7 @@ export const sendMessagesToAllPaths = async (params: {
   count: number;
 }) => {
   const amount = 100;
-  const msgGasLimit = "1000000"; // update this when add fee logic for dst gas limit
+  const msgGasLimit = "100000"; // update this when add fee logic for dst gas limit
   let gasLimit: number | undefined = 185766;
 
   try {

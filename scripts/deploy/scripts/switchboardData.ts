@@ -5,9 +5,7 @@ import {
   IntegrationTypes,
   getAllAddresses,
 } from "../../../src";
-import {
-  toLowerCase,
-} from "../utils";
+import { toLowerCase } from "../utils";
 
 import { mode } from "../config";
 import path from "path";
@@ -40,7 +38,6 @@ export const getSwitchboardData = async () => {
   let switchboards: Switchboard[] = [];
 
   for (let chainSlug in addresses) {
-
     let chainAddresses = addresses[Number(chainSlug) as ChainSlug];
     if (!chainAddresses) {
       console.log("chain addresses not found chainSlug: ", chainSlug);
@@ -56,13 +53,16 @@ export const getSwitchboardData = async () => {
       let siblingIntegrations =
         integrations[Number(siblingChainSlug) as ChainSlug];
       if (!siblingIntegrations) {
-        console.log("sibling integrations not found chainSlug: ", chainSlug, siblingChainSlug);
+        console.log(
+          "sibling integrations not found chainSlug: ",
+          chainSlug,
+          siblingChainSlug
+        );
         return;
       }
 
       let integrationTypes = Object.keys(siblingIntegrations);
       for (let integrationType of integrationTypes) {
-
         let switchboardAddresses =
           siblingIntegrations[integrationType as IntegrationTypes];
 
@@ -84,17 +84,25 @@ export const getSwitchboardData = async () => {
               integrationType as IntegrationTypes
             ].switchboard
           ),
-          isNativeSwitchboard:integrationType === IntegrationTypes.native
+          isNativeSwitchboard: integrationType === IntegrationTypes.native,
         };
         switchboards.push(switchboard);
       }
     }
   }
   switchboards.forEach((s) =>
-    console.log(s.switchboardId, s.dstSwitchboard, s.integrationType, s.isNativeSwitchboard)
+    console.log(
+      s.switchboardId,
+      s.dstSwitchboard,
+      s.integrationType,
+      s.isNativeSwitchboard
+    )
   );
   console.log("total switchboards: ", switchboards.length);
-  fs.writeFileSync("./switchboards.json", JSON.stringify(switchboards, null, 2));
+  fs.writeFileSync(
+    "./switchboards.json",
+    JSON.stringify(switchboards, null, 2)
+  );
 };
 
 getSwitchboardData();

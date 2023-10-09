@@ -10,7 +10,8 @@ import {
 import { Contract, Wallet, ethers } from "ethers";
 import { mode, overrides } from "../deploy/config";
 import { getProviderFromChainName } from "../constants";
-import { getAllAddresses } from "@socket.tech/dl-core";
+// dl-core might have old addresses
+import { getAllAddresses } from "../../src";
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const rescueFundsABI = [
