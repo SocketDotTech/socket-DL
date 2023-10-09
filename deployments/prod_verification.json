@@ -143,6 +143,18 @@
   ],
   "10": [
     [
+      "0x09A6e77912a6bcFc3abfDfb841A85380Bb2A8B97",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x301bD265F0b3C16A58CbDb886Ad87842E3A1c0a4",
+        10,
+        7200,
+        "0xbb1f202095BE99000038D8d207C7E6f0F85a3925"
+      ]
+    ],
+    [
       "0x1C2ec03Cf08C77D7a4668c045415A8809D0BD6B7",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -246,6 +258,18 @@
   ],
   "56": [
     [
+      "0xCedce2e52aa6551bC407f640D8Bd9179b528347C",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0xdF7f95dda500E8EFc872f1dc0BC46a4E6281C00e",
+        56,
+        7200,
+        "0x12E1dbCA1EC056421365bBdbC9e4Bd124c8F6760"
+      ]
+    ],
+    [
       "0x6A3496f893A15bC408dCF5674C70E51C66b23a4d",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -335,6 +359,18 @@
     ]
   ],
   "137": [
+    [
+      "0x33918BBF9f5269d90b8c0AbF1Fd1134C827bA445",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0xc20687f8dc0ad51d01003013d1c5b02d10DED001",
+        137,
+        7200,
+        "0x2F04a8f11691Db9e0EE08BF44a7712aF8273720D"
+      ]
+    ],
     [
       "0x0eaF03567A21e32e0Ce27f329b7D0e82A971Fe74",
       "Counter",
@@ -655,6 +691,18 @@
   ],
   "2999": [
     [
+      "0x768A2A53e4318dA7714a0aA65a96D9A241603562",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        2999,
+        7200,
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -744,6 +792,18 @@
     ]
   ],
   "42161": [
+    [
+      "0xd5e829827F665c42326EAF68Da3360bd59b42f2f",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x37cc674582049b579571E2fFd890a4d99355f6Ba",
+        42161,
+        7200,
+        "0x9879a2b15722374243843DDdb79e5E6872aA74B8"
+      ]
+    ],
     [
       "0xD0Bb14B2275CcC44b75baD9fF23EcB47651aF15c",
       "Counter",
