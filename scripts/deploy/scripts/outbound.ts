@@ -16,8 +16,8 @@ export const main = async () => {
     const chainSlug = await getChainSlug();
     const amount = 100;
     const msgGasLimit = "19000000";
-    const gasLimit = 200485;
-    const fees = "20000000000000000";
+    const gasLimit = "200485";
+    const fees = "2000000000000";
 
     const config: any = JSON.parse(
       fs.readFileSync(deployedAddressPath(mode), "utf-8")
@@ -30,21 +30,22 @@ export const main = async () => {
       "Counter",
       config[chainSlug]["Counter"]
     );
-    await counter
+    const tx = await counter
       .connect(signer)
       .remoteAddOperation(
         remoteChainSlug,
         amount,
         msgGasLimit,
         constants.HashZero,
+        constants.HashZero,
         {
-          gasLimit,
           value: fees,
         }
       );
 
+    await tx.wait();
     console.log(
-      `Sent remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}`
+      `Sent remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}, tx hash: ${tx.hash.toLowerCase()}`
     );
   } catch (error) {
     console.log("Error while sending transaction", error);
