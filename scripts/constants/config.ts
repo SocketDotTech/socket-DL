@@ -21,50 +21,7 @@ export const timeout: {
   [ChainKey.AEVO]: 7200,
   [ChainKey.LYRA_TESTNET]: 7200,
   [ChainKey.LYRA]: 7200,
-};
-
-export const attestGasLimit: {
-  [key: string]: number;
-} = {
-  [ChainKey.BSC_TESTNET]: 80000,
-  [ChainKey.POLYGON_MAINNET]: 80000,
-  [ChainKey.BSC]: 80000,
-  [ChainKey.POLYGON_MUMBAI]: 80000,
-  [ChainKey.ARBITRUM_GOERLI]: 1000000,
-  [ChainKey.OPTIMISM_GOERLI]: 80000,
-  [ChainKey.GOERLI]: 80000,
-  [ChainKey.HARDHAT]: 80000,
-  [ChainKey.ARBITRUM]: 1000000,
-  [ChainKey.OPTIMISM]: 80000,
-  [ChainKey.MAINNET]: 80000,
-  [ChainKey.SEPOLIA]: 80000,
-  [ChainKey.AEVO_TESTNET]: 80000,
-  [ChainKey.AEVO]: 80000,
-  [ChainKey.LYRA_TESTNET]: 80000,
-  [ChainKey.LYRA]: 80000,
-
-  // [ChainKey.LYRA]: 80000,
-};
-
-export const executionOverhead: {
-  [key: string]: number;
-} = {
-  [ChainKey.BSC_TESTNET]: 40000,
-  [ChainKey.POLYGON_MAINNET]: 40000,
-  [ChainKey.BSC]: 40000,
-  [ChainKey.POLYGON_MUMBAI]: 40000,
-  [ChainKey.ARBITRUM_GOERLI]: 500000,
-  [ChainKey.OPTIMISM_GOERLI]: 40000,
-  [ChainKey.GOERLI]: 40000,
-  [ChainKey.HARDHAT]: 40000,
-  [ChainKey.ARBITRUM]: 500000,
-  [ChainKey.OPTIMISM]: 40000,
-  [ChainKey.MAINNET]: 40000,
-  [ChainKey.SEPOLIA]: 40000,
-  [ChainKey.AEVO_TESTNET]: 40000,
-  [ChainKey.AEVO]: 40000,
-  [ChainKey.LYRA_TESTNET]: 40000,
-  [ChainKey.LYRA]: 40000,
+  [ChainKey.XAI_TESTNET]: 7200,
 };
 
 export const getDefaultIntegrationType = (
