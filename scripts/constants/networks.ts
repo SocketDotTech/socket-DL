@@ -75,6 +75,10 @@ export function getJsonRpcUrl(chain: ChainKey): string {
       jsonRpcUrl = process.env.LYRA_RPC as string;
       break;
 
+    case ChainKey.XAI_TESTNET:
+      jsonRpcUrl = process.env.XAI_TESTNET_RPC as string;
+      break;
+
     case ChainKey.HARDHAT:
       jsonRpcUrl = "http://127.0.0.1:8545/";
       break;

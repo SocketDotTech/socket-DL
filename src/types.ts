@@ -19,8 +19,10 @@ export enum ChainSlug {
   AEVO_TESTNET = 11155112,
   AEVO = 2999,
   HARDHAT = 31337,
+  AVALANCHE = 43114,
   LYRA_TESTNET = 901,
   LYRA = 0, // update this
+  XAI_TESTNET = 47279324479,
 }
 
 export enum ChainKey {
@@ -41,47 +43,49 @@ export enum ChainKey {
   AEVO = "aevo",
   LYRA_TESTNET = "lyra-testnet",
   LYRA = "lyra",
+  XAI_TESTNET = "xai_testnet",
   HARDHAT = "hardhat",
 }
 
 export const chainKeyToSlug = {
-  [ChainKey.ARBITRUM]: 42161,
-  [ChainKey.ARBITRUM_GOERLI]: 421613,
-  [ChainKey.OPTIMISM]: 10,
-  [ChainKey.OPTIMISM_GOERLI]: 420,
-  [ChainKey.AVALANCHE]: 43114,
-  [ChainKey.BSC]: 56,
-  [ChainKey.BSC_TESTNET]: 97,
-  [ChainKey.MAINNET]: 1,
-  [ChainKey.GOERLI]: 5,
-  [ChainKey.SEPOLIA]: 11155111,
-  [ChainKey.POLYGON_MAINNET]: 137,
-  [ChainKey.POLYGON_MUMBAI]: 80001,
-  [ChainKey.AEVO_TESTNET]: 11155112,
+  [ChainKey.ARBITRUM]: ChainSlug.ARBITRUM,
+  [ChainKey.ARBITRUM_GOERLI]: ChainSlug.ARBITRUM_GOERLI,
+  [ChainKey.OPTIMISM]: ChainSlug.OPTIMISM,
+  [ChainKey.OPTIMISM_GOERLI]: ChainSlug.OPTIMISM_GOERLI,
+  [ChainKey.BSC]: ChainSlug.BSC,
+  [ChainKey.BSC_TESTNET]: ChainSlug.BSC_TESTNET,
+  [ChainKey.MAINNET]: ChainSlug.MAINNET,
+  [ChainKey.GOERLI]: ChainSlug.GOERLI,
+  [ChainKey.SEPOLIA]: ChainSlug.SEPOLIA,
+  [ChainKey.POLYGON_MAINNET]: ChainSlug.POLYGON_MAINNET,
+  [ChainKey.POLYGON_MUMBAI]: ChainSlug.POLYGON_MUMBAI,
+  [ChainKey.AEVO_TESTNET]: ChainSlug.AEVO_TESTNET,
   [ChainKey.AEVO]: ChainSlug.AEVO,
   [ChainKey.LYRA_TESTNET]: ChainSlug.LYRA_TESTNET,
   [ChainKey.LYRA]: ChainSlug.LYRA,
-  [ChainKey.HARDHAT]: 31337,
+  [ChainKey.XAI_TESTNET]: ChainSlug.XAI_TESTNET,
+  [ChainKey.HARDHAT]: ChainSlug.HARDHAT,
 };
 
 export const ChainSlugToKey = {
-  43114: ChainKey.AVALANCHE,
-  56: ChainKey.BSC,
-  5: ChainKey.GOERLI,
-  11155111: ChainKey.SEPOLIA,
-  31337: ChainKey.HARDHAT,
-  1: ChainKey.MAINNET,
-  97: ChainKey.BSC_TESTNET,
-  42161: ChainKey.ARBITRUM,
-  421613: ChainKey.ARBITRUM_GOERLI,
-  10: ChainKey.OPTIMISM,
-  420: ChainKey.OPTIMISM_GOERLI,
-  137: ChainKey.POLYGON_MAINNET,
-  80001: ChainKey.POLYGON_MUMBAI,
-  11155112: ChainKey.AEVO_TESTNET,
+  [ChainSlug.AVALANCHE]: ChainKey.AVALANCHE,
+  [ChainSlug.BSC]: ChainKey.BSC,
+  [ChainSlug.GOERLI]: ChainKey.GOERLI,
+  [ChainSlug.SEPOLIA]: ChainKey.SEPOLIA,
+  [ChainSlug.HARDHAT]: ChainKey.HARDHAT,
+  [ChainSlug.MAINNET]: ChainKey.MAINNET,
+  [ChainSlug.BSC_TESTNET]: ChainKey.BSC_TESTNET,
+  [ChainSlug.ARBITRUM]: ChainKey.ARBITRUM,
+  [ChainSlug.ARBITRUM_GOERLI]: ChainKey.ARBITRUM_GOERLI,
+  [ChainSlug.OPTIMISM]: ChainKey.OPTIMISM,
+  [ChainSlug.OPTIMISM_GOERLI]: ChainKey.OPTIMISM_GOERLI,
+  [ChainSlug.POLYGON_MAINNET]: ChainKey.POLYGON_MAINNET,
+  [ChainSlug.POLYGON_MUMBAI]: ChainKey.POLYGON_MUMBAI,
+  [ChainSlug.AEVO_TESTNET]: ChainKey.AEVO_TESTNET,
   [ChainSlug.LYRA_TESTNET]: ChainKey.LYRA_TESTNET,
   [ChainSlug.LYRA]: ChainKey.LYRA,
-  2999: ChainKey.AEVO,
+  [ChainSlug.AEVO]: ChainKey.AEVO,
+  [ChainSlug.XAI_TESTNET]: ChainKey.XAI_TESTNET,
 };
 
 export const TestnetIds: ChainSlug[] = [
@@ -93,6 +97,7 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.BSC_TESTNET,
   ChainSlug.AEVO_TESTNET,
   ChainSlug.LYRA_TESTNET,
+  ChainSlug.XAI_TESTNET,
 ];
 
 export const MainnetIds: ChainSlug[] = [
@@ -118,6 +123,7 @@ export const L2Ids: ChainSlug[] = [
   ChainSlug.AEVO_TESTNET,
   ChainSlug.LYRA_TESTNET,
   ChainSlug.LYRA,
+  ChainSlug.XAI_TESTNET,
 ];
 
 export enum NativeSwitchboard {

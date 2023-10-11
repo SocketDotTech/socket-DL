@@ -52,7 +52,6 @@ if (isProduction) {
     [ChainKey.OPTIMISM_GOERLI]: getChainConfig(ChainKey.OPTIMISM_GOERLI),
     [ChainKey.POLYGON_MAINNET]: getChainConfig(ChainKey.POLYGON_MAINNET),
     [ChainKey.ARBITRUM]: getChainConfig(ChainKey.ARBITRUM),
-    [ChainKey.AVALANCHE]: getChainConfig(ChainKey.AVALANCHE),
     [ChainKey.BSC]: getChainConfig(ChainKey.BSC),
     [ChainKey.GOERLI]: getChainConfig(ChainKey.GOERLI),
     [ChainKey.MAINNET]: getChainConfig(ChainKey.MAINNET),
@@ -63,6 +62,7 @@ if (isProduction) {
     [ChainKey.AEVO_TESTNET]: getChainConfig(ChainKey.AEVO_TESTNET),
     [ChainKey.AEVO]: getChainConfig(ChainKey.AEVO),
     [ChainKey.LYRA_TESTNET]: getChainConfig(ChainKey.LYRA_TESTNET),
+    [ChainKey.XAI_TESTNET]: getChainConfig(ChainKey.XAI_TESTNET),
   };
 }
 
@@ -88,6 +88,7 @@ const config: HardhatUserConfig = {
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       aevoTestnet: process.env.AEVO_API_KEY || "",
       lyraTestnet: process.env.LYRA_API_KEY || "",
+      xaiTestnet: process.env.XAI_API_KEY || "",
     },
     customChains: [
       {
@@ -120,6 +121,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "",
           browserURL: "https://explorer-testnet.aevo.xyz/",
+        },
+      },
+      {
+        network: "xaiTestnet",
+        chainId: chainKeyToSlug[ChainKey.XAI_TESTNET],
+        urls: {
+          apiURL: "",
+          browserURL: "https://testnet-explorer.xai-chain.net/",
         },
       },
     ],
