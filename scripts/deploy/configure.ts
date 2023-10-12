@@ -128,28 +128,6 @@ export const main = async () => {
           );
         }
 
-        // register fast
-        for (let sibling of siblingSlugs) {
-          const siblingSwitchboard = getSwitchboardAddress(
-            chain,
-            IntegrationTypes.fast,
-            addresses?.[sibling]
-          );
-
-          if (!siblingSwitchboard) continue;
-
-          addr = await registerSwitchboardForSibling(
-            addr[CORE_CONTRACTS.FastSwitchboard],
-            siblingSwitchboard,
-            sibling,
-            capacitorType,
-            maxPacketLength,
-            socketSigner,
-            IntegrationTypes.fast,
-            addr
-          );
-        }
-
         // register fast2
         for (let sibling of siblingSlugs) {
           const siblingSwitchboard = getSwitchboardAddress(
