@@ -50,7 +50,7 @@ export default async function deploySwitchboards(
   for (let index = 0; index < siblings.length; index++) {
     if (
       !updatedConfig?.integrations?.[siblings[index]]?.[
-      IntegrationTypes.native
+        IntegrationTypes.native
       ]?.["switchboard"]
     ) {
       updatedConfig = await deploySwitchboard(
