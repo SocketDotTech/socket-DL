@@ -18,7 +18,7 @@ import fs from "fs";
 
 import "./tasks/accounts";
 import { getJsonRpcUrl } from "./scripts/constants/networks";
-import { ChainKey, chainKeyToSlug } from "./src";
+import { ChainId, ChainKey, chainKeyToSlug } from "./src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -29,11 +29,11 @@ if (!process.env.SOCKET_SIGNER_KEY) throw new Error("No private key found");
 const privateKey: HardhatNetworkAccountUserConfig = process.env
   .SOCKET_SIGNER_KEY as unknown as HardhatNetworkAccountUserConfig;
 
-function getChainConfig(chain: keyof typeof chainKeyToSlug): NetworkUserConfig {
+function getChainConfig(chainId: ChainId): NetworkUserConfig {
   return {
     accounts: [`0x${privateKey}`],
-    chainId: chainKeyToSlug[chain],
-    url: getJsonRpcUrl(chain),
+    chainId,
+    url: getJsonRpcUrl(chainId),
   };
 }
 
@@ -48,21 +48,21 @@ function getRemappings() {
 let liveNetworks = {};
 if (isProduction) {
   liveNetworks = {
-    [ChainKey.ARBITRUM_GOERLI]: getChainConfig(ChainKey.ARBITRUM_GOERLI),
-    [ChainKey.OPTIMISM_GOERLI]: getChainConfig(ChainKey.OPTIMISM_GOERLI),
-    [ChainKey.POLYGON_MAINNET]: getChainConfig(ChainKey.POLYGON_MAINNET),
-    [ChainKey.ARBITRUM]: getChainConfig(ChainKey.ARBITRUM),
-    [ChainKey.BSC]: getChainConfig(ChainKey.BSC),
-    [ChainKey.GOERLI]: getChainConfig(ChainKey.GOERLI),
-    [ChainKey.MAINNET]: getChainConfig(ChainKey.MAINNET),
-    [ChainKey.OPTIMISM]: getChainConfig(ChainKey.OPTIMISM),
-    [ChainKey.POLYGON_MUMBAI]: getChainConfig(ChainKey.POLYGON_MUMBAI),
-    [ChainKey.BSC_TESTNET]: getChainConfig(ChainKey.BSC_TESTNET),
-    [ChainKey.SEPOLIA]: getChainConfig(ChainKey.SEPOLIA),
-    [ChainKey.AEVO_TESTNET]: getChainConfig(ChainKey.AEVO_TESTNET),
-    [ChainKey.AEVO]: getChainConfig(ChainKey.AEVO),
-    [ChainKey.LYRA_TESTNET]: getChainConfig(ChainKey.LYRA_TESTNET),
-    [ChainKey.XAI_TESTNET]: getChainConfig(ChainKey.XAI_TESTNET),
+    [ChainKey.ARBITRUM_GOERLI]: getChainConfig(ChainId.ARBITRUM_GOERLI),
+    [ChainKey.OPTIMISM_GOERLI]: getChainConfig(ChainId.OPTIMISM_GOERLI),
+    [ChainKey.POLYGON_MAINNET]: getChainConfig(ChainId.POLYGON_MAINNET),
+    [ChainKey.ARBITRUM]: getChainConfig(ChainId.ARBITRUM),
+    [ChainKey.BSC]: getChainConfig(ChainId.BSC),
+    [ChainKey.GOERLI]: getChainConfig(ChainId.GOERLI),
+    [ChainKey.MAINNET]: getChainConfig(ChainId.MAINNET),
+    [ChainKey.OPTIMISM]: getChainConfig(ChainId.OPTIMISM),
+    [ChainKey.POLYGON_MUMBAI]: getChainConfig(ChainId.POLYGON_MUMBAI),
+    [ChainKey.BSC_TESTNET]: getChainConfig(ChainId.BSC_TESTNET),
+    [ChainKey.SEPOLIA]: getChainConfig(ChainId.SEPOLIA),
+    [ChainKey.AEVO_TESTNET]: getChainConfig(ChainId.AEVO_TESTNET),
+    [ChainKey.AEVO]: getChainConfig(ChainId.AEVO),
+    [ChainKey.LYRA_TESTNET]: getChainConfig(ChainId.LYRA_TESTNET),
+    [ChainKey.XAI_TESTNET]: getChainConfig(ChainId.XAI_TESTNET),
   };
 }
 
