@@ -4,7 +4,7 @@
  *                                             *
  ***********************************************/
 
-export enum ChainSlug {
+export enum ChainId {
   ARBITRUM = 42161,
   ARBITRUM_GOERLI = 421613,
   OPTIMISM = 10,
@@ -23,6 +23,27 @@ export enum ChainSlug {
   LYRA_TESTNET = 901,
   LYRA = 0, // update this
   XAI_TESTNET = 47279324479,
+}
+
+export enum ChainSlug {
+  ARBITRUM = ChainId.ARBITRUM,
+  ARBITRUM_GOERLI = ChainId.ARBITRUM_GOERLI,
+  OPTIMISM = ChainId.OPTIMISM,
+  OPTIMISM_GOERLI = ChainId.OPTIMISM_GOERLI,
+  BSC = ChainId.BSC,
+  BSC_TESTNET = ChainId.BSC_TESTNET,
+  MAINNET = ChainId.MAINNET,
+  GOERLI = ChainId.GOERLI,
+  SEPOLIA = ChainId.SEPOLIA,
+  POLYGON_MAINNET = ChainId.POLYGON_MAINNET,
+  POLYGON_MUMBAI = ChainId.POLYGON_MUMBAI,
+  AEVO_TESTNET = ChainId.AEVO_TESTNET,
+  AEVO = ChainId.AEVO,
+  HARDHAT = ChainId.HARDHAT,
+  AVALANCHE = ChainId.AVALANCHE,
+  LYRA_TESTNET = ChainId.LYRA_TESTNET,
+  LYRA = ChainId.LYRA,
+  XAI_TESTNET = 1399904803,
 }
 
 export enum ChainKey {
