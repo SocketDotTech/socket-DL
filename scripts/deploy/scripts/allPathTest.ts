@@ -17,7 +17,7 @@ import Counter from "../../../out/Counter.sol/Counter.json";
 import Socket from "../../../out/Socket.sol/Socket.json";
 
 import { chains, mode } from "../config";
-import { getProviderFromChainName } from "../../constants/networks";
+import { getProviderFromChainSlug } from "../../constants/networks";
 
 interface RequestObj {
   to: string;
@@ -132,9 +132,7 @@ export const sendMessagesToAllPaths = async (params: {
         }
         // console.log(" 3 ");
 
-        const provider = await getProviderFromChainName(
-          ChainSlugToKey[chainSlug]
-        );
+        const provider = await getProviderFromChainSlug(chainSlug);
         const socket: Contract = new ethers.Contract(
           addresses[CORE_CONTRACTS.Socket],
           Socket.abi,

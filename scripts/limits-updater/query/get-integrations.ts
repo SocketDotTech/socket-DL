@@ -1,22 +1,14 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import {
-  ChainKey,
-  ChainSocketAddresses,
-  chainKeyToSlug,
-} from "../../../src/types";
+import { ChainSocketAddresses, ChainSlug } from "../../../src";
 import { getAddresses } from "../../deploy/utils";
 import { mode } from "../../deploy/config";
 
 // npx ts-node scripts/deploy/get-integrations.ts
-export const getIntegrationsForAChainSlug = async (
-  chainSlug: keyof typeof chainKeyToSlug
-) => {
-  const chainId = chainKeyToSlug[chainSlug];
-
+export const getIntegrationsForAChainSlug = async (chainSlug: ChainSlug) => {
   const deployedAddressConfig: ChainSocketAddresses = (await getAddresses(
-    chainId,
+    chainSlug,
     mode
   )) as ChainSocketAddresses;
 
@@ -30,7 +22,7 @@ export const getIntegrationsForAChainSlug = async (
 // npx ts-node scripts/limits-updater/query/get-integrations.ts
 export const getIntegrations = async () => {
   try {
-    getIntegrationsForAChainSlug(ChainKey.ARBITRUM_GOERLI);
+    getIntegrationsForAChainSlug(ChainSlug.ARBITRUM_GOERLI);
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;

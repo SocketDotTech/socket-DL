@@ -4,24 +4,18 @@ dotenvConfig();
 import {
   ChainAddresses,
   ChainSocketAddresses,
-  Configs,
   Integrations,
-  chainKeyToSlug,
-} from "../../src/types";
+  ChainSlug,
+} from "../../src";
 import { getAddresses } from "../deploy/utils";
 import { mode } from "../deploy/config";
 
-export const setLimitsForAChainSlug = async (
-  chainSlugCode: keyof typeof chainKeyToSlug
-) => {
+export const setLimitsForAChainSlug = async (chainSlugCode: ChainSlug) => {
   try {
-    const chainId = chainKeyToSlug[chainSlugCode];
-    console.log(
-      `setting initLimits for chainSlug: ${chainSlugCode} and chainId: ${chainId}`
-    );
+    console.log(`setting initLimits for chainSlug: ${chainSlugCode}`);
 
     const deployedAddressConfig = (await getAddresses(
-      chainId,
+      chainSlugCode,
       mode
     )) as ChainSocketAddresses;
 
@@ -39,7 +33,7 @@ export const setLimitsForAChainSlug = async (
       deployedAddressConfig.TransmitManager as string;
 
     if (integrations) {
-      console.log(`For sourceChainId: ${chainId} \n`);
+      console.log(`For sourceChainId: ${chainSlugCode} \n`);
 
       const keys = Object.keys(integrations);
       const values = Object.values(integrations);
@@ -65,9 +59,9 @@ export const setLimitsForAChainSlug = async (
 export const setLimits = async () => {
   try {
     // for (let chainSlugKey of chainSlugKeys) {
-    //   setLimitsForAChainSlug(chainSlugKey as keyof typeof chainKeyToSlug);
+    //   setLimitsForAChainSlug(chainSlugKey);
     // }
-    setLimitsForAChainSlug("optimism-goerli");
+    setLimitsForAChainSlug(ChainSlug.OPTIMISM_GOERLI);
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;

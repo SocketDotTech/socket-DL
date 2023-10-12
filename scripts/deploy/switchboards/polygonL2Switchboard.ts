@@ -1,8 +1,8 @@
-import { chainKeyToSlug } from "../../../src";
+import { ChainSlug } from "../../../src/types";
 import { bridgeConsts } from "../../constants";
 
 export const polygonL2Switchboard = (
-  network: string,
+  chainSlug: ChainSlug,
   socketAddress: string,
   sigVerifierAddress: string,
   signerAddress: string
@@ -10,8 +10,8 @@ export const polygonL2Switchboard = (
   return {
     contractName: "PolygonL2Switchboard",
     args: [
-      chainKeyToSlug[network],
-      bridgeConsts.fxChild[network],
+      chainSlug,
+      bridgeConsts.fxChild[chainSlug],
       signerAddress,
       socketAddress,
       sigVerifierAddress,

@@ -4,6 +4,28 @@
  *                                             *
  ***********************************************/
 
+export enum ChainKey {
+  ARBITRUM = "arbitrum",
+  ARBITRUM_GOERLI = "arbitrum-goerli",
+  OPTIMISM = "optimism",
+  OPTIMISM_GOERLI = "optimism-goerli",
+  AVALANCHE = "avalanche",
+  AVALANCHE_TESTNET = "avalanche-testnet",
+  BSC = "bsc",
+  BSC_TESTNET = "bsc-testnet",
+  MAINNET = "mainnet",
+  GOERLI = "goerli",
+  SEPOLIA = "sepolia",
+  POLYGON_MAINNET = "polygon-mainnet",
+  POLYGON_MUMBAI = "polygon-mumbai",
+  AEVO_TESTNET = "aevo-testnet",
+  AEVO = "aevo",
+  LYRA_TESTNET = "lyra-testnet",
+  LYRA = "lyra",
+  XAI_TESTNET = "xai_testnet",
+  HARDHAT = "hardhat",
+}
+
 export enum ChainId {
   ARBITRUM = 42161,
   ARBITRUM_GOERLI = 421613,
@@ -44,28 +66,6 @@ export enum ChainSlug {
   LYRA_TESTNET = ChainId.LYRA_TESTNET,
   LYRA = ChainId.LYRA,
   XAI_TESTNET = 1399904803,
-}
-
-export enum ChainKey {
-  ARBITRUM = "arbitrum",
-  ARBITRUM_GOERLI = "arbitrum-goerli",
-  OPTIMISM = "optimism",
-  OPTIMISM_GOERLI = "optimism-goerli",
-  AVALANCHE = "avalanche",
-  AVALANCHE_TESTNET = "avalanche-testnet",
-  BSC = "bsc",
-  BSC_TESTNET = "bsc-testnet",
-  MAINNET = "mainnet",
-  GOERLI = "goerli",
-  SEPOLIA = "sepolia",
-  POLYGON_MAINNET = "polygon-mainnet",
-  POLYGON_MUMBAI = "polygon-mumbai",
-  AEVO_TESTNET = "aevo-testnet",
-  AEVO = "aevo",
-  LYRA_TESTNET = "lyra-testnet",
-  LYRA = "lyra",
-  XAI_TESTNET = "xai_testnet",
-  HARDHAT = "hardhat",
 }
 
 export const chainKeyToSlug = {

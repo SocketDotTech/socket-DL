@@ -1,4 +1,4 @@
-import { ChainKey, chainKeyToSlug } from "../../../src";
+import { ChainSlug } from "@socket.tech/dl-core";
 import { loadRelayerConfigs } from "../utils/relayer.config";
 
 // npx ts-node scripts/query-relayer-config.ts
@@ -7,7 +7,7 @@ export const main = async () => {
   console.log(`relayerConfigs: ${relayerConfigs.size}`);
   console.log(
     `relayerConfig value: ${JSON.stringify(
-      relayerConfigs.get(chainKeyToSlug[ChainKey.ARBITRUM])
+      relayerConfigs.get(ChainSlug.ARBITRUM)
     )}`
   );
 };

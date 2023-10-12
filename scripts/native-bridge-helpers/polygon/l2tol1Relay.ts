@@ -75,7 +75,13 @@ export class SocketRelaySigner extends Signer {
 import { getJsonRpcUrl } from "../../constants";
 import { deployedAddressPath, getInstance } from "../../deploy/utils";
 import { mode, socketOwner } from "../../deploy/config";
-import { ChainKey, chainKeyToSlug, IntegrationTypes } from "../../../src";
+import {
+  ChainId,
+  ChainKey,
+  chainKeyToSlug,
+  ChainSlug,
+  IntegrationTypes,
+} from "../../../src";
 
 // get providers for source and destination
 const sealTxHash = "";

@@ -7,7 +7,7 @@ import { ethers } from "ethers";
 import { Contract } from "ethers";
 require("dotenv").config();
 import yargs from "yargs";
-import { getProviderFromChainName } from "../../constants";
+import { getProviderFromChainSlug } from "../../constants";
 import SocketABI from "../../../out/Socket.sol/Socket.json";
 
 import path from "path";
@@ -105,7 +105,7 @@ export const main = async () => {
     const chain = argv.chain as keyof typeof chainKeyToSlug;
     const chainSlug = chainKeyToSlug[chain];
 
-    const providerInstance = getProviderFromChainName(chain);
+    const providerInstance = getProviderFromChainSlug(chainSlug);
 
     const signer = new ethers.Wallet(
       process.env.SOCKET_SIGNER_KEY as string,

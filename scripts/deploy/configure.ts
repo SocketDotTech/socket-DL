@@ -1,7 +1,7 @@
 import fs from "fs";
 import { Wallet, constants } from "ethers";
 
-import { getProviderFromChainName, switchboards } from "../constants";
+import { getProviderFromChainSlug, switchboards } from "../constants";
 import {
   deployedAddressPath,
   getInstance,
@@ -46,8 +46,8 @@ export const main = async () => {
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
 
-        const providerInstance = getProviderFromChainName(
-          ChainSlugToKey[chain]
+        const providerInstance = getProviderFromChainSlug(
+          chain as any as ChainSlug
         );
         const socketSigner: Wallet = new Wallet(
           process.env.SOCKET_SIGNER_KEY as string,
@@ -302,8 +302,8 @@ const setupPolygonNativeSwitchboard = async (addresses) => {
       srcChains.map(async (srcChain) => {
         console.log(`Configuring for ${srcChain}`);
 
-        const providerInstance = getProviderFromChainName(
-          ChainSlugToKey[srcChain]
+        const providerInstance = getProviderFromChainSlug(
+          srcChain as any as ChainSlug
         );
         const socketSigner: Wallet = new Wallet(
           process.env.SOCKET_SIGNER_KEY as string,

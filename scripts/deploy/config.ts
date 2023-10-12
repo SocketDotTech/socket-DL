@@ -28,22 +28,22 @@ console.log(
 );
 
 export const chains: Array<ChainSlug> = [
-  ChainSlug.GOERLI,
+  // ChainSlug.GOERLI,
   ChainSlug.ARBITRUM_GOERLI,
-  ChainSlug.OPTIMISM_GOERLI,
-  ChainSlug.POLYGON_MUMBAI,
-  ChainSlug.BSC_TESTNET,
-  ChainSlug.AEVO_TESTNET,
-  ChainSlug.LYRA_TESTNET,
+  // ChainSlug.OPTIMISM_GOERLI,
+  // ChainSlug.POLYGON_MUMBAI,
+  // ChainSlug.BSC_TESTNET,
+  // ChainSlug.AEVO_TESTNET,
+  // ChainSlug.LYRA_TESTNET,
   ChainSlug.XAI_TESTNET,
-  ChainSlug.SEPOLIA,
-  ChainSlug.AEVO,
-  ChainSlug.MAINNET,
-  ChainSlug.ARBITRUM,
-  ChainSlug.OPTIMISM,
-  ChainSlug.LYRA,
-  ChainSlug.BSC,
-  ChainSlug.POLYGON_MAINNET,
+  // ChainSlug.SEPOLIA,
+  // ChainSlug.AEVO,
+  // ChainSlug.MAINNET,
+  // ChainSlug.ARBITRUM,
+  // ChainSlug.OPTIMISM,
+  // ChainSlug.LYRA,
+  // ChainSlug.BSC,
+  // ChainSlug.POLYGON_MAINNET,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
