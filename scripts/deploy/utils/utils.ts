@@ -1,4 +1,4 @@
-import { Wallet } from "ethers";
+import { Wallet, utils } from "ethers";
 import { network, ethers, run } from "hardhat";
 
 import { ContractFactory, Contract } from "ethers";
@@ -281,3 +281,11 @@ export const createObj = function (
   }
   return obj;
 };
+
+export function getChainSlugFromId(chainId: number) {
+  const MAX_UINT_32 = 4294967295;
+  if (chainId < MAX_UINT_32) return chainId;
+
+  // avoid conflict for now
+  return parseInt(utils.id(chainId.toString()).substring(0, 10));
+}

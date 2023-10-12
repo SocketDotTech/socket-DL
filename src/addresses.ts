@@ -16,13 +16,13 @@ function getAllAddresses(mode: DeploymentMode): DeploymentAddresses {
 
   switch (mode) {
     case DeploymentMode.DEV:
-      addresses = dev_addresses as DeploymentAddresses;
+      addresses = dev_addresses as unknown as DeploymentAddresses;
       break;
     case DeploymentMode.PROD:
-      addresses = prod_addresses as DeploymentAddresses;
+      addresses = prod_addresses as unknown as DeploymentAddresses;
       break;
     case DeploymentMode.SURGE:
-      addresses = surge_addresses as DeploymentAddresses;
+      addresses = surge_addresses as unknown as DeploymentAddresses;
       break;
     default:
       throw new Error("No Mode Provided");
