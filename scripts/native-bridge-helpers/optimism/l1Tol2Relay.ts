@@ -5,14 +5,18 @@ import fs from "fs";
 import { Contract, providers, Wallet } from "ethers";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { getInstance, deployedAddressPath } from "../../deploy/utils";
-import { packPacketId } from "../../deploy/scripts/packetId";
-import { getJsonRpcUrl, contractNames } from "../../constants";
+import { packPacketId } from "../../deploy/utils/packetId";
+import { getJsonRpcUrl } from "../../constants";
 import { mode } from "../../deploy/config";
-import { ChainKey, chainKeyToSlug, ChainSocketAddresses } from "../../../src";
+import {
+  HardhatChainName,
+  hardhatChainNameToSlug,
+  ChainSocketAddresses,
+} from "../../../src";
 
 // get providers for source and destination
-const localChain = ChainKey.GOERLI;
-const remoteChain = ChainKey.OPTIMISM_GOERLI;
+const localChain = HardhatChainName.GOERLI;
+const remoteChain = HardhatChainName.OPTIMISM_GOERLI;
 const ATTEST_GAS_LIMIT = 800000;
 const outboundTxHash = "";
 
@@ -30,14 +34,14 @@ export const main = async () => {
     );
 
     if (
-      !addresses[chainKeyToSlug[localChain]] ||
-      !addresses[chainKeyToSlug[remoteChain]]
+      !addresses[hardhatChainNameToSlug[localChain]] ||
+      !addresses[hardhatChainNameToSlug[remoteChain]]
     ) {
       throw new Error("Deployed Addresses not found");
     }
 
     const l1Config: ChainSocketAddresses =
-      addresses[chainKeyToSlug[localChain]];
+      addresses[hardhatChainNameToSlug[localChain]];
 
     // get socket contracts for both chains
     // counter l1, counter l2, seal, execute
@@ -46,7 +50,7 @@ export const main = async () => {
     const l1Capacitor: Contract = (
       await getInstance(
         "SingleCapacitor",
-        l1Config["integrations"]?.[chainKeyToSlug[remoteChain]]?.[
+        l1Config["integrations"]?.[hardhatChainNameToSlug[remoteChain]]?.[
           contracts.integrationType
         ]?.["capacitor"]
       )
@@ -55,7 +59,7 @@ export const main = async () => {
     const l1Notary: Contract = (
       await getInstance(
         contracts.notary,
-        l1Config[contracts.notary]?.[chainKeyToSlug[remoteChain]]
+        l1Config[contracts.notary]?.[hardhatChainNameToSlug[remoteChain]]
       )
     ).connect(l1Wallet);
 
@@ -70,7 +74,7 @@ export const main = async () => {
     );
 
     const packedPacketId = packPacketId(
-      chainKeyToSlug[localChain],
+      hardhatChainNameToSlug[localChain],
       l1Capacitor.address,
       packetId
     );
@@ -78,7 +82,7 @@ export const main = async () => {
     const digest = keccak256(
       defaultAbiCoder.encode(
         ["uint256", "uint256", "bytes32"],
-        [chainKeyToSlug[remoteChain], packedPacketId, newRootHash]
+        [hardhatChainNameToSlug[remoteChain], packedPacketId, newRootHash]
       )
     );
 

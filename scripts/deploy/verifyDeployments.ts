@@ -24,7 +24,7 @@ import {
   CORE_CONTRACTS,
   IntegrationTypes,
   NativeSwitchboard,
-  chainKeyToSlug,
+  hardhatChainNameToSlug,
   getAllAddresses,
   ChainSlugToKey,
 } from "../../src";
@@ -54,7 +54,7 @@ async function checkFast(contractAddr, localChain, remoteChain) {
   const switchboard = await getInstance("FastSwitchboard", contractAddr);
 
   let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("WATCHER_ROLE", chainKeyToSlug[remoteChain]),
+    getChainRoleHash("WATCHER_ROLE", hardhatChainNameToSlug[remoteChain]),
     watcherAddresses[mode]
   );
   assert(hasRole, `❌ FastSwitchboard has wrong TRIP_ROLE ${remoteChain}`);
@@ -65,13 +65,13 @@ async function checkDefault(contractAddr, localChain, remoteChain) {
 
   // check roles
   let hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("TRIP_ROLE", chainKeyToSlug[remoteChain]),
+    getChainRoleHash("TRIP_ROLE", hardhatChainNameToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong TRIP_ROLE ${remoteChain}`);
 
   hasRole = await switchboard["hasRole(bytes32,address)"](
-    getChainRoleHash("UN_TRIP_ROLE", chainKeyToSlug[remoteChain]),
+    getChainRoleHash("UN_TRIP_ROLE", hardhatChainNameToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(hasRole, `❌ Switchboard has wrong UN_TRIP_ROLE ${remoteChain}`);
@@ -123,11 +123,11 @@ async function checkSwitchboardRegistration(
 
   const capacitor__ = await socket.capacitors__(
     switchboard,
-    chainKeyToSlug[siblingChain]
+    hardhatChainNameToSlug[siblingChain]
   );
   const decapacitor__ = await socket.decapacitors__(
     switchboard,
-    chainKeyToSlug[siblingChain]
+    hardhatChainNameToSlug[siblingChain]
   );
 
   assert(
@@ -152,11 +152,11 @@ async function checkCounter(
   // check config
   const config = await socket.getPlugConfig(
     localConfig["Counter"],
-    chainKeyToSlug[siblingSlug]
+    hardhatChainNameToSlug[siblingSlug]
   );
 
   if (
-    !localConfig?.["integrations"]?.[chainKeyToSlug[siblingSlug]]?.[
+    !localConfig?.["integrations"]?.[hardhatChainNameToSlug[siblingSlug]]?.[
       integrationType
     ]
   ) {
@@ -167,7 +167,9 @@ async function checkCounter(
   }
 
   const outboundSb =
-    localConfig["integrations"][chainKeyToSlug[siblingSlug]][integrationType];
+    localConfig["integrations"][hardhatChainNameToSlug[siblingSlug]][
+      integrationType
+    ];
   assert(
     config.siblingPlug == remoteConfig["Counter"] &&
       config.inboundSwitchboard__ == outboundSb["switchboard"] &&
@@ -209,7 +211,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("TRANSMITTER_ROLE", chainKeyToSlug[chain]),
+    getChainRoleHash("TRANSMITTER_ROLE", hardhatChainNameToSlug[chain]),
     transmitterAddresses[mode]
   );
   assert(
@@ -218,7 +220,7 @@ async function checkTransmitManager(chain, contractAddr, remoteChain) {
   );
 
   hasRole = await transmitManager["hasRole(bytes32,address)"](
-    getChainRoleHash("TRANSMITTER_ROLE", chainKeyToSlug[remoteChain]),
+    getChainRoleHash("TRANSMITTER_ROLE", hardhatChainNameToSlug[remoteChain]),
     transmitterAddresses[mode]
   );
   assert(
@@ -291,33 +293,33 @@ async function checkIntegration(
 ) {
   // config related contracts
   let localSwitchboard = getSwitchboardAddress(
-    chainKeyToSlug[remoteChain],
+    hardhatChainNameToSlug[remoteChain],
     configurationType,
     localConfig
   );
   let localCapacitor = getCapacitorAddress(
-    chainKeyToSlug[remoteChain],
+    hardhatChainNameToSlug[remoteChain],
     configurationType,
     localConfig
   );
   let localDecapacitor = getDecapacitorAddress(
-    chainKeyToSlug[remoteChain],
+    hardhatChainNameToSlug[remoteChain],
     configurationType,
     localConfig
   );
 
   let remoteSwitchboard = getSwitchboardAddress(
-    chainKeyToSlug[localChain],
+    hardhatChainNameToSlug[localChain],
     configurationType,
     remoteConfig
   );
   let remoteCapacitor = getCapacitorAddress(
-    chainKeyToSlug[localChain],
+    hardhatChainNameToSlug[localChain],
     configurationType,
     remoteConfig
   );
   let remoteDecapacitor = getDecapacitorAddress(
-    chainKeyToSlug[localChain],
+    hardhatChainNameToSlug[localChain],
     configurationType,
     remoteConfig
   );
@@ -410,8 +412,8 @@ export const main = async () => {
 
         if (chain === remoteChain) throw new Error("Wrong chains");
 
-        let remoteConfig = addresses[chainKeyToSlug[remoteChain]];
-        let localConfig = addresses[chainKeyToSlug[chain]];
+        let remoteConfig = addresses[hardhatChainNameToSlug[remoteChain]];
+        let localConfig = addresses[hardhatChainNameToSlug[chain]];
 
         await hre.changeNetwork(chain);
         checkCoreContractAddress(localConfig, remoteConfig, chain, remoteChain);

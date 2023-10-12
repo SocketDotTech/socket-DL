@@ -76,18 +76,16 @@ import { getJsonRpcUrl } from "../../constants";
 import { deployedAddressPath, getInstance } from "../../deploy/utils";
 import { mode, socketOwner } from "../../deploy/config";
 import {
-  ChainId,
-  ChainKey,
-  chainKeyToSlug,
-  ChainSlug,
+  HardhatChainName,
+  hardhatChainNameToSlug,
   IntegrationTypes,
 } from "../../../src";
 
 // get providers for source and destination
 const sealTxHash = "";
 
-const localChain = ChainKey.POLYGON_MAINNET;
-const remoteChain = ChainKey.MAINNET;
+const localChain = HardhatChainName.POLYGON_MAINNET;
+const remoteChain = HardhatChainName.MAINNET;
 
 const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(remoteChain));
@@ -110,12 +108,12 @@ export const main = async () => {
     );
 
     if (
-      !addresses[chainKeyToSlug[localChain]] ||
-      !addresses[chainKeyToSlug[remoteChain]]
+      !addresses[hardhatChainNameToSlug[localChain]] ||
+      !addresses[hardhatChainNameToSlug[remoteChain]]
     ) {
       throw new Error("Deployed Addresses not found");
     }
-    const l1Config = addresses[chainKeyToSlug[remoteChain]];
+    const l1Config = addresses[hardhatChainNameToSlug[remoteChain]];
     const ABI = ["function receiveMessage(bytes memory receivePacketProof)"];
 
     // get socket contracts for both chains
@@ -123,7 +121,7 @@ export const main = async () => {
     const l1Switchboard = (
       await getInstance(
         "PolygonL1Switchboard",
-        l1Config["integrations"][chainKeyToSlug[localChain]][
+        l1Config["integrations"][hardhatChainNameToSlug[localChain]][
           IntegrationTypes.native
         ]["switchboard"]
       )
@@ -131,8 +129,8 @@ export const main = async () => {
 
     const posClient = new POSClient();
     await posClient.init({
-      network: remoteChain === ChainKey.MAINNET ? "mainnet" : "testnet",
-      version: remoteChain === ChainKey.MAINNET ? "v1" : "mumbai",
+      network: remoteChain === HardhatChainName.MAINNET ? "mainnet" : "testnet",
+      version: remoteChain === HardhatChainName.MAINNET ? "v1" : "mumbai",
       parent: {
         provider: l1Signer, //new HDWalletProvider(privateKey, parentRPC),
         defaultConfig: {

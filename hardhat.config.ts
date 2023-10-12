@@ -18,7 +18,7 @@ import fs from "fs";
 
 import "./tasks/accounts";
 import { getJsonRpcUrl } from "./scripts/constants/networks";
-import { ChainId, ChainKey, chainKeyToSlug } from "./src";
+import { ChainId, HardhatChainName, hardhatChainNameToSlug } from "./src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -48,21 +48,21 @@ function getRemappings() {
 let liveNetworks = {};
 if (isProduction) {
   liveNetworks = {
-    [ChainKey.ARBITRUM_GOERLI]: getChainConfig(ChainId.ARBITRUM_GOERLI),
-    [ChainKey.OPTIMISM_GOERLI]: getChainConfig(ChainId.OPTIMISM_GOERLI),
-    [ChainKey.POLYGON_MAINNET]: getChainConfig(ChainId.POLYGON_MAINNET),
-    [ChainKey.ARBITRUM]: getChainConfig(ChainId.ARBITRUM),
-    [ChainKey.BSC]: getChainConfig(ChainId.BSC),
-    [ChainKey.GOERLI]: getChainConfig(ChainId.GOERLI),
-    [ChainKey.MAINNET]: getChainConfig(ChainId.MAINNET),
-    [ChainKey.OPTIMISM]: getChainConfig(ChainId.OPTIMISM),
-    [ChainKey.POLYGON_MUMBAI]: getChainConfig(ChainId.POLYGON_MUMBAI),
-    [ChainKey.BSC_TESTNET]: getChainConfig(ChainId.BSC_TESTNET),
-    [ChainKey.SEPOLIA]: getChainConfig(ChainId.SEPOLIA),
-    [ChainKey.AEVO_TESTNET]: getChainConfig(ChainId.AEVO_TESTNET),
-    [ChainKey.AEVO]: getChainConfig(ChainId.AEVO),
-    [ChainKey.LYRA_TESTNET]: getChainConfig(ChainId.LYRA_TESTNET),
-    [ChainKey.XAI_TESTNET]: getChainConfig(ChainId.XAI_TESTNET),
+    [HardhatChainName.ARBITRUM_GOERLI]: getChainConfig(ChainId.ARBITRUM_GOERLI),
+    [HardhatChainName.OPTIMISM_GOERLI]: getChainConfig(ChainId.OPTIMISM_GOERLI),
+    [HardhatChainName.POLYGON_MAINNET]: getChainConfig(ChainId.POLYGON_MAINNET),
+    [HardhatChainName.ARBITRUM]: getChainConfig(ChainId.ARBITRUM),
+    [HardhatChainName.BSC]: getChainConfig(ChainId.BSC),
+    [HardhatChainName.GOERLI]: getChainConfig(ChainId.GOERLI),
+    [HardhatChainName.MAINNET]: getChainConfig(ChainId.MAINNET),
+    [HardhatChainName.OPTIMISM]: getChainConfig(ChainId.OPTIMISM),
+    [HardhatChainName.POLYGON_MUMBAI]: getChainConfig(ChainId.POLYGON_MUMBAI),
+    [HardhatChainName.BSC_TESTNET]: getChainConfig(ChainId.BSC_TESTNET),
+    [HardhatChainName.SEPOLIA]: getChainConfig(ChainId.SEPOLIA),
+    [HardhatChainName.AEVO_TESTNET]: getChainConfig(ChainId.AEVO_TESTNET),
+    [HardhatChainName.AEVO]: getChainConfig(ChainId.AEVO),
+    [HardhatChainName.LYRA_TESTNET]: getChainConfig(ChainId.LYRA_TESTNET),
+    [HardhatChainName.XAI_TESTNET]: getChainConfig(ChainId.XAI_TESTNET),
   };
 }
 
@@ -93,7 +93,7 @@ const config: HardhatUserConfig = {
     customChains: [
       {
         network: "optimisticTestnet",
-        chainId: chainKeyToSlug[ChainKey.OPTIMISM_GOERLI],
+        chainId: hardhatChainNameToSlug[HardhatChainName.OPTIMISM_GOERLI],
         urls: {
           apiURL: "https://api-goerli-optimistic.etherscan.io/api",
           browserURL: "https://goerli-optimism.etherscan.io/",
@@ -101,7 +101,7 @@ const config: HardhatUserConfig = {
       },
       {
         network: "arbitrumTestnet",
-        chainId: chainKeyToSlug[ChainKey.ARBITRUM_GOERLI],
+        chainId: hardhatChainNameToSlug[HardhatChainName.ARBITRUM_GOERLI],
         urls: {
           apiURL: "https://api-goerli.arbiscan.io/api",
           browserURL: "https://goerli.arbiscan.io/",
@@ -109,7 +109,7 @@ const config: HardhatUserConfig = {
       },
       {
         network: "aevoTestnet",
-        chainId: chainKeyToSlug[ChainKey.AEVO_TESTNET],
+        chainId: hardhatChainNameToSlug[HardhatChainName.AEVO_TESTNET],
         urls: {
           apiURL: "",
           browserURL: "https://explorer-testnet.aevo.xyz/",
@@ -117,7 +117,7 @@ const config: HardhatUserConfig = {
       },
       {
         network: "aevo",
-        chainId: chainKeyToSlug[ChainKey.AEVO],
+        chainId: hardhatChainNameToSlug[HardhatChainName.AEVO],
         urls: {
           apiURL: "",
           browserURL: "https://explorer-testnet.aevo.xyz/",
@@ -125,7 +125,7 @@ const config: HardhatUserConfig = {
       },
       {
         network: "xaiTestnet",
-        chainId: chainKeyToSlug[ChainKey.XAI_TESTNET],
+        chainId: hardhatChainNameToSlug[HardhatChainName.XAI_TESTNET],
         urls: {
           apiURL: "",
           browserURL: "https://testnet-explorer.xai-chain.net/",
@@ -135,7 +135,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      chainId: chainKeyToSlug.hardhat,
+      chainId: hardhatChainNameToSlug.hardhat,
     },
     ...liveNetworks,
   },
