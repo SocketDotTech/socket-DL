@@ -1,6 +1,12 @@
 {
   "421613": [
     [
+      "0x25910E7Dd397948766C1A5a6f5c6328E0a6E2f93",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ],
+    [
       "0x81de84Cd8BFAdCdbb0f60B522168fF339c7846c0",
       "FastSwitchboard",
       "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
@@ -125,6 +131,12 @@
     ]
   ],
   "1399904803": [
+    [
+      "0x66ffe416eB16D879EcE55B1d50C34789CB4Ab80a",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ],
     [
       "0xbf40F1c17471C04eaca8927252bCF2360082c901",
       "Counter",
