@@ -10,6 +10,7 @@ import {
   isMainnet,
   CORE_CONTRACTS,
   ChainSlugToKey,
+  ChainId,
 } from "../../../src";
 import { getAddresses, getRelayUrl, getRelayAPIKEY } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";
@@ -66,7 +67,7 @@ const axiosPost = async (url: string, data: object, config = {}) => {
   }
 };
 
-const relayTx = async (params: RequestObj) => {
+const relayTx = async (params: RequestObj, provider: any) => {
   try {
     let { to, data, chainSlug, gasPrice, value, gasLimit } = params;
     let url = await getRelayUrl(mode);
@@ -80,7 +81,7 @@ const relayTx = async (params: RequestObj) => {
       to,
       data,
       value,
-      chainId: chainSlug,
+      chainId: (await provider.getNetwork()).chainId,
       gasLimit,
       gasPrice,
       sequential: false,
@@ -190,13 +191,16 @@ export const sendMessagesToAllPaths = async (params: {
             await Promise.all(
               tempArray.map(async (c) => {
                 // console.log(c)
-                let response = await relayTx({
-                  to,
-                  data,
-                  value,
-                  gasLimit,
-                  chainSlug,
-                });
+                let response = await relayTx(
+                  {
+                    to,
+                    data,
+                    value,
+                    gasLimit,
+                    chainSlug,
+                  },
+                  provider
+                );
                 console.log(
                   `Tx sent : ${chainSlug} -> ${siblingSlug} hash: `,
                   response?.hash

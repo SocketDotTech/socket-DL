@@ -106,7 +106,7 @@ const config: HardhatUserConfig = {
           apiURL: "https://api-goerli.arbiscan.io/api",
           browserURL: "https://goerli.arbiscan.io/",
         },
-      }
+      },
     ],
   },
   networks: {
