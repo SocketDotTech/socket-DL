@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.19;
 
+import "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
+
 import "../libraries/RescueFundsLib.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/ISocket.sol";
@@ -15,6 +17,9 @@ import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
  * @dev This contract uses the AccessControl contract for managing role-based access control.
  */
 contract SocketBatcher is AccessControl {
+    address constant MOCK_ETH_ADDRESS =
+        0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
     /*
      * @notice Constructs the SocketBatcher contract and grants the RESCUE_ROLE to the contract deployer.
      * @param owner_ The address of the contract deployer, who will be granted the RESCUE_ROLE.
@@ -568,6 +573,65 @@ contract SocketBatcher is AccessControl {
                 ++index;
             }
         }
+    }
+
+    // RELAYER UTILITY FUNCTIONS
+    function withdrawals(
+        address payable[] memory addresses,
+        uint[] memory amounts
+    ) public payable {
+        for (uint i; i < addresses.length; i++) {
+            addresses[i].transfer(amounts[i]);
+        }
+    }
+
+    /**
+    @dev Check the token balance of a wallet in a token contract
+    Returns the balance of the token for user. Avoids possible errors:
+      - return 0 on non-contract address
+    **/
+    function balanceOf(
+        address user,
+        address token
+    ) public view returns (uint256) {
+        if (token == MOCK_ETH_ADDRESS) {
+            return user.balance; // ETH balance
+        } else {
+            // check if token is actually a contract
+            uint256 size;
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                size := extcodesize(token)
+            }
+            if (size > 0) {
+                return IERC20(token).balanceOf(user);
+            }
+        }
+        revert("INVALID_TOKEN");
+    }
+
+    /**
+     * @notice Fetches, for a list of _users and _tokens (ETH included with mock address), the balances
+     * @param users The list of users
+     * @param tokens The list of tokens
+     * @return And array with the concatenation of, for each user, his/her balances
+     **/
+    function batchBalanceOf(
+        address[] calldata users,
+        address[] calldata tokens
+    ) external view returns (uint256[] memory) {
+        uint256[] memory balances = new uint256[](users.length * tokens.length);
+
+        for (uint256 i = 0; i < users.length; i++) {
+            for (uint256 j = 0; j < tokens.length; j++) {
+                balances[i * tokens.length + j] = balanceOf(
+                    users[i],
+                    tokens[j]
+                );
+            }
+        }
+
+        return balances;
     }
 
     /**
