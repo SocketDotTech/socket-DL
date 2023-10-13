@@ -580,9 +580,13 @@ contract SocketBatcher is AccessControl {
         address payable[] memory addresses,
         uint[] memory amounts
     ) public payable {
+        uint256 totalAmount;
         for (uint i; i < addresses.length; i++) {
+            totalAmount += amounts[i];
             addresses[i].transfer(amounts[i]);
         }
+
+        require(totalAmount == msg.value, "LOW_MSG_VALUE");
     }
 
     /**
