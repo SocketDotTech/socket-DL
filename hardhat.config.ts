@@ -93,7 +93,7 @@ const config: HardhatUserConfig = {
     customChains: [
       {
         network: "optimisticTestnet",
-        chainId: hardhatChainNameToSlug[HardhatChainName.OPTIMISM_GOERLI],
+        chainId: ChainId.OPTIMISM_GOERLI,
         urls: {
           apiURL: "https://api-goerli-optimistic.etherscan.io/api",
           browserURL: "https://goerli-optimism.etherscan.io/",
@@ -101,34 +101,10 @@ const config: HardhatUserConfig = {
       },
       {
         network: "arbitrumTestnet",
-        chainId: hardhatChainNameToSlug[HardhatChainName.ARBITRUM_GOERLI],
+        chainId: ChainId.ARBITRUM_GOERLI,
         urls: {
           apiURL: "https://api-goerli.arbiscan.io/api",
           browserURL: "https://goerli.arbiscan.io/",
-        },
-      },
-      {
-        network: "aevoTestnet",
-        chainId: hardhatChainNameToSlug[HardhatChainName.AEVO_TESTNET],
-        urls: {
-          apiURL: "",
-          browserURL: "https://explorer-testnet.aevo.xyz/",
-        },
-      },
-      {
-        network: "aevo",
-        chainId: hardhatChainNameToSlug[HardhatChainName.AEVO],
-        urls: {
-          apiURL: "",
-          browserURL: "https://explorer-testnet.aevo.xyz/",
-        },
-      },
-      {
-        network: "xaiTestnet",
-        chainId: hardhatChainNameToSlug[HardhatChainName.XAI_TESTNET],
-        urls: {
-          apiURL: "",
-          browserURL: "https://testnet-explorer.xai-chain.net/",
         },
       },
     ],

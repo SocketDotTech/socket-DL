@@ -1,59 +1,155 @@
 {
   "421613": {
-    "SignatureVerifier": "0xc4d095265F1BF06c6852D66C64E347F611aa0461",
-    "Hasher": "0x79C06C807b94278f50933B714a98127cc96af3c2",
-    "CapacitorFactory": "0x2eAB34221D760BE1AF2F7C504a9Fe46803BCec52",
-    "Socket": "0x27EBaD611583eDf65b28f59c88c8628A43C7F4a8",
-    "ExecutionManager": "0xf25d348F632878eb8fe8EeA98cd12B85F1b61ABF",
-    "TransmitManager": "0x333f728D2DAfAa16f9391B791663746426abFCDD",
+    "SignatureVerifier": "0x353287093b3C9f5842396a6fc9704766aA5409c7",
+    "Hasher": "0x164a9e444e4f1EF4f8C9D47F27A11e6E160e1caE",
+    "CapacitorFactory": "0xe1f7dB73d6e27dd256396adEeD8df6909c96798a",
+    "Socket": "0x5a90a285ab72393B2c47168374895a5C8101012c",
+    "ExecutionManager": "0x0b8c68Cf68bbBFdF9043aaF71A566c98646AcDd0",
+    "TransmitManager": "0x7BdD806f0464Da8363405d2F09456883E83878ea",
     "integrations": {
       "5": {
         "NATIVE_BRIDGE": {
-          "switchboard": "0xFB61279721695A38CDC63a82141Ebce07B85C6E6"
+          "switchboard": "0x46Ffe7d8c87176DbC87adF59DD8d75116C835007",
+          "capacitor": "0x26aD31F66F8764FD3106bd0a7E34BAC7706d34eA",
+          "decapacitor": "0x3Fe90bF6876C8f71b93DFac34590aE4C71205791"
+        },
+        "FAST": {
+          "capacitor": "0x6F7ca80AFcff655115896E409a0C96D0F1c45B78",
+          "decapacitor": "0x61145f2a1b7182a0c9713d4cA9852904d6027c26",
+          "switchboard": "0xA4C366be8e0BFE59011d26f66E683B1D290DcF45"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x6dA78676EFe0aB16B150737c12dBd8e29c93D737",
+          "decapacitor": "0x49b5750DC22f3e71489aCF0351953A7227A0D288",
+          "switchboard": "0x0FE19867199d6c96f2e1FE022c38ebb4292543F8"
+        }
+      },
+      "420": {
+        "FAST": {
+          "capacitor": "0x1fdfEFa7eD62A01F48D1a263555F48ba4b224bE9",
+          "decapacitor": "0x7C82954B75219dcBEB9Bc70D08608fAAE95d16e4",
+          "switchboard": "0xA4C366be8e0BFE59011d26f66E683B1D290DcF45"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0xC066998D3D84688f349abaFDaf35ee4da6a89669",
+          "decapacitor": "0x261d1DB0B65AFF064141058C95A662cD9ecf066a",
+          "switchboard": "0x0FE19867199d6c96f2e1FE022c38ebb4292543F8"
+        },
+        "FAST2": {
+          "capacitor": "0xD5a258282aF75D2758D6D10F047D590f06c7E950",
+          "decapacitor": "0x132c95211972cc709eB1Aab754E03b49Fc2C6D15",
+          "switchboard": "0xFD468fc7d23dA3e7466EE78327D4db5FcA232B2d"
+        }
+      },
+      "901": {
+        "FAST": {
+          "capacitor": "0xc9f5FcEbb5414b4065d8E74C203aCfcF166E1Cda",
+          "decapacitor": "0x0EC9B7822D785497E67d07647e423E8eA803C41d",
+          "switchboard": "0xA4C366be8e0BFE59011d26f66E683B1D290DcF45"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x30EC47639578F1521D86b9DbA1337dd2DA87CbBA",
+          "decapacitor": "0xa16BA459CA0f26C7c78143C4A5619Cc723dC3a46",
+          "switchboard": "0x0FE19867199d6c96f2e1FE022c38ebb4292543F8"
+        }
+      },
+      "80001": {
+        "FAST": {
+          "capacitor": "0x15033a9C21Fc6E69a01DC9e21F418FC01ED2E352",
+          "decapacitor": "0x1dbAEff5C7BC7f29716c0E0b9D313FCF80A73dA2",
+          "switchboard": "0xA4C366be8e0BFE59011d26f66E683B1D290DcF45"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x8703748808130233B8E24659254E3136650Adb1e",
+          "decapacitor": "0x867d1C40be7229F099E72d88b1Afef62339Fc344",
+          "switchboard": "0x0FE19867199d6c96f2e1FE022c38ebb4292543F8"
+        },
+        "FAST2": {
+          "capacitor": "0xb26412B7aFd7E9c1BC3553C1d070bEE2a380bc71",
+          "decapacitor": "0x370eE148379e26E22C00f6d083c32B4a8D5bFE40",
+          "switchboard": "0xFD468fc7d23dA3e7466EE78327D4db5FcA232B2d"
+        }
+      },
+      "11155111": {
+        "FAST": {
+          "capacitor": "0x1d1d09ce399ed6a66Acd62d75DB56Ddd6fbcBBd2",
+          "decapacitor": "0xe247e4D5e155Bab4632591DaF067AAb9b2cdA10c",
+          "switchboard": "0xA4C366be8e0BFE59011d26f66E683B1D290DcF45"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0xD388319E855eFf026252763CF8d71540a6c43B85",
+          "decapacitor": "0x9DDF4CF04517442F9a9535b4C59dB3729F424486",
+          "switchboard": "0x0FE19867199d6c96f2e1FE022c38ebb4292543F8"
+        }
+      },
+      "11155112": {
+        "FAST": {
+          "capacitor": "0x3c984335075667CA8abDfA5A2D0767027af3dBF9",
+          "decapacitor": "0xab364fDFC424aC5104845264DED6a5E14f7Fb2E9",
+          "switchboard": "0xA4C366be8e0BFE59011d26f66E683B1D290DcF45"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0xC1295bD9c08d8F9059172fB5640c7e8CFD82b3c7",
+          "decapacitor": "0xb6562dDFF738FD1D1fad0Ce7BCEE51F3FA715A8F",
+          "switchboard": "0x0FE19867199d6c96f2e1FE022c38ebb4292543F8"
+        },
+        "FAST2": {
+          "capacitor": "0x5ef8a3FE885d40486456691F7A280698bbAd8293",
+          "decapacitor": "0x77230d566c3FA6Fa714659A0365Fe0a8b1041018",
+          "switchboard": "0xFD468fc7d23dA3e7466EE78327D4db5FcA232B2d"
         }
       },
       "1399904803": {
         "FAST2": {
-          "capacitor": "0x18cEf546d89FbD2AE64AB5B16220d3a445b811c2",
-          "decapacitor": "0xF4e6b110368604D0Df48675D7685616Ed145941B",
-          "switchboard": "0x6c2Bd8f6C35C54B9C7D7f12F89c22808C8b6b8FA"
+          "capacitor": "0x138116734EF26363Ca45b7aB03C2B014008a5703",
+          "decapacitor": "0x15F5D690C1E04008c728529696Aea70547D36351",
+          "switchboard": "0xFD468fc7d23dA3e7466EE78327D4db5FcA232B2d"
         },
         "OPTIMISTIC": {
-          "capacitor": "0x194fd59dd05D42E376AdeB0B7D2Dd3CD8833DEC0",
-          "decapacitor": "0x5b49603d96aF0a8Ca6E40A03BBC4c7A1D63D0e59",
-          "switchboard": "0xEaF2379d53f039c3f18A856B36c2b67a523F4Ceb"
+          "capacitor": "0xc200f99A1157c3F624a38a6a39D37eEf33d686ab",
+          "decapacitor": "0x411F27A7556E4C72184F9074B744356231F17f54",
+          "switchboard": "0x0FE19867199d6c96f2e1FE022c38ebb4292543F8"
         }
       }
     },
-    "FastSwitchboard2": "0x6c2Bd8f6C35C54B9C7D7f12F89c22808C8b6b8FA",
-    "OptimisticSwitchboard": "0xEaF2379d53f039c3f18A856B36c2b67a523F4Ceb",
-    "Counter": "0x0140bd943F0346f87b5Ead2633eA492A50c92CeB",
-    "SocketBatcher": "0x25910E7Dd397948766C1A5a6f5c6328E0a6E2f93"
+    "FastSwitchboard": "0xA4C366be8e0BFE59011d26f66E683B1D290DcF45",
+    "OptimisticSwitchboard": "0x0FE19867199d6c96f2e1FE022c38ebb4292543F8",
+    "Counter": "0xc8dD08F4f7392b4577f4D6499233792d163DA5Ee",
+    "SocketBatcher": "0x93D246a24B032C101c0858354dC5FbB7A113d500",
+    "FastSwitchboard2": "0xFD468fc7d23dA3e7466EE78327D4db5FcA232B2d"
   },
   "1399904803": {
-    "SignatureVerifier": "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A",
-    "Hasher": "0x9814d1E6751ADAE2D60fF16f987ae02a25C87224",
-    "CapacitorFactory": "0x98472CDb864DedcF13a560Ec2b79745a6063A3aC",
-    "Socket": "0x323684c3556480F94F9232A1525eAD02fde4F0d1",
-    "ExecutionManager": "0xeDCaf50c533F8fB411568f569F47a4a706A99B84",
-    "TransmitManager": "0x571614C396B5E95Bc3373b7cC61C8e770443A0A4",
+    "SignatureVerifier": "0x85778A90ec60249f10d7AEe06484ffC290d5Efd8",
+    "Hasher": "0xB9EDe9aaEaA40e35033ABBC872D141950d08cc4d",
+    "CapacitorFactory": "0xEDF6dB2f3BC8deE014762e0141EE4CA19d685dBd",
+    "Socket": "0xAE9bE0eA6DD7B53C88665Cb2EFf7d40dFD51cf91",
+    "ExecutionManager": "0x0f8F4E665221528e6a444458dd098216E9ec7807",
+    "TransmitManager": "0xaDDaC77B80C990A87906C4273902be5EC7f25B42",
     "integrations": {
       "421613": {
         "FAST2": {
-          "capacitor": "0x906B93b51A1661740D5c178444B531dF2aD941d6",
-          "decapacitor": "0x7DCe64Fd91c17234525Adc86553E1c4698507d3b",
-          "switchboard": "0x38CbBc8F45A350aAcaf8c1bb680633149604cca3"
+          "capacitor": "0x7d60006d8DDeCfF345f503E27981fcD3BD3e1752",
+          "decapacitor": "0x42466181c03b83f84F45deB949019c6077FdCbdf",
+          "switchboard": "0xaE51c633fb58df92FCcBb0694EA22E060d29F5F7"
         },
         "OPTIMISTIC": {
-          "capacitor": "0xcc8b50eA6FF57d640D656C6cDb46eA50485A011d",
-          "decapacitor": "0x3a87Bc57F99AFFc9BDD1e747b68bd253aEB4E33D",
-          "switchboard": "0x4f960040E588B8A7a76a4d0066F55EB432e3B1b2"
+          "capacitor": "0x95D14f58B838c9027FE38695Da2EF8F4C3464B17",
+          "decapacitor": "0x5e101353391b603C9725275aC0A6a66B0BC7A7C3",
+          "switchboard": "0xA53185E856916228505372F1E3333BbbB4AC2063"
+        }
+      },
+      "": {
+        "FAST2": {
+          "switchboard": "0xaE51c633fb58df92FCcBb0694EA22E060d29F5F7"
+        },
+        "OPTIMISTIC": {
+          "switchboard": "0xA53185E856916228505372F1E3333BbbB4AC2063"
         }
       }
     },
-    "FastSwitchboard2": "0x38CbBc8F45A350aAcaf8c1bb680633149604cca3",
-    "OptimisticSwitchboard": "0x4f960040E588B8A7a76a4d0066F55EB432e3B1b2",
-    "Counter": "0xbf40F1c17471C04eaca8927252bCF2360082c901",
-    "SocketBatcher": "0x66ffe416eB16D879EcE55B1d50C34789CB4Ab80a"
+    "FastSwitchboard2": "0xaE51c633fb58df92FCcBb0694EA22E060d29F5F7",
+    "OptimisticSwitchboard": "0xA53185E856916228505372F1E3333BbbB4AC2063",
+    "SocketBatcher": "0x918ECe20236B9d8C2AA1742540246D6F9a9eB081",
+    "Counter": "0x30DaDbc1D9EdF62f5E7491439c78bD6502c6c22B"
   }
 }
