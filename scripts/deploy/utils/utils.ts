@@ -155,7 +155,10 @@ export const storeAddresses = async (
   }
 
   deploymentAddresses[chainSlug] = addresses;
-  fs.writeFileSync(addressesPath, JSON.stringify(deploymentAddresses, null, 2));
+  fs.writeFileSync(
+    addressesPath,
+    JSON.stringify(deploymentAddresses, null, 2) + "\n"
+  );
 };
 
 export const storeAllAddresses = async (
@@ -167,7 +170,7 @@ export const storeAllAddresses = async (
   }
 
   const addressesPath = deploymentsPath + `${mode}_addresses.json`;
-  fs.writeFileSync(addressesPath, JSON.stringify(addresses, null, 2));
+  fs.writeFileSync(addressesPath, JSON.stringify(addresses, null, 2) + "\n");
 };
 
 export const storeVerificationParams = async (
@@ -197,7 +200,7 @@ export const storeVerificationParams = async (
 
   fs.writeFileSync(
     verificationPath,
-    JSON.stringify(verificationDetails, null, 2)
+    JSON.stringify(verificationDetails, null, 2) + "\n"
   );
 };
 
