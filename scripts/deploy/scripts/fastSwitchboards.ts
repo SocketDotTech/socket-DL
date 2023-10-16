@@ -22,10 +22,7 @@ import {
   maxAllowedPacketLength,
 } from "../../constants";
 
-const main = async (
-  srcChains: ChainSlug[],
-  dstChains: ChainSlug[]
-) => {
+const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
   try {
     let addresses: DeploymentAddresses;
     try {
