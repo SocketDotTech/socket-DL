@@ -1,4 +1,4 @@
-import { IntegrationTypes, NativeSwitchboard } from "../../../src";
+import { IntegrationTypes, NativeSwitchboard, ChainSlug } from "../../../src";
 
 import { fastSwitchboard } from "./fastSwitchboard";
 import { optimisticSwitchboard } from "./optimisticSwitchboard";
@@ -12,21 +12,17 @@ import { polygonL2Switchboard } from "./polygonL2Switchboard";
 import { switchboards } from "../../constants";
 
 export const getSwitchboardDeployData = (
-  integrationType,
-  localChain,
-  remoteChain,
-  socketAddress,
-  sigVerifierAddress,
-  signerAddress
+  integrationType: IntegrationTypes,
+  localChain: ChainSlug,
+  remoteChain: ChainSlug | string,
+  socketAddress: string,
+  sigVerifierAddress: string,
+  signerAddress: string
 ) => {
-  if (integrationType === IntegrationTypes.fast) {
-    return fastSwitchboard(
-      localChain,
-      socketAddress,
-      sigVerifierAddress,
-      signerAddress
-    );
-  } else if (integrationType === IntegrationTypes.fast2) {
+  if (
+    integrationType === IntegrationTypes.fast ||
+    integrationType === IntegrationTypes.fast2
+  ) {
     return fastSwitchboard(
       localChain,
       socketAddress,

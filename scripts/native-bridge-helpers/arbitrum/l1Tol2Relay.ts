@@ -9,10 +9,9 @@ import { getInstance } from "../../deploy/utils";
 import { getJsonRpcUrl } from "../../constants";
 import { mode, socketOwner } from "../../deploy/config";
 import {
-  ChainKey,
+  HardhatChainName,
   IntegrationTypes,
-  chainKeyToSlug,
-  getAllAddresses,
+  hardhatChainNameToSlug,
   getSwitchboardAddress,
 } from "../../../src";
 import { L1ToL2MessageStatus, L1TransactionReceipt } from "@arbitrum/sdk";
@@ -20,8 +19,8 @@ import { L1ToL2MessageStatus, L1TransactionReceipt } from "@arbitrum/sdk";
 // get providers for source and destination
 
 // replace following variables to initiate the txn
-const l1Chain = ChainKey.GOERLI;
-const l2Chain = ChainKey.ARBITRUM_GOERLI;
+const l1Chain = HardhatChainName.GOERLI;
+const l2Chain = HardhatChainName.ARBITRUM_GOERLI;
 const packetId =
   "0x00000005feb89935220606f3c3670ae510a74ab5750e810c0000000000000000";
 const root =
@@ -90,8 +89,8 @@ export const getBridgeParams = async (from, to) => {
 export const main = async () => {
   try {
     const sbAddr = getSwitchboardAddress(
-      chainKeyToSlug[l1Chain],
-      chainKeyToSlug[l2Chain],
+      hardhatChainNameToSlug[l1Chain],
+      hardhatChainNameToSlug[l2Chain],
       IntegrationTypes.native,
       mode
     );
@@ -103,8 +102,8 @@ export const main = async () => {
     const { bridgeParams, callValue } = await getBridgeParams(
       l1Switchboard.address,
       getSwitchboardAddress(
-        chainKeyToSlug[l2Chain],
-        chainKeyToSlug[l1Chain],
+        hardhatChainNameToSlug[l2Chain],
+        hardhatChainNameToSlug[l1Chain],
         IntegrationTypes.native,
         mode
       )

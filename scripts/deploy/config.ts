@@ -28,7 +28,7 @@ console.log(
 );
 
 export const chains: Array<ChainSlug> = [
-  ChainSlug.GOERLI,
+  // ChainSlug.GOERLI,
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.POLYGON_MUMBAI,
@@ -43,6 +43,7 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.LYRA,
   ChainSlug.BSC,
   ChainSlug.POLYGON_MAINNET,
+  ChainSlug.XAI_TESTNET,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
@@ -74,6 +75,7 @@ export const msgValueMaxThreshold: { [chain in ChainSlug]?: BigNumberish } = {
   [ChainSlug.AEVO]: utils.parseEther("0.001"),
   [ChainSlug.LYRA_TESTNET]: utils.parseEther("0.001"),
   [ChainSlug.LYRA]: utils.parseEther("0.001"),
+  [ChainSlug.XAI_TESTNET]: utils.parseEther("0.001"),
 };
 
 export const transmitterAddresses = {
@@ -173,6 +175,11 @@ export const overrides: {
     // gasPrice: 100_000_000,
   },
   [ChainSlug.LYRA]: {
+    // type: 1,
+    // gasLimit,
+    // gasPrice: 100_000_000,
+  },
+  [ChainSlug.XAI_TESTNET]: {
     // type: 1,
     // gasLimit,
     // gasPrice: 100_000_000,

@@ -3,10 +3,10 @@ import fs from "fs";
 
 import { deploymentsPath, verify } from "./utils/utils";
 import { mode } from "./config";
-import { ChainKey, ChainSlugToKey } from "../../src";
+import { HardhatChainName, ChainSlugToKey } from "../../src";
 
 export type VerifyParams = {
-  [chain in ChainKey]?: VerifyArgs[];
+  [chain in HardhatChainName]?: VerifyArgs[];
 };
 type VerifyArgs = [string, string, string, any[]];
 

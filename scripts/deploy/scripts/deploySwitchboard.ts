@@ -9,33 +9,23 @@ import {
   ChainSocketAddresses,
   DeploymentMode,
   IntegrationTypes,
-  chainKeyToSlug,
+  ChainSlug,
 } from "../../../src";
 import { getSwitchboardDeployData } from "../switchboards";
 import { Wallet } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 export default async function deploySwitchboards(
-  network: string,
+  chainSlug: ChainSlug,
   signer: SignerWithAddress | Wallet,
   sourceConfig: ChainSocketAddresses,
   mode: DeploymentMode
 ): Promise<ChainSocketAddresses> {
   let updatedConfig: any = sourceConfig;
-  if (!sourceConfig.FastSwitchboard)
-    updatedConfig = await deploySwitchboard(
-      IntegrationTypes.fast,
-      network,
-      "",
-      signer,
-      updatedConfig,
-      mode
-    );
-
   if (!sourceConfig.FastSwitchboard2)
     updatedConfig = await deploySwitchboard(
       IntegrationTypes.fast2,
-      network,
+      chainSlug,
       "",
       signer,
       updatedConfig,
@@ -45,24 +35,27 @@ export default async function deploySwitchboards(
   if (!sourceConfig.OptimisticSwitchboard)
     updatedConfig = await deploySwitchboard(
       IntegrationTypes.optimistic,
-      network,
+      chainSlug,
       "",
       signer,
       updatedConfig,
       mode
     );
 
-  if (!switchboards[network]) return updatedConfig;
-  const siblings = Object.keys(switchboards[network]);
+  if (!switchboards[chainSlug]) return updatedConfig;
+  const siblings: ChainSlug[] = Object.keys(switchboards[chainSlug]).map(
+    (c) => parseInt(c) as ChainSlug
+  );
+
   for (let index = 0; index < siblings.length; index++) {
     if (
-      !updatedConfig?.integrations?.[chainKeyToSlug[siblings[index]]]?.[
+      !updatedConfig?.integrations?.[siblings[index]]?.[
         IntegrationTypes.native
       ]?.["switchboard"]
     ) {
       updatedConfig = await deploySwitchboard(
         IntegrationTypes.native,
-        network,
+        chainSlug,
         siblings[index],
         signer,
         updatedConfig,
@@ -76,8 +69,8 @@ export default async function deploySwitchboards(
 
 async function deploySwitchboard(
   integrationType: IntegrationTypes,
-  network: string,
-  remoteChain: string,
+  chainSlug: ChainSlug,
+  remoteChain: ChainSlug | string,
   signer: SignerWithAddress | Wallet,
   sourceConfig: ChainSocketAddresses,
   mode: DeploymentMode
@@ -85,7 +78,7 @@ async function deploySwitchboard(
   try {
     const { contractName, args, path } = getSwitchboardDeployData(
       integrationType,
-      network,
+      chainSlug,
       remoteChain,
       sourceConfig[CORE_CONTRACTS.Socket],
       sourceConfig[CORE_CONTRACTS.SignatureVerifier],
@@ -103,18 +96,13 @@ async function deploySwitchboard(
     );
     await storeVerificationParams(
       [switchboard.address, contractName, path, args],
-      chainKeyToSlug[network],
+      chainSlug,
       mode
     );
 
     sourceConfig = createObj(
       sourceConfig,
-      [
-        "integrations",
-        chainKeyToSlug[remoteChain],
-        integrationType,
-        "switchboard",
-      ],
+      ["integrations", remoteChain.toString(), integrationType, "switchboard"],
       switchboard.address
     );
 
