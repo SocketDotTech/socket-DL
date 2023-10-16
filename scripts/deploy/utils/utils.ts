@@ -282,6 +282,11 @@ export const createObj = function (
   return obj;
 };
 
+export const toLowerCase = (str?: string) => {
+  if (!str) return "";
+  return str.toLowerCase();
+};
+
 export function getChainSlugFromId(chainId: number) {
   const MAX_UINT_32 = 4294967295;
   if (chainId < MAX_UINT_32) return chainId;
