@@ -46,10 +46,7 @@ export const main = async () => {
 
         const siblingIntegrationtype: IntegrationTypes[] = siblingSlugs.map(
           (chainSlug) => {
-            return getDefaultIntegrationType(
-              ChainSlugToKey[chain],
-              ChainSlugToKey[chainSlug]
-            );
+            return getDefaultIntegrationType(chain, chainSlug);
           }
         );
 
