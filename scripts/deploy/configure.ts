@@ -95,8 +95,6 @@ export const main = async () => {
           await tx.wait();
         }
 
-        if (!addr["integrations"]) return;
-
         const integrations = addr["integrations"] ?? {};
         const integrationList = Object.keys(integrations).filter((chain) =>
           chains.includes(parseInt(chain) as ChainSlug)

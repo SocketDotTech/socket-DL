@@ -100,11 +100,17 @@ async function deploySwitchboard(
       mode
     );
 
-    sourceConfig = createObj(
-      sourceConfig,
-      ["integrations", remoteChain.toString(), integrationType, "switchboard"],
-      switchboard.address
-    );
+    if (remoteChain.toString().length > 0)
+      sourceConfig = createObj(
+        sourceConfig,
+        [
+          "integrations",
+          remoteChain.toString(),
+          integrationType,
+          "switchboard",
+        ],
+        switchboard.address
+      );
 
     if (integrationType === IntegrationTypes.optimistic) {
       sourceConfig[CORE_CONTRACTS.OptimisticSwitchboard] = switchboard.address;
