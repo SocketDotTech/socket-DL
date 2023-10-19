@@ -1,18 +1,15 @@
-import {  utils } from "ethers";
-import {  ethers } from "hardhat";
-
+import { utils } from "ethers";
+import { ethers } from "hardhat";
 
 import {
   version,
   DeploymentAddresses,
   getAllAddresses,
   ChainSlug,
-  IntegrationTypes
+  IntegrationTypes,
 } from "../../../src";
 import { mode, chains } from "../config";
-import {
-  getProviderFromChainSlug,
-} from "../../constants";
+import { getProviderFromChainSlug } from "../../constants";
 import { encodePacketId } from "../utils/packetId";
 
 const main = async (
