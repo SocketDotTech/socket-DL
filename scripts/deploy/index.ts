@@ -7,14 +7,24 @@ import {
   ChainSocketAddresses,
   DeploymentAddresses,
   getAllAddresses,
-  ChainSlugToKey,
 } from "../../src";
 import { chains, mode } from "./config";
 
 /**
  * Deploys network-independent socket contracts
  */
-export const main = async () => {
+const deploy = async () => {
+  try {
+    await deployForChains(chains);
+  } catch (error) {
+    console.log("Error while deploying contracts");
+  }
+};
+
+export const deployForChains = async (
+  chains: ChainSlug[]
+): Promise<ChainSocketAddresses[]> => {
+  let deployedAddresses: ChainSocketAddresses[] = [];
   try {
     let addresses: DeploymentAddresses;
     try {
@@ -47,15 +57,19 @@ export const main = async () => {
 
           allDeployed = results.allDeployed;
           chainAddresses = results.deployedAddresses;
+
+          deployedAddresses[chain] = chainAddresses;
         }
       })
     );
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
   }
+
+  return deployedAddresses;
 };
 
-main()
+deploy()
   .then(() => process.exit(0))
   .catch((error: Error) => {
     console.error(error);

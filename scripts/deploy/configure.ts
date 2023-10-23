@@ -40,7 +40,6 @@ export const main = async () => {
     let addresses: DeploymentAddresses = JSON.parse(
       fs.readFileSync(deployedAddressPath(mode), "utf-8")
     );
-    let chain: ChainSlug;
 
     await Promise.all(
       chains.map(async (chain) => {
@@ -62,38 +61,15 @@ export const main = async () => {
         );
 
         await configureExecutionManager(
-          addr,
           executionManagerVersion,
+          addr[executionManagerVersion]!,
+          addr[CORE_CONTRACTS.SocketBatcher],
           chain,
           siblingSlugs,
           socketSigner
         );
 
-        const socket = (
-          await getInstance(CORE_CONTRACTS.Socket, addr.Socket)
-        ).connect(socketSigner);
-
-        let tx;
-        const currentEM = await socket.executionManager__();
-        if (
-          currentEM.toLowerCase() !==
-          addr[executionManagerVersion]?.toLowerCase()
-        ) {
-          tx = await socket.setExecutionManager(addr[executionManagerVersion], {
-            ...overrides[await socketSigner.getChainId()],
-          });
-          console.log("updateExecutionManager", tx.hash);
-          await tx.wait();
-        }
-
-        const currentTM = await socket.transmitManager__();
-        if (currentTM.toLowerCase() !== addr.TransmitManager?.toLowerCase()) {
-          tx = await socket.setTransmitManager(addr.TransmitManager, {
-            ...overrides[await socketSigner.getChainId()],
-          });
-          console.log("updateTransmitManager", tx.hash);
-          await tx.wait();
-        }
+        await setManagers(addr, socketSigner);
 
         const integrations = addr["integrations"] ?? {};
         const integrationList = Object.keys(integrations).filter((chain) =>
@@ -126,50 +102,25 @@ export const main = async () => {
           );
         }
 
-        // register fast2
-        for (let sibling of siblingSlugs) {
-          const siblingSwitchboard = getSwitchboardAddress(
-            chain,
-            IntegrationTypes.fast2,
-            addresses?.[sibling]
-          );
+        addr = await registerSwitchboards(
+          chain,
+          siblingSlugs,
+          CORE_CONTRACTS.FastSwitchboard2,
+          IntegrationTypes.fast2,
+          addr,
+          addresses,
+          socketSigner
+        );
 
-          if (!siblingSwitchboard || !addr[CORE_CONTRACTS.FastSwitchboard2])
-            continue;
-
-          addr = await registerSwitchboardForSibling(
-            addr[CORE_CONTRACTS.FastSwitchboard2],
-            siblingSwitchboard,
-            sibling,
-            capacitorType,
-            maxPacketLength,
-            socketSigner,
-            IntegrationTypes.fast2,
-            addr
-          );
-        }
-
-        // register optimistic
-        for (let sibling of siblingSlugs) {
-          const siblingSwitchboard = getSwitchboardAddress(
-            chain,
-            IntegrationTypes.optimistic,
-            addresses?.[sibling]
-          );
-
-          if (!siblingSwitchboard) continue;
-
-          addr = await registerSwitchboardForSibling(
-            addr[CORE_CONTRACTS.OptimisticSwitchboard],
-            siblingSwitchboard,
-            sibling,
-            capacitorType,
-            maxPacketLength,
-            socketSigner,
-            IntegrationTypes.optimistic,
-            addr
-          );
-        }
+        addr = await registerSwitchboards(
+          chain,
+          siblingSlugs,
+          CORE_CONTRACTS.OptimisticSwitchboard,
+          IntegrationTypes.optimistic,
+          addr,
+          addresses,
+          socketSigner
+        );
 
         addresses[chain] = addr;
 
@@ -184,32 +135,90 @@ export const main = async () => {
   }
 };
 
-const configureExecutionManager = async (
+export const registerSwitchboards = async (
+  chain: ChainSlug,
+  siblingSlugs: ChainSlug[],
+  switchboardContractName: string,
+  integrationType: IntegrationTypes,
   addr: ChainSocketAddresses,
+  addresses: DeploymentAddresses,
+  socketSigner: Wallet
+) => {
+  for (let sibling of siblingSlugs) {
+    const siblingSwitchboard = getSwitchboardAddress(
+      chain,
+      integrationType,
+      addresses?.[sibling]
+    );
+
+    if (!siblingSwitchboard || !addr[switchboardContractName]) continue;
+
+    addr = await registerSwitchboardForSibling(
+      addr[switchboardContractName],
+      siblingSwitchboard,
+      sibling,
+      capacitorType,
+      maxPacketLength,
+      socketSigner,
+      integrationType,
+      addr
+    );
+  }
+
+  return addr;
+};
+
+export const setManagers = async (
+  addr: ChainSocketAddresses,
+  socketSigner: Wallet
+) => {
+  const socket = (
+    await getInstance(CORE_CONTRACTS.Socket, addr.Socket)
+  ).connect(socketSigner);
+
+  let tx;
+  const currentEM = await socket.executionManager__();
+  if (
+    currentEM.toLowerCase() !== addr[executionManagerVersion]?.toLowerCase()
+  ) {
+    tx = await socket.setExecutionManager(addr[executionManagerVersion], {
+      ...overrides[await socketSigner.getChainId()],
+    });
+    console.log("updateExecutionManager", tx.hash);
+    await tx.wait();
+  }
+
+  const currentTM = await socket.transmitManager__();
+  if (currentTM.toLowerCase() !== addr.TransmitManager?.toLowerCase()) {
+    tx = await socket.setTransmitManager(addr.TransmitManager, {
+      ...overrides[await socketSigner.getChainId()],
+    });
+    console.log("updateTransmitManager", tx.hash);
+    await tx.wait();
+  }
+};
+
+export const configureExecutionManager = async (
   contractName: string,
+  emAddress: string,
+  socketBatcherAddress: string,
   chain: ChainSlug,
   siblingSlugs: ChainSlug[],
   socketSigner: Wallet
 ) => {
   try {
-    console.log(
-      "configuring execution manager for ",
-      chain,
-      addr[contractName]
-    );
+    console.log("configuring execution manager for ", chain, emAddress);
 
     let executionManagerContract, socketBatcherContract;
     executionManagerContract = (
-      await getInstance(contractName, addr[contractName]!)
+      await getInstance(contractName, emAddress!)
     ).connect(socketSigner);
 
     let nextNonce = (
       await executionManagerContract.nextNonce(socketSigner.address)
     ).toNumber();
-    // console.log({ nextNonce });
 
     let requests: any = [];
-
     await Promise.all(
       siblingSlugs.map(async (siblingSlug) => {
         let currentValue = await executionManagerContract.msgValueMaxThreshold(
@@ -220,7 +229,6 @@ const configureExecutionManager = async (
           currentValue.toString() ==
           msgValueMaxThreshold[siblingSlug]?.toString()
         ) {
-          // console.log("already set, returning ", { currentValue });
           return;
         }
 
@@ -229,7 +237,7 @@ const configureExecutionManager = async (
             ["bytes32", "address", "uint32", "uint32", "uint256", "uint256"],
             [
               id("MSG_VALUE_MAX_THRESHOLD_UPDATE"),
-              addr[contractName]!,
+              emAddress!,
               chain,
               siblingSlug,
               nextNonce,
@@ -253,11 +261,11 @@ const configureExecutionManager = async (
 
     if (requests.length === 0) return;
     socketBatcherContract = (
-      await getInstance("SocketBatcher", addr[CORE_CONTRACTS.SocketBatcher]!)
+      await getInstance("SocketBatcher", socketBatcherAddress)
     ).connect(socketSigner);
 
     let tx = await socketBatcherContract.setExecutionFeesBatch(
-      addr[contractName]!,
+      emAddress!,
       requests,
       { ...overrides[chain] }
     );
