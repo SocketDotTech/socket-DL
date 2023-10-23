@@ -590,7 +590,7 @@ const main = async () => {
     newRoleStatus,
   });
 
-  // Setup Fast Switchboard roles except WATCHER
+  // Setup Fast Switchboard roles
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
@@ -621,7 +621,7 @@ const main = async () => {
     newRoleStatus,
   });
 
-  // Setup Fast Switchboard2 roles except WATCHER
+  // Setup Fast Switchboard2 roles
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {

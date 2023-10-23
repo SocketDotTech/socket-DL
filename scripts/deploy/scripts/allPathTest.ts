@@ -9,8 +9,6 @@ import {
   isTestnet,
   isMainnet,
   CORE_CONTRACTS,
-  ChainSlugToKey,
-  ChainId,
 } from "../../../src";
 import { getAddresses, getRelayUrl, getRelayAPIKEY } from "../utils";
 import { BigNumber, Contract, ethers } from "ethers";

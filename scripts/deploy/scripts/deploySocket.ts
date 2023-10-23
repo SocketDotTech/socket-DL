@@ -5,7 +5,6 @@ import {
   CORE_CONTRACTS,
   ChainSocketAddresses,
   DeploymentMode,
-  ChainSlugToKey,
   version,
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
