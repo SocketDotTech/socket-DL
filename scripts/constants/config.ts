@@ -1,31 +1,15 @@
-import {
-  ChainSlug,
-  IntegrationTypes,
-  NativeSwitchboard,
-} from "../../src/types";
+import { ChainSlug, IntegrationTypes, NativeSwitchboard } from "../../src";
+import chainConfig from "./chainConfig.json";
 
 export const maxAllowedPacketLength = 10;
 
-export const timeout: {
-  [key: string]: number;
-} = {
-  [ChainSlug.BSC_TESTNET]: 7200,
-  [ChainSlug.POLYGON_MAINNET]: 7200,
-  [ChainSlug.BSC]: 7200,
-  [ChainSlug.POLYGON_MUMBAI]: 7200,
-  [ChainSlug.ARBITRUM_GOERLI]: 7200,
-  [ChainSlug.OPTIMISM_GOERLI]: 7200,
-  [ChainSlug.GOERLI]: 7200,
-  [ChainSlug.HARDHAT]: 7200,
-  [ChainSlug.ARBITRUM]: 7200,
-  [ChainSlug.OPTIMISM]: 7200,
-  [ChainSlug.MAINNET]: 7200,
-  [ChainSlug.SEPOLIA]: 7200,
-  [ChainSlug.AEVO_TESTNET]: 7200,
-  [ChainSlug.AEVO]: 7200,
-  [ChainSlug.LYRA_TESTNET]: 7200,
-  [ChainSlug.LYRA]: 7200,
-  [ChainSlug.XAI_TESTNET]: 7200,
+const TIMEOUT = 7200;
+
+// return chain specific timeout if present else default value
+export const timeout = (chain: number): number => {
+  if (chainConfig[chain] && chainConfig[chain].timeout)
+    return chainConfig[chain].timeout;
+  return TIMEOUT;
 };
 
 export const getDefaultIntegrationType = (

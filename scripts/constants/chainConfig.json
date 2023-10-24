@@ -1,0 +1,14 @@
+{
+  "31337": {
+    "chainSlug": 31337,
+    "chainName": "hardhat",
+    "timeout": 7200,
+    "rpc": "http://127.0.0.1:8545/",
+    "msgValueMaxThreshold": 10000000000000000,
+    "overrides": {
+      "type": 1,
+      "gasLimit": 20000000,
+      "gasPrice": 1000000000000
+    }
+  }
+}
