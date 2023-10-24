@@ -7,8 +7,8 @@ import {
   DeploymentAddresses,
   IntegrationTypes,
   ROLES,
-} from "../../src";
-import { checkAndUpdateRoles } from "../deploy/checkRoles";
+} from "../../../src";
+import { checkAndUpdateRoles } from "../scripts/roles";
 import {
   chains,
   executionManagerVersion,
@@ -20,13 +20,13 @@ import {
   socketOwner,
   transmitterAddresses,
   watcherAddresses,
-} from "../deploy/config";
+} from "../config";
 import {
   configureExecutionManager,
   registerSwitchboards,
-} from "../deploy/configure";
-import { getProviderFromChainSlug } from "../constants";
-import { deployedAddressPath, storeAllAddresses } from "../deploy/utils";
+} from "../scripts/configureSocket";
+import { getProviderFromChainSlug } from "../../constants";
+import { deployedAddressPath, storeAllAddresses } from "../utils";
 
 export const main = async () => {
   const addresses: DeploymentAddresses = JSON.parse(

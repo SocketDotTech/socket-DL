@@ -7,33 +7,33 @@ import {
   DeploymentAddresses,
   IntegrationTypes,
   ROLES,
-} from "../../src";
-import { checkAndUpdateRoles } from "../deploy/checkRoles";
-import { executionManagerVersion, mode } from "../deploy/config";
+} from "../../../src";
+import { checkAndUpdateRoles } from "../scripts/roles";
+import { executionManagerVersion, mode } from "../config";
 import {
   configureExecutionManager,
   registerSwitchboards,
   setManagers,
-} from "../deploy/configure";
-import { deployForChains } from "../deploy/index";
-import { getProviderFromChainSlug } from "../constants";
-import { deployedAddressPath, storeAllAddresses } from "../deploy/utils";
+} from "../scripts/configureSocket";
+import { deployForChains } from "../scripts/deploySocketFor";
+import { getProviderFromChainSlug } from "../../constants";
+import { deployedAddressPath, storeAllAddresses } from "../utils";
 
-const chain = ChainSlug.XAI_TESTNET;
-const siblings = [];
-const ownerAddress = "";
-const transmitterAddress = "";
-const executorAddress = "";
-const watcherAddress = "";
-const feeUpdaterAddress = "";
+const chain = ChainSlug.HARDHAT;
+const siblings = [ChainSlug.POLYGON_MUMBAI];
+const ownerAddress = "0xB5E683CFe38Ea721CadE0eD9783E44C2D920B337";
+const transmitterAddress = "0xB5E683CFe38Ea721CadE0eD9783E44C2D920B337";
+const executorAddress = "0xB5E683CFe38Ea721CadE0eD9783E44C2D920B337";
+const watcherAddress = "0xB5E683CFe38Ea721CadE0eD9783E44C2D920B337";
+const feeUpdaterAddress = "0xB5E683CFe38Ea721CadE0eD9783E44C2D920B337";
 
 const sendTransaction = true;
 const newRoleStatus = true;
 
 export const main = async () => {
   const addresses = await deployForChains([chain]);
-
   if (!addresses[chain]) throw new Error("Address not deployed!");
+
   // grant all roles for new chain
   await grantRoles();
 
@@ -235,3 +235,5 @@ const grantRoles = async () => {
     newRoleStatus,
   });
 };
+
+main();
