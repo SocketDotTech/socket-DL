@@ -1,10 +1,7 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import {
-  ROLES,
-  CORE_CONTRACTS,
-} from "../../src";
+import { ROLES, CORE_CONTRACTS } from "../../src";
 import {
   executorAddresses,
   filterChains,

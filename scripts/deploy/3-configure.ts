@@ -25,7 +25,12 @@ import {
   mode,
   executionManagerVersion,
 } from "./config";
-import { configureExecutionManager, registerSwitchboards, setManagers, setupPolygonNativeSwitchboard } from "./scripts/configureSocket";
+import {
+  configureExecutionManager,
+  registerSwitchboards,
+  setManagers,
+  setupPolygonNativeSwitchboard,
+} from "./scripts/configureSocket";
 
 export const main = async () => {
   try {
