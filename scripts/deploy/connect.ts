@@ -12,7 +12,6 @@ import {
   TestnetIds,
   getAllAddresses,
   isTestnet,
-  ChainSlugToKey,
 } from "../../src";
 import { chains, mode } from "./config";
 import { Contract, Wallet } from "ethers";
