@@ -3,7 +3,7 @@ dotenvConfig();
 
 import { ChainSlug, DeploymentMode, CORE_CONTRACTS, version } from "../../src";
 import { BigNumberish, utils } from "ethers";
-import chainConfig from "../constants/chainConfig.json";
+import chainConfig from "../../chainConfig.json";
 
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode

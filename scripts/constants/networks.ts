@@ -7,7 +7,7 @@ import {
   ChainSlug,
   ChainSlugToKey,
 } from "../../src";
-import chainConfig from "./chainConfig.json";
+import chainConfig from "../../chainConfig.json";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });

@@ -1,5 +1,5 @@
 import { ChainSlug, IntegrationTypes, NativeSwitchboard } from "../../src";
-import chainConfig from "./chainConfig.json";
+import chainConfig from "../../chainConfig.json";
 
 export const maxAllowedPacketLength = 10;
 
