@@ -108,12 +108,12 @@ export const main = async () => {
     );
 
     if (
-      !addresses[hardhatChainNameToSlug[localChain]] ||
-      !addresses[hardhatChainNameToSlug[remoteChain]]
+      !addresses[hardhatChainNameToSlug(localChain)] ||
+      !addresses[hardhatChainNameToSlug(remoteChain)]
     ) {
       throw new Error("Deployed Addresses not found");
     }
-    const l1Config = addresses[hardhatChainNameToSlug[remoteChain]];
+    const l1Config = addresses[hardhatChainNameToSlug(remoteChain)];
     const ABI = ["function receiveMessage(bytes memory receivePacketProof)"];
 
     // get socket contracts for both chains
@@ -121,7 +121,7 @@ export const main = async () => {
     const l1Switchboard = (
       await getInstance(
         "PolygonL1Switchboard",
-        l1Config["integrations"][hardhatChainNameToSlug[localChain]][
+        l1Config["integrations"][hardhatChainNameToSlug(localChain)][
           IntegrationTypes.native
         ]["switchboard"]
       )

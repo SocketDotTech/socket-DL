@@ -157,7 +157,7 @@ async function checkCounter(
 
   if (
     !localConfig?.["integrations"]?.[hardhatChainNameToSlug[siblingSlug]]?.[
-      integrationType
+    integrationType
     ]
   ) {
     console.log(
@@ -168,14 +168,14 @@ async function checkCounter(
 
   const outboundSb =
     localConfig["integrations"][hardhatChainNameToSlug[siblingSlug]][
-      integrationType
+    integrationType
     ];
   assert(
     config.siblingPlug == remoteConfig["Counter"] &&
-      config.inboundSwitchboard__ == outboundSb["switchboard"] &&
-      config.outboundSwitchboard__ == outboundSb["switchboard"] &&
-      config.capacitor__ == outboundSb["capacitor"] &&
-      config.decapacitor__ == outboundSb["decapacitor"],
+    config.inboundSwitchboard__ == outboundSb["switchboard"] &&
+    config.outboundSwitchboard__ == outboundSb["switchboard"] &&
+    config.capacitor__ == outboundSb["capacitor"] &&
+    config.decapacitor__ == outboundSb["decapacitor"],
     `❌ Socket has wrong config set for ${siblingSlug}`
   );
 }
@@ -440,8 +440,8 @@ export const main = async () => {
           localConfig,
           remoteConfig,
           getDefaultIntegrationType(
-            ChainSlugToKey[chain],
-            ChainSlugToKey[remoteConfig]
+            chain,
+            remoteConfig
           )
         );
         console.log("✅ Checked Counter");

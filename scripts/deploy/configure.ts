@@ -278,12 +278,12 @@ export const configureExecutionManager = async (
 
 const setupPolygonNativeSwitchboard = async (addresses) => {
   try {
-    let srcChains = Object.keys(addresses).filter((chain) =>
-      ["5", "1", "80001", "137"].includes(chain)
-    );
+    let srcChains = Object.keys(addresses)
+      .filter((chain) => ["5", "1", "80001", "137"].includes(chain))
+      .map((c) => parseInt(c) as ChainSlug);
 
     await Promise.all(
-      srcChains.map(async (srcChain) => {
+      srcChains.map(async (srcChain: ChainSlug) => {
         console.log(`Configuring for ${srcChain}`);
 
         const providerInstance = getProviderFromChainSlug(
@@ -299,8 +299,8 @@ const setupPolygonNativeSwitchboard = async (addresses) => {
           if (!dstConfig?.[IntegrationTypes.native]) continue;
 
           const srcSwitchboardType =
-            switchboards[ChainSlugToKey[srcChain]]?.[
-              ChainSlugToKey[dstChain]
+            switchboards[ChainSlugToKey(srcChain)]?.[
+              ChainSlugToKey(parseInt(dstChain) as ChainSlug)
             ]?.["switchboard"];
 
           const dstSwitchboardAddress = getSwitchboardAddress(
@@ -362,9 +362,9 @@ const setupPolygonNativeSwitchboard = async (addresses) => {
   }
 };
 
-main()
-  .then(() => process.exit(0))
-  .catch((error: Error) => {
-    console.error(error);
-    process.exit(1);
-  });
+// main()
+//   .then(() => process.exit(0))
+//   .catch((error: Error) => {
+//     console.error(error);
+//     process.exit(1);
+//   });

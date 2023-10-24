@@ -34,8 +34,8 @@ export const main = async () => {
     );
 
     if (
-      !addresses[hardhatChainNameToSlug[localChain]] ||
-      !addresses[hardhatChainNameToSlug[remoteChain]]
+      !addresses[hardhatChainNameToSlug(localChain)] ||
+      !addresses[hardhatChainNameToSlug(remoteChain)]
     ) {
       throw new Error("Deployed Addresses not found");
     }
@@ -50,7 +50,7 @@ export const main = async () => {
     const l1Capacitor: Contract = (
       await getInstance(
         "SingleCapacitor",
-        l1Config["integrations"]?.[hardhatChainNameToSlug[remoteChain]]?.[
+        l1Config["integrations"]?.[hardhatChainNameToSlug(remoteChain)]?.[
           contracts.integrationType
         ]?.["capacitor"]
       )
@@ -59,7 +59,7 @@ export const main = async () => {
     const l1Notary: Contract = (
       await getInstance(
         contracts.notary,
-        l1Config[contracts.notary]?.[hardhatChainNameToSlug[remoteChain]]
+        l1Config[contracts.notary]?.[hardhatChainNameToSlug(remoteChain)]
       )
     ).connect(l1Wallet);
 
@@ -74,7 +74,7 @@ export const main = async () => {
     );
 
     const packedPacketId = packPacketId(
-      hardhatChainNameToSlug[localChain],
+      hardhatChainNameToSlug(localChain),
       l1Capacitor.address,
       packetId
     );
@@ -82,7 +82,7 @@ export const main = async () => {
     const digest = keccak256(
       defaultAbiCoder.encode(
         ["uint256", "uint256", "bytes32"],
-        [hardhatChainNameToSlug[remoteChain], packedPacketId, newRootHash]
+        [hardhatChainNameToSlug(remoteChain), packedPacketId, newRootHash]
       )
     );
 

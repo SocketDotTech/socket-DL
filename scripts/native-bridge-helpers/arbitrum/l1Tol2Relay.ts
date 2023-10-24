@@ -89,8 +89,8 @@ export const getBridgeParams = async (from, to) => {
 export const main = async () => {
   try {
     const sbAddr = getSwitchboardAddress(
-      hardhatChainNameToSlug[l1Chain],
-      hardhatChainNameToSlug[l2Chain],
+      hardhatChainNameToSlug(l1Chain),
+      hardhatChainNameToSlug(l2Chain),
       IntegrationTypes.native,
       mode
     );
@@ -102,8 +102,8 @@ export const main = async () => {
     const { bridgeParams, callValue } = await getBridgeParams(
       l1Switchboard.address,
       getSwitchboardAddress(
-        hardhatChainNameToSlug[l2Chain],
-        hardhatChainNameToSlug[l1Chain],
+        hardhatChainNameToSlug(l2Chain),
+        hardhatChainNameToSlug(l1Chain),
         IntegrationTypes.native,
         mode
       )

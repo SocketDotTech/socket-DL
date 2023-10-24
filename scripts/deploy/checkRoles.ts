@@ -320,7 +320,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
 
         // console.log(
         //   "============= checking for network: ",
-        //   ChainSlugToKey[chainSlug],
+        //   ChainSlugToKey(chainSlug),
         //   "================="
         // );
         let addresses: ChainSocketAddresses | undefined;
@@ -718,9 +718,9 @@ const main = async () => {
   });
 };
 
-main()
-  .then(() => process.exit(0))
-  .catch((error: Error) => {
-    console.error(error);
-    process.exit(1);
-  });
+// main()
+//   .then(() => process.exit(0))
+//   .catch((error: Error) => {
+//     console.error(error);
+//     process.exit(1);
+//   });

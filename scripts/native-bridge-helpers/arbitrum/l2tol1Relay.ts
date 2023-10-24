@@ -29,8 +29,8 @@ export const main = async () => {
   try {
     const addresses = getAllAddresses(mode);
     if (
-      !addresses[hardhatChainNameToSlug[l1Chain]] ||
-      !addresses[hardhatChainNameToSlug[l2Chain]]
+      !addresses[hardhatChainNameToSlug(l1Chain)] ||
+      !addresses[hardhatChainNameToSlug(l2Chain)]
     ) {
       throw new Error("Deployed Addresses not found");
     }
