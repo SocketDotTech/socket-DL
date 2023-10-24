@@ -9,14 +9,14 @@ import {
   isTestnet,
   isMainnet,
   CORE_CONTRACTS,
-} from "../../../src";
-import { getAddresses, getRelayUrl, getRelayAPIKEY } from "../utils";
+} from "../../../../src";
+import { getAddresses, getRelayUrl, getRelayAPIKEY } from "../../utils";
 import { BigNumber, Contract, ethers } from "ethers";
-import Counter from "../../../out/Counter.sol/Counter.json";
-import Socket from "../../../out/Socket.sol/Socket.json";
+import Counter from "../../../../out/Counter.sol/Counter.json";
+import Socket from "../../../../out/Socket.sol/Socket.json";
 
-import { chains, mode } from "../config";
-import { getProviderFromChainSlug } from "../../constants/networks";
+import { chains, mode } from "../../config";
+import { getProviderFromChainSlug } from "../../../constants/networks";
 
 interface RequestObj {
   to: string;

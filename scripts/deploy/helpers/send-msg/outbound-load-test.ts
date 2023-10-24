@@ -7,17 +7,17 @@ import { ethers } from "ethers";
 import { Contract } from "ethers";
 require("dotenv").config();
 import yargs from "yargs";
-import { getProviderFromChainSlug } from "../../constants";
-import SocketABI from "../../../out/Socket.sol/Socket.json";
+import { getProviderFromChainSlug } from "../../../constants";
+import SocketABI from "../../../../out/Socket.sol/Socket.json";
 
 import path from "path";
-import { mode } from "../config";
+import { mode } from "../../config";
 import {
   CORE_CONTRACTS,
   ChainSlug,
   HardhatChainName,
   hardhatChainNameToSlug,
-} from "../../../src";
+} from "../../../../src";
 
 const deployedAddressPath = path.join(
   __dirname,

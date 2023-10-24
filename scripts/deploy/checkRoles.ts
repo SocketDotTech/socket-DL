@@ -17,7 +17,7 @@ import {
 } from "../../src";
 import { getRoleHash, getChainRoleHash } from "./utils";
 import { Contract, Wallet, ethers } from "ethers";
-import { getABI } from "./scripts/getABIs";
+import { getABI } from "./utils/getABIs";
 import { getProviderFromChainSlug } from "../constants";
 import {
   executorAddresses,
