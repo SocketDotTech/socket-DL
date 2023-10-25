@@ -3,7 +3,7 @@ dotenvConfig();
 
 import { ChainSlug, DeploymentMode, CORE_CONTRACTS, version } from "../../src";
 import { BigNumberish, utils } from "ethers";
-import chainConfig from "../../chainConfig.json";
+import { chainConfig } from "../../chainConfig";
 
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
@@ -34,6 +34,7 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.POLYGON_MUMBAI,
+  ChainSlug.SX_NETWORK_TESTNET,
   ChainSlug.BSC_TESTNET,
   ChainSlug.AEVO_TESTNET,
   ChainSlug.LYRA_TESTNET,
@@ -64,7 +65,7 @@ export const type = 0;
 const MSG_VALUE_MAX_THRESHOLD = utils.parseEther("0.001");
 export const msgValueMaxThreshold = (chain: ChainSlug): BigNumberish => {
   if (chainConfig[chain] && chainConfig[chain].msgValueMaxThreshold)
-    return chainConfig[chain].msgValueMaxThreshold;
+    return chainConfig[chain].msgValueMaxThreshold!;
   return MSG_VALUE_MAX_THRESHOLD;
 };
 
@@ -95,7 +96,7 @@ export const overrides = (
   gasPrice?: BigNumberish | undefined;
 } => {
   if (chainConfig[chain] && chainConfig[chain].overrides)
-    return chainConfig[chain].overrides;
+    return chainConfig[chain].overrides!;
 
   return { type, gasLimit, gasPrice };
 };
