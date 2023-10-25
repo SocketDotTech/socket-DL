@@ -8,7 +8,7 @@ import {
   ChainSlugToKey,
   hardhatChainNameToSlug,
 } from "../../src";
-import chainConfig from "../../chainConfig.json";
+import { chainConfig } from "../../chainConfig";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });

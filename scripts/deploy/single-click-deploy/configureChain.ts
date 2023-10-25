@@ -13,11 +13,9 @@ import {
   chains,
   executionManagerVersion,
   executorAddresses,
-  filterSiblingChains,
   mode,
   newRoleStatus,
   sendTransaction,
-  socketOwner,
   transmitterAddresses,
   watcherAddresses,
 } from "../config";
@@ -27,11 +25,22 @@ import {
 } from "../scripts/configureSocket";
 import { getProviderFromChainSlug } from "../../constants";
 import { deployedAddressPath, storeAllAddresses } from "../utils";
+import { chainConfig } from "../../../chainConfig";
+
+const chain = ChainSlug.SX_NETWORK_TESTNET;
+const filterChains = [
+  ChainSlug.POLYGON_MUMBAI,
+  ChainSlug.GOERLI,
+  ChainSlug.ARBITRUM_GOERLI,
+];
 
 export const main = async () => {
   const addresses: DeploymentAddresses = JSON.parse(
     fs.readFileSync(deployedAddressPath(mode), "utf-8")
   );
+
+  // grant all roles for new chain
+  await grantRoles();
 
   let addr;
   for (let c = 0; c < chains.length; c++) {
@@ -41,22 +50,19 @@ export const main = async () => {
       providerInstance
     );
 
-    // grant all roles for new chain
-    await grantRoles();
-
     // general configs for socket
     await configureExecutionManager(
       executionManagerVersion,
       addresses[c].ExecutionManager!,
       addresses[c].SocketBatcher,
       c,
-      filterSiblingChains,
+      [chain],
       socketSigner
     );
 
     addr = await registerSwitchboards(
       c,
-      filterSiblingChains,
+      [chain],
       CORE_CONTRACTS.FastSwitchboard2,
       IntegrationTypes.fast2,
       addresses[c],
@@ -68,13 +74,22 @@ export const main = async () => {
 };
 
 const grantRoles = async () => {
+  if (!chainConfig || !chainConfig[chain])
+    throw new Error("Chain config not found!");
+  const config = chainConfig[chain];
+
+  if (
+    !config.executorAddress ||
+    !config.transmitterAddress ||
+    !config.watcherAddress ||
+    !config.feeUpdaterAddress ||
+    !config.ownerAddress
+  )
+    throw new Error("Add all required addresses!");
+
   // Grant rescue,withdraw and governance role for Execution Manager to owner
   await checkAndUpdateRoles({
     userSpecificRoles: [
-      {
-        userAddress: socketOwner,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
       {
         userAddress: transmitterAddresses[mode],
         filterRoles: [ROLES.FEES_UPDATER_ROLE],
@@ -85,8 +100,8 @@ const grantRoles = async () => {
       },
     ],
     contractName: executionManagerVersion,
-    filterChains: chains,
-    filterSiblingChains,
+    filterChains,
+    filterSiblingChains: [chain],
     sendTransaction,
     newRoleStatus,
   });
@@ -94,10 +109,6 @@ const grantRoles = async () => {
   // Grant owner roles for TransmitManager
   await checkAndUpdateRoles({
     userSpecificRoles: [
-      {
-        userAddress: socketOwner,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
       {
         userAddress: transmitterAddresses[mode],
         filterRoles: [ROLES.TRANSMITTER_ROLE],
@@ -109,7 +120,7 @@ const grantRoles = async () => {
     ],
     contractName: CORE_CONTRACTS.TransmitManager,
     filterChains: chains,
-    filterSiblingChains,
+    filterSiblingChains: [chain],
     sendTransaction,
     newRoleStatus,
   });
@@ -117,10 +128,6 @@ const grantRoles = async () => {
   // Setup Fast Switchboard2 roles
   await checkAndUpdateRoles({
     userSpecificRoles: [
-      {
-        userAddress: socketOwner,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
       {
         userAddress: transmitterAddresses[mode],
         filterRoles: [ROLES.FEES_UPDATER_ROLE],
@@ -133,7 +140,7 @@ const grantRoles = async () => {
 
     contractName: CORE_CONTRACTS.FastSwitchboard2,
     filterChains: chains,
-    filterSiblingChains,
+    filterSiblingChains: [chain],
     sendTransaction,
     newRoleStatus,
   });
@@ -141,10 +148,6 @@ const grantRoles = async () => {
   // Grant watcher role to watcher for OptimisticSwitchboard
   await checkAndUpdateRoles({
     userSpecificRoles: [
-      {
-        userAddress: socketOwner,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
       {
         userAddress: transmitterAddresses[mode],
         filterRoles: [ROLES.FEES_UPDATER_ROLE], // all roles
@@ -156,8 +159,10 @@ const grantRoles = async () => {
     ],
     contractName: CORE_CONTRACTS.OptimisticSwitchboard,
     filterChains: chains,
-    filterSiblingChains,
+    filterSiblingChains: [chain],
     sendTransaction,
     newRoleStatus,
   });
 };
+
+main();
