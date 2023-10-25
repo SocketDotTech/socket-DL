@@ -23,7 +23,7 @@ export enum HardhatChainName {
   LYRA_TESTNET = "lyra-testnet",
   LYRA = "lyra",
   XAI_TESTNET = "xai_testnet",
-  SX_NETWORK_TESTNET = "sx_network_testnet",
+  SX_NETWORK_TESTNET = "sxn_testnet",
   HARDHAT = "hardhat",
 }
 
@@ -70,6 +70,50 @@ export enum ChainSlug {
   XAI_TESTNET = 1399904803,
   SX_NETWORK_TESTNET = ChainId.SX_NETWORK_TESTNET,
 }
+
+export const hardhatChainNameToSlug = {
+  [HardhatChainName.ARBITRUM]: ChainSlug.ARBITRUM,
+  [HardhatChainName.ARBITRUM_GOERLI]: ChainSlug.ARBITRUM_GOERLI,
+  [HardhatChainName.OPTIMISM]: ChainSlug.OPTIMISM,
+  [HardhatChainName.OPTIMISM_GOERLI]: ChainSlug.OPTIMISM_GOERLI,
+  [HardhatChainName.BSC]: ChainSlug.BSC,
+  [HardhatChainName.BSC_TESTNET]: ChainSlug.BSC_TESTNET,
+  [HardhatChainName.MAINNET]: ChainSlug.MAINNET,
+  [HardhatChainName.GOERLI]: ChainSlug.GOERLI,
+  [HardhatChainName.SEPOLIA]: ChainSlug.SEPOLIA,
+  [HardhatChainName.POLYGON_MAINNET]: ChainSlug.POLYGON_MAINNET,
+  [HardhatChainName.POLYGON_MUMBAI]: ChainSlug.POLYGON_MUMBAI,
+  [HardhatChainName.AEVO_TESTNET]: ChainSlug.AEVO_TESTNET,
+  [HardhatChainName.AEVO]: ChainSlug.AEVO,
+  [HardhatChainName.HARDHAT]: ChainSlug.HARDHAT,
+  [HardhatChainName.AVALANCHE]: ChainSlug.AVALANCHE,
+  [HardhatChainName.LYRA_TESTNET]: ChainSlug.LYRA_TESTNET,
+  [HardhatChainName.LYRA]: ChainSlug.LYRA,
+  [HardhatChainName.XAI_TESTNET]: ChainSlug.XAI_TESTNET,
+  [HardhatChainName.SX_NETWORK_TESTNET]: ChainSlug.SX_NETWORK_TESTNET,
+};
+
+export const ChainSlugToKey = {
+  [ChainSlug.ARBITRUM]: HardhatChainName.ARBITRUM,
+  [ChainSlug.ARBITRUM_GOERLI]: HardhatChainName.ARBITRUM_GOERLI,
+  [ChainSlug.OPTIMISM]: HardhatChainName.OPTIMISM,
+  [ChainSlug.OPTIMISM_GOERLI]: HardhatChainName.OPTIMISM_GOERLI,
+  [ChainSlug.BSC]: HardhatChainName.BSC,
+  [ChainSlug.BSC_TESTNET]: HardhatChainName.BSC_TESTNET,
+  [ChainSlug.MAINNET]: HardhatChainName.MAINNET,
+  [ChainSlug.GOERLI]: HardhatChainName.GOERLI,
+  [ChainSlug.SEPOLIA]: HardhatChainName.SEPOLIA,
+  [ChainSlug.POLYGON_MAINNET]: HardhatChainName.POLYGON_MAINNET,
+  [ChainSlug.POLYGON_MUMBAI]: HardhatChainName.POLYGON_MUMBAI,
+  [ChainSlug.AEVO_TESTNET]: HardhatChainName.AEVO_TESTNET,
+  [ChainSlug.AEVO]: HardhatChainName.AEVO,
+  [ChainSlug.HARDHAT]: HardhatChainName.HARDHAT,
+  [ChainSlug.AVALANCHE]: HardhatChainName.AVALANCHE,
+  [ChainSlug.LYRA_TESTNET]: HardhatChainName.LYRA_TESTNET,
+  [ChainSlug.LYRA]: HardhatChainName.LYRA,
+  [ChainSlug.XAI_TESTNET]: HardhatChainName.XAI_TESTNET,
+  [ChainSlug.SX_NETWORK_TESTNET]: HardhatChainName.SX_NETWORK_TESTNET,
+};
 
 export const TestnetIds: ChainSlug[] = [
   ChainSlug.GOERLI,

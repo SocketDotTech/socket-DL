@@ -21,7 +21,7 @@ export const checkBalance = async () => {
         console.log(
           chainSlug,
           " ",
-          ChainSlugToKey(chainSlug),
+          ChainSlugToKey[chainSlug],
           " : ",
           utils.formatEther(await provider.getBalance(ownerAddress))
         );
