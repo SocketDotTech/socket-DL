@@ -23,6 +23,7 @@ export enum HardhatChainName {
   LYRA_TESTNET = "lyra-testnet",
   LYRA = "lyra",
   XAI_TESTNET = "xai_testnet",
+  SX_NETWORK_TESTNET = "sx_network_testnet",
   HARDHAT = "hardhat",
 }
 
@@ -45,6 +46,7 @@ export enum ChainId {
   LYRA_TESTNET = 901,
   LYRA = 0, // update this
   XAI_TESTNET = 47279324479,
+  SX_NETWORK_TESTNET = 647,
 }
 
 export enum ChainSlug {
@@ -66,6 +68,7 @@ export enum ChainSlug {
   LYRA_TESTNET = ChainId.LYRA_TESTNET,
   LYRA = ChainId.LYRA,
   XAI_TESTNET = 1399904803,
+  SX_NETWORK_TESTNET = ChainId.SX_NETWORK_TESTNET,
 }
 
 export const TestnetIds: ChainSlug[] = [
@@ -78,6 +81,7 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.AEVO_TESTNET,
   ChainSlug.LYRA_TESTNET,
   ChainSlug.XAI_TESTNET,
+  ChainSlug.SX_NETWORK_TESTNET,
 ];
 
 export const MainnetIds: ChainSlug[] = [

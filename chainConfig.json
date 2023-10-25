@@ -10,5 +10,11 @@
       "gasLimit": 20000000,
       "gasPrice": 1000000000000
     }
+  },
+  "647": {
+    "chainSlug": 647,
+    "chainName": "sxn_testnet",
+    "timeout": 7200,
+    "rpc": "https://rpc.toronto.sx.technology/"
   }
 }
