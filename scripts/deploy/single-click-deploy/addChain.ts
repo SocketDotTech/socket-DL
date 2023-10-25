@@ -55,7 +55,7 @@ export const main = async () => {
 
   await setManagers(addresses[chain], socketSigner);
 
-  const allAddresses: DeploymentAddresses = JSON.parse(
+  let allAddresses: DeploymentAddresses = JSON.parse(
     fs.readFileSync(deployedAddressPath(mode), "utf-8")
   );
 
@@ -69,7 +69,8 @@ export const main = async () => {
     socketSigner
   );
 
-  await storeAllAddresses(addr[chain], mode);
+  allAddresses[chain] = addr;
+  await storeAllAddresses(allAddresses, mode);
 };
 
 const grantRoles = async () => {

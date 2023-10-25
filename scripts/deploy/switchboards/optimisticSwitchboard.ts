@@ -13,7 +13,7 @@ export const optimisticSwitchboard = (
       signerAddress,
       socketAddress,
       chainSlug,
-      timeout[chainSlug],
+      timeout(chainSlug),
       sigVerifierAddress,
     ],
     path: "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
