@@ -108,7 +108,7 @@ export const main = async () => {
       }).argv;
 
     const chain = argv.chain as HardhatChainName;
-    const chainSlug = hardhatChainNameToSlug(chain);
+    const chainSlug = hardhatChainNameToSlug[chain];
 
     const providerInstance = getProviderFromChainSlug(chainSlug);
 
@@ -118,7 +118,7 @@ export const main = async () => {
     );
 
     const remoteChain = argv.remoteChain as HardhatChainName;
-    remoteChainSlug = hardhatChainNameToSlug(remoteChain);
+    remoteChainSlug = hardhatChainNameToSlug[remoteChain];
 
     const numOfRequests = argv.numOfRequests as number;
     const waitTime = argv.waitTime as number;

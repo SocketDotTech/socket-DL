@@ -29,7 +29,7 @@ export const main = async () => {
     for (let chainIndex = 0; chainIndex < chains.length; chainIndex++) {
       const chain = parseInt(chains[chainIndex]) as ChainSlug;
 
-      hre.changeNetwork(ChainSlugToKey(chain));
+      hre.changeNetwork(ChainSlugToKey[chain]);
       const chainParams: VerifyArgs[] = verificationParams[chain];
       if (chainParams.length) {
         const len = chainParams.length;

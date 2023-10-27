@@ -113,7 +113,7 @@ export const configureExecutionManager = async (
 
         if (
           currentValue.toString() ==
-          msgValueMaxThreshold[siblingSlug]?.toString()
+          msgValueMaxThreshold(siblingSlug)?.toString()
         ) {
           return;
         }
@@ -127,7 +127,7 @@ export const configureExecutionManager = async (
               chain,
               siblingSlug,
               nextNonce,
-              msgValueMaxThreshold[siblingSlug],
+              msgValueMaxThreshold(siblingSlug),
             ]
           )
         );
@@ -138,7 +138,7 @@ export const configureExecutionManager = async (
           signature,
           dstChainSlug: siblingSlug,
           nonce: nextNonce++,
-          fees: msgValueMaxThreshold[siblingSlug],
+          fees: msgValueMaxThreshold(siblingSlug),
           functionSelector: "0xa1885700", // setMsgValueMaxThreshold
         };
         requests.push(request);
@@ -185,8 +185,8 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
           if (!dstConfig?.[IntegrationTypes.native]) continue;
 
           const srcSwitchboardType =
-            switchboards[ChainSlugToKey(srcChain)]?.[
-              ChainSlugToKey(parseInt(dstChain) as ChainSlug)
+            switchboards[ChainSlugToKey[srcChain]]?.[
+              ChainSlugToKey[parseInt(dstChain) as ChainSlug]
             ]?.["switchboard"];
 
           const dstSwitchboardAddress = getSwitchboardAddress(

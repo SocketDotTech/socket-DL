@@ -10,16 +10,10 @@ import {
 } from "../../../src";
 import { checkAndUpdateRoles } from "../scripts/roles";
 import {
-  chains,
   executionManagerVersion,
-  executorAddresses,
-  filterSiblingChains,
   mode,
   newRoleStatus,
   sendTransaction,
-  socketOwner,
-  transmitterAddresses,
-  watcherAddresses,
 } from "../config";
 import {
   configureExecutionManager,
@@ -27,39 +21,51 @@ import {
 } from "../scripts/configureSocket";
 import { getProviderFromChainSlug } from "../../constants";
 import { deployedAddressPath, storeAllAddresses } from "../utils";
+import { chainConfig } from "../../../chainConfig";
+
+const chain = ChainSlug.SX_NETWORK_TESTNET;
+const filterChains = [
+  ChainSlug.POLYGON_MUMBAI,
+  ChainSlug.GOERLI,
+  ChainSlug.ARBITRUM_GOERLI,
+];
 
 export const main = async () => {
   const addresses: DeploymentAddresses = JSON.parse(
     fs.readFileSync(deployedAddressPath(mode), "utf-8")
   );
 
+  // grant all roles for new chain
+  await grantRoles();
+
   let addr;
-  for (let c = 0; c < chains.length; c++) {
-    const providerInstance = getProviderFromChainSlug(c as any as ChainSlug);
+  for (let c = 0; c < filterChains.length; c++) {
+    const sibling = filterChains[c] as any as ChainSlug;
+    const providerInstance = getProviderFromChainSlug(sibling);
     const socketSigner: Wallet = new Wallet(
       process.env.SOCKET_SIGNER_KEY as string,
       providerInstance
     );
 
-    // grant all roles for new chain
-    await grantRoles();
+    if (!addresses || !addresses[sibling])
+      throw new Error(`Sibling addresses not found! ${sibling}`);
 
     // general configs for socket
     await configureExecutionManager(
       executionManagerVersion,
-      addresses[c].ExecutionManager!,
-      addresses[c].SocketBatcher,
-      c,
-      filterSiblingChains,
+      addresses[sibling]?.ExecutionManager!,
+      addresses[sibling]?.SocketBatcher!,
+      sibling,
+      [chain],
       socketSigner
     );
 
     addr = await registerSwitchboards(
-      c,
-      filterSiblingChains,
+      sibling,
+      [chain],
       CORE_CONTRACTS.FastSwitchboard2,
       IntegrationTypes.fast2,
-      addresses[c],
+      addresses[sibling]!,
       addresses,
       socketSigner
     );
@@ -68,25 +74,34 @@ export const main = async () => {
 };
 
 const grantRoles = async () => {
+  if (!chainConfig || !chainConfig[chain])
+    throw new Error("Chain config not found!");
+  const config = chainConfig[chain];
+
+  if (
+    !config.executorAddress ||
+    !config.transmitterAddress ||
+    !config.watcherAddress ||
+    !config.feeUpdaterAddress ||
+    !config.ownerAddress
+  )
+    throw new Error("Add all required addresses!");
+
   // Grant rescue,withdraw and governance role for Execution Manager to owner
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: socketOwner,
+        userAddress: config.feeUpdaterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE],
       },
       {
-        userAddress: transmitterAddresses[mode],
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
-      {
-        userAddress: executorAddresses[mode],
+        userAddress: config.executorAddress,
         filterRoles: [ROLES.EXECUTOR_ROLE],
       },
     ],
     contractName: executionManagerVersion,
-    filterChains: chains,
-    filterSiblingChains,
+    filterChains,
+    filterSiblingChains: [chain],
     sendTransaction,
     newRoleStatus,
   });
@@ -95,21 +110,17 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: socketOwner,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
-      {
-        userAddress: transmitterAddresses[mode],
+        userAddress: config.feeUpdaterAddress,
         filterRoles: [ROLES.TRANSMITTER_ROLE],
       },
       {
-        userAddress: transmitterAddresses[mode],
+        userAddress: config.transmitterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE],
       },
     ],
     contractName: CORE_CONTRACTS.TransmitManager,
-    filterChains: chains,
-    filterSiblingChains,
+    filterChains,
+    filterSiblingChains: [chain],
     sendTransaction,
     newRoleStatus,
   });
@@ -118,22 +129,18 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: socketOwner,
+        userAddress: config.feeUpdaterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE],
       },
       {
-        userAddress: transmitterAddresses[mode],
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
-      {
-        userAddress: watcherAddresses[mode],
+        userAddress: config.watcherAddress,
         filterRoles: [ROLES.WATCHER_ROLE],
       },
     ],
 
     contractName: CORE_CONTRACTS.FastSwitchboard2,
-    filterChains: chains,
-    filterSiblingChains,
+    filterChains,
+    filterSiblingChains: [chain],
     sendTransaction,
     newRoleStatus,
   });
@@ -142,22 +149,20 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: socketOwner,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
-      {
-        userAddress: transmitterAddresses[mode],
+        userAddress: config.feeUpdaterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE], // all roles
       },
       {
-        userAddress: watcherAddresses[mode],
+        userAddress: config.watcherAddress,
         filterRoles: [ROLES.WATCHER_ROLE],
       },
     ],
     contractName: CORE_CONTRACTS.OptimisticSwitchboard,
-    filterChains: chains,
-    filterSiblingChains,
+    filterChains,
+    filterSiblingChains: [chain],
     sendTransaction,
     newRoleStatus,
   });
 };
+
+main();

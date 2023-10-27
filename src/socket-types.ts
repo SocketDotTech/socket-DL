@@ -1,17 +1,4 @@
-import {
-  ChainSlug,
-  HardhatChainName,
-  MainnetIds,
-  TestnetIds,
-} from "./chain-types";
-
-export const hardhatChainNameToSlug = (chain: HardhatChainName): ChainSlug => {
-  return ChainSlug[chain];
-};
-
-export const ChainSlugToKey = (chain: ChainSlug): HardhatChainName => {
-  return HardhatChainName[chain];
-};
+import { ChainSlug, MainnetIds, TestnetIds } from "./chain-types";
 
 export const L1Ids: ChainSlug[] = [ChainSlug.MAINNET, ChainSlug.GOERLI];
 

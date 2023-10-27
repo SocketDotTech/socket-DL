@@ -51,7 +51,7 @@ export const loadRelayerConfigs = (): Map<number, RelayerConfig> => {
 const relayerConfigs: Map<number, RelayerConfig> = loadRelayerConfigs();
 
 export const getRpcProvider = (chainSlug: number) => {
-  return new StaticJsonRpcProvider(getJsonRpcUrl(ChainSlugToKey(chainSlug)));
+  return new StaticJsonRpcProvider(getJsonRpcUrl(ChainSlugToKey[chainSlug]));
 };
 
 export const getSigner = (chainSlug: number) => {

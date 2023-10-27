@@ -111,7 +111,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      chainId: hardhatChainNameToSlug(HardhatChainName.HARDHAT),
+      chainId: hardhatChainNameToSlug[HardhatChainName.HARDHAT],
     },
     ...liveNetworks,
   },

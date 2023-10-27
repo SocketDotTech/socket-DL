@@ -88,7 +88,6 @@ export async function deployContractWithArgs(
     // gasLimit is set to undefined to not use the value set in overrides
     const contract: Contract = await Contract.connect(signer).deploy(...args, {
       ...overrides[await signer.getChainId()],
-      gasLimit: undefined,
     });
     await contract.deployed();
     return contract;
