@@ -641,6 +641,14 @@
       ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
+  "647": [
+    [
+      "0x5D3F469BEA637c5017Df408fF25AA8B9BC6e6400",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ]
+  ],
   "901": [
     [
       "0x1D6811553Aff8231aDd04A84F300b89E15D99EA4",
@@ -1252,6 +1260,12 @@
     ]
   ],
   "11155111": [
+    [
+      "0x2521b29FD8d3787Ab42141f55F6b462E6115C737",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ],
     [
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "SocketBatcher",
