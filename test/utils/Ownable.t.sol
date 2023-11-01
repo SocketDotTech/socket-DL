@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../../contracts/mocks/MockOwnable.sol";
 
 contract OwnableTest is Test {
-    uint256 internal c = 1;
+    uint256 internal c = 1000;
     address immutable _bob = address(uint160(c++));
     address immutable _owner = address(uint160(c++));
     address immutable _newOwner = address(uint160(c++));

@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../../contracts/mocks/MockAccessControl.sol";
 
 contract AccessControlTest is Test {
-    uint256 internal c = 1;
+    uint256 internal c = 1000;
     address immutable _owner = address(uint160(c++));
     address immutable _giraffe_0 = address(uint160(c++));
     address immutable _giraffe_1 = address(uint160(c++));
