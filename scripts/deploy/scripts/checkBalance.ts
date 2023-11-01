@@ -14,9 +14,7 @@ export const checkBalance = async () => {
     // parallelize chains
     await Promise.all(
       chains.map(async (chainSlug) => {
-        const provider = await getProviderFromChainSlug(
-          chainSlug
-        );
+        const provider = await getProviderFromChainSlug(chainSlug);
         // let ownerAddress = process.env.SOCKET_OWNER_ADDRESS;
         let ownerAddress = "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa";
         if (!ownerAddress) throw Error("owner address not present");

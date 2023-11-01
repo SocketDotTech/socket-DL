@@ -32,7 +32,7 @@ const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
     }
     let srcChainSlugs = srcChains ?? chains;
     let dstChainSlugs = dstChains ?? chains;
-    
+
     let data: any[] = [];
     await Promise.all(
       srcChainSlugs.map(async (chainSlug) => {
@@ -66,14 +66,13 @@ const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
               )
             );
 
-            
             // console.log(result);
             data.push({
               chainSlug,
               siblingChain,
               totalWatchers: result.toNumber(),
               digest,
-              fastSwitchboardAddress
+              fastSwitchboardAddress,
             });
           })
         );

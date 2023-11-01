@@ -230,4 +230,4 @@ main()
     process.exit(1);
   });
 
-  // npx ts-node scripts/deploy/scripts/allPathTest.ts
+// npx ts-node scripts/deploy/scripts/allPathTest.ts
