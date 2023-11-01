@@ -1,26 +1,16 @@
-import { ContractFactory } from "ethers";
-import { network, ethers, run } from "hardhat";
-
-import { DeployParams, getOrDeploy, storeAddresses } from "../utils";
+import { utils } from "ethers";
+import { ethers } from "hardhat";
 
 import {
-  CORE_CONTRACTS,
-  ChainSocketAddresses,
-  DeploymentMode,
-  ChainSlugToKey,
   version,
   DeploymentAddresses,
   getAllAddresses,
   ChainSlug,
   IntegrationTypes,
 } from "../../../src";
-import deploySwitchboards from "../scripts/deploySwitchboard";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { socketOwner, executionManagerVersion, mode, chains } from "../config";
-import {
-  getProviderFromChainSlug,
-  maxAllowedPacketLength,
-} from "../../constants";
+import { mode, chains } from "../config";
+import { getProviderFromChainSlug } from "../../constants";
+import { encodePacketId } from "../utils/packetId";
 
 const main = async (
   srcChains: ChainSlug[],
@@ -28,6 +18,8 @@ const main = async (
   integrationTypes: IntegrationTypes[]
 ) => {
   try {
+    let data: any[] = [];
+
     let addresses: DeploymentAddresses;
     try {
       addresses = getAllAddresses(mode);
@@ -63,24 +55,40 @@ const main = async (
                   "SingleCapacitor"
                 );
                 let instance = Contract.attach(capacitor).connect(provider);
-                let result = await instance.getNextPacketToBeSealed();
-                console.log(
-                  chainSlug,
-                  " ",
-                  Number(siblingChain),
-                  " ",
-                  integrationType,
-                  " ",
-                  result[1].toNumber(),
-                  " ",
-                  result[0].toString()
+                let nextSealedPacket = await instance.getNextPacketToBeSealed();
+                let lastFilledPacket = await instance.getLastFilledPacket();
+
+                let digest = utils.keccak256(
+                  utils.defaultAbiCoder.encode(
+                    ["bytes32", "uint32", "bytes32", "bytes32"],
+                    [
+                      utils.id(version[mode]),
+                      siblingChain,
+                      encodePacketId(
+                        chainSlug,
+                        capacitor,
+                        nextSealedPacket[1].toNumber()
+                      ),
+                      nextSealedPacket[0].toString(),
+                    ]
+                  )
                 );
+                data.push({
+                  chainSlug,
+                  siblingChain,
+                  integrationType,
+                  lastFilledPacket: lastFilledPacket.toNumber(),
+                  nextSealedPacketCount: nextSealedPacket[1].toNumber(),
+                  root: nextSealedPacket[0].toString(),
+                  digest: digest,
+                });
               })
             );
           })
         );
       })
     );
+    console.table(data);
   } catch (error) {
     console.log(error);
   }

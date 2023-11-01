@@ -44,3 +44,18 @@ export const packPacketId = (
 
   return BigNumber.from(id).toString();
 };
+
+export function encodePacketId(
+  chainSlug: number,
+  capacitorAddress: string,
+  packetCount: number
+) {
+  const encodedValue =
+    (BigInt(chainSlug) << BigInt(224)) |
+    (BigInt(capacitorAddress) << BigInt(64)) |
+    BigInt(packetCount);
+
+  // Ensure the result is a 32-byte hex string (bytes32 in Solidity)
+  const resultHex = encodedValue.toString(16).padStart(64, "0");
+  return "0x" + resultHex;
+}

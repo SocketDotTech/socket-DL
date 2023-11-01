@@ -227,3 +227,5 @@ main()
     console.error(error);
     process.exit(1);
   });
+
+// npx ts-node scripts/deploy/scripts/allPathTest.ts
