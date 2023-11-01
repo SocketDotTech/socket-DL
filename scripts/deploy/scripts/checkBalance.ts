@@ -6,7 +6,7 @@ import { ChainSlugToKey } from "../../../src";
 import { utils } from "ethers";
 
 import { chains, mode } from "../config";
-import { getProviderFromChainName } from "../../constants/networks";
+import { getProviderFromChainSlug } from "../../constants/networks";
 
 // check balance of owner address on all chains
 export const checkBalance = async () => {
@@ -14,8 +14,8 @@ export const checkBalance = async () => {
     // parallelize chains
     await Promise.all(
       chains.map(async (chainSlug) => {
-        const provider = await getProviderFromChainName(
-          ChainSlugToKey[chainSlug]
+        const provider = await getProviderFromChainSlug(
+          chainSlug
         );
         // let ownerAddress = process.env.SOCKET_OWNER_ADDRESS;
         let ownerAddress = "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa";

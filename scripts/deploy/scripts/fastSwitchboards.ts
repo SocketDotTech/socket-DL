@@ -1,4 +1,4 @@
-import { ContractFactory } from "ethers";
+import { ContractFactory, utils } from "ethers";
 import { network, ethers, run } from "hardhat";
 
 import { DeployParams, getOrDeploy, storeAddresses } from "../utils";
@@ -31,6 +31,8 @@ const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
       addresses = {} as DeploymentAddresses;
     }
     let srcChainSlugs = srcChains ?? chains;
+    let dstChainSlugs = dstChains ?? chains;
+    
     let data: any[] = [];
     await Promise.all(
       srcChainSlugs.map(async (chainSlug) => {
@@ -38,7 +40,7 @@ const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
           addresses[chainSlug as ChainSlug]?.FastSwitchboard2;
         if (!fastSwitchboardAddress) return;
 
-        let siblingChains = dstChains ?? chains.filter((s) => chainSlug !== s);
+        let siblingChains = dstChainSlugs.filter((s) => chainSlug !== s);
 
         await Promise.all(
           siblingChains.map(async (siblingChain) => {
@@ -49,11 +51,29 @@ const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
             );
             // console.log(instance);÷\
             let result = await instance["totalWatchers(uint32)"](siblingChain);
+
+            let digest = utils.keccak256(
+              utils.defaultAbiCoder.encode(
+                ["address", "uint32", "bytes32", "uint256"],
+                // ["address", "uint32", "bytes32", "uint256", "bytes32"],
+                [
+                  fastSwitchboardAddress?.toLowerCase(),
+                  chainSlug,
+                  "0x00aa36a841667f3df292b3ed613d66b39dd2d8327d2ef5a80000000000000000",
+                  0,
+                  // "0x80b582422ec90d907e218c10e879241ddf21d3274e03÷18de902f4abece0ac6c5"
+                ]
+              )
+            );
+
+            
             // console.log(result);
             data.push({
               chainSlug,
               siblingChain,
               totalWatchers: result.toNumber(),
+              digest,
+              fastSwitchboardAddress
             });
           })
         );
