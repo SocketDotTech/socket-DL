@@ -1,8 +1,8 @@
 import { bridgeConsts } from "../../constants";
-import { chainKeyToSlug } from "../../../src";
+import { ChainSlug } from "../../../src";
 
 export const arbitrumL1Switchboard = (
-  network: string,
+  chainSlug: ChainSlug,
   socketAddress: string,
   sigVerifierAddress: string,
   signerAddress: string
@@ -10,12 +10,12 @@ export const arbitrumL1Switchboard = (
   return {
     contractName: "ArbitrumL1Switchboard",
     args: [
-      chainKeyToSlug[network],
-      bridgeConsts.inbox[network],
+      chainSlug,
+      bridgeConsts.inbox[chainSlug],
       signerAddress,
       socketAddress,
-      bridgeConsts.bridge[network],
-      bridgeConsts.outbox[network],
+      bridgeConsts.bridge[chainSlug],
+      bridgeConsts.outbox[chainSlug],
       sigVerifierAddress,
     ],
     path: "contracts/switchboard/native/ArbitrumL1Switchboard.sol",

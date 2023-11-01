@@ -4,11 +4,15 @@ dotenvConfig();
 import { providers, Wallet } from "ethers";
 import { getJsonRpcUrl } from "../../constants";
 import { L2ToL1MessageStatus, L2TransactionReceipt } from "@arbitrum/sdk";
-import { ChainKey, chainKeyToSlug, getAllAddresses } from "../../../src";
+import {
+  HardhatChainName,
+  hardhatChainNameToSlug,
+  getAllAddresses,
+} from "../../../src";
 
 // https://goerli.arbiscan.io/txsExit to check message status
-const l1Chain = ChainKey.GOERLI;
-const l2Chain = ChainKey.ARBITRUM_GOERLI;
+const l1Chain = HardhatChainName.GOERLI;
+const l2Chain = HardhatChainName.ARBITRUM_GOERLI;
 const sealTxHash =
   "0x0113020a1e3b9f814a78791b9719bf583bb0f25075cde1e754af99f1dcf137a7";
 
@@ -25,8 +29,8 @@ export const main = async () => {
   try {
     const addresses = getAllAddresses(mode);
     if (
-      !addresses[chainKeyToSlug[l1Chain]] ||
-      !addresses[chainKeyToSlug[l2Chain]]
+      !addresses[hardhatChainNameToSlug[l1Chain]] ||
+      !addresses[hardhatChainNameToSlug[l2Chain]]
     ) {
       throw new Error("Deployed Addresses not found");
     }
