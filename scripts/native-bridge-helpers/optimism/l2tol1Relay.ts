@@ -1,12 +1,13 @@
 import { providers, Wallet } from "ethers";
 import { CrossChainMessenger, MessageStatus } from "@eth-optimism/sdk";
 import { getJsonRpcUrl } from "../../constants";
+import { ChainKey } from "../../../src";
 
 // get providers for source and destination
-const localChain = "optimism-goerli";
-const remoteChain = "goerli";
+const localChain = ChainKey.GOERLI;
+const remoteChain = ChainKey.OPTIMISM_GOERLI;
 
-const walletPrivateKey = process.env.SOCKET_SIGNER_KEY;
+const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 
@@ -24,11 +25,18 @@ export const main = async () => {
 
   const status = await crossChainMessenger.getMessageStatus(sealTxHash);
 
-  if (MessageStatus.READY_FOR_RELAY === status) {
+  if (MessageStatus.READY_TO_PROVE === status) {
+    const tx = await crossChainMessenger.proveMessage(sealTxHash);
+    await tx.wait();
+    console.log("Message proved", tx.hash);
+  } else if (MessageStatus.READY_FOR_RELAY === status) {
     const tx = await crossChainMessenger.finalizeMessage(sealTxHash);
     await tx.wait();
+    console.log("Message finalized", tx.hash);
+  } else if (MessageStatus.RELAYED === status) {
+    console.log("Message relayed");
   } else {
-    console.log("Message not confirmed yet!");
+    console.log(`Message is in ${status} status`);
   }
 };
 

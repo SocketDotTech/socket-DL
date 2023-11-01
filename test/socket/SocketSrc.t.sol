@@ -70,8 +70,8 @@ contract SocketSrcTest is Setup {
         address switchboard = address(uint160(c++));
         address siblingSwitchboard_ = address(uint160(c++));
 
-        address expectedCapacitor = 0xC03b41d3947f3974978680061B15a736DF5346Cf;
-        address expectedDecapacitor = 0xf787702c0F39b8A70d4F8A6C99C3dB0a87275087;
+        address expectedCapacitor = 0x069B4B6deECf1352726B90c47C88d024595c033D;
+        address expectedDecapacitor = 0xB166304f5613cb56C8E8Ce7316dd51067388302D;
 
         hoax(switchboard);
         vm.expectEmit(false, false, false, true);

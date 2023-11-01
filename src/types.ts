@@ -68,6 +68,27 @@ export enum ChainSlug {
   XAI_TESTNET = 1399904803,
 }
 
+export const ChainSlugToId = {
+  [ChainSlug.AVALANCHE]: ChainId.AVALANCHE,
+  [ChainSlug.BSC]: ChainId.BSC,
+  [ChainSlug.GOERLI]: ChainId.GOERLI,
+  [ChainSlug.SEPOLIA]: ChainId.SEPOLIA,
+  [ChainSlug.HARDHAT]: ChainId.HARDHAT,
+  [ChainSlug.MAINNET]: ChainId.MAINNET,
+  [ChainSlug.BSC_TESTNET]: ChainId.BSC_TESTNET,
+  [ChainSlug.ARBITRUM]: ChainId.ARBITRUM,
+  [ChainSlug.ARBITRUM_GOERLI]: ChainId.ARBITRUM_GOERLI,
+  [ChainSlug.OPTIMISM]: ChainId.OPTIMISM,
+  [ChainSlug.OPTIMISM_GOERLI]: ChainId.OPTIMISM_GOERLI,
+  [ChainSlug.POLYGON_MAINNET]: ChainId.POLYGON_MAINNET,
+  [ChainSlug.POLYGON_MUMBAI]: ChainId.POLYGON_MUMBAI,
+  [ChainSlug.AEVO_TESTNET]: ChainId.AEVO_TESTNET,
+  [ChainSlug.LYRA_TESTNET]: ChainId.LYRA_TESTNET,
+  [ChainSlug.LYRA]: ChainId.LYRA,
+  [ChainSlug.AEVO]: ChainId.AEVO,
+  [ChainSlug.XAI_TESTNET]: ChainId.XAI_TESTNET,
+};
+
 export const hardhatChainNameToSlug = {
   [HardhatChainName.ARBITRUM]: ChainSlug.ARBITRUM,
   [HardhatChainName.ARBITRUM_GOERLI]: ChainSlug.ARBITRUM_GOERLI,
