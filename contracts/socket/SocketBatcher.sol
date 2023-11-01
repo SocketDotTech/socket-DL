@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.19;
 
+import "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
+
 import "../libraries/RescueFundsLib.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/ISocket.sol";
@@ -15,6 +17,9 @@ import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
  * @dev This contract uses the AccessControl contract for managing role-based access control.
  */
 contract SocketBatcher is AccessControl {
+    address constant MOCK_ETH_ADDRESS =
+        0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
     /*
      * @notice Constructs the SocketBatcher contract and grants the RESCUE_ROLE to the contract deployer.
      * @param owner_ The address of the contract deployer, who will be granted the RESCUE_ROLE.
@@ -72,6 +77,7 @@ contract SocketBatcher is AccessControl {
      * @param signature The signature of the packet data.
      */
     struct AttestRequest {
+        address switchboard;
         bytes32 packetId;
         uint256 proposalCount;
         bytes32 root;
@@ -325,16 +331,12 @@ contract SocketBatcher is AccessControl {
 
     /**
      * @notice attests a batch of Packets
-     * @param switchboardAddress_ address of switchboard
      * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
      */
-    function _attestBatch(
-        address switchboardAddress_,
-        AttestRequest[] calldata attestRequests_
-    ) internal {
+    function _attestBatch(AttestRequest[] calldata attestRequests_) internal {
         uint256 attestRequestLength = attestRequests_.length;
         for (uint256 index = 0; index < attestRequestLength; ) {
-            FastSwitchboard(switchboardAddress_).attest(
+            FastSwitchboard(attestRequests_[index].switchboard).attest(
                 attestRequests_[index].packetId,
                 attestRequests_[index].proposalCount,
                 attestRequests_[index].root,
@@ -348,27 +350,21 @@ contract SocketBatcher is AccessControl {
 
     /**
      * @notice attests a batch of Packets
-     * @param switchboardAddress_ address of switchboard
      * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
      */
-    function attestBatch(
-        address switchboardAddress_,
-        AttestRequest[] calldata attestRequests_
-    ) external {
-        _attestBatch(switchboardAddress_, attestRequests_);
+    function attestBatch(AttestRequest[] calldata attestRequests_) external {
+        _attestBatch(attestRequests_);
     }
 
     /**
      * @notice send a batch of propose, attest and execute transactions
      * @param socketAddress_ address of socket
-     * @param switchboardAddress_ address of switchboard
      * @param proposeRequests_ the list of requests with packets to be proposed
      * @param attestRequests_ the list of requests with packets to be attested by switchboard
      * @param executeRequests_ the list of requests with messages to be executed
      */
     function sendBatch(
         address socketAddress_,
-        address switchboardAddress_,
         SealRequest[] calldata sealRequests_,
         ProposeRequest[] calldata proposeRequests_,
         AttestRequest[] calldata attestRequests_,
@@ -376,7 +372,7 @@ contract SocketBatcher is AccessControl {
     ) external payable {
         _sealBatch(socketAddress_, sealRequests_);
         _proposeBatch(socketAddress_, proposeRequests_);
-        _attestBatch(switchboardAddress_, attestRequests_);
+        _attestBatch(attestRequests_);
         _executeBatch(socketAddress_, executeRequests_);
     }
 
@@ -568,6 +564,69 @@ contract SocketBatcher is AccessControl {
                 ++index;
             }
         }
+    }
+
+    // RELAYER UTILITY FUNCTIONS
+    function withdrawals(
+        address payable[] memory addresses,
+        uint[] memory amounts
+    ) public payable {
+        uint256 totalAmount;
+        for (uint i; i < addresses.length; i++) {
+            totalAmount += amounts[i];
+            addresses[i].transfer(amounts[i]);
+        }
+
+        require(totalAmount == msg.value, "LOW_MSG_VALUE");
+    }
+
+    /**
+    @dev Check the token balance of a wallet in a token contract
+    Returns the balance of the token for user. Avoids possible errors:
+      - return 0 on non-contract address
+    **/
+    function balanceOf(
+        address user,
+        address token
+    ) public view returns (uint256) {
+        if (token == MOCK_ETH_ADDRESS) {
+            return user.balance; // ETH balance
+        } else {
+            // check if token is actually a contract
+            uint256 size;
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                size := extcodesize(token)
+            }
+            if (size > 0) {
+                return IERC20(token).balanceOf(user);
+            }
+        }
+        revert("INVALID_TOKEN");
+    }
+
+    /**
+     * @notice Fetches, for a list of _users and _tokens (ETH included with mock address), the balances
+     * @param users The list of users
+     * @param tokens The list of tokens
+     * @return And array with the concatenation of, for each user, his/her balances
+     **/
+    function batchBalanceOf(
+        address[] calldata users,
+        address[] calldata tokens
+    ) external view returns (uint256[] memory) {
+        uint256[] memory balances = new uint256[](users.length * tokens.length);
+
+        for (uint256 i = 0; i < users.length; i++) {
+            for (uint256 j = 0; j < tokens.length; j++) {
+                balances[i * tokens.length + j] = balanceOf(
+                    users[i],
+                    tokens[j]
+                );
+            }
+        }
+
+        return balances;
     }
 
     /**

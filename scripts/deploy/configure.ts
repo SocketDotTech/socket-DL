@@ -1,7 +1,7 @@
 import fs from "fs";
 import { Wallet, constants } from "ethers";
 
-import { getProviderFromChainName, switchboards } from "../constants";
+import { getProviderFromChainSlug, switchboards } from "../constants";
 import {
   deployedAddressPath,
   getInstance,
@@ -46,8 +46,8 @@ export const main = async () => {
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
 
-        const providerInstance = getProviderFromChainName(
-          ChainSlugToKey[chain]
+        const providerInstance = getProviderFromChainSlug(
+          chain as any as ChainSlug
         );
         const socketSigner: Wallet = new Wallet(
           process.env.SOCKET_SIGNER_KEY as string,
@@ -95,8 +95,6 @@ export const main = async () => {
           await tx.wait();
         }
 
-        if (!addr["integrations"]) return;
-
         const integrations = addr["integrations"] ?? {};
         const integrationList = Object.keys(integrations).filter((chain) =>
           chains.includes(parseInt(chain) as ChainSlug)
@@ -124,28 +122,6 @@ export const main = async () => {
             maxPacketLength,
             socketSigner,
             IntegrationTypes.native,
-            addr
-          );
-        }
-
-        // register fast
-        for (let sibling of siblingSlugs) {
-          const siblingSwitchboard = getSwitchboardAddress(
-            chain,
-            IntegrationTypes.fast,
-            addresses?.[sibling]
-          );
-
-          if (!siblingSwitchboard) continue;
-
-          addr = await registerSwitchboardForSibling(
-            addr[CORE_CONTRACTS.FastSwitchboard],
-            siblingSwitchboard,
-            sibling,
-            capacitorType,
-            maxPacketLength,
-            socketSigner,
-            IntegrationTypes.fast,
             addr
           );
         }
@@ -302,8 +278,8 @@ const setupPolygonNativeSwitchboard = async (addresses) => {
       srcChains.map(async (srcChain) => {
         console.log(`Configuring for ${srcChain}`);
 
-        const providerInstance = getProviderFromChainName(
-          ChainSlugToKey[srcChain]
+        const providerInstance = getProviderFromChainSlug(
+          srcChain as any as ChainSlug
         );
         const socketSigner: Wallet = new Wallet(
           process.env.SOCKET_SIGNER_KEY as string,

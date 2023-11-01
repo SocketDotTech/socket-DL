@@ -96,7 +96,7 @@ export const deploySocket = async (
 
     // switchboards deploy
     deployUtils.addresses = await deploySwitchboards(
-      ChainSlugToKey[chainSlug],
+      chainSlug,
       socketSigner,
       deployUtils.addresses,
       currentMode

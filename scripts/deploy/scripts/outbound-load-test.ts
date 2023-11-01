@@ -7,12 +7,12 @@ import { ethers } from "ethers";
 import { Contract } from "ethers";
 require("dotenv").config();
 import yargs from "yargs";
-import { getProviderFromChainName } from "../../constants";
+import { getProviderFromChainSlug } from "../../constants";
 import SocketABI from "../../../out/Socket.sol/Socket.json";
 
 import path from "path";
 import { mode } from "../config";
-import { CORE_CONTRACTS, chainKeyToSlug } from "../../../src";
+import { CORE_CONTRACTS, hardhatChainNameToSlug } from "../../../src";
 
 const deployedAddressPath = path.join(
   __dirname,
@@ -102,18 +102,18 @@ export const main = async () => {
         },
       }).argv;
 
-    const chain = argv.chain as keyof typeof chainKeyToSlug;
-    const chainSlug = chainKeyToSlug[chain];
+    const chain = argv.chain as keyof typeof hardhatChainNameToSlug;
+    const chainSlug = hardhatChainNameToSlug[chain];
 
-    const providerInstance = getProviderFromChainName(chain);
+    const providerInstance = getProviderFromChainSlug(chainSlug);
 
     const signer = new ethers.Wallet(
       process.env.SOCKET_SIGNER_KEY as string,
       providerInstance
     );
 
-    const remoteChain = argv.remoteChain as keyof typeof chainKeyToSlug;
-    remoteChainSlug = chainKeyToSlug[remoteChain];
+    const remoteChain = argv.remoteChain as keyof typeof hardhatChainNameToSlug;
+    remoteChainSlug = hardhatChainNameToSlug[remoteChain];
 
     const numOfRequests = argv.numOfRequests as number;
     const waitTime = argv.waitTime as number;

@@ -1,75 +1,36 @@
-import { ChainKey, IntegrationTypes, NativeSwitchboard } from "../../src/types";
+import {
+  ChainSlug,
+  IntegrationTypes,
+  NativeSwitchboard,
+} from "../../src/types";
 
 export const maxAllowedPacketLength = 10;
 
 export const timeout: {
   [key: string]: number;
 } = {
-  [ChainKey.BSC_TESTNET]: 7200,
-  [ChainKey.POLYGON_MAINNET]: 7200,
-  [ChainKey.BSC]: 7200,
-  [ChainKey.POLYGON_MUMBAI]: 7200,
-  [ChainKey.ARBITRUM_GOERLI]: 7200,
-  [ChainKey.OPTIMISM_GOERLI]: 7200,
-  [ChainKey.GOERLI]: 7200,
-  [ChainKey.HARDHAT]: 7200,
-  [ChainKey.ARBITRUM]: 7200,
-  [ChainKey.OPTIMISM]: 7200,
-  [ChainKey.MAINNET]: 7200,
-  [ChainKey.SEPOLIA]: 7200,
-  [ChainKey.AEVO_TESTNET]: 7200,
-  [ChainKey.AEVO]: 7200,
-  [ChainKey.LYRA_TESTNET]: 7200,
-  [ChainKey.LYRA]: 7200,
-};
-
-export const attestGasLimit: {
-  [key: string]: number;
-} = {
-  [ChainKey.BSC_TESTNET]: 80000,
-  [ChainKey.POLYGON_MAINNET]: 80000,
-  [ChainKey.BSC]: 80000,
-  [ChainKey.POLYGON_MUMBAI]: 80000,
-  [ChainKey.ARBITRUM_GOERLI]: 1000000,
-  [ChainKey.OPTIMISM_GOERLI]: 80000,
-  [ChainKey.GOERLI]: 80000,
-  [ChainKey.HARDHAT]: 80000,
-  [ChainKey.ARBITRUM]: 1000000,
-  [ChainKey.OPTIMISM]: 80000,
-  [ChainKey.MAINNET]: 80000,
-  [ChainKey.SEPOLIA]: 80000,
-  [ChainKey.AEVO_TESTNET]: 80000,
-  [ChainKey.AEVO]: 80000,
-  [ChainKey.LYRA_TESTNET]: 80000,
-  [ChainKey.LYRA]: 80000,
-
-  // [ChainKey.LYRA]: 80000,
-};
-
-export const executionOverhead: {
-  [key: string]: number;
-} = {
-  [ChainKey.BSC_TESTNET]: 40000,
-  [ChainKey.POLYGON_MAINNET]: 40000,
-  [ChainKey.BSC]: 40000,
-  [ChainKey.POLYGON_MUMBAI]: 40000,
-  [ChainKey.ARBITRUM_GOERLI]: 500000,
-  [ChainKey.OPTIMISM_GOERLI]: 40000,
-  [ChainKey.GOERLI]: 40000,
-  [ChainKey.HARDHAT]: 40000,
-  [ChainKey.ARBITRUM]: 500000,
-  [ChainKey.OPTIMISM]: 40000,
-  [ChainKey.MAINNET]: 40000,
-  [ChainKey.SEPOLIA]: 40000,
-  [ChainKey.AEVO_TESTNET]: 40000,
-  [ChainKey.AEVO]: 40000,
-  [ChainKey.LYRA_TESTNET]: 40000,
-  [ChainKey.LYRA]: 40000,
+  [ChainSlug.BSC_TESTNET]: 7200,
+  [ChainSlug.POLYGON_MAINNET]: 7200,
+  [ChainSlug.BSC]: 7200,
+  [ChainSlug.POLYGON_MUMBAI]: 7200,
+  [ChainSlug.ARBITRUM_GOERLI]: 7200,
+  [ChainSlug.OPTIMISM_GOERLI]: 7200,
+  [ChainSlug.GOERLI]: 7200,
+  [ChainSlug.HARDHAT]: 7200,
+  [ChainSlug.ARBITRUM]: 7200,
+  [ChainSlug.OPTIMISM]: 7200,
+  [ChainSlug.MAINNET]: 7200,
+  [ChainSlug.SEPOLIA]: 7200,
+  [ChainSlug.AEVO_TESTNET]: 7200,
+  [ChainSlug.AEVO]: 7200,
+  [ChainSlug.LYRA_TESTNET]: 7200,
+  [ChainSlug.LYRA]: 7200,
+  [ChainSlug.XAI_TESTNET]: 7200,
 };
 
 export const getDefaultIntegrationType = (
-  chain: ChainKey,
-  sibling: ChainKey
+  chain: ChainSlug,
+  sibling: ChainSlug
 ): IntegrationTypes => {
   return switchboards?.[chain]?.[sibling]
     ? IntegrationTypes.native
@@ -78,55 +39,55 @@ export const getDefaultIntegrationType = (
 };
 
 export const switchboards = {
-  [ChainKey.ARBITRUM_GOERLI]: {
-    [ChainKey.GOERLI]: {
+  [ChainSlug.ARBITRUM_GOERLI]: {
+    [ChainSlug.GOERLI]: {
       switchboard: NativeSwitchboard.ARBITRUM_L2,
     },
   },
-  [ChainKey.ARBITRUM]: {
-    [ChainKey.MAINNET]: {
+  [ChainSlug.ARBITRUM]: {
+    [ChainSlug.MAINNET]: {
       switchboard: NativeSwitchboard.ARBITRUM_L2,
     },
   },
-  [ChainKey.OPTIMISM]: {
-    [ChainKey.MAINNET]: {
+  [ChainSlug.OPTIMISM]: {
+    [ChainSlug.MAINNET]: {
       switchboard: NativeSwitchboard.OPTIMISM,
     },
   },
-  [ChainKey.OPTIMISM_GOERLI]: {
-    [ChainKey.GOERLI]: {
+  [ChainSlug.OPTIMISM_GOERLI]: {
+    [ChainSlug.GOERLI]: {
       switchboard: NativeSwitchboard.OPTIMISM,
     },
   },
-  [ChainKey.POLYGON_MAINNET]: {
-    [ChainKey.MAINNET]: {
+  [ChainSlug.POLYGON_MAINNET]: {
+    [ChainSlug.MAINNET]: {
       switchboard: NativeSwitchboard.POLYGON_L2,
     },
   },
-  [ChainKey.POLYGON_MUMBAI]: {
-    [ChainKey.GOERLI]: {
+  [ChainSlug.POLYGON_MUMBAI]: {
+    [ChainSlug.GOERLI]: {
       switchboard: NativeSwitchboard.POLYGON_L2,
     },
   },
-  [ChainKey.GOERLI]: {
-    [ChainKey.ARBITRUM_GOERLI]: {
+  [ChainSlug.GOERLI]: {
+    [ChainSlug.ARBITRUM_GOERLI]: {
       switchboard: NativeSwitchboard.ARBITRUM_L1,
     },
-    [ChainKey.OPTIMISM_GOERLI]: {
+    [ChainSlug.OPTIMISM_GOERLI]: {
       switchboard: NativeSwitchboard.OPTIMISM,
     },
-    [ChainKey.POLYGON_MUMBAI]: {
+    [ChainSlug.POLYGON_MUMBAI]: {
       switchboard: NativeSwitchboard.POLYGON_L1,
     },
   },
-  [ChainKey.MAINNET]: {
-    [ChainKey.ARBITRUM]: {
+  [ChainSlug.MAINNET]: {
+    [ChainSlug.ARBITRUM]: {
       switchboard: NativeSwitchboard.ARBITRUM_L1,
     },
-    [ChainKey.OPTIMISM]: {
+    [ChainSlug.OPTIMISM]: {
       switchboard: NativeSwitchboard.OPTIMISM,
     },
-    [ChainKey.POLYGON_MAINNET]: {
+    [ChainSlug.POLYGON_MAINNET]: {
       switchboard: NativeSwitchboard.POLYGON_L1,
     },
   },

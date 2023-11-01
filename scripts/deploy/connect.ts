@@ -1,6 +1,6 @@
 import {
   getDefaultIntegrationType,
-  getProviderFromChainName,
+  getProviderFromChainSlug,
 } from "../constants";
 import { getInstance } from "./utils";
 import {
@@ -22,15 +22,12 @@ import { overrides } from "./config";
 export const main = async () => {
   try {
     let addresses: DeploymentAddresses = getAllAddresses(mode);
-    let chain: ChainSlug;
 
     await Promise.all(
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
 
-        const providerInstance = getProviderFromChainName(
-          ChainSlugToKey[chain]
-        );
+        const providerInstance = getProviderFromChainSlug(chain);
         const socketSigner: Wallet = new Wallet(
           process.env.SOCKET_SIGNER_KEY as string,
           providerInstance

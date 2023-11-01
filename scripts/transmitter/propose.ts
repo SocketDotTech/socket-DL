@@ -5,16 +5,15 @@ import { arrayify } from "@ethersproject/bytes";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { Contract, Wallet, utils } from "ethers";
 import { version, getAddresses } from "../../src/index";
-import { getProviderFromChainName } from "../constants/networks";
+import { getProviderFromChainSlug } from "../constants/networks";
 
-import { CORE_CONTRACTS, ChainKey, chainKeyToSlug } from "@socket.tech/dl-core";
+import { CORE_CONTRACTS, ChainSlug } from "@socket.tech/dl-core";
 import { getInstance } from "../deploy/utils";
 import { mode, overrides } from "../deploy/config";
 
 export const VERSION_HASH = utils.id(version[mode]);
 
-const chain: ChainKey = ChainKey.OPTIMISM_GOERLI;
-const chainSlug = chainKeyToSlug[chain];
+const chainSlug: ChainSlug = ChainSlug.OPTIMISM_GOERLI;
 const packetId =
   "0x000138815c83e326c0b4380127dccf01c3b69ff4dd5c16ae0000000000000001";
 const root =
@@ -22,10 +21,10 @@ const root =
 
 export const main = async () => {
   try {
-    if (!chain) throw new Error("No chain found!");
+    if (!chainSlug) throw new Error("No chain found!");
     const signer = new Wallet(
       process.env.SOCKET_SIGNER_KEY!,
-      getProviderFromChainName(chain)
+      getProviderFromChainSlug(chainSlug)
     );
 
     if (!process.env.TRANSMITTER_PK)
@@ -33,7 +32,7 @@ export const main = async () => {
 
     const transmitterSigner = new Wallet(
       process.env.TRANSMITTER_PK!,
-      getProviderFromChainName(chain)
+      getProviderFromChainSlug(chainSlug)
     );
 
     const proposeDigest = keccak256(

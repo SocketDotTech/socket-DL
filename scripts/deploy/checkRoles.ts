@@ -14,13 +14,11 @@ import {
   isTestnet,
   isMainnet,
   getAddresses,
-  chainKeyToSlug,
-  ChainSlugToKey,
 } from "../../src";
 import { getRoleHash, getChainRoleHash } from "./utils";
 import { Contract, Wallet, ethers } from "ethers";
 import { getABI } from "./scripts/getABIs";
-import { getProviderFromChainName } from "../constants";
+import { getProviderFromChainSlug } from "../constants";
 import {
   executorAddresses,
   filterChains,
@@ -48,7 +46,7 @@ interface checkAndUpdateRolesObj {
 
 // let roleTxns: any;
 let roleTxns: {
-  [chainId in ChainSlug]?: {
+  [chainSlug in ChainSlug]?: {
     [contractName: string]: {
       to: string;
       role: string;
@@ -59,7 +57,7 @@ let roleTxns: {
 } = {};
 
 let otherTxns: {
-  [chainId in ChainSlug]?: {
+  [chainSlug in ChainSlug]?: {
     to: string;
     data: string;
   }[];
@@ -69,7 +67,7 @@ const isRoleChanged = (hasRole: boolean, newRoleStatus: boolean) => {
   return (!hasRole && newRoleStatus) || (hasRole && !newRoleStatus);
 };
 const addTransaction = (
-  chainId: ChainSlug,
+  chainSlug: ChainSlug,
   contractName: string,
   contractAddress: string,
   hasRole: boolean,
@@ -79,10 +77,10 @@ const addTransaction = (
   newRoleStatus: boolean
 ) => {
   if (isRoleChanged(hasRole, newRoleStatus)) {
-    if (!roleTxns[chainId]) roleTxns[chainId] = {};
-    if (!roleTxns[chainId]![contractName])
-      roleTxns[chainId]![contractName] = [];
-    roleTxns[chainId]![contractName]?.push({
+    if (!roleTxns[chainSlug]) roleTxns[chainSlug] = {};
+    if (!roleTxns[chainSlug]![contractName])
+      roleTxns[chainSlug]![contractName] = [];
+    roleTxns[chainSlug]![contractName]?.push({
       to: contractAddress,
       role,
       slug,
@@ -116,16 +114,16 @@ const getRoleTxnData = (
 };
 
 const executeRoleTransactions = async (
-  chainId: ChainSlug,
+  chainSlug: ChainSlug,
   newRoleStatus: boolean,
   wallet: Wallet
 ) => {
-  if (!roleTxns[chainId]) return;
-  let contracts = Object.keys(roleTxns[chainId]!);
+  if (!roleTxns[chainSlug]) return;
+  let contracts = Object.keys(roleTxns[chainSlug]!);
   for (let i = 0; i < contracts.length; i++) {
     let contractSpecificTxns:
       | { to: string; role: string; slug: number; grantee: string }[]
-      | undefined = roleTxns[chainId]![contracts[i] as CORE_CONTRACTS];
+      | undefined = roleTxns[chainSlug]![contracts[i] as CORE_CONTRACTS];
     if (!contractSpecificTxns?.length) continue;
 
     let roles: string[] = [],
@@ -148,7 +146,7 @@ const executeRoleTransactions = async (
     });
 
     if (!roles.length) continue;
-    console.log(chainId, contracts[0], roles.length);
+    console.log(chainSlug, contracts[0], roles.length);
     let data: string;
     if (newRoleStatus) {
       data = getRoleTxnData(roles, slugs, addresses, "GRANT");
@@ -158,10 +156,10 @@ const executeRoleTransactions = async (
     let tx = await wallet.sendTransaction({
       to: contractAddress,
       data,
-      ...overrides[chainId],
+      ...overrides[chainSlug],
     });
     console.log(
-      `chain: ${chainId}`,
+      `chain: ${chainSlug}`,
       " contract:",
       contractAddress,
       { newRoleStatus },
@@ -172,16 +170,19 @@ const executeRoleTransactions = async (
   }
 };
 
-const executeOtherTransactions = async (chainId: ChainSlug, wallet: Wallet) => {
-  if (!otherTxns[chainId as any as keyof typeof otherTxns]) return;
+const executeOtherTransactions = async (
+  chainSlug: ChainSlug,
+  wallet: Wallet
+) => {
+  if (!otherTxns[chainSlug as any as keyof typeof otherTxns]) return;
 
-  let txnDatas = otherTxns[chainId as any as keyof typeof otherTxns]!;
+  let txnDatas = otherTxns[chainSlug as any as keyof typeof otherTxns]!;
   for (let i = 0; i < txnDatas.length; i++) {
     let { to, data } = txnDatas[i];
     let tx = await wallet.sendTransaction({
       to,
       data,
-      ...overrides[chainId],
+      ...overrides[chainSlug],
     });
     console.log(`to: ${to}, txHash: ${tx?.hash}`);
     await tx.wait();
@@ -194,29 +195,23 @@ const executeTransactions = async (
   newRoleStatus: boolean
 ) => {
   await Promise.all(
-    activeChainSlugs.map(async (chainId) => {
-      let provider = getProviderFromChainName(
-        ChainSlugToKey[
-          chainId as any as ChainSlug
-        ] as keyof typeof chainKeyToSlug
-      );
+    activeChainSlugs.map(async (chainSlug) => {
+      let provider = getProviderFromChainSlug(chainSlug as any as ChainSlug);
       let wallet = new Wallet(process.env.SOCKET_SIGNER_KEY!, provider);
-      await executeRoleTransactions(chainId, newRoleStatus, wallet);
-      await executeOtherTransactions(chainId, wallet);
+      await executeRoleTransactions(chainSlug, newRoleStatus, wallet);
+      await executeOtherTransactions(chainSlug, wallet);
     })
   );
 };
 
-const getSiblingSlugs = (chainId: ChainSlug): ChainSlug[] => {
-  if (isTestnet(chainId))
-    return TestnetIds.filter((chainSlug) => chainSlug !== chainId);
-  if (isMainnet(chainId))
-    return MainnetIds.filter((chainSlug) => chainSlug !== chainId);
+const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
+  if (isTestnet(chainSlug)) return TestnetIds.filter((c) => c !== chainSlug);
+  if (isMainnet(chainSlug)) return MainnetIds.filter((c) => c !== chainSlug);
   return [];
 };
 
 export const checkNativeSwitchboardRoles = async ({
-  chainId,
+  chainSlug,
   provider,
   siblingSlugs,
   addresses,
@@ -224,7 +219,7 @@ export const checkNativeSwitchboardRoles = async ({
   userAddress,
   newRoleStatus,
 }: {
-  chainId: ChainSlug;
+  chainSlug: ChainSlug;
   siblingSlugs: ChainSlug[];
   provider: any;
   addresses: ChainSocketAddresses | undefined;
@@ -246,7 +241,7 @@ export const checkNativeSwitchboardRoles = async ({
 
       if (!contractAddress) {
         // console.log(
-        //   chainId,
+        //   chainSlug,
         //   siblingSlug,
         //   " address not present: ",
         //   contractName
@@ -261,7 +256,7 @@ export const checkNativeSwitchboardRoles = async ({
       let requiredRoles =
         REQUIRED_ROLES[contractName as keyof typeof REQUIRED_ROLES];
 
-      roleStatus[chainId][pseudoContractName] = {};
+      roleStatus[chainSlug][pseudoContractName] = {};
       await Promise.all(
         requiredRoles.map(async (role) => {
           if (filterRoles.length > 0 && !filterRoles.includes(role)) return;
@@ -270,16 +265,16 @@ export const checkNativeSwitchboardRoles = async ({
             userAddress
           );
 
-          if (!roleStatus[chainId][pseudoContractName]["global"])
-            roleStatus[chainId][pseudoContractName]["global"] = [];
+          if (!roleStatus[chainSlug][pseudoContractName]["global"])
+            roleStatus[chainSlug][pseudoContractName]["global"] = [];
           if (isRoleChanged(hasRole, newRoleStatus))
-            roleStatus[chainId][pseudoContractName]["global"].push({
+            roleStatus[chainSlug][pseudoContractName]["global"].push({
               hasRole,
               role,
               userAddress,
             });
           addTransaction(
-            chainId,
+            chainSlug,
             pseudoContractName,
             contractAddress!,
             hasRole,
@@ -313,31 +308,30 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
       filterChains.length > 0 ? filterChains : [...MainnetIds, ...TestnetIds];
     // parallelize chains
     await Promise.all(
-      activeChainSlugs.map(async (chainId) => {
-        if (filterChains.length > 0 && !filterChains.includes(chainId)) return;
-        roleStatus[chainId] = {};
-        // roleStatus[chainId]["integrations"] = {};
+      activeChainSlugs.map(async (chainSlug) => {
+        if (filterChains.length > 0 && !filterChains.includes(chainSlug))
+          return;
+        roleStatus[chainSlug] = {};
+        // roleStatus[chainSlug]["integrations"] = {};
 
-        let siblingSlugs = getSiblingSlugs(chainId);
+        let siblingSlugs = getSiblingSlugs(chainSlug);
 
-        // console.log(chainId, " Sibling Slugs: ", siblingSlugs);
+        // console.log(chainSlug, " Sibling Slugs: ", siblingSlugs);
 
         // console.log(
         //   "============= checking for network: ",
-        //   ChainSlugToKey[chainId],
+        //   ChainSlugToKey[chainSlug],
         //   "================="
         // );
         let addresses: ChainSocketAddresses | undefined;
         try {
-          addresses = await getAddresses(chainId, mode);
+          addresses = await getAddresses(chainSlug, mode);
         } catch (error) {
           addresses = undefined;
         }
 
         if (!addresses) return;
-        let provider = getProviderFromChainName(
-          ChainSlugToKey[chainId] as keyof typeof chainKeyToSlug
-        );
+        let provider = getProviderFromChainSlug(chainSlug as any as ChainSlug);
 
         let contractNames = Object.keys(REQUIRED_ROLES);
         await Promise.all(
@@ -349,7 +343,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
             // In case of native switchboard, check for address under integrations->NATIVE_BRIDGE
             if (contractName === CORE_CONTRACTS.NativeSwitchboard) {
               await checkNativeSwitchboardRoles({
-                chainId,
+                chainSlug,
                 provider,
                 siblingSlugs,
                 addresses,
@@ -365,7 +359,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
               addresses?.[contractName as keyof ChainSocketAddresses];
 
             if (!contractAddress) {
-              console.log(chainId, " address not present: ", contractName);
+              console.log(chainSlug, " address not present: ", contractName);
               return;
             }
             let instance = new Contract(
@@ -376,7 +370,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
             let requiredRoles =
               REQUIRED_ROLES[contractName as keyof typeof REQUIRED_ROLES];
 
-            roleStatus[chainId][contractName!] = {};
+            roleStatus[chainSlug][contractName!] = {};
             await Promise.all(
               requiredRoles.map(async (role) => {
                 if (filterRoles.length > 0 && !filterRoles.includes(role))
@@ -385,19 +379,19 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                   "hasRole(bytes32,address)"
                 ](getRoleHash(role), userAddress);
                 if (isRoleChanged(hasRole, newRoleStatus)) {
-                  if (!roleStatus[chainId][contractName!]["global"]) {
-                    roleStatus[chainId][contractName!]["global"] = [];
+                  if (!roleStatus[chainSlug][contractName!]["global"]) {
+                    roleStatus[chainSlug][contractName!]["global"] = [];
                   }
-                  roleStatus[chainId][contractName]["global"].push({
+                  roleStatus[chainSlug][contractName]["global"].push({
                     hasRole,
                     role,
                     userAddress,
                   });
                 }
 
-                // console.log(chainId, contractName, role, hasRole);
+                // console.log(chainSlug, contractName, role, hasRole);
                 addTransaction(
-                  chainId,
+                  chainSlug,
                   contractName as CORE_CONTRACTS,
                   contractAddress!,
                   hasRole,
@@ -419,7 +413,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
               contractName == CORE_CONTRACTS.TransmitManager &&
               filterRoles.includes(ROLES.TRANSMITTER_ROLE)
             ) {
-              siblingSlugs.push(chainId);
+              siblingSlugs.push(chainSlug);
             }
             await Promise.all(
               siblingSlugs.map(async (siblingSlug) => {
@@ -439,18 +433,19 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
 
                     if (isRoleChanged(hasRole, newRoleStatus)) {
                       if (
-                        !roleStatus[chainId][contractName][siblingSlug]?.length
+                        !roleStatus[chainSlug][contractName][siblingSlug]
+                          ?.length
                       )
-                        roleStatus[chainId][contractName][siblingSlug] = [];
+                        roleStatus[chainSlug][contractName][siblingSlug] = [];
 
-                      roleStatus[chainId][contractName][siblingSlug].push({
+                      roleStatus[chainSlug][contractName][siblingSlug].push({
                         role,
                         hasRole,
                         userAddress,
                       });
                     }
 
-                    // console.log(chainId, contractName, role, hasRole);
+                    // console.log(chainSlug, contractName, role, hasRole);
 
                     // If Watcher role in FastSwitchboard, have to call another function
                     // to set the role
@@ -473,14 +468,14 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
                         );
                       }
 
-                      if (!otherTxns[chainId]) otherTxns[chainId] = [];
-                      otherTxns[chainId]?.push({
+                      if (!otherTxns[chainSlug]) otherTxns[chainSlug] = [];
+                      otherTxns[chainSlug]?.push({
                         to: instance.address,
                         data,
                       });
                     } else {
                       addTransaction(
-                        chainId,
+                        chainSlug,
                         contractName as CORE_CONTRACTS,
                         contractAddress!,
                         hasRole,

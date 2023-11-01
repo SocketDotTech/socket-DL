@@ -4,13 +4,12 @@ dotenvConfig();
 
 import { Contract, Wallet, ethers } from "ethers";
 import { mode, overrides } from "../deploy/config";
-import { getProviderFromChainName } from "../constants";
+import { getProviderFromChainSlug } from "../constants";
 import {
   getAllAddresses,
   ChainSocketAddresses,
   DeploymentAddresses,
   IntegrationTypes,
-  ChainSlugToKey,
   ChainSlug,
 } from "@socket.tech/dl-core";
 
@@ -131,8 +130,8 @@ export const main = async () => {
           return;
         }
 
-        const providerInstance = getProviderFromChainName(
-          ChainSlugToKey[chainSlug]
+        const providerInstance = getProviderFromChainSlug(
+          parseInt(chainSlug) as ChainSlug
         );
         const signer: Wallet = new ethers.Wallet(
           process.env.SOCKET_SIGNER_KEY as string,
