@@ -26,6 +26,7 @@ export const timeout: {
   [ChainSlug.LYRA_TESTNET]: 7200,
   [ChainSlug.LYRA]: 7200,
   [ChainSlug.XAI_TESTNET]: 7200,
+  [ChainSlug.SX_NETWORK_TESTNET]: 7200,
 };
 
 export const getDefaultIntegrationType = (
