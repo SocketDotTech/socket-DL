@@ -515,9 +515,8 @@ contract SocketBatcher is AccessControl {
         bytes32[] memory packetRoots = new bytes32[](capacitorAddressesLength);
 
         for (uint256 index = 0; index < capacitorAddressesLength; ) {
-            packetRoots[index] = ICapacitor(capacitorAddresses_[index]).getRootByCount(
-                packetCounts_[index]
-            );
+            packetRoots[index] = ICapacitor(capacitorAddresses_[index])
+                .getRootByCount(packetCounts_[index]);
             unchecked {
                 ++index;
             }
