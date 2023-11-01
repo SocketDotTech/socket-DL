@@ -265,16 +265,51 @@ contract SocketBatcher is AccessControl {
      * @param socketAddress_ address of socket
      * @param sealRequests_ the list of requests with packets to be sealed on sourceChain
      */
-    function sealBatch(
+    function _sealBatch(
         address socketAddress_,
         SealRequest[] calldata sealRequests_
-    ) external {
+    ) internal {
         uint256 sealRequestLength = sealRequests_.length;
         for (uint256 index = 0; index < sealRequestLength; ) {
             ISocket(socketAddress_).seal(
                 sealRequests_[index].batchSize,
                 sealRequests_[index].capacitorAddress,
                 sealRequests_[index].signature
+            );
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    /**
+     * @notice seal a batch of packets from capacitor on sourceChain mentioned in sealRequests
+     * @param socketAddress_ address of socket
+     * @param sealRequests_ the list of requests with packets to be sealed on sourceChain
+     */
+    function sealBatch(
+        address socketAddress_,
+        SealRequest[] calldata sealRequests_
+    ) external {
+        _sealBatch(socketAddress_, sealRequests_);
+    }
+
+    /**
+     * @notice propose a batch of packets sequentially by socketDestination
+     * @param socketAddress_ address of socket
+     * @param proposeRequests_ the list of requests with packets to be proposed by socketDestination
+     */
+    function _proposeBatch(
+        address socketAddress_,
+        ProposeRequest[] calldata proposeRequests_
+    ) internal {
+        uint256 proposeRequestLength = proposeRequests_.length;
+        for (uint256 index = 0; index < proposeRequestLength; ) {
+            ISocket(socketAddress_).proposeForSwitchboard(
+                proposeRequests_[index].packetId,
+                proposeRequests_[index].root,
+                proposeRequests_[index].switchboard,
+                proposeRequests_[index].signature
             );
             unchecked {
                 ++index;
@@ -291,13 +326,21 @@ contract SocketBatcher is AccessControl {
         address socketAddress_,
         ProposeRequest[] calldata proposeRequests_
     ) external {
-        uint256 proposeRequestLength = proposeRequests_.length;
-        for (uint256 index = 0; index < proposeRequestLength; ) {
-            ISocket(socketAddress_).proposeForSwitchboard(
-                proposeRequests_[index].packetId,
-                proposeRequests_[index].root,
-                proposeRequests_[index].switchboard,
-                proposeRequests_[index].signature
+        _proposeBatch(socketAddress_, proposeRequests_);
+    }
+
+    /**
+     * @notice attests a batch of Packets
+     * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
+     */
+    function _attestBatch(AttestRequest[] calldata attestRequests_) internal {
+        uint256 attestRequestLength = attestRequests_.length;
+        for (uint256 index = 0; index < attestRequestLength; ) {
+            FastSwitchboard(attestRequests_[index].switchboard).attest(
+                attestRequests_[index].packetId,
+                attestRequests_[index].proposalCount,
+                attestRequests_[index].root,
+                attestRequests_[index].signature
             );
             unchecked {
                 ++index;
@@ -309,22 +352,28 @@ contract SocketBatcher is AccessControl {
      * @notice attests a batch of Packets
      * @param attestRequests_ the list of requests with packets to be attested by switchboard in sequence
      */
-    function attestBatch(
-        address switchboardAddress_,
-        AttestRequest[] calldata attestRequests_
-    ) external {
-        uint256 attestRequestLength = attestRequests_.length;
-        for (uint256 index = 0; index < attestRequestLength; ) {
-            FastSwitchboard(switchboardAddress_).attest(
-                attestRequests_[index].packetId,
-                attestRequests_[index].proposalCount,
-                attestRequests_[index].root,
-                attestRequests_[index].signature
-            );
-            unchecked {
-                ++index;
-            }
-        }
+    function attestBatch(AttestRequest[] calldata attestRequests_) external {
+        _attestBatch(attestRequests_);
+    }
+
+    /**
+     * @notice send a batch of propose, attest and execute transactions
+     * @param socketAddress_ address of socket
+     * @param proposeRequests_ the list of requests with packets to be proposed
+     * @param attestRequests_ the list of requests with packets to be attested by switchboard
+     * @param executeRequests_ the list of requests with messages to be executed
+     */
+    function sendBatch(
+        address socketAddress_,
+        SealRequest[] calldata sealRequests_,
+        ProposeRequest[] calldata proposeRequests_,
+        AttestRequest[] calldata attestRequests_,
+        ExecuteRequest[] calldata executeRequests_
+    ) external payable {
+        _sealBatch(socketAddress_, sealRequests_);
+        _proposeBatch(socketAddress_, proposeRequests_);
+        _attestBatch(attestRequests_);
+        _executeBatch(socketAddress_, executeRequests_);
     }
 
     /**
@@ -363,10 +412,10 @@ contract SocketBatcher is AccessControl {
      * @param socketAddress_ address of socket
      * @param executeRequests_ the list of requests with messages to be executed in sequence
      */
-    function executeBatch(
+    function _executeBatch(
         address socketAddress_,
         ExecuteRequest[] calldata executeRequests_
-    ) external payable {
+    ) internal {
         uint256 executeRequestLength = executeRequests_.length;
         uint256 totalMsgValue = msg.value;
         for (uint256 index = 0; index < executeRequestLength; ) {
@@ -392,6 +441,18 @@ contract SocketBatcher is AccessControl {
         if (totalMsgValue > 0) {
             SafeTransferLib.safeTransferETH(msg.sender, totalMsgValue);
         }
+    }
+
+    /**
+     * @notice executes a batch of messages
+     * @param socketAddress_ address of socket
+     * @param executeRequests_ the list of requests with messages to be executed in sequence
+     */
+    function executeBatch(
+        address socketAddress_,
+        ExecuteRequest[] calldata executeRequests_
+    ) external payable {
+        _executeBatch(socketAddress_, executeRequests_);
     }
 
     /**
