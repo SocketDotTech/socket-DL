@@ -6,6 +6,7 @@ import "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 import "../libraries/RescueFundsLib.sol";
 import "../utils/AccessControl.sol";
 import "../interfaces/ISocket.sol";
+import "../interfaces/ICapacitor.sol";
 import "../switchboard/default-switchboards/FastSwitchboard.sol";
 import "../interfaces/INativeRelay.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
@@ -498,6 +499,30 @@ contract SocketBatcher is AccessControl {
             }
         }
         return proposalCounts;
+    }
+
+    /**
+     * @notice returns root for capacitorAddress and count
+     * @param capacitorAddresses_ addresses of capacitor
+     * @param packetCounts_ the list of packetCounts
+     */
+    function getPacketRootBatch(
+        address[] calldata capacitorAddresses_,
+        uint64[] calldata packetCounts_
+    ) external view returns (bytes32[] memory) {
+        uint256 capacitorAddressesLength = capacitorAddresses_.length;
+
+        bytes32[] memory packetRoots = new bytes32[](capacitorAddressesLength);
+
+        for (uint256 index = 0; index < capacitorAddressesLength; ) {
+            packetRoots[index] = ICapacitor(capacitorAddresses_[index]).getRootByCount(
+                packetCounts_[index]
+            );
+            unchecked {
+                ++index;
+            }
+        }
+        return packetRoots;
     }
 
     /**
