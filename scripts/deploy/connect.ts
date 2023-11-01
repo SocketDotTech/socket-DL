@@ -46,10 +46,7 @@ export const main = async () => {
 
         const siblingIntegrationtype: IntegrationTypes[] = siblingSlugs.map(
           (chainSlug) => {
-            return getDefaultIntegrationType(
-              ChainSlugToKey[chain],
-              ChainSlugToKey[chainSlug]
-            );
+            return getDefaultIntegrationType(chain, chainSlug);
           }
         );
 
@@ -66,12 +63,18 @@ export const main = async () => {
         for (let index = 0; index < siblingSlugs.length; index++) {
           const sibling = siblingSlugs[index];
           const siblingCounter = addresses?.[sibling]?.["Counter"];
-          const switchboard = getSwitchboardAddress(
-            chain,
-            sibling,
-            siblingIntegrationtype[index],
-            mode
-          );
+          let switchboard;
+          try {
+            switchboard = getSwitchboardAddress(
+              chain,
+              sibling,
+              siblingIntegrationtype[index],
+              mode
+            );
+          } catch (error) {
+            console.log(error, " continuing");
+          }
+          if (!switchboard) continue;
 
           const configs = await socket.getPlugConfig(counter.address, sibling);
           if (
