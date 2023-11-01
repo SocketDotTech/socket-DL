@@ -22,7 +22,7 @@ import "../contracts/capacitors/HashChainCapacitor.sol";
 import "../contracts/decapacitors/HashChainDecapacitor.sol";
 
 contract Setup is Test {
-    uint256 internal c = 1;
+    uint256 internal c = 1000;
     uint32 internal aChainSlug = uint32(uint256(0x2013AA262));
     uint32 internal bChainSlug = uint32(uint256(0x2013AA263));
     uint32 internal cChainSlug = uint32(uint256(0x2013AA264));
