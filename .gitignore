@@ -22,3 +22,7 @@ scripts/deploy/gasEstimate.ts
 
 # coverage
 lcov.info
+
+dev_switchboards.json
+prod_switchboards.json
+switchboards.json

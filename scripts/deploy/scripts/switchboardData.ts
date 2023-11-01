@@ -100,7 +100,7 @@ export const getSwitchboardData = async () => {
   );
   console.log("total switchboards: ", switchboards.length);
   fs.writeFileSync(
-    "./switchboards.json",
+    `./${mode}_switchboards.json`,
     JSON.stringify(switchboards, null, 2)
   );
 };
