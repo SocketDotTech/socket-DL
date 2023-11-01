@@ -98,7 +98,7 @@
     "FastSwitchboard2": "0x6B5b7402e5bA4732D8A231552144384FC369Ce5e",
     "OptimisticSwitchboard": "0x3DFDc6DFa41FA64aa3a879254B41517e5ba50c56",
     "Counter": "0xEA33a8f11A719d728A42Ff5A860eBd7620683433",
-    "SocketBatcher": "0xB5f289a6Af87A65fddF1a7068F556E7d669c0D4b"
+    "SocketBatcher": "0x5a23e41c1ff969244eE2A5D563519b170F143AcD"
   },
   "10": {
     "SignatureVerifier": "0xbb1f202095BE99000038D8d207C7E6f0F85a3925",
@@ -448,7 +448,7 @@
     "FastSwitchboard2": "0x7bFeb0bf17Da2eCFD3d897f11f87e0b80b3e5303",
     "OptimisticSwitchboard": "0xDFbf47607FBA3707E69B16576F653154a92d9B96",
     "Counter": "0x9d10C5D68C0878Ba255E62b3f2051f22E43A9b2f",
-    "SocketBatcher": "0xb80d97657277e24d70caee6dEF92BFaa7D884A7f"
+    "SocketBatcher": "0xE0DD154111D407Db671eAeC703CF472d3a2c5333"
   },
   "901": {
     "SignatureVerifier": "0x19791877C020f7Cd5Ca1c97bdd5D268a52dbB0ff",
@@ -534,7 +534,7 @@
     "FastSwitchboard2": "0xB39Cb89dfD708115616fdA1a2735613931B14181",
     "OptimisticSwitchboard": "0x1d6E46fd4DFdfe063f9096Dc2C0862D36A25b1aD",
     "Counter": "0xfCa282147D5E9b14c208D09dbEbC7Eb5C3814dC5",
-    "SocketBatcher": "0xb2dA552c9Baa0e15b13302aBBF7B555aBc8eE4E8"
+    "SocketBatcher": "0xe54f19dCD6f855296F57BC26a899f278E369464e"
   },
   "2999": {
     "SignatureVerifier": "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
@@ -796,7 +796,7 @@
     "FastSwitchboard2": "0xedAC223C3Fe694A6d4c8407b4f6e95c299d6Eba6",
     "OptimisticSwitchboard": "0x6977afB0d9F041327D2C7d1E9d412685C1B202ea",
     "Counter": "0xAf8FcDA8536eBA1dDf2e6F8E405ADAd5C44b8568",
-    "SocketBatcher": "0x4941AE128a3d0d276d5ABA751B596f1173b2b762"
+    "SocketBatcher": "0x60dB9641eFee65c437aD8a44D3CEc7fB7934eD9c"
   },
   "421613": {
     "SignatureVerifier": "0x52e987409522F2abeaD9A66B87B8914Dc5A071D9",
@@ -887,7 +887,7 @@
     "FastSwitchboard2": "0xB73f329E38265E6a619eeC198A8eC4DB0b9ebe21",
     "OptimisticSwitchboard": "0xb56e8417755685E6d01A11598f6a1229F11Cc9b5",
     "Counter": "0x07680Ca88B8Df538A5aB564BBBD3E4F3aBbF97eE",
-    "SocketBatcher": "0x3F8cdB2F8F61c31855cA6314FFA480F4dEe9574f"
+    "SocketBatcher": "0x762769E24b61800682B7a66C83835f9C23FB9955"
   },
   "11155111": {
     "SignatureVerifier": "0x10d9DA6AE85eff6D582A91829f78bde2a3EC2dCC",
@@ -899,8 +899,8 @@
     "integrations": {},
     "FastSwitchboard2": "0x501fCBa3e6F92b2D1d89038FeD56EdacaaF5f7c2",
     "OptimisticSwitchboard": "0xd84fabe06806270Fb2dDFC2255102206e3B36865",
-    "SocketBatcher": "0xBc3Ff3923b36F1590C16363b09c4759654d7B6d4",
-    "Counter": "0xE593288228d17a6D057D9a61a35F32166A6B4191"
+    "Counter": "0xE593288228d17a6D057D9a61a35F32166A6B4191",
+    "SocketBatcher": "0x6ba1161bbBC353F4173eB9f785E3A0513264769d"
   },
   "11155112": {
     "SignatureVerifier": "0x7E3D0FAC82b9d5a67906f7028Aa4a70d582011b2",
@@ -986,7 +986,7 @@
     "FastSwitchboard2": "0x61438D1E9C9127F4996E2f74bb7BF62CC7f9B32F",
     "OptimisticSwitchboard": "0xFCd8ebA25c0e0973Fd131b6bF77fd8dAEcCaC75B",
     "Counter": "0x21abD53f1150b6DFA1111E4F2b7536F6eaA48538",
-    "SocketBatcher": "0xd17A64B37b432Bc344420D12eD086c5E6BEC1a30"
+    "SocketBatcher": "0xaE966C37eAb996B2bA55f0b3caD61564EBD691Fa"
   },
   "1399904803": {
     "SignatureVerifier": "0x03D51955216a7E6F301e0613515fA86A6f3d59A9",
@@ -997,7 +997,6 @@
     "TransmitManager": "0x0777Ab388f065FC3CdB96008C701751827Ee171B",
     "FastSwitchboard2": "0x2735d5B15066049a709e680b2D400155aA5A91BE",
     "OptimisticSwitchboard": "0x59AcE34e5c47aEe3ec8feF2A89DcF14Ac98538C9",
-    "SocketBatcher": "0x0B35F40f13C3641bDed7654C9a7620cFa312aA7a",
     "Counter": "0x91C27Cad374246314E756f8Aa2f62F433d6F102C",
     "integrations": {
       "5": {
@@ -1072,6 +1071,7 @@
           "switchboard": "0x59AcE34e5c47aEe3ec8feF2A89DcF14Ac98538C9"
         }
       }
-    }
+    },
+    "SocketBatcher": "0xaa95869960B4f783b17410a7E9e4b91DA3b371C4"
   }
 }
