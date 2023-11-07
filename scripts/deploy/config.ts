@@ -47,6 +47,8 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.LYRA,
   ChainSlug.BSC,
   ChainSlug.POLYGON_MAINNET,
+  ChainSlug.XAI_TESTNET,
+  ChainSlug.SX_NETWORK_TESTNET,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;

@@ -63,6 +63,9 @@ if (isProduction) {
     [HardhatChainName.AEVO]: getChainConfig(ChainId.AEVO),
     [HardhatChainName.LYRA_TESTNET]: getChainConfig(ChainId.LYRA_TESTNET),
     [HardhatChainName.XAI_TESTNET]: getChainConfig(ChainId.XAI_TESTNET),
+    [HardhatChainName.SX_NETWORK_TESTNET]: getChainConfig(
+      ChainId.SX_NETWORK_TESTNET
+    ),
   };
 }
 
@@ -89,6 +92,7 @@ const config: HardhatUserConfig = {
       aevoTestnet: process.env.AEVO_API_KEY || "",
       lyraTestnet: process.env.LYRA_API_KEY || "",
       xaiTestnet: process.env.XAI_API_KEY || "",
+      sxnTestnet: process.env.SX_NETWORK_API_KEY || "",
     },
     customChains: [
       {
