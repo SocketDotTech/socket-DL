@@ -14,24 +14,13 @@ import {
   isTestnet,
   isMainnet,
   getAddresses,
-} from "../../src";
-import { getRoleHash, getChainRoleHash } from "./utils";
+} from "../../../src";
+import { getRoleHash, getChainRoleHash } from "../utils";
 import { Contract, Wallet, ethers } from "ethers";
-import { getABI } from "./scripts/getABIs";
-import { getProviderFromChainSlug } from "../constants";
-import {
-  executorAddresses,
-  filterChains,
-  filterSiblingChains,
-  mode,
-  newRoleStatus,
-  sendTransaction,
-  socketOwner,
-  transmitterAddresses,
-  watcherAddresses,
-  executionManagerVersion,
-} from "./config";
-import { overrides } from "./config";
+import { getABI } from "../utils/getABIs";
+import { getProviderFromChainSlug } from "../../constants";
+import { filterChains, mode } from "../config";
+import { overrides } from "../config";
 
 let roleStatus: any = {};
 
@@ -289,9 +278,9 @@ export const checkNativeSwitchboardRoles = async ({
   );
 };
 
-let summary: { params: any; roleStatus: any }[] = [];
-
-export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
+export const checkAndUpdateRoles = async (
+  params: checkAndUpdateRolesObj
+): Promise<{ params: checkAndUpdateRolesObj; roleStatus: any }> => {
   try {
     let {
       sendTransaction,
@@ -320,7 +309,7 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
 
         // console.log(
         //   "============= checking for network: ",
-        //   ChainSlugToKey[chainSlug],
+        //   ChainSlugToKey(chainSlug),
         //   "================="
         // );
         let addresses: ChainSocketAddresses | undefined;
@@ -510,217 +499,9 @@ export const checkAndUpdateRoles = async (params: checkAndUpdateRolesObj) => {
     if (sendTransaction)
       await executeTransactions(activeChainSlugs, newRoleStatus);
 
-    summary.push({ params, roleStatus });
+    return { params, roleStatus };
   } catch (error) {
     console.log("Error while checking roles", error);
     throw error;
   }
 };
-
-const main = async () => {
-  let ownerAddress = socketOwner;
-  let executorAddress = executorAddresses[mode];
-  let transmitterAddress = transmitterAddresses[mode];
-  let watcherAddress = watcherAddresses[mode];
-
-  // Grant rescue,withdraw and governance role for Execution Manager to owner
-  await checkAndUpdateRoles({
-    userSpecificRoles: [
-      {
-        userAddress: ownerAddress,
-        filterRoles: [
-          ROLES.RESCUE_ROLE,
-          ROLES.GOVERNANCE_ROLE,
-          ROLES.WITHDRAW_ROLE,
-          ROLES.FEES_UPDATER_ROLE,
-        ],
-      },
-      {
-        userAddress: transmitterAddress,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
-      {
-        userAddress: executorAddress,
-        filterRoles: [ROLES.EXECUTOR_ROLE],
-      },
-    ],
-    contractName: executionManagerVersion,
-    filterChains,
-    filterSiblingChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
-  // Grant owner roles for TransmitManager
-  await checkAndUpdateRoles({
-    userSpecificRoles: [
-      {
-        userAddress: ownerAddress,
-        filterRoles: [
-          ROLES.RESCUE_ROLE,
-          ROLES.GOVERNANCE_ROLE,
-          ROLES.WITHDRAW_ROLE,
-          ROLES.FEES_UPDATER_ROLE,
-        ],
-      },
-      {
-        userAddress: transmitterAddress,
-        filterRoles: [ROLES.TRANSMITTER_ROLE, ROLES.FEES_UPDATER_ROLE],
-      },
-    ],
-    contractName: CORE_CONTRACTS.TransmitManager,
-    filterChains,
-    filterSiblingChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
-  // Grant owner roles in socket
-  await checkAndUpdateRoles({
-    userSpecificRoles: [
-      {
-        userAddress: ownerAddress,
-        filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
-      },
-    ],
-    contractName: CORE_CONTRACTS.Socket,
-    filterChains,
-    filterSiblingChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
-  // Setup Fast Switchboard roles except WATCHER
-  await checkAndUpdateRoles({
-    userSpecificRoles: [
-      {
-        userAddress: ownerAddress,
-        filterRoles: [
-          ROLES.RESCUE_ROLE,
-          ROLES.GOVERNANCE_ROLE,
-          ROLES.TRIP_ROLE,
-          ROLES.UN_TRIP_ROLE,
-          ROLES.WITHDRAW_ROLE,
-          ROLES.FEES_UPDATER_ROLE,
-        ],
-      },
-      {
-        userAddress: transmitterAddress,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
-      {
-        userAddress: watcherAddress,
-        filterRoles: [ROLES.WATCHER_ROLE],
-      },
-    ],
-
-    contractName: CORE_CONTRACTS.FastSwitchboard,
-    filterChains,
-    filterSiblingChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
-  // Setup Fast Switchboard2 roles except WATCHER
-  await checkAndUpdateRoles({
-    userSpecificRoles: [
-      {
-        userAddress: ownerAddress,
-        filterRoles: [
-          ROLES.RESCUE_ROLE,
-          ROLES.GOVERNANCE_ROLE,
-          ROLES.TRIP_ROLE,
-          ROLES.UN_TRIP_ROLE,
-          ROLES.WITHDRAW_ROLE,
-          ROLES.FEES_UPDATER_ROLE,
-        ],
-      },
-      {
-        userAddress: transmitterAddress,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
-      {
-        userAddress: watcherAddress,
-        filterRoles: [ROLES.WATCHER_ROLE],
-      },
-    ],
-
-    contractName: CORE_CONTRACTS.FastSwitchboard2,
-    filterChains,
-    filterSiblingChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
-  // Grant watcher role to watcher for OptimisticSwitchboard
-  await checkAndUpdateRoles({
-    userSpecificRoles: [
-      {
-        userAddress: ownerAddress,
-        filterRoles: [
-          ROLES.TRIP_ROLE,
-          ROLES.UN_TRIP_ROLE,
-          ROLES.RESCUE_ROLE,
-          ROLES.GOVERNANCE_ROLE,
-          ROLES.FEES_UPDATER_ROLE,
-        ],
-      },
-      {
-        userAddress: transmitterAddress,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE], // all roles
-      },
-      {
-        userAddress: watcherAddress,
-        filterRoles: [ROLES.WATCHER_ROLE],
-      },
-    ],
-    contractName: CORE_CONTRACTS.OptimisticSwitchboard,
-    filterChains,
-    filterSiblingChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
-  // Grant owner roles in NativeSwitchboard
-  await checkAndUpdateRoles({
-    userSpecificRoles: [
-      {
-        userAddress: ownerAddress,
-        filterRoles: [
-          ROLES.TRIP_ROLE,
-          ROLES.UN_TRIP_ROLE,
-          ROLES.GOVERNANCE_ROLE,
-          ROLES.WITHDRAW_ROLE,
-          ROLES.RESCUE_ROLE,
-          ROLES.FEES_UPDATER_ROLE,
-        ], // all roles
-      },
-      {
-        userAddress: transmitterAddress,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE], // all roles
-      },
-    ],
-    contractName: CORE_CONTRACTS.NativeSwitchboard,
-    filterChains,
-    filterSiblingChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-
-  console.log(
-    "=========================== SUMMARY ================================="
-  );
-
-  summary.forEach((result) => {
-    console.log("=============================================");
-    console.log("params:", result.params);
-    console.log("role status: ", JSON.stringify(result.roleStatus));
-  });
-};
-
-main()
-  .then(() => process.exit(0))
-  .catch((error: Error) => {
-    console.error(error);
-    process.exit(1);
-  });

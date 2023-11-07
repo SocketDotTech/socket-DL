@@ -3,7 +3,7 @@ import fs from "fs";
 
 import { deploymentsPath, verify } from "./utils/utils";
 import { mode } from "./config";
-import { HardhatChainName, ChainSlugToKey } from "../../src";
+import { HardhatChainName, ChainSlugToKey, ChainSlug } from "../../src";
 
 export type VerifyParams = {
   [chain in HardhatChainName]?: VerifyArgs[];
@@ -27,7 +27,7 @@ export const main = async () => {
     if (!chains) return;
 
     for (let chainIndex = 0; chainIndex < chains.length; chainIndex++) {
-      const chain = chains[chainIndex];
+      const chain = parseInt(chains[chainIndex]) as ChainSlug;
 
       hre.changeNetwork(ChainSlugToKey[chain]);
       const chainParams: VerifyArgs[] = verificationParams[chain];

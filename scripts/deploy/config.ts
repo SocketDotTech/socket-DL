@@ -3,6 +3,8 @@ dotenvConfig();
 
 import { ChainSlug, DeploymentMode, CORE_CONTRACTS, version } from "../../src";
 import { BigNumberish, utils } from "ethers";
+import { chainConfig } from "../../chainConfig";
+
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
@@ -28,14 +30,16 @@ console.log(
 );
 
 export const chains: Array<ChainSlug> = [
-  // ChainSlug.GOERLI,
+  ChainSlug.GOERLI,
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.POLYGON_MUMBAI,
+  ChainSlug.SX_NETWORK_TESTNET,
   ChainSlug.BSC_TESTNET,
   ChainSlug.AEVO_TESTNET,
   ChainSlug.LYRA_TESTNET,
   ChainSlug.SEPOLIA,
+  ChainSlug.XAI_TESTNET,
   ChainSlug.AEVO,
   ChainSlug.MAINNET,
   ChainSlug.ARBITRUM,
@@ -60,24 +64,11 @@ export const gasLimit = undefined;
 export const gasPrice = undefined;
 export const type = 0;
 
-export const msgValueMaxThreshold: { [chain in ChainSlug]?: BigNumberish } = {
-  [ChainSlug.ARBITRUM_GOERLI]: utils.parseEther("0.001"),
-  [ChainSlug.OPTIMISM_GOERLI]: utils.parseEther("0.001"),
-  [ChainSlug.POLYGON_MUMBAI]: utils.parseEther("0.1"),
-  [ChainSlug.BSC_TESTNET]: utils.parseEther("0.001"),
-  [ChainSlug.GOERLI]: utils.parseEther("0.001"),
-  [ChainSlug.SEPOLIA]: utils.parseEther("0.001"),
-  [ChainSlug.ARBITRUM]: utils.parseEther("0.001"),
-  [ChainSlug.OPTIMISM]: utils.parseEther("0.001"),
-  [ChainSlug.POLYGON_MAINNET]: utils.parseEther("0.1"),
-  [ChainSlug.BSC]: utils.parseEther("0.001"),
-  [ChainSlug.MAINNET]: utils.parseEther("0.001"),
-  [ChainSlug.AEVO_TESTNET]: utils.parseEther("0.001"),
-  [ChainSlug.AEVO]: utils.parseEther("0.001"),
-  [ChainSlug.LYRA_TESTNET]: utils.parseEther("0.001"),
-  [ChainSlug.LYRA]: utils.parseEther("0.001"),
-  [ChainSlug.XAI_TESTNET]: utils.parseEther("0.001"),
-  [ChainSlug.SX_NETWORK_TESTNET]: utils.parseEther("0.001"),
+const MSG_VALUE_MAX_THRESHOLD = utils.parseEther("0.001");
+export const msgValueMaxThreshold = (chain: ChainSlug): BigNumberish => {
+  if (chainConfig[chain] && chainConfig[chain].msgValueMaxThreshold)
+    return chainConfig[chain].msgValueMaxThreshold!;
+  return MSG_VALUE_MAX_THRESHOLD;
 };
 
 export const transmitterAddresses = {
@@ -99,96 +90,15 @@ export const executorAddresses = {
   [DeploymentMode.PROD]: "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
 };
 
-export const overrides: {
-  [chain in ChainSlug | number]?: {
-    type?: number | undefined;
-    gasLimit?: BigNumberish | undefined;
-    gasPrice?: BigNumberish | undefined;
-  };
-} = {
-  [ChainSlug.ARBITRUM]: {
-    type,
-    gasLimit: 20_000_000,
-    gasPrice,
-  },
-  [ChainSlug.ARBITRUM_GOERLI]: {
-    // type,
-    // gasLimit: 20_000_000,
-    // gasPrice,
-  },
-  [ChainSlug.OPTIMISM]: {
-    type,
-    gasLimit: 2_000_000,
-    gasPrice,
-  },
-  [ChainSlug.OPTIMISM_GOERLI]: {
-    // type,
-    // gasLimit: 20_000_000,
-    // gasPrice,
-  },
-  [ChainSlug.BSC]: {
-    type,
-    gasLimit,
-    gasPrice,
-  },
-  [ChainSlug.BSC_TESTNET]: {
-    type,
-    gasLimit,
-    gasPrice,
-  },
-  [ChainSlug.MAINNET]: {
-    type,
-    gasLimit,
-    gasPrice,
-  },
-  [ChainSlug.GOERLI]: {
-    type,
-    gasLimit: 3_000_000,
-    gasPrice,
-  },
-  [ChainSlug.POLYGON_MAINNET]: {
-    type,
-    gasLimit,
-    gasPrice: 250_000_000_000,
-  },
-  [ChainSlug.POLYGON_MUMBAI]: {
-    type: 0,
-    gasLimit: 2_000_000,
-    gasPrice,
-  },
-  [ChainSlug.SEPOLIA]: {
-    type,
-    gasLimit,
-    gasPrice,
-  },
-  [ChainSlug.AEVO_TESTNET]: {
-    type: 2,
-    // gasLimit,
-    // gasPrice,
-  },
-  [ChainSlug.AEVO]: {
-    type: 1,
-    // gasLimit,
-    gasPrice: 100_000_000,
-  },
-  [ChainSlug.LYRA_TESTNET]: {
-    type: 2,
-    // gasLimit,
-    // gasPrice: 100_000_000,
-  },
-  [ChainSlug.LYRA]: {
-    // type: 1,
-    // gasLimit,
-    // gasPrice: 100_000_000,
-  },
-  [ChainSlug.XAI_TESTNET]: {
-    // type: 1,
-    // gasLimit,
-    // gasPrice: 100_000_000,
-  },
-  [ChainSlug.SX_NETWORK_TESTNET]: {
-    // type: 1,
-    // gasLimit,
-    // gasPrice: 100_000_000,
-  },
+export const overrides = (
+  chain: ChainSlug | number
+): {
+  type?: number | undefined;
+  gasLimit?: BigNumberish | undefined;
+  gasPrice?: BigNumberish | undefined;
+} => {
+  if (chainConfig[chain] && chainConfig[chain].overrides)
+    return chainConfig[chain].overrides!;
+
+  return { type, gasLimit, gasPrice };
 };

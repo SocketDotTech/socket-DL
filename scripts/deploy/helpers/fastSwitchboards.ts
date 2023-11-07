@@ -14,7 +14,7 @@ import {
   ChainSlug,
   IntegrationTypes,
 } from "../../../src";
-import deploySwitchboards from "./deploySwitchboard";
+import deploySwitchboards from "../scripts/deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { socketOwner, executionManagerVersion, mode, chains } from "../config";
 import {

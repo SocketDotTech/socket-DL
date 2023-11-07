@@ -439,10 +439,7 @@ export const main = async () => {
           remoteChain,
           localConfig,
           remoteConfig,
-          getDefaultIntegrationType(
-            ChainSlugToKey[chain],
-            ChainSlugToKey[remoteConfig]
-          )
+          getDefaultIntegrationType(chain, remoteConfig)
         );
         console.log("✅ Checked Counter");
 

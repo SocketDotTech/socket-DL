@@ -1,5 +1,5 @@
-npx hardhat run scripts/deploy/index.ts  && 
-npx ts-node scripts/deploy/checkRoles.ts --no-compile && 
-npx hardhat run scripts/deploy/configure.ts --no-compile && 
-npx hardhat run scripts/deploy/connect.ts --no-compile &&
-npx hardhat run scripts/deploy/verify.ts --no-compile
+npx hardhat run scripts/deploy/1-deploy.ts  && 
+npx ts-node scripts/deploy/2-check-roles.ts --no-compile && 
+npx hardhat run scripts/deploy/3-configure.ts --no-compile && 
+npx hardhat run scripts/deploy/4-connect.ts --no-compile &&
+npx hardhat run scripts/deploy/5-verify.ts --no-compile

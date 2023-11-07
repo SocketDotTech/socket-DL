@@ -44,7 +44,6 @@ export const setLimitsForAChainSlug = async (chainSlugCode: ChainSlug) => {
         const chainAddresses: ChainAddresses = values[i];
 
         const chainSlugCode = "optimism-goerli";
-        // ChainSlugToKey[dstChainId]
       }
 
       console.log(`-------------------------------------\n\n`);
@@ -58,9 +57,6 @@ export const setLimitsForAChainSlug = async (chainSlugCode: ChainSlug) => {
 // npx ts-node scripts/limits-updater/initLimits.ts
 export const setLimits = async () => {
   try {
-    // for (let chainSlugKey of chainSlugKeys) {
-    //   setLimitsForAChainSlug(chainSlugKey);
-    // }
     setLimitsForAChainSlug(ChainSlug.OPTIMISM_GOERLI);
   } catch (error) {
     console.log("Error while sending transaction", error);

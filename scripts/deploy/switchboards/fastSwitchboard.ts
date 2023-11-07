@@ -13,7 +13,7 @@ export const fastSwitchboard = (
       signerAddress,
       socketAddress,
       chainSlug,
-      timeout[chainSlug],
+      timeout(chainSlug),
       sigVerifierAddress,
     ],
     path: "contracts/switchboard/default-switchboards/FastSwitchboard.sol",

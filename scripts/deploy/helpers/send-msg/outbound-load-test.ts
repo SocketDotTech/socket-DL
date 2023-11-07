@@ -7,12 +7,17 @@ import { ethers } from "ethers";
 import { Contract } from "ethers";
 require("dotenv").config();
 import yargs from "yargs";
-import { getProviderFromChainSlug } from "../../constants";
-import SocketABI from "../../../out/Socket.sol/Socket.json";
+import { getProviderFromChainSlug } from "../../../constants";
+import SocketABI from "../../../../out/Socket.sol/Socket.json";
 
 import path from "path";
-import { mode } from "../config";
-import { CORE_CONTRACTS, hardhatChainNameToSlug } from "../../../src";
+import { mode } from "../../config";
+import {
+  CORE_CONTRACTS,
+  ChainSlug,
+  HardhatChainName,
+  hardhatChainNameToSlug,
+} from "../../../../src";
 
 const deployedAddressPath = path.join(
   __dirname,
@@ -102,7 +107,7 @@ export const main = async () => {
         },
       }).argv;
 
-    const chain = argv.chain as keyof typeof hardhatChainNameToSlug;
+    const chain = argv.chain as HardhatChainName;
     const chainSlug = hardhatChainNameToSlug[chain];
 
     const providerInstance = getProviderFromChainSlug(chainSlug);
@@ -112,7 +117,7 @@ export const main = async () => {
       providerInstance
     );
 
-    const remoteChain = argv.remoteChain as keyof typeof hardhatChainNameToSlug;
+    const remoteChain = argv.remoteChain as HardhatChainName;
     remoteChainSlug = hardhatChainNameToSlug[remoteChain];
 
     const numOfRequests = argv.numOfRequests as number;

@@ -5,9 +5,9 @@ import fs from "fs";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { utils, constants } from "ethers";
-import { getInstance, getChainSlug, deployedAddressPath } from "../utils";
+import { getInstance, getChainSlug, deployedAddressPath } from "../../utils";
 import { Contract } from "ethers";
-import { mode } from "../config";
+import { mode } from "../../config";
 
 const remoteChainSlug = "";
 

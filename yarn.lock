@@ -1001,10 +1001,10 @@
   resolved "https://registry.npmjs.org/@sindresorhus/is/-/is-4.6.0.tgz"
   integrity sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==
 
-"@socket.tech/dl-core@2.4.5":
-  version "2.4.5"
-  resolved "https://registry.yarnpkg.com/@socket.tech/dl-core/-/dl-core-2.4.5.tgz#93097e084fd4abbff7c8d00e8c37af006b83ce83"
-  integrity sha512-i9elPjrkbRZ1sUlvxNbhtDU7R+Yx7nIhoo4OVHDVqSSMtSrXdSVmQAMMiFdCoQP/NeV532aXIDo/PILo3PHEOw==
+"@socket.tech/dl-core@2.4.9":
+  version "2.4.9"
+  resolved "https://registry.yarnpkg.com/@socket.tech/dl-core/-/dl-core-2.4.9.tgz#4d12ff34148bfcef85cb3c0240e941fee4d01027"
+  integrity sha512-nbuid8aq+cfYubU8mLtw2mZaZKjk9ZUsEcenpFF8EvvuS4YAriLoo0lOiGYRqXZNNfogh6wsXj4EbbXwxs7hGw==
   dependencies:
     axios "^1.3.6"
     yargs "^17.7.1"

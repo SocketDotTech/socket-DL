@@ -1,20 +1,19 @@
 import { ethers } from "hardhat";
 import { Wallet } from "ethers";
-import { ReturnObj, deploySocket } from "./scripts/deploySocket";
-import { getProviderFromChainSlug } from "../constants";
+import { ReturnObj, deploySocket } from "../scripts/deploySocket";
+import { getProviderFromChainSlug } from "../../constants";
 import {
   ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
   getAllAddresses,
-  ChainSlugToKey,
-} from "../../src";
-import { chains, mode } from "./config";
+} from "../../../src";
+import { mode } from "../config";
 
-/**
- * Deploys network-independent socket contracts
- */
-export const main = async () => {
+export const deployForChains = async (
+  chains: ChainSlug[]
+): Promise<ChainSocketAddresses[]> => {
+  let deployedAddresses: ChainSocketAddresses[] = [];
   try {
     let addresses: DeploymentAddresses;
     try {
@@ -47,17 +46,14 @@ export const main = async () => {
 
           allDeployed = results.allDeployed;
           chainAddresses = results.deployedAddresses;
+
+          deployedAddresses[chain] = chainAddresses;
         }
       })
     );
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
   }
-};
 
-main()
-  .then(() => process.exit(0))
-  .catch((error: Error) => {
-    console.error(error);
-    process.exit(1);
-  });
+  return deployedAddresses;
+};

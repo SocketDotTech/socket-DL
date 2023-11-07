@@ -1,6 +1,7 @@
-import { DeploymentMode } from "./types";
+import { DeploymentMode } from "./socket-types";
 
-export * from "./types";
+export * from "./socket-types";
+export * from "./chain-types";
 export * from "./addresses";
 
 export const version = {

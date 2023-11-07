@@ -1,4 +1,4 @@
-import { ChainSlug } from "../../../src/types";
+import { ChainSlug } from "../../../src";
 import { bridgeConsts } from "../../constants";
 
 export const polygonL2Switchboard = (

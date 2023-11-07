@@ -5,7 +5,7 @@ import {
   DeploymentMode,
   IntegrationTypes,
   DeploymentAddresses,
-} from "./types";
+} from "./";
 
 import dev_addresses from "../deployments/dev_addresses.json";
 import prod_addresses from "../deployments/prod_addresses.json";
