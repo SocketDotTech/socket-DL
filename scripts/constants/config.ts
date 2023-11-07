@@ -23,8 +23,8 @@ export const getDefaultIntegrationType = (
 };
 
 export const switchboards = {
-  [ChainSlug.ARBITRUM_GOERLI]: {
-    [ChainSlug.GOERLI]: {
+  [ChainSlug.ARBITRUM_SEPOLIA]: {
+    [ChainSlug.SEPOLIA]: {
       switchboard: NativeSwitchboard.ARBITRUM_L2,
     },
   },
@@ -38,8 +38,8 @@ export const switchboards = {
       switchboard: NativeSwitchboard.OPTIMISM,
     },
   },
-  [ChainSlug.OPTIMISM_GOERLI]: {
-    [ChainSlug.GOERLI]: {
+  [ChainSlug.OPTIMISM_SEPOLIA]: {
+    [ChainSlug.SEPOLIA]: {
       switchboard: NativeSwitchboard.OPTIMISM,
     },
   },
@@ -54,14 +54,16 @@ export const switchboards = {
     },
   },
   [ChainSlug.GOERLI]: {
-    [ChainSlug.ARBITRUM_GOERLI]: {
-      switchboard: NativeSwitchboard.ARBITRUM_L1,
-    },
-    [ChainSlug.OPTIMISM_GOERLI]: {
-      switchboard: NativeSwitchboard.OPTIMISM,
-    },
     [ChainSlug.POLYGON_MUMBAI]: {
       switchboard: NativeSwitchboard.POLYGON_L1,
+    },
+  },
+  [ChainSlug.SEPOLIA]: {
+    [ChainSlug.ARBITRUM_SEPOLIA]: {
+      switchboard: NativeSwitchboard.ARBITRUM_L1,
+    },
+    [ChainSlug.OPTIMISM_SEPOLIA]: {
+      switchboard: NativeSwitchboard.OPTIMISM,
     },
   },
   [ChainSlug.MAINNET]: {

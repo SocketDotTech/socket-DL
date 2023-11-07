@@ -7,8 +7,10 @@
 export enum HardhatChainName {
   ARBITRUM = "arbitrum",
   ARBITRUM_GOERLI = "arbitrum-goerli",
+  ARBITRUM_SEPOLIA = "arbitrum-sepolia",
   OPTIMISM = "optimism",
   OPTIMISM_GOERLI = "optimism-goerli",
+  OPTIMISM_SEPOLIA = "optimism-sepolia",
   AVALANCHE = "avalanche",
   AVALANCHE_TESTNET = "avalanche-testnet",
   BSC = "bsc",
@@ -24,14 +26,17 @@ export enum HardhatChainName {
   LYRA = "lyra",
   XAI_TESTNET = "xai_testnet",
   SX_NETWORK_TESTNET = "sxn_testnet",
+  CDK_TESTNET = "cdk_testnet",
   HARDHAT = "hardhat",
 }
 
 export enum ChainId {
   ARBITRUM = 42161,
   ARBITRUM_GOERLI = 421613,
+  ARBITRUM_SEPOLIA = 421614,
   OPTIMISM = 10,
   OPTIMISM_GOERLI = 420,
+  OPTIMISM_SEPOLIA = 11155420,
   BSC = 56,
   BSC_TESTNET = 97,
   MAINNET = 1,
@@ -46,14 +51,17 @@ export enum ChainId {
   LYRA_TESTNET = 901,
   LYRA = 0, // update this
   XAI_TESTNET = 47279324479,
+  CDK_TESTNET = 686669576,
   SX_NETWORK_TESTNET = 647,
 }
 
 export enum ChainSlug {
   ARBITRUM = ChainId.ARBITRUM,
   ARBITRUM_GOERLI = ChainId.ARBITRUM_GOERLI,
+  ARBITRUM_SEPOLIA = ChainId.ARBITRUM_SEPOLIA,
   OPTIMISM = ChainId.OPTIMISM,
   OPTIMISM_GOERLI = ChainId.OPTIMISM_GOERLI,
+  OPTIMISM_SEPOLIA = ChainId.OPTIMISM_SEPOLIA,
   BSC = ChainId.BSC,
   BSC_TESTNET = ChainId.BSC_TESTNET,
   MAINNET = ChainId.MAINNET,
@@ -69,13 +77,16 @@ export enum ChainSlug {
   LYRA = ChainId.LYRA,
   XAI_TESTNET = 1399904803,
   SX_NETWORK_TESTNET = ChainId.SX_NETWORK_TESTNET,
+  CDK_TESTNET = ChainId.CDK_TESTNET,
 }
 
 export const hardhatChainNameToSlug = {
   [HardhatChainName.ARBITRUM]: ChainSlug.ARBITRUM,
   [HardhatChainName.ARBITRUM_GOERLI]: ChainSlug.ARBITRUM_GOERLI,
+  [HardhatChainName.ARBITRUM_SEPOLIA]: ChainSlug.ARBITRUM_SEPOLIA,
   [HardhatChainName.OPTIMISM]: ChainSlug.OPTIMISM,
   [HardhatChainName.OPTIMISM_GOERLI]: ChainSlug.OPTIMISM_GOERLI,
+  [HardhatChainName.OPTIMISM_SEPOLIA]: ChainSlug.OPTIMISM_SEPOLIA,
   [HardhatChainName.BSC]: ChainSlug.BSC,
   [HardhatChainName.BSC_TESTNET]: ChainSlug.BSC_TESTNET,
   [HardhatChainName.MAINNET]: ChainSlug.MAINNET,
@@ -91,13 +102,16 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.LYRA]: ChainSlug.LYRA,
   [HardhatChainName.XAI_TESTNET]: ChainSlug.XAI_TESTNET,
   [HardhatChainName.SX_NETWORK_TESTNET]: ChainSlug.SX_NETWORK_TESTNET,
+  [HardhatChainName.CDK_TESTNET]: ChainSlug.CDK_TESTNET,
 };
 
 export const ChainSlugToKey = {
   [ChainSlug.ARBITRUM]: HardhatChainName.ARBITRUM,
   [ChainSlug.ARBITRUM_GOERLI]: HardhatChainName.ARBITRUM_GOERLI,
+  [ChainSlug.ARBITRUM_SEPOLIA]: HardhatChainName.ARBITRUM_SEPOLIA,
   [ChainSlug.OPTIMISM]: HardhatChainName.OPTIMISM,
   [ChainSlug.OPTIMISM_GOERLI]: HardhatChainName.OPTIMISM_GOERLI,
+  [ChainSlug.OPTIMISM_SEPOLIA]: HardhatChainName.OPTIMISM_SEPOLIA,
   [ChainSlug.BSC]: HardhatChainName.BSC,
   [ChainSlug.BSC_TESTNET]: HardhatChainName.BSC_TESTNET,
   [ChainSlug.MAINNET]: HardhatChainName.MAINNET,
@@ -113,6 +127,7 @@ export const ChainSlugToKey = {
   [ChainSlug.LYRA]: HardhatChainName.LYRA,
   [ChainSlug.XAI_TESTNET]: HardhatChainName.XAI_TESTNET,
   [ChainSlug.SX_NETWORK_TESTNET]: HardhatChainName.SX_NETWORK_TESTNET,
+  [ChainSlug.CDK_TESTNET]: HardhatChainName.CDK_TESTNET,
 };
 
 export const TestnetIds: ChainSlug[] = [
@@ -120,12 +135,15 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.SEPOLIA,
   ChainSlug.POLYGON_MUMBAI,
   ChainSlug.ARBITRUM_GOERLI,
+  ChainSlug.ARBITRUM_SEPOLIA,
   ChainSlug.OPTIMISM_GOERLI,
+  ChainSlug.OPTIMISM_SEPOLIA,
   ChainSlug.BSC_TESTNET,
   ChainSlug.AEVO_TESTNET,
   ChainSlug.LYRA_TESTNET,
   ChainSlug.XAI_TESTNET,
   ChainSlug.SX_NETWORK_TESTNET,
+  ChainSlug.CDK_TESTNET,
 ];
 
 export const MainnetIds: ChainSlug[] = [

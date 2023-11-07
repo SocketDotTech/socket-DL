@@ -56,6 +56,7 @@ export const getSwitchboardDeployData = (
     } else if (switchboardType === NativeSwitchboard.OPTIMISM) {
       return optimismSwitchboard(
         localChain,
+        remoteChain,
         socketAddress,
         sigVerifierAddress,
         signerAddress
