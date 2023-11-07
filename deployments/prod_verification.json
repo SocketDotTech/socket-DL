@@ -1,6 +1,12 @@
 {
   "5": [
     [
+      "0x64b3149a51795e4Bd85505087c2AAB3d9B50D957",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
       "0x5a23e41c1ff969244eE2A5D563519b170F143AcD",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
@@ -155,6 +161,12 @@
   ],
   "10": [
     [
+      "0x208cB87549740B4eb32043D0471A153ED1c54408",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
       "0x09A6e77912a6bcFc3abfDfb841A85380Bb2A8B97",
       "FastSwitchboard",
       "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
@@ -270,6 +282,12 @@
   ],
   "56": [
     [
+      "0x929625aCcE321770c747C38CC989B689EE823d90",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
       "0xCedce2e52aa6551bC407f640D8Bd9179b528347C",
       "FastSwitchboard",
       "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
@@ -371,6 +389,12 @@
     ]
   ],
   "137": [
+    [
+      "0x69Adf49285c25d9f840c577A0e3cb134caF944D3",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
     [
       "0x33918BBF9f5269d90b8c0AbF1Fd1134C827bA445",
       "FastSwitchboard",
@@ -485,6 +509,12 @@
     ]
   ],
   "420": [
+    [
+      "0x702dD708262D8Edb585814acaD5c976EBe978560",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
     [
       "0xE0DD154111D407Db671eAeC703CF472d3a2c5333",
       "SocketBatcher",
@@ -611,7 +641,21 @@
       ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
+  "647": [
+    [
+      "0x5D3F469BEA637c5017Df408fF25AA8B9BC6e6400",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ]
+  ],
   "901": [
+    [
+      "0x1D6811553Aff8231aDd04A84F300b89E15D99EA4",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
     [
       "0xe54f19dCD6f855296F57BC26a899f278E369464e",
       "SocketBatcher",
@@ -727,6 +771,12 @@
   ],
   "2999": [
     [
+      "0xffC2D8f660a5CC41273f1Db714EaEcd19D28d147",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
       "0x768A2A53e4318dA7714a0aA65a96D9A241603562",
       "FastSwitchboard",
       "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
@@ -828,6 +878,12 @@
     ]
   ],
   "42161": [
+    [
+      "0x107e182815C5e164E05F0C2CF478acE44FD468A8",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
     [
       "0xd5e829827F665c42326EAF68Da3360bd59b42f2f",
       "FastSwitchboard",
@@ -941,6 +997,12 @@
     ]
   ],
   "80001": [
+    [
+      "0x1F0F1FC746fcd4d59b6dBDDFf67a88cde70dAeE5",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
     [
       "0x60dB9641eFee65c437aD8a44D3CEc7fB7934eD9c",
       "SocketBatcher",
@@ -1068,6 +1130,12 @@
   ],
   "421613": [
     [
+      "0x7043637C53c7fFc96227a1943be0BeeA2baef242",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
       "0x762769E24b61800682B7a66C83835f9C23FB9955",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
@@ -1193,6 +1261,18 @@
   ],
   "11155111": [
     [
+      "0x2521b29FD8d3787Ab42141f55F6b462E6115C737",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ],
+    [
+      "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
       "0x6ba1161bbBC353F4173eB9f785E3A0513264769d",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
@@ -1300,6 +1380,12 @@
     ]
   ],
   "11155112": [
+    [
+      "0x2ddf16BA6d0180e5357d5e170eF1917a01b41fc0",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
     [
       "0xaE966C37eAb996B2bA55f0b3caD61564EBD691Fa",
       "SocketBatcher",
@@ -1414,6 +1500,12 @@
     ]
   ],
   "1399904803": [
+    [
+      "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
     [
       "0xaa95869960B4f783b17410a7E9e4b91DA3b371C4",
       "SocketBatcher",

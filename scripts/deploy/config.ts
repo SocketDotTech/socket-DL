@@ -44,6 +44,7 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.BSC,
   ChainSlug.POLYGON_MAINNET,
   ChainSlug.XAI_TESTNET,
+  ChainSlug.SX_NETWORK_TESTNET,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
@@ -76,6 +77,7 @@ export const msgValueMaxThreshold: { [chain in ChainSlug]?: BigNumberish } = {
   [ChainSlug.LYRA_TESTNET]: utils.parseEther("0.001"),
   [ChainSlug.LYRA]: utils.parseEther("0.001"),
   [ChainSlug.XAI_TESTNET]: utils.parseEther("0.001"),
+  [ChainSlug.SX_NETWORK_TESTNET]: utils.parseEther("0.001"),
 };
 
 export const transmitterAddresses = {
@@ -180,6 +182,11 @@ export const overrides: {
     // gasPrice: 100_000_000,
   },
   [ChainSlug.XAI_TESTNET]: {
+    // type: 1,
+    // gasLimit,
+    // gasPrice: 100_000_000,
+  },
+  [ChainSlug.SX_NETWORK_TESTNET]: {
     // type: 1,
     // gasLimit,
     // gasPrice: 100_000_000,
