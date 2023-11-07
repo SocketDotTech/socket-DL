@@ -50,15 +50,6 @@ export const main = async () => {
     if (!addresses || !addresses[sibling])
       throw new Error(`Sibling addresses not found! ${sibling}`);
 
-    // general configs for socket
-    await configureExecutionManager(
-      executionManagerVersion,
-      addresses[sibling]?.ExecutionManager!,
-      addresses[sibling]?.SocketBatcher!,
-      sibling,
-      [chain],
-      socketSigner
-    );
 
     addr = await registerSwitchboards(
       sibling,
