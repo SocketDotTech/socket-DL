@@ -43,6 +43,11 @@ export const switchboards = {
       switchboard: NativeSwitchboard.OPTIMISM,
     },
   },
+  [ChainSlug.LYRA_TESTNET]: {
+    [ChainSlug.SEPOLIA]: {
+      switchboard: NativeSwitchboard.OPTIMISM,
+    },
+  },
   [ChainSlug.POLYGON_MAINNET]: {
     [ChainSlug.MAINNET]: {
       switchboard: NativeSwitchboard.POLYGON_L2,
@@ -63,6 +68,9 @@ export const switchboards = {
       switchboard: NativeSwitchboard.ARBITRUM_L1,
     },
     [ChainSlug.OPTIMISM_SEPOLIA]: {
+      switchboard: NativeSwitchboard.OPTIMISM,
+    },
+    [ChainSlug.LYRA_TESTNET]: {
       switchboard: NativeSwitchboard.OPTIMISM,
     },
   },
