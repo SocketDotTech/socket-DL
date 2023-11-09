@@ -645,7 +645,8 @@ const main = async () => {
       },
     ],
 
-    contractName: CORE_CONTRACTS.FastSwitchboard2,
+    contractName: CORE_CONTRACTS.FastSwitchboard,
+    // contractName: CORE_CONTRACTS.FastSwitchboard2,
     filterChains,
     filterSiblingChains,
     sendTransaction,

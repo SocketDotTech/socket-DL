@@ -22,9 +22,11 @@ export default async function deploySwitchboards(
   mode: DeploymentMode
 ): Promise<ChainSocketAddresses> {
   let updatedConfig: any = sourceConfig;
-  if (!sourceConfig.FastSwitchboard2)
+  if (!sourceConfig.FastSwitchboard)
+  // if (!sourceConfig.FastSwitchboard2)
     updatedConfig = await deploySwitchboard(
-      IntegrationTypes.fast2,
+      IntegrationTypes.fast,
+      // IntegrationTypes.fast2,
       chainSlug,
       "",
       signer,
