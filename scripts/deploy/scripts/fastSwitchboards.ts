@@ -38,7 +38,7 @@ const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
       srcChainSlugs.map(async (chainSlug) => {
         let fastSwitchboardAddress =
           addresses[chainSlug as ChainSlug]?.FastSwitchboard;
-          // addresses[chainSlug as ChainSlug]?.FastSwitchboard2;
+        // addresses[chainSlug as ChainSlug]?.FastSwitchboard2;
         if (!fastSwitchboardAddress) return;
 
         let siblingChains = dstChainSlugs.filter((s) => chainSlug !== s);

@@ -136,7 +136,7 @@ export const main = async () => {
           );
 
           if (!siblingSwitchboard || !addr[CORE_CONTRACTS.FastSwitchboard])
-          // if (!siblingSwitchboard || !addr[CORE_CONTRACTS.FastSwitchboard2])
+            // if (!siblingSwitchboard || !addr[CORE_CONTRACTS.FastSwitchboard2])
             continue;
 
           addr = await registerSwitchboardForSibling(
