@@ -26,3 +26,4 @@ lcov.info
 dev_switchboards.json
 prod_switchboards.json
 switchboards.json
+chainConfig.ts
