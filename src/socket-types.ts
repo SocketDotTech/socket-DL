@@ -1,11 +1,17 @@
 import { ChainSlug, MainnetIds, TestnetIds } from "./chain-types";
 
-export const L1Ids: ChainSlug[] = [ChainSlug.MAINNET, ChainSlug.GOERLI];
+export const L1Ids: ChainSlug[] = [
+  ChainSlug.MAINNET,
+  ChainSlug.GOERLI,
+  ChainSlug.SEPOLIA,
+];
 
 export const L2Ids: ChainSlug[] = [
   ChainSlug.POLYGON_MUMBAI,
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.OPTIMISM_GOERLI,
+  ChainSlug.ARBITRUM_SEPOLIA,
+  ChainSlug.OPTIMISM_SEPOLIA,
   ChainSlug.POLYGON_MAINNET,
   ChainSlug.ARBITRUM,
   ChainSlug.OPTIMISM,

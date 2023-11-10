@@ -50,7 +50,6 @@ export const main = async () => {
     if (!addresses || !addresses[sibling])
       throw new Error(`Sibling addresses not found! ${sibling}`);
 
-
     addr = await registerSwitchboards(
       sibling,
       [chain],

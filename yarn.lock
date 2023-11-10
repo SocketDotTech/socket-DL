@@ -2,14 +2,15 @@
 # yarn lockfile v1
 
 
-"@arbitrum/sdk@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.npmjs.org/@arbitrum/sdk/-/sdk-3.0.0.tgz"
-  integrity sha512-Mws5WAxxirp3vk8JH3vyQ5H6q1NNUIAAGEd9oEnQYDMyTBHLKU293GA3s9w4w6ZfIq/RZq8YCexhy4D1R+mQng==
+"@arbitrum/sdk@^3.1.13":
+  version "3.1.13"
+  resolved "https://registry.yarnpkg.com/@arbitrum/sdk/-/sdk-3.1.13.tgz#a0d3d9a7b387f42547c63f6f066d8a6c4dd945cc"
+  integrity sha512-oE/j8ThWWEdFfV0helmR8lD0T67/CY1zMCt6RVslaCLrytFdbg3QsrHs/sQE3yiCXgisQlsx3qomCgh8PfBo8Q==
   dependencies:
     "@ethersproject/address" "^5.0.8"
     "@ethersproject/bignumber" "^5.1.1"
     "@ethersproject/bytes" "^5.0.8"
+    async-mutex "^0.4.0"
     ethers "^5.1.0"
 
 "@aws-crypto/sha256-js@1.2.2":
@@ -1594,6 +1595,13 @@ async-limiter@~1.0.0:
   version "1.0.1"
   resolved "https://registry.npmjs.org/async-limiter/-/async-limiter-1.0.1.tgz"
   integrity sha512-csOlWGAcRFJaI6m+F2WKdnMKr4HhdhFVBk0H/QbJFMCr+uO2kwohwXQPxw/9OCxp05r5ghVBFSyioixx3gfkNQ==
+
+async-mutex@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/async-mutex/-/async-mutex-0.4.0.tgz#ae8048cd4d04ace94347507504b3cf15e631c25f"
+  integrity sha512-eJFZ1YhRR8UN8eBLoNzcDPcy/jqjsg6I1AP+KvWQX80BqOSW1oJPJXDylPUEeMr2ZQvHgnQ//Lp6f3RQ1zI7HA==
+  dependencies:
+    tslib "^2.4.0"
 
 async-retry@^1.3.3:
   version "1.3.3"
@@ -8184,6 +8192,11 @@ tslib@^2.3.1, tslib@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.5.0.tgz#42bfed86f5787aeb41d031866c8f402429e0fddf"
   integrity sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==
+
+tslib@^2.4.0:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.6.2.tgz#703ac29425e7b37cd6fd456e92404d46d1f3e4ae"
+  integrity sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==
 
 tsort@0.0.1:
   version "0.0.1"

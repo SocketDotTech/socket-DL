@@ -31,8 +31,8 @@ console.log(
 
 export const chains: Array<ChainSlug> = [
   ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_GOERLI,
-  ChainSlug.OPTIMISM_GOERLI,
+  ChainSlug.ARBITRUM_SEPOLIA,
+  ChainSlug.OPTIMISM_SEPOLIA,
   ChainSlug.POLYGON_MUMBAI,
   ChainSlug.SX_NETWORK_TESTNET,
   ChainSlug.BSC_TESTNET,
@@ -40,6 +40,7 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.LYRA_TESTNET,
   ChainSlug.SEPOLIA,
   ChainSlug.XAI_TESTNET,
+  ChainSlug.CDK_TESTNET,
   ChainSlug.AEVO,
   ChainSlug.MAINNET,
   ChainSlug.ARBITRUM,
@@ -47,8 +48,6 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.LYRA,
   ChainSlug.BSC,
   ChainSlug.POLYGON_MAINNET,
-  ChainSlug.XAI_TESTNET,
-  ChainSlug.SX_NETWORK_TESTNET,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
