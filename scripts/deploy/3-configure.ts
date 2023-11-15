@@ -105,8 +105,8 @@ export const main = async () => {
         addr = await registerSwitchboards(
           chain,
           siblingSlugs,
-          CORE_CONTRACTS.FastSwitchboard2,
-          IntegrationTypes.fast2,
+          CORE_CONTRACTS.FastSwitchboard,
+          IntegrationTypes.fast,
           addr,
           addresses,
           socketSigner

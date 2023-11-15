@@ -126,38 +126,6 @@ const main = async () => {
   });
   summary.push(s);
 
-  // Setup Fast Switchboard2 roles
-  s = await checkAndUpdateRoles({
-    userSpecificRoles: [
-      {
-        userAddress: ownerAddress,
-        filterRoles: [
-          ROLES.RESCUE_ROLE,
-          ROLES.GOVERNANCE_ROLE,
-          ROLES.TRIP_ROLE,
-          ROLES.UN_TRIP_ROLE,
-          ROLES.WITHDRAW_ROLE,
-          ROLES.FEES_UPDATER_ROLE,
-        ],
-      },
-      {
-        userAddress: transmitterAddress,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
-      {
-        userAddress: watcherAddress,
-        filterRoles: [ROLES.WATCHER_ROLE],
-      },
-    ],
-
-    contractName: CORE_CONTRACTS.FastSwitchboard2,
-    filterChains,
-    filterSiblingChains,
-    sendTransaction,
-    newRoleStatus,
-  });
-  summary.push(s);
-
   // Grant watcher role to watcher for OptimisticSwitchboard
   s = await checkAndUpdateRoles({
     userSpecificRoles: [

@@ -53,8 +53,8 @@ export const main = async () => {
     addr = await registerSwitchboards(
       sibling,
       [chain],
-      CORE_CONTRACTS.FastSwitchboard2,
-      IntegrationTypes.fast2,
+      CORE_CONTRACTS.FastSwitchboard,
+      IntegrationTypes.fast,
       addresses[sibling]!,
       addresses,
       socketSigner
@@ -109,26 +109,6 @@ const grantRoles = async () => {
       },
     ],
     contractName: CORE_CONTRACTS.TransmitManager,
-    filterChains,
-    filterSiblingChains: [chain],
-    sendTransaction,
-    newRoleStatus,
-  });
-
-  // Setup Fast Switchboard2 roles
-  await checkAndUpdateRoles({
-    userSpecificRoles: [
-      {
-        userAddress: config.feeUpdaterAddress,
-        filterRoles: [ROLES.FEES_UPDATER_ROLE],
-      },
-      {
-        userAddress: config.watcherAddress,
-        filterRoles: [ROLES.WATCHER_ROLE],
-      },
-    ],
-
-    contractName: CORE_CONTRACTS.FastSwitchboard2,
     filterChains,
     filterSiblingChains: [chain],
     sendTransaction,

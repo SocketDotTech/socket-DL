@@ -18,8 +18,7 @@ export const getDefaultIntegrationType = (
 ): IntegrationTypes => {
   return switchboards?.[chain]?.[sibling]
     ? IntegrationTypes.native
-    : IntegrationTypes.fast2;
-  // : IntegrationTypes.fast; // revert back this when migration done
+    : IntegrationTypes.fast; // revert back this when migration done
 };
 
 export const switchboards = {
