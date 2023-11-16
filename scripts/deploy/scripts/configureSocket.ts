@@ -186,7 +186,7 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
 
           const srcSwitchboardType =
             switchboards[ChainSlugToKey[srcChain]]?.[
-            ChainSlugToKey[parseInt(dstChain) as ChainSlug]
+              ChainSlugToKey[parseInt(dstChain) as ChainSlug]
             ]?.["switchboard"];
 
           const dstSwitchboardAddress = getSwitchboardAddress(

@@ -1,13 +1,13 @@
 export type ChainConfig = {
-  chainSlug: number;
-  chainName: string;
-  timeout: number;
-  rpc: string;
-  transmitterAddress: string;
-  executorAddress: string;
-  watcherAddress: string;
-  feeUpdaterAddress: string;
-  ownerAddress: string;
+  chainSlug?: number;
+  chainName?: string;
+  timeout?: number;
+  rpc?: string;
+  transmitterAddress?: string;
+  executorAddress?: string;
+  watcherAddress?: string;
+  feeUpdaterAddress?: string;
+  ownerAddress?: string;
   msgValueMaxThreshold?: string | number;
   overrides?: {
     type?: number;
@@ -33,6 +33,34 @@ export const chainConfig: { [chain: string]: ChainConfig } = {
       type: 1,
       gasLimit: 20000000,
       gasPrice: 1000000000000,
+    },
+  },
+  "1": {
+    overrides: {
+      type: 1,
+      gasLimit: 1_000_000,
+      gasPrice: 40000000000, // 40 gwei
+    },
+  },
+  "957": {
+    overrides: {
+      type: 1,
+      gasLimit: 20000000,
+      gasPrice: 100000000, // 0.1 gwei
+    },
+  },
+  56: {
+    overrides: {
+      type: 1,
+      gasLimit: 2_000_000,
+      gasPrice: 10000000000, // 10 gwei
+    },
+  },
+  137: {
+    overrides: {
+      type: 1,
+      gasPrice: 10000_000_000_000, // 6000 gwei
+      gasLimit: 2_000_000,
     },
   },
 };
