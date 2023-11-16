@@ -68,7 +68,7 @@ export const setManagers = async (
     currentEM.toLowerCase() !== addr[executionManagerVersion]?.toLowerCase()
   ) {
     tx = await socket.setExecutionManager(addr[executionManagerVersion], {
-      ...overrides[await socketSigner.getChainId()],
+      ...overrides(await socketSigner.getChainId()),
     });
     console.log("updateExecutionManager", tx.hash);
     await tx.wait();
@@ -77,7 +77,7 @@ export const setManagers = async (
   const currentTM = await socket.transmitManager__();
   if (currentTM.toLowerCase() !== addr.TransmitManager?.toLowerCase()) {
     tx = await socket.setTransmitManager(addr.TransmitManager, {
-      ...overrides[await socketSigner.getChainId()],
+      ...overrides(await socketSigner.getChainId()),
     });
     console.log("updateTransmitManager", tx.hash);
     await tx.wait();
@@ -151,7 +151,7 @@ export const configureExecutionManager = async (
     ).connect(socketSigner);
 
     let tx = await socketBatcherContract.setExecutionFeesBatch(
-      emAddress!,
+      emAddress,
       requests,
       { ...overrides[chain] }
     );
@@ -186,7 +186,7 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
 
           const srcSwitchboardType =
             switchboards[ChainSlugToKey[srcChain]]?.[
-              ChainSlugToKey[parseInt(dstChain) as ChainSlug]
+            ChainSlugToKey[parseInt(dstChain) as ChainSlug]
             ]?.["switchboard"];
 
           const dstSwitchboardAddress = getSwitchboardAddress(
@@ -213,7 +213,7 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
             const tx = await sbContract
               .connect(socketSigner)
               .setFxChildTunnel(dstSwitchboardAddress, {
-                ...overrides[await socketSigner.getChainId()],
+                ...overrides(await socketSigner.getChainId()),
               });
             console.log(srcChain, tx.hash);
             await tx.wait();
@@ -231,7 +231,7 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
             const tx = await sbContract
               .connect(socketSigner)
               .setFxRootTunnel(dstSwitchboardAddress, {
-                ...overrides[await socketSigner.getChainId()],
+                ...overrides(await socketSigner.getChainId()),
               });
             console.log(srcChain, tx.hash);
             await tx.wait();

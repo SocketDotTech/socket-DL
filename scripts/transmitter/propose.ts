@@ -54,7 +54,7 @@ export const main = async () => {
     ).connect(signer);
 
     const tx = await socket.propose(packetId, root, signature, {
-      ...overrides[chainSlug],
+      ...overrides(chainSlug),
     });
 
     console.log(`Proposing at tx hash: ${tx.hash}`);
