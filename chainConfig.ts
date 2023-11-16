@@ -63,4 +63,15 @@ export const chainConfig: { [chain: string]: ChainConfig } = {
       gasLimit: 2_000_000,
     },
   },
+  42161: {
+    overrides: {
+      type: 2,
+      gasLimit: 20_000_000,
+    },
+  },
+  10: {
+    overrides: {
+      type: 2,
+    },
+  },
 };

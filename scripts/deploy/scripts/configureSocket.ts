@@ -153,7 +153,7 @@ export const configureExecutionManager = async (
     let tx = await socketBatcherContract.setExecutionFeesBatch(
       emAddress,
       requests,
-      { ...overrides[chain] }
+      { ...overrides(chain) }
     );
     console.log(chain, tx.hash);
     await tx.wait();
