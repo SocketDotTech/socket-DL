@@ -1,13 +1,13 @@
 export type ChainConfig = {
-  chainSlug: number;
-  chainName: string;
-  timeout: number;
-  rpc: string;
-  transmitterAddress: string;
-  executorAddress: string;
-  watcherAddress: string;
-  feeUpdaterAddress: string;
-  ownerAddress: string;
+  chainSlug?: number;
+  chainName?: string;
+  timeout?: number;
+  rpc?: string;
+  transmitterAddress?: string;
+  executorAddress?: string;
+  watcherAddress?: string;
+  feeUpdaterAddress?: string;
+  ownerAddress?: string;
   msgValueMaxThreshold?: string | number;
   overrides?: {
     type?: number;
@@ -29,6 +29,13 @@ export const chainConfig: { [chain: string]: ChainConfig } = {
     feeUpdaterAddress: "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
     ownerAddress: "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
     msgValueMaxThreshold: 10000000000000000,
+    overrides: {
+      type: 1,
+      gasLimit: 20000000,
+      gasPrice: 1000000000000,
+    },
+  },
+  56: {
     overrides: {
       type: 1,
       gasLimit: 20000000,
