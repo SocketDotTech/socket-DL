@@ -1,4 +1,4 @@
-import { ChainSlug, MainnetIds, TestnetIds } from "./chain-types";
+import { ChainSlug, MainnetIds, TestnetIds } from "./enums";
 
 export const L1Ids: ChainSlug[] = [
   ChainSlug.MAINNET,
