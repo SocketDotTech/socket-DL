@@ -1,5 +1,6 @@
-import { Wallet } from "ethers";
+import { Wallet, providers } from "ethers";
 import fs from "fs";
+import path from "path";
 
 import {
   CORE_CONTRACTS,
@@ -15,18 +16,37 @@ import {
   newRoleStatus,
   sendTransaction,
 } from "../config";
+import { registerSwitchboards } from "../scripts/configureSocket";
 import {
-  configureExecutionManager,
-  registerSwitchboards,
-} from "../scripts/configureSocket";
-import { RoleOwners, getProviderFromChainSlug } from "../../constants";
+  ChainConfigs,
+  RoleOwners,
+  getProviderFromChainSlug,
+} from "../../constants";
 import { deployedAddressPath, storeAllAddresses } from "../utils";
 
-export const configureChain = async (
-  chain: ChainSlug,
-  siblings: ChainSlug[],
-  roleOwners: RoleOwners
-) => {
+const configPath = path.join(__dirname, `/../../../chainConfig.json`);
+
+export const configureChain = async () => {
+  if (!fs.existsSync(configPath)) {
+    throw new Error("chainConfig.json not found");
+  }
+  let configs: ChainConfigs = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+
+  const jsonRpcUrl = process.env.NEW_RPC as string;
+  if (!jsonRpcUrl) {
+    throw new Error("rpc url not found");
+  }
+
+  const providerInstance = new providers.StaticJsonRpcProvider(jsonRpcUrl);
+  const network = await providerInstance.getNetwork();
+  const chain = network.chainId;
+
+  if (!configs[chain]) throw new Error("Setup not done yet!!");
+  const siblings = configs[chain]?.siblings;
+  const roleOwners = configs[chain]?.roleOwners;
+
+  if (!siblings || !roleOwners) throw new Error("Setup not proper!!");
+
   const addresses: DeploymentAddresses = JSON.parse(
     fs.readFileSync(deployedAddressPath(mode), "utf-8")
   );

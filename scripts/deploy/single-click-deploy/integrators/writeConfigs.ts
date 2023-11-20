@@ -1,121 +1,200 @@
-import path from "path";
-import fs from "fs";
-import { writeFile } from "fs/promises";
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
+import { utils } from "ethers";
+import prompts from "prompts";
 
-import { ChainId, ChainSlug } from "../../../../src";
-import { ChainConfig, ChainConfigs } from "../../../constants";
+import { updateSDK, buildEnvFile, updateConfig } from "./utils";
+import {
+  ChainSlug,
+  DeploymentMode,
+  MainnetIds,
+  TestnetIds,
+} from "../../../../src";
+import {
+  executorAddresses,
+  transmitterAddresses,
+  watcherAddresses,
+} from "../../config";
+import { RoleOwners } from "../../../constants";
 
-const configFilePath = path.join(__dirname, `/../../../../`);
-const enumFolderPath = path.join(__dirname, `/../../../../src/enums/`);
+export async function writeConfigs() {
+  const response = await prompts([
+    {
+      name: "rpc",
+      type: "text",
+      message: "Enter rpc url",
+      validate: validateRpc,
+    },
+    {
+      name: "chainName",
+      type: "text",
+      message: "Enter chain name (without spaces, use - instead of spaces)",
+    },
+    {
+      name: "isMainnet",
+      type: "toggle",
+      message: "Is it mainnet or testnet?",
+    },
+  ]);
 
-export const updateConfig = async (
-  chainSlug: ChainSlug,
-  chainConfig: ChainConfig
-) => {
-  const addressesPath = configFilePath + "chainConfig.json";
-  const outputExists = fs.existsSync(addressesPath);
-  let configs: ChainConfigs = {};
+  const chainOptions = response.isMainnet ? MainnetIds : TestnetIds;
+  const choices = chainOptions.map((chain) => ({
+    title: chain.toString(),
+    value: chain,
+  }));
 
-  if (outputExists) {
-    const configsString = fs.readFileSync(addressesPath, "utf-8");
-    configs = JSON.parse(configsString);
-  }
+  const configResponse = await prompts([
+    {
+      name: "siblings",
+      type: "multiselect",
+      message: "Select chains you want to use as message destination",
+      choices,
+    },
+    {
+      name: "owner",
+      type: "text",
+      message: "Enter owner address",
+      validate: validateAddress,
+    },
+    {
+      name: "transmitter",
+      type: "text",
+      message:
+        "Enter transmitter address if you want to transmit, else leave blank",
+      validate: validateAddress,
+    },
+    {
+      name: "executor",
+      type: "text",
+      message:
+        "Enter executor address if you want to execute, else leave blank",
+      validate: validateAddress,
+    },
+    {
+      name: "watcher",
+      type: "text",
+      message: "Enter watcher address if you want to attest, else leave blank",
+      validate: validateAddress,
+    },
+    {
+      name: "feeUpdater",
+      type: "text",
+      message:
+        "Enter fee updater address if you want to run oracle, else leave blank",
+      validate: validateAddress,
+    },
+    {
+      name: "pk",
+      type: "text",
+      message:
+        "Enter deployer private key (can be left blank and added to env separately)",
+    },
+    {
+      name: "timeout",
+      type: "text",
+      message:
+        "Enter timeout, leave blank if you want to keep it default (2 hrs)",
+    },
+    {
+      name: "msgValueMaxThreshold",
+      type: "text",
+      message:
+        "Enter max msg value transfer limit, leave blank if you want to keep it default (0.01 ETH)",
+    },
+    {
+      name: "type",
+      type: "text",
+      message:
+        "Enter transaction type supported, leave blank if you want it to be picked from RPC",
+    },
+    {
+      name: "gasLimit",
+      type: "text",
+      message:
+        "Enter max gas limit, leave blank if you want it to be picked from RPC",
+    },
+    {
+      name: "gasPrice",
+      type: "text",
+      message:
+        "Enter gas price, leave blank if you want it to be picked from RPC",
+    },
+  ]);
 
-  configs[chainSlug] = chainConfig;
-  fs.writeFileSync(addressesPath, JSON.stringify(configs, null, 2) + "\n");
-};
+  // update types and enums
+  const chainId = await getChainId(response.rpc);
+  await updateSDK(response.chainName, chainId, response.isMainnet);
 
-export const buildEnvFile = async (
-  rpc: string,
-  ownerAddress: string,
-  pk: string
-) => {
-  const addressesPath = configFilePath + ".env.example";
-  const outputExists = fs.existsSync(addressesPath);
+  // update env and config
+  const roleOwners: RoleOwners = {
+    ownerAddress: "",
+    executorAddress: "",
+    transmitterAddress: "",
+    watcherAddress: "",
+    feeUpdaterAddress: "",
+  };
 
-  let configsString = "";
-  if (outputExists) {
-    configsString = fs.readFileSync(addressesPath, "utf-8");
-  }
+  if (configResponse.owner) {
+    roleOwners.ownerAddress = configResponse.owner;
+  } else roleOwners.ownerAddress = transmitterAddresses[DeploymentMode.PROD];
 
-  configsString =
-    configsString +
-    `\nDEPLOYMENT_MODE="prod"\nSOCKET_OWNER_ADDRESS=${ownerAddress}\nSOCKET_SIGNER_KEY=${pk}\nNEW_RPC=${rpc}\n`;
-  await writeFile(".env", configsString);
-  console.log("Created env");
-};
-
-export const updateSDK = async (
-  chainName: string,
-  chainId: number,
-  isMainnet: boolean
-) => {
-  if (!fs.existsSync(enumFolderPath)) {
-    throw new Error(`Folder not found! ${enumFolderPath}`);
-  }
-
-  const filteredChain = Object.values(ChainId).filter((c) => c == chainId);
-  if (filteredChain.length > 0) {
-    console.log("Chain already added!");
-    return;
-  }
-
-  await updateFile(
-    "hardhatChainName.ts",
-    `,\n  ${chainName.toUpperCase()} = "${chainName.toLowerCase()}",\n}\n`,
-    ",\n}"
-  );
-  await updateFile(
-    "chainId.ts",
-    `,\n  ${chainName.toUpperCase()} = ${chainId},\n}\n`,
-    ",\n}"
-  );
-  await updateFile(
-    "chainSlug.ts",
-    `,\n  ${chainName.toUpperCase()} = ChainId.${chainName.toUpperCase()},\n}\n`,
-    ",\n}"
-  );
-  await updateFile(
-    "chainSlugToKey.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: HardhatChainName.${chainName.toUpperCase()},\n};\n`,
-    ",\n};"
-  );
-  await updateFile(
-    "chainSlugToId.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: ChainId.${chainName.toUpperCase()},\n};\n`,
-    ",\n};"
-  );
-  await updateFile(
-    "hardhatChainNameToSlug.ts",
-    `,\n  [HardhatChainName.${chainName.toUpperCase()}]: ChainSlug.${chainName.toUpperCase()},\n};\n`,
-    ",\n};"
-  );
-
-  if (isMainnet) {
-    await updateFile(
-      "mainnetIds.ts",
-      `,\n  ChainSlug.${chainName.toUpperCase()},\n];\n`,
-      ",\n];"
-    );
+  if (configResponse.transmitter) {
+    roleOwners.transmitterAddress = configResponse.transmitter;
   } else
-    await updateFile(
-      "testnetIds.ts",
-      `,\n  ChainSlug.${chainName.toUpperCase()},\n];\n`,
-      ",\n];"
-    );
+    roleOwners.transmitterAddress = transmitterAddresses[DeploymentMode.PROD];
+
+  if (configResponse.executor) {
+    roleOwners.executorAddress = configResponse.executor;
+  } else roleOwners.executorAddress = executorAddresses[DeploymentMode.PROD];
+
+  if (configResponse.watcher) {
+    roleOwners.watcherAddress = configResponse.watcher;
+  } else roleOwners.watcherAddress = watcherAddresses[DeploymentMode.PROD];
+
+  if (configResponse.feeUpdater) {
+    roleOwners.feeUpdaterAddress = configResponse.feeUpdater;
+  } else
+    roleOwners.feeUpdaterAddress = transmitterAddresses[DeploymentMode.PROD];
+
+  // write chain config and env for NEW_RPC and SOCKET_SIGNER_KEY
+  const config = {
+    roleOwners,
+    siblings: configResponse.siblings,
+    overrides: {},
+  };
+
+  if (configResponse.timeout) config["timeout"] = configResponse.timeout;
+  if (configResponse.msgValueMaxThreshold)
+    config["msgValueMaxThreshold"] = configResponse.msgValueMaxThreshold;
+  if (configResponse.type) config["overrides"]["type"] = configResponse.type;
+  if (configResponse.gasLimit)
+    config["overrides"]["gasLimit"] = configResponse.gasLimit;
+  if (configResponse.gasPrice)
+    config["overrides"]["gasPrice"] = configResponse.gasPrice;
+
+  await updateConfig(chainId as ChainSlug, config);
+  await buildEnvFile(
+    response.rpc,
+    roleOwners.ownerAddress,
+    configResponse.pk ?? ""
+  );
+}
+
+const validateRpc = async (rpcUrl: string) => {
+  if (!rpcUrl) {
+    return "Invalid RPC";
+  }
+  return getChainId(rpcUrl)
+    .then((a) => true)
+    .catch((e) => `Invalid RPC: ${e}`);
 };
 
-const updateFile = async (fileName, newChainDetails, replaceWith) => {
-  const filePath = enumFolderPath + fileName;
-  const outputExists = fs.existsSync(filePath);
-  if (!outputExists) throw new Error(`${fileName} enum not found! ${filePath}`);
+const validateAddress = (address: string) => {
+  if (!address || address.length === 0) return true;
+  return utils.isAddress(address);
+};
 
-  const verificationDetailsString = fs.readFileSync(filePath, "utf-8");
-
-  // replace last bracket with new line
-  const verificationDetails = verificationDetailsString
-    .trimEnd()
-    .replace(replaceWith, newChainDetails);
-
-  fs.writeFileSync(filePath, verificationDetails);
+const getChainId = async (rpcUrl: string) => {
+  const provider = new StaticJsonRpcProvider(rpcUrl);
+  const network = await provider.getNetwork();
+  return network.chainId;
 };

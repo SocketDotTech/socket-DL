@@ -9,8 +9,8 @@ export type RoleOwners = {
 };
 
 export type ChainConfig = {
-  roleOwners?: RoleOwners;
-  siblings?: ChainSlug[];
+  roleOwners: RoleOwners;
+  siblings: ChainSlug[];
   timeout?: number;
   msgValueMaxThreshold?: string;
   overrides?: {
