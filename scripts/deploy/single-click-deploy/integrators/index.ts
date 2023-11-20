@@ -176,7 +176,7 @@ async function main() {
   await buildEnvFile(
     response.rpc,
     roleOwners.ownerAddress,
-    response.pk ? response.pk : ""
+    configResponse.pk ?? ""
   );
 
   // deploy
