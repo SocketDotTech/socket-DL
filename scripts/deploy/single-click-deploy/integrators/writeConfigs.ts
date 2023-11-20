@@ -52,7 +52,8 @@ export async function writeConfigs() {
     {
       name: "owner",
       type: "text",
-      message: "Enter owner address",
+      message:
+        "Enter deployer address (this will be owner initially to configure roles)",
       validate: validateAddress,
     },
     {
