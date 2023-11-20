@@ -7,32 +7,28 @@ import {
   DeploymentAddresses,
   IntegrationTypes,
   ROLES,
-} from "../../../src";
-import { checkAndUpdateRoles } from "../scripts/roles";
-import { executionManagerVersion, mode } from "../config";
+} from "../../../../src";
+import { checkAndUpdateRoles } from "../../scripts/roles";
+import { executionManagerVersion, mode } from "../../config";
 import {
   configureExecutionManager,
   registerSwitchboards,
   setManagers,
-} from "../scripts/configureSocket";
-import { deployForChains } from "../scripts/deploySocketFor";
-import { getProviderFromChainSlug } from "../../constants";
-import { deployedAddressPath, storeAllAddresses } from "../utils";
-import { chainConfig } from "../../../chainConfig";
+} from "../../scripts/configureSocket";
+import { deployForChains } from "../../scripts/deploySocketFor";
+import { RoleOwners, getProviderFromChainSlug } from "../../../constants";
+import { deployedAddressPath, storeAllAddresses } from "../../utils";
 
-const chain = ChainSlug.SX_NETWORK_TESTNET;
-const siblings = [
-  ChainSlug.POLYGON_MUMBAI,
-  ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_GOERLI,
-];
-
-export const main = async () => {
+export const addChain = async (
+  chain: ChainSlug,
+  siblings: ChainSlug[],
+  roleOwners: RoleOwners
+) => {
   const addresses = await deployForChains([chain]);
   if (!addresses[chain]) throw new Error("Address not deployed!");
 
   // grant all roles for new chain
-  await grantRoles();
+  await grantRoles(chain, siblings, roleOwners);
 
   const providerInstance = getProviderFromChainSlug(chain as any as ChainSlug);
   const socketSigner: Wallet = new Wallet(
@@ -70,17 +66,17 @@ export const main = async () => {
   await storeAllAddresses(allAddresses, mode);
 };
 
-const grantRoles = async () => {
-  if (!chainConfig || !chainConfig[chain])
-    throw new Error("Chain config not found!");
-  const config = chainConfig[chain];
-
+const grantRoles = async (
+  chain: ChainSlug,
+  siblings: ChainSlug[],
+  roleOwners: RoleOwners
+) => {
   if (
-    !config.executorAddress ||
-    !config.transmitterAddress ||
-    !config.watcherAddress ||
-    !config.feeUpdaterAddress ||
-    !config.ownerAddress
+    !roleOwners.executorAddress ||
+    !roleOwners.transmitterAddress ||
+    !roleOwners.watcherAddress ||
+    !roleOwners.feeUpdaterAddress ||
+    !roleOwners.ownerAddress
   )
     throw new Error("Add all required addresses!");
 
@@ -88,7 +84,7 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: config.ownerAddress,
+        userAddress: roleOwners.ownerAddress,
         filterRoles: [
           ROLES.RESCUE_ROLE,
           ROLES.GOVERNANCE_ROLE,
@@ -97,11 +93,11 @@ const grantRoles = async () => {
         ],
       },
       {
-        userAddress: config.feeUpdaterAddress,
+        userAddress: roleOwners.feeUpdaterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE],
       },
       {
-        userAddress: config.executorAddress,
+        userAddress: roleOwners.executorAddress,
         filterRoles: [ROLES.EXECUTOR_ROLE],
       },
     ],
@@ -116,7 +112,7 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: config.ownerAddress,
+        userAddress: roleOwners.ownerAddress,
         filterRoles: [
           ROLES.RESCUE_ROLE,
           ROLES.GOVERNANCE_ROLE,
@@ -125,11 +121,11 @@ const grantRoles = async () => {
         ],
       },
       {
-        userAddress: config.transmitterAddress,
+        userAddress: roleOwners.transmitterAddress,
         filterRoles: [ROLES.TRANSMITTER_ROLE],
       },
       {
-        userAddress: config.feeUpdaterAddress,
+        userAddress: roleOwners.feeUpdaterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE],
       },
     ],
@@ -144,7 +140,7 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: config.ownerAddress,
+        userAddress: roleOwners.ownerAddress,
         filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
       },
     ],
@@ -159,7 +155,7 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: config.ownerAddress,
+        userAddress: roleOwners.ownerAddress,
         filterRoles: [
           ROLES.RESCUE_ROLE,
           ROLES.GOVERNANCE_ROLE,
@@ -170,11 +166,11 @@ const grantRoles = async () => {
         ],
       },
       {
-        userAddress: config.feeUpdaterAddress,
+        userAddress: roleOwners.feeUpdaterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE],
       },
       {
-        userAddress: config.watcherAddress,
+        userAddress: roleOwners.watcherAddress,
         filterRoles: [ROLES.WATCHER_ROLE],
       },
     ],
@@ -190,7 +186,7 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: config.ownerAddress,
+        userAddress: roleOwners.ownerAddress,
         filterRoles: [
           ROLES.RESCUE_ROLE,
           ROLES.GOVERNANCE_ROLE,
@@ -201,11 +197,11 @@ const grantRoles = async () => {
         ],
       },
       {
-        userAddress: config.feeUpdaterAddress,
+        userAddress: roleOwners.feeUpdaterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE],
       },
       {
-        userAddress: config.watcherAddress,
+        userAddress: roleOwners.watcherAddress,
         filterRoles: [ROLES.WATCHER_ROLE],
       },
     ],
@@ -221,7 +217,7 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: config.ownerAddress,
+        userAddress: roleOwners.ownerAddress,
         filterRoles: [
           ROLES.TRIP_ROLE,
           ROLES.UN_TRIP_ROLE,
@@ -231,11 +227,11 @@ const grantRoles = async () => {
         ],
       },
       {
-        userAddress: config.feeUpdaterAddress,
+        userAddress: roleOwners.feeUpdaterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE], // all roles
       },
       {
-        userAddress: config.watcherAddress,
+        userAddress: roleOwners.watcherAddress,
         filterRoles: [ROLES.WATCHER_ROLE],
       },
     ],
@@ -246,5 +242,3 @@ const grantRoles = async () => {
     newRoleStatus: true,
   });
 };
-
-main();

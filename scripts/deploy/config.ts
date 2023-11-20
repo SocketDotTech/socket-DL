@@ -3,7 +3,7 @@ dotenvConfig();
 
 import { ChainSlug, DeploymentMode, CORE_CONTRACTS, version } from "../../src";
 import { BigNumberish, utils } from "ethers";
-import { chainConfig } from "../../chainConfig";
+import chainConfig from "../../chainConfig.json";
 
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
@@ -198,5 +198,7 @@ export const overrides = (
       // gasLimit,
       // gasPrice: 100_000_000,
     };
+  } else if (chainConfig[chain] && chainConfig[chain].overrides) {
+    return chainConfig[chain].overrides!;
   } else return { type, gasLimit, gasPrice };
 };
