@@ -1,10 +1,10 @@
 import path from "path";
 import fs from "fs";
-import { ChainId } from "../../../src";
+import { ChainId } from "../../../../src";
 
-const enumFolderPath = path.join(__dirname, `/../../../src/enums/`);
+const enumFolderPath = path.join(__dirname, `/../../../../src/enums/`);
 
-export const update = async (
+export const updateSDK = async (
   chainName: string,
   chainId: number,
   isMainnet: boolean
