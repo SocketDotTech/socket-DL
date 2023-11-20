@@ -1,8 +1,49 @@
 import path from "path";
 import fs from "fs";
-import { ChainId } from "../../../../src";
+import { writeFile } from "fs/promises";
 
+import { ChainId, ChainSlug } from "../../../../src";
+import { ChainConfig, ChainConfigs } from "../../../constants";
+
+const configFilePath = path.join(__dirname, `/../../../../`);
 const enumFolderPath = path.join(__dirname, `/../../../../src/enums/`);
+
+export const updateConfig = async (
+  chainSlug: ChainSlug,
+  chainConfig: ChainConfig
+) => {
+  const addressesPath = configFilePath + "chainConfig.json";
+  const outputExists = fs.existsSync(addressesPath);
+  let configs: ChainConfigs = {};
+
+  if (outputExists) {
+    const configsString = fs.readFileSync(addressesPath, "utf-8");
+    configs = JSON.parse(configsString);
+  }
+
+  configs[chainSlug] = chainConfig;
+  fs.writeFileSync(addressesPath, JSON.stringify(configs, null, 2) + "\n");
+};
+
+export const buildEnvFile = async (
+  rpc: string,
+  ownerAddress: string,
+  pk: string
+) => {
+  const addressesPath = configFilePath + ".env.example";
+  const outputExists = fs.existsSync(addressesPath);
+
+  let configsString = "";
+  if (outputExists) {
+    configsString = fs.readFileSync(addressesPath, "utf-8");
+  }
+
+  configsString =
+    configsString +
+    `\nDEPLOYMENT_MODE="prod"\nSOCKET_OWNER_ADDRESS=${ownerAddress}\nSOCKET_SIGNER_KEY=${pk}\nNEW_RPC=${rpc}\n`;
+  await writeFile(".env", configsString);
+  console.log("Created env");
+};
 
 export const updateSDK = async (
   chainName: string,
@@ -36,18 +77,18 @@ export const updateSDK = async (
   );
   await updateFile(
     "chainSlugToKey.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: HardhatChainName.${chainName.toUpperCase()},\n}\n`,
-    ",\n}"
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: HardhatChainName.${chainName.toUpperCase()},\n};\n`,
+    ",\n};"
   );
   await updateFile(
     "chainSlugToId.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: ChainId.${chainName.toUpperCase()},\n}\n`,
-    ",\n}"
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: ChainId.${chainName.toUpperCase()},\n};\n`,
+    ",\n};"
   );
   await updateFile(
     "hardhatChainNameToSlug.ts",
-    `,\n  [HardhatChainName.${chainName.toUpperCase()}]: ChainSlug.${chainName.toUpperCase()},\n}\n`,
-    ",\n}"
+    `,\n  [HardhatChainName.${chainName.toUpperCase()}]: ChainSlug.${chainName.toUpperCase()},\n};\n`,
+    ",\n};"
   );
 
   if (isMainnet) {

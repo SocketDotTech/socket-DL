@@ -9,8 +9,8 @@ export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
 
-if (!process.env.SOCKET_OWNER_ADDRESS)
-  throw Error("Socket owner address not present");
+// if (!process.env.SOCKET_OWNER_ADDRESS)
+//   throw Error("Socket owner address not present");
 export const socketOwner = process.env.SOCKET_OWNER_ADDRESS;
 
 console.log(
