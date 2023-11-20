@@ -20,7 +20,7 @@ git clone https://github.com/SocketDotTech/socket-dl
 # move to repository folder
 cd socket-dl
 
-# move to repository folder
+# checkout to this branch
 git checkout feat/write-enums
 
 # install forge dependencies
