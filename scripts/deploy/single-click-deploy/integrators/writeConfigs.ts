@@ -27,7 +27,7 @@ export async function writeConfigs() {
     {
       name: "chainName",
       type: "text",
-      message: "Enter chain name (without spaces, use - instead of spaces)",
+      message: "Enter chain name (without spaces, use underscore instead of spaces)",
     },
     {
       name: "isMainnet",
@@ -173,10 +173,15 @@ export async function writeConfigs() {
     config["overrides"]["gasPrice"] = configResponse.gasPrice;
 
   await updateConfig(chainId as ChainSlug, config);
+
+  let pk = configResponse.pk ?? "";
+  if (configResponse.pk && configResponse.pk.length > 64)
+    pk = configResponse.pk.substring(2);
+
   await buildEnvFile(
     response.rpc,
     roleOwners.ownerAddress,
-    configResponse.pk ?? ""
+    pk
   );
 }
 

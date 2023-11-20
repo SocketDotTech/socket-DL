@@ -6,7 +6,7 @@
 
 - Hardhat
 - Foundry
-- NodeJS
+- NodeJS (Supported version: "^14.0.0 || ^16.0.0 || ^18.0.0")
 - Yarn
 
 ### Setup
@@ -19,6 +19,9 @@ git clone https://github.com/SocketDotTech/socket-dl
 
 # move to repository folder
 cd socket-dl
+
+# move to repository folder
+git checkout feat/write-enums
 
 # install forge dependencies
 forge install
@@ -34,8 +37,8 @@ Deployments use [Hardhat](https://github.com/NomicFoundation/hardhat)
 # Setup config and env:
 
     - Run command: `yarn setup` and select first option
-    - Add all the required details, you can skip some configs if it is mentioned in command
-    - Once done, go to .env and check if last 4 configs are set properly.
+    - Add all the required details, you can skip configs which are not required
+    - Once done, go to .env and check if last owner address, rpc and private key are correctly set!
 
     - Next compile contracts, `npx hardhat compile`
 
