@@ -38,7 +38,7 @@ export default async function registerSwitchboardForSibling(
         initialPacketCount,
         siblingSwitchBoardAddress,
         {
-          ...overrides[await signer.getChainId()],
+          ...overrides(await signer.getChainId()),
         }
       );
       console.log(

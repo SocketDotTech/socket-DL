@@ -47,11 +47,11 @@ export const switchboards = {
       switchboard: NativeSwitchboard.OPTIMISM,
     },
   },
-  [ChainSlug.LYRA]: {
-    [ChainSlug.MAINNET]: {
-      switchboard: NativeSwitchboard.OPTIMISM,
-    },
-  },
+  // [ChainSlug.LYRA]: {
+  //   [ChainSlug.MAINNET]: {
+  //     switchboard: NativeSwitchboard.OPTIMISM,
+  //   },
+  // },
   [ChainSlug.POLYGON_MAINNET]: {
     [ChainSlug.MAINNET]: {
       switchboard: NativeSwitchboard.POLYGON_L2,
