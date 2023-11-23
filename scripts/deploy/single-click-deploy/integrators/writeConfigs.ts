@@ -27,7 +27,8 @@ export async function writeConfigs() {
     {
       name: "chainName",
       type: "text",
-      message: "Enter chain name (without spaces, use underscore instead of spaces)",
+      message:
+        "Enter chain name (without spaces, use underscore instead of spaces)",
     },
     {
       name: "isMainnet",
@@ -178,11 +179,7 @@ export async function writeConfigs() {
   if (configResponse.pk && configResponse.pk.length > 64)
     pk = configResponse.pk.substring(2);
 
-  await buildEnvFile(
-    response.rpc,
-    roleOwners.ownerAddress,
-    pk
-  );
+  await buildEnvFile(response.rpc, roleOwners.ownerAddress, pk);
 }
 
 const validateRpc = async (rpcUrl: string) => {
