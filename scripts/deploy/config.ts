@@ -84,7 +84,8 @@ export const watcherAddresses = {
 };
 
 export const executorAddresses = {
-  [DeploymentMode.DEV]: "0x8e90345042b2720F33138CC437f8f897AC84A095",
+  // [DeploymentMode.DEV]: "0x8e90345042b2720F33138CC437f8f897AC84A095", // private key
+  [DeploymentMode.DEV]: "0x5ea69806b1df5dbdc6c1a78c662682ca48f9524d", // kms
   [DeploymentMode.SURGE]: "0x3051Aa7F267bF425A4e8bF766750D60391F014B4",
   [DeploymentMode.PROD]: "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
 };

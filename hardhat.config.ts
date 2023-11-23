@@ -51,6 +51,8 @@ if (isProduction) {
   liveNetworks = {
     [HardhatChainName.ARBITRUM_GOERLI]: getChainConfig(ChainId.ARBITRUM_GOERLI),
     [HardhatChainName.OPTIMISM_GOERLI]: getChainConfig(ChainId.OPTIMISM_GOERLI),
+    [HardhatChainName.ARBITRUM_SEPOLIA]: getChainConfig(ChainId.ARBITRUM_SEPOLIA),
+    [HardhatChainName.OPTIMISM_SEPOLIA]: getChainConfig(ChainId.OPTIMISM_SEPOLIA),
     [HardhatChainName.POLYGON_MAINNET]: getChainConfig(ChainId.POLYGON_MAINNET),
     [HardhatChainName.ARBITRUM]: getChainConfig(ChainId.ARBITRUM),
     [HardhatChainName.BSC]: getChainConfig(ChainId.BSC),
@@ -100,18 +102,18 @@ const config: HardhatUserConfig = {
     customChains: [
       {
         network: "optimisticTestnet",
-        chainId: ChainId.OPTIMISM_GOERLI,
+        chainId: ChainId.OPTIMISM_SEPOLIA,
         urls: {
-          apiURL: "https://api-goerli-optimistic.etherscan.io/api",
-          browserURL: "https://goerli-optimism.etherscan.io/",
+          apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
+          browserURL: "https://sepolia-optimism.etherscan.io/",
         },
       },
       {
         network: "arbitrumTestnet",
-        chainId: ChainId.ARBITRUM_GOERLI,
+        chainId: ChainId.ARBITRUM_SEPOLIA,
         urls: {
-          apiURL: "https://api-goerli.arbiscan.io/api",
-          browserURL: "https://goerli.arbiscan.io/",
+          apiURL: "https://api-sepolia.arbiscan.io/api",
+          browserURL: "https://sepolia.arbiscan.io/",
         },
       },
     ],
