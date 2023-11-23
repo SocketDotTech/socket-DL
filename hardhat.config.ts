@@ -25,7 +25,8 @@ dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 const isProduction = process.env.NODE_ENV === "production";
 
 // Ensure that we have all the environment variables we need.
-if (!process.env.SOCKET_SIGNER_KEY) throw new Error("No private key found");
+// TODO: fix it for setup scripts
+// if (!process.env.SOCKET_SIGNER_KEY) throw new Error("No private key found");
 const privateKey: HardhatNetworkAccountUserConfig = process.env
   .SOCKET_SIGNER_KEY as unknown as HardhatNetworkAccountUserConfig;
 

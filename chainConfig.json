@@ -1,0 +1,12 @@
+{
+  "31337": {
+    "siblings": [],
+    "timeout": 7200,
+    "msgValueMaxThreshold": 10000000000000000,
+    "overrides": {
+      "type": 1,
+      "gasLimit": 20000000,
+      "gasPrice": 1000000000000
+    }
+  }
+}

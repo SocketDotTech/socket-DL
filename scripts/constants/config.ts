@@ -1,14 +1,15 @@
 import { ChainSlug, IntegrationTypes, NativeSwitchboard } from "../../src";
-import { chainConfig } from "../../chainConfig";
-
-export const maxAllowedPacketLength = 10;
+import chainConfig from "../../chainConfig.json";
 
 const TIMEOUT = 7200;
+export const maxAllowedPacketLength = 10;
 
 // return chain specific timeout if present else default value
 export const timeout = (chain: number): number => {
-  if (chainConfig[chain] && chainConfig[chain].timeout)
-    return chainConfig[chain].timeout;
+  if (chainConfig[chain]) {
+    if (chainConfig[chain].timeout && !isNaN(chainConfig[chain].timeout!))
+      return chainConfig[chain].timeout!;
+  }
   return TIMEOUT;
 };
 
@@ -18,7 +19,7 @@ export const getDefaultIntegrationType = (
 ): IntegrationTypes => {
   return switchboards?.[chain]?.[sibling]
     ? IntegrationTypes.native
-    : IntegrationTypes.fast; // revert back this when migration done
+    : IntegrationTypes.fast;
 };
 
 export const switchboards = {

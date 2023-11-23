@@ -15,12 +15,12 @@ import {
   isMainnet,
   getAddresses,
 } from "../../../src";
-import { getRoleHash, getChainRoleHash } from "../utils";
+import { getRoleHash, getChainRoleHash, getInstance } from "../utils";
 import { Contract, Wallet, ethers } from "ethers";
-import { getABI } from "../utils/getABIs";
 import { getProviderFromChainSlug } from "../../constants";
 import { filterChains, mode } from "../config";
 import { overrides } from "../config";
+import AccessControlExtendedABI from "@socket.tech/dl-core/artifacts/abi/AccessControlExtended.json";
 
 let roleStatus: any = {};
 
@@ -85,7 +85,7 @@ const getRoleTxnData = (
   type: "GRANT" | "REVOKE"
 ) => {
   let accessControlInterface = new ethers.utils.Interface(
-    getABI["AccessControlExtended"]
+    AccessControlExtendedABI
   );
   if (type === "GRANT") {
     return accessControlInterface.encodeFunctionData(
@@ -237,9 +237,7 @@ export const checkNativeSwitchboardRoles = async ({
         // );
         return;
       }
-      let instance = new Contract(
-        contractAddress,
-        getABI[contractName as keyof typeof getABI],
+      let instance = (await getInstance(contractName, contractAddress)).connect(
         provider
       );
       let requiredRoles =
@@ -351,11 +349,10 @@ export const checkAndUpdateRoles = async (
               console.log(chainSlug, " address not present: ", contractName);
               return;
             }
-            let instance = new Contract(
-              contractAddress,
-              getABI[contractName as keyof typeof getABI],
-              provider
-            );
+            let instance = (
+              await getInstance(contractName, contractAddress)
+            ).connect(provider);
+
             let requiredRoles =
               REQUIRED_ROLES[contractName as keyof typeof REQUIRED_ROLES];
 

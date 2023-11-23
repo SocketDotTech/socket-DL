@@ -6,9 +6,7 @@ import {
   HardhatChainName,
   ChainSlug,
   ChainSlugToKey,
-  hardhatChainNameToSlug,
 } from "../../src";
-import { chainConfig } from "../../chainConfig";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -112,11 +110,9 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       break;
 
     default:
-      const config =
-        chainConfig[chain] || chainConfig[hardhatChainNameToSlug[chain]];
-      if (config && config.rpc) {
-        jsonRpcUrl = config.rpc;
-      } else throw new Error("JSON RPC URL not found!!");
+      if (process.env.NEW_RPC) {
+        jsonRpcUrl = process.env.NEW_RPC as string;
+      } else throw new Error(`JSON RPC URL not found for ${chain}!!`);
   }
 
   return jsonRpcUrl;

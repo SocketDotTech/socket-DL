@@ -7,16 +7,17 @@ import {
   DeploymentMode,
 } from "../../src";
 import { chains, mode, overrides } from "../deploy/config";
-import { getABI } from "../deploy/scripts/getABIs";
 import { getProviderFromChainSlug } from "../constants";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
+import { CORE_CONTRACTS } from "@socket.tech/dl-core";
+import { getInstance } from "../deploy/utils";
 
 const main = async () => {
   for (const chain of chains) {
     for (const siblingChain of chains) {
       for (const integrationType of Object.values(IntegrationTypes)) {
         if (integrationType === IntegrationTypes.native) continue;
-        const switchboard = getSwitchboardInstance(
+        const switchboard = await getSwitchboardInstance(
           chain,
           siblingChain,
           integrationType,
@@ -79,12 +80,12 @@ const main = async () => {
 };
 
 const sbContracts: { [key: string]: Contract } = {};
-const getSwitchboardInstance = (
+const getSwitchboardInstance = async (
   chain: ChainSlug,
   siblingChain: ChainSlug,
   integrationType: IntegrationTypes,
   mode: DeploymentMode
-): Contract | undefined => {
+): Promise<Contract | undefined> => {
   let switchboardAddress: string;
   try {
     switchboardAddress = getSwitchboardAddress(
@@ -103,11 +104,9 @@ const getSwitchboardInstance = (
       throw new Error("SOCKET_SIGNER_KEY not set");
     const signer: Wallet = new Wallet(process.env.SOCKET_SIGNER_KEY, provider);
 
-    sbContracts[`${chain}${siblingChain}${switchboardAddress}`] = new Contract(
-      switchboardAddress,
-      getABI.FastSwitchboard,
-      signer
-    );
+    sbContracts[`${chain}${siblingChain}${switchboardAddress}`] = (
+      await getInstance(CORE_CONTRACTS.FastSwitchboard, switchboardAddress)
+    ).connect(signer);
   }
   return sbContracts[`${chain}${siblingChain}${switchboardAddress}`];
 };

@@ -1,5 +1,6 @@
-import { Wallet } from "ethers";
+import { Wallet, providers } from "ethers";
 import fs from "fs";
+import path from "path";
 
 import {
   CORE_CONTRACTS,
@@ -15,32 +16,47 @@ import {
   newRoleStatus,
   sendTransaction,
 } from "../config";
+import { registerSwitchboards } from "../scripts/configureSocket";
 import {
-  configureExecutionManager,
-  registerSwitchboards,
-} from "../scripts/configureSocket";
-import { getProviderFromChainSlug } from "../../constants";
+  ChainConfigs,
+  RoleOwners,
+  getProviderFromChainSlug,
+} from "../../constants";
 import { deployedAddressPath, storeAllAddresses } from "../utils";
-import { chainConfig } from "../../../chainConfig";
 
-const chain = ChainSlug.SX_NETWORK_TESTNET;
-const filterChains = [
-  ChainSlug.POLYGON_MUMBAI,
-  ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_GOERLI,
-];
+const configPath = path.join(__dirname, `/../../../chainConfig.json`);
 
-export const main = async () => {
+export const configureChain = async () => {
+  if (!fs.existsSync(configPath)) {
+    throw new Error("chainConfig.json not found");
+  }
+  let configs: ChainConfigs = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+
+  const jsonRpcUrl = process.env.NEW_RPC as string;
+  if (!jsonRpcUrl) {
+    throw new Error("rpc url not found");
+  }
+
+  const providerInstance = new providers.StaticJsonRpcProvider(jsonRpcUrl);
+  const network = await providerInstance.getNetwork();
+  const chain = network.chainId;
+
+  if (!configs[chain]) throw new Error("Setup not done yet!!");
+  const siblings = configs[chain]?.siblings;
+  const roleOwners = configs[chain]?.roleOwners;
+
+  if (!siblings || !roleOwners) throw new Error("Setup not proper!!");
+
   const addresses: DeploymentAddresses = JSON.parse(
     fs.readFileSync(deployedAddressPath(mode), "utf-8")
   );
 
   // grant all roles for new chain
-  await grantRoles();
+  await grantRoles(chain, siblings, roleOwners);
 
   let addr;
-  for (let c = 0; c < filterChains.length; c++) {
-    const sibling = filterChains[c] as any as ChainSlug;
+  for (let c = 0; c < siblings.length; c++) {
+    const sibling = siblings[c] as any as ChainSlug;
     const providerInstance = getProviderFromChainSlug(sibling);
     const socketSigner: Wallet = new Wallet(
       process.env.SOCKET_SIGNER_KEY as string,
@@ -63,17 +79,17 @@ export const main = async () => {
   await storeAllAddresses(addresses, mode);
 };
 
-const grantRoles = async () => {
-  if (!chainConfig || !chainConfig[chain])
-    throw new Error("Chain config not found!");
-  const config = chainConfig[chain];
-
+const grantRoles = async (
+  chain: ChainSlug,
+  siblings: ChainSlug[],
+  roleOwners: RoleOwners
+) => {
   if (
-    !config.executorAddress ||
-    !config.transmitterAddress ||
-    !config.watcherAddress ||
-    !config.feeUpdaterAddress ||
-    !config.ownerAddress
+    !roleOwners.executorAddress ||
+    !roleOwners.transmitterAddress ||
+    !roleOwners.watcherAddress ||
+    !roleOwners.feeUpdaterAddress ||
+    !roleOwners.ownerAddress
   )
     throw new Error("Add all required addresses!");
 
@@ -81,16 +97,16 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: config.feeUpdaterAddress,
+        userAddress: roleOwners.feeUpdaterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE],
       },
       {
-        userAddress: config.executorAddress,
+        userAddress: roleOwners.executorAddress,
         filterRoles: [ROLES.EXECUTOR_ROLE],
       },
     ],
     contractName: executionManagerVersion,
-    filterChains,
+    filterChains: siblings,
     filterSiblingChains: [chain],
     sendTransaction,
     newRoleStatus,
@@ -100,16 +116,16 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: config.feeUpdaterAddress,
+        userAddress: roleOwners.feeUpdaterAddress,
         filterRoles: [ROLES.TRANSMITTER_ROLE],
       },
       {
-        userAddress: config.transmitterAddress,
+        userAddress: roleOwners.transmitterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE],
       },
     ],
     contractName: CORE_CONTRACTS.TransmitManager,
-    filterChains,
+    filterChains: siblings,
     filterSiblingChains: [chain],
     sendTransaction,
     newRoleStatus,
@@ -119,20 +135,18 @@ const grantRoles = async () => {
   await checkAndUpdateRoles({
     userSpecificRoles: [
       {
-        userAddress: config.feeUpdaterAddress,
+        userAddress: roleOwners.feeUpdaterAddress,
         filterRoles: [ROLES.FEES_UPDATER_ROLE], // all roles
       },
       {
-        userAddress: config.watcherAddress,
+        userAddress: roleOwners.watcherAddress,
         filterRoles: [ROLES.WATCHER_ROLE],
       },
     ],
     contractName: CORE_CONTRACTS.OptimisticSwitchboard,
-    filterChains,
+    filterChains: siblings,
     filterSiblingChains: [chain],
     sendTransaction,
     newRoleStatus,
   });
 };
-
-main();

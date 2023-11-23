@@ -49,7 +49,7 @@ export const getOrDeploy = async (
   let contract: Contract;
   if (!deployUtils.addresses[contractName]) {
     contract = await deployContractWithArgs(
-      contractName,
+      path + `:${contractName}`,
       args,
       deployUtils.signer
     );
