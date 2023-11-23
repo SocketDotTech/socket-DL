@@ -67,7 +67,7 @@ const main = async () => {
             nonce,
             siblingChain,
             signature,
-            { ...overrides[chain] }
+            { ...overrides(chain) }
           );
           console.log(tx.hash);
 

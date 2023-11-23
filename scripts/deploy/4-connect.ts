@@ -90,7 +90,7 @@ export const main = async () => {
             sibling,
             siblingCounter,
             switchboard,
-            { ...overrides[chain] }
+            { ...overrides(chain) }
           );
 
           console.log(

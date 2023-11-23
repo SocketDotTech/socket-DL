@@ -89,6 +89,7 @@ export type Configs = {
 };
 
 export interface ChainSocketAddresses {
+  startBlock?: number;
   Counter: string;
   CapacitorFactory: string;
   ExecutionManager?: string;

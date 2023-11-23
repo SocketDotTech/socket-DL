@@ -70,7 +70,7 @@ const main = async () => {
     switchboardFees,
     verificationOverheadFees,
     signature,
-    { ...overrides[chain] }
+    { ...overrides(chain) }
   );
   console.log(tx.hash);
 
