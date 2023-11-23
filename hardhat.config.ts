@@ -51,8 +51,12 @@ if (isProduction) {
   liveNetworks = {
     [HardhatChainName.ARBITRUM_GOERLI]: getChainConfig(ChainId.ARBITRUM_GOERLI),
     [HardhatChainName.OPTIMISM_GOERLI]: getChainConfig(ChainId.OPTIMISM_GOERLI),
-    [HardhatChainName.ARBITRUM_SEPOLIA]: getChainConfig(ChainId.ARBITRUM_SEPOLIA),
-    [HardhatChainName.OPTIMISM_SEPOLIA]: getChainConfig(ChainId.OPTIMISM_SEPOLIA),
+    [HardhatChainName.ARBITRUM_SEPOLIA]: getChainConfig(
+      ChainId.ARBITRUM_SEPOLIA
+    ),
+    [HardhatChainName.OPTIMISM_SEPOLIA]: getChainConfig(
+      ChainId.OPTIMISM_SEPOLIA
+    ),
     [HardhatChainName.POLYGON_MAINNET]: getChainConfig(ChainId.POLYGON_MAINNET),
     [HardhatChainName.ARBITRUM]: getChainConfig(ChainId.ARBITRUM),
     [HardhatChainName.BSC]: getChainConfig(ChainId.BSC),

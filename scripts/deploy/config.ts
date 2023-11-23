@@ -30,24 +30,24 @@ console.log(
 );
 
 export const chains: Array<ChainSlug> = [
-  ChainSlug.GOERLI,
+  // ChainSlug.GOERLI,
   ChainSlug.ARBITRUM_SEPOLIA,
   ChainSlug.OPTIMISM_SEPOLIA,
   ChainSlug.POLYGON_MUMBAI,
-  ChainSlug.SX_NETWORK_TESTNET,
-  ChainSlug.BSC_TESTNET,
-  ChainSlug.AEVO_TESTNET,
-  ChainSlug.LYRA_TESTNET,
+  // ChainSlug.SX_NETWORK_TESTNET,
+  // ChainSlug.BSC_TESTNET,
+  // ChainSlug.AEVO_TESTNET,
+  // ChainSlug.LYRA_TESTNET,
   ChainSlug.SEPOLIA,
-  ChainSlug.XAI_TESTNET,
-  ChainSlug.CDK_TESTNET,
-  ChainSlug.AEVO,
-  ChainSlug.MAINNET,
-  ChainSlug.ARBITRUM,
-  ChainSlug.OPTIMISM,
-  ChainSlug.LYRA,
-  ChainSlug.BSC,
-  ChainSlug.POLYGON_MAINNET,
+  // ChainSlug.XAI_TESTNET,
+  // ChainSlug.CDK_TESTNET,
+  // ChainSlug.AEVO,
+  // ChainSlug.MAINNET,
+  // ChainSlug.ARBITRUM,
+  // ChainSlug.OPTIMISM,
+  // ChainSlug.LYRA,
+  // ChainSlug.BSC,
+  // ChainSlug.POLYGON_MAINNET,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
@@ -103,10 +103,10 @@ export const overrides = (
       gasLimit: 20_000_000,
       gasPrice,
     };
-  } else if (chain == ChainSlug.ARBITRUM_GOERLI) {
+  } else if (chain == ChainSlug.ARBITRUM_SEPOLIA) {
     return {
       // type,
-      // gasLimit: 20_000_000,
+      // gasLimit,
       // gasPrice,
     };
   } else if (chain == ChainSlug.OPTIMISM) {
@@ -115,10 +115,10 @@ export const overrides = (
       gasLimit: 2_000_000,
       gasPrice,
     };
-  } else if (chain == ChainSlug.OPTIMISM_GOERLI) {
+  } else if (chain == ChainSlug.OPTIMISM_SEPOLIA) {
     return {
       // type,
-      // gasLimit: 20_000_000,
+      // gasLimit,
       // gasPrice,
     };
   } else if (chain == ChainSlug.BSC) {
@@ -153,15 +153,15 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.POLYGON_MUMBAI) {
     return {
-      type: 0,
-      gasLimit: 2_000_000,
-      gasPrice,
+      type: 1,
+      gasLimit: 3000000,
+      gasPrice: 10_000_000_000,
     };
   } else if (chain == ChainSlug.SEPOLIA) {
     return {
       type,
       gasLimit,
-      gasPrice,
+      gasPrice: 1_000_000_000,
     };
   } else if (chain == ChainSlug.AEVO_TESTNET) {
     return {

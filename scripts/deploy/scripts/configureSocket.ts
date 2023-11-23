@@ -155,7 +155,7 @@ export const configureExecutionManager = async (
       requests,
       { ...overrides(chain) }
     );
-    console.log(chain, tx.hash);
+    console.log("configured EM for ", chain, tx.hash, tx);
     await tx.wait();
   } catch (error) {
     console.log("error while configuring execution manager: ", error);

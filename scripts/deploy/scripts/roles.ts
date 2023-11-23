@@ -236,9 +236,9 @@ export const checkNativeSwitchboardRoles = async ({
         // );
         return;
       }
-      let instance = (await getInstance("OptimismSwitchboard", contractAddress)).connect(
-        provider
-      );
+      let instance = (
+        await getInstance("OptimismSwitchboard", contractAddress)
+      ).connect(provider);
       let requiredRoles =
         REQUIRED_ROLES[contractName as keyof typeof REQUIRED_ROLES];
 
