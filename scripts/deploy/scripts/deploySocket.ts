@@ -118,6 +118,9 @@ export const deploySocket = async (
     );
     deployUtils.addresses["Counter"] = counter.address;
 
+    deployUtils.addresses.startBlock =
+      await socketSigner.provider?.getBlockNumber();
+
     allDeployed = true;
     console.log(deployUtils.addresses);
     console.log("Contracts deployed!");

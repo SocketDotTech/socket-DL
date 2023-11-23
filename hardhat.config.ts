@@ -62,6 +62,7 @@ if (isProduction) {
     [HardhatChainName.AEVO_TESTNET]: getChainConfig(ChainId.AEVO_TESTNET),
     [HardhatChainName.AEVO]: getChainConfig(ChainId.AEVO),
     [HardhatChainName.LYRA_TESTNET]: getChainConfig(ChainId.LYRA_TESTNET),
+    [HardhatChainName.LYRA]: getChainConfig(ChainId.LYRA),
     [HardhatChainName.XAI_TESTNET]: getChainConfig(ChainId.XAI_TESTNET),
     [HardhatChainName.SX_NETWORK_TESTNET]: getChainConfig(
       ChainId.SX_NETWORK_TESTNET
@@ -91,6 +92,7 @@ const config: HardhatUserConfig = {
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       aevoTestnet: process.env.AEVO_API_KEY || "",
       lyraTestnet: process.env.LYRA_API_KEY || "",
+      lyra: process.env.LYRA_API_KEY || "",
       xaiTestnet: process.env.XAI_API_KEY || "",
       sxnTestnet: process.env.SX_NETWORK_API_KEY || "",
     },
