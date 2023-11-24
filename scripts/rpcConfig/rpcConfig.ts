@@ -11,11 +11,11 @@ const checkEnvVar = (envVar: string) => {
     throw new Error(`Missing environment variable ${envVar}`);
   }
   return value;
-}
+};
 
 const rpcs = {
   [ChainSlug.AEVO]: checkEnvVar("AEVO_RPC"),
-  [ChainSlug.ARBITRUM]:checkEnvVar("ARBITRUM_RPC"),
+  [ChainSlug.ARBITRUM]: checkEnvVar("ARBITRUM_RPC"),
   [ChainSlug.LYRA]: checkEnvVar("LYRA_RPC"),
   [ChainSlug.OPTIMISM]: checkEnvVar("OPTIMISM_RPC"),
   [ChainSlug.BSC]: checkEnvVar("BSC_RPC"),
@@ -24,17 +24,17 @@ const rpcs = {
 
   [ChainSlug.ARBITRUM_SEPOLIA]: checkEnvVar("ARBITRUM_SEPOLIA_RPC"),
   [ChainSlug.OPTIMISM_SEPOLIA]: checkEnvVar("OPTIMISM_SEPOLIA_RPC"),
-  [ChainSlug.SEPOLIA]:checkEnvVar("SEPOLIA_RPC"),
+  [ChainSlug.SEPOLIA]: checkEnvVar("SEPOLIA_RPC"),
   [ChainSlug.POLYGON_MUMBAI]: checkEnvVar("POLYGON_MUMBAI_RPC"),
   [ChainSlug.ARBITRUM_GOERLI]: checkEnvVar("ARB_GOERLI_RPC"),
-  [ChainSlug.AEVO_TESTNET]:  checkEnvVar("AEVO_TESTNET_RPC"),
+  [ChainSlug.AEVO_TESTNET]: checkEnvVar("AEVO_TESTNET_RPC"),
   [ChainSlug.LYRA_TESTNET]: checkEnvVar("LYRA_TESTNET_RPC"),
   [ChainSlug.OPTIMISM_GOERLI]: checkEnvVar("OPTIMISM_GOERLI_RPC"),
   [ChainSlug.BSC_TESTNET]: checkEnvVar("BSC_TESTNET_RPC"),
   [ChainSlug.GOERLI]: checkEnvVar("GOERLI_RPC"),
   [ChainSlug.XAI_TESTNET]: checkEnvVar("XAI_TESTNET_RPC"),
   [ChainSlug.SX_NETWORK_TESTNET]: checkEnvVar("SX_NETWORK_TESTNET_RPC"),
-  [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC")
+  [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 
 const devConfig = {
@@ -65,14 +65,12 @@ const devConfig = {
     ChainSlug.OPTIMISM_SEPOLIA,
     ChainSlug.SEPOLIA,
     ChainSlug.POLYGON_MUMBAI,
-    ChainSlug.SX_NETWORK_TESTNET
+    ChainSlug.SX_NETWORK_TESTNET,
   ],
-
 };
 
 const prodConfig = {
   chains: {
-
     [ChainSlug.AEVO]: {
       rpc: rpcs[ChainSlug.AEVO],
       // blockNumber:,
@@ -153,7 +151,6 @@ const prodConfig = {
       rpc: rpcs[ChainSlug.POLYGON_MUMBAI],
       // blockNumber:,
     },
-
   },
   batcherSupportedChainSlugs: [
     ChainSlug.AEVO,

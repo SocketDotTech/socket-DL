@@ -48,5 +48,4 @@ const uploadToS3 = async () => {
 
 uploadToS3();
 
-
 // npx ts-node scripts/rpcConfig/uploadS3Config.ts
