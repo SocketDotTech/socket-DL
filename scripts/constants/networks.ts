@@ -109,6 +109,16 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       jsonRpcUrl = "http://127.0.0.1:8545/";
       break;
 
+    case HardhatChainName.OPTIMISM_SEPOLIA:
+    case ChainId.OPTIMISM_SEPOLIA:
+      jsonRpcUrl = process.env.OPTIMISM_SEPOLIA_RPC as string;
+      break;
+
+    case HardhatChainName.ARBITRUM_SEPOLIA:
+    case ChainId.ARBITRUM_SEPOLIA:
+      jsonRpcUrl = process.env.ARBITRUM_SEPOLIA_RPC as string;
+      break;
+
     default:
       if (process.env.NEW_RPC) {
         jsonRpcUrl = process.env.NEW_RPC as string;
