@@ -47,7 +47,7 @@ export async function writeConfigs() {
     {
       name: "siblings",
       type: "multiselect",
-      message: "Select chains you want to use as message destination",
+      message: "Select destination chains",
       choices,
     },
     {
@@ -61,64 +61,62 @@ export async function writeConfigs() {
       name: "transmitter",
       type: "text",
       message:
-        "Enter transmitter address if you want to transmit, else leave blank",
+        "Enter transmitter address (skip this for standard contract deployment)",
       validate: validateAddress,
     },
     {
       name: "executor",
       type: "text",
       message:
-        "Enter executor address if you want to execute, else leave blank",
+        "Enter executor address (skip this for standard contract deployment)",
       validate: validateAddress,
     },
     {
       name: "watcher",
       type: "text",
-      message: "Enter watcher address if you want to attest, else leave blank",
+      message:
+        "Enter watcher address (skip this for standard contract deployment)",
       validate: validateAddress,
     },
     {
       name: "feeUpdater",
       type: "text",
       message:
-        "Enter fee updater address if you want to run oracle, else leave blank",
+        "Enter fee updater address (skip this for standard contract deployment)",
       validate: validateAddress,
     },
     {
       name: "pk",
       type: "text",
       message:
-        "Enter deployer private key (can be left blank and added to env separately)",
+        "Enter deployer private key (can be left blank and added to env as SOCKET_SIGNER_KEY)",
     },
     {
       name: "timeout",
       type: "text",
-      message:
-        "Enter timeout, leave blank if you want to keep it default (2 hrs)",
+      message: "Enter timeout, skip if you want to keep it default (2 hrs)",
     },
     {
       name: "msgValueMaxThreshold",
       type: "text",
       message:
-        "Enter max msg value transfer limit, leave blank if you want to keep it default (0.01 ETH)",
+        "Enter max msg value transfer limit, skip if you want to keep it default (0.01 ETH)",
     },
     {
       name: "type",
       type: "text",
       message:
-        "Enter transaction type supported, leave blank if you want it to be picked from RPC",
+        "Enter transaction type supported, skip if you want it to be picked from RPC",
     },
     {
       name: "gasLimit",
       type: "text",
-      message:
-        "Enter max gas limit, leave blank if you want it to be picked from RPC",
+      message: "Enter max gas limit, skip if you want it to be picked from RPC",
     },
     {
       name: "gasPrice",
       type: "text",
-      message:
-        "Enter gas price, leave blank if you want it to be picked from RPC",
+      message: "Enter gas price, skip if you want it to be picked from RPC",
     },
   ]);
 
