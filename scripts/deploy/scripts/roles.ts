@@ -16,7 +16,7 @@ import {
   getAddresses,
 } from "../../../src";
 import { getRoleHash, getChainRoleHash, getInstance } from "../utils";
-import { Contract, Wallet, ethers } from "ethers";
+import { Wallet, ethers } from "ethers";
 import { getProviderFromChainSlug } from "../../constants";
 import { filterChains, mode } from "../config";
 import { overrides } from "../config";
@@ -217,7 +217,6 @@ export const checkNativeSwitchboardRoles = async ({
   newRoleStatus: boolean;
 }) => {
   let contractName = CORE_CONTRACTS.NativeSwitchboard;
-
   await Promise.all(
     siblingSlugs.map(async (siblingSlug) => {
       if (filterChains.length > 0 && !filterChains.includes(siblingSlug))
@@ -237,9 +236,9 @@ export const checkNativeSwitchboardRoles = async ({
         // );
         return;
       }
-      let instance = (await getInstance(contractName, contractAddress)).connect(
-        provider
-      );
+      let instance = (
+        await getInstance("OptimismSwitchboard", contractAddress)
+      ).connect(provider);
       let requiredRoles =
         REQUIRED_ROLES[contractName as keyof typeof REQUIRED_ROLES];
 
@@ -303,13 +302,6 @@ export const checkAndUpdateRoles = async (
 
         let siblingSlugs = getSiblingSlugs(chainSlug);
 
-        // console.log(chainSlug, " Sibling Slugs: ", siblingSlugs);
-
-        // console.log(
-        //   "============= checking for network: ",
-        //   ChainSlugToKey(chainSlug),
-        //   "================="
-        // );
         let addresses: ChainSocketAddresses | undefined;
         try {
           addresses = await getAddresses(chainSlug, mode);

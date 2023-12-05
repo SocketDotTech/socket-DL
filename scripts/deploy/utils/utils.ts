@@ -101,19 +101,22 @@ export const verify = async (
   contractName: string,
   path: string,
   args: any[]
-) => {
+): Promise<boolean> => {
   try {
     const chainSlug = await getChainSlug();
-    if (chainSlug === 31337) return;
+    if (chainSlug === 31337) return true;
 
     await run("verify:verify", {
       address,
       contract: `${path}:${contractName}`,
       constructorArguments: args,
     });
+    return true;
   } catch (error) {
     console.log("Error during verification", error);
   }
+
+  return false;
 };
 
 export const sleep = (delay: number) =>
