@@ -34,6 +34,8 @@ const rpcs = {
   [ChainSlug.GOERLI]: checkEnvVar("GOERLI_RPC"),
   [ChainSlug.XAI_TESTNET]: checkEnvVar("XAI_TESTNET_RPC"),
   [ChainSlug.SX_NETWORK_TESTNET]: checkEnvVar("SX_NETWORK_TESTNET_RPC"),
+  [ChainSlug.MODE_TESTNET]: checkEnvVar("MODE_TESTNET_RPC"),
+  [ChainSlug.VICTION_TESTNET]: checkEnvVar("VICTION_TESTNET_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 
@@ -61,6 +63,14 @@ const devConfig = {
     },
     [ChainSlug.SX_NETWORK_TESTNET]: {
       rpc: rpcs[ChainSlug.SX_NETWORK_TESTNET],
+      // blockNumber:,
+    },
+    [ChainSlug.MODE_TESTNET]: {
+      rpc: rpcs[ChainSlug.MODE_TESTNET],
+      // blockNumber:,
+    },
+    [ChainSlug.VICTION_TESTNET]: {
+      rpc: rpcs[ChainSlug.VICTION_TESTNET],
       // blockNumber:,
     },
   },
@@ -141,6 +151,14 @@ const prodConfig = {
       rpc: rpcs[ChainSlug.SX_NETWORK_TESTNET],
       // blockNumber:,
     },
+    [ChainSlug.MODE_TESTNET]: {
+      rpc: rpcs[ChainSlug.MODE_TESTNET],
+      // blockNumber:,
+    },
+    [ChainSlug.VICTION_TESTNET]: {
+      rpc: rpcs[ChainSlug.VICTION_TESTNET],
+      // blockNumber:,
+    },
     [ChainSlug.CDK_TESTNET]: {
       rpc: rpcs[ChainSlug.CDK_TESTNET],
       // blockNumber:,
@@ -184,6 +202,8 @@ const prodConfig = {
     ChainSlug.CDK_TESTNET,
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
+    ChainSlug.MODE_TESTNET,
+    ChainSlug.VICTION_TESTNET,
   ],
   watcherSupportedChainSlugs: [
     ChainSlug.AEVO,
@@ -207,6 +227,8 @@ const prodConfig = {
     ChainSlug.CDK_TESTNET,
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
+    ChainSlug.MODE_TESTNET,
+    ChainSlug.VICTION_TESTNET,
   ],
 };
 
