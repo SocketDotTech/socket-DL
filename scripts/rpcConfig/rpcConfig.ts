@@ -41,19 +41,23 @@ const devConfig = {
   chains: {
     [ChainSlug.ARBITRUM_SEPOLIA]: {
       rpc: rpcs[ChainSlug.ARBITRUM_SEPOLIA],
-      // blockNumber:,
+      blockNumber:1430261,
+      confirmations:1
     },
     [ChainSlug.OPTIMISM_SEPOLIA]: {
       rpc: rpcs[ChainSlug.OPTIMISM_SEPOLIA],
-      // blockNumber:,
+      blockNumber:4475713,
+      confirmations:1
     },
     [ChainSlug.SEPOLIA]: {
       rpc: rpcs[ChainSlug.SEPOLIA],
-      // blockNumber:,
+      blockNumber:4751027,
+      confirmations:1
     },
     [ChainSlug.POLYGON_MUMBAI]: {
       rpc: rpcs[ChainSlug.POLYGON_MUMBAI],
-      // blockNumber:,
+      blockNumber:42750896,
+      confirmations:5
     },
     [ChainSlug.SX_NETWORK_TESTNET]: {
       rpc: rpcs[ChainSlug.SX_NETWORK_TESTNET],
@@ -67,6 +71,12 @@ const devConfig = {
     ChainSlug.POLYGON_MUMBAI,
     ChainSlug.SX_NETWORK_TESTNET,
   ],
+  watcherSupportedChainSlugs: [
+    ChainSlug.ARBITRUM_SEPOLIA,
+    ChainSlug.OPTIMISM_SEPOLIA,
+    ChainSlug.SEPOLIA,
+    ChainSlug.POLYGON_MUMBAI
+  ]
 };
 
 const prodConfig = {
@@ -153,6 +163,29 @@ const prodConfig = {
     },
   },
   batcherSupportedChainSlugs: [
+    ChainSlug.AEVO,
+    ChainSlug.ARBITRUM,
+    ChainSlug.OPTIMISM,
+    ChainSlug.BSC,
+    ChainSlug.POLYGON_MAINNET,
+    ChainSlug.LYRA,
+    ChainSlug.MAINNET,
+
+    ChainSlug.AEVO_TESTNET,
+    ChainSlug.ARBITRUM_GOERLI,
+    ChainSlug.OPTIMISM_GOERLI,
+    ChainSlug.GOERLI,
+    ChainSlug.SEPOLIA,
+    ChainSlug.POLYGON_MUMBAI,
+    // ChainSlug.BSC_TESTNET,
+    ChainSlug.LYRA_TESTNET,
+    ChainSlug.XAI_TESTNET,
+    ChainSlug.SX_NETWORK_TESTNET,
+    ChainSlug.CDK_TESTNET,
+    ChainSlug.ARBITRUM_SEPOLIA,
+    ChainSlug.OPTIMISM_SEPOLIA,
+  ],
+  watcherSupportedChainSlugs: [
     ChainSlug.AEVO,
     ChainSlug.ARBITRUM,
     ChainSlug.OPTIMISM,
