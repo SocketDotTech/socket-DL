@@ -3,13 +3,12 @@ pragma solidity 0.8.19;
 
 import "../interfaces/IPlug.sol";
 import "../interfaces/ISocket.sol";
+import "../utils/Ownable.sol";
 import "../libraries/RescueFundsLib.sol";
 
-contract Counter is IPlug {
+contract Counter is IPlug, Ownable(msg.sender) {
     // immutables
     address public immutable socket;
-
-    address public owner;
 
     // application state
     uint256 public counter;
@@ -18,18 +17,11 @@ contract Counter is IPlug {
     bytes32 public constant OP_ADD = keccak256("OP_ADD");
     bytes32 public constant OP_SUB = keccak256("OP_SUB");
 
-    error OnlyOwner();
     error OnlySocket();
     error InvalidAmount();
 
     constructor(address socket_) {
         socket = socket_;
-        owner = msg.sender;
-    }
-
-    modifier onlyOwner() {
-        if (msg.sender != owner) revert OnlyOwner();
-        _;
     }
 
     function localAddOperation(uint256 amount_) external {
@@ -134,10 +126,6 @@ contract Counter is IPlug {
             switchboard_,
             switchboard_
         );
-    }
-
-    function setupComplete() external {
-        owner = address(0);
     }
 
     /**
