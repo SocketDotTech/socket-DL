@@ -41,23 +41,23 @@ const devConfig = {
   chains: {
     [ChainSlug.ARBITRUM_SEPOLIA]: {
       rpc: rpcs[ChainSlug.ARBITRUM_SEPOLIA],
-      blockNumber:1430261,
-      confirmations:1
+      blockNumber: 1430261,
+      confirmations: 1,
     },
     [ChainSlug.OPTIMISM_SEPOLIA]: {
       rpc: rpcs[ChainSlug.OPTIMISM_SEPOLIA],
-      blockNumber:4475713,
-      confirmations:1
+      blockNumber: 4475713,
+      confirmations: 1,
     },
     [ChainSlug.SEPOLIA]: {
       rpc: rpcs[ChainSlug.SEPOLIA],
-      blockNumber:4751027,
-      confirmations:1
+      blockNumber: 4751027,
+      confirmations: 1,
     },
     [ChainSlug.POLYGON_MUMBAI]: {
       rpc: rpcs[ChainSlug.POLYGON_MUMBAI],
-      blockNumber:42750896,
-      confirmations:5
+      blockNumber: 42750896,
+      confirmations: 5,
     },
     [ChainSlug.SX_NETWORK_TESTNET]: {
       rpc: rpcs[ChainSlug.SX_NETWORK_TESTNET],
@@ -75,8 +75,8 @@ const devConfig = {
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
     ChainSlug.SEPOLIA,
-    ChainSlug.POLYGON_MUMBAI
-  ]
+    ChainSlug.POLYGON_MUMBAI,
+  ],
 };
 
 const prodConfig = {
