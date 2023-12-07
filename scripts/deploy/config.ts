@@ -33,8 +33,10 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.GOERLI,
   ChainSlug.ARBITRUM_SEPOLIA,
   ChainSlug.OPTIMISM_SEPOLIA,
-  ChainSlug.POLYGON_MUMBAI,
+  // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
+  ChainSlug.MODE_TESTNET,
+  ChainSlug.VICTION_TESTNET,
   // ChainSlug.BSC_TESTNET,
   // ChainSlug.AEVO_TESTNET,
   // ChainSlug.LYRA_TESTNET,
@@ -194,6 +196,18 @@ export const overrides = (
       // gasPrice: 100_000_000,
     };
   } else if (chain == ChainSlug.SX_NETWORK_TESTNET) {
+    return {
+      // type: 1,
+      // gasLimit,
+      // gasPrice: 100_000_000,
+    };
+  } else if (chain == ChainSlug.MODE_TESTNET) {
+    return {
+      type: 1,
+      // gasLimit,
+      gasPrice: 100_000_000,
+    };
+  } else if (chain == ChainSlug.VICTION_TESTNET) {
     return {
       // type: 1,
       // gasLimit,

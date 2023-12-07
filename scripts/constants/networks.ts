@@ -104,6 +104,16 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       jsonRpcUrl = process.env.SX_NETWORK_TESTNET_RPC as string;
       break;
 
+    case HardhatChainName.MODE_TESTNET:
+    case ChainId.MODE_TESTNET:
+      jsonRpcUrl = process.env.MODE_TESTNET_RPC as string;
+      break;
+
+    case HardhatChainName.VICTION_TESTNET:
+    case ChainId.VICTION_TESTNET:
+      jsonRpcUrl = process.env.VICTION_TESTNET_RPC as string;
+      break;
+
     case HardhatChainName.HARDHAT:
     case ChainId.HARDHAT:
       jsonRpcUrl = "http://127.0.0.1:8545/";

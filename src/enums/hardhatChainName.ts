@@ -20,6 +20,8 @@ export enum HardhatChainName {
   LYRA = "lyra",
   XAI_TESTNET = "xai_testnet",
   SX_NETWORK_TESTNET = "sxn_testnet",
+  MODE_TESTNET = "mode_testnet",
+  VICTION_TESTNET = "viction_testnet",
   CDK_TESTNET = "cdk_testnet",
   HARDHAT = "hardhat",
 }

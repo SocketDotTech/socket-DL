@@ -74,6 +74,12 @@ if (isProduction) {
     [HardhatChainName.SX_NETWORK_TESTNET]: getChainConfig(
       ChainId.SX_NETWORK_TESTNET
     ),
+    [HardhatChainName.MODE_TESTNET]: getChainConfig(
+      ChainId.MODE_TESTNET
+    ),
+    [HardhatChainName.VICTION_TESTNET]: getChainConfig(
+      ChainId.VICTION_TESTNET
+    ),
   };
 }
 
@@ -102,6 +108,8 @@ const config: HardhatUserConfig = {
       lyra: process.env.LYRA_API_KEY || "",
       xaiTestnet: process.env.XAI_API_KEY || "",
       sxnTestnet: process.env.SX_NETWORK_API_KEY || "",
+      modeTestnet: process.env.MODE_API_KEY || "",
+      victionTestnet: process.env.VICTION_API_KEY || "",
     },
     customChains: [
       {
