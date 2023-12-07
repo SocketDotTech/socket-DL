@@ -23,9 +23,10 @@ const main = async () => {
   let watcherAddress = watcherAddresses[mode];
 
   let summary: { params: any; roleStatus: any }[] = [];
+  let s;
 
   // Grant rescue,withdraw and governance role for Execution Manager to owner
-  let s = await checkAndUpdateRoles({
+  s = await checkAndUpdateRoles({
     userSpecificRoles: [
       {
         userAddress: ownerAddress,

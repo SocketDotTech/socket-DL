@@ -568,6 +568,102 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
+  "89": [
+    [
+      "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
+    ],
+    [
+      "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
+    ],
+    [
+      "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
+      "OptimisticSwitchboard",
+      "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        89,
+        7200,
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0x8f9EaEe5c5df888aBA3c1Ab19689a0660d042c6d",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        89,
+        7200,
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0xbDf50eAe568ECef74796ed6022a0d453e8432410",
+      "TransmitManager",
+      "contracts/TransmitManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        89,
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0xc317144DE60E6bC9455363bB09852C00bd14CD61",
+      "ExecutionManager",
+      "contracts/ExecutionManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        89,
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+      "Socket",
+      "contracts/socket/Socket.sol",
+      [
+        89,
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+        "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "IMLI"
+      ]
+    ],
+    [
+      "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+      "CapacitorFactory",
+      "contracts/CapacitorFactory.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
+    ],
+    [
+      "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+      "Hasher",
+      "contracts/utils/Hasher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+      "SignatureVerifier",
+      "contracts/utils/SignatureVerifier.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ]
+  ],
   "137": [
     [
       "0x69Adf49285c25d9f840c577A0e3cb134caF944D3",
@@ -960,6 +1056,102 @@
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
       ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
+    ]
+  ],
+  "919": [
+    [
+      "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
+    ],
+    [
+      "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
+    ],
+    [
+      "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
+      "OptimisticSwitchboard",
+      "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        919,
+        7200,
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0x8f9EaEe5c5df888aBA3c1Ab19689a0660d042c6d",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        919,
+        7200,
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0xbDf50eAe568ECef74796ed6022a0d453e8432410",
+      "TransmitManager",
+      "contracts/TransmitManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        919,
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0xc317144DE60E6bC9455363bB09852C00bd14CD61",
+      "ExecutionManager",
+      "contracts/ExecutionManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        919,
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+      "Socket",
+      "contracts/socket/Socket.sol",
+      [
+        919,
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+        "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "IMLI"
+      ]
+    ],
+    [
+      "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+      "CapacitorFactory",
+      "contracts/CapacitorFactory.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
+    ],
+    [
+      "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+      "Hasher",
+      "contracts/utils/Hasher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+      "SignatureVerifier",
+      "contracts/utils/SignatureVerifier.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "957": [
@@ -1570,6 +1762,12 @@
   ],
   "421614": [
     [
+      "0xA7f7e4fE8E4cdDCD9969Bd3fbcFF67000CD7DE47",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0xEA59E2b1539b514290dD3dCEa989Ea36279aC6F2"]
+    ],
+    [
       "0x0f8F4E665221528e6a444458dd098216E9ec7807",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -1652,6 +1850,12 @@
     ]
   ],
   "11155111": [
+    [
+      "0x1d43076909Ca139BFaC4EbB7194518bE3638fc76",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0x07e11D1A1543B0D0b91684eb741d1ab7D51ae237"]
+    ],
     [
       "0x2b863CDA83e855078c702233E215884c4d0200dE",
       "OptimismSwitchboard",
@@ -1932,6 +2136,12 @@
     ]
   ],
   "11155420": [
+    [
+      "0xD9e492C3899aC768F67aD9AdC0Ce88aAB5463f60",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0xEA59E2b1539b514290dD3dCEa989Ea36279aC6F2"]
+    ],
     [
       "0x0f8F4E665221528e6a444458dd098216E9ec7807",
       "Counter",

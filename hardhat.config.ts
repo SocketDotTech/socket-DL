@@ -74,12 +74,8 @@ if (isProduction) {
     [HardhatChainName.SX_NETWORK_TESTNET]: getChainConfig(
       ChainId.SX_NETWORK_TESTNET
     ),
-    [HardhatChainName.MODE_TESTNET]: getChainConfig(
-      ChainId.MODE_TESTNET
-    ),
-    [HardhatChainName.VICTION_TESTNET]: getChainConfig(
-      ChainId.VICTION_TESTNET
-    ),
+    [HardhatChainName.MODE_TESTNET]: getChainConfig(ChainId.MODE_TESTNET),
+    [HardhatChainName.VICTION_TESTNET]: getChainConfig(ChainId.VICTION_TESTNET),
   };
 }
 
