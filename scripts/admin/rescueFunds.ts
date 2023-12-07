@@ -10,8 +10,8 @@ import {
   ChainSocketAddresses,
   DeploymentAddresses,
   IntegrationTypes,
-  ChainSlug,
 } from "@socket.tech/dl-core";
+import { ChainSlug } from "../../src";
 
 /**
  * Usable flags
@@ -163,7 +163,7 @@ export const main = async () => {
                 ETH_ADDRESS,
                 signer.address,
                 rescueAmount,
-                { ...overrides(chainSlug) }
+                { ...overrides(parseInt(chainSlug)) }
               );
               console.log(
                 `Rescuing ${rescueAmount} from ${contractAddr[index]} on ${chainSlug}: ${tx.hash}`
