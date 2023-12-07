@@ -26,3 +26,8 @@ lcov.info
 dev_switchboards.json
 prod_switchboards.json
 switchboards.json
+
+devRpcConfig.ts
+devRpcConfig.json
+prodRpcConfig.ts
+prodRpcConfig.json
