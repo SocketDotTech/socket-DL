@@ -36,6 +36,8 @@ const rpcs = {
   [ChainSlug.SX_NETWORK_TESTNET]: checkEnvVar("SX_NETWORK_TESTNET_RPC"),
   [ChainSlug.MODE_TESTNET]: checkEnvVar("MODE_TESTNET_RPC"),
   [ChainSlug.VICTION_TESTNET]: checkEnvVar("VICTION_TESTNET_RPC"),
+  [ChainSlug.BASE]: checkEnvVar("BASE_RPC"),
+  [ChainSlug.MODE]: checkEnvVar("MODE_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 

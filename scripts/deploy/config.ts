@@ -126,7 +126,7 @@ export const overrides = (
   } else if (chain == ChainSlug.BSC) {
     return {
       type,
-      gasLimit,
+      gasLimit: 3000000,
       gasPrice,
     };
   } else if (chain == ChainSlug.BSC_TESTNET) {
@@ -137,9 +137,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.MAINNET) {
     return {
-      type,
-      gasLimit,
-      gasPrice,
+      type: 1,
+      gasLimit: 3000000,
+      gasPrice: 47_000_000_000,
     };
   } else if (chain == ChainSlug.GOERLI) {
     return {
