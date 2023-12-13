@@ -24,4 +24,6 @@ export enum HardhatChainName {
   VICTION_TESTNET = "viction_testnet",
   CDK_TESTNET = "cdk_testnet",
   HARDHAT = "hardhat",
+  BASE = "base",
+  MODE = "mode",
 }

@@ -25,4 +25,6 @@ export enum ChainSlug {
   MODE_TESTNET = ChainId.MODE_TESTNET,
   VICTION_TESTNET = ChainId.VICTION_TESTNET,
   CDK_TESTNET = ChainId.CDK_TESTNET,
+  BASE = ChainId.BASE,
+  MODE = ChainId.MODE,
 }

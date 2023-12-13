@@ -23,4 +23,6 @@ export enum ChainId {
   SX_NETWORK_TESTNET = 647,
   MODE_TESTNET = 919,
   VICTION_TESTNET = 89,
+  BASE = 8453,
+  MODE = 34443,
 }

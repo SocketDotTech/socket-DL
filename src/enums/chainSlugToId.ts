@@ -26,4 +26,6 @@ export const ChainSlugToId = {
   [ChainSlug.MODE_TESTNET]: ChainId.MODE_TESTNET,
   [ChainSlug.VICTION_TESTNET]: ChainId.VICTION_TESTNET,
   [ChainSlug.CDK_TESTNET]: ChainId.CDK_TESTNET,
+  [ChainSlug.BASE]: ChainId.BASE,
+  [ChainSlug.MODE]: ChainId.MODE,
 };
