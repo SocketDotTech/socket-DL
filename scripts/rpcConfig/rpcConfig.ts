@@ -22,23 +22,31 @@ const getBlockNumber = (
   deploymentMode: DeploymentMode,
   chainSlug: ChainSlug
 ) => {
-  const addresses = getAddresses(chainSlug, deploymentMode);
-  return addresses.startBlock ?? 1;
+  try {
+    const addresses = getAddresses(chainSlug, deploymentMode);
+    return addresses.startBlock ?? 1;
+  } catch (error) {
+    return 1;
+  }
 };
 
 const getSiblings = (
   deploymentMode: DeploymentMode,
   chainSlug: ChainSlug
 ): ChainSlug[] => {
-  const integrations: Integrations = getAddresses(
-    chainSlug,
-    deploymentMode
-  ).integrations;
-  if (!integrations) return [] as ChainSlug[];
+  try {
+    const integrations: Integrations = getAddresses(
+      chainSlug,
+      deploymentMode
+    ).integrations;
+    if (!integrations) return [] as ChainSlug[];
 
-  return Object.keys(integrations).map(
-    (chainSlug) => parseInt(chainSlug) as ChainSlug
-  );
+    return Object.keys(integrations).map(
+      (chainSlug) => parseInt(chainSlug) as ChainSlug
+    );
+  } catch (error) {
+    return [] as ChainSlug[];
+  }
 };
 
 const rpcs = {
@@ -300,9 +308,7 @@ const prodConfig = {
     ChainSlug.POLYGON_MUMBAI,
     // ChainSlug.BSC_TESTNET,
     ChainSlug.LYRA_TESTNET,
-    ChainSlug.XAI_TESTNET,
     ChainSlug.SX_NETWORK_TESTNET,
-    ChainSlug.CDK_TESTNET,
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
     ChainSlug.MODE_TESTNET,
@@ -327,9 +333,7 @@ const prodConfig = {
     ChainSlug.POLYGON_MUMBAI,
     // ChainSlug.BSC_TESTNET,
     ChainSlug.LYRA_TESTNET,
-    ChainSlug.XAI_TESTNET,
     ChainSlug.SX_NETWORK_TESTNET,
-    ChainSlug.CDK_TESTNET,
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
     ChainSlug.MODE_TESTNET,
