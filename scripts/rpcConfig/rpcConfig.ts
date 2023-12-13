@@ -161,6 +161,14 @@ const prodConfig = {
       rpc: rpcs[ChainSlug.VICTION_TESTNET],
       // blockNumber:,
     },
+    [ChainSlug.BASE]: {
+      rpc: rpcs[ChainSlug.BASE],
+      // blockNumber:,
+    },
+    [ChainSlug.MODE]: {
+      rpc: rpcs[ChainSlug.MODE],
+      // blockNumber:,
+    },
     [ChainSlug.CDK_TESTNET]: {
       rpc: rpcs[ChainSlug.CDK_TESTNET],
       // blockNumber:,
@@ -206,6 +214,8 @@ const prodConfig = {
     ChainSlug.OPTIMISM_SEPOLIA,
     ChainSlug.MODE_TESTNET,
     ChainSlug.VICTION_TESTNET,
+    ChainSlug.BASE,
+    ChainSlug.MODE,
   ],
   watcherSupportedChainSlugs: [
     ChainSlug.AEVO,
@@ -231,6 +241,8 @@ const prodConfig = {
     ChainSlug.OPTIMISM_SEPOLIA,
     ChainSlug.MODE_TESTNET,
     ChainSlug.VICTION_TESTNET,
+    ChainSlug.BASE,
+    ChainSlug.MODE,
   ],
 };
 
