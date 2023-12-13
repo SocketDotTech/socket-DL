@@ -33,7 +33,7 @@ export async function writeConfigs() {
     {
       name: "isMainnet",
       type: "toggle",
-      message: "Is it mainnet or testnet?",
+      message: "Is it a mainnet?",
     },
   ]);
 
@@ -47,7 +47,7 @@ export async function writeConfigs() {
     {
       name: "siblings",
       type: "multiselect",
-      message: "Select destination chains",
+      message: "Select chains to connect",
       choices,
     },
     {
