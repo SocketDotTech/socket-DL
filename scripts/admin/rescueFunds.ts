@@ -11,7 +11,8 @@ import {
   DeploymentAddresses,
   IntegrationTypes,
 } from "@socket.tech/dl-core";
-import { ChainSlug } from "../../src";
+import { ChainSlug, isMainnet, isTestnet } from "../../src";
+import { formatEther } from "ethers/lib/utils";
 
 /**
  * Usable flags
@@ -31,6 +32,9 @@ import { ChainSlug } from "../../src";
  * --chains         Run only for specified chains.
  *                  Default is all chains.
  *                  Eg. npx --chains=10,2999 ts-node scripts/admin/rescueFunds.ts
+ *
+ * --testnets       Run for testnets.
+ *                  Default is false.
  */
 
 // const maxRescueAmounts = {
@@ -40,8 +44,16 @@ import { ChainSlug } from "../../src";
 // };
 
 const addresses: DeploymentAddresses = getAllAddresses(mode);
-const activeChainSlugs = Object.keys(addresses);
-
+const testnets = process.env.npm_config_testnets == "true";
+let activeChainSlugs: string[];
+if (testnets)
+  activeChainSlugs = Object.keys(addresses).filter((c) =>
+    isTestnet(parseInt(c))
+  );
+else
+  activeChainSlugs = Object.keys(addresses).filter((c) =>
+    isMainnet(parseInt(c))
+  );
 const all = process.env.npm_config_all == "true";
 const sendTx = process.env.npm_config_sendtx == "true";
 const filterChains = process.env.npm_config_chains
@@ -140,14 +152,25 @@ export const main = async () => {
 
         const contractAddr = createContractAddrArray(chainAddresses);
         for (let index = 0; index < contractAddr.length; index++) {
-          const amount = await providerInstance.getBalance(contractAddr[index]);
-          console.log(
-            `balance of ${contractAddr[index]} on ${chainSlug} : ${amount}`
+          const rescueableAmount = await providerInstance.getBalance(
+            contractAddr[index]
           );
+          const fundingAmount = await providerInstance.getBalance(
+            "0x0240c3151FE3e5bdBB1894F59C5Ed9fE71ba0a5E"
+          );
+          console.log(
+            `rescueableAmount on ${chainSlug} : ${formatEther(
+              rescueableAmount
+            )}`
+          );
+          console.log(
+            `fundingAmount on ${chainSlug}: ${formatEther(fundingAmount)}`
+          );
+          console.log();
 
           const rescueAmount =
-            maxRescueAmount.eq(0) || amount.lt(maxRescueAmount)
-              ? amount
+            maxRescueAmount.eq(0) || rescueableAmount.lt(maxRescueAmount)
+              ? rescueableAmount
               : maxRescueAmount;
           if (rescueAmount.toString() === "0") continue;
 

@@ -99,6 +99,11 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       jsonRpcUrl = process.env.XAI_TESTNET_RPC as string;
       break;
 
+    case HardhatChainName.CDK_TESTNET:
+    case ChainId.CDK_TESTNET:
+      jsonRpcUrl = process.env.CDK_TESTNET_RPC as string;
+      break;
+
     case HardhatChainName.SX_NETWORK_TESTNET:
     case ChainId.SX_NETWORK_TESTNET:
       jsonRpcUrl = process.env.SX_NETWORK_TESTNET_RPC as string;
