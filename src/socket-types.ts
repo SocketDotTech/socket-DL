@@ -195,3 +195,17 @@ export const REQUIRED_CHAIN_ROLES = {
   FastSwitchboard2: [ROLES.WATCHER_ROLE, ROLES.FEES_UPDATER_ROLE],
   OptimisticSwitchboard: [ROLES.WATCHER_ROLE, ROLES.FEES_UPDATER_ROLE],
 };
+
+export type S3Config = {
+  chains: {
+    [chainSlug in ChainSlug]?: {
+      rpc: string;
+      blockNumber: number;
+      confirmations: number;
+      siblings: ChainSlug[];
+    };
+  };
+  batcherSupportedChainSlugs: ChainSlug[];
+  watcherSupportedChainSlugs: ChainSlug[];
+  transmitterSupportedChainSlugs: ChainSlug[];
+};
