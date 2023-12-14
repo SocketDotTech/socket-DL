@@ -109,7 +109,6 @@ const devConfig: S3Config = {
     ChainSlug.OPTIMISM_SEPOLIA,
     ChainSlug.SEPOLIA,
     ChainSlug.POLYGON_MUMBAI,
-    ChainSlug.SX_NETWORK_TESTNET,
   ],
   watcherSupportedChainSlugs: [
     ChainSlug.ARBITRUM_SEPOLIA,
