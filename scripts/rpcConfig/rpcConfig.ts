@@ -2,8 +2,8 @@ import {
   ChainSlug,
   getAddresses,
   Integrations,
-  ChainAddresses,
   DeploymentMode,
+  S3Config,
 } from "../../src";
 
 import dotenv from "dotenv";
@@ -77,7 +77,7 @@ const rpcs = {
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 
-const devConfig = {
+const devConfig: S3Config = {
   chains: {
     [ChainSlug.ARBITRUM_SEPOLIA]: {
       rpc: rpcs[ChainSlug.ARBITRUM_SEPOLIA],
@@ -117,9 +117,15 @@ const devConfig = {
     ChainSlug.SEPOLIA,
     ChainSlug.POLYGON_MUMBAI,
   ],
+  nativeSupportedChainSlugs: [
+    ChainSlug.ARBITRUM_SEPOLIA,
+    ChainSlug.OPTIMISM_SEPOLIA,
+    ChainSlug.SEPOLIA,
+    ChainSlug.POLYGON_MUMBAI,
+  ],
 };
 
-const prodConfig = {
+const prodConfig: S3Config = {
   chains: {
     [ChainSlug.AEVO]: {
       rpc: rpcs[ChainSlug.AEVO],
@@ -340,6 +346,21 @@ const prodConfig = {
     ChainSlug.VICTION_TESTNET,
     ChainSlug.BASE,
     ChainSlug.MODE,
+  ],
+  nativeSupportedChainSlugs: [
+    ChainSlug.ARBITRUM,
+    ChainSlug.OPTIMISM,
+    ChainSlug.POLYGON_MAINNET,
+    ChainSlug.LYRA,
+    ChainSlug.MAINNET,
+    ChainSlug.ARBITRUM_GOERLI,
+    ChainSlug.OPTIMISM_GOERLI,
+    ChainSlug.GOERLI,
+    ChainSlug.SEPOLIA,
+    ChainSlug.POLYGON_MUMBAI,
+    ChainSlug.LYRA_TESTNET,
+    ChainSlug.ARBITRUM_SEPOLIA,
+    ChainSlug.OPTIMISM_SEPOLIA,
   ],
 };
 

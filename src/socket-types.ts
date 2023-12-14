@@ -207,5 +207,5 @@ export type S3Config = {
   };
   batcherSupportedChainSlugs: ChainSlug[];
   watcherSupportedChainSlugs: ChainSlug[];
-  transmitterSupportedChainSlugs: ChainSlug[];
+  nativeSupportedChainSlugs: ChainSlug[];
 };
