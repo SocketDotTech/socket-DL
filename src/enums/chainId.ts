@@ -25,4 +25,5 @@ export enum ChainId {
   VICTION_TESTNET = 89,
   BASE = 8453,
   MODE = 34443,
+  ANCIENT8_TESTNET = 2863311531,
 }

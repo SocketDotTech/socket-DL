@@ -26,4 +26,5 @@ export enum HardhatChainName {
   HARDHAT = "hardhat",
   BASE = "base",
   MODE = "mode",
+  ANCIENT8_TESTNET = "ancient8_testnet",
 }

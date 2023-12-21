@@ -16,4 +16,5 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.MODE_TESTNET,
   ChainSlug.VICTION_TESTNET,
   ChainSlug.CDK_TESTNET,
+  ChainSlug.ANCIENT8_TESTNET,
 ];

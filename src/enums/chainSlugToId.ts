@@ -28,4 +28,5 @@ export const ChainSlugToId = {
   [ChainSlug.CDK_TESTNET]: ChainId.CDK_TESTNET,
   [ChainSlug.BASE]: ChainId.BASE,
   [ChainSlug.MODE]: ChainId.MODE,
+  [ChainSlug.ANCIENT8_TESTNET]: ChainId.ANCIENT8_TESTNET,
 };

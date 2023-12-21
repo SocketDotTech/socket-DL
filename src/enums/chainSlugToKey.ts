@@ -28,4 +28,5 @@ export const ChainSlugToKey = {
   [ChainSlug.CDK_TESTNET]: HardhatChainName.CDK_TESTNET,
   [ChainSlug.BASE]: HardhatChainName.BASE,
   [ChainSlug.MODE]: HardhatChainName.MODE,
+  [ChainSlug.ANCIENT8_TESTNET]: HardhatChainName.ANCIENT8_TESTNET,
 };

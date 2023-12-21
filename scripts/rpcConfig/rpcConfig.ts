@@ -74,6 +74,7 @@ const rpcs = {
   [ChainSlug.VICTION_TESTNET]: checkEnvVar("VICTION_TESTNET_RPC"),
   [ChainSlug.BASE]: checkEnvVar("BASE_RPC"),
   [ChainSlug.MODE]: checkEnvVar("MODE_RPC"),
+  [ChainSlug.ANCIENT8_TESTNET]: checkEnvVar("ANCIENT8_TESTNET_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 
@@ -295,6 +296,15 @@ const prodConfig: S3Config = {
       confirmations: 1,
       siblings: getSiblings(DeploymentMode.PROD, ChainSlug.POLYGON_MUMBAI),
     },
+    [ChainSlug.ANCIENT8_TESTNET]: {
+      rpc: rpcs[ChainSlug.ANCIENT8_TESTNET],
+      blockNumber: getBlockNumber(
+        DeploymentMode.PROD,
+        ChainSlug.ANCIENT8_TESTNET
+      ),
+      confirmations: 1,
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.ANCIENT8_TESTNET),
+    },
   },
   batcherSupportedChainSlugs: [
     ChainSlug.AEVO,
@@ -320,6 +330,7 @@ const prodConfig: S3Config = {
     ChainSlug.VICTION_TESTNET,
     ChainSlug.BASE,
     ChainSlug.MODE,
+    ChainSlug.ANCIENT8_TESTNET,
   ],
   watcherSupportedChainSlugs: [
     ChainSlug.AEVO,
@@ -345,6 +356,7 @@ const prodConfig: S3Config = {
     ChainSlug.VICTION_TESTNET,
     ChainSlug.BASE,
     ChainSlug.MODE,
+    ChainSlug.ANCIENT8_TESTNET,
   ],
   nativeSupportedChainSlugs: [
     ChainSlug.ARBITRUM,

@@ -27,4 +27,5 @@ export enum ChainSlug {
   CDK_TESTNET = ChainId.CDK_TESTNET,
   BASE = ChainId.BASE,
   MODE = ChainId.MODE,
+  ANCIENT8_TESTNET = ChainId.ANCIENT8_TESTNET,
 }
