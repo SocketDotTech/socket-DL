@@ -89,6 +89,11 @@
           "capacitor": "0x1f06BAf9ff58Db17970803ce03463096654A3795",
           "decapacitor": "0x5bb34262f7C9757c860f420B2a2C9a735b15C7ED",
           "switchboard": "0xD5a83a40F262E2247e6566171f9ADc76b745F5cD"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0xA5cd2abA033d3Ca3941A8Daf26591635C32c1119",
+          "decapacitor": "0xd64E6f92A0A8e92256D7f8154C3ADC0A38A7e750",
+          "switchboard": "0xEaa15Fd42D68b8334a3BB1E9bF8cA85BaBE83790"
         }
       },
       "34443": {
@@ -96,6 +101,11 @@
           "capacitor": "0xC100ECD1717E7bcD9332c9405d6eDd6dD599c871",
           "decapacitor": "0x0A211DDdB4E9bAe283f4C12BF49b93e8555F1e91",
           "switchboard": "0xD5a83a40F262E2247e6566171f9ADc76b745F5cD"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x1f9A70B21e84483Baa9b59D093D8B96B115b8DB2",
+          "decapacitor": "0x6e5Cac46cb0d45Eb6C1c41208703d77d54A02889",
+          "switchboard": "0xEaa15Fd42D68b8334a3BB1E9bF8cA85BaBE83790"
         }
       },
       "42161": {
@@ -322,6 +332,11 @@
           "capacitor": "0x072d479fe4f49a717cFE5Ca7097c213902281948",
           "decapacitor": "0xc11aed6A1870c1973F01dF4F83a55CE9E503769b",
           "switchboard": "0x09A6e77912a6bcFc3abfDfb841A85380Bb2A8B97"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0xc3E1f3D65703c3f6130d8e4112218BFf4e8B838F",
+          "decapacitor": "0x6eDC81d700Cb634CaD909147DCA822511B3ff77b",
+          "switchboard": "0xb113d72896d4874111AF00c9499b5a64e9f1e3f4"
         }
       },
       "34443": {
@@ -329,6 +344,11 @@
           "capacitor": "0x803118D6a13897813D7dEa2d7ceC2fa9f3dA0e2D",
           "decapacitor": "0x7505D0bAA438DD2788D5E0C649982B0c9269310d",
           "switchboard": "0x09A6e77912a6bcFc3abfDfb841A85380Bb2A8B97"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x4faD0f161B7dF84729D431B479e3bBfa5706e854",
+          "decapacitor": "0xE757E14FA7FB163feecC35296960201D7E030835",
+          "switchboard": "0xb113d72896d4874111AF00c9499b5a64e9f1e3f4"
         }
       },
       "42161": {
@@ -1189,6 +1209,11 @@
           "capacitor": "0x769539bE1b533841acA8436078ada53d6E64035f",
           "decapacitor": "0x413248783F1B66703a0248d455EE790436FAdcA9",
           "switchboard": "0x957301825Dc21d4A92919C9E72dC9E6C6a29e7f8"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x34543E63E38EEc5C9818D9234d08A4EEFF18bD2D",
+          "decapacitor": "0x7aCF234A02676E59Df1A7A35069bbcab686D127C",
+          "switchboard": "0x15A55294B7278260DdfFC659Fb39a401871EeE34"
         }
       },
       "10": {
@@ -1196,6 +1221,11 @@
           "capacitor": "0xCcdc860cB233dB57Af21665dE1A46911d41dB717",
           "decapacitor": "0x9570F603ab0424adCa0Cb56e79363DDf90054733",
           "switchboard": "0x957301825Dc21d4A92919C9E72dC9E6C6a29e7f8"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x06c8f503684459B4f8b7F0875cfed44879Be1Bbc",
+          "decapacitor": "0xd3FB87591Cbf521907D554CdD09d6c51d30aBf44",
+          "switchboard": "0x15A55294B7278260DdfFC659Fb39a401871EeE34"
         }
       },
       "56": {
@@ -1217,6 +1247,11 @@
           "capacitor": "0x279824278c1C78662A4BF9fb25EeA954BBF74d97",
           "decapacitor": "0x0603c547e428b2aA4BdBcfD540d205D8Db8B5dc9",
           "switchboard": "0x957301825Dc21d4A92919C9E72dC9E6C6a29e7f8"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0xd93BF81B8B54860E94e5b26E786F428c0f78A434",
+          "decapacitor": "0xfF94F698B1EC0966bCd5F90487Fbd5D9410B31e1",
+          "switchboard": "0x15A55294B7278260DdfFC659Fb39a401871EeE34"
         }
       },
       "42161": {
@@ -1224,6 +1259,11 @@
           "capacitor": "0x1a50D1e4f3bf1F9D1E2752B0D1cE0Cd2F99aDb3b",
           "decapacitor": "0x5F030Ed56CA8742dB95d599caAc8dEbBE70B2a07",
           "switchboard": "0x957301825Dc21d4A92919C9E72dC9E6C6a29e7f8"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x6e7dAd288966Afa716AfCa2356dc699b3bF621a1",
+          "decapacitor": "0x24B9be73D1fC7131C00B5f1eDa39722c62C49588",
+          "switchboard": "0x15A55294B7278260DdfFC659Fb39a401871EeE34"
         }
       }
     }
@@ -1246,6 +1286,11 @@
           "capacitor": "0xB4Ca08934052A664Fd1D5c5d206a66a5684D95Cf",
           "decapacitor": "0x5A7A6Ac35E886FfaBF773bA8B94313E6Fb1dDc86",
           "switchboard": "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x921B7f179ef04227E53324927F9AFb7155149db0",
+          "decapacitor": "0x529967A44995313fc468AD29c2C1c14DaebCBAE7",
+          "switchboard": "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e"
         }
       },
       "10": {
@@ -1253,6 +1298,11 @@
           "capacitor": "0xDAc077a030b43CF7771d954E46b8408A2526B99F",
           "decapacitor": "0x77F88b197dEF6b531fB4d67B77D5F0BD19182f27",
           "switchboard": "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x43BBF5B1C8000f09a19a52A4abc126dd0dA69466",
+          "decapacitor": "0xf3b4CAA568Ac166a724b2d710EcE0f67efFedE57",
+          "switchboard": "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e"
         }
       },
       "8453": {
@@ -1260,6 +1310,11 @@
           "capacitor": "0xFFB1668F7978C67B385acB40AB9A9ada879a1271",
           "decapacitor": "0xa6b874Ca1AcF2c453b614cCEB022cFE91E2f37bC",
           "switchboard": "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x81153EFD395E5fF30FE69637c63203793fEEF233",
+          "decapacitor": "0x4110331Fc94EdCD78e2f3193039E40316fC09702",
+          "switchboard": "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e"
         }
       },
       "42161": {
@@ -1267,6 +1322,11 @@
           "capacitor": "0x32588ee44eA7014e7E8C37954141cb56681179ca",
           "decapacitor": "0x15a815152CF82a83FD6fe325409AEF8998C491A8",
           "switchboard": "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0xb7e909Eb9fbcdb5Ed34b47f70eee381244B3c9b5",
+          "decapacitor": "0x1DFB66c58B460B74Ac2DC22c9D68BC3A95317eEB",
+          "switchboard": "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e"
         }
       }
     }
@@ -1361,6 +1421,11 @@
           "capacitor": "0x6b19c12C0d5A41449d69AB2EB059959414531D3E",
           "decapacitor": "0x3D571b6afa1d3b8FDf7EE8238aFF55ddaF8D2b99",
           "switchboard": "0xd5e829827F665c42326EAF68Da3360bd59b42f2f"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0xF5F048a6362b593FF7071610275F3f5a15404461",
+          "decapacitor": "0x5474fc6D25639A0eA78C4347981e9229b67CC00F",
+          "switchboard": "0x1812ff6bd726934f18159164e2927B34949B16a8"
         }
       },
       "34443": {
@@ -1368,6 +1433,11 @@
           "capacitor": "0x79d9b5653e7672e937A05CF95a4730AA84D9A79b",
           "decapacitor": "0x870b38C612Bf67eE7673ba2E537ADDe965B67cfc",
           "switchboard": "0xd5e829827F665c42326EAF68Da3360bd59b42f2f"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x9394b3BC68Ea794E9511157F619082bB2af5EfB2",
+          "decapacitor": "0x39B61bc0F6b84E32B999dfF259D5354761AE549D",
+          "switchboard": "0x1812ff6bd726934f18159164e2927B34949B16a8"
         }
       }
     },
