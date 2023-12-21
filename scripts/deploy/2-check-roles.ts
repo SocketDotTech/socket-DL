@@ -16,6 +16,8 @@ import {
 } from "./config";
 import { checkAndUpdateRoles } from "./scripts/roles";
 
+const sleepTime = 3000;
+
 const main = async () => {
   let ownerAddress = socketOwner;
   let executorAddress = executorAddresses[mode];
@@ -54,6 +56,8 @@ const main = async () => {
   });
   summary.push(s);
 
+  await sleep(sleepTime);
+
   // Grant owner roles for TransmitManager
   s = await checkAndUpdateRoles({
     userSpecificRoles: [
@@ -79,6 +83,8 @@ const main = async () => {
   });
   summary.push(s);
 
+  await sleep(sleepTime);
+
   // Grant owner roles in socket
   s = await checkAndUpdateRoles({
     userSpecificRoles: [
@@ -94,6 +100,8 @@ const main = async () => {
     newRoleStatus,
   });
   summary.push(s);
+
+  await sleep(sleepTime);
 
   // Setup Fast Switchboard roles
   s = await checkAndUpdateRoles({
@@ -127,6 +135,8 @@ const main = async () => {
   });
   summary.push(s);
 
+  await sleep(sleepTime);
+
   // Grant watcher role to watcher for OptimisticSwitchboard
   s = await checkAndUpdateRoles({
     userSpecificRoles: [
@@ -156,6 +166,8 @@ const main = async () => {
     newRoleStatus,
   });
   summary.push(s);
+
+  await sleep(sleepTime);
 
   // Grant owner roles in NativeSwitchboard
   s = await checkAndUpdateRoles({
@@ -201,3 +213,6 @@ main()
     console.error(error);
     process.exit(1);
   });
+
+const sleep = (delay: any) =>
+  new Promise((resolve) => setTimeout(resolve, delay));
