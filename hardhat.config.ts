@@ -74,6 +74,13 @@ if (isProduction) {
     [HardhatChainName.SX_NETWORK_TESTNET]: getChainConfig(
       ChainId.SX_NETWORK_TESTNET
     ),
+    [HardhatChainName.MODE_TESTNET]: getChainConfig(ChainId.MODE_TESTNET),
+    [HardhatChainName.VICTION_TESTNET]: getChainConfig(ChainId.VICTION_TESTNET),
+    [HardhatChainName.BASE]: getChainConfig(ChainId.BASE),
+    [HardhatChainName.MODE]: getChainConfig(ChainId.MODE),
+    [HardhatChainName.ANCIENT8_TESTNET]: getChainConfig(
+      ChainId.ANCIENT8_TESTNET
+    ),
   };
 }
 
@@ -102,6 +109,11 @@ const config: HardhatUserConfig = {
       lyra: process.env.LYRA_API_KEY || "",
       xaiTestnet: process.env.XAI_API_KEY || "",
       sxnTestnet: process.env.SX_NETWORK_API_KEY || "",
+      modeTestnet: process.env.MODE_API_KEY || "",
+      victionTestnet: process.env.VICTION_API_KEY || "",
+      base: process.env.BASESCAN_API_KEY || "",
+      mode: process.env.MODE_API_KEY || "",
+      ancient8Testnet: process.env.ANCIENT8_API_KEY || "",
     },
     customChains: [
       {
@@ -118,6 +130,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-sepolia.arbiscan.io/api",
           browserURL: "https://sepolia.arbiscan.io/",
+        },
+      },
+      {
+        network: "base",
+        chainId: ChainId.BASE,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org/",
         },
       },
     ],

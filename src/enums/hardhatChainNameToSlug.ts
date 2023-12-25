@@ -23,5 +23,10 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.LYRA]: ChainSlug.LYRA,
   [HardhatChainName.XAI_TESTNET]: ChainSlug.XAI_TESTNET,
   [HardhatChainName.SX_NETWORK_TESTNET]: ChainSlug.SX_NETWORK_TESTNET,
+  [HardhatChainName.MODE_TESTNET]: ChainSlug.MODE_TESTNET,
+  [HardhatChainName.VICTION_TESTNET]: ChainSlug.VICTION_TESTNET,
   [HardhatChainName.CDK_TESTNET]: ChainSlug.CDK_TESTNET,
+  [HardhatChainName.BASE]: ChainSlug.BASE,
+  [HardhatChainName.MODE]: ChainSlug.MODE,
+  [HardhatChainName.ANCIENT8_TESTNET]: ChainSlug.ANCIENT8_TESTNET,
 };

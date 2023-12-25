@@ -23,5 +23,10 @@ export const ChainSlugToId = {
   [ChainSlug.LYRA]: ChainId.LYRA,
   [ChainSlug.XAI_TESTNET]: ChainId.XAI_TESTNET,
   [ChainSlug.SX_NETWORK_TESTNET]: ChainId.SX_NETWORK_TESTNET,
+  [ChainSlug.MODE_TESTNET]: ChainId.MODE_TESTNET,
+  [ChainSlug.VICTION_TESTNET]: ChainId.VICTION_TESTNET,
   [ChainSlug.CDK_TESTNET]: ChainId.CDK_TESTNET,
+  [ChainSlug.BASE]: ChainId.BASE,
+  [ChainSlug.MODE]: ChainId.MODE,
+  [ChainSlug.ANCIENT8_TESTNET]: ChainId.ANCIENT8_TESTNET,
 };

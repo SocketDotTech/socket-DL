@@ -8,4 +8,6 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.BSC,
   ChainSlug.AEVO,
   ChainSlug.LYRA,
+  ChainSlug.BASE,
+  ChainSlug.MODE,
 ];

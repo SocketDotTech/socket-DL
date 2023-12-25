@@ -150,3 +150,10 @@ const grantRoles = async (
     newRoleStatus,
   });
 };
+
+configureChain()
+  .then(() => process.exit(0))
+  .catch((error: Error) => {
+    console.error(error);
+    process.exit(1);
+  });

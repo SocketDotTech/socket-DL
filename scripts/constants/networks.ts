@@ -99,9 +99,39 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       jsonRpcUrl = process.env.XAI_TESTNET_RPC as string;
       break;
 
+    case HardhatChainName.CDK_TESTNET:
+    case ChainId.CDK_TESTNET:
+      jsonRpcUrl = process.env.CDK_TESTNET_RPC as string;
+      break;
+
     case HardhatChainName.SX_NETWORK_TESTNET:
     case ChainId.SX_NETWORK_TESTNET:
       jsonRpcUrl = process.env.SX_NETWORK_TESTNET_RPC as string;
+      break;
+
+    case HardhatChainName.MODE_TESTNET:
+    case ChainId.MODE_TESTNET:
+      jsonRpcUrl = process.env.MODE_TESTNET_RPC as string;
+      break;
+
+    case HardhatChainName.VICTION_TESTNET:
+    case ChainId.VICTION_TESTNET:
+      jsonRpcUrl = process.env.VICTION_TESTNET_RPC as string;
+      break;
+
+    case HardhatChainName.BASE:
+    case ChainId.BASE:
+      jsonRpcUrl = process.env.BASE_RPC as string;
+      break;
+
+    case HardhatChainName.MODE:
+    case ChainId.MODE:
+      jsonRpcUrl = process.env.MODE_RPC as string;
+      break;
+
+    case HardhatChainName.ANCIENT8_TESTNET:
+    case ChainId.ANCIENT8_TESTNET:
+      jsonRpcUrl = process.env.ANCIENT8_TESTNET_RPC as string;
       break;
 
     case HardhatChainName.HARDHAT:

@@ -33,12 +33,14 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.GOERLI,
   ChainSlug.ARBITRUM_SEPOLIA,
   ChainSlug.OPTIMISM_SEPOLIA,
-  ChainSlug.POLYGON_MUMBAI,
+  // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
+  // ChainSlug.MODE_TESTNET,
+  // ChainSlug.VICTION_TESTNET,
   // ChainSlug.BSC_TESTNET,
   // ChainSlug.AEVO_TESTNET,
   // ChainSlug.LYRA_TESTNET,
-  ChainSlug.SEPOLIA,
+  // ChainSlug.SEPOLIA,
   // ChainSlug.XAI_TESTNET,
   // ChainSlug.CDK_TESTNET,
   // ChainSlug.AEVO,
@@ -47,6 +49,9 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.OPTIMISM,
   // ChainSlug.LYRA,
   // ChainSlug.BSC,
+  // ChainSlug.BASE,
+  // ChainSlug.MODE,
+  ChainSlug.ANCIENT8_TESTNET,
   // ChainSlug.POLYGON_MAINNET,
 ];
 
@@ -124,7 +129,7 @@ export const overrides = (
   } else if (chain == ChainSlug.BSC) {
     return {
       type,
-      gasLimit,
+      gasLimit: 3000000,
       gasPrice,
     };
   } else if (chain == ChainSlug.BSC_TESTNET) {
@@ -135,9 +140,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.MAINNET) {
     return {
-      type,
-      gasLimit,
-      gasPrice,
+      type: 1,
+      gasLimit: 3000000,
+      gasPrice: 47_000_000_000,
     };
   } else if (chain == ChainSlug.GOERLI) {
     return {
@@ -194,6 +199,18 @@ export const overrides = (
       // gasPrice: 100_000_000,
     };
   } else if (chain == ChainSlug.SX_NETWORK_TESTNET) {
+    return {
+      // type: 1,
+      // gasLimit,
+      // gasPrice: 100_000_000,
+    };
+  } else if (chain == ChainSlug.MODE_TESTNET) {
+    return {
+      type: 1,
+      // gasLimit,
+      gasPrice: 100_000_000,
+    };
+  } else if (chain == ChainSlug.VICTION_TESTNET) {
     return {
       // type: 1,
       // gasLimit,

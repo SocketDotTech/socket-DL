@@ -13,5 +13,8 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.LYRA_TESTNET,
   ChainSlug.XAI_TESTNET,
   ChainSlug.SX_NETWORK_TESTNET,
+  ChainSlug.MODE_TESTNET,
+  ChainSlug.VICTION_TESTNET,
   ChainSlug.CDK_TESTNET,
+  ChainSlug.ANCIENT8_TESTNET,
 ];
