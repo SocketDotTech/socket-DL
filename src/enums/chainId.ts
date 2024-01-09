@@ -26,4 +26,5 @@ export enum ChainId {
   BASE = 8453,
   MODE = 34443,
   ANCIENT8_TESTNET = 2863311531,
+  HOOK_TESTNET = 46658378,
 }

@@ -51,7 +51,8 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.BSC,
   // ChainSlug.BASE,
   // ChainSlug.MODE,
-  ChainSlug.ANCIENT8_TESTNET,
+  // ChainSlug.ANCIENT8_TESTNET,
+  ChainSlug.HOOK_TESTNET,
   // ChainSlug.POLYGON_MAINNET,
 ];
 
@@ -124,9 +125,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.OPTIMISM_SEPOLIA) {
     return {
-      // type,
-      // gasLimit,
-      // gasPrice,
+      type,
+      gasLimit: 2_000_000,
+      gasPrice,
     };
   } else if (chain == ChainSlug.BSC) {
     return {
