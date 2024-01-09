@@ -86,6 +86,8 @@ export const watcherAddresses = {
   [DeploymentMode.SURGE]: "0xD7Ab0e4c8c31A91fb26552F7Ad3E91E169B86225",
   [DeploymentMode.PROD]: "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14", // prod
   // [DeploymentMode.PROD]: "0x55296741c6d72a07f3965abab04737c29016f2eb", // aevo watcher
+  // [DeploymentMode.PROD]: "0xA3a585c6d59CCE6aAe7035e8df48b3327cC8BE54", // sx watcher 1
+  // [DeploymentMode.PROD]: "0x7EFF16a34e3433182D636488bc97919b10283F37", // sx watcher 2
 };
 
 export const executorAddresses = {
