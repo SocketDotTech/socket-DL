@@ -28,4 +28,5 @@ export enum ChainSlug {
   BASE = ChainId.BASE,
   MODE = ChainId.MODE,
   ANCIENT8_TESTNET = ChainId.ANCIENT8_TESTNET,
+  HOOK_TESTNET = ChainId.HOOK_TESTNET,
 }
