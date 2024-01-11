@@ -81,6 +81,9 @@ if (isProduction) {
     [HardhatChainName.ANCIENT8_TESTNET]: getChainConfig(
       ChainId.ANCIENT8_TESTNET
     ),
+    [HardhatChainName.ANCIENT8_TESTNET2]: getChainConfig(
+      ChainId.ANCIENT8_TESTNET2
+    ),
     [HardhatChainName.HOOK_TESTNET]: getChainConfig(ChainId.HOOK_TESTNET),
   };
 }
@@ -115,6 +118,7 @@ const config: HardhatUserConfig = {
       base: process.env.BASESCAN_API_KEY || "",
       mode: process.env.MODE_API_KEY || "",
       ancient8Testnet: process.env.ANCIENT8_API_KEY || "",
+      ancient8Testnet2: process.env.ANCIENT8_API_KEY || "",
       hookTestnet: process.env.HOOK_API_KEY || "",
     },
     customChains: [
