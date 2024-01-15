@@ -32,4 +32,5 @@ export const ChainSlugToKey = {
   [ChainSlug.ANCIENT8_TESTNET2]: HardhatChainName.ANCIENT8_TESTNET2,
   [ChainSlug.HOOK_TESTNET]: HardhatChainName.HOOK_TESTNET,
   [ChainSlug.PARALLEL]: HardhatChainName.PARALLEL,
+  [ChainSlug.MANTLE]: HardhatChainName.MANTLE,
 };

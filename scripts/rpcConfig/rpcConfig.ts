@@ -78,6 +78,7 @@ const rpcs = {
   [ChainSlug.ANCIENT8_TESTNET2]: checkEnvVar("ANCIENT8_TESTNET2_RPC"),
   [ChainSlug.HOOK_TESTNET]: checkEnvVar("HOOK_TESTNET_RPC"),
   [ChainSlug.PARALLEL]: checkEnvVar("PARALLEL_RPC"),
+  [ChainSlug.MANTLE]: checkEnvVar("MANTLE_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 
@@ -329,6 +330,12 @@ const prodConfig: S3Config = {
       confirmations: 1,
       siblings: getSiblings(DeploymentMode.PROD, ChainSlug.PARALLEL),
     },
+    [ChainSlug.MANTLE]: {
+      rpc: rpcs[ChainSlug.MANTLE],
+      blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.MANTLE),
+      confirmations: 1,
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.MANTLE),
+    },
   },
   batcherSupportedChainSlugs: [
     ChainSlug.AEVO,
@@ -339,6 +346,7 @@ const prodConfig: S3Config = {
     ChainSlug.LYRA,
     ChainSlug.MAINNET,
     ChainSlug.PARALLEL,
+    ChainSlug.MANTLE,
 
     ChainSlug.AEVO_TESTNET,
     // ChainSlug.ARBITRUM_GOERLI,
@@ -368,6 +376,7 @@ const prodConfig: S3Config = {
     ChainSlug.LYRA,
     ChainSlug.MAINNET,
     ChainSlug.PARALLEL,
+    ChainSlug.MANTLE,
 
     ChainSlug.AEVO_TESTNET,
     // ChainSlug.ARBITRUM_GOERLI,

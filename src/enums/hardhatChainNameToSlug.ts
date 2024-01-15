@@ -32,4 +32,5 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.ANCIENT8_TESTNET2]: ChainSlug.ANCIENT8_TESTNET2,
   [HardhatChainName.HOOK_TESTNET]: ChainSlug.HOOK_TESTNET,
   [HardhatChainName.PARALLEL]: ChainSlug.PARALLEL,
+  [HardhatChainName.MANTLE]: ChainSlug.MANTLE,
 };
