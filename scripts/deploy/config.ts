@@ -31,8 +31,8 @@ console.log(
 
 export const chains: Array<ChainSlug> = [
   // ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_SEPOLIA,
-  ChainSlug.OPTIMISM_SEPOLIA,
+  // ChainSlug.ARBITRUM_SEPOLIA,
+  // ChainSlug.OPTIMISM_SEPOLIA,
   // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
   // ChainSlug.MODE_TESTNET,
@@ -44,15 +44,16 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.XAI_TESTNET,
   // ChainSlug.CDK_TESTNET,
   // ChainSlug.AEVO,
-  // ChainSlug.MAINNET,
-  // ChainSlug.ARBITRUM,
-  // ChainSlug.OPTIMISM,
+  ChainSlug.MAINNET,
+  ChainSlug.ARBITRUM,
+  ChainSlug.OPTIMISM,
   // ChainSlug.LYRA,
   // ChainSlug.BSC,
-  // ChainSlug.BASE,
+  ChainSlug.BASE,
   // ChainSlug.MODE,
   // ChainSlug.ANCIENT8_TESTNET,
-  ChainSlug.HOOK_TESTNET,
+  // ChainSlug.HOOK_TESTNET,
+  ChainSlug.PARALLEL,
   // ChainSlug.POLYGON_MAINNET,
 ];
 
@@ -145,7 +146,7 @@ export const overrides = (
     return {
       type: 1,
       gasLimit: 3000000,
-      gasPrice: 47_000_000_000,
+      gasPrice: 25_000_000_000,
     };
   } else if (chain == ChainSlug.GOERLI) {
     return {

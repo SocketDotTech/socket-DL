@@ -10,4 +10,5 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.LYRA,
   ChainSlug.BASE,
   ChainSlug.MODE,
+  ChainSlug.PARALLEL,
 ];

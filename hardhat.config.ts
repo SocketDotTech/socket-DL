@@ -82,6 +82,7 @@ if (isProduction) {
       ChainId.ANCIENT8_TESTNET
     ),
     [HardhatChainName.HOOK_TESTNET]: getChainConfig(ChainId.HOOK_TESTNET),
+    [HardhatChainName.PARALLEL]: getChainConfig(ChainId.PARALLEL),
   };
 }
 
@@ -116,6 +117,7 @@ const config: HardhatUserConfig = {
       mode: process.env.MODE_API_KEY || "",
       ancient8Testnet: process.env.ANCIENT8_API_KEY || "",
       hookTestnet: process.env.HOOK_API_KEY || "",
+      parallelTestnet: process.env.PARALLEL_API_KEY || "",
     },
     customChains: [
       {
