@@ -75,6 +75,7 @@ const rpcs = {
   [ChainSlug.BASE]: checkEnvVar("BASE_RPC"),
   [ChainSlug.MODE]: checkEnvVar("MODE_RPC"),
   [ChainSlug.ANCIENT8_TESTNET]: checkEnvVar("ANCIENT8_TESTNET_RPC"),
+  [ChainSlug.ANCIENT8_TESTNET2]: checkEnvVar("ANCIENT8_TESTNET2_RPC"),
   [ChainSlug.HOOK_TESTNET]: checkEnvVar("HOOK_TESTNET_RPC"),
   [ChainSlug.PARALLEL]: checkEnvVar("PARALLEL_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
@@ -307,6 +308,15 @@ const prodConfig: S3Config = {
       confirmations: 1,
       siblings: getSiblings(DeploymentMode.PROD, ChainSlug.ANCIENT8_TESTNET),
     },
+    [ChainSlug.ANCIENT8_TESTNET2]: {
+      rpc: rpcs[ChainSlug.ANCIENT8_TESTNET2],
+      blockNumber: getBlockNumber(
+        DeploymentMode.PROD,
+        ChainSlug.ANCIENT8_TESTNET2
+      ),
+      confirmations: 1,
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.ANCIENT8_TESTNET2),
+    },
     [ChainSlug.HOOK_TESTNET]: {
       rpc: rpcs[ChainSlug.HOOK_TESTNET],
       blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.HOOK_TESTNET),
@@ -342,10 +352,11 @@ const prodConfig: S3Config = {
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
     ChainSlug.MODE_TESTNET,
-    ChainSlug.VICTION_TESTNET,
+    // ChainSlug.VICTION_TESTNET,
     ChainSlug.BASE,
     ChainSlug.MODE,
-    ChainSlug.ANCIENT8_TESTNET,
+    // ChainSlug.ANCIENT8_TESTNET,
+    ChainSlug.ANCIENT8_TESTNET2,
     ChainSlug.HOOK_TESTNET,
   ],
   watcherSupportedChainSlugs: [
@@ -370,10 +381,11 @@ const prodConfig: S3Config = {
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
     ChainSlug.MODE_TESTNET,
-    ChainSlug.VICTION_TESTNET,
+    // ChainSlug.VICTION_TESTNET,
     ChainSlug.BASE,
     ChainSlug.MODE,
-    ChainSlug.ANCIENT8_TESTNET,
+    // ChainSlug.ANCIENT8_TESTNET,
+    ChainSlug.ANCIENT8_TESTNET2,
     ChainSlug.HOOK_TESTNET,
   ],
   nativeSupportedChainSlugs: [

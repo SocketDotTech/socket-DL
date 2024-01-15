@@ -29,6 +29,7 @@ export const ChainSlugToId = {
   [ChainSlug.BASE]: ChainId.BASE,
   [ChainSlug.MODE]: ChainId.MODE,
   [ChainSlug.ANCIENT8_TESTNET]: ChainId.ANCIENT8_TESTNET,
+  [ChainSlug.ANCIENT8_TESTNET2]: ChainId.ANCIENT8_TESTNET2,
   [ChainSlug.HOOK_TESTNET]: ChainId.HOOK_TESTNET,
   [ChainSlug.PARALLEL]: ChainId.PARALLEL,
 };

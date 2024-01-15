@@ -134,6 +134,11 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       jsonRpcUrl = process.env.ANCIENT8_TESTNET_RPC as string;
       break;
 
+    case HardhatChainName.ANCIENT8_TESTNET2:
+    case ChainId.ANCIENT8_TESTNET2:
+      jsonRpcUrl = process.env.ANCIENT8_TESTNET2_RPC as string;
+      break;
+
     case HardhatChainName.HOOK_TESTNET:
     case ChainId.HOOK_TESTNET:
       jsonRpcUrl = process.env.HOOK_TESTNET_RPC as string;

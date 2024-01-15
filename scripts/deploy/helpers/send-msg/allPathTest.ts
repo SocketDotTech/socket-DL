@@ -181,7 +181,7 @@ export const sendMessagesToAllPaths = async (params: {
 
             gasLimit =
               chainSlug === ChainSlug.ARBITRUM ||
-              chainSlug === ChainSlug.ARBITRUM_GOERLI
+              chainSlug === ChainSlug.ARBITRUM_SEPOLIA
                 ? undefined
                 : gasLimit;
 
