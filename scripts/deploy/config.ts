@@ -52,7 +52,8 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.BASE,
   // ChainSlug.MODE,
   // ChainSlug.ANCIENT8_TESTNET,
-  ChainSlug.HOOK_TESTNET,
+  ChainSlug.ANCIENT8_TESTNET2,
+  // ChainSlug.HOOK_TESTNET,
   // ChainSlug.POLYGON_MAINNET,
 ];
 
