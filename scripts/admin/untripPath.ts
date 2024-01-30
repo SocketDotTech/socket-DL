@@ -16,9 +16,16 @@ import {
 } from "@socket.tech/dl-core";
 import dotenv from "dotenv";
 import { getSwitchboardInstance } from "../common";
-
-dotenv.config();
-const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
+import {
+  sendTx,
+  integrationType,
+  filterChains,
+  siblingFilterChains,
+  SummaryObj,
+  printSummary,
+  deploymentMode,
+  formatMsg,
+} from "./tripCommon";
 
 /**
  * Usable flags
@@ -41,29 +48,6 @@ const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
  *                  Default is fast.
  */
 
-const addresses: DeploymentAddresses = getAllAddresses(mode);
-const testnets = process.env.npm_config_testnets == "true";
-let activeChainSlugs: string[];
-if (testnets)
-  activeChainSlugs = Object.keys(addresses).filter((c) =>
-    isTestnet(parseInt(c))
-  );
-else
-  activeChainSlugs = Object.keys(addresses).filter((c) =>
-    isMainnet(parseInt(c))
-  );
-const sendTx = process.env.npm_config_sendtx == "true";
-const integrationType = process.env.npm_config_integration
-  ? process.env.npm_config_integration.toUpperCase()
-  : IntegrationTypes.fast;
-let filterChains = process.env.npm_config_chains
-  ? process.env.npm_config_chains.split(",").map((c) => Number(c))
-  : activeChainSlugs;
-
-let siblingFilterChains = process.env.npm_config_sibling_chains
-  ? process.env.npm_config_sibling_chains.split(",").map((c) => Number(c))
-  : undefined;
-
 const main = async () => {
   if (
     integrationType &&
@@ -72,15 +56,27 @@ const main = async () => {
   ) {
     throw new Error("Invalid integration type. Can be FAST or OPTIMISTIC");
   }
-  filterChains = filterChains.map((c) => Number(c));
-  console.log({ filterChains });
-  for (const chain of filterChains) {
-    console.log("======= Checking ", { chain }, "==============");
+  console.log(
+    formatMsg("Config", {
+      integrationType,
+      filterChains,
+      siblingFilterChains,
+      sendTx,
+    })
+  );
 
+  let summary: SummaryObj[] = [];
+
+  for (const chain of filterChains) {
     let siblingChains = siblingFilterChains
       ? siblingFilterChains
       : getSiblings(deploymentMode, Number(chain) as ChainSlug);
 
+    if (!siblingChains.length) {
+      console.log("No siblings found for ", chain, " continuing...");
+      continue;
+    }
+    console.log(" Checking chain: ", chain);
     for (const siblingChain of siblingChains) {
       const switchboard = getSwitchboardInstance(
         chain,
@@ -101,57 +97,87 @@ const main = async () => {
       let tripStatus: boolean;
       try {
         tripStatus = await switchboard.isPathTripped(siblingChain);
-        console.log({
-          src: siblingChain,
-          dst: chain,
-          type: integrationType,
-          tripStatus,
-        });
+        console.log({ src: siblingChain, dst: chain, tripStatus });
       } catch (error) {
         console.log("RPC Error while fetching trip status: ", error);
         continue;
       }
       if (!tripStatus) continue;
 
+      let userAddress = await switchboard.signer.getAddress();
+      let role = ROLES.UN_TRIP_ROLE;
+
+      let hasRole = await checkRole(role, switchboard, userAddress);
+      if (!hasRole) {
+        console.log(
+          `${userAddress} doesn't have ${role} for contract ${switchboard.address}`
+        );
+        continue;
+      }
+      const nonce = await switchboard.nextNonce(userAddress);
+      let signature = await getSignature(
+        chain,
+        siblingChain,
+        nonce,
+        switchboard
+      );
+
+      summary.push({
+        chain,
+        hasRole,
+        siblingChain,
+        currentTripStatus: tripStatus,
+        newTripStatus: !tripStatus,
+        signature,
+        nonce,
+        ...overrides(chain),
+      });
+
       if (sendTx) {
-        let hasRole = await checkRole(ROLES.UN_TRIP_ROLE, switchboard);
-        if (!hasRole) break;
-        console.log("untripping path...");
-
-        const nonce = await switchboard.nextNonce(
-          switchboard.signer.getAddress()
-        );
-        const digest = keccak256(
-          defaultAbiCoder.encode(
-            ["bytes32", "address", "uint32", "uint32", "uint256", "bool"],
-            [
-              UN_TRIP_PATH_SIG_IDENTIFIER,
-              switchboard.address,
-              siblingChain,
-              chain,
-              nonce,
-              false,
-            ]
-          )
-        );
-
-        const signature = await switchboard.signer.signMessage(
-          arrayify(digest)
-        );
-
-        const tx = await switchboard.unTripPath(
-          nonce,
-          siblingChain,
-          signature,
-          { ...overrides(chain) }
-        );
-        console.log(tx.hash);
-
-        await tx.wait();
-        console.log("done");
+        sendTxn(chain, siblingChain, nonce, signature, switchboard);
       }
     }
   }
+  printSummary(summary);
+};
+
+const sendTxn = async (
+  chain: ChainSlug,
+  siblingChain: ChainSlug,
+  nonce: number,
+  signature: string,
+  switchboard: Contract
+) => {
+  let tx = await switchboard.unTripPath(nonce, siblingChain, signature, {
+    ...overrides(chain),
+  });
+  console.log(tx.hash);
+
+  await tx.wait();
+  console.log("done");
+};
+
+const getSignature = async (
+  chain: ChainSlug,
+  siblingChain: ChainSlug,
+  nonce: number,
+  switchboard: Contract
+) => {
+  const digest = keccak256(
+    defaultAbiCoder.encode(
+      ["bytes32", "address", "uint32", "uint32", "uint256", "bool"],
+      [
+        UN_TRIP_PATH_SIG_IDENTIFIER,
+        switchboard.address,
+        siblingChain,
+        chain,
+        nonce,
+        false,
+      ]
+    )
+  );
+
+  return await switchboard.signer.signMessage(arrayify(digest));
 };
 
 main()

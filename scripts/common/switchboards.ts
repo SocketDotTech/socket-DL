@@ -51,7 +51,7 @@ export const getSwitchboardInstance = (
 };
 
 export const checkRole = async (
-  role: ROLES,
+  role: string,
   instance: Contract,
   address: string = ""
 ): Promise<boolean> => {

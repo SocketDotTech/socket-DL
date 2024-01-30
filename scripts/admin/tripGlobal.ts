@@ -7,35 +7,39 @@ import {
 } from "../../src";
 import { mode, overrides } from "../deploy/config";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { checkRole, getSiblings } from "../common";
 import {
-  getAllAddresses,
-  DeploymentAddresses,
-  ROLES,
-} from "@socket.tech/dl-core";
-import dotenv from "dotenv";
-import {
+  UN_TRIP_GLOBAL_SIG_IDENTIFIER,
+  UN_TRIP_NATIVE_SIG_IDENTIFIER,
+  checkRole,
+  getSiblings,
   getSwitchboardInstance,
   TRIP_GLOBAL_SIG_IDENTIFIER,
   TRIP_NATIVE_SIG_IDENTIFIER,
 } from "../common";
+import { ROLES } from "@socket.tech/dl-core";
+import dotenv from "dotenv";
 import {
-  addresses,
-  testnets,
   sendTx,
   integrationType,
   filterChains,
-  siblingFilterChains,
-  formatMsg,
   SummaryObj,
   printSummary,
+  trip,
+  untrip,
+  deploymentMode,
+  formatMsg,
 } from "./tripCommon";
 import { BigNumberish, Contract } from "ethers";
-dotenv.config();
-const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
 
 /**
  * Usable flags
+ * 
+ * --trip         trip Global
+ *                  Eg. npx --untrip ts-node scripts/admin/rescueFunds.ts
+ * 
+ * --untrip         unTrip Global
+ *                  Eg. npx --untrip ts-node scripts/admin/rescueFunds.ts
+ * 
  * --sendtx         Send trip tx 
  *                  Default is false, only check trip status.
  *                  Eg. npx --sendtx ts-node scripts/admin/rescueFunds.ts
@@ -52,6 +56,15 @@ const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
  */
 
 const main = async () => {
+  if (trip && untrip) {
+    console.log("both trip and untrip flags cant be passed. pass one of them.");
+    return;
+  }
+  if (!trip && !untrip) {
+    console.log("pass one of trip or untrip flag.");
+    return;
+  }
+
   if (
     integrationType &&
     !Object.values(IntegrationTypes).includes(
@@ -62,15 +75,20 @@ const main = async () => {
       "Invalid integration type. Can be FAST, NATIVE_BRIDGE or OPTIMISTIC"
     );
   }
-  console.log({ filterChains });
+  console.log(
+    formatMsg("Config", { trip, untrip, integrationType, filterChains, sendTx })
+  );
 
   let summary: SummaryObj[] = [];
 
   for (const chain of filterChains) {
     let siblingChains = getSiblings(deploymentMode, Number(chain) as ChainSlug);
 
-    if (siblingChains.length)
-      console.log("======= Checking ", { chain }, "==============");
+    if (!siblingChains.length) {
+      console.log("No siblings found for ", chain, " continuing...");
+      continue;
+    }
+    console.log("\nChecking chain: ", chain);
     let siblingChain = siblingChains[0];
 
     const switchboard = getSwitchboardInstance(
@@ -87,38 +105,68 @@ const main = async () => {
     let tripStatus: boolean;
     try {
       tripStatus = await switchboard.isGlobalTipped();
-      console.log({ type: integrationType, tripStatus });
+      console.log("trip status: ", tripStatus);
     } catch (error) {
       console.log("RPC Error while fetching trip status: ", error);
       continue;
     }
 
-    if (tripStatus) continue; // as global trip, check for a single siblingChain is enough
+    if (trip && tripStatus) continue;
+    if (untrip && !tripStatus) continue;
 
     let userAddress = await switchboard.signer.getAddress();
-    let hasRole = await checkRole(ROLES.TRIP_ROLE, switchboard, userAddress);
+    let role: string;
+    if (trip) role = ROLES.TRIP_ROLE;
+    if (untrip) role = ROLES.UN_TRIP_ROLE;
+
+    let hasRole = await checkRole(role, switchboard, userAddress);
     if (!hasRole) {
       console.log(
-        `${userAddress} doesn't have ${ROLES.TRIP_ROLE} for contract ${switchboard.address}`
+        `${userAddress} doesn't have ${role} for contract ${switchboard.address}`
       );
       continue;
     }
-    const nonce = await switchboard.nextNonce(switchboard.signer.getAddress());
+    const nonce = await switchboard.nextNonce(userAddress);
     let signature = await getSignature(chain, nonce, switchboard);
 
-    summary.push({ chain, tripStatus, signature, nonce, ...overrides(chain) });
+    summary.push({
+      chain,
+      hasRole,
+      currentTripStatus: tripStatus,
+      newTripStatus: !tripStatus,
+      signature,
+      nonce,
+      ...overrides(chain),
+    });
 
     if (sendTx) {
-      const tx = await switchboard.tripGlobal(nonce, signature, {
-        ...overrides(chain),
-      });
-      console.log(tx.hash);
-
-      await tx.wait();
-      console.log("done");
+      sendTxn(chain, nonce, signature, switchboard, trip, untrip);
     }
   }
   printSummary(summary);
+};
+
+const sendTxn = async (
+  chain: ChainSlug,
+  nonce: number,
+  signature: string,
+  switchboard: Contract,
+  trip: boolean,
+  untrip: boolean
+) => {
+  let tx;
+  if (trip)
+    tx = await switchboard.tripGlobal(nonce, signature, {
+      ...overrides(chain),
+    });
+  if (untrip)
+    tx = await switchboard.unTrip(nonce, signature, {
+      ...overrides(chain),
+    });
+  console.log(tx.hash);
+
+  await tx.wait();
+  console.log("done");
 };
 
 const getSignature = async (
@@ -126,18 +174,36 @@ const getSignature = async (
   nonce: number,
   switchboard: Contract
 ) => {
-  let sigIdentifier =
-    integrationType == IntegrationTypes.native
-      ? TRIP_NATIVE_SIG_IDENTIFIER
-      : TRIP_GLOBAL_SIG_IDENTIFIER;
-  const digest = keccak256(
-    defaultAbiCoder.encode(
-      ["bytes32", "address", "uint32", "uint256", "bool"],
-      [sigIdentifier, switchboard.address, chain, nonce, true]
-    )
-  );
+  if (trip) {
+    let sigIdentifier =
+      integrationType == IntegrationTypes.native
+        ? TRIP_NATIVE_SIG_IDENTIFIER
+        : TRIP_GLOBAL_SIG_IDENTIFIER;
+    const digest = keccak256(
+      defaultAbiCoder.encode(
+        ["bytes32", "address", "uint32", "uint256", "bool"],
+        [sigIdentifier, switchboard.address, chain, nonce, true]
+      )
+    );
 
-  return await switchboard.signer.signMessage(arrayify(digest));
+    return await switchboard.signer.signMessage(arrayify(digest));
+  }
+
+  if (untrip) {
+    let sigIdentifier =
+      integrationType == IntegrationTypes.native
+        ? UN_TRIP_NATIVE_SIG_IDENTIFIER
+        : UN_TRIP_GLOBAL_SIG_IDENTIFIER;
+
+    const digest = keccak256(
+      defaultAbiCoder.encode(
+        ["bytes32", "address", "uint32", "uint256", "bool"],
+        [sigIdentifier, switchboard.address, chain, nonce, false]
+      )
+    );
+
+    return await switchboard.signer.signMessage(arrayify(digest));
+  }
 };
 
 main()
@@ -147,8 +213,16 @@ main()
     process.exit(1);
   });
 
-// npx ts-node scripts/admin/tripGlobal.ts  - check trip status for all mainnet chains
-// npx --chains=421614  ts-node scripts/admin/tripGlobal.ts
-// npx --sendtx --chains=421614  ts-node scripts/admin/tripGlobal.ts
-// npx --sendtx --chains=421614 --integration=fast ts-node scripts/admin/tripGlobal.ts
-// npx --sendtx --chains=421614 --testnets --integration=fast ts-node scripts/admin/tripGlobal.ts
+// TRIP Commands
+// npx --trip ts-node scripts/admin/tripGlobal.ts  - check trip status for all mainnet chains
+// npx --trip --chains=421614  ts-node scripts/admin/tripGlobal.ts
+// npx --trip --sendtx --chains=421614  ts-node scripts/admin/tripGlobal.ts
+// npx --trip --sendtx --chains=421614 --integration=fast ts-node scripts/admin/tripGlobal.ts
+// npx --trip --sendtx --chains=421614 --testnets --integration=fast ts-node scripts/admin/tripGlobal.ts
+
+// UNTRIP COMMANDS
+// npx --untrip ts-node scripts/admin/tripGlobal.ts  - check trip status for all mainnet chains
+// npx --untrip --chains=421614  ts-node scripts/admin/tripGlobal.ts
+// npx --untrip --sendtx --chains=421614  ts-node scripts/admin/tripGlobal.ts
+// npx --untrip --sendtx --chains=421614 --integration=fast ts-node scripts/admin/tripGlobal.ts
+// npx --untrip --sendtx --chains=421614 --testnets --integration=fast ts-node scripts/admin/tripGlobal.ts

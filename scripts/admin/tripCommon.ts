@@ -18,13 +18,16 @@ import dotenv from "dotenv";
 import { getSwitchboardInstance } from "../common";
 
 dotenv.config();
-const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
+export const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
 
 export type SummaryObj = {
   chain: ChainSlug;
+  siblingChain?: ChainSlug;
   nonce: number;
-  tripStatus: boolean;
+  currentTripStatus: boolean;
+  newTripStatus: boolean;
   signature: string;
+  hasRole: boolean;
   gasLimit?: BigNumberish;
   gasPrice?: BigNumberish;
   type?: number;
@@ -40,7 +43,7 @@ export type SummaryObj = {
  *                  Default is all chains.
  *                  Eg. npx --chains=10,2999 ts-node scripts/admin/tripGlobal.ts
  *
- * --sibling_chains Run only for specified sibling chains.
+ * --sibling_chains Run only for specified sibling chains. (used for unTripPath only)
  *                  Default is all sibling chains.
  *                  Eg. npx --sibling_chains=10,2999 ts-node scripts/admin/tripGlobal.ts
  *
@@ -63,6 +66,8 @@ else
     isMainnet(parseInt(c))
   );
 export const sendTx = process.env.npm_config_sendtx == "true";
+export const trip = process.env.npm_config_trip == "true";
+export const untrip = process.env.npm_config_untrip == "true";
 export const integrationType = process.env.npm_config_integration
   ? process.env.npm_config_integration.toUpperCase()
   : IntegrationTypes.fast;
@@ -75,7 +80,7 @@ export let siblingFilterChains = process.env.npm_config_sibling_chains
   : undefined;
 
 export const printSummary = (summary: SummaryObj[]) => {
-  console.log("\n========SUMMARY ==========\n");
+  console.log("\n======== UPDATE SUMMARY ==========\n");
   for (let summaryObj of summary) {
     let { chain, ...rest } = summaryObj;
     console.log(formatMsg(String(chain), rest));
@@ -83,7 +88,7 @@ export const printSummary = (summary: SummaryObj[]) => {
 };
 
 export const formatMsg = (title: string, data: any) => {
-  let message = `=== ${title} ===\n`;
+  let message = `====== ${title} ======\n`;
 
   // Iterate through the object's key-value pairs
   for (const key in data) {
