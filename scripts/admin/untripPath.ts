@@ -8,8 +8,12 @@ import {
 } from "../../src";
 import { mode, overrides } from "../deploy/config";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { UN_TRIP_PATH_SIG_IDENTIFIER, getSiblings } from "../common";
-import { getAllAddresses, DeploymentAddresses } from "@socket.tech/dl-core";
+import { UN_TRIP_PATH_SIG_IDENTIFIER, checkRole, getSiblings } from "../common";
+import {
+  getAllAddresses,
+  DeploymentAddresses,
+  ROLES,
+} from "@socket.tech/dl-core";
 import dotenv from "dotenv";
 import { getSwitchboardInstance } from "../common";
 
@@ -94,17 +98,24 @@ const main = async () => {
         continue;
       }
 
-      const tripStatus = await switchboard.isPathTripped(siblingChain);
-      console.log({
-        src: siblingChain,
-        dst: chain,
-        type: integrationType,
-        tripStatus,
-      });
-
+      let tripStatus: boolean;
+      try {
+        tripStatus = await switchboard.isPathTripped(siblingChain);
+        console.log({
+          src: siblingChain,
+          dst: chain,
+          type: integrationType,
+          tripStatus,
+        });
+      } catch (error) {
+        console.log("RPC Error while fetching trip status: ", error);
+        continue;
+      }
       if (!tripStatus) continue;
 
       if (sendTx) {
+        let hasRole = await checkRole(ROLES.UN_TRIP_ROLE, switchboard);
+        if (!hasRole) break;
         console.log("untripping path...");
 
         const nonce = await switchboard.nextNonce(

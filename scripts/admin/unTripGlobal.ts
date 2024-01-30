@@ -11,9 +11,14 @@ import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import {
   UN_TRIP_GLOBAL_SIG_IDENTIFIER,
   UN_TRIP_NATIVE_SIG_IDENTIFIER,
+  checkRole,
   getSiblings,
 } from "../common";
-import { getAllAddresses, DeploymentAddresses } from "@socket.tech/dl-core";
+import {
+  getAllAddresses,
+  DeploymentAddresses,
+  ROLES,
+} from "@socket.tech/dl-core";
 import dotenv from "dotenv";
 import { getSwitchboardInstance } from "../common";
 
@@ -71,9 +76,9 @@ const main = async () => {
   filterChains = filterChains.map((c) => Number(c));
   console.log({ filterChains });
   for (const chain of filterChains) {
-    console.log("======= Checking ", { chain }, "==============");
     let siblingChains = getSiblings(deploymentMode, Number(chain) as ChainSlug);
-
+    if (siblingChains.length)
+      console.log("======= Checking ", { chain }, "==============");
     for (const siblingChain of siblingChains) {
       const switchboard = getSwitchboardInstance(
         chain,
@@ -81,14 +86,29 @@ const main = async () => {
         integrationType as IntegrationTypes,
         mode
       );
-      if (switchboard === undefined) continue;
+      if (switchboard === undefined) {
+        console.log(
+          "Switchboard address not found for ",
+          chain,
+          "continuing..."
+        );
+        continue;
+      }
 
-      const tripStatus = await switchboard.isGlobalTipped();
-      console.log({ type: integrationType, tripStatus });
+      let tripStatus: boolean;
+      try {
+        tripStatus = await switchboard.isGlobalTipped();
+        console.log({ type: integrationType, tripStatus });
+      } catch (error) {
+        console.log("RPC Error while fetching trip status: ", error);
+        break;
+      }
 
       if (!tripStatus) break; // as global trip, check for a single siblingChain is enough
 
       if (sendTx) {
+        let hasRole = await checkRole(ROLES.UN_TRIP_ROLE, switchboard);
+        if (!hasRole) break;
         console.log("untripping", { chain });
 
         const nonce = await switchboard.nextNonce(
@@ -112,7 +132,7 @@ const main = async () => {
         );
 
         const tx = await switchboard.unTrip(nonce, signature, {
-          ...overrides[chain],
+          ...overrides(chain),
         });
         console.log(tx.hash);
 

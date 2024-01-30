@@ -9,6 +9,8 @@ import {
 import { getProviderFromChainSlug } from "../constants";
 import FastSwitchboardABI from "@socket.tech/dl-core/artifacts/abi/FastSwitchboard.json";
 import NativeSwitchboardABI from "@socket.tech/dl-core/artifacts/abi/NativeSwitchboardBase.json";
+import { ROLES } from "@socket.tech/dl-core";
+import { getRoleHash } from "../deploy/utils/utils";
 
 const sbContracts: { [key: string]: Contract } = {};
 export const getSwitchboardInstance = (
@@ -31,8 +33,10 @@ export const getSwitchboardInstance = (
   }
   if (!sbContracts[`${chain}${siblingChain}${switchboardAddress}`]) {
     const provider: StaticJsonRpcProvider = getProviderFromChainSlug(chain);
+
     if (!process.env.SOCKET_SIGNER_KEY)
       throw new Error("SOCKET_SIGNER_KEY not set");
+
     const signer: Wallet = new Wallet(process.env.SOCKET_SIGNER_KEY, provider);
 
     sbContracts[`${chain}${siblingChain}${switchboardAddress}`] = new Contract(
@@ -44,4 +48,22 @@ export const getSwitchboardInstance = (
     );
   }
   return sbContracts[`${chain}${siblingChain}${switchboardAddress}`];
+};
+
+export const checkRole = async (
+  role: ROLES,
+  instance: Contract,
+  address: string = ""
+): Promise<boolean> => {
+  if (!address) address = await instance.signer.getAddress();
+  let hasRole = await instance.callStatic["hasRole(bytes32,address)"](
+    getRoleHash(role),
+    address
+  );
+  if (!hasRole) {
+    console.log(
+      `${address} doesn't have ${role} for contract ${instance.address}`
+    );
+  }
+  return hasRole;
 };
