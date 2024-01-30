@@ -51,7 +51,6 @@ const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
  *                  Default is fast.
  */
 
-
 const main = async () => {
   if (
     integrationType &&

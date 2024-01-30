@@ -21,14 +21,14 @@ dotenv.config();
 const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
 
 export type SummaryObj = {
-    chain: ChainSlug;
-    nonce: number;
-    tripStatus: boolean;
-    signature: string;
-    gasLimit?: BigNumberish;
-    gasPrice?: BigNumberish;
-    type?: number;
-  };
+  chain: ChainSlug;
+  nonce: number;
+  tripStatus: boolean;
+  signature: string;
+  gasLimit?: BigNumberish;
+  gasPrice?: BigNumberish;
+  type?: number;
+};
 
 /**
  * Usable flags
@@ -74,16 +74,14 @@ export let siblingFilterChains = process.env.npm_config_sibling_chains
   ? process.env.npm_config_sibling_chains.split(",").map((c) => Number(c))
   : undefined;
 
-
-
-export const printSummary = (summary:SummaryObj[]) => {
-    console.log("\n========SUMMARY ==========\n")
+export const printSummary = (summary: SummaryObj[]) => {
+  console.log("\n========SUMMARY ==========\n");
   for (let summaryObj of summary) {
     let { chain, ...rest } = summaryObj;
     console.log(formatMsg(String(chain), rest));
   }
-}
-  
+};
+
 export const formatMsg = (title: string, data: any) => {
   let message = `=== ${title} ===\n`;
 
