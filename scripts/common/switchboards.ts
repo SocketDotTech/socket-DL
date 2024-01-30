@@ -56,14 +56,8 @@ export const checkRole = async (
   address: string = ""
 ): Promise<boolean> => {
   if (!address) address = await instance.signer.getAddress();
-  let hasRole = await instance.callStatic["hasRole(bytes32,address)"](
+  return await instance.callStatic["hasRole(bytes32,address)"](
     getRoleHash(role),
     address
   );
-  if (!hasRole) {
-    console.log(
-      `${address} doesn't have ${role} for contract ${instance.address}`
-    );
-  }
-  return hasRole;
 };
