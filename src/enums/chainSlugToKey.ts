@@ -33,4 +33,5 @@ export const ChainSlugToKey = {
   [ChainSlug.HOOK_TESTNET]: HardhatChainName.HOOK_TESTNET,
   [ChainSlug.PARALLEL]: HardhatChainName.PARALLEL,
   [ChainSlug.MANTLE]: HardhatChainName.MANTLE,
+  [ChainSlug.REYA_CRONOS]: HardhatChainName.REYA_CRONOS,
 };

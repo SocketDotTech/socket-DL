@@ -30,4 +30,5 @@ export enum ChainId {
   HOOK_TESTNET = 46658378,
   PARALLEL = 1024,
   MANTLE = 5000,
+  REYA_CRONOS = 1729,
 }

@@ -32,4 +32,5 @@ export enum ChainSlug {
   HOOK_TESTNET = ChainId.HOOK_TESTNET,
   PARALLEL = ChainId.PARALLEL,
   MANTLE = ChainId.MANTLE,
+  REYA_CRONOS = ChainId.REYA_CRONOS,
 }

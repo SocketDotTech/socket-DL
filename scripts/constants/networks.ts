@@ -154,6 +154,11 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       jsonRpcUrl = process.env.MANTLE_RPC as string;
       break;
 
+    case HardhatChainName.REYA_CRONOS:
+    case ChainId.REYA_CRONOS:
+      jsonRpcUrl = process.env.REYA_CRONOS_RPC as string;
+      break;
+
     case HardhatChainName.HARDHAT:
     case ChainId.HARDHAT:
       jsonRpcUrl = "http://127.0.0.1:8545/";
