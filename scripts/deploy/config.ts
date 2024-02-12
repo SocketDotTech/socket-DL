@@ -31,8 +31,8 @@ console.log(
 
 export const chains: Array<ChainSlug> = [
   // ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_SEPOLIA,
-  ChainSlug.OPTIMISM_SEPOLIA,
+  // ChainSlug.ARBITRUM_SEPOLIA,
+  // ChainSlug.OPTIMISM_SEPOLIA,
   // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
   // ChainSlug.MODE_TESTNET,
@@ -40,22 +40,23 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.BSC_TESTNET,
   // ChainSlug.AEVO_TESTNET,
   // ChainSlug.LYRA_TESTNET,
-  ChainSlug.SEPOLIA,
+  // ChainSlug.SEPOLIA,
   // ChainSlug.XAI_TESTNET,
   // ChainSlug.CDK_TESTNET,
   // ChainSlug.AEVO,
   // ChainSlug.MAINNET,
-  // ChainSlug.ARBITRUM,
-  // ChainSlug.OPTIMISM,
+  ChainSlug.ARBITRUM,
+  ChainSlug.OPTIMISM,
   // ChainSlug.LYRA,
   // ChainSlug.BSC,
   // ChainSlug.BASE,
   // ChainSlug.MODE,
   // ChainSlug.ANCIENT8_TESTNET,
   // ChainSlug.HOOK_TESTNET,
+  ChainSlug.HOOK,
   // ChainSlug.PARALLEL,
   // ChainSlug.MANTLE,
-  ChainSlug.REYA_CRONOS,
+  // ChainSlug.REYA_CRONOS,
   // ChainSlug.POLYGON_MAINNET,
 ];
 
@@ -221,6 +222,12 @@ export const overrides = (
       // type: 1,
       // gasLimit,
       // gasPrice: 100_000_000,
+    };
+  } else if (chain == ChainSlug.HOOK) {
+    return {
+      type: 1,
+      // gasLimit: 10_000_000,
+      gasPrice: 100_000_000,
     };
   } else if (chainConfig[chain] && chainConfig[chain].overrides) {
     return chainConfig[chain].overrides!;
