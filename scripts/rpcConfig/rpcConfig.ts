@@ -347,7 +347,7 @@ const prodConfig: S3Config = {
     [ChainSlug.REYA_CRONOS]: {
       rpc: rpcs[ChainSlug.REYA_CRONOS],
       blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.REYA_CRONOS),
-      confirmations: 1,
+      confirmations: 0,
       siblings: getSiblings(DeploymentMode.PROD, ChainSlug.REYA_CRONOS),
     },
   },
