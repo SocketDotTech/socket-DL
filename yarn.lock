@@ -2027,10 +2027,10 @@
     "@smithy/types" "^2.6.0"
     tslib "^2.5.0"
 
-"@socket.tech/dl-core@2.4.15":
-  version "2.4.15"
-  resolved "https://registry.yarnpkg.com/@socket.tech/dl-core/-/dl-core-2.4.15.tgz#07e3b8b46a7e29129c6d9b45237c94f5de63b210"
-  integrity sha512-VQi4mdzZGukUQyzin4avxKs7Ia6u+ZbX6j4KOXoJGTzWEJE6LhzxybxOUCMlEfT1AKyrp+3N/rfLI0rQmTYWXw==
+"@socket.tech/dl-core@2.4.22":
+  version "2.4.22"
+  resolved "https://registry.yarnpkg.com/@socket.tech/dl-core/-/dl-core-2.4.22.tgz#abe14f7e9c302e278810be102ec2bfc8aaffad43"
+  integrity sha512-3hUUwPRk404Lq00jE8XD4PUp9QeWlX2zSmj9Ek4yBnRusjHMxzZYeBGN5mATVuM5C5U1RWpNPADgeR5QdUvJkw==
   dependencies:
     axios "^1.3.6"
     prompts "^2.4.2"
