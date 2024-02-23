@@ -68,9 +68,11 @@ else
 export const sendTx = process.env.npm_config_sendtx == "true";
 export const trip = process.env.npm_config_trip == "true";
 export const untrip = process.env.npm_config_untrip == "true";
-export const integrationType = process.env.npm_config_integration
-  ? process.env.npm_config_integration.toUpperCase()
-  : IntegrationTypes.fast;
+export const integrationType = (
+  process.env.npm_config_integration
+    ? process.env.npm_config_integration.toUpperCase()
+    : IntegrationTypes.fast
+) as IntegrationTypes;
 export let filterChains = process.env.npm_config_chains
   ? process.env.npm_config_chains.split(",").map((c) => Number(c))
   : activeChainSlugs.map((c) => Number(c));
