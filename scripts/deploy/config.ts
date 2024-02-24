@@ -225,9 +225,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.HOOK) {
     return {
-      type: 1,
-      // gasLimit: 10_000_000,
-      gasPrice: 100_000_000,
+      // type: 1,
+      // gasLimit: 200000,
+      // gasPrice: 100000000,
     };
   } else if (chainConfig[chain] && chainConfig[chain].overrides) {
     return chainConfig[chain].overrides!;

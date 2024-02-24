@@ -15,7 +15,7 @@ import { BigNumber, Contract, ethers } from "ethers";
 import Counter from "../../../../out/Counter.sol/Counter.json";
 import Socket from "../../../../out/Socket.sol/Socket.json";
 
-import { chains, mode } from "../../config";
+import { chains, mode, overrides } from "../../config";
 import { getProviderFromChainSlug } from "../../../constants/networks";
 
 interface RequestObj {
@@ -23,8 +23,8 @@ interface RequestObj {
   data: string;
   chainSlug: number;
   value?: string | BigNumber;
-  gasPrice?: string | BigNumber;
-  gasLimit: number | undefined;
+  gasPrice?: string | BigNumber | undefined;
+  gasLimit: string | number | undefined;
 }
 
 const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
@@ -100,8 +100,6 @@ export const sendMessagesToAllPaths = async (params: {
 }) => {
   const amount = 100;
   const msgGasLimit = "100000"; // update this when add fee logic for dst gas limit
-  let gasLimit: number | undefined = 185766;
-
   try {
     let { senderChains, receiverChains, count } = params;
 
@@ -179,11 +177,13 @@ export const sendMessagesToAllPaths = async (params: {
 
             console.log(`fees is ${value}`);
 
-            gasLimit =
+            const gasLimit: number | string | undefined =
               chainSlug === ChainSlug.ARBITRUM ||
               chainSlug === ChainSlug.ARBITRUM_SEPOLIA
-                ? undefined
-                : gasLimit;
+                ? 200000
+                : overrides(chainSlug)?.gasLimit
+                ? overrides(chainSlug).gasLimit.toString()
+                : undefined;
 
             let tempArray = new Array(count).fill(1);
             await Promise.all(
@@ -195,6 +195,8 @@ export const sendMessagesToAllPaths = async (params: {
                     data,
                     value,
                     gasLimit,
+                    gasPrice:
+                      overrides(chainSlug)?.gasPrice?.toString() || undefined,
                     chainSlug,
                   },
                   provider
@@ -215,7 +217,7 @@ export const sendMessagesToAllPaths = async (params: {
 };
 
 const main = async () => {
-  let senderChains = chains;
+  let senderChains = [ChainSlug.HOOK];
   let receiverChains = chains;
   let count = 1;
   await sendMessagesToAllPaths({ senderChains, receiverChains, count });
@@ -228,4 +230,4 @@ main()
     process.exit(1);
   });
 
-// npx ts-node scripts/deploy/scripts/allPathTest.ts
+// npx ts-node scripts/deploy/helpers/send-msg/allPathTest.ts
