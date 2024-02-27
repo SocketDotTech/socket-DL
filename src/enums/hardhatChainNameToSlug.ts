@@ -34,5 +34,5 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.HOOK]: ChainSlug.HOOK,
   [HardhatChainName.PARALLEL]: ChainSlug.PARALLEL,
   [HardhatChainName.MANTLE]: ChainSlug.MANTLE,
-  [HardhatChainName.REYA_CRONOS]: ChainSlug.REYA_CRONOS,
+  [HardhatChainName.REYA_CRONOS_ORBIT]: ChainSlug.REYA_CRONOS_ORBIT,
 };

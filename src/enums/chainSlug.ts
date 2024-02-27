@@ -33,5 +33,5 @@ export enum ChainSlug {
   HOOK = ChainId.HOOK,
   PARALLEL = ChainId.PARALLEL,
   MANTLE = ChainId.MANTLE,
-  REYA_CRONOS = ChainId.REYA_CRONOS,
+  REYA_CRONOS_ORBIT = 2195343682,
 }

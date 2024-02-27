@@ -88,7 +88,9 @@ if (isProduction) {
     [HardhatChainName.HOOK]: getChainConfig(ChainId.HOOK),
     [HardhatChainName.PARALLEL]: getChainConfig(ChainId.PARALLEL),
     [HardhatChainName.MANTLE]: getChainConfig(ChainId.MANTLE),
-    [HardhatChainName.REYA_CRONOS]: getChainConfig(ChainId.REYA_CRONOS),
+    [HardhatChainName.REYA_CRONOS_ORBIT]: getChainConfig(
+      ChainId.REYA_CRONOS_ORBIT
+    ),
   };
 }
 

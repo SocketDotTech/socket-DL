@@ -80,7 +80,7 @@ const rpcs = {
   [ChainSlug.HOOK]: checkEnvVar("HOOK_RPC"),
   [ChainSlug.PARALLEL]: checkEnvVar("PARALLEL_RPC"),
   [ChainSlug.MANTLE]: checkEnvVar("MANTLE_RPC"),
-  [ChainSlug.REYA_CRONOS]: checkEnvVar("REYA_CRONOS_RPC"),
+  [ChainSlug.REYA_CRONOS_ORBIT]: checkEnvVar("REYA_CRONOS_ORBIT_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 
@@ -344,11 +344,14 @@ const prodConfig: S3Config = {
       confirmations: 1,
       siblings: getSiblings(DeploymentMode.PROD, ChainSlug.MANTLE),
     },
-    [ChainSlug.REYA_CRONOS]: {
-      rpc: rpcs[ChainSlug.REYA_CRONOS],
-      blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.REYA_CRONOS),
+    [ChainSlug.REYA_CRONOS_ORBIT]: {
+      rpc: rpcs[ChainSlug.REYA_CRONOS_ORBIT],
+      blockNumber: getBlockNumber(
+        DeploymentMode.PROD,
+        ChainSlug.REYA_CRONOS_ORBIT
+      ),
       confirmations: 0,
-      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.REYA_CRONOS),
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.REYA_CRONOS_ORBIT),
     },
   },
   batcherSupportedChainSlugs: [
@@ -381,7 +384,7 @@ const prodConfig: S3Config = {
     // ChainSlug.ANCIENT8_TESTNET,
     ChainSlug.ANCIENT8_TESTNET2,
     ChainSlug.HOOK_TESTNET,
-    ChainSlug.REYA_CRONOS,
+    ChainSlug.REYA_CRONOS_ORBIT,
   ],
   watcherSupportedChainSlugs: [
     ChainSlug.AEVO,
@@ -413,7 +416,7 @@ const prodConfig: S3Config = {
     // ChainSlug.ANCIENT8_TESTNET,
     ChainSlug.ANCIENT8_TESTNET2,
     ChainSlug.HOOK_TESTNET,
-    ChainSlug.REYA_CRONOS,
+    ChainSlug.REYA_CRONOS_ORBIT,
   ],
   nativeSupportedChainSlugs: [
     ChainSlug.ARBITRUM,

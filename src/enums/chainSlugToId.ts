@@ -34,5 +34,5 @@ export const ChainSlugToId = {
   [ChainSlug.HOOK]: ChainId.HOOK,
   [ChainSlug.PARALLEL]: ChainId.PARALLEL,
   [ChainSlug.MANTLE]: ChainId.MANTLE,
-  [ChainSlug.REYA_CRONOS]: ChainId.REYA_CRONOS,
+  [ChainSlug.REYA_CRONOS_ORBIT]: ChainId.REYA_CRONOS_ORBIT,
 };

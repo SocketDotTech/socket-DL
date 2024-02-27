@@ -159,9 +159,9 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       jsonRpcUrl = process.env.MANTLE_RPC as string;
       break;
 
-    case HardhatChainName.REYA_CRONOS:
-    case ChainId.REYA_CRONOS:
-      jsonRpcUrl = process.env.REYA_CRONOS_RPC as string;
+    case HardhatChainName.REYA_CRONOS_ORBIT:
+    case ChainId.REYA_CRONOS_ORBIT:
+      jsonRpcUrl = process.env.REYA_CRONOS_ORBIT_RPC as string;
       break;
 
     case HardhatChainName.HARDHAT:

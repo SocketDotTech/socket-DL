@@ -31,5 +31,5 @@ export enum ChainId {
   HOOK = 4665,
   PARALLEL = 1024,
   MANTLE = 5000,
-  REYA_CRONOS = 1729,
+  REYA_CRONOS_ORBIT = 30173524224,
 }

@@ -32,5 +32,5 @@ export enum HardhatChainName {
   HOOK = "hook",
   PARALLEL = "parallel",
   MANTLE = "mantle",
-  REYA_CRONOS = "reya-cronos",
+  REYA_CRONOS_ORBIT = "reya_cronos_orbit",
 }
