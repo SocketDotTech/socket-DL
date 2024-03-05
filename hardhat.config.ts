@@ -85,7 +85,9 @@ if (isProduction) {
       ChainId.ANCIENT8_TESTNET2
     ),
     [HardhatChainName.HOOK_TESTNET]: getChainConfig(ChainId.HOOK_TESTNET),
-    [HardhatChainName.SYNDR_SEPOLIA_L3]: getChainConfig(ChainId.SYNDR_SEPOLIA_L3),
+    [HardhatChainName.SYNDR_SEPOLIA_L3]: getChainConfig(
+      ChainId.SYNDR_SEPOLIA_L3
+    ),
   };
 }
 

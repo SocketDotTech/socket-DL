@@ -325,7 +325,10 @@ const prodConfig: S3Config = {
     },
     [ChainSlug.SYNDR_SEPOLIA_L3]: {
       rpc: rpcs[ChainSlug.SYNDR_SEPOLIA_L3],
-      blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.SYNDR_SEPOLIA_L3),
+      blockNumber: getBlockNumber(
+        DeploymentMode.PROD,
+        ChainSlug.SYNDR_SEPOLIA_L3
+      ),
       confirmations: 1,
       siblings: getSiblings(DeploymentMode.PROD, ChainSlug.SYNDR_SEPOLIA_L3),
     },
@@ -386,7 +389,7 @@ const prodConfig: S3Config = {
     // ChainSlug.ANCIENT8_TESTNET,
     ChainSlug.ANCIENT8_TESTNET2,
     ChainSlug.HOOK_TESTNET,
-    ChainSlug.SYNDR_SEPOLIA_L3
+    ChainSlug.SYNDR_SEPOLIA_L3,
   ],
   nativeSupportedChainSlugs: [
     ChainSlug.ARBITRUM,

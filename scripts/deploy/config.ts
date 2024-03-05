@@ -222,7 +222,7 @@ export const overrides = (
     return {
       type: 1,
       gasLimit: 5_000_000_000,
-      gasPrice: 1_000_000
+      gasPrice: 1_000_000,
     };
   } else if (chain == ChainSlug.VICTION_TESTNET) {
     return {
