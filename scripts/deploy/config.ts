@@ -56,7 +56,8 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.HOOK,
   // ChainSlug.PARALLEL,
   // ChainSlug.MANTLE,
-  ChainSlug.REYA_CRONOS_ORBIT,
+  ChainSlug.REYA_CRONOS,
+  // ChainSlug.REYA,
   // ChainSlug.POLYGON_MAINNET,
 ];
 
@@ -228,6 +229,12 @@ export const overrides = (
       // type: 1,
       // gasLimit: 200000,
       // gasPrice: 100000000,
+    };
+  } else if (chain == ChainSlug.REYA_CRONOS) {
+    return {
+      type: 1,
+      // gasLimit: 200000,
+      gasPrice: 0,
     };
   } else if (chainConfig[chain] && chainConfig[chain].overrides) {
     return chainConfig[chain].overrides!;

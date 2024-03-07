@@ -13,4 +13,5 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.PARALLEL,
   ChainSlug.MANTLE,
   ChainSlug.HOOK,
+  ChainSlug.REYA,
 ];
