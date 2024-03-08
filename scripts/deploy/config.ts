@@ -31,8 +31,8 @@ console.log(
 
 export const chains: Array<ChainSlug> = [
   // ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_SEPOLIA,
-  ChainSlug.OPTIMISM_SEPOLIA,
+  // ChainSlug.ARBITRUM_SEPOLIA,
+  // ChainSlug.OPTIMISM_SEPOLIA,
   // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
   // ChainSlug.MODE_TESTNET,
@@ -40,13 +40,14 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.BSC_TESTNET,
   // ChainSlug.AEVO_TESTNET,
   // ChainSlug.LYRA_TESTNET,
-  ChainSlug.SEPOLIA,
+  // ChainSlug.SEPOLIA,
   // ChainSlug.XAI_TESTNET,
   // ChainSlug.CDK_TESTNET,
   // ChainSlug.AEVO,
-  // ChainSlug.MAINNET,
-  // ChainSlug.ARBITRUM,
-  // ChainSlug.OPTIMISM,
+  ChainSlug.MAINNET,
+  ChainSlug.ARBITRUM,
+  ChainSlug.OPTIMISM,
+  ChainSlug.POLYGON_MAINNET,
   // ChainSlug.LYRA,
   // ChainSlug.BSC,
   // ChainSlug.BASE,
@@ -56,9 +57,8 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.HOOK,
   // ChainSlug.PARALLEL,
   // ChainSlug.MANTLE,
-  ChainSlug.REYA_CRONOS,
-  // ChainSlug.REYA,
-  // ChainSlug.POLYGON_MAINNET,
+  // ChainSlug.REYA_CRONOS,
+  ChainSlug.REYA,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
@@ -148,9 +148,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.MAINNET) {
     return {
-      type: 1,
+      // type: 1,
       gasLimit: 3000000,
-      gasPrice: 25_000_000_000,
+      // gasPrice: 25_000_000_000,
     };
   } else if (chain == ChainSlug.GOERLI) {
     return {
@@ -162,7 +162,7 @@ export const overrides = (
     return {
       type,
       gasLimit,
-      gasPrice: 250_000_000_000,
+      gasPrice: 200_000_000_000,
     };
   } else if (chain == ChainSlug.POLYGON_MUMBAI) {
     return {
@@ -235,6 +235,12 @@ export const overrides = (
       type: 1,
       // gasLimit: 200000,
       gasPrice: 0,
+    };
+  } else if (chain == ChainSlug.REYA) {
+    return {
+      type: 1,
+      // gasLimit: 20000000,
+      gasPrice: 100000000,
     };
   } else if (chainConfig[chain] && chainConfig[chain].overrides) {
     return chainConfig[chain].overrides!;
