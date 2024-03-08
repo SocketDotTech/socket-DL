@@ -240,7 +240,7 @@ export const overrides = (
     return {
       type: 1,
       // gasLimit: 20000000,
-      gasPrice: 100000000,
+      gasPrice: 0,
     };
   } else if (chainConfig[chain] && chainConfig[chain].overrides) {
     return chainConfig[chain].overrides!;
