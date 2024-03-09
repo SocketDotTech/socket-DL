@@ -35,6 +35,7 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.OPTIMISM_SEPOLIA,
   // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
+  ChainSlug.SX_NETWORK,
   // ChainSlug.MODE_TESTNET,
   // ChainSlug.VICTION_TESTNET,
   // ChainSlug.BSC_TESTNET,
@@ -45,8 +46,8 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.CDK_TESTNET,
   // ChainSlug.AEVO,
   ChainSlug.MAINNET,
-  ChainSlug.ARBITRUM,
-  ChainSlug.OPTIMISM,
+  // ChainSlug.ARBITRUM,
+  // ChainSlug.OPTIMISM,
   ChainSlug.POLYGON_MAINNET,
   // ChainSlug.LYRA,
   // ChainSlug.BSC,
@@ -58,7 +59,7 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.PARALLEL,
   // ChainSlug.MANTLE,
   // ChainSlug.REYA_CRONOS,
-  ChainSlug.REYA,
+  // ChainSlug.REYA,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
@@ -150,7 +151,7 @@ export const overrides = (
     return {
       // type: 1,
       gasLimit: 3000000,
-      // gasPrice: 25_000_000_000,
+      gasPrice: 80_000_000_000,
     };
   } else if (chain == ChainSlug.GOERLI) {
     return {

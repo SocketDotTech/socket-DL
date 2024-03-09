@@ -217,7 +217,7 @@ export const sendMessagesToAllPaths = async (params: {
 };
 
 const main = async () => {
-  let senderChains = [ChainSlug.HOOK];
+  let senderChains = chains;
   let receiverChains = chains;
   let count = 1;
   await sendMessagesToAllPaths({ senderChains, receiverChains, count });

@@ -74,6 +74,7 @@ const rpcs = {
   [ChainSlug.GOERLI]: checkEnvVar("GOERLI_RPC"),
   [ChainSlug.XAI_TESTNET]: checkEnvVar("XAI_TESTNET_RPC"),
   [ChainSlug.SX_NETWORK_TESTNET]: checkEnvVar("SX_NETWORK_TESTNET_RPC"),
+  [ChainSlug.SX_NETWORK]: checkEnvVar("SX_NETWORK_RPC"),
   [ChainSlug.MODE_TESTNET]: checkEnvVar("MODE_TESTNET_RPC"),
   [ChainSlug.VICTION_TESTNET]: checkEnvVar("VICTION_TESTNET_RPC"),
   [ChainSlug.BASE]: checkEnvVar("BASE_RPC"),
@@ -249,6 +250,12 @@ const prodConfig: S3Config = {
       confirmations: 1,
       siblings: getSiblings(DeploymentMode.PROD, ChainSlug.SX_NETWORK_TESTNET),
     },
+    [ChainSlug.SX_NETWORK]: {
+      rpc: rpcs[ChainSlug.SX_NETWORK],
+      blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.SX_NETWORK),
+      confirmations: 1,
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.SX_NETWORK),
+    },
     [ChainSlug.MODE_TESTNET]: {
       rpc: rpcs[ChainSlug.MODE_TESTNET],
       blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.MODE_TESTNET),
@@ -370,6 +377,7 @@ const prodConfig: S3Config = {
     ChainSlug.MANTLE,
     ChainSlug.HOOK,
     ChainSlug.REYA,
+    ChainSlug.SX_NETWORK,
 
     ChainSlug.AEVO_TESTNET,
     // ChainSlug.ARBITRUM_GOERLI,
@@ -403,6 +411,7 @@ const prodConfig: S3Config = {
     ChainSlug.MANTLE,
     ChainSlug.HOOK,
     ChainSlug.REYA,
+    ChainSlug.SX_NETWORK,
 
     ChainSlug.AEVO_TESTNET,
     // ChainSlug.ARBITRUM_GOERLI,
