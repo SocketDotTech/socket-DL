@@ -19,4 +19,5 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.ANCIENT8_TESTNET,
   ChainSlug.ANCIENT8_TESTNET2,
   ChainSlug.HOOK_TESTNET,
+  ChainSlug.REYA_CRONOS,
 ];

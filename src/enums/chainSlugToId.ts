@@ -23,6 +23,7 @@ export const ChainSlugToId = {
   [ChainSlug.LYRA]: ChainId.LYRA,
   [ChainSlug.XAI_TESTNET]: ChainId.XAI_TESTNET,
   [ChainSlug.SX_NETWORK_TESTNET]: ChainId.SX_NETWORK_TESTNET,
+  [ChainSlug.SX_NETWORK]: ChainId.SX_NETWORK,
   [ChainSlug.MODE_TESTNET]: ChainId.MODE_TESTNET,
   [ChainSlug.VICTION_TESTNET]: ChainId.VICTION_TESTNET,
   [ChainSlug.CDK_TESTNET]: ChainId.CDK_TESTNET,
@@ -31,4 +32,9 @@ export const ChainSlugToId = {
   [ChainSlug.ANCIENT8_TESTNET]: ChainId.ANCIENT8_TESTNET,
   [ChainSlug.ANCIENT8_TESTNET2]: ChainId.ANCIENT8_TESTNET2,
   [ChainSlug.HOOK_TESTNET]: ChainId.HOOK_TESTNET,
+  [ChainSlug.HOOK]: ChainId.HOOK,
+  [ChainSlug.PARALLEL]: ChainId.PARALLEL,
+  [ChainSlug.MANTLE]: ChainId.MANTLE,
+  [ChainSlug.REYA_CRONOS]: ChainId.REYA_CRONOS,
+  [ChainSlug.REYA]: ChainId.REYA,
 };
