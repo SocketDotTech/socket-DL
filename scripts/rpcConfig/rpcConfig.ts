@@ -4,11 +4,16 @@ import {
   Integrations,
   DeploymentMode,
   S3Config,
+  ChainSlugToId,
+  TestnetIds, 
+  MainnetIds,
+  getAllAddresses
 } from "../../src";
 
 import dotenv from "dotenv";
 dotenv.config();
 const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
+const addresses = getAllAddresses(deploymentMode);
 
 const checkEnvVar = (envVar: string) => {
   let value = process.env[envVar];
@@ -131,6 +136,10 @@ const devConfig: S3Config = {
     ChainSlug.SEPOLIA,
     ChainSlug.POLYGON_MUMBAI,
   ],
+  testnetIds:TestnetIds,
+  mainnetIds:MainnetIds,
+  addresses,
+  chainSlugToId:ChainSlugToId
 };
 
 const prodConfig: S3Config = {
@@ -448,6 +457,10 @@ const prodConfig: S3Config = {
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
   ],
+  testnetIds:TestnetIds,
+  mainnetIds:MainnetIds,
+  addresses,
+  chainSlugToId:ChainSlugToId
 };
 
 export const config = deploymentMode === "prod" ? prodConfig : devConfig;

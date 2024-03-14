@@ -61,6 +61,28 @@ function getSwitchboardAddress(
   return switchboardAddress;
 }
 
+function getSwitchboardAddressFromAllAddresses(
+  allAddresses: DeploymentAddresses,
+  srcChainSlug: ChainSlug,
+  dstChainSlug: ChainSlug,
+  integration: IntegrationTypes
+) {
+  const addr = allAddresses[srcChainSlug];
+  if (!addr) {
+    throw new Error(`Addresses for ${srcChainSlug} not found`);
+  }
+  const switchboardAddress =
+    addr?.["integrations"]?.[dstChainSlug]?.[integration]?.switchboard;
+
+  if (!switchboardAddress) {
+    throw new Error(
+      `Switchboard address for ${srcChainSlug}-${dstChainSlug}-${integration} not found`
+    );
+  }
+
+  return switchboardAddress;
+}
+
 function getCapacitorAddress(
   srcChainSlug: ChainSlug,
   dstChainSlug: ChainSlug,
@@ -68,6 +90,28 @@ function getCapacitorAddress(
   mode: DeploymentMode
 ) {
   const addr = getAddresses(srcChainSlug, mode);
+  const capacitorAddress =
+    addr?.["integrations"]?.[dstChainSlug]?.[integration]?.capacitor;
+
+  if (!capacitorAddress) {
+    throw new Error(
+      `Capacitor address for ${srcChainSlug}-${dstChainSlug}-${integration} not found`
+    );
+  }
+
+  return capacitorAddress;
+}
+
+function getCapacitorAddressFromAllAddresses(
+  allAddresses: DeploymentAddresses,
+  srcChainSlug: ChainSlug,
+  dstChainSlug: ChainSlug,
+  integration: IntegrationTypes,
+) {
+  const addr = allAddresses[srcChainSlug];
+  if (!addr) {
+    throw new Error(`Addresses for ${srcChainSlug} not found`);
+  }
   const capacitorAddress =
     addr?.["integrations"]?.[dstChainSlug]?.[integration]?.capacitor;
 
@@ -99,10 +143,35 @@ function getDeCapacitorAddress(
   return deCapacitorAddress;
 }
 
+function getDeCapacitorAddressFromAllAddresses(
+  allAddresses: DeploymentAddresses,
+  srcChainSlug: ChainSlug,
+  dstChainSlug: ChainSlug,
+  integration: IntegrationTypes,
+) {
+  const addr = allAddresses[srcChainSlug];
+  if (!addr) {
+    throw new Error(`Addresses for ${srcChainSlug} not found`);
+  }
+  const deCapacitorAddress =
+    addr?.["integrations"]?.[dstChainSlug]?.[integration]?.capacitor;
+
+  if (!deCapacitorAddress) {
+    throw new Error(
+      `De Capacitor address for ${srcChainSlug}-${dstChainSlug}-${integration} not found`
+    );
+  }
+
+  return deCapacitorAddress;
+}
+
 export {
   getSwitchboardAddress,
   getCapacitorAddress,
   getDeCapacitorAddress,
   getAddresses,
   getAllAddresses,
+  getCapacitorAddressFromAllAddresses,
+  getDeCapacitorAddressFromAllAddresses,
+  getSwitchboardAddressFromAllAddresses,
 };
