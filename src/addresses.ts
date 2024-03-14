@@ -106,7 +106,7 @@ function getCapacitorAddressFromAllAddresses(
   allAddresses: DeploymentAddresses,
   srcChainSlug: ChainSlug,
   dstChainSlug: ChainSlug,
-  integration: IntegrationTypes,
+  integration: IntegrationTypes
 ) {
   const addr = allAddresses[srcChainSlug];
   if (!addr) {
@@ -147,7 +147,7 @@ function getDeCapacitorAddressFromAllAddresses(
   allAddresses: DeploymentAddresses,
   srcChainSlug: ChainSlug,
   dstChainSlug: ChainSlug,
-  integration: IntegrationTypes,
+  integration: IntegrationTypes
 ) {
   const addr = allAddresses[srcChainSlug];
   if (!addr) {
