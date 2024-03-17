@@ -142,6 +142,10 @@ const devConfig: S3Config = {
   chainSlugToId: ChainSlugToId,
 };
 
+const devConfigPublic = {
+  addresses,
+  chainSlugToId: ChainSlugToId,
+};
 const prodConfig: S3Config = {
   chains: {
     [ChainSlug.AEVO]: {
@@ -463,4 +467,10 @@ const prodConfig: S3Config = {
   chainSlugToId: ChainSlugToId,
 };
 
+const prodConfigPublic = {
+  addresses,
+  chainSlugToId: ChainSlugToId,
+};
 export const config = deploymentMode === "prod" ? prodConfig : devConfig;
+export const publicConfig =
+  deploymentMode === "prod" ? prodConfigPublic : devConfigPublic;
