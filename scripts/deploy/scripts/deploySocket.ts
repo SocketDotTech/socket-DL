@@ -1,5 +1,10 @@
-import { Contract, Wallet } from "ethers";
-import { DeployParams, getOrDeploy, storeAddresses } from "../utils";
+import { Contract, Wallet, constants } from "ethers";
+import {
+  DeployParams,
+  getInstance,
+  getOrDeploy,
+  storeAddresses,
+} from "../utils";
 
 import {
   CORE_CONTRACTS,
@@ -11,7 +16,6 @@ import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { socketOwner, executionManagerVersion } from "../config";
 import { maxAllowedPacketLength } from "../../constants";
-import { ethers } from "hardhat";
 
 let allDeployed = false;
 
@@ -163,14 +167,22 @@ export const deploySocket = async (
       switchboardSimulator.address;
 
     // setup
-    const tx = await socketSimulator.setup(
-      counter.address,
-      switchboardSimulator.address,
-      simulatorUtils.address
-    );
-    console.log(tx.hash, "setup for simulator");
-    await tx.wait();
+    const simulatorContract = (
+      await getInstance("SocketSimulator", socketSimulator.address)
+    ).connect(deployUtils.signer);
+    let capacitor = await simulatorContract.capacitor();
+    if (capacitor == constants.AddressZero) {
+      const tx = await simulatorContract.setup(
+        counter.address,
+        switchboardSimulator.address,
+        simulatorUtils.address
+      );
+      console.log(tx.hash, "setup for simulator");
+      await tx.wait();
+    }
 
+    deployUtils.addresses["CapacitorSimulator"] =
+      await simulatorContract.capacitor();
     deployUtils.addresses.startBlock = deployUtils.addresses.startBlock
       ? deployUtils.addresses.startBlock
       : await socketSigner.provider?.getBlockNumber();
