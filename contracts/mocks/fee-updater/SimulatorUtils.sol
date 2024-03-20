@@ -1,9 +1,10 @@
 pragma solidity 0.8.19;
 
 import "../../interfaces/IDecapacitor.sol";
-import "../../capacitors/SingleCapacitor.sol";
-import "../../switchboard/default-switchboards/FastSwitchboard.sol";
-import "../../utils/AccessRoles.sol";
+import "../../interfaces/ISocket.sol";
+import "../../interfaces/ISignatureVerifier.sol";
+import {TRANSMITTER_ROLE, EXECUTOR_ROLE} from "../../utils/AccessRoles.sol";
+import "../../utils/AccessControlExtended.sol";
 
 contract SimulatorUtils is AccessControlExtended {
     ISocket public socket__;
@@ -38,7 +39,7 @@ contract SimulatorUtils is AccessControlExtended {
         return (transmitter, true);
     }
 
-    // // EM
+    // EM
     function updateExecutionFees(address, uint128, bytes32) external view {
         if (msg.sender != address(socket__)) return;
     }

@@ -1362,6 +1362,45 @@
   ],
   "1024": [
     [
+      "0x5bA62006442bC42e28E3E5147A5221Be723ca1DE",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
+        "0x320Cd79c54927Fe130427bD4492b6c6068D075E3",
+        1024,
+        1000,
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0xb515E9E6E6aBA44bBEC72FBF6B1a18DDB6bec68e",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0x320Cd79c54927Fe130427bD4492b6c6068D075E3",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
+        1024
+      ]
+    ],
+    [
+      "0x320Cd79c54927Fe130427bD4492b6c6068D075E3",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        1024,
+        1024,
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
+    [
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",

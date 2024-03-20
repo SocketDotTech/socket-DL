@@ -8,6 +8,7 @@ import "../contracts/utils/Hasher.sol";
 
 import "../contracts/utils/AccessRoles.sol";
 import "../contracts/utils/SigIdentifiers.sol";
+import "../contracts/switchboard/default-switchboards/FastSwitchboard.sol";
 import "../contracts/mocks/fee-updater/SocketSimulator.sol";
 import "../contracts/mocks/fee-updater/SwitchboardSimulator.sol";
 import "../contracts/mocks/fee-updater/SimulatorUtils.sol";

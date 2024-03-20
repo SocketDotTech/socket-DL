@@ -2,16 +2,35 @@ pragma solidity 0.8.19;
 
 import "../../capacitors/SingleCapacitor.sol";
 import "../../decapacitors/SingleDecapacitor.sol";
-
-import {FastSwitchboard, AccessControlExtended} from "../../switchboard/default-switchboards/FastSwitchboard.sol";
-import "./SimulatorUtils.sol";
+import "../../utils/AccessControl.sol";
 import "../../interfaces/IHasher.sol";
+import "../../interfaces/ISignatureVerifier.sol";
+
 import "../../interfaces/IPlug.sol";
+import "../../interfaces/ISwitchboard.sol";
 
-// figure out how to update storage after deployment if needed
+interface ISimulatorUtils {
+    function checkTransmitter(
+        uint32 siblingSlug_,
+        bytes32 digest_,
+        bytes calldata signature_
+    ) external view returns (address, bool);
 
-contract SocketSimulator is AccessControlExtended {
-    SimulatorUtils public utils__;
+    function updateExecutionFees(address, uint128, bytes32) external view;
+
+    function verifyParams(
+        bytes32 executionParams_,
+        uint256 msgValue_
+    ) external pure;
+
+    function isExecutor(
+        bytes32 packedMessage,
+        bytes memory sig
+    ) external view returns (address executor, bool isValidExecutor);
+}
+
+contract SocketSimulator is AccessControl {
+    ISimulatorUtils public utils__;
     ISignatureVerifier public signatureVerifier__;
     IHasher public hasher__;
     SingleCapacitor public capacitor;
@@ -76,7 +95,7 @@ contract SocketSimulator is AccessControlExtended {
         address hasher_,
         address signatureVerifier_,
         string memory version_
-    ) AccessControlExtended(msg.sender) {
+    ) AccessControl(msg.sender) {
         chainSlug = chainSlug_;
         siblingChain = siblingChainSlug_;
         version = keccak256(bytes(version_));
@@ -89,7 +108,7 @@ contract SocketSimulator is AccessControlExtended {
         address switchboard_,
         address utils_
     ) external onlyOwner {
-        utils__ = SimulatorUtils(utils_);
+        utils__ = ISimulatorUtils(utils_);
 
         bytes32 packedMessage = hasher__.packMessage(
             chainSlug,
