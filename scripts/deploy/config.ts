@@ -225,9 +225,6 @@ export const overrides = (
       // gasLimit,
       gasPrice: 100_000_000,
     };
-    // "type": 1,
-    // "gasLimit": 5000000000,
-    // "gasPrice": 1000000
   } else if (chain == ChainSlug.SYNDR_SEPOLIA_L3) {
     return {
       type: 1,
