@@ -74,6 +74,7 @@ if (isProduction) {
     [HardhatChainName.SX_NETWORK_TESTNET]: getChainConfig(
       ChainId.SX_NETWORK_TESTNET
     ),
+    [HardhatChainName.SX_NETWORK]: getChainConfig(ChainId.SX_NETWORK),
     [HardhatChainName.MODE_TESTNET]: getChainConfig(ChainId.MODE_TESTNET),
     [HardhatChainName.VICTION_TESTNET]: getChainConfig(ChainId.VICTION_TESTNET),
     [HardhatChainName.BASE]: getChainConfig(ChainId.BASE),
@@ -85,6 +86,11 @@ if (isProduction) {
       ChainId.ANCIENT8_TESTNET2
     ),
     [HardhatChainName.HOOK_TESTNET]: getChainConfig(ChainId.HOOK_TESTNET),
+    [HardhatChainName.HOOK]: getChainConfig(ChainId.HOOK),
+    [HardhatChainName.PARALLEL]: getChainConfig(ChainId.PARALLEL),
+    [HardhatChainName.MANTLE]: getChainConfig(ChainId.MANTLE),
+    [HardhatChainName.REYA_CRONOS]: getChainConfig(ChainId.REYA_CRONOS),
+    [HardhatChainName.REYA]: getChainConfig(ChainId.REYA),
     [HardhatChainName.SYNDR_SEPOLIA_L3]: getChainConfig(
       ChainId.SYNDR_SEPOLIA_L3
     ),
@@ -115,7 +121,7 @@ const config: HardhatUserConfig = {
       lyraTestnet: process.env.LYRA_API_KEY || "",
       lyra: process.env.LYRA_API_KEY || "",
       xaiTestnet: process.env.XAI_API_KEY || "",
-      sxnTestnet: process.env.SX_NETWORK_API_KEY || "",
+      sxn: process.env.SX_NETWORK_API_KEY || "",
       modeTestnet: process.env.MODE_API_KEY || "",
       victionTestnet: process.env.VICTION_API_KEY || "",
       base: process.env.BASESCAN_API_KEY || "",
@@ -123,6 +129,10 @@ const config: HardhatUserConfig = {
       ancient8Testnet: process.env.ANCIENT8_API_KEY || "",
       ancient8Testnet2: process.env.ANCIENT8_API_KEY || "",
       hookTestnet: process.env.HOOK_API_KEY || "",
+      hook: process.env.HOOK_API_KEY || "",
+      parallelTestnet: process.env.PARALLEL_API_KEY || "",
+      mantle: process.env.MANTLE_API_KEY || "",
+      reya: process.env.REYA_API_KEY || "",
       syndrSepoliaL3: process.env.SYNDR_API_KEY || "",
     },
     customChains: [

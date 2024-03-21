@@ -1,20 +1,9 @@
 import { Contract, Wallet, utils } from "ethers";
-import {
-  IntegrationTypes,
-  ChainSlug,
-  DeploymentMode,
-  isTestnet,
-  isMainnet,
-} from "../../src";
+import { IntegrationTypes, ChainSlug } from "../../src";
 import { mode, overrides } from "../deploy/config";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { UN_TRIP_PATH_SIG_IDENTIFIER, checkRole, getSiblings } from "../common";
-import {
-  getAllAddresses,
-  DeploymentAddresses,
-  ROLES,
-} from "@socket.tech/dl-core";
-import dotenv from "dotenv";
+import { ROLES } from "@socket.tech/dl-core";
 import { getSwitchboardInstance } from "../common";
 import {
   sendTx,
@@ -81,7 +70,7 @@ const main = async () => {
       const switchboard = getSwitchboardInstance(
         chain,
         siblingChain,
-        integrationType as IntegrationTypes,
+        integrationType,
         mode
       );
       if (switchboard === undefined) {
@@ -134,7 +123,7 @@ const main = async () => {
       });
 
       if (sendTx) {
-        sendTxn(chain, siblingChain, nonce, signature, switchboard);
+        await sendTxn(chain, siblingChain, nonce, signature, switchboard);
       }
     }
   }

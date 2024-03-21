@@ -4,11 +4,16 @@ import {
   Integrations,
   DeploymentMode,
   S3Config,
+  ChainSlugToId,
+  TestnetIds,
+  MainnetIds,
+  getAllAddresses,
 } from "../../src";
 
 import dotenv from "dotenv";
 dotenv.config();
 const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
+const addresses = getAllAddresses(deploymentMode);
 
 const checkEnvVar = (envVar: string) => {
   let value = process.env[envVar];
@@ -57,6 +62,10 @@ const rpcs = {
   [ChainSlug.BSC]: checkEnvVar("BSC_RPC"),
   [ChainSlug.POLYGON_MAINNET]: checkEnvVar("POLYGON_RPC"),
   [ChainSlug.MAINNET]: checkEnvVar("ETHEREUM_RPC"),
+  [ChainSlug.PARALLEL]: checkEnvVar("PARALLEL_RPC"),
+  [ChainSlug.HOOK]: checkEnvVar("HOOK_RPC"),
+  [ChainSlug.MANTLE]: checkEnvVar("MANTLE_RPC"),
+  [ChainSlug.REYA]: checkEnvVar("REYA_RPC"),
 
   [ChainSlug.ARBITRUM_SEPOLIA]: checkEnvVar("ARBITRUM_SEPOLIA_RPC"),
   [ChainSlug.OPTIMISM_SEPOLIA]: checkEnvVar("OPTIMISM_SEPOLIA_RPC"),
@@ -70,6 +79,7 @@ const rpcs = {
   [ChainSlug.GOERLI]: checkEnvVar("GOERLI_RPC"),
   [ChainSlug.XAI_TESTNET]: checkEnvVar("XAI_TESTNET_RPC"),
   [ChainSlug.SX_NETWORK_TESTNET]: checkEnvVar("SX_NETWORK_TESTNET_RPC"),
+  [ChainSlug.SX_NETWORK]: checkEnvVar("SX_NETWORK_RPC"),
   [ChainSlug.MODE_TESTNET]: checkEnvVar("MODE_TESTNET_RPC"),
   [ChainSlug.VICTION_TESTNET]: checkEnvVar("VICTION_TESTNET_RPC"),
   [ChainSlug.BASE]: checkEnvVar("BASE_RPC"),
@@ -77,6 +87,7 @@ const rpcs = {
   [ChainSlug.ANCIENT8_TESTNET]: checkEnvVar("ANCIENT8_TESTNET_RPC"),
   [ChainSlug.ANCIENT8_TESTNET2]: checkEnvVar("ANCIENT8_TESTNET2_RPC"),
   [ChainSlug.HOOK_TESTNET]: checkEnvVar("HOOK_TESTNET_RPC"),
+  [ChainSlug.REYA_CRONOS]: checkEnvVar("REYA_CRONOS_RPC"),
   [ChainSlug.SYNDR_SEPOLIA_L3]: checkEnvVar("SYNDR_SEPOLIA_L3_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
@@ -126,6 +137,10 @@ const devConfig: S3Config = {
     ChainSlug.SEPOLIA,
     ChainSlug.POLYGON_MUMBAI,
   ],
+  testnetIds: TestnetIds,
+  mainnetIds: MainnetIds,
+  addresses,
+  chainSlugToId: ChainSlugToId,
 };
 
 const prodConfig: S3Config = {
@@ -245,6 +260,12 @@ const prodConfig: S3Config = {
       confirmations: 1,
       siblings: getSiblings(DeploymentMode.PROD, ChainSlug.SX_NETWORK_TESTNET),
     },
+    [ChainSlug.SX_NETWORK]: {
+      rpc: rpcs[ChainSlug.SX_NETWORK],
+      blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.SX_NETWORK),
+      confirmations: 1,
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.SX_NETWORK),
+    },
     [ChainSlug.MODE_TESTNET]: {
       rpc: rpcs[ChainSlug.MODE_TESTNET],
       blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.MODE_TESTNET),
@@ -323,6 +344,36 @@ const prodConfig: S3Config = {
       confirmations: 1,
       siblings: getSiblings(DeploymentMode.PROD, ChainSlug.HOOK_TESTNET),
     },
+    [ChainSlug.HOOK]: {
+      rpc: rpcs[ChainSlug.HOOK],
+      blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.HOOK),
+      confirmations: 1,
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.HOOK),
+    },
+    [ChainSlug.PARALLEL]: {
+      rpc: rpcs[ChainSlug.PARALLEL],
+      blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.PARALLEL),
+      confirmations: 1,
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.PARALLEL),
+    },
+    [ChainSlug.MANTLE]: {
+      rpc: rpcs[ChainSlug.MANTLE],
+      blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.MANTLE),
+      confirmations: 1,
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.MANTLE),
+    },
+    [ChainSlug.REYA_CRONOS]: {
+      rpc: rpcs[ChainSlug.REYA_CRONOS],
+      blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.REYA_CRONOS),
+      confirmations: 0,
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.REYA_CRONOS),
+    },
+    [ChainSlug.REYA]: {
+      rpc: rpcs[ChainSlug.REYA],
+      blockNumber: getBlockNumber(DeploymentMode.PROD, ChainSlug.REYA),
+      confirmations: 0,
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.REYA),
+    },
     [ChainSlug.SYNDR_SEPOLIA_L3]: {
       rpc: rpcs[ChainSlug.SYNDR_SEPOLIA_L3],
       blockNumber: getBlockNumber(
@@ -341,6 +392,11 @@ const prodConfig: S3Config = {
     ChainSlug.POLYGON_MAINNET,
     ChainSlug.LYRA,
     ChainSlug.MAINNET,
+    ChainSlug.PARALLEL,
+    ChainSlug.MANTLE,
+    ChainSlug.HOOK,
+    ChainSlug.REYA,
+    ChainSlug.SX_NETWORK,
 
     ChainSlug.AEVO_TESTNET,
     // ChainSlug.ARBITRUM_GOERLI,
@@ -360,6 +416,7 @@ const prodConfig: S3Config = {
     // ChainSlug.ANCIENT8_TESTNET,
     ChainSlug.ANCIENT8_TESTNET2,
     ChainSlug.HOOK_TESTNET,
+    ChainSlug.REYA_CRONOS,
     ChainSlug.SYNDR_SEPOLIA_L3,
   ],
   watcherSupportedChainSlugs: [
@@ -370,6 +427,11 @@ const prodConfig: S3Config = {
     ChainSlug.POLYGON_MAINNET,
     ChainSlug.LYRA,
     ChainSlug.MAINNET,
+    ChainSlug.PARALLEL,
+    ChainSlug.MANTLE,
+    ChainSlug.HOOK,
+    ChainSlug.REYA,
+    ChainSlug.SX_NETWORK,
 
     ChainSlug.AEVO_TESTNET,
     // ChainSlug.ARBITRUM_GOERLI,
@@ -389,6 +451,7 @@ const prodConfig: S3Config = {
     // ChainSlug.ANCIENT8_TESTNET,
     ChainSlug.ANCIENT8_TESTNET2,
     ChainSlug.HOOK_TESTNET,
+    ChainSlug.REYA_CRONOS,
     ChainSlug.SYNDR_SEPOLIA_L3,
   ],
   nativeSupportedChainSlugs: [
@@ -406,6 +469,10 @@ const prodConfig: S3Config = {
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
   ],
+  testnetIds: TestnetIds,
+  mainnetIds: MainnetIds,
+  addresses,
+  chainSlugToId: ChainSlugToId,
 };
 
 export const config = deploymentMode === "prod" ? prodConfig : devConfig;

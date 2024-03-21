@@ -20,6 +20,7 @@ export enum HardhatChainName {
   LYRA = "lyra",
   XAI_TESTNET = "xai_testnet",
   SX_NETWORK_TESTNET = "sxn_testnet",
+  SX_NETWORK = "sxn",
   MODE_TESTNET = "mode_testnet",
   VICTION_TESTNET = "viction_testnet",
   CDK_TESTNET = "cdk_testnet",
@@ -29,5 +30,10 @@ export enum HardhatChainName {
   ANCIENT8_TESTNET = "ancient8_testnet",
   ANCIENT8_TESTNET2 = "ancient8_testnet2",
   HOOK_TESTNET = "hook_testnet",
+  HOOK = "hook",
+  PARALLEL = "parallel",
+  MANTLE = "mantle",
+  REYA_CRONOS = "reya_cronos",
+  REYA = "reya",
   SYNDR_SEPOLIA_L3 = "syndr_sepolia_l3",
 }

@@ -31,10 +31,11 @@ console.log(
 
 export const chains: Array<ChainSlug> = [
   // ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_SEPOLIA,
-  ChainSlug.OPTIMISM_SEPOLIA,
+  // ChainSlug.ARBITRUM_SEPOLIA,
+  // ChainSlug.OPTIMISM_SEPOLIA,
   // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
+  ChainSlug.SX_NETWORK,
   // ChainSlug.MODE_TESTNET,
   // ChainSlug.VICTION_TESTNET,
   // ChainSlug.BSC_TESTNET,
@@ -44,9 +45,10 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.XAI_TESTNET,
   // ChainSlug.CDK_TESTNET,
   // ChainSlug.AEVO,
-  // ChainSlug.MAINNET,
+  ChainSlug.MAINNET,
   // ChainSlug.ARBITRUM,
   // ChainSlug.OPTIMISM,
+  ChainSlug.POLYGON_MAINNET,
   // ChainSlug.LYRA,
   // ChainSlug.BSC,
   // ChainSlug.BASE,
@@ -55,7 +57,11 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.ANCIENT8_TESTNET2,
   ChainSlug.SYNDR_SEPOLIA_L3,
   // ChainSlug.HOOK_TESTNET,
-  // ChainSlug.POLYGON_MAINNET,
+  // ChainSlug.HOOK,
+  // ChainSlug.PARALLEL,
+  // ChainSlug.MANTLE,
+  // ChainSlug.REYA_CRONOS,
+  // ChainSlug.REYA,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
@@ -89,8 +95,12 @@ export const watcherAddresses = {
   [DeploymentMode.SURGE]: "0xD7Ab0e4c8c31A91fb26552F7Ad3E91E169B86225",
   [DeploymentMode.PROD]: "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14", // prod
   // [DeploymentMode.PROD]: "0x55296741c6d72a07f3965abab04737c29016f2eb", // aevo watcher
-  // [DeploymentMode.PROD]: "0xA3a585c6d59CCE6aAe7035e8df48b3327cC8BE54", // sx watcher 1
-  // [DeploymentMode.PROD]: "0x7EFF16a34e3433182D636488bc97919b10283F37", // sx watcher 2
+  // [DeploymentMode.PROD]: "0xA3a585c6d59CCE6aAe7035e8df48b3327cC8BE54", // sx testnet watcher 1
+  // [DeploymentMode.PROD]: "0x7EFF16a34e3433182D636488bc97919b10283F37", // sx testnet watcher 2
+  // [DeploymentMode.PROD]: "0x8fB53330b1AEa01f6d34faff90e0B7c2797FC3aD", // sx watcher 1
+  // [DeploymentMode.PROD]: "0xE8D6b3eE50887c131D64065a97CCC786dF0bA336", // sx watcher 2
+  // [DeploymentMode.PROD]: "0x3b9FF70BcdF0B459A92fce1AbE5A6A713261BA75", // sx watcher 3
+  // [DeploymentMode.PROD]: "0x5Ca565e0952C44DBF1986988ba4d10A171D45FB9", // sx watcher 4
 };
 
 export const executorAddresses = {
@@ -145,9 +155,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.MAINNET) {
     return {
-      type: 1,
+      // type: 1,
       gasLimit: 3000000,
-      gasPrice: 47_000_000_000,
+      gasPrice: 80_000_000_000,
     };
   } else if (chain == ChainSlug.GOERLI) {
     return {
@@ -159,7 +169,7 @@ export const overrides = (
     return {
       type,
       gasLimit,
-      gasPrice: 250_000_000_000,
+      gasPrice: 200_000_000_000,
     };
   } else if (chain == ChainSlug.POLYGON_MUMBAI) {
     return {
@@ -171,7 +181,7 @@ export const overrides = (
     return {
       type,
       gasLimit,
-      gasPrice: 1_000_000_000,
+      gasPrice: 10_000_000_000,
     };
   } else if (chain == ChainSlug.AEVO_TESTNET) {
     return {
@@ -229,6 +239,24 @@ export const overrides = (
       // type: 1,
       // gasLimit,
       // gasPrice: 100_000_000,
+    };
+  } else if (chain == ChainSlug.HOOK) {
+    return {
+      // type: 1,
+      // gasLimit: 200000,
+      // gasPrice: 100000000,
+    };
+  } else if (chain == ChainSlug.REYA_CRONOS) {
+    return {
+      type: 1,
+      // gasLimit: 200000,
+      gasPrice: 0,
+    };
+  } else if (chain == ChainSlug.REYA) {
+    return {
+      type: 1,
+      // gasLimit: 20000000,
+      gasPrice: 0,
     };
   } else if (chainConfig[chain] && chainConfig[chain].overrides) {
     return chainConfig[chain].overrides!;
