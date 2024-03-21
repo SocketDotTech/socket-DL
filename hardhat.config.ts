@@ -123,7 +123,7 @@ const config: HardhatUserConfig = {
       ancient8Testnet: process.env.ANCIENT8_API_KEY || "",
       ancient8Testnet2: process.env.ANCIENT8_API_KEY || "",
       hookTestnet: process.env.HOOK_API_KEY || "",
-      syndrTestnet: process.env.SYNDR_API_KEY || "",
+      syndrSepoliaL3: process.env.SYNDR_API_KEY || "",
     },
     customChains: [
       {

@@ -146,7 +146,7 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
 
     case HardhatChainName.SYNDR_SEPOLIA_L3:
     case ChainId.SYNDR_SEPOLIA_L3:
-      jsonRpcUrl = process.env.SYNDR_TESTNET_RPC as string;
+      jsonRpcUrl = process.env.SYNDR_SEPOLIA_L3_RPC as string;
       break;
 
     case HardhatChainName.HARDHAT:
