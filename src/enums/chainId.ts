@@ -34,4 +34,5 @@ export enum ChainId {
   MANTLE = 5000,
   REYA_CRONOS = 89346161,
   REYA = 1729,
+  SYNDR_SEPOLIA_L3 = 444444,
 }

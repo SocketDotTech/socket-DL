@@ -36,4 +36,5 @@ export enum ChainSlug {
   MANTLE = ChainId.MANTLE,
   REYA_CRONOS = ChainId.REYA_CRONOS,
   REYA = 1324967486,
+  SYNDR_SEPOLIA_L3 = ChainId.SYNDR_SEPOLIA_L3,
 }

@@ -54,6 +54,8 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.BASE,
   // ChainSlug.MODE,
   // ChainSlug.ANCIENT8_TESTNET,
+  // ChainSlug.ANCIENT8_TESTNET2,
+  ChainSlug.SYNDR_SEPOLIA_L3,
   // ChainSlug.HOOK_TESTNET,
   // ChainSlug.HOOK,
   // ChainSlug.PARALLEL,
@@ -123,9 +125,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.ARBITRUM_SEPOLIA) {
     return {
-      // type,
-      // gasLimit,
-      // gasPrice,
+      type,
+      gasLimit: 5_000_000,
+      gasPrice,
     };
   } else if (chain == ChainSlug.OPTIMISM) {
     return {
@@ -222,6 +224,12 @@ export const overrides = (
       type: 1,
       // gasLimit,
       gasPrice: 100_000_000,
+    };
+  } else if (chain == ChainSlug.SYNDR_SEPOLIA_L3) {
+    return {
+      type: 1,
+      gasLimit: 5_000_000_000,
+      gasPrice: 1_000_000,
     };
   } else if (chain == ChainSlug.VICTION_TESTNET) {
     return {

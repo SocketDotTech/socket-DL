@@ -37,4 +37,5 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.MANTLE]: ChainSlug.MANTLE,
   [HardhatChainName.REYA_CRONOS]: ChainSlug.REYA_CRONOS,
   [HardhatChainName.REYA]: ChainSlug.REYA,
+  [HardhatChainName.SYNDR_SEPOLIA_L3]: ChainSlug.SYNDR_SEPOLIA_L3,
 };

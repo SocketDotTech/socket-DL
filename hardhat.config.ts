@@ -91,6 +91,9 @@ if (isProduction) {
     [HardhatChainName.MANTLE]: getChainConfig(ChainId.MANTLE),
     [HardhatChainName.REYA_CRONOS]: getChainConfig(ChainId.REYA_CRONOS),
     [HardhatChainName.REYA]: getChainConfig(ChainId.REYA),
+    [HardhatChainName.SYNDR_SEPOLIA_L3]: getChainConfig(
+      ChainId.SYNDR_SEPOLIA_L3
+    ),
   };
 }
 
@@ -130,6 +133,7 @@ const config: HardhatUserConfig = {
       parallelTestnet: process.env.PARALLEL_API_KEY || "",
       mantle: process.env.MANTLE_API_KEY || "",
       reya: process.env.REYA_API_KEY || "",
+      syndrSepoliaL3: process.env.SYNDR_API_KEY || "",
     },
     customChains: [
       {
