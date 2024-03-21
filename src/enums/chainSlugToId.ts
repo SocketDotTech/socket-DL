@@ -37,4 +37,5 @@ export const ChainSlugToId = {
   [ChainSlug.MANTLE]: ChainId.MANTLE,
   [ChainSlug.REYA_CRONOS]: ChainId.REYA_CRONOS,
   [ChainSlug.REYA]: ChainId.REYA,
+  [ChainSlug.SYNDR_SEPOLIA_L3]: ChainId.SYNDR_SEPOLIA_L3,
 };

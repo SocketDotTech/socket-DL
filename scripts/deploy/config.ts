@@ -54,6 +54,8 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.BASE,
   // ChainSlug.MODE,
   // ChainSlug.ANCIENT8_TESTNET,
+  // ChainSlug.ANCIENT8_TESTNET2,
+  ChainSlug.SYNDR_SEPOLIA_L3,
   // ChainSlug.HOOK_TESTNET,
   // ChainSlug.HOOK,
   // ChainSlug.PARALLEL,
@@ -93,8 +95,12 @@ export const watcherAddresses = {
   [DeploymentMode.SURGE]: "0xD7Ab0e4c8c31A91fb26552F7Ad3E91E169B86225",
   [DeploymentMode.PROD]: "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14", // prod
   // [DeploymentMode.PROD]: "0x55296741c6d72a07f3965abab04737c29016f2eb", // aevo watcher
-  // [DeploymentMode.PROD]: "0xA3a585c6d59CCE6aAe7035e8df48b3327cC8BE54", // sx watcher 1
-  // [DeploymentMode.PROD]: "0x7EFF16a34e3433182D636488bc97919b10283F37", // sx watcher 2
+  // [DeploymentMode.PROD]: "0xA3a585c6d59CCE6aAe7035e8df48b3327cC8BE54", // sx testnet watcher 1
+  // [DeploymentMode.PROD]: "0x7EFF16a34e3433182D636488bc97919b10283F37", // sx testnet watcher 2
+  // [DeploymentMode.PROD]: "0x8fB53330b1AEa01f6d34faff90e0B7c2797FC3aD", // sx watcher 1
+  // [DeploymentMode.PROD]: "0xE8D6b3eE50887c131D64065a97CCC786dF0bA336", // sx watcher 2
+  // [DeploymentMode.PROD]: "0x3b9FF70BcdF0B459A92fce1AbE5A6A713261BA75", // sx watcher 3
+  // [DeploymentMode.PROD]: "0x5Ca565e0952C44DBF1986988ba4d10A171D45FB9", // sx watcher 4
 };
 
 export const executorAddresses = {
@@ -119,9 +125,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.ARBITRUM_SEPOLIA) {
     return {
-      // type,
-      // gasLimit,
-      // gasPrice,
+      type,
+      gasLimit: 5_000_000,
+      gasPrice,
     };
   } else if (chain == ChainSlug.OPTIMISM) {
     return {
@@ -218,6 +224,12 @@ export const overrides = (
       type: 1,
       // gasLimit,
       gasPrice: 100_000_000,
+    };
+  } else if (chain == ChainSlug.SYNDR_SEPOLIA_L3) {
+    return {
+      type: 1,
+      gasLimit: 5_000_000_000,
+      gasPrice: 1_000_000,
     };
   } else if (chain == ChainSlug.VICTION_TESTNET) {
     return {

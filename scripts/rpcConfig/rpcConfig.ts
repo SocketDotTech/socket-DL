@@ -4,11 +4,16 @@ import {
   Integrations,
   DeploymentMode,
   S3Config,
+  ChainSlugToId,
+  TestnetIds,
+  MainnetIds,
+  getAllAddresses,
 } from "../../src";
 
 import dotenv from "dotenv";
 dotenv.config();
 const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
+const addresses = getAllAddresses(deploymentMode);
 
 const checkEnvVar = (envVar: string) => {
   let value = process.env[envVar];
@@ -83,6 +88,7 @@ const rpcs = {
   [ChainSlug.ANCIENT8_TESTNET2]: checkEnvVar("ANCIENT8_TESTNET2_RPC"),
   [ChainSlug.HOOK_TESTNET]: checkEnvVar("HOOK_TESTNET_RPC"),
   [ChainSlug.REYA_CRONOS]: checkEnvVar("REYA_CRONOS_RPC"),
+  [ChainSlug.SYNDR_SEPOLIA_L3]: checkEnvVar("SYNDR_SEPOLIA_L3_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 
@@ -131,6 +137,10 @@ const devConfig: S3Config = {
     ChainSlug.SEPOLIA,
     ChainSlug.POLYGON_MUMBAI,
   ],
+  testnetIds: TestnetIds,
+  mainnetIds: MainnetIds,
+  addresses,
+  chainSlugToId: ChainSlugToId,
 };
 
 const prodConfig: S3Config = {
@@ -364,6 +374,15 @@ const prodConfig: S3Config = {
       confirmations: 0,
       siblings: getSiblings(DeploymentMode.PROD, ChainSlug.REYA),
     },
+    [ChainSlug.SYNDR_SEPOLIA_L3]: {
+      rpc: rpcs[ChainSlug.SYNDR_SEPOLIA_L3],
+      blockNumber: getBlockNumber(
+        DeploymentMode.PROD,
+        ChainSlug.SYNDR_SEPOLIA_L3
+      ),
+      confirmations: 1,
+      siblings: getSiblings(DeploymentMode.PROD, ChainSlug.SYNDR_SEPOLIA_L3),
+    },
   },
   batcherSupportedChainSlugs: [
     ChainSlug.AEVO,
@@ -398,6 +417,7 @@ const prodConfig: S3Config = {
     ChainSlug.ANCIENT8_TESTNET2,
     ChainSlug.HOOK_TESTNET,
     ChainSlug.REYA_CRONOS,
+    ChainSlug.SYNDR_SEPOLIA_L3,
   ],
   watcherSupportedChainSlugs: [
     ChainSlug.AEVO,
@@ -432,6 +452,7 @@ const prodConfig: S3Config = {
     ChainSlug.ANCIENT8_TESTNET2,
     ChainSlug.HOOK_TESTNET,
     ChainSlug.REYA_CRONOS,
+    ChainSlug.SYNDR_SEPOLIA_L3,
   ],
   nativeSupportedChainSlugs: [
     ChainSlug.ARBITRUM,
@@ -448,6 +469,10 @@ const prodConfig: S3Config = {
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
   ],
+  testnetIds: TestnetIds,
+  mainnetIds: MainnetIds,
+  addresses,
+  chainSlugToId: ChainSlugToId,
 };
 
 export const config = deploymentMode === "prod" ? prodConfig : devConfig;

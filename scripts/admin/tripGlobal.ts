@@ -1,10 +1,4 @@
-import {
-  IntegrationTypes,
-  ChainSlug,
-  DeploymentMode,
-  isTestnet,
-  isMainnet,
-} from "../../src";
+import { IntegrationTypes, ChainSlug } from "../../src";
 import { mode, overrides } from "../deploy/config";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import {
@@ -17,7 +11,6 @@ import {
   TRIP_NATIVE_SIG_IDENTIFIER,
 } from "../common";
 import { ROLES } from "@socket.tech/dl-core";
-import dotenv from "dotenv";
 import {
   sendTx,
   integrationType,
@@ -29,7 +22,7 @@ import {
   deploymentMode,
   formatMsg,
 } from "./tripCommon";
-import { BigNumberish, Contract } from "ethers";
+import { Contract } from "ethers";
 
 /**
  * Usable flags
@@ -67,9 +60,7 @@ const main = async () => {
 
   if (
     integrationType &&
-    !Object.values(IntegrationTypes).includes(
-      integrationType as IntegrationTypes
-    )
+    !Object.values(IntegrationTypes).includes(integrationType)
   ) {
     throw new Error(
       "Invalid integration type. Can be FAST, NATIVE_BRIDGE or OPTIMISTIC"
@@ -89,14 +80,13 @@ const main = async () => {
       continue;
     }
     console.log("\nChecking chain: ", chain);
-    let siblingChain = siblingChains[0];
 
-    const switchboard = getSwitchboardInstance(
-      chain,
-      siblingChain,
-      integrationType as IntegrationTypes,
-      mode
-    );
+    const switchboard = siblingChains
+      .map((siblingChain) =>
+        getSwitchboardInstance(chain, siblingChain, integrationType, mode)
+      )
+      .find((siblingChain) => !!siblingChain);
+
     if (switchboard === undefined) {
       console.log("Switchboard address not found for ", chain, "continuing...");
       continue;
@@ -140,7 +130,7 @@ const main = async () => {
     });
 
     if (sendTx) {
-      sendTxn(chain, nonce, signature, switchboard, trip, untrip);
+      await sendTxn(chain, nonce, signature, switchboard, trip, untrip);
     }
   }
   printSummary(summary);

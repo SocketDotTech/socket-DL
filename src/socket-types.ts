@@ -200,12 +200,17 @@ export const REQUIRED_CHAIN_ROLES = {
 };
 
 export type S3Config = {
+  chainSlugToId: { [chainSlug: number]: number };
+  addresses: DeploymentAddresses;
+  testnetIds: ChainSlug[];
+  mainnetIds: ChainSlug[];
   chains: {
     [chainSlug in ChainSlug]?: {
       rpc: string;
       blockNumber: number;
       confirmations: number;
       siblings: ChainSlug[];
+      eventBlockRange?: number;
     };
   };
   batcherSupportedChainSlugs: ChainSlug[];
