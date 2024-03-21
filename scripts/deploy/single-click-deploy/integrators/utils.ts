@@ -90,6 +90,11 @@ export const updateSDK = async (
     `,\n  [HardhatChainName.${chainName.toUpperCase()}]: ChainSlug.${chainName.toUpperCase()},\n};\n`,
     ",\n};"
   );
+  await updateFile(
+    "chainSlugToHardhatChainName.ts",
+    `,\n  ChainSlug.${chainName.toUpperCase()} = [HardhatChainName.${chainName.toUpperCase()}],\n}\n`,
+    ",\n}"
+  );
 
   if (isMainnet) {
     await updateFile(
