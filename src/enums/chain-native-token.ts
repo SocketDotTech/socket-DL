@@ -6,6 +6,7 @@ export enum NativeTokens {
   "binancecoin" = "binancecoin",
   "sx-network-2" = "sx-network-2",
   "mantle" = "mantle",
+  "no-token" = "0",
 }
 
 export const getCurrency = (chainSlug: ChainSlug) => {
@@ -29,9 +30,6 @@ export const getCurrency = (chainSlug: ChainSlug) => {
     case ChainSlug.OPTIMISM_SEPOLIA:
     case ChainSlug.PARALLEL:
     case ChainSlug.SEPOLIA:
-    // no gas needed for txs
-    case ChainSlug.REYA_CRONOS:
-    case ChainSlug.REYA:
       return NativeTokens.ethereum;
 
     case ChainSlug.BSC:
@@ -48,6 +46,10 @@ export const getCurrency = (chainSlug: ChainSlug) => {
 
     case ChainSlug.MANTLE:
       return NativeTokens.mantle;
+
+    case ChainSlug.REYA_CRONOS:
+    case ChainSlug.REYA:
+      return NativeTokens["no-token"];
 
     default:
       throw new Error("Invalid chainSlug");
