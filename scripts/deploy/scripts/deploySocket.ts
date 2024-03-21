@@ -14,7 +14,7 @@ import {
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { socketOwner, executionManagerVersion } from "../config";
+import { socketOwner, executionManagerVersion, overrides } from "../config";
 import { maxAllowedPacketLength } from "../../constants";
 
 let allDeployed = false;
@@ -175,7 +175,10 @@ export const deploySocket = async (
       const tx = await simulatorContract.setup(
         counter.address,
         switchboardSimulator.address,
-        simulatorUtils.address
+        simulatorUtils.address,
+        {
+          ...overrides(chainSlug),
+        }
       );
       console.log(tx.hash, "setup for simulator");
       await tx.wait();
