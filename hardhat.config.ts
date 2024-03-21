@@ -85,6 +85,9 @@ if (isProduction) {
       ChainId.ANCIENT8_TESTNET2
     ),
     [HardhatChainName.HOOK_TESTNET]: getChainConfig(ChainId.HOOK_TESTNET),
+    [HardhatChainName.SYNDR_SEPOLIA_L3]: getChainConfig(
+      ChainId.SYNDR_SEPOLIA_L3
+    ),
   };
 }
 
@@ -120,6 +123,7 @@ const config: HardhatUserConfig = {
       ancient8Testnet: process.env.ANCIENT8_API_KEY || "",
       ancient8Testnet2: process.env.ANCIENT8_API_KEY || "",
       hookTestnet: process.env.HOOK_API_KEY || "",
+      syndrTestnet: process.env.SYNDR_API_KEY || "",
     },
     customChains: [
       {
