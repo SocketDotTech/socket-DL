@@ -1,12 +1,13 @@
 import { ChainSlug } from "./chainSlug";
 
+// add coingecko token id here
 export enum NativeTokens {
   "ethereum" = "ethereum",
   "matic-network" = "matic-network",
   "binancecoin" = "binancecoin",
   "sx-network-2" = "sx-network-2",
   "mantle" = "mantle",
-  "no-token" = "0",
+  "no-token" = "no-token",
 }
 
 export const getCurrency = (chainSlug: ChainSlug) => {
