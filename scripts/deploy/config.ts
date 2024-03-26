@@ -31,9 +31,9 @@ console.log(
 
 export const chains: Array<ChainSlug> = [
   // ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_SEPOLIA,
+  // ChainSlug.ARBITRUM_SEPOLIA,
   // ChainSlug.OPTIMISM_SEPOLIA,
-  ChainSlug.POLYGON_MUMBAI,
+  // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
   // ChainSlug.SX_NETWORK,
   // ChainSlug.MODE_TESTNET,
@@ -41,7 +41,7 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.BSC_TESTNET,
   // ChainSlug.AEVO_TESTNET,
   // ChainSlug.LYRA_TESTNET,
-  ChainSlug.SEPOLIA,
+  // ChainSlug.SEPOLIA,
   // ChainSlug.XAI_TESTNET,
   // ChainSlug.CDK_TESTNET,
   // ChainSlug.AEVO,
@@ -49,13 +49,13 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.ARBITRUM,
   // ChainSlug.OPTIMISM,
   // ChainSlug.POLYGON_MAINNET,
-  // ChainSlug.LYRA,
+  ChainSlug.LYRA,
   // ChainSlug.BSC,
-  // ChainSlug.BASE,
+  ChainSlug.BASE,
   // ChainSlug.MODE,
   // ChainSlug.ANCIENT8_TESTNET,
   // ChainSlug.ANCIENT8_TESTNET2,
-  ChainSlug.SYNDR_SEPOLIA_L3,
+  // ChainSlug.SYNDR_SEPOLIA_L3,
   // ChainSlug.HOOK_TESTNET,
   // ChainSlug.HOOK,
   // ChainSlug.PARALLEL,
@@ -134,6 +134,12 @@ export const overrides = (
       type,
       gasLimit: 2_000_000,
       gasPrice,
+    };
+  } else if (chain == ChainSlug.BASE) {
+    return {
+      type,
+      gasLimit: 2_000_000,
+      gasPrice: 2_000_000_000,
     };
   } else if (chain == ChainSlug.OPTIMISM_SEPOLIA) {
     return {
