@@ -35,7 +35,7 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.OPTIMISM_SEPOLIA,
   // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
-  ChainSlug.SX_NETWORK,
+  // ChainSlug.SX_NETWORK,
   // ChainSlug.MODE_TESTNET,
   // ChainSlug.VICTION_TESTNET,
   // ChainSlug.BSC_TESTNET,
@@ -45,17 +45,17 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.XAI_TESTNET,
   // ChainSlug.CDK_TESTNET,
   // ChainSlug.AEVO,
-  ChainSlug.MAINNET,
+  // ChainSlug.MAINNET,
   // ChainSlug.ARBITRUM,
   // ChainSlug.OPTIMISM,
-  ChainSlug.POLYGON_MAINNET,
-  // ChainSlug.LYRA,
+  // ChainSlug.POLYGON_MAINNET,
+  ChainSlug.LYRA,
   // ChainSlug.BSC,
-  // ChainSlug.BASE,
+  ChainSlug.BASE,
   // ChainSlug.MODE,
   // ChainSlug.ANCIENT8_TESTNET,
   // ChainSlug.ANCIENT8_TESTNET2,
-  ChainSlug.SYNDR_SEPOLIA_L3,
+  // ChainSlug.SYNDR_SEPOLIA_L3,
   // ChainSlug.HOOK_TESTNET,
   // ChainSlug.HOOK,
   // ChainSlug.PARALLEL,
@@ -126,7 +126,7 @@ export const overrides = (
   } else if (chain == ChainSlug.ARBITRUM_SEPOLIA) {
     return {
       type,
-      gasLimit: 5_000_000,
+      gasLimit: 500_000_000,
       gasPrice,
     };
   } else if (chain == ChainSlug.OPTIMISM) {
@@ -134,6 +134,12 @@ export const overrides = (
       type,
       gasLimit: 2_000_000,
       gasPrice,
+    };
+  } else if (chain == ChainSlug.BASE) {
+    return {
+      type,
+      gasLimit: 2_000_000,
+      gasPrice: 2_000_000_000,
     };
   } else if (chain == ChainSlug.OPTIMISM_SEPOLIA) {
     return {
@@ -180,8 +186,8 @@ export const overrides = (
   } else if (chain == ChainSlug.SEPOLIA) {
     return {
       type,
-      gasLimit,
-      gasPrice: 10_000_000_000,
+      gasLimit: 2_000_000,
+      gasPrice: 250_000_000_000,
     };
   } else if (chain == ChainSlug.AEVO_TESTNET) {
     return {
@@ -228,7 +234,7 @@ export const overrides = (
   } else if (chain == ChainSlug.SYNDR_SEPOLIA_L3) {
     return {
       type: 1,
-      gasLimit: 5_000_000_000,
+      gasLimit: 500_000_000,
       gasPrice: 1_000_000,
     };
   } else if (chain == ChainSlug.VICTION_TESTNET) {

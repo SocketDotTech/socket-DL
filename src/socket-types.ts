@@ -103,6 +103,9 @@ export interface ChainSocketAddresses {
   SocketBatcher: string;
   integrations?: Integrations;
   OpenExecutionManager?: string;
+  SocketSimulator?: string;
+  SimulatorUtils?: string;
+  SwitchboardSimulator?: string;
 }
 
 export type DeploymentAddresses = {
