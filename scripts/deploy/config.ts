@@ -45,11 +45,11 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.XAI_TESTNET,
   // ChainSlug.CDK_TESTNET,
   // ChainSlug.AEVO,
-  // ChainSlug.MAINNET,
-  // ChainSlug.ARBITRUM,
-  // ChainSlug.OPTIMISM,
+  ChainSlug.MAINNET,
+  ChainSlug.ARBITRUM,
+  ChainSlug.OPTIMISM,
   // ChainSlug.POLYGON_MAINNET,
-  ChainSlug.LYRA,
+  // ChainSlug.LYRA,
   // ChainSlug.BSC,
   ChainSlug.BASE,
   // ChainSlug.MODE,
@@ -57,7 +57,7 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.ANCIENT8_TESTNET2,
   // ChainSlug.SYNDR_SEPOLIA_L3,
   // ChainSlug.HOOK_TESTNET,
-  // ChainSlug.HOOK,
+  ChainSlug.HOOK,
   // ChainSlug.PARALLEL,
   // ChainSlug.MANTLE,
   // ChainSlug.REYA_CRONOS,
@@ -246,7 +246,7 @@ export const overrides = (
   } else if (chain == ChainSlug.HOOK) {
     return {
       // type: 1,
-      // gasLimit: 200000,
+      gasLimit: 3_000_000,
       // gasPrice: 100000000,
     };
   } else if (chain == ChainSlug.REYA_CRONOS) {
