@@ -202,8 +202,7 @@ export const sendMessagesToAllPaths = async (params: {
                   provider
                 );
                 console.log(
-                  `Tx sent : ${chainSlug} -> ${siblingSlug} hash: `,
-                  response?.hash
+                  `Track message here: https://prod.dlapi.socket.tech/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${response?.hash}`
                 );
               })
             );
