@@ -17,6 +17,7 @@ import Socket from "../../../../out/Socket.sol/Socket.json";
 
 import { chains, mode, overrides } from "../../config";
 import { getProviderFromChainSlug } from "../../../constants/networks";
+import { formatEther } from "ethers/lib/utils";
 
 interface RequestObj {
   to: string;
@@ -175,7 +176,11 @@ export const sendMessagesToAllPaths = async (params: {
               to
             );
 
-            console.log(`fees is ${value}`);
+            console.log(
+              `fees for path ${chainSlug}-${siblingSlug} is ${formatEther(
+                value
+              )}`
+            );
 
             const gasLimit: number | string | undefined =
               chainSlug === ChainSlug.ARBITRUM ||
