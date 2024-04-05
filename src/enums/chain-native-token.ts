@@ -27,10 +27,6 @@ export const getCurrency = (chainSlug: ChainSlug) => {
     case ChainSlug.MANTLE:
       return NativeTokens.mantle;
 
-    case ChainSlug.REYA_CRONOS:
-    case ChainSlug.REYA:
-      return NativeTokens["no-token"];
-
     default:
       return NativeTokens.ethereum;
   }
