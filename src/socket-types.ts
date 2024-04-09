@@ -1,4 +1,4 @@
-import { ChainSlug, MainnetIds, TestnetIds } from "./enums";
+import { ChainSlug, MainnetIds, NativeTokens, TestnetIds } from "./enums";
 
 export const L1Ids: ChainSlug[] = [
   ChainSlug.MAINNET,
@@ -199,6 +199,14 @@ export const REQUIRED_CHAIN_ROLES = {
   OptimisticSwitchboard: [ROLES.WATCHER_ROLE, ROLES.FEES_UPDATER_ROLE],
 };
 
+export enum ChainType {
+  opStackL2Chain = "opStackL2Chain",
+  arbL3Chain = "arbL3Chain",
+  arbChain = "arbChain",
+  polygonCDKChain = "polygonCDKChain",
+  default = "default",
+}
+
 export type S3Config = {
   chainSlugToId: { [chainSlug: number]: number };
   addresses: DeploymentAddresses;
@@ -211,6 +219,8 @@ export type S3Config = {
       confirmations: number;
       siblings: ChainSlug[];
       eventBlockRange?: number;
+      nativeToken: NativeTokens;
+      chainType: ChainType;
     };
   };
   batcherSupportedChainSlugs: ChainSlug[];
