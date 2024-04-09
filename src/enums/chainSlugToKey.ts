@@ -38,4 +38,5 @@ export const ChainSlugToKey = {
   [ChainSlug.REYA_CRONOS]: HardhatChainName.REYA_CRONOS,
   [ChainSlug.REYA]: HardhatChainName.REYA,
   [ChainSlug.SYNDR_SEPOLIA_L3]: HardhatChainName.SYNDR_SEPOLIA_L3,
+  [ChainSlug.POLYNOMIAL_TESTNET]: HardhatChainName.POLYNOMIAL_TESTNET,
 };

@@ -94,6 +94,9 @@ if (isProduction) {
     [HardhatChainName.SYNDR_SEPOLIA_L3]: getChainConfig(
       ChainId.SYNDR_SEPOLIA_L3
     ),
+    [HardhatChainName.POLYNOMIAL_TESTNET]: getChainConfig(
+      ChainId.POLYNOMIAL_TESTNET
+    ),
   };
 }
 
