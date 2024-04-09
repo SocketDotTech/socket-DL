@@ -96,6 +96,7 @@ const rpcs = {
 };
 
 const devConfig: S3Config = {
+  version: "dev-1.0.0",
   chains: {
     [ChainSlug.ARBITRUM_SEPOLIA]: {
       rpc: rpcs[ChainSlug.ARBITRUM_SEPOLIA],
@@ -155,6 +156,7 @@ const devConfig: S3Config = {
 };
 
 const prodConfig: S3Config = {
+  version: "prod-1.0.1",
   chains: {
     [ChainSlug.AEVO]: {
       rpc: rpcs[ChainSlug.AEVO],

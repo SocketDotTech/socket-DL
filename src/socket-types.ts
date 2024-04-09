@@ -208,6 +208,7 @@ export enum ChainType {
 }
 
 export type S3Config = {
+  version: string;
   chainSlugToId: { [chainSlug: number]: number };
   addresses: DeploymentAddresses;
   testnetIds: ChainSlug[];
@@ -219,8 +220,8 @@ export type S3Config = {
       confirmations: number;
       siblings: ChainSlug[];
       eventBlockRange?: number;
-      nativeToken: NativeTokens;
-      chainType: ChainType;
+      nativeToken?: NativeTokens;
+      chainType?: ChainType;
     };
   };
   batcherSupportedChainSlugs: ChainSlug[];
