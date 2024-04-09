@@ -1,5 +1,10 @@
-import { Contract, Wallet } from "ethers";
-import { DeployParams, getOrDeploy, storeAddresses } from "../utils";
+import { Contract, Wallet, constants } from "ethers";
+import {
+  DeployParams,
+  getInstance,
+  getOrDeploy,
+  storeAddresses,
+} from "../utils";
 
 import {
   CORE_CONTRACTS,
@@ -9,7 +14,7 @@ import {
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { socketOwner, executionManagerVersion } from "../config";
+import { socketOwner, executionManagerVersion, overrides } from "../config";
 import { maxAllowedPacketLength } from "../../constants";
 
 let allDeployed = false;
@@ -118,8 +123,72 @@ export const deploySocket = async (
     );
     deployUtils.addresses["Counter"] = counter.address;
 
-    deployUtils.addresses.startBlock =
-      await socketSigner.provider?.getBlockNumber();
+    // simulators
+    const socketSimulator: Contract = await getOrDeploy(
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        chainSlug,
+        chainSlug,
+        hasher.address,
+        signatureVerifier.address,
+        version,
+      ],
+      deployUtils
+    );
+    deployUtils.addresses["SocketSimulator"] = socketSimulator.address;
+
+    const simulatorUtils: Contract = await getOrDeploy(
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        socketSimulator.address,
+        signatureVerifier.address,
+        socketOwner,
+        chainSlug,
+      ],
+      deployUtils
+    );
+    deployUtils.addresses["SimulatorUtils"] = simulatorUtils.address;
+
+    const switchboardSimulator: Contract = await getOrDeploy(
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        socketOwner,
+        socketSimulator.address,
+        chainSlug,
+        1000,
+        signatureVerifier.address,
+      ],
+      deployUtils
+    );
+    deployUtils.addresses["SwitchboardSimulator"] =
+      switchboardSimulator.address;
+
+    // setup
+    const simulatorContract = (
+      await getInstance("SocketSimulator", socketSimulator.address)
+    ).connect(deployUtils.signer);
+    let capacitor = await simulatorContract.capacitor();
+    if (capacitor == constants.AddressZero) {
+      const tx = await simulatorContract.setup(
+        counter.address,
+        switchboardSimulator.address,
+        simulatorUtils.address,
+        {
+          ...overrides(chainSlug),
+        }
+      );
+      console.log(tx.hash, "setup for simulator");
+      await tx.wait();
+    }
+
+    deployUtils.addresses["CapacitorSimulator"] =
+      await simulatorContract.capacitor();
+    deployUtils.addresses.startBlock = deployUtils.addresses.startBlock
+      ? deployUtils.addresses.startBlock
+      : await socketSigner.provider?.getBlockNumber();
 
     allDeployed = true;
     console.log(deployUtils.addresses);
