@@ -156,7 +156,7 @@ const devConfig: S3Config = {
 };
 
 const prodConfig: S3Config = {
-  version: "prod-1.0.1",
+  version: "prod-1.0.2",
   chains: {
     [ChainSlug.AEVO]: {
       rpc: rpcs[ChainSlug.AEVO],
