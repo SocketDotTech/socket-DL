@@ -8,10 +8,14 @@ import {
   TestnetIds,
   MainnetIds,
   getAllAddresses,
-  NativeTokens,
   ChainType,
   TxData,
   chainSlugToHardhatChainName,
+  getCurrency,
+  opStackL2Chain,
+  arbChains,
+  arbL3Chains,
+  polygonCDKChains,
 } from "../../src";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
 
@@ -59,6 +63,18 @@ const getSiblings = (
   }
 };
 
+const getChainType = (chainSlug: ChainSlug) => {
+  if (opStackL2Chain.includes(chainSlug)) {
+    return ChainType.opStackL2Chain;
+  } else if (arbChains.includes(chainSlug)) {
+    return ChainType.arbChain;
+  } else if (arbL3Chains.includes(chainSlug)) {
+    return ChainType.arbL3Chain;
+  } else if (polygonCDKChains.includes(chainSlug)) {
+    return ChainType.polygonCDKChain;
+  } else return ChainType.default;
+};
+
 const getChainData = async (chainSlug: ChainSlug, txData: TxData) => {
   return {
     rpc: rpcs[chainSlug],
@@ -66,6 +82,8 @@ const getChainData = async (chainSlug: ChainSlug, txData: TxData) => {
     blockNumber: getBlockNumber(deploymentMode, chainSlug),
     siblings: getSiblings(deploymentMode, chainSlug),
     chainTxData: await getChainTxData(chainSlug, txData),
+    nativeToken: getCurrency(chainSlug),
+    chainType: getChainType(chainSlug),
   };
 };
 
@@ -115,26 +133,18 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
       [ChainSlug.ARBITRUM_SEPOLIA]: {
         ...(await getChainData(ChainSlug.ARBITRUM_SEPOLIA, txData)),
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
       },
       [ChainSlug.OPTIMISM_SEPOLIA]: {
         ...(await getChainData(ChainSlug.OPTIMISM_SEPOLIA, txData)),
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
       },
       [ChainSlug.SEPOLIA]: {
         ...(await getChainData(ChainSlug.SEPOLIA, txData)),
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
       },
       [ChainSlug.POLYGON_MUMBAI]: {
         ...(await getChainData(ChainSlug.POLYGON_MUMBAI, txData)),
         confirmations: 5,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
       },
     },
     batcherSupportedChainSlugs: [
@@ -177,213 +187,142 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
       [ChainSlug.AEVO]: {
         ...(await getChainData(ChainSlug.AEVO, txData)),
         confirmations: 2,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
       },
       [ChainSlug.ARBITRUM]: {
         ...(await getChainData(ChainSlug.ARBITRUM, txData)),
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.arbChain,
       },
       [ChainSlug.LYRA]: {
         ...(await getChainData(ChainSlug.LYRA, txData)),
         confirmations: 2,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
       },
       [ChainSlug.OPTIMISM]: {
         ...(await getChainData(ChainSlug.OPTIMISM, txData)),
         confirmations: 15,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
       },
       [ChainSlug.BSC]: {
         ...(await getChainData(ChainSlug.BSC, txData)),
         confirmations: 1,
-        nativeToken: NativeTokens.binancecoin,
-        chainType: ChainType.default,
       },
       [ChainSlug.POLYGON_MAINNET]: {
         confirmations: 256,
-        nativeToken: NativeTokens["matic-network"],
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.POLYGON_MAINNET, txData)),
       },
       [ChainSlug.MAINNET]: {
         confirmations: 18,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.MAINNET, txData)),
       },
       [ChainSlug.BASE]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
         ...(await getChainData(ChainSlug.BASE, txData)),
       },
       [ChainSlug.MODE]: {
         confirmations: 2,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
         ...(await getChainData(ChainSlug.MODE, txData)),
       },
-
       [ChainSlug.ARBITRUM_GOERLI]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.arbChain,
         ...(await getChainData(ChainSlug.ARBITRUM_GOERLI, txData)),
       },
       [ChainSlug.AEVO_TESTNET]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
         ...(await getChainData(ChainSlug.AEVO_TESTNET, txData)),
       },
       [ChainSlug.LYRA_TESTNET]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
         ...(await getChainData(ChainSlug.LYRA_TESTNET, txData)),
       },
       [ChainSlug.OPTIMISM_GOERLI]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
         ...(await getChainData(ChainSlug.OPTIMISM_GOERLI, txData)),
       },
       [ChainSlug.BSC_TESTNET]: {
         confirmations: 1,
-        nativeToken: NativeTokens.binancecoin,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.BSC_TESTNET, txData)),
       },
       [ChainSlug.GOERLI]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.GOERLI, txData)),
       },
       [ChainSlug.XAI_TESTNET]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.polygonCDKChain,
         ...(await getChainData(ChainSlug.XAI_TESTNET, txData)),
       },
       [ChainSlug.SX_NETWORK_TESTNET]: {
         confirmations: 1,
-        nativeToken: NativeTokens["sx-network-2"],
-        chainType: ChainType.arbL3Chain,
         ...(await getChainData(ChainSlug.SX_NETWORK_TESTNET, txData)),
       },
       [ChainSlug.SX_NETWORK]: {
         confirmations: 1,
-        nativeToken: NativeTokens["sx-network-2"],
-        chainType: ChainType.arbL3Chain,
         ...(await getChainData(ChainSlug.SX_NETWORK, txData)),
       },
       [ChainSlug.MODE_TESTNET]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
         ...(await getChainData(ChainSlug.MODE_TESTNET, txData)),
       },
       [ChainSlug.VICTION_TESTNET]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.VICTION_TESTNET, txData)),
       },
       [ChainSlug.CDK_TESTNET]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.CDK_TESTNET, txData)),
       },
       [ChainSlug.ARBITRUM_SEPOLIA]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.arbChain,
         ...(await getChainData(ChainSlug.ARBITRUM_SEPOLIA, txData)),
       },
       [ChainSlug.OPTIMISM_SEPOLIA]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
         ...(await getChainData(ChainSlug.OPTIMISM_SEPOLIA, txData)),
       },
       [ChainSlug.SEPOLIA]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.SEPOLIA, txData)),
       },
       [ChainSlug.POLYGON_MUMBAI]: {
         confirmations: 1,
-        nativeToken: NativeTokens["matic-network"],
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.POLYGON_MUMBAI, txData)),
       },
       [ChainSlug.ANCIENT8_TESTNET]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.ANCIENT8_TESTNET, txData)),
       },
       [ChainSlug.ANCIENT8_TESTNET2]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.ANCIENT8_TESTNET2, txData)),
       },
       [ChainSlug.HOOK_TESTNET]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.HOOK_TESTNET, txData)),
       },
       [ChainSlug.HOOK]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.HOOK, txData)),
       },
       [ChainSlug.PARALLEL]: {
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.PARALLEL, txData)),
       },
       [ChainSlug.MANTLE]: {
         confirmations: 1,
-        nativeToken: NativeTokens.mantle,
-        chainType: ChainType.default,
         ...(await getChainData(ChainSlug.MANTLE, txData)),
       },
       [ChainSlug.REYA_CRONOS]: {
         ...(await getChainData(ChainSlug.REYA_CRONOS, txData)),
         confirmations: 0,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.arbChain,
       },
       [ChainSlug.REYA]: {
         ...(await getChainData(ChainSlug.REYA, txData)),
         confirmations: 0,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.arbChain,
       },
       [ChainSlug.SYNDR_SEPOLIA_L3]: {
         ...(await getChainData(ChainSlug.SYNDR_SEPOLIA_L3, txData)),
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.default,
       },
       [ChainSlug.POLYNOMIAL_TESTNET]: {
         ...(await getChainData(ChainSlug.POLYNOMIAL_TESTNET, txData)),
         confirmations: 1,
-        nativeToken: NativeTokens.ethereum,
-        chainType: ChainType.opStackL2Chain,
       },
     },
     batcherSupportedChainSlugs: [
@@ -394,7 +333,7 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
       ChainSlug.POLYGON_MAINNET,
       ChainSlug.LYRA,
       ChainSlug.MAINNET,
-      ChainSlug.PARALLEL,
+      // ChainSlug.PARALLEL,
       ChainSlug.MANTLE,
       ChainSlug.HOOK,
       ChainSlug.REYA,
@@ -481,7 +420,7 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
       ChainSlug.POLYGON_MAINNET,
       ChainSlug.LYRA,
       ChainSlug.MAINNET,
-      ChainSlug.PARALLEL,
+      // ChainSlug.PARALLEL,
       ChainSlug.MANTLE,
       ChainSlug.HOOK,
       ChainSlug.REYA,
