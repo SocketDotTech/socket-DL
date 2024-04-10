@@ -43,4 +43,5 @@ export const ethLikeChains = [
   ChainSlug.ANCIENT8_TESTNET2,
   ChainSlug.REYA_CRONOS,
   ChainSlug.REYA,
+  ChainSlug.POLYNOMIAL_TESTNET,
 ];

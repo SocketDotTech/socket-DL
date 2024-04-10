@@ -179,6 +179,11 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       jsonRpcUrl = process.env.SYNDR_SEPOLIA_L3_RPC as string;
       break;
 
+    case HardhatChainName.POLYNOMIAL_TESTNET:
+    case ChainId.POLYNOMIAL_TESTNET:
+      jsonRpcUrl = process.env.POLYNOMIAL_TESTNET_RPC as string;
+      break;
+
     case HardhatChainName.HARDHAT:
     case ChainId.HARDHAT:
       jsonRpcUrl = "http://127.0.0.1:8545/";
