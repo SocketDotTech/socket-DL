@@ -218,7 +218,7 @@ export interface ChainTxData {
   owner: string;
 }
 
-export interface ChainConfig {
+export interface S3ChainConfig {
   rpc: string;
   blockNumber: number;
   confirmations: number;
@@ -237,7 +237,7 @@ export type S3Config = {
   testnetIds: ChainSlug[];
   mainnetIds: ChainSlug[];
   chains: {
-    [chainSlug in ChainSlug]?: ChainConfig;
+    [chainSlug in ChainSlug]?: S3ChainConfig;
   };
   batcherSupportedChainSlugs: ChainSlug[];
   watcherSupportedChainSlugs: ChainSlug[];
