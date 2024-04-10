@@ -27,7 +27,6 @@ const createConfig = async () => {
     deploymentMode === "prod"
       ? await generateProdConfig(txData)
       : await generateDevConfig(txData);
-  console.log(config);
   const jsonString = JSON.stringify(config, null, 2); // Use null and 2 for pretty formatting
 
   // Write the JSON string to the local file

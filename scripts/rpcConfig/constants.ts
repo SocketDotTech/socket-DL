@@ -120,9 +120,10 @@ export const prodBatcherSupportedChainSlugs = [
 
 export const prodFeesUpdaterSupportedChainSlugs = (): ChainSlug[] => {
   const feesUpdaterSupportedChainSlugs = [];
-  MainnetIds.every((m) => {
-    if (prodBatcherSupportedChainSlugs.includes(m))
+  MainnetIds.forEach((m) => {
+    if (prodBatcherSupportedChainSlugs.includes(m)) {
       feesUpdaterSupportedChainSlugs.push(m);
+    }
   });
 
   return [...feesUpdaterSupportedChainSlugs, ChainSlug.POLYNOMIAL_TESTNET];
