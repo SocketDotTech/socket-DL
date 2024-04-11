@@ -7,8 +7,12 @@ export const opStackL2Chain = [
   ChainSlug.MODE_TESTNET,
   ChainSlug.LYRA_TESTNET,
   ChainSlug.MODE,
+  ChainSlug.OPTIMISM,
+  ChainSlug.OPTIMISM_SEPOLIA,
+  ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.BASE,
   ChainSlug.MANTLE,
+  ChainSlug.POLYNOMIAL_TESTNET,
 ];
 
 export const arbL3Chains = [
@@ -28,6 +32,8 @@ export const polygonCDKChains = [
   ChainSlug.CDK_TESTNET,
   ChainSlug.ANCIENT8_TESTNET2,
   ChainSlug.SX_NETWORK_TESTNET,
+  ChainSlug.SX_NETWORK,
+  ChainSlug.XAI_TESTNET,
 ];
 
 // chains having constant gas limits
@@ -40,8 +46,12 @@ export const ethLikeChains = [
   ChainSlug.SEPOLIA,
   ChainSlug.SX_NETWORK,
   ChainSlug.SX_NETWORK_TESTNET,
+  ChainSlug.ANCIENT8_TESTNET,
   ChainSlug.ANCIENT8_TESTNET2,
   ChainSlug.REYA_CRONOS,
   ChainSlug.REYA,
-  ChainSlug.POLYNOMIAL_TESTNET,
+  ChainSlug.BSC_TESTNET,
+  ChainSlug.GOERLI,
+  ChainSlug.VICTION_TESTNET,
+  ChainSlug.SYNDR_SEPOLIA_L3,
 ];

@@ -207,6 +207,29 @@ export enum ChainType {
   default = "default",
 }
 
+export type TxData = {
+  [chainSlug in ChainSlug]?: ChainTxData;
+};
+
+export interface ChainTxData {
+  sealTxData: any[];
+  proposeTxData: any[];
+  attestTxData: any[];
+  owner: string;
+}
+
+export interface S3ChainConfig {
+  rpc: string;
+  blockNumber: number;
+  confirmations: number;
+  siblings: ChainSlug[];
+  chainName: string;
+  eventBlockRange?: number;
+  nativeToken?: NativeTokens;
+  chainType?: ChainType;
+  chainTxData?: ChainTxData;
+}
+
 export type S3Config = {
   version: string;
   chainSlugToId: { [chainSlug: number]: number };
@@ -214,17 +237,10 @@ export type S3Config = {
   testnetIds: ChainSlug[];
   mainnetIds: ChainSlug[];
   chains: {
-    [chainSlug in ChainSlug]?: {
-      rpc: string;
-      blockNumber: number;
-      confirmations: number;
-      siblings: ChainSlug[];
-      eventBlockRange?: number;
-      nativeToken?: NativeTokens;
-      chainType?: ChainType;
-    };
+    [chainSlug in ChainSlug]?: S3ChainConfig;
   };
   batcherSupportedChainSlugs: ChainSlug[];
   watcherSupportedChainSlugs: ChainSlug[];
   nativeSupportedChainSlugs: ChainSlug[];
+  feeUpdaterSupportedChainSlugs: ChainSlug[];
 };
