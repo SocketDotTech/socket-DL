@@ -48,6 +48,7 @@ export const rpcs = {
   [ChainSlug.REYA_CRONOS]: checkEnvVar("REYA_CRONOS_RPC"),
   [ChainSlug.SYNDR_SEPOLIA_L3]: checkEnvVar("SYNDR_SEPOLIA_L3_RPC"),
   [ChainSlug.POLYNOMIAL_TESTNET]: checkEnvVar("POLYNOMIAL_TESTNET_RPC"),
+  [ChainSlug.BOB]: checkEnvVar("BOB_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 
@@ -68,8 +69,8 @@ export const confirmations = {
   [ChainSlug.BSC_TESTNET]: 1,
   [ChainSlug.GOERLI]: 1,
   [ChainSlug.XAI_TESTNET]: 1,
-  [ChainSlug.SX_NETWORK_TESTNET]: 1,
-  [ChainSlug.SX_NETWORK]: 1,
+  [ChainSlug.SX_NETWORK_TESTNET]: 0,
+  [ChainSlug.SX_NETWORK]: 0,
   [ChainSlug.MODE_TESTNET]: 1,
   [ChainSlug.VICTION_TESTNET]: 1,
   [ChainSlug.CDK_TESTNET]: 1,
@@ -79,14 +80,15 @@ export const confirmations = {
   [ChainSlug.POLYGON_MUMBAI]: 1,
   [ChainSlug.ANCIENT8_TESTNET]: 1,
   [ChainSlug.ANCIENT8_TESTNET2]: 1,
-  [ChainSlug.HOOK_TESTNET]: 1,
-  [ChainSlug.HOOK]: 1,
+  [ChainSlug.HOOK_TESTNET]: 0,
+  [ChainSlug.HOOK]: 0,
   [ChainSlug.PARALLEL]: 1,
   [ChainSlug.MANTLE]: 1,
-  [ChainSlug.REYA_CRONOS]: 1,
+  [ChainSlug.REYA_CRONOS]: 0,
   [ChainSlug.REYA]: 0,
-  [ChainSlug.SYNDR_SEPOLIA_L3]: 1,
-  [ChainSlug.POLYNOMIAL_TESTNET]: 1,
+  [ChainSlug.SYNDR_SEPOLIA_L3]: 0,
+  [ChainSlug.POLYNOMIAL_TESTNET]: 0,
+  [ChainSlug.BOB]: 0,
 };
 
 export const prodBatcherSupportedChainSlugs = [
@@ -116,6 +118,7 @@ export const prodBatcherSupportedChainSlugs = [
   ChainSlug.REYA_CRONOS,
   ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.POLYNOMIAL_TESTNET,
+  ChainSlug.BOB,
 ];
 
 export const prodFeesUpdaterSupportedChainSlugs = (): ChainSlug[] => {

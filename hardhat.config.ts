@@ -97,6 +97,7 @@ if (isProduction) {
     [HardhatChainName.POLYNOMIAL_TESTNET]: getChainConfig(
       ChainId.POLYNOMIAL_TESTNET
     ),
+    [HardhatChainName.BOB]: getChainConfig(ChainId.BOB),
   };
 }
 

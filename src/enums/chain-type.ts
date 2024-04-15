@@ -13,6 +13,7 @@ export const opStackL2Chain = [
   ChainSlug.BASE,
   ChainSlug.MANTLE,
   ChainSlug.POLYNOMIAL_TESTNET,
+  ChainSlug.BOB,
 ];
 
 export const arbL3Chains = [

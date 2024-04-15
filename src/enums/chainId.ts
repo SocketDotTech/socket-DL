@@ -36,4 +36,5 @@ export enum ChainId {
   REYA = 1729,
   SYNDR_SEPOLIA_L3 = 444444,
   POLYNOMIAL_TESTNET = 80008,
+  BOB = 60808,
 }

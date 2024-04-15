@@ -39,4 +39,5 @@ export const ChainSlugToId = {
   [ChainSlug.REYA]: ChainId.REYA,
   [ChainSlug.SYNDR_SEPOLIA_L3]: ChainId.SYNDR_SEPOLIA_L3,
   [ChainSlug.POLYNOMIAL_TESTNET]: ChainId.POLYNOMIAL_TESTNET,
+  [ChainSlug.BOB]: ChainId.BOB,
 };

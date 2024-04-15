@@ -37,4 +37,5 @@ export enum HardhatChainName {
   REYA = "reya",
   SYNDR_SEPOLIA_L3 = "syndr_sepolia_l3",
   POLYNOMIAL_TESTNET = "polynomial_testnet",
+  BOB = "bob",
 }
