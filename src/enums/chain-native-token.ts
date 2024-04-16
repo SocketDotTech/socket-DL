@@ -17,7 +17,6 @@ export const getCurrency = (chainSlug: ChainSlug) => {
       return NativeTokens.binancecoin;
 
     case ChainSlug.POLYGON_MAINNET:
-    case ChainSlug.POLYGON_MUMBAI:
       return NativeTokens["matic-network"];
 
     case ChainSlug.SX_NETWORK_TESTNET:

@@ -14,7 +14,6 @@ export const ChainSlugToId = {
   [ChainSlug.GOERLI]: ChainId.GOERLI,
   [ChainSlug.SEPOLIA]: ChainId.SEPOLIA,
   [ChainSlug.POLYGON_MAINNET]: ChainId.POLYGON_MAINNET,
-  [ChainSlug.POLYGON_MUMBAI]: ChainId.POLYGON_MUMBAI,
   [ChainSlug.AEVO_TESTNET]: ChainId.AEVO_TESTNET,
   [ChainSlug.AEVO]: ChainId.AEVO,
   [ChainSlug.HARDHAT]: ChainId.HARDHAT,

@@ -113,7 +113,6 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
     ChainSlug.SEPOLIA,
-    ChainSlug.POLYGON_MUMBAI,
   ];
 
   return {
@@ -144,7 +143,6 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
       ChainSlug.MAINNET,
       ChainSlug.GOERLI,
       ChainSlug.SEPOLIA,
-      ChainSlug.POLYGON_MUMBAI,
       ChainSlug.LYRA_TESTNET,
       ChainSlug.ARBITRUM_SEPOLIA,
       ChainSlug.OPTIMISM_SEPOLIA,

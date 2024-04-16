@@ -43,7 +43,6 @@ export const ethLikeChains = [
   ChainSlug.BSC,
   ChainSlug.BSC_TESTNET,
   ChainSlug.POLYGON_MAINNET,
-  ChainSlug.POLYGON_MUMBAI,
   ChainSlug.SEPOLIA,
   ChainSlug.SX_NETWORK,
   ChainSlug.SX_NETWORK_TESTNET,

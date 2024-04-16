@@ -14,7 +14,6 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.GOERLI]: ChainSlug.GOERLI,
   [HardhatChainName.SEPOLIA]: ChainSlug.SEPOLIA,
   [HardhatChainName.POLYGON_MAINNET]: ChainSlug.POLYGON_MAINNET,
-  [HardhatChainName.POLYGON_MUMBAI]: ChainSlug.POLYGON_MUMBAI,
   [HardhatChainName.AEVO_TESTNET]: ChainSlug.AEVO_TESTNET,
   [HardhatChainName.AEVO]: ChainSlug.AEVO,
   [HardhatChainName.HARDHAT]: ChainSlug.HARDHAT,
