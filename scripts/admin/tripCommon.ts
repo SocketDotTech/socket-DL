@@ -47,7 +47,7 @@ export type SummaryObj = {
  * --testnets       Run for testnets.
  *                  Default is false.
  * 
- * --integration  Run for sepcified integration type. Can be fast or optimistic.
+ * --integration  Run for specified integration type. Can be fast or optimistic.
  *                  Default is fast.
  */
 

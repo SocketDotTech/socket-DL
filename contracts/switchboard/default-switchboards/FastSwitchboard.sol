@@ -48,10 +48,10 @@ contract FastSwitchboard is SwitchboardBase {
     error AlreadyAttested();
 
     // Error emitted if grant/revoke is tried for watcher role using generic grant/revoke functions.
-    // Watcher role is handled seperately bacause totalWatchers and fees need to be updated along with role change.
+    // Watcher role is handled seperately because totalWatchers and fees need to be updated along with role change.
     error InvalidRole();
 
-    // Error emitted while attesting if root is zero or it doesnt match the root on socket for given proposal
+    // Error emitted while attesting if root is zero or it doesn't match the root on socket for given proposal
     // helps in cases where attest tx has been sent but root changes on socket due to reorgs.
     error InvalidRoot();
 
