@@ -13,6 +13,7 @@ import {
 } from "../../../src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { overrides } from "../config";
+import { isKinto, deployOnKinto } from "./kinto/kinto";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
@@ -82,13 +83,18 @@ export async function deployContractWithArgs(
   signer: SignerWithAddress | Wallet
 ) {
   try {
-    const Contract: ContractFactory = await ethers.getContractFactory(
-      contractName
-    );
-    // gasLimit is set to undefined to not use the value set in overrides
-    const contract: Contract = await Contract.connect(signer).deploy(...args, {
-      ...overrides(await signer.getChainId()),
-    });
+    let contract: Contract;
+    if (isKinto()) {
+      contract = await deployOnKinto(contractName, args, signer);
+    } else {
+      const Contract: ContractFactory = await ethers.getContractFactory(
+        contractName
+      );
+      // gasLimit is set to undefined to not use the value set in overrides
+      contract = await Contract.connect(signer).deploy(...args, {
+        ...overrides(await signer.getChainId()),
+      });
+    }
     await contract.deployed();
     return contract;
   } catch (error) {

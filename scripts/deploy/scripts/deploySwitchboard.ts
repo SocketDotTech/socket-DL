@@ -17,6 +17,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 export default async function deploySwitchboards(
   chainSlug: ChainSlug,
+  owner: string,
   signer: SignerWithAddress | Wallet,
   sourceConfig: ChainSocketAddresses,
   mode: DeploymentMode
@@ -27,6 +28,7 @@ export default async function deploySwitchboards(
       IntegrationTypes.fast,
       chainSlug,
       "",
+      owner,
       signer,
       updatedConfig,
       mode
@@ -37,6 +39,7 @@ export default async function deploySwitchboards(
       IntegrationTypes.optimistic,
       chainSlug,
       "",
+      owner,
       signer,
       updatedConfig,
       mode
@@ -57,6 +60,7 @@ export default async function deploySwitchboards(
         IntegrationTypes.native,
         chainSlug,
         siblings[index],
+        owner,
         signer,
         updatedConfig,
         mode
@@ -71,6 +75,7 @@ async function deploySwitchboard(
   integrationType: IntegrationTypes,
   chainSlug: ChainSlug,
   remoteChain: ChainSlug | string,
+  owner: string,
   signer: SignerWithAddress | Wallet,
   sourceConfig: ChainSocketAddresses,
   mode: DeploymentMode
@@ -82,7 +87,7 @@ async function deploySwitchboard(
       remoteChain,
       sourceConfig[CORE_CONTRACTS.Socket],
       sourceConfig[CORE_CONTRACTS.SignatureVerifier],
-      signer.address
+      owner
     );
 
     const switchboard = await deployContractWithArgs(

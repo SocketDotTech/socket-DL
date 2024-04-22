@@ -97,9 +97,7 @@ if (isProduction) {
     [HardhatChainName.POLYNOMIAL_TESTNET]: getChainConfig(
       ChainId.POLYNOMIAL_TESTNET
     ),
-    [HardhatChainName.KINTO]: getChainConfig(
-      ChainId.KINTO
-    ),
+    [HardhatChainName.KINTO]: getChainConfig(ChainId.KINTO),
     [HardhatChainName.KINTO_DEVNET]: getChainConfig(ChainId.KINTO_DEVNET),
   };
 }

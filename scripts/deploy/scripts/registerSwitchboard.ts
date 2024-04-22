@@ -4,6 +4,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { createObj, getInstance } from "../utils";
 import { ChainSlug, ChainSocketAddresses } from "../../../src";
 import { initialPacketCount, overrides } from "../config";
+import { handleOps, isKinto } from "../utils/kinto/kinto";
 
 export default async function registerSwitchboardForSibling(
   switchBoardAddress: string,
@@ -31,21 +32,30 @@ export default async function registerSwitchboardForSibling(
     );
 
     if (capacitor === constants.AddressZero) {
-      const registerTx = await switchboard.registerSiblingSlug(
-        remoteChainSlug,
-        maxPacketLength,
-        capacitorType,
-        initialPacketCount,
-        siblingSwitchBoardAddress,
-        {
-          ...overrides(await signer.getChainId()),
-        }
-      );
-      console.log(
-        `Registering Switchboard remoteChainSlug - ${remoteChainSlug} ${switchBoardAddress}: ${registerTx.hash}`
-      );
+      let registerTx;
+      const txRequest =
+        await switchboard.populateTransaction.registerSiblingSlug(
+          remoteChainSlug,
+          maxPacketLength,
+          capacitorType,
+          initialPacketCount,
+          siblingSwitchBoardAddress,
+          {
+            ...overrides(await signer.getChainId()),
+          }
+        );
 
-      await registerTx.wait();
+      if (isKinto()) {
+        registerTx = await handleOps([txRequest], switchboard.signer);
+      } else {
+        registerTx = await (
+          await switchboard.signer.sendTransaction(txRequest)
+        ).wait();
+      }
+
+      console.log(
+        `Registering Switchboard remoteChainSlug - ${remoteChainSlug} ${switchBoardAddress}: ${registerTx.transactionHash}`
+      );
     }
 
     // get capacitor and decapacitor for config

@@ -1,4 +1,5 @@
 import { Contract, Wallet, constants } from "ethers";
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import {
   DeployParams,
   getInstance,
@@ -10,12 +11,14 @@ import {
   CORE_CONTRACTS,
   ChainSocketAddresses,
   DeploymentMode,
+  INTEGRATION_CONTRACTS,
   version,
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { socketOwner, executionManagerVersion, overrides } from "../config";
 import { maxAllowedPacketLength } from "../../constants";
+import { handleOps, isKinto } from "../utils/kinto/kinto";
 
 let allDeployed = false;
 
@@ -33,6 +36,7 @@ export const deploySocket = async (
   currentMode: DeploymentMode,
   deployedAddresses: ChainSocketAddresses
 ): Promise<ReturnObj> => {
+  console.log("\nDeploying socket contracts on chain", chainSlug);
   const deployUtils: DeployParams = {
     addresses: deployedAddresses,
     mode: currentMode,
@@ -41,6 +45,18 @@ export const deploySocket = async (
   };
 
   try {
+    // if chain is Kinto, deploy KintoDeployer
+    if (isKinto()) {
+      const KintoDeployer: Contract = await getOrDeploy(
+        "KintoDeployer",
+        "contracts/utils/KintoDeployer.sol",
+        [],
+        deployUtils
+      );
+      deployUtils.addresses[INTEGRATION_CONTRACTS.KintoDeployer] =
+        KintoDeployer.address;
+    }
+
     const signatureVerifier: Contract = await getOrDeploy(
       CORE_CONTRACTS.SignatureVerifier,
       "contracts/utils/SignatureVerifier.sol",
@@ -101,6 +117,7 @@ export const deploySocket = async (
     // switchboards deploy
     deployUtils.addresses = await deploySwitchboards(
       chainSlug,
+      socketOwner,
       socketSigner,
       deployUtils.addresses,
       currentMode
@@ -132,7 +149,7 @@ export const deploySocket = async (
         chainSlug,
         hasher.address,
         signatureVerifier.address,
-        version,
+        version[deployUtils.mode],
       ],
       deployUtils
     );
@@ -172,7 +189,8 @@ export const deploySocket = async (
     ).connect(deployUtils.signer);
     let capacitor = await simulatorContract.capacitor();
     if (capacitor == constants.AddressZero) {
-      const tx = await simulatorContract.setup(
+      let tx: TransactionReceipt;
+      let txRequest = await simulatorContract.populateTransaction.setup(
         counter.address,
         switchboardSimulator.address,
         simulatorUtils.address,
@@ -180,8 +198,14 @@ export const deploySocket = async (
           ...overrides(chainSlug),
         }
       );
-      console.log(tx.hash, "setup for simulator");
-      await tx.wait();
+      if (isKinto()) {
+        tx = await handleOps([txRequest], simulatorContract.signer);
+      } else {
+        tx = await (
+          await simulatorContract.signer.sendTransaction(txRequest)
+        ).wait();
+      }
+      console.log(tx.transactionHash, "setup for simulator");
     }
 
     deployUtils.addresses["CapacitorSimulator"] =

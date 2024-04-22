@@ -20,6 +20,7 @@ import {
   overrides,
   msgValueMaxThreshold,
 } from "../config";
+import { handleOps, isKinto } from "../utils/kinto/kinto";
 
 export const registerSwitchboards = async (
   chain: ChainSlug,
@@ -67,20 +68,37 @@ export const setManagers = async (
   if (
     currentEM.toLowerCase() !== addr[executionManagerVersion]?.toLowerCase()
   ) {
-    tx = await socket.setExecutionManager(addr[executionManagerVersion], {
-      ...overrides(await socketSigner.getChainId()),
-    });
-    console.log("updateExecutionManager", tx.hash);
-    await tx.wait();
+    const txRequest = await socket.populateTransaction.setExecutionManager(
+      addr[executionManagerVersion],
+      {
+        ...overrides(await socketSigner.getChainId()),
+      }
+    );
+
+    if (isKinto()) {
+      tx = await handleOps([txRequest], socket.signer);
+    } else {
+      tx = await (await socket.signer.sendTransaction(txRequest)).wait();
+    }
+    console.log("updateExecutionManager", tx.transactionHash);
   }
 
   const currentTM = await socket.transmitManager__();
   if (currentTM.toLowerCase() !== addr.TransmitManager?.toLowerCase()) {
-    tx = await socket.setTransmitManager(addr.TransmitManager, {
-      ...overrides(await socketSigner.getChainId()),
-    });
-    console.log("updateTransmitManager", tx.hash);
-    await tx.wait();
+    const txRequest = await socket.populateTransaction.setTransmitManager(
+      addr.TransmitManager,
+      {
+        ...overrides(await socketSigner.getChainId()),
+      }
+    );
+
+    if (isKinto()) {
+      tx = await handleOps([txRequest], socket.signer);
+    } else {
+      tx = await (await socket.signer.sendTransaction(txRequest)).wait();
+    }
+
+    console.log("updateTransmitManager", tx.transactionHash);
   }
 };
 
@@ -150,13 +168,23 @@ export const configureExecutionManager = async (
       await getInstance("SocketBatcher", socketBatcherAddress)
     ).connect(socketSigner);
 
-    let tx = await socketBatcherContract.setExecutionFeesBatch(
-      emAddress,
-      requests,
-      { ...overrides(chain) }
-    );
-    console.log("configured EM for ", chain, tx.hash);
-    await tx.wait();
+    let tx: any;
+    const txRequest =
+      await socketBatcherContract.populateTransaction.setExecutionFeesBatch(
+        emAddress,
+        requests,
+        { ...overrides(chain) }
+      );
+
+    if (isKinto()) {
+      tx = await handleOps([txRequest], socketBatcherContract.signer);
+    } else {
+      tx = await (
+        await socketBatcherContract.signer.sendTransaction(txRequest)
+      ).wait();
+    }
+
+    console.log("configured EM for ", chain, tx.transactionHash);
   } catch (error) {
     console.log("error while configuring execution manager: ", error);
   }
@@ -210,13 +238,25 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
               `Setting ${dstSwitchboardAddress} fx child tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
             );
 
-            const tx = await sbContract
-              .connect(socketSigner)
-              .setFxChildTunnel(dstSwitchboardAddress, {
-                ...overrides(await socketSigner.getChainId()),
-              });
-            console.log(srcChain, tx.hash);
-            await tx.wait();
+            let tx;
+            const contract = await sbContract.connect(socketSigner);
+            const txRequest =
+              await contract.populateTransaction.setFxChildTunnel(
+                dstSwitchboardAddress,
+                {
+                  ...overrides(await socketSigner.getChainId()),
+                }
+              );
+
+            if (isKinto()) {
+              tx = await handleOps([txRequest], contract.signer);
+            } else {
+              tx = await (
+                await contract.signer.sendTransaction(txRequest)
+              ).wait();
+            }
+
+            console.log(srcChain, tx.transactionHash);
           } else if (srcSwitchboardType === NativeSwitchboard.POLYGON_L2) {
             const sbContract = (
               await getInstance("PolygonL2Switchboard", srcSwitchboardAddress)
@@ -228,13 +268,24 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
               `Setting ${dstSwitchboardAddress} fx root tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
             );
 
-            const tx = await sbContract
-              .connect(socketSigner)
-              .setFxRootTunnel(dstSwitchboardAddress, {
-                ...overrides(await socketSigner.getChainId()),
-              });
-            console.log(srcChain, tx.hash);
-            await tx.wait();
+            let tx;
+            const contract = await sbContract.connect(socketSigner);
+            const txRequest =
+              await contract.populateTransaction.setFxRootTunnel(
+                dstSwitchboardAddress,
+                {
+                  ...overrides(await socketSigner.getChainId()),
+                }
+              );
+
+            if (isKinto()) {
+              tx = await handleOps([txRequest], contract.signer);
+            } else {
+              tx = await (
+                await contract.signer.sendTransaction(txRequest)
+              ).wait();
+            }
+            console.log(srcChain, tx.transactionHash);
           } else continue;
         }
 

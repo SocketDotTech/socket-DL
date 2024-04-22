@@ -16,11 +16,12 @@ import {
   getAddresses,
 } from "../../../src";
 import { getRoleHash, getChainRoleHash, getInstance } from "../utils";
-import { Wallet, ethers } from "ethers";
+import { PopulatedTransaction, Wallet, ethers } from "ethers";
 import { getProviderFromChainSlug } from "../../constants";
 import { filterChains, mode } from "../config";
 import { overrides } from "../config";
 import AccessControlExtendedABI from "@socket.tech/dl-core/artifacts/abi/AccessControlExtended.json";
+import { handleOps, isKinto } from "../utils/kinto/kinto";
 
 let roleStatus: any = {};
 
@@ -142,20 +143,38 @@ const executeRoleTransactions = async (
     } else {
       data = getRoleTxnData(roles, slugs, addresses, "REVOKE");
     }
-    let tx = await wallet.sendTransaction({
+
+    let tx: any;
+    let txRequest = {
       to: contractAddress,
       data,
       ...overrides(chainSlug),
-    });
+    } as PopulatedTransaction;
+    if (isKinto()) {
+      const contract = await getInstance("ExecutionManager", contractAddress);
+      const owner = await (await contract.connect(wallet)).owner();
+
+      let accessControlInterface = new ethers.utils.Interface(
+        AccessControlExtendedABI
+      );
+      txRequest.data = accessControlInterface.encodeFunctionData(
+        "grantBatchRole",
+        [roles, slugs, addresses]
+      );
+
+      tx = await handleOps([txRequest], wallet);
+    } else {
+      tx = await (await wallet.sendTransaction(txRequest)).wait();
+    }
+
     console.log(
       `chain: ${chainSlug}`,
       " contract:",
       contractAddress,
       { newRoleStatus },
       "hash: ",
-      tx.hash
+      tx.transactionHash
     );
-    await tx.wait();
   }
 };
 
@@ -168,11 +187,18 @@ const executeOtherTransactions = async (
   let txnDatas = otherTxns[chainSlug as any as keyof typeof otherTxns]!;
   for (let i = 0; i < txnDatas.length; i++) {
     let { to, data } = txnDatas[i];
-    let tx = await wallet.sendTransaction({
+
+    let tx: any;
+    const txRequest = {
       to,
       data,
       ...overrides(chainSlug),
-    });
+    } as PopulatedTransaction;
+    if (isKinto()) {
+      tx = await handleOps([txRequest], wallet);
+    } else {
+      tx = await (await wallet.sendTransaction(txRequest)).wait();
+    }
     console.log(`to: ${to}, txHash: ${tx?.hash}`);
     await tx.wait();
     console.log(`txHash: ${tx?.hash} COMPLETE`);

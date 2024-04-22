@@ -17,6 +17,7 @@ import { chains, mode } from "./config";
 import { Contract, Wallet } from "ethers";
 import { getSwitchboardAddress } from "../../src";
 import { overrides } from "./config";
+import { handleOps, isKinto } from "./utils/kinto/kinto";
 
 export const main = async () => {
   try {
@@ -86,17 +87,23 @@ export const main = async () => {
             continue;
           }
 
-          const tx = await counter.setSocketConfig(
+          let tx;
+          const txRequest = await counter.populateTransaction.setSocketConfig(
             sibling,
             siblingCounter,
             switchboard,
             { ...overrides(chain) }
           );
 
+          if (isKinto()) {
+            tx = await handleOps([txRequest], counter.signer);
+          } else {
+            tx = await (await counter.signer.sendTransaction(txRequest)).wait();
+          }
+
           console.log(
-            `Connecting counter of ${chain} for ${sibling} and ${siblingIntegrationtype[index]} at tx hash: ${tx.hash}`
+            `Connecting counter of ${chain} for ${sibling} and ${siblingIntegrationtype[index]} at tx hash: ${tx.transactionHash}`
           );
-          await tx.wait();
         }
       })
     );
