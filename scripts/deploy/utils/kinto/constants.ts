@@ -8,8 +8,6 @@ export const KINTO_DATA = {
       ],
     },
     kintoWallet: {
-      // address: "0x2e2B1c42E38f5af81771e65D87729E57ABD1337a", // Socket's kinto wallet
-      address: "0x41d63E71941Cd489d7BbE297d79A6B0827544F7A",
       abi: [
         "function getNonce() view returns (uint256)",
         "function whitelistApp(address[] calldata apps, bool[] calldata flags)",

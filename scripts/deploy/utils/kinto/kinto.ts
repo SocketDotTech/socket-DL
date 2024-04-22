@@ -105,7 +105,7 @@ const deployWithDeployer = async (
   const chainId = await signer.getChainId();
   const { contracts: kinto, gasParams } = KINTO_DATA;
   const kintoWallet = new ethers.Contract(
-    kinto.kintoWallet.address,
+    process.env.SOCKET_OWNER_ADDRESS,
     kinto.kintoWallet.abi,
     signer
   );
@@ -300,7 +300,7 @@ const handleOps = async (
     signer
   );
   const kintoWallet = new ethers.Contract(
-    kinto.kintoWallet.address,
+    process.env.SOCKET_OWNER_ADDRESS,
     kinto.kintoWallet.abi,
     signer
   );
@@ -354,7 +354,7 @@ const whitelistApp = async (
 ): Promise<TransactionReceipt> => {
   const { contracts: kinto, gasParams } = KINTO_DATA;
   const kintoWallet = new ethers.Contract(
-    kinto.kintoWallet.address,
+    process.env.SOCKET_OWNER_ADDRESS,
     kinto.kintoWallet.abi,
     signer
   );
