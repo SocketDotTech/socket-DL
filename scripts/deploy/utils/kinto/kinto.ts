@@ -280,12 +280,8 @@ const deployWithKintoFactory = async (
 
 // other utils
 
-const isKinto = async (): Promise<boolean> => {
-  return (
-    (await getChainSlug()) === ChainId.KINTO ||
-    (await getChainSlug()) === ChainId.KINTO
-  ); // 7886 -> KINTO (TODO: remove devnet)
-};
+const isKinto = async (): Promise<boolean> =>
+  (await getChainSlug()) === ChainId.KINTO;
 
 const handleOps = async (
   userOps: PopulatedTransaction[] | UserOperation[],

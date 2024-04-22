@@ -34,7 +34,6 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.ARBITRUM_SEPOLIA,
   ChainSlug.OPTIMISM_SEPOLIA,
   ChainSlug.KINTO,
-  ChainSlug.KINTO_DEVNET,
   // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
   // ChainSlug.SX_NETWORK,
@@ -271,12 +270,6 @@ export const overrides = (
       gasPrice,
     };
   } else if (chain == ChainSlug.KINTO) {
-    return {
-      type,
-      gasLimit: 4_000_000,
-      gasPrice,
-    };
-  } else if (chain == ChainSlug.KINTO_DEVNET) {
     return {
       type,
       gasLimit: 4_000_000,
