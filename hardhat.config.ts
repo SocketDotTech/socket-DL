@@ -26,7 +26,7 @@ const isProduction = process.env.NODE_ENV === "production";
 
 // Ensure that we have all the environment variables we need.
 // TODO: fix it for setup scripts
-// if (!process.env.SOCKET_SIGNER_KEY) throw new Error("No private key found");
+if (!process.env.SOCKET_SIGNER_KEY) throw new Error("No private key found");
 const privateKey: HardhatNetworkAccountUserConfig = process.env
   .SOCKET_SIGNER_KEY as unknown as HardhatNetworkAccountUserConfig;
 
@@ -97,6 +97,10 @@ if (isProduction) {
     [HardhatChainName.POLYNOMIAL_TESTNET]: getChainConfig(
       ChainId.POLYNOMIAL_TESTNET
     ),
+    [HardhatChainName.KINTO]: getChainConfig(
+      ChainId.KINTO
+    ),
+    [HardhatChainName.KINTO_DEVNET]: getChainConfig(ChainId.KINTO_DEVNET),
   };
 }
 
@@ -137,6 +141,8 @@ const config: HardhatUserConfig = {
       mantle: process.env.MANTLE_API_KEY || "",
       reya: process.env.REYA_API_KEY || "",
       syndrSepoliaL3: process.env.SYNDR_API_KEY || "",
+      kinto: process.env.KINTO_API_KEY || "",
+      kinto_devnet: process.env.KINTO_API_KEY || "",
     },
     customChains: [
       {
@@ -161,6 +167,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.basescan.org/api",
           browserURL: "https://basescan.org/",
+        },
+      },
+      {
+        network: "kinto_devnet",
+        chainId: ChainId.KINTO_DEVNET,
+        urls: {
+          apiURL: "https://kinto-erc20-dev.explorer.caldera.xyz/api",
+          browserURL: "https://kinto-erc20-dev.explorer.caldera.xyz",
+        },
+      },
+      {
+        network: "kinto",
+        chainId: ChainId.KINTO,
+        urls: {
+          apiURL: "https://explorer.kinto.xyz/api",
+          browserURL: "https://explorer.kinto.xyz",
         },
       },
     ],

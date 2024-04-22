@@ -106,6 +106,7 @@ export interface ChainSocketAddresses {
   SocketSimulator?: string;
   SimulatorUtils?: string;
   SwitchboardSimulator?: string;
+  KintoDeployer?: string;
 }
 
 export type DeploymentAddresses = {
@@ -137,6 +138,10 @@ export enum CORE_CONTRACTS {
   FastSwitchboard2 = "FastSwitchboard2",
   OptimisticSwitchboard = "OptimisticSwitchboard",
   NativeSwitchboard = "NativeSwitchboard",
+}
+
+export enum INTEGRATION_CONTRACTS {
+  KintoDeployer = "KintoDeployer",
 }
 
 export const REQUIRED_ROLES = {

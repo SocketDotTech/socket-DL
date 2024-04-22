@@ -9,8 +9,8 @@ export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
   | DeploymentMode.DEV;
 
-// if (!process.env.SOCKET_OWNER_ADDRESS)
-//   throw Error("Socket owner address not present");
+if (!process.env.SOCKET_OWNER_ADDRESS)
+  throw Error("Socket owner address not present");
 export const socketOwner = process.env.SOCKET_OWNER_ADDRESS;
 
 console.log(
@@ -33,6 +33,8 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.GOERLI,
   ChainSlug.ARBITRUM_SEPOLIA,
   ChainSlug.OPTIMISM_SEPOLIA,
+  ChainSlug.KINTO,
+  ChainSlug.KINTO_DEVNET,
   // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
   // ChainSlug.SX_NETWORK,
@@ -263,6 +265,18 @@ export const overrides = (
       gasPrice: 0,
     };
   } else if (chain == ChainSlug.POLYNOMIAL_TESTNET) {
+    return {
+      type,
+      gasLimit: 4_000_000,
+      gasPrice,
+    };
+  } else if (chain == ChainSlug.KINTO) {
+    return {
+      type,
+      gasLimit: 4_000_000,
+      gasPrice,
+    };
+  } else if (chain == ChainSlug.KINTO_DEVNET) {
     return {
       type,
       gasLimit: 4_000_000,
