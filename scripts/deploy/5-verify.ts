@@ -1,9 +1,16 @@
 import hre from "hardhat";
 import fs from "fs";
+import readlineSync from "readline-sync";
 
 import { deploymentsPath, verify } from "./utils/utils";
 import { mode } from "./config";
-import { HardhatChainName, ChainSlugToKey, ChainSlug } from "../../src";
+import {
+  HardhatChainName,
+  ChainSlugToKey,
+  ChainSlug,
+  ChainSlugToId,
+  hardhatChainNameToSlug,
+} from "../../src";
 
 export type VerifyParams = {
   [chain in HardhatChainName]?: VerifyArgs[];
@@ -24,13 +31,30 @@ export const main = async () => {
     );
 
     const chains = Object.keys(verificationParams);
-    if (!chains) return;
+    const configChains = Object.keys(hre.config.networks).filter(
+      (item) => !["localhost", "hardhat"].includes(item)
+    );
 
-    for (let chainIndex = 0; chainIndex < chains.length; chainIndex++) {
-      const chain = parseInt(chains[chainIndex]) as ChainSlug;
+    if (chains.length !== configChains.length) {
+      console.log(
+        "Networks in hardhat.config.ts and verification.json do not match."
+      );
+      console.log(
+        `Verification will proceed only for chains in hardhat.config.ts: [${configChains}]. Do you want to proceed?`
+      );
+      const answer = readlineSync.question("Enter y/n: ");
+      if (answer !== "y") return;
+    }
 
-      hre.changeNetwork(ChainSlugToKey[chain]);
-      const chainParams: VerifyArgs[] = verificationParams[chain];
+    if (!configChains) return;
+
+    for (let chainIndex = 0; chainIndex < configChains.length; chainIndex++) {
+      const chainName = configChains[chainIndex];
+      const chainId = hardhatChainNameToSlug[chainName];
+
+      console.log(`Verifying contracts for ${chainName}`);
+      hre.changeNetwork(chainName);
+      const chainParams: VerifyArgs[] = verificationParams[chainId];
       if (chainParams.length) {
         const len = chainParams.length;
         for (let index = 0; index < len!; index++)

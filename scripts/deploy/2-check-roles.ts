@@ -20,9 +20,9 @@ const sleepTime = 3000;
 
 const main = async () => {
   let ownerAddress = socketOwner;
-  let executorAddress = executorAddresses[mode];
-  let transmitterAddress = transmitterAddresses[mode];
-  let watcherAddress = watcherAddresses[mode];
+  let executorAddress = executorAddresses[mode]; // TODO: should probably be socketOwner on Kinto?
+  let transmitterAddress = transmitterAddresses[mode]; // TODO: should probably be socketOwner on Kinto?
+  let watcherAddress = watcherAddresses[mode]; // TODO: should probably be socketOwner on Kinto?
 
   let summary: { params: any; roleStatus: any }[] = [];
   let s;

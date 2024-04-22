@@ -70,8 +70,6 @@ yarn test
 
 Deployments use [Hardhat](https://github.com/NomicFoundation/hardhat)
 
-Testnet deployments:
-
 ```bash=
 bash deploy.sh
 ```
