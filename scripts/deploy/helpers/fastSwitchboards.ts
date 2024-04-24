@@ -1,19 +1,9 @@
 import { utils } from "ethers";
 import { ethers } from "hardhat";
 
-
-import {
-  DeploymentAddresses,
-  getAllAddresses,
-  ChainSlug,
-} from "../../../src";
-import {
-  mode,
-  chains,
-} from "../config/config";
-import {
-  getProviderFromChainSlug,
-} from "../../constants";
+import { DeploymentAddresses, getAllAddresses, ChainSlug } from "../../../src";
+import { mode, chains } from "../config/config";
+import { getProviderFromChainSlug } from "../../constants";
 
 const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
   try {

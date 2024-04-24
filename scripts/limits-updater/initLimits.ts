@@ -8,7 +8,7 @@ import {
   ChainSlug,
 } from "../../src";
 import { getAddresses } from "../deploy/utils";
-import { mode } from "../deploy/config";
+import { mode } from "../deploy/config/config";
 
 export const setLimitsForAChainSlug = async (chainSlugCode: ChainSlug) => {
   try {
