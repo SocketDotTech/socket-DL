@@ -75,7 +75,6 @@ const deployOnKinto = async (
 
   // whitelist contract on Socket's kinto wallet
   await whitelistApp(contractAddr, signer);
-
   return (await ethers.getContractFactory(contractName)).attach(contractAddr);
 };
 
@@ -379,13 +378,6 @@ const whitelistApp = async (
   const tx = await handleOps([txRequest], signer);
   console.log(`- Contract succesfully whitelisted on Kinto Wallet`);
   return tx;
-
-  // const whitelistAppCalldata = kintoWalletInterface.encodeFunctionData("whitelistApp", [[contractAddr], [true]]);
-
-  // // encode the KintoWallet `execute` call
-  // nonce = nonce.add(1);
-  // executeCalldata = kintoWalletInterface.encodeFunctionData("execute", [kintoWallet.address, 0, whitelistAppCalldata]);
-  // userOps[1] = await createUserOp(chainId, kintoWallet.address, entryPoint.address, paymaster.address, nonce, executeCalldata, gasParams );
 };
 
 // extract argument types from constructor
