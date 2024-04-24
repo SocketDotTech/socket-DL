@@ -19,7 +19,7 @@ import {
   executionManagerVersion,
   overrides,
   msgValueMaxThreshold,
-} from "../config";
+} from "../config/config";
 
 export const registerSwitchboards = async (
   chain: ChainSlug,

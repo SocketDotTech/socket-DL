@@ -1,8 +1,8 @@
 import {
   getDefaultIntegrationType,
   getProviderFromChainSlug,
-} from "../constants";
-import { getInstance } from "./utils";
+} from "../../constants";
+import { getInstance } from "../utils";
 import {
   ChainSlug,
   ChainSocketAddresses,
@@ -10,18 +10,17 @@ import {
   IntegrationTypes,
   MainnetIds,
   TestnetIds,
-  getAllAddresses,
   isTestnet,
-} from "../../src";
-import { chains, mode } from "./config";
+} from "../../../src";
 import { Contract, Wallet } from "ethers";
-import { getSwitchboardAddress } from "../../src";
-import { overrides } from "./config";
+import { getSwitchboardAddressFromAllAddresses } from "../../../src";
+import { overrides } from "../config/config";
 
-export const main = async () => {
+export const connectPlugs = async (
+  addresses: DeploymentAddresses,
+  chains: ChainSlug[]
+) => {
   try {
-    let addresses: DeploymentAddresses = getAllAddresses(mode);
-
     await Promise.all(
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
@@ -64,11 +63,11 @@ export const main = async () => {
           const siblingCounter = addresses?.[sibling]?.["Counter"];
           let switchboard;
           try {
-            switchboard = getSwitchboardAddress(
+            switchboard = getSwitchboardAddressFromAllAddresses(
+              addresses,
               chain,
               sibling,
-              siblingIntegrationtype[index],
-              mode
+              siblingIntegrationtype[index]
             );
           } catch (error) {
             console.log(error, " continuing");
@@ -104,10 +103,3 @@ export const main = async () => {
     console.log("Error while sending transaction", error);
   }
 };
-
-main()
-  .then(() => process.exit(0))
-  .catch((error: Error) => {
-    console.error(error);
-    process.exit(1);
-  });

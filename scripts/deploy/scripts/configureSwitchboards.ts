@@ -1,12 +1,7 @@
-import fs from "fs";
 import { Wallet } from "ethers";
 
-import { getProviderFromChainSlug } from "../constants";
-import {
-  deployedAddressPath,
-  getSwitchboardAddress,
-  storeAllAddresses,
-} from "./utils";
+import { getProviderFromChainSlug } from "../../constants";
+import { storeAllAddresses } from "../utils";
 import {
   CORE_CONTRACTS,
   ChainSlug,
@@ -15,32 +10,28 @@ import {
   IntegrationTypes,
   MainnetIds,
   TestnetIds,
+  getSwitchboardAddressFromAllAddresses,
   isTestnet,
-} from "../../src";
-import registerSwitchboardForSibling from "./scripts/registerSwitchboard";
+} from "../../../src";
+import registerSwitchboardForSibling from "./registerSwitchboard";
 import {
   capacitorType,
-  chains,
   maxPacketLength,
   mode,
   executionManagerVersion,
-} from "./config";
+} from "../config/config";
 import {
   configureExecutionManager,
   registerSwitchboards,
   setManagers,
   setupPolygonNativeSwitchboard,
-} from "./scripts/configureSocket";
+} from "./configureSocket";
 
-export const main = async () => {
+export const configureSwitchboards = async (
+  addresses: DeploymentAddresses,
+  chains: ChainSlug[]
+) => {
   try {
-    if (!fs.existsSync(deployedAddressPath(mode))) {
-      throw new Error("addresses.json not found");
-    }
-    let addresses: DeploymentAddresses = JSON.parse(
-      fs.readFileSync(deployedAddressPath(mode), "utf-8")
-    );
-
     await Promise.all(
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
@@ -82,10 +73,11 @@ export const main = async () => {
           const config = integrations[sibling][IntegrationTypes.native];
           if (!config) continue;
 
-          const siblingSwitchboard = getSwitchboardAddress(
+          const siblingSwitchboard = getSwitchboardAddressFromAllAddresses(
+            addresses,
             chain,
-            IntegrationTypes.native,
-            addresses?.[sibling]
+            parseInt(sibling) as ChainSlug,
+            IntegrationTypes.native
           );
 
           if (!siblingSwitchboard) continue;
@@ -133,11 +125,6 @@ export const main = async () => {
   } catch (error) {
     console.log("Error while sending transaction", error);
   }
-};
 
-main()
-  .then(() => process.exit(0))
-  .catch((error: Error) => {
-    console.error(error);
-    process.exit(1);
-  });
+  return addresses;
+};

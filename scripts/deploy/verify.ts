@@ -2,7 +2,7 @@ import hre from "hardhat";
 import fs from "fs";
 
 import { deploymentsPath, verify } from "./utils/utils";
-import { mode } from "./config";
+import { mode } from "./config/config";
 import { HardhatChainName, ChainSlugToKey, ChainSlug } from "../../src";
 
 export type VerifyParams = {

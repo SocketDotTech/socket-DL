@@ -12,7 +12,7 @@ import {
   DeploymentMode,
 } from "../../../src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { overrides } from "../config";
+import { overrides } from "../config/config";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
@@ -118,9 +118,6 @@ export const verify = async (
 
   return false;
 };
-
-export const sleep = (delay: number) =>
-  new Promise((resolve) => setTimeout(resolve, delay * 1000));
 
 export const getInstance = async (
   contractName: string,

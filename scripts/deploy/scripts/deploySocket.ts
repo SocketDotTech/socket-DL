@@ -1,10 +1,5 @@
 import { Contract, Wallet, constants } from "ethers";
-import {
-  DeployParams,
-  getInstance,
-  getOrDeploy,
-  storeAddresses,
-} from "../utils";
+import { DeployParams, getInstance, getOrDeploy } from "../utils";
 
 import {
   CORE_CONTRACTS,
@@ -14,7 +9,11 @@ import {
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { socketOwner, executionManagerVersion, overrides } from "../config";
+import {
+  socketOwner,
+  executionManagerVersion,
+  overrides,
+} from "../config/config";
 import { maxAllowedPacketLength } from "../../constants";
 
 let allDeployed = false;
@@ -197,11 +196,6 @@ export const deploySocket = async (
     console.log("Error in deploying setup contracts", error);
   }
 
-  await storeAddresses(
-    deployUtils.addresses,
-    deployUtils.currentChainSlug,
-    deployUtils.mode
-  );
   return {
     allDeployed,
     deployedAddresses: deployUtils.addresses,
