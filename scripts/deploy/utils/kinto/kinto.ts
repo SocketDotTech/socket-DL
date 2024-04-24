@@ -29,7 +29,6 @@ import { randomBytes } from "crypto";
 
 // gas estimation helpers
 const COST_OF_POST = parseUnits("200000", "wei");
-const MAX_FEE_PER_GAS = parseUnits("1", "gwei");
 
 type UserOperation = {
   sender: Address;
@@ -156,11 +155,12 @@ const deployWithDeployer = async (
 
   let nonce: BigNumber = await kintoWallet.getNonce();
   const userOps = [];
+  const paymasterAddr = "0x"; // if using paymaster replace with `paymaster.address`
   userOps[0] = await createUserOp(
     chainId,
     kintoWallet.address,
     entryPoint.address,
-    paymaster.address,
+    paymasterAddr,
     nonce,
     executeCalldata,
     gasParams
@@ -228,9 +228,20 @@ const deployWithDeployer = async (
   }
 
   // gas check
-  // const requiredPrefund = calculateRequiredPrefund(callGasLimit, verificationGasLimit, preVerificationGas);
-  // const ethMaxCost = calculateEthMaxCost(requiredPrefund);
-  // const paymasterBalance = await paymaster.balances(deployer);
+  const feeData = await signer.provider.getFeeData();
+  const maxFeePerGas = feeData.maxFeePerGas.toNumber();
+  const requiredPrefund = calculateRequiredPrefund(gasParams, maxFeePerGas);
+  const ethMaxCost =
+    calculateEthMaxCost(signer, requiredPrefund) * userOps.length;
+
+  // get balance of kinto wallet
+  const kintoWalletBalance = await signer.provider.getBalance(
+    kintoWallet.address
+  );
+  if (kintoWalletBalance.lt(ethMaxCost))
+    throw new Error(
+      `Kinto Wallet balance ${kintoWalletBalance} is less than the required ETH max cost ${ethMaxCost.toString()}`
+    );
   // if (paymasterBalance.lt(ethMaxCost)) throw new Error(`Paymaster balance ${paymasterBalance} is less than the required ETH max cost ${ethMaxCost.toString()}`);
 
   // submit user operation to the EntryPoint
@@ -337,13 +348,17 @@ const handleOps = async (
     userOps = ops;
   }
 
+  const handleOpsEstimate = await estimateGas(signer, entryPoint, userOps);
+  const txCost = handleOpsEstimate.gasLimit.mul(handleOpsEstimate.maxFeePerGas);
+  console.log("Estimated gas cost (ETH):", ethers.utils.formatEther(txCost));
+
   const txResponse: TransactionResponse = await entryPoint.handleOps(
     userOps,
     await signer.getAddress(),
     {
-      maxPriorityFeePerGas: parseUnits("1", "gwei"),
-      maxFeePerGas: parseUnits("1", "gwei"),
-      gasLimit: "400000000",
+      gasLimit: handleOpsEstimate.gasLimit,
+      maxFeePerGas: handleOpsEstimate.maxFeePerGas,
+      maxPriorityFeePerGas: handleOpsEstimate.maxPriorityFeePerGas,
     }
   );
   const receipt: TransactionReceipt = await txResponse.wait();
@@ -358,7 +373,7 @@ const whitelistApp = async (
   app: Address,
   signer: SignerWithAddress | Wallet
 ): Promise<TransactionReceipt> => {
-  const { contracts: kinto, gasParams } = KINTO_DATA;
+  const { contracts: kinto } = KINTO_DATA;
   const kintoWallet = new ethers.Contract(
     process.env.SOCKET_OWNER_ADDRESS,
     kinto.kintoWallet.abi,
@@ -370,8 +385,6 @@ const whitelistApp = async (
     [true],
     {
       gasLimit: 4_000_000,
-      // type,
-      // gasPrice,
     }
   );
 
@@ -464,8 +477,7 @@ const createUserOp = async (
     preVerificationGas,
     maxFeePerGas: parseUnits("1", "gwei"),
     maxPriorityFeePerGas: parseUnits("1", "gwei"),
-    paymasterAndData: "0x",
-    // paymasterAndData: paymaster,
+    paymasterAndData: paymaster,
     signature: hexlify([]),
   };
 
@@ -499,21 +511,36 @@ const hasErrors = (tx: TransactionReceipt): boolean => {
 };
 
 const calculateRequiredPrefund = (
-  callGasLimit,
-  verificationGasLimit,
-  preVerificationGas
+  gasParams,
+  maxFeePerGas,
+  multiplier = 1 // 2 if paymaster is used
 ) => {
-  const multiplier = 2; // assume paymaster is used
+  const { callGasLimit, verificationGasLimit, preVerificationGas } = gasParams;
   const requiredGas =
     callGasLimit + verificationGasLimit * multiplier + preVerificationGas;
-  const requiredPrefund = requiredGas * MAX_FEE_PER_GAS.toNumber();
+  const requiredPrefund = requiredGas * maxFeePerGas;
   return requiredPrefund;
 };
 
-const calculateEthMaxCost = (requiredPrefund) => {
-  const ethMaxCost =
-    requiredPrefund + COST_OF_POST.toNumber() * MAX_FEE_PER_GAS.toNumber();
+const calculateEthMaxCost = (requiredPrefund, maxFeePerGas) => {
+  const ethMaxCost = requiredPrefund + COST_OF_POST.toNumber() * maxFeePerGas;
   return ethMaxCost;
+};
+
+const estimateGas = async (signer, entryPoint, userOps) => {
+  const feeData = await signer.provider.getFeeData();
+  const gasLimit = await entryPoint.estimateGas.handleOps(
+    userOps,
+    await signer.getAddress()
+  );
+  const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toNumber();
+  const maxFeePerGas = feeData.maxFeePerGas.toNumber();
+  const gasParams = {
+    maxPriorityFeePerGas,
+    maxFeePerGas,
+    gasLimit,
+  };
+  return gasParams;
 };
 
 const getInstance = async (
