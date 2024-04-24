@@ -229,16 +229,17 @@ const deployWithDeployer = async (
 
   // gas check
   const feeData = await signer.provider.getFeeData();
-  const maxFeePerGas = feeData.maxFeePerGas.toNumber();
+  const maxFeePerGas = feeData.maxFeePerGas;
   const requiredPrefund = calculateRequiredPrefund(gasParams, maxFeePerGas);
-  const ethMaxCost =
-    calculateEthMaxCost(requiredPrefund, maxFeePerGas) * userOps.length;
+  const ethMaxCost = calculateEthMaxCost(requiredPrefund, maxFeePerGas).mul(
+    userOps.length
+  );
 
   // get balance of kinto wallet
-  const kintoWalletBalance = (
-    await signer.provider.getBalance(kintoWallet.address)
-  ).toNumber();
-  if (kintoWalletBalance < ethMaxCost)
+  const kintoWalletBalance = await signer.provider.getBalance(
+    kintoWallet.address
+  );
+  if (kintoWalletBalance.lt(ethMaxCost))
     throw new Error(
       `Kinto Wallet balance ${kintoWalletBalance} is less than the required ETH max cost ${ethMaxCost.toString()}`
     );
@@ -512,20 +513,20 @@ const hasErrors = (tx: TransactionReceipt): boolean => {
 
 const calculateRequiredPrefund = (
   gasParams,
-  maxFeePerGas,
+  maxFeePerGas: BigNumber,
   multiplier = 1 // 2 if paymaster is used
-) => {
+): BigNumber => {
   const { callGasLimit, verificationGasLimit, preVerificationGas } = gasParams;
   const requiredGas =
     callGasLimit + verificationGasLimit * multiplier + preVerificationGas;
-  const requiredPrefund = requiredGas * maxFeePerGas;
+  const requiredPrefund = BigNumber.from(requiredGas).mul(maxFeePerGas);
   return requiredPrefund;
 };
 
-const calculateEthMaxCost = (requiredPrefund, maxFeePerGas) => {
-  const ethMaxCost = requiredPrefund + COST_OF_POST.toNumber() * maxFeePerGas;
-  return ethMaxCost;
-};
+const calculateEthMaxCost = (
+  requiredPrefund: BigNumber,
+  maxFeePerGas: BigNumber
+): BigNumber => requiredPrefund.add(COST_OF_POST).mul(maxFeePerGas);
 
 const estimateGas = async (signer, entryPoint, userOps) => {
   const feeData = await signer.provider.getFeeData();
