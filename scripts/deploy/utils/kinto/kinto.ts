@@ -232,7 +232,7 @@ const deployWithDeployer = async (
   const maxFeePerGas = feeData.maxFeePerGas.toNumber();
   const requiredPrefund = calculateRequiredPrefund(gasParams, maxFeePerGas);
   const ethMaxCost =
-    calculateEthMaxCost(signer, requiredPrefund) * userOps.length;
+    calculateEthMaxCost(requiredPrefund, maxFeePerGas) * userOps.length;
 
   // get balance of kinto wallet
   const kintoWalletBalance = await signer.provider.getBalance(
