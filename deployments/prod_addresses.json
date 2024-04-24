@@ -1582,6 +1582,23 @@
       }
     }
   },
+  "7887": {
+    "SignatureVerifier": "0x64eb210Ac59Bb168C4e3Ec608f2aD14648E6183F",
+    "Hasher": "0xFa982005a3401eC026705Ab59B05e3e5946Dd874",
+    "CapacitorFactory": "0x0087c250BC22298fc28BCcb4cc2Fc4f1Aa5A6110",
+    "Socket": "0x0ce869904707568f4a5880Ce8C65244685835b67",
+    "ExecutionManager": "0x8951cBf976F089AA95d2f5F6Ab1F986c3D8b71e4",
+    "TransmitManager": "0x3311aC8F93f7cA5669c67562AC7d74F345f49209",
+    "FastSwitchboard": "0x331561c7D99e508425af6191Ae4908f6134ceF6F",
+    "OptimisticSwitchboard": "0x6A1473748E05cA1b1F06795a39A44f2e8079b98B",
+    "SocketBatcher": "0xf7D4d31384A53C5Dfc55F189bF58574B3C98De38",
+    "Counter": "0x001696fE3A15012829B7A73fe52387c21eda2a22",
+    "SocketSimulator": "0x0b758Dc79Be4C104009ACc99837169c185dfD10B",
+    "SimulatorUtils": "0x41855BcD7065D86a3cc5D7915b307C16019B4da3",
+    "SwitchboardSimulator": "0x870d98Fdfc75d535eB4b6bf1A4E2f55c350285f2",
+    "CapacitorSimulator": "0x5469697F9572f75a4bBC62fAa4A4cB22Ee981DC1",
+    "startBlock": 128429
+  },
   "8453": {
     "SignatureVerifier": "0xA7f7e4fE8E4cdDCD9969Bd3fbcFF67000CD7DE47",
     "Hasher": "0xAC313d7491910516E06FBfC2A0b5BB49bb072D91",
