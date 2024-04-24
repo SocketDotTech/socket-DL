@@ -235,10 +235,10 @@ const deployWithDeployer = async (
     calculateEthMaxCost(requiredPrefund, maxFeePerGas) * userOps.length;
 
   // get balance of kinto wallet
-  const kintoWalletBalance = await signer.provider.getBalance(
-    kintoWallet.address
-  );
-  if (kintoWalletBalance.lt(ethMaxCost))
+  const kintoWalletBalance = (
+    await signer.provider.getBalance(kintoWallet.address)
+  ).toNumber();
+  if (kintoWalletBalance < ethMaxCost)
     throw new Error(
       `Kinto Wallet balance ${kintoWalletBalance} is less than the required ETH max cost ${ethMaxCost.toString()}`
     );
