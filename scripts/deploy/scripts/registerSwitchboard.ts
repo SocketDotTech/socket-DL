@@ -45,7 +45,7 @@ export default async function registerSwitchboardForSibling(
           }
         );
 
-      if (isKinto()) {
+      if (isKinto(await signer.getChainId())) {
         registerTx = await handleOps([txRequest], switchboard.signer);
       } else {
         registerTx = await (

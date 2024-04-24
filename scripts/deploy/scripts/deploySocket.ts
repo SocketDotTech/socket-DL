@@ -11,7 +11,6 @@ import {
   CORE_CONTRACTS,
   ChainSocketAddresses,
   DeploymentMode,
-  INTEGRATION_CONTRACTS,
   version,
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
@@ -45,18 +44,6 @@ export const deploySocket = async (
   };
 
   try {
-    // if chain is Kinto, deploy KintoDeployer
-    if (isKinto()) {
-      const KintoDeployer: Contract = await getOrDeploy(
-        "KintoDeployer",
-        "contracts/utils/KintoDeployer.sol",
-        [],
-        deployUtils
-      );
-      deployUtils.addresses[INTEGRATION_CONTRACTS.KintoDeployer] =
-        KintoDeployer.address;
-    }
-
     const signatureVerifier: Contract = await getOrDeploy(
       CORE_CONTRACTS.SignatureVerifier,
       "contracts/utils/SignatureVerifier.sol",
@@ -198,7 +185,7 @@ export const deploySocket = async (
           ...overrides(chainSlug),
         }
       );
-      if (isKinto()) {
+      if (isKinto(chainSlug)) {
         tx = await handleOps([txRequest], simulatorContract.signer);
       } else {
         tx = await (

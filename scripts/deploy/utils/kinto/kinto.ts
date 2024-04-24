@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { ethers } from "hardhat";
 import {
   Wallet,
@@ -22,10 +24,7 @@ import {
 import { Address } from "hardhat-deploy/dist/types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { signUserOp } from "./signature";
-import { KINTO_DATA } from "./constants";
-import { getChainSlug, getInstance } from "../utils";
-import { mode, overrides } from "../../config";
-import { ChainId, getAllAddresses } from "../../../../src";
+import { KINTO_DATA } from "./constants.json";
 import { randomBytes } from "crypto";
 
 // gas estimation helpers
@@ -53,57 +52,61 @@ const deployOnKinto = async (
   args: Array<string>,
   signer: SignerWithAddress | Wallet
 ): Promise<Contract> => {
+  let contractAddr: Address;
   const argTypes = await extractArgTypes(contractName);
 
-  let contractAddr: Address;
-  // if the contract is `KintoDeployer`, we need to deploy it via factory
-  if (contractName.includes("KintoDeployer")) {
-    contractAddr = await deployWithKintoFactory(
+  // if the contract inherits from Socket's custom 2-step Ownable contract, we deploy it via KintoDeployer
+  if (await isOwnable(contractName)) {
+    contractAddr = await deployWithDeployer(
       contractName,
       argTypes,
       args,
       signer
     );
   } else {
-    const addresses = getAllAddresses(mode)[await getChainSlug()];
-    if (!addresses.KintoDeployer)
-      throw new Error("KintoDeployer is not deployed"); // make sure KintoDeployer is deployed
-
-    // if the contract inherits from Socket's custom 2-step Ownable contract, we deploy it via KintoDeployer
-    if (await isOwnable(contractName)) {
-      contractAddr = await deployWithDeployer(
-        contractName,
-        argTypes,
-        args,
-        addresses.KintoDeployer,
-        signer
-      );
-    } else {
-      // otherwise, we deploy it via Kinto's factory
-      contractAddr = await deployWithKintoFactory(
-        contractName,
-        argTypes,
-        args,
-        signer
-      );
-    }
+    // otherwise, we deploy it via Kinto's factory
+    contractAddr = await deployWithKintoFactory(
+      contractName,
+      argTypes,
+      args,
+      signer
+    );
   }
 
-  // whitelist KintoDeployer on Socket's kinto wallet
+  // whitelist contract on Socket's kinto wallet
   await whitelistApp(contractAddr, signer);
 
   return (await ethers.getContractFactory(contractName)).attach(contractAddr);
+};
+
+const getOrDeployDeployer = async (signer: SignerWithAddress | Wallet) => {
+  let deployer = KINTO_DATA.contracts.deployer.address;
+  if (!deployer || deployer === "0x") {
+    // if deployer address is not set, deploy it and save it
+    deployer = await deployWithKintoFactory("KintoDeployer", [], [], signer);
+
+    // write address in constants.ts using fs
+    KINTO_DATA.contracts.deployer.address = deployer;
+    const filePath = path.join(__dirname, "constants.json");
+    fs.writeFileSync(filePath, JSON.stringify({ KINTO_DATA }, null, 2));
+
+    // whitelist KintoDeployer on Socket's kinto wallet
+    await whitelistApp(deployer, signer);
+  }
+  return deployer;
 };
 
 const deployWithDeployer = async (
   contractName: string,
   argTypes: Array<any>,
   args: Array<any>,
-  deployer: Address,
   signer: SignerWithAddress | Wallet
 ): Promise<Address> => {
   const chainId = await signer.getChainId();
   const { contracts: kinto, gasParams } = KINTO_DATA;
+  const deployer = await getOrDeployDeployer(signer);
+  console.log(`Deployer address: ${deployer}`);
+
   const kintoWallet = new ethers.Contract(
     process.env.SOCKET_OWNER_ADDRESS,
     kinto.kintoWallet.abi,
@@ -235,8 +238,12 @@ const deployWithDeployer = async (
   await handleOps(userOps, signer);
 
   console.log(`- ${name} contract deployed @ ${contractAddr}`);
-  const owner = await (await getInstance(contractName, contractAddr)).owner();
-  console.log(`- ${name} contract owner is ${owner}`);
+  try {
+    const owner = await (await getInstance(contractName, contractAddr)).owner();
+    console.log(`- ${name} contract owner is ${owner}`);
+  } catch (error) {
+    console.error("Error getting owner:", error);
+  }
   return contractAddr;
 };
 
@@ -280,8 +287,8 @@ const deployWithKintoFactory = async (
 
 // other utils
 
-const isKinto = async (): Promise<boolean> =>
-  (await getChainSlug()) === ChainId.KINTO;
+const isKinto = async (chainId: number): Promise<boolean> =>
+  chainId === KINTO_DATA.chainId;
 
 const handleOps = async (
   userOps: PopulatedTransaction[] | UserOperation[],
@@ -363,7 +370,9 @@ const whitelistApp = async (
     [app],
     [true],
     {
-      ...overrides(await signer.getChainId()),
+      gasLimit: 4_000_000,
+      // type,
+      // gasPrice,
     }
   );
 
@@ -514,5 +523,11 @@ const calculateEthMaxCost = (requiredPrefund) => {
     requiredPrefund + COST_OF_POST.toNumber() * MAX_FEE_PER_GAS.toNumber();
   return ethMaxCost;
 };
+
+const getInstance = async (
+  contractName: string,
+  address: Address
+): Promise<Contract> =>
+  (await ethers.getContractFactory(contractName)).attach(address);
 
 export { isKinto, handleOps, deployOnKinto, whitelistApp };

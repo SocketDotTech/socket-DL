@@ -8,7 +8,7 @@ import {
   joinSignature,
 } from "ethers/lib/utils";
 import { Address } from "hardhat-deploy/dist/types";
-import { KINTO_DATA } from "./constants";
+import { KINTO_DATA } from "./constants.json";
 import { getProviderFromChainSlug } from "../../../constants";
 import { ChainId, ChainSlug } from "../../../../src";
 
@@ -93,7 +93,7 @@ const sign = async (privateKey: Address): Promise<string> => {
   const value = {
     signer: wallet.address,
     nonce: await kintoID.nonces(wallet.address),
-    expiresAt: Math.floor(Date.now() / 1000) + 24 * 60 * 60 // 24 hours expiry
+    expiresAt: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours expiry
   };
 
   const signature = await wallet._signTypedData(domain, types, value);

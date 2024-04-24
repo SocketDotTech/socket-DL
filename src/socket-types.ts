@@ -140,10 +140,6 @@ export enum CORE_CONTRACTS {
   NativeSwitchboard = "NativeSwitchboard",
 }
 
-export enum INTEGRATION_CONTRACTS {
-  KintoDeployer = "KintoDeployer",
-}
-
 export const REQUIRED_ROLES = {
   CapacitorFactory: [ROLES.RESCUE_ROLE],
   ExecutionManager: [

@@ -18,7 +18,7 @@ import {
 import { getRoleHash, getChainRoleHash, getInstance } from "../utils";
 import { PopulatedTransaction, Wallet, ethers } from "ethers";
 import { getProviderFromChainSlug } from "../../constants";
-import { filterChains, mode } from "../config";
+import { chains, filterChains, mode } from "../config";
 import { overrides } from "../config";
 import AccessControlExtendedABI from "@socket.tech/dl-core/artifacts/abi/AccessControlExtended.json";
 import { handleOps, isKinto } from "../utils/kinto/kinto";
@@ -150,7 +150,7 @@ const executeRoleTransactions = async (
       data,
       ...overrides(chainSlug),
     } as PopulatedTransaction;
-    if (isKinto()) {
+    if (isKinto(chainSlug)) {
       const contract = await getInstance("ExecutionManager", contractAddress);
       const owner = await (await contract.connect(wallet)).owner();
 
@@ -194,7 +194,7 @@ const executeOtherTransactions = async (
       data,
       ...overrides(chainSlug),
     } as PopulatedTransaction;
-    if (isKinto()) {
+    if (isKinto(chainSlug)) {
       tx = await handleOps([txRequest], wallet);
     } else {
       tx = await (await wallet.sendTransaction(txRequest)).wait();

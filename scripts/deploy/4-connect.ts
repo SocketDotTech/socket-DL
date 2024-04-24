@@ -95,7 +95,7 @@ export const main = async () => {
             { ...overrides(chain) }
           );
 
-          if (isKinto()) {
+          if (isKinto(chain)) {
             tx = await handleOps([txRequest], counter.signer);
           } else {
             tx = await (await counter.signer.sendTransaction(txRequest)).wait();

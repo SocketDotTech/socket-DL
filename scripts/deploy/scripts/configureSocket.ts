@@ -75,7 +75,7 @@ export const setManagers = async (
       }
     );
 
-    if (isKinto()) {
+    if (isKinto(await socketSigner.getChainId())) {
       tx = await handleOps([txRequest], socket.signer);
     } else {
       tx = await (await socket.signer.sendTransaction(txRequest)).wait();
@@ -92,7 +92,7 @@ export const setManagers = async (
       }
     );
 
-    if (isKinto()) {
+    if (isKinto(await socketSigner.getChainId())) {
       tx = await handleOps([txRequest], socket.signer);
     } else {
       tx = await (await socket.signer.sendTransaction(txRequest)).wait();
@@ -176,7 +176,7 @@ export const configureExecutionManager = async (
         { ...overrides(chain) }
       );
 
-    if (isKinto()) {
+    if (isKinto(chain)) {
       tx = await handleOps([txRequest], socketBatcherContract.signer);
     } else {
       tx = await (
@@ -248,7 +248,7 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
                 }
               );
 
-            if (isKinto()) {
+            if (isKinto(await socketSigner.getChainId())) {
               tx = await handleOps([txRequest], contract.signer);
             } else {
               tx = await (
@@ -278,7 +278,7 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
                 }
               );
 
-            if (isKinto()) {
+            if (isKinto(await socketSigner.getChainId())) {
               tx = await handleOps([txRequest], contract.signer);
             } else {
               tx = await (
