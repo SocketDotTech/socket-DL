@@ -526,7 +526,7 @@ const calculateRequiredPrefund = (
 const calculateEthMaxCost = (
   requiredPrefund: BigNumber,
   maxFeePerGas: BigNumber
-): BigNumber => requiredPrefund.add(COST_OF_POST).mul(maxFeePerGas);
+): BigNumber => requiredPrefund.add(COST_OF_POST.mul(maxFeePerGas));
 
 const estimateGas = async (signer, entryPoint, userOps) => {
   const feeData = await signer.provider.getFeeData();
