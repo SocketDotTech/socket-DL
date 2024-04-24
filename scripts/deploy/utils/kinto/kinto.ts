@@ -196,7 +196,7 @@ const deployWithDeployer = async (
       chainId,
       kintoWallet.address,
       entryPoint.address,
-      paymaster.address,
+      paymasterAddr,
       nonce,
       executeCalldata,
       gasParams
@@ -220,7 +220,7 @@ const deployWithDeployer = async (
       chainId,
       kintoWallet.address,
       entryPoint.address,
-      paymaster.address,
+      paymasterAddr,
       nonce,
       calldataClaimOwner,
       gasParams
@@ -303,7 +303,8 @@ const isKinto = async (chainId: number): Promise<boolean> =>
 
 const handleOps = async (
   userOps: PopulatedTransaction[] | UserOperation[],
-  signer: Signer | Wallet
+  signer: Signer | Wallet,
+  withPaymaster = false
 ): Promise<TransactionReceipt> => {
   const { contracts: kinto, gasParams } = KINTO_DATA;
 
@@ -339,7 +340,7 @@ const handleOps = async (
         await signer.getChainId(),
         kintoWallet.address,
         entryPoint.address,
-        paymaster.address,
+        withPaymaster ? paymaster.address : "0x",
         nonce,
         calldata,
         gasParams
@@ -351,7 +352,7 @@ const handleOps = async (
 
   const handleOpsEstimate = await estimateGas(signer, entryPoint, userOps);
   const txCost = handleOpsEstimate.gasLimit.mul(handleOpsEstimate.maxFeePerGas);
-  console.log("Estimated gas cost (ETH):", ethers.utils.formatEther(txCost));
+  console.log("- Estimated gas cost (ETH):", ethers.utils.formatEther(txCost));
 
   const txResponse: TransactionResponse = await entryPoint.handleOps(
     userOps,
@@ -528,19 +529,30 @@ const calculateEthMaxCost = (
   maxFeePerGas: BigNumber
 ): BigNumber => requiredPrefund.add(COST_OF_POST.mul(maxFeePerGas));
 
-const estimateGas = async (signer, entryPoint, userOps) => {
+const estimateGas = async (signer: Signer, entryPoint: Contract, userOps) => {
   const feeData = await signer.provider.getFeeData();
-  const gasLimit = await entryPoint.estimateGas.handleOps(
-    userOps,
-    await signer.getAddress()
-  );
-  const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toNumber();
-  const maxFeePerGas = feeData.maxFeePerGas.toNumber();
-  const gasParams = {
-    maxPriorityFeePerGas,
-    maxFeePerGas,
-    gasLimit,
-  };
+
+  let gasParams;
+  try {
+    const gasLimit = await entryPoint.estimateGas.handleOps(
+      userOps,
+      await signer.getAddress()
+    );
+    const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toNumber();
+    const maxFeePerGas = feeData.maxFeePerGas.toNumber();
+    gasParams = {
+      maxPriorityFeePerGas,
+      maxFeePerGas,
+      gasLimit,
+    };
+  } catch (error) {
+    console.log("- Error estimating gas limit, using default values");
+    gasParams = {
+      maxPriorityFeePerGas: parseUnits("1.1", "gwei"),
+      maxFeePerGas: parseUnits("1.1", "gwei"),
+      gasLimit: BigNumber.from("400000000"),
+    };
+  }
   return gasParams;
 };
 
