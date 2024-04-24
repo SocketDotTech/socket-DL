@@ -11,13 +11,13 @@ import { getProviderFromChainSlug } from "../../../constants";
 import SocketABI from "../../../../out/Socket.sol/Socket.json";
 
 import path from "path";
-import { mode } from "../../config";
+import { mode } from "../../config/config";
 import {
   CORE_CONTRACTS,
-  ChainSlug,
   HardhatChainName,
   hardhatChainNameToSlug,
 } from "../../../../src";
+import { sleep } from "@socket.tech/dl-common";
 
 const deployedAddressPath = path.join(
   __dirname,
@@ -273,9 +273,6 @@ const confirmAndWait = async (
     }
   }
 };
-
-const sleep = (delay: any) =>
-  new Promise((resolve) => setTimeout(resolve, delay));
 
 main()
   .then(() => process.exit(0))

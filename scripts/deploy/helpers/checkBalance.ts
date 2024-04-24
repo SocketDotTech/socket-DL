@@ -5,7 +5,7 @@ dotenvConfig();
 import { ChainSlugToKey } from "../../../src";
 import { utils } from "ethers";
 
-import { chains, mode } from "../config";
+import { chains, mode } from "../config/config";
 import { getProviderFromChainSlug } from "../../constants/networks";
 
 // check balance of owner address on all chains

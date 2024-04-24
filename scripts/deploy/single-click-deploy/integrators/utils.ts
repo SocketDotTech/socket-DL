@@ -92,7 +92,7 @@ export const updateSDK = async (
   );
   await updateFile(
     "chainSlugToHardhatChainName.ts",
-    `,\n  ChainSlug.${chainName.toUpperCase()} = [HardhatChainName.${chainName.toUpperCase()}],\n}\n`,
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: [HardhatChainName.${chainName.toUpperCase()}],\n}\n`,
     ",\n}"
   );
 

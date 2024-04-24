@@ -13,7 +13,7 @@ import {
   executorAddresses,
   transmitterAddresses,
   watcherAddresses,
-} from "../../config";
+} from "../../config/config";
 import { RoleOwners } from "../../../constants";
 
 export async function writeConfigs() {

@@ -1,6 +1,6 @@
 import { Contract, Wallet, utils } from "ethers";
 import { IntegrationTypes, ChainSlug } from "../../src";
-import { mode, overrides } from "../deploy/config";
+import { mode, overrides } from "../deploy/config/config";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { UN_TRIP_PATH_SIG_IDENTIFIER, checkRole, getSiblings } from "../common";
 import { ROLES } from "@socket.tech/dl-core";

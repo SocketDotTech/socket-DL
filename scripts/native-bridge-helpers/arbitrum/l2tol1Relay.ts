@@ -16,7 +16,7 @@ const l2Chain = HardhatChainName.ARBITRUM_GOERLI;
 const sealTxHash =
   "0x0113020a1e3b9f814a78791b9719bf583bb0f25075cde1e754af99f1dcf137a7";
 
-import { mode } from "../../deploy/config";
+import { mode } from "../../deploy/config/config";
 
 const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));

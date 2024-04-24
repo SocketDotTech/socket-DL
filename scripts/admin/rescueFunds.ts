@@ -3,7 +3,7 @@ import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
 import { Contract, Wallet, ethers } from "ethers";
-import { mode, overrides } from "../deploy/config";
+import { mode, overrides } from "../deploy/config/config";
 import { getProviderFromChainSlug } from "../constants";
 import {
   getAllAddresses,

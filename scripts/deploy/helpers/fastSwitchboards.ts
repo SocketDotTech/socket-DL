@@ -1,25 +1,18 @@
-import { ContractFactory, utils } from "ethers";
-import { network, ethers, run } from "hardhat";
+import { utils } from "ethers";
+import { ethers } from "hardhat";
 
-import { DeployParams, getOrDeploy, storeAddresses } from "../utils";
 
 import {
-  CORE_CONTRACTS,
-  ChainSocketAddresses,
-  DeploymentMode,
-  ChainSlugToKey,
-  version,
   DeploymentAddresses,
   getAllAddresses,
   ChainSlug,
-  IntegrationTypes,
 } from "../../../src";
-import deploySwitchboards from "../scripts/deploySwitchboard";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { socketOwner, executionManagerVersion, mode, chains } from "../config";
+import {
+  mode,
+  chains,
+} from "../config/config";
 import {
   getProviderFromChainSlug,
-  maxAllowedPacketLength,
 } from "../../constants";
 
 const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
@@ -84,11 +77,6 @@ const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
   }
 };
 
-// let srcChains;
-// let dstChains;
-
 let srcChains = [ChainSlug.ARBITRUM_GOERLI];
 let dstChains = [ChainSlug.AEVO_TESTNET];
-// let integrationTypes = [IntegrationTypes.fast2];
-
 main(srcChains, dstChains);
