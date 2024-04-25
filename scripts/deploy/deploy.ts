@@ -12,39 +12,30 @@ import prompts from "prompts";
 
 const main = async () => {
   try {
-    const response = await prompts([
-      {
-        name: "isMainnet",
-        type: "toggle",
-        message: "Is it a mainnet?",
-      },
-    ]);
+    const chainSlugs = Object.keys(ChainSlug);
+    const chain = ChainSlug[chainSlugs[chainSlugs.length - 1]];
 
-    const chainOptions = response.isMainnet ? MainnetIds : TestnetIds;
-    const choices = chainOptions.map((chain) => ({
+    const isMainnet = MainnetIds.includes(chain);
+    const chainOptions = isMainnet ? MainnetIds : TestnetIds;
+    let choices = chainOptions.map((chain) => ({
       title: chain.toString(),
       value: chain,
     }));
-
+    choices = choices.filter(c => c.value !== chain)
     const configResponse = await prompts([
       {
         name: "chains",
         type: "multiselect",
-        message: "Select chains to connect",
+        message: "Select sibling chains to connect",
         choices,
       },
     ]);
 
     const chains = configResponse.chains;
 
-    if (chains.length === 0) {
-      console.log("No chains selected!");
-      return;
-    }
-
     let addresses: DeploymentAddresses = await deployForChains(chains);
 
-    if (chains.length === 1) {
+    if (chains.length === 0) {
       console.log("No siblings selected!");
       return;
     }

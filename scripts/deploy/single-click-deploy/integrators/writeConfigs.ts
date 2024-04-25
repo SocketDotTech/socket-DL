@@ -16,7 +16,7 @@ import {
 } from "../../config/config";
 import { RoleOwners } from "../../../constants";
 
-export async function writeConfigs() {
+export async function addChainToSDK() {
   const response = await prompts([
     {
       name: "rpc",
@@ -36,6 +36,16 @@ export async function writeConfigs() {
       message: "Is it a mainnet?",
     },
   ]);
+
+  // update types and enums
+  const chainId = await getChainId(response.rpc);
+  await updateSDK(response.chainName, chainId, response.isMainnet);
+
+  return { response, chainId }
+}
+
+export async function writeConfigs() {
+  const { response, chainId } = await addChainToSDK();
 
   const chainOptions = response.isMainnet ? MainnetIds : TestnetIds;
   const choices = chainOptions.map((chain) => ({
@@ -119,10 +129,6 @@ export async function writeConfigs() {
       message: "Enter gas price, skip if you want it to be picked from RPC",
     },
   ]);
-
-  // update types and enums
-  const chainId = await getChainId(response.rpc);
-  await updateSDK(response.chainName, chainId, response.isMainnet);
 
   // update env and config
   const roleOwners: RoleOwners = {
