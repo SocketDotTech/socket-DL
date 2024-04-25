@@ -31,8 +31,8 @@ console.log(
 
 export const chains: Array<ChainSlug> = [
   // ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_SEPOLIA,
-  ChainSlug.OPTIMISM_SEPOLIA,
+  // ChainSlug.ARBITRUM_SEPOLIA,
+  // ChainSlug.OPTIMISM_SEPOLIA,
   // ChainSlug.POLYGON_MUMBAI,
   // ChainSlug.SX_NETWORK_TESTNET,
   // ChainSlug.SX_NETWORK,
@@ -51,7 +51,7 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.POLYGON_MAINNET,
   // ChainSlug.LYRA,
   // ChainSlug.BSC,
-  // ChainSlug.BASE,
+  ChainSlug.BASE,
   // ChainSlug.MODE,
   // ChainSlug.ANCIENT8_TESTNET,
   // ChainSlug.ANCIENT8_TESTNET2,
@@ -61,8 +61,8 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.PARALLEL,
   // ChainSlug.MANTLE,
   // ChainSlug.REYA_CRONOS,
-  // ChainSlug.REYA,
-  ChainSlug.POLYNOMIAL_TESTNET,
+  ChainSlug.REYA,
+  // ChainSlug.POLYNOMIAL_TESTNET,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
@@ -260,7 +260,7 @@ export const overrides = (
     return {
       type: 1,
       // gasLimit: 20000000,
-      gasPrice: 0,
+      gasPrice: 100_000_000,
     };
   } else if (chain == ChainSlug.POLYNOMIAL_TESTNET) {
     return {
