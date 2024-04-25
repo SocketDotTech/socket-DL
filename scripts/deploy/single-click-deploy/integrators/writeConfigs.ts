@@ -11,6 +11,7 @@ import {
 } from "../../../../src";
 import {
   executorAddresses,
+  ownerAddresses,
   transmitterAddresses,
   watcherAddresses,
 } from "../../config";
@@ -135,7 +136,7 @@ export async function writeConfigs() {
 
   if (configResponse.owner) {
     roleOwners.ownerAddress = configResponse.owner;
-  } else roleOwners.ownerAddress = transmitterAddresses[DeploymentMode.PROD];
+  } else roleOwners.ownerAddress = ownerAddresses[DeploymentMode.PROD];
 
   if (configResponse.transmitter) {
     roleOwners.transmitterAddress = configResponse.transmitter;

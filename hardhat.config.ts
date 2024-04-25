@@ -63,7 +63,6 @@ if (isProduction) {
     [HardhatChainName.GOERLI]: getChainConfig(ChainId.GOERLI),
     [HardhatChainName.MAINNET]: getChainConfig(ChainId.MAINNET),
     [HardhatChainName.OPTIMISM]: getChainConfig(ChainId.OPTIMISM),
-    [HardhatChainName.POLYGON_MUMBAI]: getChainConfig(ChainId.POLYGON_MUMBAI),
     [HardhatChainName.BSC_TESTNET]: getChainConfig(ChainId.BSC_TESTNET),
     [HardhatChainName.SEPOLIA]: getChainConfig(ChainId.SEPOLIA),
     [HardhatChainName.AEVO_TESTNET]: getChainConfig(ChainId.AEVO_TESTNET),
@@ -97,6 +96,7 @@ if (isProduction) {
     [HardhatChainName.POLYNOMIAL_TESTNET]: getChainConfig(
       ChainId.POLYNOMIAL_TESTNET
     ),
+    [HardhatChainName.BOB]: getChainConfig(ChainId.BOB),
   };
 }
 
@@ -119,7 +119,6 @@ const config: HardhatUserConfig = {
       optimisticEthereum: process.env.OPTIMISM_API_KEY || "",
       optimisticTestnet: process.env.OPTIMISM_API_KEY || "",
       polygon: process.env.POLYGONSCAN_API_KEY || "",
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       aevoTestnet: process.env.AEVO_API_KEY || "",
       lyraTestnet: process.env.LYRA_API_KEY || "",
       lyra: process.env.LYRA_API_KEY || "",

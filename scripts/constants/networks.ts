@@ -39,11 +39,6 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       jsonRpcUrl = process.env.POLYGON_RPC as string;
       break;
 
-    case HardhatChainName.POLYGON_MUMBAI:
-    case ChainId.POLYGON_MUMBAI:
-      jsonRpcUrl = process.env.POLYGON_MUMBAI_RPC as string;
-      break;
-
     case HardhatChainName.AVALANCHE:
     case ChainId.AVALANCHE:
       jsonRpcUrl = process.env.AVAX_RPC as string;
@@ -182,6 +177,11 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
     case HardhatChainName.POLYNOMIAL_TESTNET:
     case ChainId.POLYNOMIAL_TESTNET:
       jsonRpcUrl = process.env.POLYNOMIAL_TESTNET_RPC as string;
+      break;
+
+    case HardhatChainName.BOB:
+    case ChainId.BOB:
+      jsonRpcUrl = process.env.BOB_RPC as string;
       break;
 
     case HardhatChainName.HARDHAT:

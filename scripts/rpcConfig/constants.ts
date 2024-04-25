@@ -10,7 +10,7 @@ export function checkEnvVar(envVar: string) {
   return value;
 }
 
-export const prodVersion = "prod-1.0.5";
+export const prodVersion = "prod-1.0.7";
 export const devVersion = "dev-1.0.0";
 
 export const rpcs = {
@@ -28,7 +28,6 @@ export const rpcs = {
   [ChainSlug.ARBITRUM_SEPOLIA]: checkEnvVar("ARBITRUM_SEPOLIA_RPC"),
   [ChainSlug.OPTIMISM_SEPOLIA]: checkEnvVar("OPTIMISM_SEPOLIA_RPC"),
   [ChainSlug.SEPOLIA]: checkEnvVar("SEPOLIA_RPC"),
-  [ChainSlug.POLYGON_MUMBAI]: checkEnvVar("POLYGON_MUMBAI_RPC"),
   [ChainSlug.ARBITRUM_GOERLI]: checkEnvVar("ARB_GOERLI_RPC"),
   [ChainSlug.AEVO_TESTNET]: checkEnvVar("AEVO_TESTNET_RPC"),
   [ChainSlug.LYRA_TESTNET]: checkEnvVar("LYRA_TESTNET_RPC"),
@@ -48,6 +47,7 @@ export const rpcs = {
   [ChainSlug.REYA_CRONOS]: checkEnvVar("REYA_CRONOS_RPC"),
   [ChainSlug.SYNDR_SEPOLIA_L3]: checkEnvVar("SYNDR_SEPOLIA_L3_RPC"),
   [ChainSlug.POLYNOMIAL_TESTNET]: checkEnvVar("POLYNOMIAL_TESTNET_RPC"),
+  [ChainSlug.BOB]: checkEnvVar("BOB_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 
@@ -68,25 +68,25 @@ export const confirmations = {
   [ChainSlug.BSC_TESTNET]: 1,
   [ChainSlug.GOERLI]: 1,
   [ChainSlug.XAI_TESTNET]: 1,
-  [ChainSlug.SX_NETWORK_TESTNET]: 1,
-  [ChainSlug.SX_NETWORK]: 1,
+  [ChainSlug.SX_NETWORK_TESTNET]: 0,
+  [ChainSlug.SX_NETWORK]: 0,
   [ChainSlug.MODE_TESTNET]: 1,
   [ChainSlug.VICTION_TESTNET]: 1,
   [ChainSlug.CDK_TESTNET]: 1,
   [ChainSlug.ARBITRUM_SEPOLIA]: 1,
   [ChainSlug.OPTIMISM_SEPOLIA]: 1,
   [ChainSlug.SEPOLIA]: 1,
-  [ChainSlug.POLYGON_MUMBAI]: 1,
   [ChainSlug.ANCIENT8_TESTNET]: 1,
   [ChainSlug.ANCIENT8_TESTNET2]: 1,
-  [ChainSlug.HOOK_TESTNET]: 1,
-  [ChainSlug.HOOK]: 1,
+  [ChainSlug.HOOK_TESTNET]: 0,
+  [ChainSlug.HOOK]: 0,
   [ChainSlug.PARALLEL]: 1,
   [ChainSlug.MANTLE]: 1,
-  [ChainSlug.REYA_CRONOS]: 1,
+  [ChainSlug.REYA_CRONOS]: 0,
   [ChainSlug.REYA]: 0,
-  [ChainSlug.SYNDR_SEPOLIA_L3]: 1,
-  [ChainSlug.POLYNOMIAL_TESTNET]: 1,
+  [ChainSlug.SYNDR_SEPOLIA_L3]: 0,
+  [ChainSlug.POLYNOMIAL_TESTNET]: 0,
+  [ChainSlug.BOB]: 0,
 };
 
 export const prodBatcherSupportedChainSlugs = [
@@ -103,7 +103,6 @@ export const prodBatcherSupportedChainSlugs = [
   ChainSlug.SX_NETWORK,
   ChainSlug.AEVO_TESTNET,
   ChainSlug.SEPOLIA,
-  ChainSlug.POLYGON_MUMBAI,
   ChainSlug.LYRA_TESTNET,
   ChainSlug.SX_NETWORK_TESTNET,
   ChainSlug.ARBITRUM_SEPOLIA,
@@ -116,6 +115,7 @@ export const prodBatcherSupportedChainSlugs = [
   ChainSlug.REYA_CRONOS,
   ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.POLYNOMIAL_TESTNET,
+  ChainSlug.BOB,
 ];
 
 export const prodFeesUpdaterSupportedChainSlugs = (): ChainSlug[] => {

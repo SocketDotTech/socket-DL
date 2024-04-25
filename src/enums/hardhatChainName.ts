@@ -13,7 +13,6 @@ export enum HardhatChainName {
   GOERLI = "goerli",
   SEPOLIA = "sepolia",
   POLYGON_MAINNET = "polygon-mainnet",
-  POLYGON_MUMBAI = "polygon-mumbai",
   AEVO_TESTNET = "aevo-testnet",
   AEVO = "aevo",
   LYRA_TESTNET = "lyra-testnet",
@@ -37,4 +36,5 @@ export enum HardhatChainName {
   REYA = "reya",
   SYNDR_SEPOLIA_L3 = "syndr_sepolia_l3",
   POLYNOMIAL_TESTNET = "polynomial_testnet",
+  BOB = "bob",
 }
