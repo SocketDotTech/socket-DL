@@ -22,7 +22,9 @@ import {
   capacitorType,
   maxPacketLength,
   mode,
+  newRoleStatus,
   executionManagerVersion,
+  sendTransaction,
   filterSiblingChains,
   filterChains,
 } from "./config";
@@ -32,6 +34,9 @@ import {
   setManagers,
   setupPolygonNativeSwitchboard,
 } from "./scripts/configureSocket";
+import { checkAndUpdateRoles } from "./scripts/roles";
+import { ROLES } from "@socket.tech/dl-core";
+import { isKinto } from "./utils/kinto/kinto";
 
 export const main = async () => {
   try {
@@ -62,6 +67,27 @@ export const main = async () => {
             chainSlug !== chain && filterSiblingChains.includes(chainSlug)
         );
 
+        if (isKinto(chain)) {
+          // since configureExecutionManager() calls socketBatcher.setExecutionFeesBatch
+          // which calls executionManager.setMsgValueMaxThreshold and this function receives
+          // the signature of an address with `FEES_UPDATER_ROLE` role and this role has only been given
+          // to a kinto wallet (which can't generate a signature), we need give this role to the socketSigner
+          // so that the kinto wallet can make the call passing the socketSigner signature
+          await checkAndUpdateRoles({
+            userSpecificRoles: [
+              {
+                userAddress: socketSigner.address,
+                filterRoles: [ROLES.FEES_UPDATER_ROLE],
+              },
+            ],
+            contractName: executionManagerVersion,
+            filterChains,
+            filterSiblingChains,
+            sendTransaction,
+            newRoleStatus,
+          });
+        }
+
         await configureExecutionManager(
           executionManagerVersion,
           addr[executionManagerVersion]!,
@@ -70,6 +96,23 @@ export const main = async () => {
           siblingSlugs,
           socketSigner
         );
+
+        if (isKinto(chain)) {
+          // we now want to revoke the FEES_UPDATER_ROLE from the socketSigner since it's not that safe
+          await checkAndUpdateRoles({
+            userSpecificRoles: [
+              {
+                userAddress: socketSigner.address,
+                filterRoles: [ROLES.FEES_UPDATER_ROLE],
+              },
+            ],
+            contractName: executionManagerVersion,
+            filterChains,
+            filterSiblingChains,
+            sendTransaction,
+            newRoleStatus: !newRoleStatus,
+          });
+        }
 
         await setManagers(addr, socketSigner);
 

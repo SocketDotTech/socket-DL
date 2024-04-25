@@ -199,9 +199,8 @@ const executeOtherTransactions = async (
     } else {
       tx = await (await wallet.sendTransaction(txRequest)).wait();
     }
-    console.log(`to: ${to}, txHash: ${tx?.hash}`);
-    await tx.wait();
-    console.log(`txHash: ${tx?.hash} COMPLETE`);
+    console.log(`to: ${to}, txHash: ${tx?.transactionHash}`);
+    console.log(`txHash: ${tx?.transactionHash} COMPLETE`);
   }
 };
 
