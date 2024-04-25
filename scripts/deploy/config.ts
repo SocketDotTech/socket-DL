@@ -70,7 +70,12 @@ export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
 export const sendTransaction = true;
 export const newRoleStatus = true;
 export const filterChains: number[] = chains;
-export const filterSiblingChains: number[] = chains;
+export const filterSiblingChains: number[] = [
+  ChainSlug.ARBITRUM,
+  ChainSlug.BASE,
+  ChainSlug.MAINNET,
+  ChainSlug.OPTIMISM,
+];
 export const capacitorType = 1;
 export const maxPacketLength = 1;
 export const initialPacketCount = 0;
