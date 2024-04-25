@@ -7,7 +7,6 @@ export const L1Ids: ChainSlug[] = [
 ];
 
 export const L2Ids: ChainSlug[] = [
-  ChainSlug.POLYGON_MUMBAI,
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.ARBITRUM_SEPOLIA,

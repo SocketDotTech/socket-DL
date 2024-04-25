@@ -58,16 +58,6 @@ export const switchboards = {
       switchboard: NativeSwitchboard.POLYGON_L2,
     },
   },
-  [ChainSlug.POLYGON_MUMBAI]: {
-    [ChainSlug.GOERLI]: {
-      switchboard: NativeSwitchboard.POLYGON_L2,
-    },
-  },
-  [ChainSlug.GOERLI]: {
-    [ChainSlug.POLYGON_MUMBAI]: {
-      switchboard: NativeSwitchboard.POLYGON_L1,
-    },
-  },
   [ChainSlug.SEPOLIA]: {
     [ChainSlug.ARBITRUM_SEPOLIA]: {
       switchboard: NativeSwitchboard.ARBITRUM_L1,

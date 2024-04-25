@@ -22,7 +22,6 @@ export const bridgeConsts = {
   },
   fxChild: {
     [ChainSlug.POLYGON_MAINNET]: "0x8397259c983751DAf40400790063935a11afa28a",
-    [ChainSlug.POLYGON_MUMBAI]: "0xCf73231F28B7331BBe3124B907840A94851f9f11",
   },
   checkpointManager: {
     [ChainSlug.HARDHAT]: "0x86e4dc95c7fbdbf52e33d563bbdb00823894c287",

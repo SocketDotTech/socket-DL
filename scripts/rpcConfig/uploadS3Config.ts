@@ -15,7 +15,7 @@ const s3Client = new S3Client({
 const fileName = deploymentMode + "RpcConfig.json";
 const localFilePath = fileName;
 
-const bucketName = "socket-dl-" + deploymentMode;
+const bucketName = "socket-ll-" + deploymentMode;
 const s3FileKey = fileName; // File key in S3
 
 const createConfig = async () => {
