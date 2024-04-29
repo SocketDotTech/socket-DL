@@ -6,6 +6,7 @@ import { PacketInfo, VERSION_HASH, getPacketInfo } from "./util";
 import { getProviderFromChainSlug } from "../../constants";
 import { deploymentMode } from "../rpcConfig";
 import { TxData, ChainSlug, getAllAddresses, ChainTxData } from "../../../src";
+import { prodBatcherSupportedChainSlugs } from "../constants";
 
 const randomPrivateKey =
   "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
@@ -84,12 +85,13 @@ export const getTxData = async (): Promise<TxData> => {
     getProviderFromChainSlug(ChainSlug.SEPOLIA)
   );
   const addresses = getAllAddresses(deploymentMode);
-  const allChainSlugs: ChainSlug[] = Object.keys(addresses)
-    .map((c) => parseInt(c) as ChainSlug)
-    .filter((c) => addresses[c]?.["SocketSimulator"]);
+  const allChainSlugs: ChainSlug[] = prodBatcherSupportedChainSlugs.filter(
+    (c) => addresses[c]?.["SocketSimulator"]
+  );
 
   const txData: TxData = {};
   for (const chainSlug of allChainSlugs) {
+    console.log(`Getting tx data for ${chainSlug}`);
     const packetInfo = await getPacketInfo(
       chainSlug,
       addresses[chainSlug]?.["CapacitorSimulator"]

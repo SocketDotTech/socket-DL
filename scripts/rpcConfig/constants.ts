@@ -10,7 +10,7 @@ export function checkEnvVar(envVar: string) {
   return value;
 }
 
-export const prodVersion = "prod-1.0.7";
+export const prodVersion = "prod-1.0.9";
 export const devVersion = "dev-1.0.0";
 
 export const rpcs = {
@@ -100,20 +100,20 @@ export const prodBatcherSupportedChainSlugs = [
   ChainSlug.MANTLE,
   ChainSlug.HOOK,
   ChainSlug.REYA,
-  ChainSlug.SX_NETWORK,
+  // ChainSlug.SX_NETWORK,
   ChainSlug.AEVO_TESTNET,
   ChainSlug.SEPOLIA,
   ChainSlug.LYRA_TESTNET,
-  ChainSlug.SX_NETWORK_TESTNET,
+  // ChainSlug.SX_NETWORK_TESTNET,
   ChainSlug.ARBITRUM_SEPOLIA,
   ChainSlug.OPTIMISM_SEPOLIA,
-  ChainSlug.MODE_TESTNET,
+  // ChainSlug.MODE_TESTNET,
   ChainSlug.BASE,
-  ChainSlug.MODE,
-  ChainSlug.ANCIENT8_TESTNET2,
+  // ChainSlug.MODE,
+  // ChainSlug.ANCIENT8_TESTNET2,
   ChainSlug.HOOK_TESTNET,
   ChainSlug.REYA_CRONOS,
-  ChainSlug.SYNDR_SEPOLIA_L3,
+  // ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.POLYNOMIAL_TESTNET,
   ChainSlug.BOB,
 ];
