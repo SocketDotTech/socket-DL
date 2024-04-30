@@ -6,6 +6,7 @@ import { Address } from "hardhat-deploy/dist/types";
 import path from "path";
 import fs from "fs";
 import {
+  ChainSlugToId,
   ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
@@ -13,6 +14,8 @@ import {
 } from "../../../src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { overrides } from "../config/config";
+import { getJsonRpcUrl } from "../../constants";
+import { HardhatNetworkAccountUserConfig } from "hardhat/types";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
@@ -292,4 +295,12 @@ export function getChainSlugFromId(chainId: number) {
 
   // avoid conflict for now
   return parseInt(utils.id(chainId.toString()).substring(0, 10));
+}
+
+export function getChainConfig(chainSlug: ChainSlug, privateKey: HardhatNetworkAccountUserConfig) {
+  return {
+    accounts: [`0x${privateKey}`],
+    chainId: ChainSlugToId[chainSlug],
+    url: getJsonRpcUrl(chainSlug),
+  };
 }

@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import { writeFile } from "fs/promises";
 
-import { ChainId, ChainSlug } from "../../../../src";
+import { ChainId, ChainSlug, ChainType, NativeTokens } from "../../../../src";
 import { ChainConfig, ChainConfigs } from "../../../constants";
 
 const configFilePath = path.join(__dirname, `/../../../../`);
@@ -48,7 +48,10 @@ export const buildEnvFile = async (
 export const updateSDK = async (
   chainName: string,
   chainId: number,
-  isMainnet: boolean
+  nativeToken: string,
+  chainType: ChainType,
+  isMainnet: boolean,
+  isNewNative: boolean
 ) => {
   if (!fs.existsSync(enumFolderPath)) {
     throw new Error(`Folder not found! ${enumFolderPath}`);
@@ -77,24 +80,72 @@ export const updateSDK = async (
   );
   await updateFile(
     "chainSlugToKey.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: HardhatChainName.${chainName.toUpperCase()},\n};\n`,
-    ",\n};"
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: HardhatChainName.${chainName.toUpperCase()},\n}\n`,
+    ",\n}"
   );
   await updateFile(
     "chainSlugToId.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: ChainId.${chainName.toUpperCase()},\n};\n`,
-    ",\n};"
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: ChainId.${chainName.toUpperCase()},\n}\n`,
+    ",\n}"
   );
   await updateFile(
     "hardhatChainNameToSlug.ts",
-    `,\n  [HardhatChainName.${chainName.toUpperCase()}]: ChainSlug.${chainName.toUpperCase()},\n};\n`,
-    ",\n};"
+    `,\n  [HardhatChainName.${chainName.toUpperCase()}]: ChainSlug.${chainName.toUpperCase()},\n}\n`,
+    ",\n}"
   );
   await updateFile(
     "chainSlugToHardhatChainName.ts",
     `,\n  [ChainSlug.${chainName.toUpperCase()}]: [HardhatChainName.${chainName.toUpperCase()}],\n}\n`,
     ",\n}"
   );
+
+  if (isNewNative) {
+    await updateFile(
+      "native-tokens.ts",
+      `,\n  "${nativeToken.toLowerCase()} = "${nativeToken.toLowerCase()}",\n}\n`,
+      ",\n}"
+    );
+  }
+
+  if (nativeToken !== NativeTokens.ethereum) {
+    await updateFile(
+      "currency.ts",
+      `,\n  [ChainSlug.${chainName.toUpperCase()}]: NativeTokens["${nativeToken}"],\n}\n`,
+      ",\n}"
+    );
+  }
+
+  if (chainType === ChainType.arbChain) {
+    await updateFile(
+      "arbChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
+      ",\n]"
+    );
+  } else if (chainType === ChainType.arbL3Chain) {
+    await updateFile(
+      "arbL3Chains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
+      ",\n]"
+    );
+  } else if (chainType === ChainType.opStackL2Chain) {
+    await updateFile(
+      "opStackChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
+      ",\n]"
+    );
+  } else if (chainType === ChainType.polygonCDKChain) {
+    await updateFile(
+      "polygonCDKChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
+      ",\n]"
+    );
+  } else if (chainType === ChainType.default) {
+    await updateFile(
+      "ethLikeChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
+      ",\n]"
+    );
+  }
 
   if (isMainnet) {
     await updateFile(

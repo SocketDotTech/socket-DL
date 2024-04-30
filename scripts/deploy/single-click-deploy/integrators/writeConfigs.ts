@@ -5,8 +5,10 @@ import prompts from "prompts";
 import { updateSDK, buildEnvFile, updateConfig } from "./utils";
 import {
   ChainSlug,
+  ChainType,
   DeploymentMode,
   MainnetIds,
+  NativeTokens,
   TestnetIds,
 } from "../../../../src";
 import {
@@ -17,6 +19,8 @@ import {
 import { RoleOwners } from "../../../constants";
 
 export async function addChainToSDK() {
+  const currencyChoices = [...Object.keys(NativeTokens), "other"];
+
   const response = await prompts([
     {
       name: "rpc",
@@ -35,13 +39,48 @@ export async function addChainToSDK() {
       type: "toggle",
       message: "Is it a mainnet?",
     },
+    {
+      name: "chainType",
+      type: "select",
+      message: "Select the rollup type (select default if not)",
+      choices: [...Object.keys(ChainType)],
+    },
+    {
+      name: "currency",
+      type: "select",
+      message: "Select the native token",
+      choices: currencyChoices,
+    },
   ]);
+
+  let isNewNative = false;
+  let currency = response.currency;
+  if (response.currency == currencyChoices.length - 1) {
+    const currencyPromptResponse = await prompts([
+      {
+        name: "coingeckoId",
+        type: "text",
+        message: "Enter coingecko id of your token",
+        validate: validateCoingeckoId,
+      },
+    ]);
+
+    isNewNative = true;
+    currency = currencyPromptResponse.coingeckoId;
+  }
 
   // update types and enums
   const chainId = await getChainId(response.rpc);
-  await updateSDK(response.chainName, chainId, response.isMainnet);
+  await updateSDK(
+    response.chainName,
+    chainId,
+    currency,
+    response.chainType as ChainType,
+    response.isMainnet,
+    isNewNative
+  );
 
-  return { response, chainId }
+  return { response, chainId };
 }
 
 export async function writeConfigs() {
@@ -185,6 +224,15 @@ export async function writeConfigs() {
 
   await buildEnvFile(response.rpc, roleOwners.ownerAddress, pk);
 }
+
+const validateCoingeckoId = async (coingeckoId: string) => {
+  if (!coingeckoId) {
+    return "Invalid coingecko Id";
+  }
+
+  // todo use either public api
+  return true;
+};
 
 const validateRpc = async (rpcUrl: string) => {
   if (!rpcUrl) {

@@ -43,7 +43,6 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.SX_NETWORK,
   // ChainSlug.MODE_TESTNET,
   // ChainSlug.VICTION_TESTNET,
-  // ChainSlug.BSC_TESTNET,
   // ChainSlug.AEVO_TESTNET,
   // ChainSlug.LYRA_TESTNET,
   // ChainSlug.SEPOLIA,
@@ -157,12 +156,6 @@ export const overrides = (
     return {
       type,
       gasLimit: 3000000,
-      gasPrice,
-    };
-  } else if (chain == ChainSlug.BSC_TESTNET) {
-    return {
-      type,
-      gasLimit,
       gasPrice,
     };
   } else if (chain == ChainSlug.MAINNET) {

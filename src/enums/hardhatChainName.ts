@@ -8,7 +8,6 @@ export enum HardhatChainName {
   AVALANCHE = "avalanche",
   AVALANCHE_TESTNET = "avalanche-testnet",
   BSC = "bsc",
-  BSC_TESTNET = "bsc-testnet",
   MAINNET = "mainnet",
   GOERLI = "goerli",
   SEPOLIA = "sepolia",

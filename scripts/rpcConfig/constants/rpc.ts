@@ -42,7 +42,6 @@ export const rpcs = {
   [ChainSlug.AEVO_TESTNET]: checkEnvVar("AEVO_TESTNET_RPC"),
   [ChainSlug.LYRA_TESTNET]: checkEnvVar("LYRA_TESTNET_RPC"),
   [ChainSlug.OPTIMISM_GOERLI]: checkEnvVar("OPTIMISM_GOERLI_RPC"),
-  [ChainSlug.BSC_TESTNET]: checkEnvVar("BSC_TESTNET_RPC"),
   [ChainSlug.GOERLI]: checkEnvVar("GOERLI_RPC"),
   [ChainSlug.XAI_TESTNET]: checkEnvVar("XAI_TESTNET_RPC"),
   [ChainSlug.SX_NETWORK_TESTNET]: checkEnvVar("SX_NETWORK_TESTNET_RPC"),

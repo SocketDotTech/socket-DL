@@ -4,13 +4,14 @@
 # setup chain details 
 npx ts-node scripts/deploy/writeChainConfig.ts
 
-# deploy contracts
+# # deploy contracts
+# # update overrides in config.ts if needed
 npx hardhat run scripts/deploy/deploy.ts
 
-# publish package
+# # publish package
 yarn build 
 
 npm publish
 
-# upload s3 config
+# # upload s3 config
 npx ts-node scripts/rpcConfig/uploadS3Config.ts

@@ -21,7 +21,7 @@ const main = async () => {
       title: chain.toString(),
       value: chain,
     }));
-    choices = choices.filter(c => c.value !== chain)
+    choices = choices.filter((c) => c.value !== chain);
     const configResponse = await prompts([
       {
         name: "chains",
