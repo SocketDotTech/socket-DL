@@ -8,6 +8,5 @@ export const Currency = {
   [ChainSlug.SX_NETWORK_TESTNET]: NativeTokens["sx-network-2"],
   [ChainSlug.SX_NETWORK]: NativeTokens["sx-network-2"],
   [ChainSlug.MANTLE]: NativeTokens.mantle,
-  [ChainSlug.BASE_TESTNET]: NativeTokens["undefined"],
-}
-;
+  [ChainSlug.BSC_TESTNET]: NativeTokens["binancecoin"],
+};

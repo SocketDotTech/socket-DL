@@ -16,4 +16,5 @@ export const ethLikeChains = [
   ChainSlug.GOERLI,
   ChainSlug.VICTION_TESTNET,
   ChainSlug.SYNDR_SEPOLIA_L3,
+  ChainSlug.BSC_TESTNET,
 ];

@@ -9,18 +9,22 @@ import "hardhat-change-network";
 
 import { config as dotenvConfig } from "dotenv";
 import type { HardhatUserConfig } from "hardhat/config";
+import type {
+  HardhatNetworkAccountUserConfig,
+  NetworkUserConfig,
+} from "hardhat/types";
 import { resolve } from "path";
 import fs from "fs";
 
 import "./tasks/accounts";
+import { getJsonRpcUrl } from "./scripts/constants/networks";
 import {
   ChainId,
   ChainSlug,
+  ChainSlugToId,
   HardhatChainName,
   hardhatChainNameToSlug,
 } from "./src";
-import { HardhatNetworkAccountUserConfig } from "hardhat/types";
-import { getChainConfig } from "./scripts/deploy/utils";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -32,6 +36,14 @@ const isProduction = process.env.NODE_ENV === "production";
 const privateKey: HardhatNetworkAccountUserConfig = process.env
   .SOCKET_SIGNER_KEY as unknown as HardhatNetworkAccountUserConfig;
 
+function getChainConfig(chainSlug: ChainSlug): NetworkUserConfig {
+  return {
+    accounts: [`0x${privateKey}`],
+    chainId: ChainSlugToId[chainSlug],
+    url: getJsonRpcUrl(chainSlug),
+  };
+}
+
 function getRemappings() {
   return fs
     .readFileSync("remappings.txt", "utf8")
@@ -40,106 +52,65 @@ function getRemappings() {
     .map((line) => line.trim().split("="));
 }
 
-export const networks = {
-  [HardhatChainName.ARBITRUM_GOERLI]: getChainConfig(
-    ChainSlug.ARBITRUM_GOERLI,
-    privateKey
-  ),
-  [HardhatChainName.OPTIMISM_GOERLI]: getChainConfig(
-    ChainSlug.OPTIMISM_GOERLI,
-    privateKey
-  ),
-  [HardhatChainName.ARBITRUM_SEPOLIA]: getChainConfig(
-    ChainSlug.ARBITRUM_SEPOLIA,
-    privateKey
-  ),
-  [HardhatChainName.OPTIMISM_SEPOLIA]: getChainConfig(
-    ChainSlug.OPTIMISM_SEPOLIA,
-    privateKey
-  ),
-  [HardhatChainName.POLYGON_MAINNET]: getChainConfig(
-    ChainSlug.POLYGON_MAINNET,
-    privateKey
-  ),
-  [HardhatChainName.ARBITRUM]: getChainConfig(ChainSlug.ARBITRUM, privateKey),
-  [HardhatChainName.BSC]: getChainConfig(ChainSlug.BSC, privateKey),
-  [HardhatChainName.GOERLI]: getChainConfig(ChainSlug.GOERLI, privateKey),
-  [HardhatChainName.MAINNET]: getChainConfig(ChainSlug.MAINNET, privateKey),
-  [HardhatChainName.OPTIMISM]: getChainConfig(ChainSlug.OPTIMISM, privateKey),
-  [HardhatChainName.POLYGON_MUMBAI]: getChainConfig(
-    ChainSlug.POLYGON_MUMBAI,
-    privateKey
-  ),
-  [HardhatChainName.SEPOLIA]: getChainConfig(ChainSlug.SEPOLIA, privateKey),
-  [HardhatChainName.AEVO_TESTNET]: getChainConfig(
-    ChainSlug.AEVO_TESTNET,
-    privateKey
-  ),
-  [HardhatChainName.AEVO]: getChainConfig(ChainSlug.AEVO, privateKey),
-  [HardhatChainName.LYRA_TESTNET]: getChainConfig(
-    ChainSlug.LYRA_TESTNET,
-    privateKey
-  ),
-  [HardhatChainName.LYRA]: getChainConfig(ChainSlug.LYRA, privateKey),
-  [HardhatChainName.XAI_TESTNET]: getChainConfig(
-    ChainSlug.XAI_TESTNET,
-    privateKey
-  ),
-  [HardhatChainName.SX_NETWORK_TESTNET]: getChainConfig(
-    ChainSlug.SX_NETWORK_TESTNET,
-    privateKey
-  ),
-  [HardhatChainName.SX_NETWORK]: getChainConfig(
-    ChainSlug.SX_NETWORK,
-    privateKey
-  ),
-  [HardhatChainName.MODE_TESTNET]: getChainConfig(
-    ChainSlug.MODE_TESTNET,
-    privateKey
-  ),
-  [HardhatChainName.VICTION_TESTNET]: getChainConfig(
-    ChainSlug.VICTION_TESTNET,
-    privateKey
-  ),
-  [HardhatChainName.BASE]: getChainConfig(ChainSlug.BASE, privateKey),
-  [HardhatChainName.MODE]: getChainConfig(ChainSlug.MODE, privateKey),
-  [HardhatChainName.ANCIENT8_TESTNET]: getChainConfig(
-    ChainSlug.ANCIENT8_TESTNET,
-    privateKey
-  ),
-  [HardhatChainName.ANCIENT8_TESTNET2]: getChainConfig(
-    ChainSlug.ANCIENT8_TESTNET2,
-    privateKey
-  ),
-  [HardhatChainName.HOOK_TESTNET]: getChainConfig(
-    ChainSlug.HOOK_TESTNET,
-    privateKey
-  ),
-  [HardhatChainName.HOOK]: getChainConfig(ChainSlug.HOOK, privateKey),
-  [HardhatChainName.PARALLEL]: getChainConfig(ChainSlug.PARALLEL, privateKey),
-  [HardhatChainName.MANTLE]: getChainConfig(ChainSlug.MANTLE, privateKey),
-  [HardhatChainName.REYA_CRONOS]: getChainConfig(
-    ChainSlug.REYA_CRONOS,
-    privateKey
-  ),
-  [HardhatChainName.REYA]: getChainConfig(ChainSlug.REYA, privateKey),
-  [HardhatChainName.SYNDR_SEPOLIA_L3]: getChainConfig(
-    ChainSlug.SYNDR_SEPOLIA_L3,
-    privateKey
-  ),
-  [HardhatChainName.POLYNOMIAL_TESTNET]: getChainConfig(
-    ChainSlug.POLYNOMIAL_TESTNET,
-    privateKey
-  ),
-  [HardhatChainName.BSC_TESTNET]: getChainConfig(
-    ChainSlug.BSC_TESTNET,
-    privateKey
-  ),
-};
-
 let liveNetworks = {};
 if (isProduction) {
-  liveNetworks = networks;
+  liveNetworks = {
+    [HardhatChainName.ARBITRUM_GOERLI]: getChainConfig(
+      ChainSlug.ARBITRUM_GOERLI
+    ),
+    [HardhatChainName.OPTIMISM_GOERLI]: getChainConfig(
+      ChainSlug.OPTIMISM_GOERLI
+    ),
+    [HardhatChainName.ARBITRUM_SEPOLIA]: getChainConfig(
+      ChainSlug.ARBITRUM_SEPOLIA
+    ),
+    [HardhatChainName.OPTIMISM_SEPOLIA]: getChainConfig(
+      ChainSlug.OPTIMISM_SEPOLIA
+    ),
+    [HardhatChainName.POLYGON_MAINNET]: getChainConfig(
+      ChainSlug.POLYGON_MAINNET
+    ),
+    [HardhatChainName.ARBITRUM]: getChainConfig(ChainSlug.ARBITRUM),
+    [HardhatChainName.BSC]: getChainConfig(ChainSlug.BSC),
+    [HardhatChainName.BSC_TESTNET]: getChainConfig(ChainSlug.BSC_TESTNET),
+    [HardhatChainName.GOERLI]: getChainConfig(ChainSlug.GOERLI),
+    [HardhatChainName.MAINNET]: getChainConfig(ChainSlug.MAINNET),
+    [HardhatChainName.OPTIMISM]: getChainConfig(ChainSlug.OPTIMISM),
+    [HardhatChainName.SEPOLIA]: getChainConfig(ChainSlug.SEPOLIA),
+    [HardhatChainName.AEVO_TESTNET]: getChainConfig(ChainSlug.AEVO_TESTNET),
+    [HardhatChainName.AEVO]: getChainConfig(ChainSlug.AEVO),
+    [HardhatChainName.LYRA_TESTNET]: getChainConfig(ChainSlug.LYRA_TESTNET),
+    [HardhatChainName.LYRA]: getChainConfig(ChainSlug.LYRA),
+    [HardhatChainName.XAI_TESTNET]: getChainConfig(ChainSlug.XAI_TESTNET),
+    [HardhatChainName.SX_NETWORK_TESTNET]: getChainConfig(
+      ChainSlug.SX_NETWORK_TESTNET
+    ),
+    [HardhatChainName.SX_NETWORK]: getChainConfig(ChainSlug.SX_NETWORK),
+    [HardhatChainName.MODE_TESTNET]: getChainConfig(ChainSlug.MODE_TESTNET),
+    [HardhatChainName.VICTION_TESTNET]: getChainConfig(
+      ChainSlug.VICTION_TESTNET
+    ),
+    [HardhatChainName.BASE]: getChainConfig(ChainSlug.BASE),
+    [HardhatChainName.MODE]: getChainConfig(ChainSlug.MODE),
+    [HardhatChainName.ANCIENT8_TESTNET]: getChainConfig(
+      ChainSlug.ANCIENT8_TESTNET
+    ),
+    [HardhatChainName.ANCIENT8_TESTNET2]: getChainConfig(
+      ChainSlug.ANCIENT8_TESTNET2
+    ),
+    [HardhatChainName.HOOK_TESTNET]: getChainConfig(ChainSlug.HOOK_TESTNET),
+    [HardhatChainName.HOOK]: getChainConfig(ChainSlug.HOOK),
+    [HardhatChainName.PARALLEL]: getChainConfig(ChainSlug.PARALLEL),
+    [HardhatChainName.MANTLE]: getChainConfig(ChainSlug.MANTLE),
+    [HardhatChainName.REYA_CRONOS]: getChainConfig(ChainSlug.REYA_CRONOS),
+    [HardhatChainName.REYA]: getChainConfig(ChainSlug.REYA),
+    [HardhatChainName.SYNDR_SEPOLIA_L3]: getChainConfig(
+      ChainSlug.SYNDR_SEPOLIA_L3
+    ),
+    [HardhatChainName.POLYNOMIAL_TESTNET]: getChainConfig(
+      ChainSlug.POLYNOMIAL_TESTNET
+    ),
+  };
 }
 
 const config: HardhatUserConfig = {
@@ -161,7 +132,6 @@ const config: HardhatUserConfig = {
       optimisticEthereum: process.env.OPTIMISM_API_KEY || "",
       optimisticTestnet: process.env.OPTIMISM_API_KEY || "",
       polygon: process.env.POLYGONSCAN_API_KEY || "",
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       aevoTestnet: process.env.AEVO_API_KEY || "",
       lyraTestnet: process.env.LYRA_API_KEY || "",
       lyra: process.env.LYRA_API_KEY || "",

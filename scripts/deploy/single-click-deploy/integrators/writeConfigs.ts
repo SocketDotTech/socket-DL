@@ -4,6 +4,7 @@ import prompts from "prompts";
 
 import { updateSDK, buildEnvFile, updateConfig } from "./utils";
 import {
+  ChainId,
   ChainSlug,
   ChainType,
   DeploymentMode,
@@ -21,7 +22,7 @@ import { RoleOwners } from "../../../constants";
 export async function addChainToSDK() {
   const currencyChoices = [...Object.keys(NativeTokens), "other"];
 
-  const response = await prompts([
+  const rpcResponse = await prompts([
     {
       name: "rpc",
       type: "text",
@@ -34,6 +35,21 @@ export async function addChainToSDK() {
       message:
         "Enter chain name (without spaces, use underscore instead of spaces)",
     },
+  ]);
+
+  const chainId = await getChainId(rpcResponse.rpc);
+
+  const filteredChain = Object.values(ChainId).filter((c) => c == chainId);
+  if (filteredChain.length > 0) {
+    console.log("Chain already added!");
+    return {
+      response: { rpc: rpcResponse.rpc, chainName: rpcResponse.chainName },
+      chainId,
+      isAlreadyAdded: true,
+    };
+  }
+
+  const response = await prompts([
     {
       name: "isMainnet",
       type: "toggle",
@@ -52,9 +68,11 @@ export async function addChainToSDK() {
       choices: currencyChoices,
     },
   ]);
+  response.rpc = rpcResponse.rpc;
+  response.chainName = rpcResponse.chainName;
 
   let isNewNative = false;
-  let currency = response.currency;
+  let currency = currencyChoices[response.currency];
   if (response.currency == currencyChoices.length - 1) {
     const currencyPromptResponse = await prompts([
       {
@@ -70,17 +88,16 @@ export async function addChainToSDK() {
   }
 
   // update types and enums
-  const chainId = await getChainId(response.rpc);
   await updateSDK(
     response.chainName,
     chainId,
     currency,
-    response.chainType as ChainType,
+    response.chainType,
     response.isMainnet,
     isNewNative
   );
 
-  return { response, chainId };
+  return { response, chainId, isAlreadyAdded: false };
 }
 
 export async function writeConfigs() {
@@ -230,7 +247,7 @@ const validateCoingeckoId = async (coingeckoId: string) => {
     return "Invalid coingecko Id";
   }
 
-  // todo use either public api
+  // todo use either public api key or a list cached somewhere in dl updated frequently
   return true;
 };
 

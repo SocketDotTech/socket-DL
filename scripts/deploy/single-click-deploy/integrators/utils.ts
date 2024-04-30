@@ -42,14 +42,13 @@ export const buildEnvFile = async (
     configsString +
     `\nDEPLOYMENT_MODE="prod"\nSOCKET_OWNER_ADDRESS=${ownerAddress}\nSOCKET_SIGNER_KEY=${pk}\nNEW_RPC=${rpc}\n`;
   await writeFile(".env", configsString);
-  console.log("Created env");
 };
 
 export const updateSDK = async (
   chainName: string,
   chainId: number,
   nativeToken: string,
-  chainType: ChainType,
+  chainType: number,
   isMainnet: boolean,
   isNewNative: boolean
 ) => {
@@ -115,31 +114,31 @@ export const updateSDK = async (
     );
   }
 
-  if (chainType === ChainType.arbChain) {
+  if (chainType === 0) {
     await updateFile(
       "arbChains.ts",
       `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
       ",\n]"
     );
-  } else if (chainType === ChainType.arbL3Chain) {
+  } else if (chainType === 1) {
     await updateFile(
       "arbL3Chains.ts",
       `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
       ",\n]"
     );
-  } else if (chainType === ChainType.opStackL2Chain) {
+  } else if (chainType === 2) {
     await updateFile(
       "opStackChains.ts",
       `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
       ",\n]"
     );
-  } else if (chainType === ChainType.polygonCDKChain) {
+  } else if (chainType === 3) {
     await updateFile(
       "polygonCDKChains.ts",
       `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
       ",\n]"
     );
-  } else if (chainType === ChainType.default) {
+  } else {
     await updateFile(
       "ethLikeChains.ts",
       `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
