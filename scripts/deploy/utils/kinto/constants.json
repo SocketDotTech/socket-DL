@@ -39,7 +39,7 @@
         ]
       }
     },
-    "gasParams": {
+    "userOpGasParams": {
       "callGasLimit": 4000000,
       "verificationGasLimit": 210000,
       "preVerificationGas": 21000

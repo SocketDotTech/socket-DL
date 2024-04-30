@@ -44,6 +44,18 @@ type UserOperation = {
   signature: string;
 };
 
+type GasParams = {
+  gasLimit?: BigNumber;
+  maxFeePerGas?: BigNumber;
+  maxPriorityFeePerGas?: BigNumber;
+};
+
+type UserOpGasParams = {
+  callGasLimit: number;
+  verificationGasLimit: number;
+  preVerificationGas: number;
+};
+
 // deployer utils
 
 const deployOnKinto = async (
@@ -74,7 +86,9 @@ const deployOnKinto = async (
 
   // whitelist contract on Socket's kinto wallet
   await whitelistApp(contractAddr, signer);
-  return (await ethers.getContractFactory(contractName)).attach(contractAddr);
+  return (await ethers.getContractFactory(contractName))
+    .attach(contractAddr)
+    .connect(signer);
 };
 
 const getOrDeployDeployer = async (signer: SignerWithAddress | Wallet) => {
@@ -101,7 +115,7 @@ const deployWithDeployer = async (
   signer: SignerWithAddress | Wallet
 ): Promise<Address> => {
   const chainId = await signer.getChainId();
-  const { contracts: kinto, gasParams } = KINTO_DATA;
+  const { contracts: kinto, userOpGasParams } = KINTO_DATA;
   const deployer = await getOrDeployDeployer(signer);
   console.log(`Deployer address: ${deployer}`);
 
@@ -162,8 +176,7 @@ const deployWithDeployer = async (
     entryPoint.address,
     paymasterAddr,
     nonce,
-    executeCalldata,
-    gasParams
+    executeCalldata
   );
 
   // compute the contract address
@@ -198,8 +211,7 @@ const deployWithDeployer = async (
       entryPoint.address,
       paymasterAddr,
       nonce,
-      executeCalldata,
-      gasParams
+      executeCalldata
     );
 
     //// (3). claim ownership
@@ -222,15 +234,17 @@ const deployWithDeployer = async (
       entryPoint.address,
       paymasterAddr,
       nonce,
-      calldataClaimOwner,
-      gasParams
+      calldataClaimOwner
     );
   }
 
   // gas check
   const feeData = await signer.provider.getFeeData();
   const maxFeePerGas = feeData.maxFeePerGas;
-  const requiredPrefund = calculateRequiredPrefund(gasParams, maxFeePerGas);
+  const requiredPrefund = calculateRequiredPrefund(
+    userOpGasParams,
+    maxFeePerGas
+  );
   const ethMaxCost = calculateEthMaxCost(requiredPrefund, maxFeePerGas).mul(
     userOps.length
   );
@@ -250,7 +264,9 @@ const deployWithDeployer = async (
 
   console.log(`- ${name} contract deployed @ ${contractAddr}`);
   try {
-    const owner = await (await getInstance(contractName, contractAddr)).owner();
+    const owner = await (
+      await getInstance(contractName, contractAddr, signer)
+    ).owner();
     console.log(`- ${name} contract owner is ${owner}`);
   } catch (error) {
     console.error("Error getting owner:", error);
@@ -304,9 +320,10 @@ const isKinto = async (chainId: number): Promise<boolean> =>
 const handleOps = async (
   userOps: PopulatedTransaction[] | UserOperation[],
   signer: Signer | Wallet,
+  gasParams: GasParams = {},
   withPaymaster = false
 ): Promise<TransactionReceipt> => {
-  const { contracts: kinto, gasParams } = KINTO_DATA;
+  const { contracts: kinto } = KINTO_DATA;
 
   const entryPoint = new ethers.Contract(
     kinto.entryPoint.address,
@@ -342,26 +359,17 @@ const handleOps = async (
         entryPoint.address,
         withPaymaster ? paymaster.address : "0x",
         nonce,
-        calldata,
-        gasParams
+        calldata
       );
       nonce = nonce.add(1);
     }
     userOps = ops;
   }
 
-  const handleOpsEstimate = await estimateGas(signer, entryPoint, userOps);
-  const txCost = handleOpsEstimate.gasLimit.mul(handleOpsEstimate.maxFeePerGas);
-  console.log("- Estimated gas cost (ETH):", ethers.utils.formatEther(txCost));
-
   const txResponse: TransactionResponse = await entryPoint.handleOps(
     userOps,
     await signer.getAddress(),
-    {
-      gasLimit: handleOpsEstimate.gasLimit,
-      maxFeePerGas: handleOpsEstimate.maxFeePerGas,
-      maxPriorityFeePerGas: handleOpsEstimate.maxPriorityFeePerGas,
-    }
+    gasParams
   );
   const receipt: TransactionReceipt = await txResponse.wait();
   if (hasErrors(receipt))
@@ -465,10 +473,10 @@ const createUserOp = async (
   entryPoint: Address,
   paymaster: Address,
   nonce: BigNumber,
-  callData: string,
-  gasParams: any
-): Promise<object> => {
-  const { callGasLimit, verificationGasLimit, preVerificationGas } = gasParams;
+  callData: string
+): Promise<UserOperation> => {
+  const { callGasLimit, verificationGasLimit, preVerificationGas } =
+    KINTO_DATA.userOpGasParams as UserOpGasParams;
   const userOp = {
     sender,
     nonce,
@@ -529,21 +537,25 @@ const calculateEthMaxCost = (
   maxFeePerGas: BigNumber
 ): BigNumber => requiredPrefund.add(COST_OF_POST.mul(maxFeePerGas));
 
-const estimateGas = async (signer: Signer, entryPoint: Contract, userOps) => {
+const estimateGas = async (
+  signer: Signer,
+  entryPoint: Contract,
+  userOps: UserOperation[]
+) => {
   const feeData = await signer.provider.getFeeData();
 
-  let gasParams;
+  let gasParams: GasParams;
   try {
     const gasLimit = await entryPoint.estimateGas.handleOps(
       userOps,
       await signer.getAddress()
     );
-    const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toNumber();
-    const maxFeePerGas = feeData.maxFeePerGas.toNumber();
+    const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas;
+    const maxFeePerGas = feeData.maxFeePerGas;
     gasParams = {
+      gasLimit,
       maxPriorityFeePerGas,
       maxFeePerGas,
-      gasLimit,
     };
   } catch (error) {
     console.log("- Error estimating gas limit, using default values");
@@ -553,13 +565,20 @@ const estimateGas = async (signer: Signer, entryPoint: Contract, userOps) => {
       gasLimit: BigNumber.from("400000000"),
     };
   }
+
+  const txCost = gasParams.gasLimit.mul(gasParams.maxFeePerGas);
+  console.log("- Estimated gas cost (ETH):", ethers.utils.formatEther(txCost));
+
   return gasParams;
 };
 
 const getInstance = async (
   contractName: string,
-  address: Address
+  address: Address,
+  signer: SignerWithAddress | Wallet
 ): Promise<Contract> =>
-  (await ethers.getContractFactory(contractName)).attach(address);
+  (await ethers.getContractFactory(contractName))
+    .attach(address)
+    .connect(signer);
 
-export { isKinto, handleOps, deployOnKinto, whitelistApp };
+export { isKinto, handleOps, deployOnKinto, whitelistApp, estimateGas };
