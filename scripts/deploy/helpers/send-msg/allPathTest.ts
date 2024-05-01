@@ -194,11 +194,7 @@ export const sendMessagesToAllPaths = async (params: {
             await Promise.all(
               tempArray.map(async (c) => {
                 // console.log(c)
-                console.log(
-                  to,
-                    data,
-                    value,
-                )
+                console.log(to, data, value);
                 let response = await relayTx(
                   {
                     to,

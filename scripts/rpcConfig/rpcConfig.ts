@@ -84,7 +84,7 @@ const getChainData = async (
 ): Promise<S3ChainConfig> => {
   return {
     rpc: rpcs[chainSlug],
-    explorer:explorers[chainSlug],
+    explorer: explorers[chainSlug],
     chainName: chainSlugToHardhatChainName[chainSlug],
     blockNumber: getBlockNumber(deploymentMode, chainSlug),
     siblings: getSiblings(deploymentMode, chainSlug),
@@ -92,7 +92,7 @@ const getChainData = async (
     nativeToken: getCurrency(chainSlug),
     chainType: getChainType(chainSlug),
     confirmations: confirmations[chainSlug],
-    icon:icons[chainSlug]
+    icon: icons[chainSlug],
   };
 };
 

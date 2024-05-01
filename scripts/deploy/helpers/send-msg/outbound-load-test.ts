@@ -150,7 +150,7 @@ export const main = async () => {
       remoteChainSlug,
       counterAddress
     );
-      console.log("fees : ", value.toString(), formatEther(value));
+    console.log("fees : ", value.toString(), formatEther(value));
     if (WAIT_FOR_TX) {
       await confirmAndWait(
         signer,
@@ -252,7 +252,7 @@ const confirmAndWait = async (
         numOfRequests,
         {
           value: BigNumber.from(value).mul(numOfRequests),
-          ...overrides(chainSlug)
+          ...overrides(chainSlug),
         }
       );
 

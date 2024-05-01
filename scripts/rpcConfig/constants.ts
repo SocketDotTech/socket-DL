@@ -51,8 +51,6 @@ export const rpcs = {
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 
-
-
 export const explorers = {
   [ChainSlug.AEVO]: "https://explorer.aevo.xyz",
   [ChainSlug.LYRA]: "https://explorer.lyra.finance",
@@ -61,7 +59,6 @@ export const explorers = {
   [ChainSlug.REYA]: "https://explorer.reya.network",
 };
 
-
 export const icons = {
   [ChainSlug.AEVO]: "",
   [ChainSlug.LYRA]: "",
@@ -69,7 +66,6 @@ export const icons = {
   [ChainSlug.MANTLE]: "",
   [ChainSlug.REYA]: "",
 };
-
 
 export const confirmations = {
   [ChainSlug.AEVO]: 2,
