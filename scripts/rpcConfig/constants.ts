@@ -11,7 +11,7 @@ export function checkEnvVar(envVar: string) {
 }
 
 export const prodVersion = "prod-1.0.10";
-export const devVersion = "dev-1.0.0";
+export const devVersion = "dev-1.0.1";
 
 export const rpcs = {
   [ChainSlug.AEVO]: checkEnvVar("AEVO_RPC"),
