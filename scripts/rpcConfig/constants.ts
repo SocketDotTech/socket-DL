@@ -10,7 +10,7 @@ export function checkEnvVar(envVar: string) {
   return value;
 }
 
-export const prodVersion = "prod-1.0.9";
+export const prodVersion = "prod-1.0.10";
 export const devVersion = "dev-1.0.0";
 
 export const rpcs = {
@@ -113,7 +113,7 @@ export const prodBatcherSupportedChainSlugs = [
   // ChainSlug.ANCIENT8_TESTNET2,
   ChainSlug.HOOK_TESTNET,
   ChainSlug.REYA_CRONOS,
-  // ChainSlug.SYNDR_SEPOLIA_L3,
+  ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.POLYNOMIAL_TESTNET,
   ChainSlug.BOB,
 ];
