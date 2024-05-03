@@ -129,7 +129,7 @@ export const prodBatcherSupportedChainSlugs = [
   // ChainSlug.ANCIENT8_TESTNET2,
   ChainSlug.HOOK_TESTNET,
   ChainSlug.REYA_CRONOS,
-  // ChainSlug.SYNDR_SEPOLIA_L3,
+  ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.POLYNOMIAL_TESTNET,
   ChainSlug.BOB,
 ];
