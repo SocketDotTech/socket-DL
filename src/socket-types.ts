@@ -227,6 +227,8 @@ export interface S3ChainConfig {
   nativeToken?: NativeTokens;
   chainType?: ChainType;
   chainTxData?: ChainTxData;
+  explorer?: string;
+  icon?: string;
 }
 
 export type S3Config = {

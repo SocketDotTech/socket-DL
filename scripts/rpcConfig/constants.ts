@@ -10,8 +10,8 @@ export function checkEnvVar(envVar: string) {
   return value;
 }
 
-export const prodVersion = "prod-1.0.10";
-export const devVersion = "dev-1.0.0";
+export const prodVersion = "prod-1.0.11";
+export const devVersion = "dev-1.0.1";
 
 export const rpcs = {
   [ChainSlug.AEVO]: checkEnvVar("AEVO_RPC"),
@@ -49,6 +49,22 @@ export const rpcs = {
   [ChainSlug.POLYNOMIAL_TESTNET]: checkEnvVar("POLYNOMIAL_TESTNET_RPC"),
   [ChainSlug.BOB]: checkEnvVar("BOB_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
+};
+
+export const explorers = {
+  [ChainSlug.AEVO]: "https://explorer.aevo.xyz",
+  [ChainSlug.LYRA]: "https://explorer.lyra.finance",
+  [ChainSlug.HOOK]: "https://hook.calderaexplorer.xyz",
+  [ChainSlug.MANTLE]: "https://explorer.mantle.xyz",
+  [ChainSlug.REYA]: "https://explorer.reya.network",
+};
+
+export const icons = {
+  [ChainSlug.AEVO]: "",
+  [ChainSlug.LYRA]: "",
+  [ChainSlug.HOOK]: "",
+  [ChainSlug.MANTLE]: "",
+  [ChainSlug.REYA]: "",
 };
 
 export const confirmations = {

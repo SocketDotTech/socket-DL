@@ -199,6 +199,16 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       jsonRpcUrl = process.env.ARBITRUM_SEPOLIA_RPC as string;
       break;
 
+    case HardhatChainName.KINTO:
+    case ChainId.KINTO:
+      jsonRpcUrl = process.env.KINTO_RPC as string;
+      break;
+
+    case HardhatChainName.KINTO_DEVNET:
+    case ChainId.KINTO_DEVNET:
+      jsonRpcUrl = process.env.KINTO_DEVNET_RPC as string;
+      break;
+
     default:
       if (process.env.NEW_RPC) {
         jsonRpcUrl = process.env.NEW_RPC as string;
