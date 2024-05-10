@@ -2007,6 +2007,37 @@
       }
     }
   },
+  "412346": {
+    "SignatureVerifier": "0x2e0A292D1Ed4f6DD69FA10dd87956F4F5cC59e4C",
+    "Hasher": "0x4736D6EDD681B30db42CE4dAA156aB02283B3EEf",
+    "CapacitorFactory": "0x338A439Bb624674597D8a47ee34776C5071fB2A2",
+    "Socket": "0xC466F40823345733622e453dBd022f115F75E1C9",
+    "ExecutionManager": "0x96c91707004f6268d6C38D331fdfe7E9a60f392E",
+    "TransmitManager": "0xc11070fD9e6b88a043090C032807d804e76Afe0c",
+    "FastSwitchboard": "0x0a909C528280B8676bEC32974d27A98Cc4ea3629",
+    "OptimisticSwitchboard": "0x6262730cf1639CFB451B930e81D9011037d83bBe",
+    "SocketBatcher": "0xEb174818B343791ae70574eEC7BB41F3dF42247C",
+    "Counter": "0xb101ecA37dBDe4a8b09E6fc667ED1702C8681c5c",
+    "SocketSimulator": "0xf5988925c2f95E03bD5f8f6B493dc5A58686729e",
+    "SimulatorUtils": "0xf24B16691bFD4BFAFbB491f6a652a47C3044a8d0",
+    "SwitchboardSimulator": "0x62d13B787BffD3C73B20eD329C9C54B66821EB49",
+    "CapacitorSimulator": "0x3150A8d302e86B4bCCFAc0a4485873af084C4D5f",
+    "startBlock": 91,
+    "integrations": {
+      "421614": {
+        "FAST": {
+          "capacitor": "0x54deeb51BD5B32DdE6032F1fcB518a2E629A87E5",
+          "decapacitor": "0xa6D1EDC916BC605a89268C93c6d97D22EC195967",
+          "switchboard": "0x0a909C528280B8676bEC32974d27A98Cc4ea3629"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0xbdD51293906F34dedE4f12ad785c6B672eA9AC54",
+          "decapacitor": "0xf29D30a55eD16A48e41a72F5ddd0297CFC81e7da",
+          "switchboard": "0x6262730cf1639CFB451B930e81D9011037d83bBe"
+        }
+      }
+    }
+  },
   "421613": {
     "SignatureVerifier": "0x52e987409522F2abeaD9A66B87B8914Dc5A071D9",
     "Hasher": "0x9737201f185df1d8d1165776af0bF08874711F1f",
@@ -2166,6 +2197,18 @@
         "OPTIMISTIC": {
           "capacitor": "0xa15d28D33FbD0eE67C456076F9d2A2B48F847804",
           "decapacitor": "0x3B9c5A6991874525ba5E44cB113B871b818d2b44",
+          "switchboard": "0xEDF6dB2f3BC8deE014762e0141EE4CA19d685dBd"
+        }
+      },
+      "412346": {
+        "FAST": {
+          "capacitor": "0x67e7D52de5F5eFb1aD4a9d095CC4DbDf27D1e5E0",
+          "decapacitor": "0x44e08e987184F67599C89B50Fc35D56090e48C24",
+          "switchboard": "0xB9EDe9aaEaA40e35033ABBC872D141950d08cc4d"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x6462b018347198eaA09BEB4191C477D50d9081d5",
+          "decapacitor": "0xDF728EaBDC92Fc7eD73F3FCEB1F6F1c56c5E9BF3",
           "switchboard": "0xEDF6dB2f3BC8deE014762e0141EE4CA19d685dBd"
         }
       },
