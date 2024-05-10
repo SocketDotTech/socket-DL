@@ -39,4 +39,6 @@ export const ChainSlugToKey = {
   [ChainSlug.SYNDR_SEPOLIA_L3]: HardhatChainName.SYNDR_SEPOLIA_L3,
   [ChainSlug.POLYNOMIAL_TESTNET]: HardhatChainName.POLYNOMIAL_TESTNET,
   [ChainSlug.BOB]: HardhatChainName.BOB,
+  [ChainSlug.KINTO]: HardhatChainName.KINTO,
+  [ChainSlug.KINTO_DEVNET]: HardhatChainName.KINTO_DEVNET,
 };

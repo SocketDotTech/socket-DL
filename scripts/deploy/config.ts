@@ -274,6 +274,18 @@ export const overrides = (
       gasLimit: 4_000_000,
       gasPrice: 100_000_000,
     };
+  } else if (chain == ChainSlug.KINTO) {
+    return {
+      type,
+      gasLimit: 4_000_000,
+      gasPrice,
+    };
+  } else if (chain == ChainSlug.KINTO_DEVNET) {
+    return {
+      type,
+      gasLimit: 4_000_000,
+      gasPrice,
+    };
   } else if (chainConfig[chain] && chainConfig[chain].overrides) {
     return chainConfig[chain].overrides!;
   } else return { type, gasLimit, gasPrice };
