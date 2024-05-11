@@ -65,10 +65,10 @@ const signUserOp = async (userOp, entryPointAddress, chainId, privateKeys) => {
   return signature;
 };
 
-const sign = async (privateKey: Address): Promise<string> => {
+const sign = async (privateKey: Address, chainId: number): Promise<string> => {
   const wallet = new ethers.Wallet(
     privateKey,
-    getProviderFromChainSlug(ChainSlug.KINTO)
+    getProviderFromChainSlug(chainId)
   );
   const kintoID = new ethers.Contract(
     KINTO_DATA.contracts.kintoID.address,
@@ -79,7 +79,7 @@ const sign = async (privateKey: Address): Promise<string> => {
   const domain = {
     name: "KintoID",
     version: "1",
-    chainId: ChainId.KINTO,
+    chainId,
     verifyingContract: KINTO_DATA.contracts.kintoID.address,
   };
 
