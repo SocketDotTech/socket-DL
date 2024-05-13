@@ -10,7 +10,7 @@ export function checkEnvVar(envVar: string) {
   return value;
 }
 
-export const prodVersion = "prod-1.0.11";
+export const prodVersion = "prod-1.0.12";
 export const devVersion = "dev-1.0.1";
 
 export const rpcs = {
@@ -48,6 +48,8 @@ export const rpcs = {
   [ChainSlug.SYNDR_SEPOLIA_L3]: checkEnvVar("SYNDR_SEPOLIA_L3_RPC"),
   [ChainSlug.POLYNOMIAL_TESTNET]: checkEnvVar("POLYNOMIAL_TESTNET_RPC"),
   [ChainSlug.BOB]: checkEnvVar("BOB_RPC"),
+  [ChainSlug.KINTO]: checkEnvVar("KINTO_RPC"),
+  [ChainSlug.KINTO_DEVNET]: checkEnvVar("KINTO_DEVNET_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
 };
 
@@ -103,6 +105,8 @@ export const confirmations = {
   [ChainSlug.SYNDR_SEPOLIA_L3]: 0,
   [ChainSlug.POLYNOMIAL_TESTNET]: 0,
   [ChainSlug.BOB]: 0,
+  [ChainSlug.KINTO]: 0,
+  [ChainSlug.KINTO_DEVNET]: 0,
 };
 
 export const prodBatcherSupportedChainSlugs = [
@@ -132,6 +136,8 @@ export const prodBatcherSupportedChainSlugs = [
   ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.POLYNOMIAL_TESTNET,
   ChainSlug.BOB,
+  // ChainSlug.KINTO,
+  ChainSlug.KINTO_DEVNET,
 ];
 
 export const prodFeesUpdaterSupportedChainSlugs = (): ChainSlug[] => {
