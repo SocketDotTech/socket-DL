@@ -29,6 +29,8 @@ export const arbChains = [
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.ARBITRUM_SEPOLIA,
   ChainSlug.PARALLEL,
+  ChainSlug.REYA_CRONOS,
+  ChainSlug.REYA,
 ];
 
 export const polygonCDKChains = [
@@ -50,8 +52,6 @@ export const ethLikeChains = [
   ChainSlug.SX_NETWORK_TESTNET,
   ChainSlug.ANCIENT8_TESTNET,
   ChainSlug.ANCIENT8_TESTNET2,
-  ChainSlug.REYA_CRONOS,
-  ChainSlug.REYA,
   ChainSlug.BSC_TESTNET,
   ChainSlug.GOERLI,
   ChainSlug.VICTION_TESTNET,
