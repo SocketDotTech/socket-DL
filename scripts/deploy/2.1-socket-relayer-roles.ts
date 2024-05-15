@@ -100,7 +100,7 @@ const main = async () => {
   // add each relayer to the allowlist of the SocketBatcher
   for (const relayer of relayers) {
     const socketBatcher = (await getInstance(CORE_CONTRACTS.SocketBatcher, addresses[CORE_CONTRACTS.SocketBatcher])).connect(wallet);
-    const txRequest = await socketBatcher.populateTransaction.allowlist(relayer, true, {
+    const txRequest = await socketBatcher.populateTransaction.updateAllowlist(relayer, true, {
       ...overrides(await wallet.getChainId()),
     });
     const registerTx = await handleOps([txRequest], wallet);
