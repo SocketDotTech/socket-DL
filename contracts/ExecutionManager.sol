@@ -6,7 +6,7 @@ import "./interfaces/ISocket.sol";
 import "./interfaces/ISignatureVerifier.sol";
 import "./libraries/RescueFundsLib.sol";
 import "./utils/AccessControlExtended.sol";
-import {WITHDRAW_ROLE, RESCUE_ROLE, EXECUTOR_ROLE, FEES_UPDATER_ROLE} from "./utils/AccessRoles.sol";
+import {WITHDRAW_ROLE, RESCUE_ROLE, EXECUTOR_ROLE, FEES_UPDATER_ROLE, SOCKET_RELAYER_ROLE} from "./utils/AccessRoles.sol";
 import {FEES_UPDATE_SIG_IDENTIFIER, RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENTIFIER, MSG_VALUE_MAX_THRESHOLD_SIG_IDENTIFIER, MSG_VALUE_MIN_THRESHOLD_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 
 /**
@@ -224,6 +224,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         external
         payable
         override
+        onlyRole(SOCKET_RELAYER_ROLE)
         returns (uint128 executionFee, uint128 transmissionFees)
     {
         if (msg.value >= type(uint128).max) revert InvalidMsgValue();
@@ -568,7 +569,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         uint32 siblingChainSlug_,
         address switchboard_,
         uint128 amount_
-    ) external override {
+    ) external override onlyRole(SOCKET_RELAYER_ROLE) {
         if (totalSwitchboardFees[switchboard_][siblingChainSlug_] < amount_)
             revert InsufficientFees();
 
@@ -590,7 +591,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     function withdrawTransmissionFees(
         uint32 siblingChainSlug_,
         uint128 amount_
-    ) external override {
+    ) external override onlyRole(SOCKET_RELAYER_ROLE) {
         if (
             totalExecutionAndTransmissionFees[siblingChainSlug_]
                 .totalTransmissionFees < amount_

@@ -63,4 +63,122 @@ contract SocketBatcherTest is Setup {
             address(_b.configs__[socketConfigIndex].switchboard__)
         );
     }
+
+    function testSealBatchWithoutSocketRelayerRole() external {
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(batcher__.owner());
+        batcher__.revokeRole(SOCKET_RELAYER_ROLE, address(this));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+        batcher__.sealBatch(address(0), new SocketBatcher.SealRequest[](0));
+    }
+
+    function testProposeBatchWithoutSocketRelayerRole() external {
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(batcher__.owner());
+        batcher__.revokeRole(SOCKET_RELAYER_ROLE, address(this));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+        batcher__.proposeBatch(address(0), new SocketBatcher.ProposeRequest[](0));
+    }
+
+    function testSendBatchWithoutSocketRelayerRole() external {
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(batcher__.owner());
+        batcher__.revokeRole(SOCKET_RELAYER_ROLE, address(this));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+
+        batcher__.sendBatch(
+            address(0),
+            new SocketBatcher.SealRequest[](0),
+            new SocketBatcher.ProposeRequest[](0),
+            new SocketBatcher.AttestRequest[](0),
+            new SocketBatcher.ExecuteRequest[](0)
+        );
+    }
+    
+    function testExecuteBatchWithoutSocketRelayerRole() external {
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(batcher__.owner());
+        batcher__.revokeRole(SOCKET_RELAYER_ROLE, address(this));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+        batcher__.executeBatch(
+            address(0),
+            new SocketBatcher.ExecuteRequest[](0)
+        );
+    }
+
+    function testReceiveMessageBatchWithoutSocketRelayerRole() external {
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(batcher__.owner());
+        batcher__.revokeRole(SOCKET_RELAYER_ROLE, address(this));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+        batcher__.receiveMessageBatch(
+            address(0),
+            new SocketBatcher.ReceivePacketProofRequest[](0)
+        );
+    }
+
+    function testInitiateArbitrumNativeBatch() public {
+        SocketBatcher.ArbitrumNativeInitiatorRequest[] memory requests;
+
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(batcher__.owner());
+        batcher__.revokeRole(SOCKET_RELAYER_ROLE, address(this));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+        batcher__.initiateArbitrumNativeBatch(
+            address(0),
+            address(0),
+            address(0),
+            requests
+        );
+    }
+
+    function testWithdrawalsWithoutSocketRelayerRole() external {
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(batcher__.owner());
+        batcher__.revokeRole(SOCKET_RELAYER_ROLE, address(this));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+        batcher__.withdrawals(new address payable[](0), new uint256[](0));
+    }
 }

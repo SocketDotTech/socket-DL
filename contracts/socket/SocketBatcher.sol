@@ -9,7 +9,7 @@ import "../interfaces/ISocket.sol";
 import "../interfaces/ICapacitor.sol";
 import "../switchboard/default-switchboards/FastSwitchboard.sol";
 import "../interfaces/INativeRelay.sol";
-import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
+import {RESCUE_ROLE, SOCKET_RELAYER_ROLE } from "../utils/AccessRoles.sol";
 
 /**
  * @title SocketBatcher
@@ -291,7 +291,7 @@ contract SocketBatcher is AccessControl {
     function sealBatch(
         address socketAddress_,
         SealRequest[] calldata sealRequests_
-    ) external {
+    ) external onlyRole(SOCKET_RELAYER_ROLE) {
         _sealBatch(socketAddress_, sealRequests_);
     }
 
@@ -326,7 +326,7 @@ contract SocketBatcher is AccessControl {
     function proposeBatch(
         address socketAddress_,
         ProposeRequest[] calldata proposeRequests_
-    ) external {
+    ) external onlyRole(SOCKET_RELAYER_ROLE) {
         _proposeBatch(socketAddress_, proposeRequests_);
     }
 
@@ -370,7 +370,7 @@ contract SocketBatcher is AccessControl {
         ProposeRequest[] calldata proposeRequests_,
         AttestRequest[] calldata attestRequests_,
         ExecuteRequest[] calldata executeRequests_
-    ) external payable {
+    ) external payable onlyRole(SOCKET_RELAYER_ROLE) {
         _sealBatch(socketAddress_, sealRequests_);
         _proposeBatch(socketAddress_, proposeRequests_);
         _attestBatch(attestRequests_);
@@ -452,7 +452,7 @@ contract SocketBatcher is AccessControl {
     function executeBatch(
         address socketAddress_,
         ExecuteRequest[] calldata executeRequests_
-    ) external payable {
+    ) external payable onlyRole(SOCKET_RELAYER_ROLE) {
         _executeBatch(socketAddress_, executeRequests_);
     }
 
@@ -464,7 +464,7 @@ contract SocketBatcher is AccessControl {
     function receiveMessageBatch(
         address polygonRootReceiverAddress_,
         ReceivePacketProofRequest[] calldata receivePacketProofs_
-    ) external {
+    ) external onlyRole(SOCKET_RELAYER_ROLE) {
         uint256 receivePacketProofsLength = receivePacketProofs_.length;
         for (uint256 index = 0; index < receivePacketProofsLength; ) {
             INativeRelay(polygonRootReceiverAddress_).receiveMessage(
@@ -535,7 +535,7 @@ contract SocketBatcher is AccessControl {
         address remoteRefundAddress_,
         ArbitrumNativeInitiatorRequest[]
             calldata arbitrumNativeInitiatorRequests_
-    ) external payable {
+    ) external payable onlyRole(SOCKET_RELAYER_ROLE) {
         uint256 arbitrumNativeInitiatorRequestsLength = arbitrumNativeInitiatorRequests_
                 .length;
         uint256 totalMsgValue = msg.value;
@@ -578,7 +578,7 @@ contract SocketBatcher is AccessControl {
     function initiateNativeBatch(
         address switchboardAddress_,
         bytes32[] calldata nativePacketIds_
-    ) external {
+    ) external onlyRole(SOCKET_RELAYER_ROLE) {
         uint256 nativePacketIdsLength = nativePacketIds_.length;
         for (uint256 index = 0; index < nativePacketIdsLength; ) {
             INativeRelay(switchboardAddress_).initiateNativeConfirmation(
@@ -594,7 +594,7 @@ contract SocketBatcher is AccessControl {
     function withdrawals(
         address payable[] memory addresses,
         uint[] memory amounts
-    ) public payable {
+    ) public payable onlyRole(SOCKET_RELAYER_ROLE) {
         uint256 totalAmount;
         for (uint i; i < addresses.length; i++) {
             totalAmount += amounts[i];

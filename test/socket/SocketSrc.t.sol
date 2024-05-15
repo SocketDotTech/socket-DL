@@ -61,6 +61,56 @@ contract SocketSrcTest is Setup {
 
         uint256 index = isFast ? 0 : 1;
         _configPlugContracts(index);
+
+        // grant role to this contract to be able to call SrcSocket
+        vm.prank(_a.socket__.owner());
+        _a.socket__.grantRole(SOCKET_RELAYER_ROLE, address(this));
+
+        // grant role to SrcCounter to be able to call Socket
+        vm.prank(_a.socket__.owner());
+        _a.socket__.grantRole(SOCKET_RELAYER_ROLE, address(srcCounter__));
+
+        // grant role to SrcSocket to be able to call ExecutionManager
+        vm.prank(_a.socket__.owner());
+        _a.executionManager__.grantRole(SOCKET_RELAYER_ROLE, address(_a.socket__));
+    }
+
+    function testOutboundWithoutSocketRelayerRole() external {
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(_b.socket__.owner());
+        _b.socket__.revokeRole(SOCKET_RELAYER_ROLE, address(this));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+        _b.socket__.outbound(
+            _a.chainSlug,
+            0,
+            bytes32(0),
+            bytes32(0),
+            bytes("")
+        );
+    }
+
+    function testSealWithoutSocketRelayerRole() external {
+        // grant role to this contract to be able to call SrcSocket
+        vm.prank(_a.socket__.owner());
+        _a.socket__.revokeRole(SOCKET_RELAYER_ROLE, address(this));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+        _a.socket__.seal(
+            0,
+            address(0),
+            "0x"
+        );
     }
 
     function testRegisterSwitchboardForSibling() external {

@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import "./SocketBase.sol";
+import {SOCKET_RELAYER_ROLE} from "../utils/AccessRoles.sol";
 
 /**
  * @title SocketSrc
@@ -83,6 +84,8 @@ abstract contract SocketSrc is SocketBase {
         bytes32 transmissionParams_,
         bytes calldata payload_
     ) external payable override returns (bytes32 msgId) {
+        if (!_hasRole(SOCKET_RELAYER_ROLE, msg.sender)) revert NoPermit(SOCKET_RELAYER_ROLE);
+
         PlugConfig memory plugConfig;
 
         // looks up the sibling plug address using the msg.sender as the local plug address
@@ -302,7 +305,7 @@ abstract contract SocketSrc is SocketBase {
         uint256 batchSize_,
         address capacitorAddress_,
         bytes calldata signature_
-    ) external payable override {
+    ) external payable override onlyRole(SOCKET_RELAYER_ROLE) {
         uint32 siblingChainSlug = capacitorToSlug[capacitorAddress_];
         if (siblingChainSlug == 0) revert InvalidCapacitorAddress();
 

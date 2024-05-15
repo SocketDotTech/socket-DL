@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import "../interfaces/IPlug.sol";
 import "./SocketBase.sol";
+import {SOCKET_RELAYER_ROLE} from "../utils/AccessRoles.sol";
 
 /**
  * @title SocketDst
@@ -115,6 +116,8 @@ abstract contract SocketDst is SocketBase {
         address switchboard_,
         bytes calldata signature_
     ) external payable override {
+        if (!_hasRole(SOCKET_RELAYER_ROLE, msg.sender)) revert NoPermit(SOCKET_RELAYER_ROLE);
+
         if (packetId_ == bytes32(0)) revert InvalidPacketId();
 
         (address transmitter, bool isTransmitter) = transmitManager__
@@ -151,6 +154,8 @@ abstract contract SocketDst is SocketBase {
         ISocket.ExecutionDetails calldata executionDetails_,
         ISocket.MessageDetails calldata messageDetails_
     ) external payable override {
+        if (!_hasRole(SOCKET_RELAYER_ROLE, msg.sender)) revert NoPermit(SOCKET_RELAYER_ROLE);
+
         // make sure message is not executed already
         if (messageExecuted[messageDetails_.msgId])
             revert MessageAlreadyExecuted();
@@ -329,7 +334,7 @@ abstract contract SocketDst is SocketBase {
      */
     function _decodeChainSlug(
         bytes32 id_
-    ) internal pure returns (uint32 chainSlug_) {
+    ) internal view returns (uint32 chainSlug_) {
         chainSlug_ = uint32(uint256(id_) >> 224);
     }
 }

@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import "openzeppelin-contracts/contracts/vendor/optimism/ICrossDomainMessenger.sol";
 import "./NativeSwitchboardBase.sol";
+import {SOCKET_RELAYER_ROLE} from "../../utils/AccessRoles.sol";
 
 /**
  * @title OptimismSwitchboard
@@ -57,7 +58,7 @@ contract OptimismSwitchboard is NativeSwitchboardBase {
      * @dev Function used to initiate a confirmation of a native token transfer from the remote switchboard contract.
      * @param packetId_ The identifier of the packet containing the details of the native token transfer.
      */
-    function initiateNativeConfirmation(bytes32 packetId_) external {
+    function initiateNativeConfirmation(bytes32 packetId_) external onlyRole(SOCKET_RELAYER_ROLE) {
         bytes memory data = _encodeRemoteCall(packetId_);
 
         crossDomainMessenger__.sendMessage(

@@ -33,6 +33,26 @@ contract HappyTest is Setup {
         _deployPlugContracts();
 
         _configPlugContracts(index);
+
+        // grant role to this contract to be able to call SocketDst
+        vm.prank(_b.socket__.owner());
+        _b.socket__.grantRole(SOCKET_RELAYER_ROLE, address(this));
+
+        // grant role to this contract to be able to call SocketSrc
+        vm.prank(_a.socket__.owner());
+        _a.socket__.grantRole(SOCKET_RELAYER_ROLE, address(this));
+        
+        // grant role to SocketSrc to be able to call ExecutionManager
+        vm.prank(_a.socket__.owner());
+        _a.executionManager__.grantRole(SOCKET_RELAYER_ROLE, address(_a.socket__));
+        
+        // grant role to SrcCounter to be able to call SocketDst
+        vm.prank(_b.socket__.owner());
+        _b.socket__.grantRole(SOCKET_RELAYER_ROLE, address(srcCounter__));
+
+        // grant role to SrcCounter to be able to call SocketSrc
+        vm.prank(_a.socket__.owner());
+        _a.socket__.grantRole(SOCKET_RELAYER_ROLE, address(srcCounter__));
     }
 
     function testRemoteAddFromAtoB() external {

@@ -50,6 +50,10 @@ contract FastSwitchboardTest is Setup {
         hoax(_socketOwner);
         fastSwitchboard.grantWatcherRole(aChainSlug, _altWatcher);
 
+        // grant role to this contract to be able to call Socket
+        vm.prank(_b.socket__.owner());
+        _b.socket__.grantRole(SOCKET_RELAYER_ROLE, address(this));
+
         packetId = _getPackedId(address(uint160(c++)), aChainSlug, 0);
         _signAndPropose(_b, packetId, root);
     }

@@ -29,6 +29,14 @@ contract ExecutionManagerTest is Setup {
                 _socketOwner
             )
         );
+
+        // grant role to _feesPayer to be able to call ExecutionManager
+        vm.prank(executionManager.owner());
+        executionManager.grantRole(SOCKET_RELAYER_ROLE, _feesPayer);
+
+        // grant role to this contract to be able to call ExecutionManager
+        vm.prank(executionManager.owner());
+        executionManager.grantRole(SOCKET_RELAYER_ROLE, address(this));
     }
 
     function testIsExecutor() public {
@@ -222,6 +230,34 @@ contract ExecutionManagerTest is Setup {
         );
     }
 
+    function testPayAndCheckFeesWithoutSocketRelayerRole() public {
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(executionManager.owner());
+        executionManager.revokeRole(SOCKET_RELAYER_ROLE, _feesPayer);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+
+        vm.startPrank(_feesPayer);
+        _a.executionManager__.payAndCheckFees{value: 0}(
+            0,
+            0,
+            bytes32(0),
+            bytes32(0),
+            0,
+            0,
+            0,
+            address(0),
+            address(0),
+            0
+        );
+        vm.stopPrank();
+    }
+
     function testFailPayAndCheckFeesWithFeeSetTooHigh() public {
         uint256 minMsgGasLimit = 100000;
         uint256 payloadSize = 1000;
@@ -318,6 +354,35 @@ contract ExecutionManagerTest is Setup {
         );
     }
 
+    function testPayAndCheckFeesWithMsgValueTooHighWithoutSocketRelayerRole()
+        public
+    {
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(executionManager.owner());
+        executionManager.revokeRole(SOCKET_RELAYER_ROLE, _feesPayer);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+        vm.prank(_feesPayer);
+        _a.executionManager__.payAndCheckFees{value: 0}(
+            0,
+            0,
+            bytes32(0),
+            bytes32(0),
+            0,
+            0,
+            0,
+            address(0),
+            address(0),
+            0
+        );
+    }
+
+
     function testWithdrawExecutionFees() public {
         sendFeesToExecutionManager();
         uint128 amount = 100;
@@ -397,6 +462,21 @@ contract ExecutionManagerTest is Setup {
         executionManager.withdrawTransmissionFees(bChainSlug, 100);
     }
 
+    function testWithdrawTransmissionFeesWithoutSocketRelayerRole() public {
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(executionManager.owner());
+        executionManager.revokeRole(SOCKET_RELAYER_ROLE, address(this));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+
+        executionManager.withdrawTransmissionFees(bChainSlug, 0);
+    }
+
     function testWithdrawSwitchboardFees() public {
         sendFeesToExecutionManager();
 
@@ -427,6 +507,22 @@ contract ExecutionManagerTest is Setup {
 
         assertEq(address(_a.configs__[0].switchboard__).balance, amount);
         assertEq(storedSwitchboardFees2, storedSwitchboardFees1 - amount);
+    }
+
+    function testWithdrawSwitchboardFeesWithoutSocketRelayerRole() public {
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.prank(executionManager.owner());
+        executionManager.revokeRole(SOCKET_RELAYER_ROLE, _feesPayer);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControl.NoPermit.selector,
+                SOCKET_RELAYER_ROLE
+            )
+        );
+
+        vm.prank(_feesPayer);
+        executionManager.withdrawSwitchboardFees(bChainSlug, address(0), 0);
     }
 
     function sendFeesToExecutionManager() internal {

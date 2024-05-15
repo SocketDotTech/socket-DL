@@ -38,6 +38,10 @@ contract OptimismSwitchboardL2L1Test is Setup {
         transmitterPrivateKeys[0] = _transmitterPrivateKey;
 
         _chainSetup(transmitterPrivateKeys);
+
+        // grant role to SrcSocket to be able to call OptimismSwitchboard
+        vm.prank(_a.socket__.owner());
+        optimismSwitchboard.grantRole(SOCKET_RELAYER_ROLE, address(_a.socket__));
     }
 
     function testInitiateNativeConfirmation() public {
