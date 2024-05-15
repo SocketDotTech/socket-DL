@@ -152,7 +152,8 @@ const executeRoleTransactions = async (
     } as PopulatedTransaction;
     if (isKinto(chainSlug)) {
       const contract = await getInstance("ExecutionManager", contractAddress);
-      const owner = await (await contract.connect(wallet)).owner();
+      const owner = await contract.connect(wallet).owner();
+      console.log("Owner is ", owner);
 
       let accessControlInterface = new ethers.utils.Interface(
         AccessControlExtendedABI
@@ -341,6 +342,18 @@ export const checkAndUpdateRoles = async (
         await Promise.all(
           userSpecificRoles.map(async (roleObj) => {
             let { userAddress, filterRoles } = roleObj;
+            
+            // TODO: is the switching needed or not?
+            const wallet = new Wallet(process.env.SOCKET_SIGNER_KEY, provider);
+            if (
+              !isKinto(chainSlug) &&
+              userAddress == process.env.SOCKET_OWNER_ADDRESS
+            ) {
+              console.log(
+                `- Switching userAddress from ${userAddress} to ${wallet.address}`
+              );
+              userAddress = wallet.address;
+            }
             if (!contractNames.includes(contractName as CORE_CONTRACTS)) return;
 
             let contractAddress: string | undefined;

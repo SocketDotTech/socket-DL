@@ -1,5 +1,5 @@
 import { Wallet, utils } from "ethers";
-import { network, ethers, run } from "hardhat";
+import { network, ethers, run, artifacts } from "hardhat";
 
 import { ContractFactory, Contract } from "ethers";
 import { Address } from "hardhat-deploy/dist/types";
@@ -131,8 +131,10 @@ export const sleep = (delay: number) =>
 export const getInstance = async (
   contractName: string,
   address: Address
-): Promise<Contract> =>
-  (await ethers.getContractFactory(contractName)).attach(address);
+): Promise<Contract> => {
+  const artifact = await artifacts.readArtifact(contractName);
+  return new ethers.Contract(address, artifact.abi);
+};
 
 export const getChainSlug = async (): Promise<number> => {
   if (network.config.chainId === undefined)

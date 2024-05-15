@@ -42,6 +42,9 @@ export const deploySocket = async (
     signer: socketSigner,
     currentChainSlug: chainSlug,
   };
+  // @ts-ignore
+  if (!isKinto(chainSlug)) socketOwner = socketSigner.address;
+  console.log("Socket owner: ", socketOwner);
 
   try {
     const signatureVerifier: Contract = await getOrDeploy(
