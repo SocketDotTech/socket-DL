@@ -170,8 +170,8 @@ const config: HardhatUserConfig = {
         network: "kinto_devnet",
         chainId: ChainId.KINTO_DEVNET,
         urls: {
-          apiURL: "https://kinto-erc20-dev.explorer.caldera.xyz/api",
-          browserURL: "https://kinto-erc20-dev.explorer.caldera.xyz",
+          apiURL: "https://kinto-upgrade-dev-2.explorer.caldera.xyz/api",
+          browserURL: "https://kinto-upgrade-dev-2.explorer.caldera.xyz",
         },
       },
     ],
