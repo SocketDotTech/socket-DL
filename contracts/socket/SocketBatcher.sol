@@ -18,6 +18,10 @@ import {RESCUE_ROLE, SOCKET_RELAYER_ROLE } from "../utils/AccessRoles.sol";
  * @dev This contract uses the AccessControl contract for managing role-based access control.
  */
 contract SocketBatcher is AccessControl {
+
+    // Allowlist to control who can receive funds through the withdrawals function
+    mapping(address => bool) public allowlist;
+
     address constant MOCK_ETH_ADDRESS =
         0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
@@ -152,7 +156,10 @@ contract SocketBatcher is AccessControl {
 
     event FailedLogBytes(bytes reason);
     event FailedLog(string reason);
+    event AllowlistUpdated(address indexed newAllowlist, bool indexed value);
 
+    error AddressNotAllowed(address address_);
+    
     /**
      * @notice sets fees in batch for switchboards
      * @param contractAddress_ address of contract to set fees
@@ -591,12 +598,31 @@ contract SocketBatcher is AccessControl {
     }
 
     // RELAYER UTILITY FUNCTIONS
+
+    /**
+     * @notice Updates the allowlist
+     * @param address_ The address to update
+     * @param value_ The value to set
+     */
+    function updateAllowlist(address address_, bool value_) external onlyOwner {
+        allowlist[address_] = value_;
+        emit AllowlistUpdated(address_, value_);
+    }
+    
+    /**
+     * @notice Withdraws funds to multiple addresses
+     * @param addresses The list of addresses to withdraw to
+     * @param amounts The list of amounts to withdraw
+     * @dev can only be called by addresses with the SOCKET_RELAYER_ROLE
+     * can only withdraw to addresses in the allowlist
+     */
     function withdrawals(
         address payable[] memory addresses,
         uint[] memory amounts
     ) public payable onlyRole(SOCKET_RELAYER_ROLE) {
         uint256 totalAmount;
         for (uint i; i < addresses.length; i++) {
+            if (!allowlist[addresses[i]]) revert AddressNotAllowed(addresses[i]);
             totalAmount += amounts[i];
             addresses[i].transfer(amounts[i]);
         }

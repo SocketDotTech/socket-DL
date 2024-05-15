@@ -181,4 +181,69 @@ contract SocketBatcherTest is Setup {
         );
         batcher__.withdrawals(new address payable[](0), new uint256[](0));
     }
+
+    function testUpdateAllowlist() external {
+        // add a new address to the allowlist
+        vm.prank(batcher__.owner());
+        batcher__.updateAllowlist(address(0xfede), true);
+        assertEq(batcher__.allowlist(address(0xfede)), true);
+
+        // remove the address from the allowlist
+        vm.prank(batcher__.owner());
+        batcher__.updateAllowlist(address(0xfede), false);
+        assertEq(batcher__.allowlist(address(0xfede)), false);
+
+        // revoke the SOCKET_RELAYER_ROLE
+        vm.expectRevert(Ownable.OnlyOwner.selector);
+        vm.prank(address(123));
+        batcher__.updateAllowlist(address(0xfede), true);
+    }
+
+    function testWithdrawals() external {
+        address receiver = address(0xfede);
+        address fundingRelayer = address(1);
+        vm.deal(fundingRelayer, 1 ether);
+
+        // grant funding relayer the SOCKET_RELAYER_ROLE role
+        vm.prank(batcher__.owner());
+        batcher__.grantRole(SOCKET_RELAYER_ROLE, fundingRelayer);
+
+        // add receiver to the allowlist
+        vm.prank(batcher__.owner());
+        batcher__.updateAllowlist(receiver, true);
+
+        // try sending funds to receiver
+        address payable[] memory addresses = new address payable[](1);
+        addresses[0] = payable(receiver);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 0.1 ether;
+
+        vm.prank(fundingRelayer);
+        batcher__.withdrawals{value: 0.1 ether}(addresses, amounts);
+
+        assertEq(receiver.balance, 0.1 ether);
+    }
+
+    function testWithdrawalsWhenNotInAllowlist() external {
+        address receiver = address(0xfede);
+        address fundingRelayer = address(1);
+        vm.deal(fundingRelayer, 1 ether);
+
+        // grant funding relayer the SOCKET_RELAYER_ROLE role
+        vm.prank(batcher__.owner());
+        batcher__.grantRole(SOCKET_RELAYER_ROLE, fundingRelayer);
+
+        // makse sure receiver is not in the allowlist
+        assertEq(batcher__.allowlist(receiver), false);
+
+        // try sending funds to receiver
+        address payable[] memory addresses = new address payable[](1);
+        addresses[0] = payable(receiver);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 0.1 ether;
+
+        vm.expectRevert(abi.encodeWithSelector(SocketBatcher.AddressNotAllowed.selector, receiver));
+        vm.prank(fundingRelayer);
+        batcher__.withdrawals{value: 0.1 ether}(addresses, amounts);    
+    }
 }
