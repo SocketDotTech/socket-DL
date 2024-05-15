@@ -400,17 +400,22 @@ const whitelistApp = async (
     signer
   );
 
-  const txRequest = await kintoWallet.populateTransaction.whitelistApp(
-    [app],
-    [true],
-    {
-      gasLimit: 4_000_000,
-    }
-  );
-
-  const tx = await handleOps([txRequest], signer);
-  console.log(`- Contract succesfully whitelisted on Kinto Wallet`);
-  return tx;
+  if (await kintoWallet.appWhitelist(app)) {
+    console.log(`- Contract is already whitelisted on Kinto Wallet`);
+    return;
+  } else {
+    const txRequest = await kintoWallet.populateTransaction.whitelistApp(
+      [app],
+      [true],
+      {
+        gasLimit: 4_000_000,
+      }
+    );
+  
+    const tx = await handleOps([txRequest], signer);
+    console.log(`- Contract succesfully whitelisted on Kinto Wallet`);
+    return tx;
+  }
 };
 
 // extract argument types from constructor
