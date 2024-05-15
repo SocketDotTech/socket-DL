@@ -31,10 +31,12 @@
       },
       "paymaster": {
         "address": "0x1842a4EFf3eFd24c50B63c3CF89cECEe245Fc2bd",
-        "abi": ["function balances(address) view returns (uint256)"]
+        "abi": [
+          "function balances(address) view returns (uint256)"
+        ]
       },
       "deployer": {
-        "address": "0x6407Ce6719b8B435B66F203A7dee52f4b06BB602",
+        "address": "0xcab6dF19e2C77493547baB23ad85597f8303CE92",
         "abi": [
           "function deploy(address owner, bytes calldata bytecode, bytes32 salt) public returns (address)"
         ]

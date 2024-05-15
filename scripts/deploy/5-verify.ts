@@ -49,6 +49,7 @@ export const main = async () => {
       ? [getNetworkIdFromArg()]
       : [Object.keys(verificationParams)];
     if (!chains) return;
+    chains = [7887];
 
     for (let chainIndex = 0; chainIndex < chains.length; chainIndex++) {
       const chain = parseInt(chains[chainIndex]) as ChainSlug;
