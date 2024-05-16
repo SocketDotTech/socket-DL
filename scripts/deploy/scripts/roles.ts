@@ -342,7 +342,7 @@ export const checkAndUpdateRoles = async (
         await Promise.all(
           userSpecificRoles.map(async (roleObj) => {
             let { userAddress, filterRoles } = roleObj;
-            
+
             // TODO: is the switching needed or not?
             const wallet = new Wallet(process.env.SOCKET_SIGNER_KEY, provider);
             if (

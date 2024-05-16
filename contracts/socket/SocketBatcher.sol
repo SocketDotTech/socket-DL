@@ -9,7 +9,7 @@ import "../interfaces/ISocket.sol";
 import "../interfaces/ICapacitor.sol";
 import "../switchboard/default-switchboards/FastSwitchboard.sol";
 import "../interfaces/INativeRelay.sol";
-import {RESCUE_ROLE, SOCKET_RELAYER_ROLE } from "../utils/AccessRoles.sol";
+import {RESCUE_ROLE, SOCKET_RELAYER_ROLE} from "../utils/AccessRoles.sol";
 
 /**
  * @title SocketBatcher
@@ -18,7 +18,6 @@ import {RESCUE_ROLE, SOCKET_RELAYER_ROLE } from "../utils/AccessRoles.sol";
  * @dev This contract uses the AccessControl contract for managing role-based access control.
  */
 contract SocketBatcher is AccessControl {
-
     // Allowlist to control who can receive funds through the withdrawals function
     mapping(address => bool) public allowlist;
 
@@ -159,7 +158,7 @@ contract SocketBatcher is AccessControl {
     event AllowlistUpdated(address indexed newAllowlist, bool indexed value);
 
     error AddressNotAllowed(address address_);
-    
+
     /**
      * @notice sets fees in batch for switchboards
      * @param contractAddress_ address of contract to set fees
@@ -608,7 +607,7 @@ contract SocketBatcher is AccessControl {
         allowlist[address_] = value_;
         emit AllowlistUpdated(address_, value_);
     }
-    
+
     /**
      * @notice Withdraws funds to multiple addresses
      * @param addresses The list of addresses to withdraw to
@@ -622,7 +621,8 @@ contract SocketBatcher is AccessControl {
     ) public payable onlyRole(SOCKET_RELAYER_ROLE) {
         uint256 totalAmount;
         for (uint i; i < addresses.length; i++) {
-            if (!allowlist[addresses[i]]) revert AddressNotAllowed(addresses[i]);
+            if (!allowlist[addresses[i]])
+                revert AddressNotAllowed(addresses[i]);
             totalAmount += amounts[i];
             addresses[i].transfer(amounts[i]);
         }

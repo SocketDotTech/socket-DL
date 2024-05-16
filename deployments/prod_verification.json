@@ -69,17 +69,13 @@
       "0x7a6Edde81cdD9d75BC10D87C490b132c08bD426D",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x943AC2775928318653e91d350574436A1b9b16f9"
-      ]
+      ["0x943AC2775928318653e91d350574436A1b9b16f9"]
     ],
     [
       "0xCFf802cCA1D506b3C4ac1eeb61233062a1B9f568",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xdf5f7dfDFc26ee5F629949e330bEf56906319CAe",
@@ -207,26 +203,19 @@
       "0x11Fbb9116801DB54bB51fF4dF423e34E8b45fc9a",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x5C71beE4a6b0D617D8c3d107D331292741789E27",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xf1ABF110d1B6ff0E2e8C05dd64FBF9eBA4d8af98",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "5": [
@@ -234,41 +223,31 @@
       "0x64b3149a51795e4Bd85505087c2AAB3d9B50D957",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x5a23e41c1ff969244eE2A5D563519b170F143AcD",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xB5f289a6Af87A65fddF1a7068F556E7d669c0D4b",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xEA33a8f11A719d728A42Ff5A860eBd7620683433",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xf9E6C8450C03d1f55AE69f1252A8cC7DeE884A04"
-      ]
+      ["0xf9E6C8450C03d1f55AE69f1252A8cC7DeE884A04"]
     ],
     [
       "0xB32e238F26f077Da957129DBC4F471ee77f86cBd",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x785601d9Cf7178fde548ad50146D9505F2dD50eB",
@@ -384,26 +363,19 @@
       "0x8b5C2852D831E25Bee01aA9e99C43c8e6f560155",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0xf636bEA5d5a2dbB66b84183F4155eA4Cc9d4B565",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x0b59efeE594469Ae31954940eFFfF2192bCD8422",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
   "10": [
@@ -450,9 +422,7 @@
       "0x208cB87549740B4eb32043D0471A153ED1c54408",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x09A6e77912a6bcFc3abfDfb841A85380Bb2A8B97",
@@ -470,17 +440,13 @@
       "0x1C2ec03Cf08C77D7a4668c045415A8809D0BD6B7",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x301bD265F0b3C16A58CbDb886Ad87842E3A1c0a4"
-      ]
+      ["0x301bD265F0b3C16A58CbDb886Ad87842E3A1c0a4"]
     ],
     [
       "0x2b351E9f1a1970115f5859107aF33F1BE386FB7B",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x9Cf7443685827419B0067fb2471C24969EAA716C",
@@ -557,26 +523,19 @@
       "0x8668293Ba7De23E2E8e9dd5368E6e4EB778eE7d0",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x3e89c061BF570B0678C7792BBfFC6bAA9d580Dc5",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xbb1f202095BE99000038D8d207C7E6f0F85a3925",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "56": [
@@ -584,9 +543,7 @@
       "0x929625aCcE321770c747C38CC989B689EE823d90",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xCedce2e52aa6551bC407f640D8Bd9179b528347C",
@@ -604,17 +561,13 @@
       "0x6A3496f893A15bC408dCF5674C70E51C66b23a4d",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xdF7f95dda500E8EFc872f1dc0BC46a4E6281C00e"
-      ]
+      ["0xdF7f95dda500E8EFc872f1dc0BC46a4E6281C00e"]
     ],
     [
       "0xE42553b620EEB7Aa42E5171Aeb710D4B8DD50B61",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x5490aBcD9949833FB68e4d222ee68dc225881c25",
@@ -678,26 +631,19 @@
       "0xc20Fa42A165BFF2587176Dd9f3D15c73c7fb35F7",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x47508Dd0a0bA2E4bf404Cb19A954d302b6f75d00",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x12E1dbCA1EC056421365bBdbC9e4Bd124c8F6760",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "89": [
@@ -705,25 +651,19 @@
       "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -787,26 +727,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "137": [
@@ -869,9 +802,7 @@
       "0x69Adf49285c25d9f840c577A0e3cb134caF944D3",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x33918BBF9f5269d90b8c0AbF1Fd1134C827bA445",
@@ -889,17 +820,13 @@
       "0x0eaF03567A21e32e0Ce27f329b7D0e82A971Fe74",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xc20687f8dc0ad51d01003013d1c5b02d10DED001"
-      ]
+      ["0xc20687f8dc0ad51d01003013d1c5b02d10DED001"]
     ],
     [
       "0x1eDD57A8B5D19F6FdB85b93BB327A80c64ECa934",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x72fB18276f3C3c3FD3146F6163994ec02Fa1c9D1",
@@ -975,26 +902,19 @@
       "0x915580973cdd42cB5c4320A54408702FFdc02A2D",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x8AFacb9b98d01cd8D1FD45ae1d9A8e4F12C7673e",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x2F04a8f11691Db9e0EE08BF44a7712aF8273720D",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "416": [
@@ -1002,17 +922,13 @@
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -1076,26 +992,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "420": [
@@ -1103,41 +1012,31 @@
       "0x702dD708262D8Edb585814acaD5c976EBe978560",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xE0DD154111D407Db671eAeC703CF472d3a2c5333",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xb80d97657277e24d70caee6dEF92BFaa7D884A7f",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x9d10C5D68C0878Ba255E62b3f2051f22E43A9b2f",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x5054D6c7dF3048fFf6b148765b2d58e2803837e1"
-      ]
+      ["0x5054D6c7dF3048fFf6b148765b2d58e2803837e1"]
     ],
     [
       "0xcedcDE612280074d697F79526EDF9238d6871bA1",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x2dD88939B6fC56EA71308879c57ED68D423bBa93",
@@ -1226,26 +1125,19 @@
       "0x9A71385EAD5984d4E11eFe27a28307269f3d848F",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0xE5e333d3a6BBeba1097DfB751Bb577f7952037b7",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x154425b14538ca5dCE77357133CEA76DDc6650EA",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
   "647": [
@@ -1253,9 +1145,7 @@
       "0x5D3F469BEA637c5017Df408fF25AA8B9BC6e6400",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
   "901": [
@@ -1276,41 +1166,31 @@
       "0x1D6811553Aff8231aDd04A84F300b89E15D99EA4",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xe54f19dCD6f855296F57BC26a899f278E369464e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xb2dA552c9Baa0e15b13302aBBF7B555aBc8eE4E8",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xfCa282147D5E9b14c208D09dbEbC7Eb5C3814dC5",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xFDC28fA368c33DEC7853d63B65FC5Cfe01B212fc"
-      ]
+      ["0xFDC28fA368c33DEC7853d63B65FC5Cfe01B212fc"]
     ],
     [
       "0x0EA425AeB75F5B2027Cbe8c70b821E3D3490da8e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x1d6E46fd4DFdfe063f9096Dc2C0862D36A25b1aD",
@@ -1386,26 +1266,19 @@
       "0x50cD99661C604da8d36Db001e86Df976E13A7Cf0",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0xfc2140e9A83693CBd8b54C42AFf83ecb627c2Ec7",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x19791877C020f7Cd5Ca1c97bdd5D268a52dbB0ff",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
   "919": [
@@ -1413,25 +1286,19 @@
       "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -1495,26 +1362,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "957": [
@@ -1535,17 +1395,13 @@
       "0x040993fbF458b95871Cd2D73Ee2E09F4AF6d56bB",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0x852C5DE08b9beB014caD171C16B12a8D7456ea3f",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
@@ -1622,26 +1478,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "1024": [
@@ -1688,17 +1537,13 @@
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -1762,26 +1607,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "1729": [
@@ -1789,17 +1627,13 @@
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -1863,26 +1697,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "2999": [
@@ -1890,9 +1717,7 @@
       "0xffC2D8f660a5CC41273f1Db714EaEcd19D28d147",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x768A2A53e4318dA7714a0aA65a96D9A241603562",
@@ -1910,17 +1735,13 @@
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -1984,26 +1805,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "4665": [
@@ -2011,17 +1825,13 @@
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -2085,26 +1895,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "5000": [
@@ -2112,17 +1915,13 @@
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -2186,26 +1985,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "7887": [
@@ -2248,17 +2040,13 @@
       "0x03B73a2c5c5D22D125E9572983Cc9Db33f9B5E9d",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x3e9727470C66B1e77034590926CDe0242B5A3dCc"
-      ]
+      ["0x3e9727470C66B1e77034590926CDe0242B5A3dCc"]
     ],
     [
       "0x12FF8947a2524303C13ca7dA9bE4914381f6557a",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x2e2B1c42E38f5af81771e65D87729E57ABD1337a"
-      ]
+      ["0x2e2B1c42E38f5af81771e65D87729E57ABD1337a"]
     ],
     [
       "0x2B98775aBE9cDEb041e3c2E56C76ce2560AF57FB",
@@ -2322,26 +2110,19 @@
       "0x35B1Ca86D564e69FA38Ee456C12c78A62e78Aa4c",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x2e2B1c42E38f5af81771e65D87729E57ABD1337a",
-        10
-      ]
+      ["0x2e2B1c42E38f5af81771e65D87729E57ABD1337a", 10]
     ],
     [
       "0x9652Dd5e1388CA80712470122F27be0d1c33B48b",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x2e2B1c42E38f5af81771e65D87729E57ABD1337a"
-      ]
+      ["0x2e2B1c42E38f5af81771e65D87729E57ABD1337a"]
     ],
     [
       "0x56Ac0e336f0c3620dCaF8d361E8E14eA73C31f5d",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x2e2B1c42E38f5af81771e65D87729E57ABD1337a"
-      ]
+      ["0x2e2B1c42E38f5af81771e65D87729E57ABD1337a"]
     ]
   ],
   "8453": [
@@ -2349,17 +2130,13 @@
       "0xBA585eC503d0D113ddb5B212363DBE6abb12A132",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x12E6e58864cE4402cF2B4B8a8E9c75eAD7280156"
-      ]
+      ["0x12E6e58864cE4402cF2B4B8a8E9c75eAD7280156"]
     ],
     [
       "0x17A89B7372866a0155bF14980973Ad4408A3145C",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x15A55294B7278260DdfFC659Fb39a401871EeE34",
@@ -2423,26 +2200,19 @@
       "0xDC23842d47b80D88A549777eB1F33C2F47f253D0",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0xAC313d7491910516E06FBfC2A0b5BB49bb072D91",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xA7f7e4fE8E4cdDCD9969Bd3fbcFF67000CD7DE47",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xBD9f6198a220046E944D704b7ff2A68b778F4A44",
@@ -2482,26 +2252,19 @@
       "0x2a1094b6585b32FE33929cDdF7Ee3F5a1c1E163A",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0xb584D4bE1A5470CA1a8778E9B86c81e165204599",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "34443": [
@@ -2509,17 +2272,13 @@
       "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xc317144DE60E6bC9455363bB09852C00bd14CD61"
-      ]
+      ["0xc317144DE60E6bC9455363bB09852C00bd14CD61"]
     ],
     [
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
@@ -2583,26 +2342,19 @@
       "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "42161": [
@@ -2649,9 +2401,7 @@
       "0x107e182815C5e164E05F0C2CF478acE44FD468A8",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xd5e829827F665c42326EAF68Da3360bd59b42f2f",
@@ -2669,17 +2419,13 @@
       "0xD0Bb14B2275CcC44b75baD9fF23EcB47651aF15c",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x37cc674582049b579571E2fFd890a4d99355f6Ba"
-      ]
+      ["0x37cc674582049b579571E2fFd890a4d99355f6Ba"]
     ],
     [
       "0x2ea720eA6B4Dd82A31766dA2b48300c0a31F4B8e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xaB2F8c1588ACA57bC2909512B645a860C65770d3",
@@ -2754,26 +2500,19 @@
       "0xBce4Cd69FeFEdb6eb076CF67E55Bae858567136a",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0xcDA819182c2BBE351644eD5D429280ab98004B4e",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x9879a2b15722374243843DDdb79e5E6872aA74B8",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "80001": [
@@ -2781,41 +2520,31 @@
       "0x1F0F1FC746fcd4d59b6dBDDFf67a88cde70dAeE5",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x60dB9641eFee65c437aD8a44D3CEc7fB7934eD9c",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x4941AE128a3d0d276d5ABA751B596f1173b2b762",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xAf8FcDA8536eBA1dDf2e6F8E405ADAd5C44b8568",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x54FEAB3E649Ac262028996C6082F736182717abb"
-      ]
+      ["0x54FEAB3E649Ac262028996C6082F736182717abb"]
     ],
     [
       "0xd63ecfEADceCf6048Af4C4d471f049545F8Ca0DF",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x035890A20Fc218460e5ce0F67D8dd100fe0E2877",
@@ -2903,26 +2632,19 @@
       "0x56FCC832045Ceed7A554Bea11aA8bF0AE68aE145",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0xbf2c2DBdc1fE3b12A950f742Eccb8b4830ee853e",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x4dD3dC12F678A6b8Ff0bc012A911aECB75c8A561",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
   "80008": [
@@ -2969,17 +2691,13 @@
       "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xc317144DE60E6bC9455363bB09852C00bd14CD61"
-      ]
+      ["0xc317144DE60E6bC9455363bB09852C00bd14CD61"]
     ],
     [
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
@@ -3043,26 +2761,19 @@
       "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "421613": [
@@ -3070,41 +2781,31 @@
       "0x7043637C53c7fFc96227a1943be0BeeA2baef242",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x762769E24b61800682B7a66C83835f9C23FB9955",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x3F8cdB2F8F61c31855cA6314FFA480F4dEe9574f",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x07680Ca88B8Df538A5aB564BBBD3E4F3aBbF97eE",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x7615Ddf5E1370dAf519F4EB9C9e2e5764B3031d2"
-      ]
+      ["0x7615Ddf5E1370dAf519F4EB9C9e2e5764B3031d2"]
     ],
     [
       "0xBC620878688ED5Ba3E383D795679e31Aa043607C",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xD9B69092f77E72d8E91be9905307A308afDC8ef4",
@@ -3191,26 +2892,19 @@
       "0xdc861F3D84b527515E47554724BbE90Fb5BCB3FE",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0x9737201f185df1d8d1165776af0bF08874711F1f",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x52e987409522F2abeaD9A66B87B8914Dc5A071D9",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
   "421614": [
@@ -3257,17 +2951,13 @@
       "0xA7f7e4fE8E4cdDCD9969Bd3fbcFF67000CD7DE47",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xEA59E2b1539b514290dD3dCEa989Ea36279aC6F2"
-      ]
+      ["0xEA59E2b1539b514290dD3dCEa989Ea36279aC6F2"]
     ],
     [
       "0x0f8F4E665221528e6a444458dd098216E9ec7807",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xEA59E2b1539b514290dD3dCEa989Ea36279aC6F2"
-      ]
+      ["0xEA59E2b1539b514290dD3dCEa989Ea36279aC6F2"]
     ],
     [
       "0xAE9bE0eA6DD7B53C88665Cb2EFf7d40dFD51cf91",
@@ -3342,10 +3032,7 @@
       "0x66ffe416eB16D879EcE55B1d50C34789CB4Ab80a",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ]
   ],
   "444444": [
@@ -3392,17 +3079,13 @@
       "0x87614638D9A452ffF21Ac9581Dc4d3030bd7E5db",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x015cdE684a923EBbE71Ca857208c301848C51D75"
-      ]
+      ["0x015cdE684a923EBbE71Ca857208c301848C51D75"]
     ],
     [
       "0xA02121f62Ba11D3F16dD3f7DAc5bAcd7310858e9",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x78Deb9225c3F28D12922913Fec978e4dC90E1aa4"
-      ]
+      ["0x78Deb9225c3F28D12922913Fec978e4dC90E1aa4"]
     ],
     [
       "0x1ea6b8Aa100fB44c9de7baCB47c92Dc502E69DaC",
@@ -3466,26 +3149,19 @@
       "0xE3F27BA71ECE47C68c89CFaa69105881FD81Ffc0",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x78Deb9225c3F28D12922913Fec978e4dC90E1aa4",
-        10
-      ]
+      ["0x78Deb9225c3F28D12922913Fec978e4dC90E1aa4", 10]
     ],
     [
       "0xfC96858aFda5F0F846679E00D0Dd6dda35C4026e",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x78Deb9225c3F28D12922913Fec978e4dC90E1aa4"
-      ]
+      ["0x78Deb9225c3F28D12922913Fec978e4dC90E1aa4"]
     ],
     [
       "0x845a6f4Be829e5D11906cc2eb2f8ccd39E8848a6",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x78Deb9225c3F28D12922913Fec978e4dC90E1aa4"
-      ]
+      ["0x78Deb9225c3F28D12922913Fec978e4dC90E1aa4"]
     ]
   ],
   "11155111": [
@@ -3532,9 +3208,7 @@
       "0x1d43076909Ca139BFaC4EbB7194518bE3638fc76",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x07e11D1A1543B0D0b91684eb741d1ab7D51ae237"
-      ]
+      ["0x07e11D1A1543B0D0b91684eb741d1ab7D51ae237"]
     ],
     [
       "0x2b863CDA83e855078c702233E215884c4d0200dE",
@@ -3580,41 +3254,31 @@
       "0x2521b29FD8d3787Ab42141f55F6b462E6115C737",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6ba1161bbBC353F4173eB9f785E3A0513264769d",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xE593288228d17a6D057D9a61a35F32166A6B4191",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x07e11D1A1543B0D0b91684eb741d1ab7D51ae237"
-      ]
+      ["0x07e11D1A1543B0D0b91684eb741d1ab7D51ae237"]
     ],
     [
       "0xBc3Ff3923b36F1590C16363b09c4759654d7B6d4",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xd84fabe06806270Fb2dDFC2255102206e3B36865",
@@ -3690,26 +3354,19 @@
       "0x330056a58688E7168AE3FeA1e2Edd48708e5c231",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0x6ddF1d6B719323236f58B4c61D30E523fce1Fe06",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x10d9DA6AE85eff6D582A91829f78bde2a3EC2dCC",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
   "11155112": [
@@ -3717,41 +3374,31 @@
       "0x2ddf16BA6d0180e5357d5e170eF1917a01b41fc0",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xaE966C37eAb996B2bA55f0b3caD61564EBD691Fa",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xd17A64B37b432Bc344420D12eD086c5E6BEC1a30",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x21abD53f1150b6DFA1111E4F2b7536F6eaA48538",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xcE713890F07E39C46D698b06042d590289844A13"
-      ]
+      ["0xcE713890F07E39C46D698b06042d590289844A13"]
     ],
     [
       "0xbDb6413969D5a8D8011988A50a9E2023aa67f350",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xFCd8ebA25c0e0973Fd131b6bF77fd8dAEcCaC75B",
@@ -3827,26 +3474,19 @@
       "0xf656C433B79af5274F24122222E4CA5e8DacaC17",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0xfE6189763f6351A0C0A9C3C211Af5Bbc230500CE",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x7E3D0FAC82b9d5a67906f7028Aa4a70d582011b2",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
   "11155420": [
@@ -3893,17 +3533,13 @@
       "0xD9e492C3899aC768F67aD9AdC0Ce88aAB5463f60",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xEA59E2b1539b514290dD3dCEa989Ea36279aC6F2"
-      ]
+      ["0xEA59E2b1539b514290dD3dCEa989Ea36279aC6F2"]
     ],
     [
       "0x0f8F4E665221528e6a444458dd098216E9ec7807",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xEA59E2b1539b514290dD3dCEa989Ea36279aC6F2"
-      ]
+      ["0xEA59E2b1539b514290dD3dCEa989Ea36279aC6F2"]
     ],
     [
       "0xAE9bE0eA6DD7B53C88665Cb2EFf7d40dFD51cf91",
@@ -3980,10 +3616,7 @@
       "0x66ffe416eB16D879EcE55B1d50C34789CB4Ab80a",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ]
   ],
   "28122024": [
@@ -3991,17 +3624,13 @@
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -4065,26 +3694,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "46658378": [
@@ -4092,17 +3714,13 @@
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -4166,26 +3784,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "89346161": [
@@ -4193,17 +3804,13 @@
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -4267,26 +3874,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "686669576": [
@@ -4294,17 +3894,13 @@
       "0x323684c3556480F94F9232A1525eAD02fde4F0d1",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x834Ee253f0B926DCc1d03EbAeAfEc3a3D1eE4a86"
-      ]
+      ["0x834Ee253f0B926DCc1d03EbAeAfEc3a3D1eE4a86"]
     ],
     [
       "0x2A2d4bEA2F0b8F7AC79bf70f98D3d054aa65f461",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xA418D0cCFB62FE888aCf655e54d88E09059bD6c8",
@@ -4368,26 +3964,19 @@
       "0x98472CDb864DedcF13a560Ec2b79745a6063A3aC",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0x9814d1E6751ADAE2D60fF16f987ae02a25C87224",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
   "1324967486": [
@@ -4434,17 +4023,13 @@
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -4508,26 +4093,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
   "1399904803": [
@@ -4535,33 +4113,25 @@
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0xaa95869960B4f783b17410a7E9e4b91DA3b371C4",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x91C27Cad374246314E756f8Aa2f62F433d6F102C",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xf70180727AcdcE9Dd93A9cfb9b85aCF15aF3275A"
-      ]
+      ["0xf70180727AcdcE9Dd93A9cfb9b85aCF15aF3275A"]
     ],
     [
       "0x0B35F40f13C3641bDed7654C9a7620cFa312aA7a",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x59AcE34e5c47aEe3ec8feF2A89DcF14Ac98538C9",
@@ -4625,26 +4195,19 @@
       "0x166953654e3b38C53A7e79B3813104AfABE63582",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0x3D8F5700E0Bb2f5Ab3320c674E2B7046F85d0e1A",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x03D51955216a7E6F301e0613515fA86A6f3d59A9",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
   "2863311531": [
@@ -4652,17 +4215,13 @@
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0x565810cbfa3Cf1390963E5aFa2fB953795686339"
-      ]
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
     ],
     [
       "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
@@ -4726,26 +4285,19 @@
       "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-        10
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
     ],
     [
       "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ],
     [
       "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"
-      ]
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ]
 }

@@ -89,7 +89,10 @@ contract SocketBatcherTest is Setup {
                 SOCKET_RELAYER_ROLE
             )
         );
-        batcher__.proposeBatch(address(0), new SocketBatcher.ProposeRequest[](0));
+        batcher__.proposeBatch(
+            address(0),
+            new SocketBatcher.ProposeRequest[](0)
+        );
     }
 
     function testSendBatchWithoutSocketRelayerRole() external {
@@ -112,7 +115,7 @@ contract SocketBatcherTest is Setup {
             new SocketBatcher.ExecuteRequest[](0)
         );
     }
-    
+
     function testExecuteBatchWithoutSocketRelayerRole() external {
         // revoke the SOCKET_RELAYER_ROLE
         vm.prank(batcher__.owner());
@@ -242,8 +245,13 @@ contract SocketBatcherTest is Setup {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0.1 ether;
 
-        vm.expectRevert(abi.encodeWithSelector(SocketBatcher.AddressNotAllowed.selector, receiver));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SocketBatcher.AddressNotAllowed.selector,
+                receiver
+            )
+        );
         vm.prank(fundingRelayer);
-        batcher__.withdrawals{value: 0.1 ether}(addresses, amounts);    
+        batcher__.withdrawals{value: 0.1 ether}(addresses, amounts);
     }
 }

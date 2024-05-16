@@ -73,11 +73,14 @@ contract SocketDstTest is Setup {
         // grant role to this contract to be able to call SocketSrc
         vm.prank(_a.socket__.owner());
         _a.socket__.grantRole(SOCKET_RELAYER_ROLE, address(this));
-        
+
         // grant role to SocketSrc to be able to call ExecutionManager
         vm.prank(_a.socket__.owner());
-        _a.executionManager__.grantRole(SOCKET_RELAYER_ROLE, address(_a.socket__));
-        
+        _a.executionManager__.grantRole(
+            SOCKET_RELAYER_ROLE,
+            address(_a.socket__)
+        );
+
         // grant role to SrcCounter to be able to call SocketDst
         vm.prank(_b.socket__.owner());
         _b.socket__.grantRole(SOCKET_RELAYER_ROLE, address(srcCounter__));
@@ -117,13 +120,8 @@ contract SocketDstTest is Setup {
                 SOCKET_RELAYER_ROLE
             )
         );
-        ISocket.ExecutionDetails memory executionDetails = ISocket.ExecutionDetails(
-            bytes32(0),
-            0,
-            0,
-            bytes(""),
-            bytes("")
-        );
+        ISocket.ExecutionDetails memory executionDetails = ISocket
+            .ExecutionDetails(bytes32(0), 0, 0, bytes(""), bytes(""));
         ISocket.MessageDetails memory msgDetails = ISocket.MessageDetails(
             bytes32(0),
             0,
@@ -133,7 +131,7 @@ contract SocketDstTest is Setup {
         );
         _b.socket__.execute(executionDetails, msgDetails);
     }
-    
+
     function testProposeAPacket() external {
         address capacitor = address(_a.configs__[index].capacitor__);
         sendOutboundMessage();

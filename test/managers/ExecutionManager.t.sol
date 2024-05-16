@@ -382,7 +382,6 @@ contract ExecutionManagerTest is Setup {
         );
     }
 
-
     function testWithdrawExecutionFees() public {
         sendFeesToExecutionManager();
         uint128 amount = 100;

@@ -33,9 +33,7 @@
       },
       "paymaster": {
         "address": "0x1842a4EFf3eFd24c50B63c3CF89cECEe245Fc2bd",
-        "abi": [
-          "function balances(address) view returns (uint256)"
-        ]
+        "abi": ["function balances(address) view returns (uint256)"]
       },
       "deployer": {
         "address": "0xcab6dF19e2C77493547baB23ad85597f8303CE92",

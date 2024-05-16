@@ -116,7 +116,8 @@ abstract contract SocketDst is SocketBase {
         address switchboard_,
         bytes calldata signature_
     ) external payable override {
-        if (!_hasRole(SOCKET_RELAYER_ROLE, msg.sender)) revert NoPermit(SOCKET_RELAYER_ROLE);
+        if (!_hasRole(SOCKET_RELAYER_ROLE, msg.sender))
+            revert NoPermit(SOCKET_RELAYER_ROLE);
 
         if (packetId_ == bytes32(0)) revert InvalidPacketId();
 
@@ -154,7 +155,8 @@ abstract contract SocketDst is SocketBase {
         ISocket.ExecutionDetails calldata executionDetails_,
         ISocket.MessageDetails calldata messageDetails_
     ) external payable override {
-        if (!_hasRole(SOCKET_RELAYER_ROLE, msg.sender)) revert NoPermit(SOCKET_RELAYER_ROLE);
+        if (!_hasRole(SOCKET_RELAYER_ROLE, msg.sender))
+            revert NoPermit(SOCKET_RELAYER_ROLE);
 
         // make sure message is not executed already
         if (messageExecuted[messageDetails_.msgId])

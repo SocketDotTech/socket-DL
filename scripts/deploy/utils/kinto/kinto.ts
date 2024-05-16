@@ -410,14 +410,17 @@ const whitelistApp = async (
         gasLimit: 4_000_000,
       }
     );
-  
+
     const tx = await handleOps([txRequest], signer);
     console.log(`- Contract succesfully whitelisted on Kinto Wallet`);
     return tx;
   }
 };
 
-const setFunderWhitelist = async (funders: Address[], isWhitelisted: boolean[]) => {
+const setFunderWhitelist = async (
+  funders: Address[],
+  isWhitelisted: boolean[]
+) => {
   const { contracts: kinto } = KINTO_DATA;
   const kintoWallet = new ethers.Contract(
     process.env.SOCKET_OWNER_ADDRESS,
@@ -425,13 +428,15 @@ const setFunderWhitelist = async (funders: Address[], isWhitelisted: boolean[]) 
     ethers.provider
   );
   // "function setFunderWhitelist(address[] calldata newWhitelist, bool[] calldata flags)",
-  const txRequest = await kintoWallet.populateTransaction.setFunderWhitelist(funders, isWhitelisted)
+  const txRequest = await kintoWallet.populateTransaction.setFunderWhitelist(
+    funders,
+    isWhitelisted
+  );
 
   const tx = await handleOps([txRequest], ethers.provider.getSigner());
   console.log(`- Funders whitelist succesfully updated`);
   return tx;
-}
-
+};
 
 // extract argument types from constructor
 const extractArgTypes = async (
@@ -619,4 +624,11 @@ export const getInstance = async (
 //     .attach(address)
 //     .connect(signer);
 
-export { isKinto, setFunderWhitelist, handleOps, deployOnKinto, whitelistApp, estimateGas };
+export {
+  isKinto,
+  setFunderWhitelist,
+  handleOps,
+  deployOnKinto,
+  whitelistApp,
+  estimateGas,
+};

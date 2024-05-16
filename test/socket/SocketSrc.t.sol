@@ -72,7 +72,10 @@ contract SocketSrcTest is Setup {
 
         // grant role to SrcSocket to be able to call ExecutionManager
         vm.prank(_a.socket__.owner());
-        _a.executionManager__.grantRole(SOCKET_RELAYER_ROLE, address(_a.socket__));
+        _a.executionManager__.grantRole(
+            SOCKET_RELAYER_ROLE,
+            address(_a.socket__)
+        );
     }
 
     function testOutboundWithoutSocketRelayerRole() external {
@@ -106,11 +109,7 @@ contract SocketSrcTest is Setup {
                 SOCKET_RELAYER_ROLE
             )
         );
-        _a.socket__.seal(
-            0,
-            address(0),
-            "0x"
-        );
+        _a.socket__.seal(0, address(0), "0x");
     }
 
     function testRegisterSwitchboardForSibling() external {

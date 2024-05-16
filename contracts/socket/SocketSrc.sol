@@ -84,7 +84,8 @@ abstract contract SocketSrc is SocketBase {
         bytes32 transmissionParams_,
         bytes calldata payload_
     ) external payable override returns (bytes32 msgId) {
-        if (!_hasRole(SOCKET_RELAYER_ROLE, msg.sender)) revert NoPermit(SOCKET_RELAYER_ROLE);
+        if (!_hasRole(SOCKET_RELAYER_ROLE, msg.sender))
+            revert NoPermit(SOCKET_RELAYER_ROLE);
 
         PlugConfig memory plugConfig;
 

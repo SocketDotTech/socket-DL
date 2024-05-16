@@ -2,10 +2,7 @@ import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
 import { ROLES, CORE_CONTRACTS, ChainSlug } from "../../src";
-import {
-  mode,
-  overrides,
-} from "./config";
+import { mode, overrides } from "./config";
 import constants from "./utils/kinto/constants.json";
 import { getAddresses, getInstance, getRoleHash } from "./utils";
 import { handleOps, isKinto, whitelistApp } from "./utils/kinto/kinto";
@@ -54,20 +51,15 @@ const main = async () => {
     "0x5A4c33DC6c8a53cb1Ba989eE62dcaE09036C7682",
   ];
 
-  const contracts = [
-    addresses[CORE_CONTRACTS.Socket],
-  ];
+  const contracts = [addresses[CORE_CONTRACTS.Socket]];
 
-  const connectors = [
-  ];
+  const connectors = [];
 
-  const allAddresses = [
-    ...relayers,
-    ...contracts,
-    ...connectors,
-  ]
+  const allAddresses = [...relayers, ...contracts, ...connectors];
 
-  const provider = getProviderFromChainSlug(constants.KINTO_DATA.chainId as any as ChainSlug);
+  const provider = getProviderFromChainSlug(
+    constants.KINTO_DATA.chainId as any as ChainSlug
+  );
   const wallet = new Wallet(process.env.SOCKET_SIGNER_KEY!, provider);
 
   for (const contract of whitelistedContracts) {
@@ -75,38 +67,56 @@ const main = async () => {
     const userSpecificRoles = allAddresses.map((relayer) => ({
       userAddress: relayer,
       filterRoles: [ROLES.SOCKET_RELAYER_ROLE],
-    }));    
+    }));
     console.log(`\nWhitelisting ${contract} @ ${addresses[contract]}...`);
     await whitelistApp(addresses[contract], wallet);
 
-    const instance = (await getInstance(contract === "CapacitorSimulator" ? "SingleCapacitor" : contract, addresses[contract])).connect(wallet);
+    const instance = (
+      await getInstance(
+        contract === "CapacitorSimulator" ? "SingleCapacitor" : contract,
+        addresses[contract]
+      )
+    ).connect(wallet);
 
     for (const role of userSpecificRoles) {
-      console.log(`Granting ${role.filterRoles} to ${role.userAddress} on contract ${contract}...`);
-      const txRequest =
-        await instance.populateTransaction.grantRole(
-          getRoleHash(ROLES.SOCKET_RELAYER_ROLE),
-          role.userAddress,
-          {
-            ...overrides(await wallet.getChainId()),
-          }
-        );
+      console.log(
+        `Granting ${role.filterRoles} to ${role.userAddress} on contract ${contract}...`
+      );
+      const txRequest = await instance.populateTransaction.grantRole(
+        getRoleHash(ROLES.SOCKET_RELAYER_ROLE),
+        role.userAddress,
+        {
+          ...overrides(await wallet.getChainId()),
+        }
+      );
 
       const registerTx = await handleOps([txRequest], wallet);
-      console.log(`Successfully granted ${role.filterRoles} to ${role.userAddress} on contract ${contract}. Transaction hash: ${registerTx.transactionHash}`);
+      console.log(
+        `Successfully granted ${role.filterRoles} to ${role.userAddress} on contract ${contract}. Transaction hash: ${registerTx.transactionHash}`
+      );
     }
   }
 
   // add each relayer to the allowlist of the SocketBatcher
   for (const relayer of relayers) {
-    const socketBatcher = (await getInstance(CORE_CONTRACTS.SocketBatcher, addresses[CORE_CONTRACTS.SocketBatcher])).connect(wallet);
-    const txRequest = await socketBatcher.populateTransaction.updateAllowlist(relayer, true, {
-      ...overrides(await wallet.getChainId()),
-    });
+    const socketBatcher = (
+      await getInstance(
+        CORE_CONTRACTS.SocketBatcher,
+        addresses[CORE_CONTRACTS.SocketBatcher]
+      )
+    ).connect(wallet);
+    const txRequest = await socketBatcher.populateTransaction.updateAllowlist(
+      relayer,
+      true,
+      {
+        ...overrides(await wallet.getChainId()),
+      }
+    );
     const registerTx = await handleOps([txRequest], wallet);
-    console.log(`Successfully added ${relayer} to the allowlist of SocketBatcher. Transaction hash: ${registerTx.transactionHash}`);
+    console.log(
+      `Successfully added ${relayer} to the allowlist of SocketBatcher. Transaction hash: ${registerTx.transactionHash}`
+    );
   }
-  
 };
 
 main()
