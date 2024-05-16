@@ -14,7 +14,9 @@
           "function getNonce() view returns (uint256)",
           "function whitelistApp(address[] calldata apps, bool[] calldata flags)",
           "function execute(address dest, uint256 value, bytes calldata func)",
-          "function appWhitelist(address) view returns (bool)"
+          "function appWhitelist(address) view returns (bool)",
+          "function setFunderWhitelist(address[] calldata newWhitelist, bool[] calldata flags)",
+          "function isFunderWhitelisted(address) view returns (bool)"
         ]
       },
       "factory": {

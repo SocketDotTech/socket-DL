@@ -26,7 +26,6 @@ import { Address } from "hardhat-deploy/dist/types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { signUserOp } from "./signature";
 import { KINTO_DATA } from "./constants.json";
-import { randomBytes } from "crypto";
 
 // gas estimation helpers
 const COST_OF_POST = parseUnits("200000", "wei");
@@ -418,6 +417,22 @@ const whitelistApp = async (
   }
 };
 
+const setFunderWhitelist = async (funders: Address[], isWhitelisted: boolean[]) => {
+  const { contracts: kinto } = KINTO_DATA;
+  const kintoWallet = new ethers.Contract(
+    process.env.SOCKET_OWNER_ADDRESS,
+    kinto.kintoWallet.abi,
+    ethers.provider
+  );
+  // "function setFunderWhitelist(address[] calldata newWhitelist, bool[] calldata flags)",
+  const txRequest = await kintoWallet.populateTransaction.setFunderWhitelist(funders, isWhitelisted)
+
+  const tx = await handleOps([txRequest], ethers.provider.getSigner());
+  console.log(`- Funders whitelist succesfully updated`);
+  return tx;
+}
+
+
 // extract argument types from constructor
 const extractArgTypes = async (
   contractName: string
@@ -604,4 +619,4 @@ export const getInstance = async (
 //     .attach(address)
 //     .connect(signer);
 
-export { isKinto, handleOps, deployOnKinto, whitelistApp, estimateGas };
+export { isKinto, setFunderWhitelist, handleOps, deployOnKinto, whitelistApp, estimateGas };
