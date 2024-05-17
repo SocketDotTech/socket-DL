@@ -2,11 +2,12 @@
   "compilerOptions": {
     "target": "es2018",
     "module": "commonjs",
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "outDir": "dist",
     "declaration": true,
     "resolveJsonModule": true
   },
-  "include": ["./src"]
+  "include": ["./src", "./scripts/deploy/utils/kinto"],
+  "files": ["./hardhat.config.ts"]
 }

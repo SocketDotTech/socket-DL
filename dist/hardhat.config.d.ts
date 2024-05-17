@@ -1,0 +1,12 @@
+import "@nomiclabs/hardhat-waffle";
+import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-etherscan";
+import "@typechain/hardhat";
+import "hardhat-preprocessor";
+import "hardhat-deploy";
+import "hardhat-abi-exporter";
+import "hardhat-change-network";
+import type { HardhatUserConfig } from "hardhat/config";
+import "./tasks/accounts";
+declare const config: HardhatUserConfig;
+export default config;

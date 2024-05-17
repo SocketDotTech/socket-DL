@@ -1,0 +1,67 @@
+{
+    "8453": {
+        "roleOwners": {
+            "ownerAddress": "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+            "executorAddress": "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
+            "transmitterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5",
+            "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
+            "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
+        },
+        "siblings": [1, 137, 42161, 10, 56, 34443],
+        "overrides": {
+            "type": 1,
+            "gasLimit": 3000000,
+            "gasPrice": 10000000
+        }
+    },
+    "31337": {
+        "siblings": [],
+        "timeout": 7200,
+        "msgValueMaxThreshold": 10000000000000000,
+        "overrides": {
+            "type": 1,
+            "gasLimit": 20000000,
+            "gasPrice": 1000000000000
+        }
+    },
+    "34443": {
+        "roleOwners": {
+            "ownerAddress": "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+            "executorAddress": "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
+            "transmitterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5",
+            "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
+            "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
+        },
+        "overrides": {
+            "type": 1,
+            "gasLimit": 3000000,
+            "gasPrice": 10000000
+        },
+        "siblings": [1, 42161, 10, 8453]
+    },
+    "444444": {
+        "roleOwners": {
+            "ownerAddress": "0x78Deb9225c3F28D12922913Fec978e4dC90E1aa4",
+            "executorAddress": "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
+            "transmitterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5",
+            "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
+            "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
+        },
+        "siblings": [421614, 80001, 11155111],
+        "overrides": {}
+    },
+    "2863311531": {
+        "roleOwners": {
+            "ownerAddress": "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+            "executorAddress": "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
+            "transmitterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5",
+            "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
+            "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
+        },
+        "siblings": [421614, 11155420],
+        "overrides": {
+            "type": 1,
+            "gasPrice": 100000000
+        }
+    }
+}

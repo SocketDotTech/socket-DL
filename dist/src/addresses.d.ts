@@ -1,0 +1,10 @@
+import { ChainSlug, ChainSocketAddresses, DeploymentMode, IntegrationTypes, DeploymentAddresses } from "./";
+declare function getAllAddresses(mode: DeploymentMode): DeploymentAddresses;
+declare function getAddresses(srcChainSlug: ChainSlug, mode: DeploymentMode): ChainSocketAddresses;
+declare function getSwitchboardAddress(srcChainSlug: ChainSlug, dstChainSlug: ChainSlug, integration: IntegrationTypes, mode: DeploymentMode): string;
+declare function getSwitchboardAddressFromAllAddresses(allAddresses: DeploymentAddresses, srcChainSlug: ChainSlug, dstChainSlug: ChainSlug, integration: IntegrationTypes): string;
+declare function getCapacitorAddress(srcChainSlug: ChainSlug, dstChainSlug: ChainSlug, integration: IntegrationTypes, mode: DeploymentMode): string;
+declare function getCapacitorAddressFromAllAddresses(allAddresses: DeploymentAddresses, srcChainSlug: ChainSlug, dstChainSlug: ChainSlug, integration: IntegrationTypes): string;
+declare function getDeCapacitorAddress(srcChainSlug: ChainSlug, dstChainSlug: ChainSlug, integration: IntegrationTypes, mode: DeploymentMode): string;
+declare function getDeCapacitorAddressFromAllAddresses(allAddresses: DeploymentAddresses, srcChainSlug: ChainSlug, dstChainSlug: ChainSlug, integration: IntegrationTypes): string;
+export { getSwitchboardAddress, getCapacitorAddress, getDeCapacitorAddress, getAddresses, getAllAddresses, getCapacitorAddressFromAllAddresses, getDeCapacitorAddressFromAllAddresses, getSwitchboardAddressFromAllAddresses, };

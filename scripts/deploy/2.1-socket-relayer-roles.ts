@@ -15,45 +15,49 @@ const main = async () => {
   const addresses = await getAddresses(constants.KINTO_DATA.chainId, mode);
 
   const whitelistedContracts = [
-    "CapacitorSimulator",
+    // "CapacitorSimulator",
     CORE_CONTRACTS.Socket,
-    CORE_CONTRACTS.ExecutionManager,
-    CORE_CONTRACTS.TransmitManager,
-    // CORE_CONTRACTS.FastSwitchboard, // No need
-    CORE_CONTRACTS.OptimisticSwitchboard,
-    CORE_CONTRACTS.SocketBatcher,
-    "SocketSimulator",
-    "SimulatorUtils",
-    "SwitchboardSimulator",
+    // CORE_CONTRACTS.ExecutionManager,
+    // CORE_CONTRACTS.TransmitManager,
+    // // CORE_CONTRACTS.FastSwitchboard, // No need
+    // CORE_CONTRACTS.OptimisticSwitchboard,
+    // CORE_CONTRACTS.SocketBatcher,
+    // "SocketSimulator",
+    // "SimulatorUtils",
+    // "SwitchboardSimulator",
   ];
 
   const relayers = [
-    "0x0240c3151FE3e5bdBB1894F59C5Ed9fE71ba0a5E", // funder
-    "0x090FC3eaD2E5e81d3c0FA2E45636Ef003baB9DFB",
-    "0x07ca54b301dECA9C8Bc9AF4e4Cd6A87531018031",
-    "0xA214AED7Cf1982D5e342Fd93711a49153623f953",
-    "0x78246aC69cce0d90A366B2d52064a88bb4aD8467",
-    "0x1612Ba11DC7Df706b20CD1f10485a401510b733D",
-    "0x023C34fb3Ed5880C865CF918774Ca12440dcB8BE",
-    "0xe57F05B668a660730c6E53e7219dAaEE816c6A42",
-    "0xf46b7b71Bf024c4a7A102FB570C89b03d3dDEc92",
-    "0xBc8b8f4e21d51DBdCD0E453d7D689ccb0D3e2B7b",
-    "0x54d3FD4D39Dbdc19cd5D1f7C768bFd64b9b083Fa",
-    "0x3dD9202eEF026d70fA941aaDec376D334c264655",
-    "0x7cD375aB19061bD3b5Ae28912883AaBE8108b633",
-    "0x6fB68De2F072f720BDAc80E8BCe9D124E44c33a5",
-    "0xdE4e383CaF7659C08AbC3Ce29539D8CA22ee9c71",
-    "0xeD85Fa16FE6bF65CEf63a7FCa08f2366Dc224Dd4",
-    "0x26cE14a363Cd7D52A02B996dbaC9d7eF47E46662",
-    "0xB49d1bC43e1Ae7081eF8eFc1B550C85e057da558",
-    "0xb6799BaEE97CF905D50DBD296c4e26253751eBd1",
-    "0xE83141Cc5A9d04b0F8b2A98cD32c27E0FCBa2Dd4",
-    "0x5A4c33DC6c8a53cb1Ba989eE62dcaE09036C7682",
+    // "0x0240c3151FE3e5bdBB1894F59C5Ed9fE71ba0a5E", // funder
+    // "0x090FC3eaD2E5e81d3c0FA2E45636Ef003baB9DFB",
+    // "0x07ca54b301dECA9C8Bc9AF4e4Cd6A87531018031",
+    // "0xA214AED7Cf1982D5e342Fd93711a49153623f953",
+    // "0x78246aC69cce0d90A366B2d52064a88bb4aD8467",
+    // "0x1612Ba11DC7Df706b20CD1f10485a401510b733D",
+    // "0x023C34fb3Ed5880C865CF918774Ca12440dcB8BE",
+    // "0xe57F05B668a660730c6E53e7219dAaEE816c6A42",
+    // "0xf46b7b71Bf024c4a7A102FB570C89b03d3dDEc92",
+    // "0xBc8b8f4e21d51DBdCD0E453d7D689ccb0D3e2B7b",
+    // "0x54d3FD4D39Dbdc19cd5D1f7C768bFd64b9b083Fa",
+    // "0x3dD9202eEF026d70fA941aaDec376D334c264655",
+    // "0x7cD375aB19061bD3b5Ae28912883AaBE8108b633",
+    // "0x6fB68De2F072f720BDAc80E8BCe9D124E44c33a5",
+    // "0xdE4e383CaF7659C08AbC3Ce29539D8CA22ee9c71",
+    // "0xeD85Fa16FE6bF65CEf63a7FCa08f2366Dc224Dd4",
+    // "0x26cE14a363Cd7D52A02B996dbaC9d7eF47E46662",
+    // "0xB49d1bC43e1Ae7081eF8eFc1B550C85e057da558",
+    // "0xb6799BaEE97CF905D50DBD296c4e26253751eBd1",
+    // "0xE83141Cc5A9d04b0F8b2A98cD32c27E0FCBa2Dd4",
+    // "0x5A4c33DC6c8a53cb1Ba989eE62dcaE09036C7682",
   ];
 
-  const contracts = [addresses[CORE_CONTRACTS.Socket]];
+  const contracts = [
+    // addresses[CORE_CONTRACTS.Socket]
+  ];
 
-  const connectors = [];
+  const connectors = [
+    "0x7bF48A72145e7110696638254aceF47E477AB3f4"
+  ];
 
   const allAddresses = [...relayers, ...contracts, ...connectors];
 

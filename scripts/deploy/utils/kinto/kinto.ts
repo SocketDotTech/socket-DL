@@ -428,6 +428,7 @@ const setFunderWhitelist = async (
     kinto.kintoWallet.abi,
     signer
   );
+  console.log(`\nUpdating funders whitelist on Kinto Wallet...`);
   // for each funder, check which ones are not whitelistd (isFunderWhitelisted)
   // and add them to an array to be passed to setFunderWhitelist
   for (let i = 0; i < funders.length; i++) {
@@ -437,10 +438,16 @@ const setFunderWhitelist = async (
       console.log(
         `- Funder ${funders[i]} is already ${
           isWhitelisted[i] ? "whitelisted" : "blacklisted"
-        }`
+        }. Skipping...`
       );
       funders.splice(i, 1);
       isWhitelisted.splice(i, 1);
+    } else {
+      console.log(
+        `- Funder ${funders[i]} will be ${
+          isWhitelisted[i] ? "whitelisted" : "blacklisted"
+        }`
+      );
     }
   }
 
