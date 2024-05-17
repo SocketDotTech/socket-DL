@@ -10,7 +10,7 @@ export function checkEnvVar(envVar: string) {
   return value;
 }
 
-export const prodVersion = "prod-1.0.14";
+export const prodVersion = "prod-1.0.15";
 export const devVersion = "dev-1.0.1";
 
 export const rpcs = {
@@ -136,7 +136,7 @@ export const prodBatcherSupportedChainSlugs = [
   ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.POLYNOMIAL_TESTNET,
   ChainSlug.BOB,
-  // ChainSlug.KINTO,
+  ChainSlug.KINTO,
   ChainSlug.KINTO_DEVNET,
 ];
 
@@ -148,5 +148,10 @@ export const prodFeesUpdaterSupportedChainSlugs = (): ChainSlug[] => {
     }
   });
 
-  return [...feesUpdaterSupportedChainSlugs, ChainSlug.POLYNOMIAL_TESTNET];
+  return [
+    ...feesUpdaterSupportedChainSlugs,
+    ChainSlug.POLYNOMIAL_TESTNET,
+    ChainSlug.KINTO_DEVNET,
+    ChainSlug.ARBITRUM_SEPOLIA,
+  ];
 };
