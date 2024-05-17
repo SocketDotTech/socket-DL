@@ -174,6 +174,14 @@ const config: HardhatUserConfig = {
           browserURL: "https://kinto-upgrade-dev-2.explorer.caldera.xyz",
         },
       },
+      {
+        network: "kinto",
+        chainId: ChainId.KINTO,
+        urls: {
+          apiURL: "https://explorer.kinto.xyz/api",
+          browserURL: "https://explorer.kinto.xyz",
+        },
+      },
     ],
   },
   networks: {
