@@ -173,13 +173,13 @@ const handleOps = async (userOps, signer, gasParams = {}, withPaymaster = false)
         }
         userOps = ops;
     }
-    gasParams = {
-        maxPriorityFeePerGas: (0, utils_1.parseUnits)("1.1", "gwei"),
-        maxFeePerGas: (0, utils_1.parseUnits)("1.1", "gwei"),
-        gasLimit: ethers_1.BigNumber.from("400000000"),
-    };
+    // gasParams = {
+    //   maxPriorityFeePerGas: parseUnits("1.1", "gwei"),
+    //   maxFeePerGas: parseUnits("1.1", "gwei"),
+    //   gasLimit: BigNumber.from("400000000"),
+    // };
     const txResponse = await entryPoint.handleOps(userOps, await signer.getAddress(), {
-        // gasParams,
+        // ...gasParams,
         type: 1, // non EIP-1559
     });
     const receipt = await txResponse.wait();

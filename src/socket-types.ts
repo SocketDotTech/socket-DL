@@ -107,6 +107,7 @@ export interface ChainSocketAddresses {
   SimulatorUtils?: string;
   SwitchboardSimulator?: string;
   KintoDeployer?: string;
+  CapacitorSimulator?: string;
 }
 
 export type DeploymentAddresses = {

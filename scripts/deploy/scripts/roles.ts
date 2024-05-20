@@ -350,7 +350,7 @@ export const checkAndUpdateRoles = async (
               userAddress == process.env.SOCKET_OWNER_ADDRESS
             ) {
               console.log(
-                `- Switching userAddress from ${userAddress} to ${wallet.address}`
+                `- Use ${wallet.address} as userAddress instead of ${userAddress}`
               );
               userAddress = wallet.address;
             }
