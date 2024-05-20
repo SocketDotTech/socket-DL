@@ -4,19 +4,17 @@ pragma solidity 0.8.19;
 import "../../Setup.t.sol";
 import "../../../contracts/mocks/MockPolygonL1Switchboard.sol";
 
-// Goerli -> mumbai
-// Switchboard on Goerli (5) for mumbai-testnet (80001) as remote is: 0xDe5c161D61D069B0F2069518BB4110568D465465
-// RemoteNativeSwitchBoard i.e SwitchBoard on mumbai-testnet (80001) is:0x029ce68B3A6B3B3713CaC23a39c9096f279c8Ad2
+// mainnet -> polygon
+// Switchboard on mainnet (1) for polygon (137) as remote is: 0xDe5c161D61D069B0F2069518BB4110568D465465
+// RemoteNativeSwitchBoard i.e SwitchBoard on polygon (137) is:0x029ce68B3A6B3B3713CaC23a39c9096f279c8Ad2
 contract PolygonL1SwitchboardTest is Setup {
     bytes32[] roots;
     uint256 nonce;
 
     uint256 initiateGasLimit_ = 300000;
     uint256 executionOverhead_ = 300000;
-    address checkpointManager_ = 0x2890bA17EfE978480615e330ecB65333b880928e;
-    address fxRoot_ = 0x3d1d3E34f7fB6D26245E6640E1c50710eFFf15bA;
-    address remoteNativeSwitchboard_ =
-        0x029ce68B3A6B3B3713CaC23a39c9096f279c8Ad2;
+    address checkpointManager_ = 0x86E4Dc95c7FBdBf52e33D563BbDB00823894C287;
+    address fxRoot_ = 0xfe5e5D361b2ad62c541bAb87C45a0B9B018389a2;
 
     MockPolygonL1Switchboard polygonL1Switchboard;
     ICapacitor singleCapacitor;
@@ -24,10 +22,10 @@ contract PolygonL1SwitchboardTest is Setup {
     function setUp() external {
         initialize();
 
-        _a.chainSlug = uint32(uint256(5));
-        _b.chainSlug = uint32(uint256(80001));
+        _a.chainSlug = uint32(uint256(1));
+        _b.chainSlug = uint32(uint256(137));
 
-        uint256 fork = vm.createFork(vm.envString("GOERLI_RPC"), 8546583);
+        uint256 fork = vm.createFork(vm.envString("MAINNET_RPC"));
         vm.selectFork(fork);
 
         uint256[] memory transmitterPrivateKeys = new uint256[](1);
@@ -51,7 +49,7 @@ contract PolygonL1SwitchboardTest is Setup {
             _a.chainSlug,
             msg.sender,
             _b.chainSlug,
-            0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1,
+            address(1),
             messageDetails
         );
 

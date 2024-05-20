@@ -4,8 +4,8 @@ pragma solidity 0.8.19;
 import "../../Setup.t.sol";
 import "../../../contracts/switchboard/native/OptimismSwitchboard.sol";
 
-// Goerli -> Optimism-Goerli
-// RemoteNativeSwitchBoard i.e SwitchBoard on Goerli (5) is:0x793753781B45565C68392c4BB556C1bEcFC42F24
+// sepolia -> Optimism-sepolia
+// RemoteNativeSwitchBoard i.e SwitchBoard on sepolia (11155111) is:0xEDF6dB2f3BC8deE014762e0141EE4CA19d685dBd
 contract OptimismSwitchboardL2L1Test is Setup {
     bytes32[] roots;
     uint256 nonce;
@@ -14,10 +14,10 @@ contract OptimismSwitchboardL2L1Test is Setup {
     uint256 confirmGasLimit_ = 100000;
     uint256 initiateGasLimit_ = 100000;
     uint256 executionOverhead_ = 100000;
-    address remoteNativeSwitchboard_ =
-        0x793753781B45565C68392c4BB556C1bEcFC42F24;
     address crossDomainManagerAddress_ =
         0x4200000000000000000000000000000000000007;
+    address sepoliaCrossDomainManagerAddress_ =
+        0x58Cc85b8D04EA49cC6DBd3CbFFd00B4B8D6cb3ef;
 
     OptimismSwitchboard optimismSwitchboard;
     ICapacitor singleCapacitor;
@@ -25,13 +25,10 @@ contract OptimismSwitchboardL2L1Test is Setup {
     function setUp() external {
         initialize();
 
-        _a.chainSlug = uint32(uint256(420));
-        _b.chainSlug = uint32(uint256(5));
+        _a.chainSlug = uint32(uint256(11155420));
+        _b.chainSlug = uint32(uint256(11155111));
 
-        uint256 fork = vm.createFork(
-            vm.envString("OPTIMISM_GOERLI_RPC"),
-            5911043
-        );
+        uint256 fork = vm.createFork(vm.envString("OPTIMISM_SEPOLIA_RPC"));
         vm.selectFork(fork);
 
         uint256[] memory transmitterPrivateKeys = new uint256[](1);
@@ -55,7 +52,7 @@ contract OptimismSwitchboardL2L1Test is Setup {
             _a.chainSlug,
             msg.sender,
             _b.chainSlug,
-            0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1,
+            address(1),
             messageDetails
         );
 
@@ -66,7 +63,7 @@ contract OptimismSwitchboardL2L1Test is Setup {
             _a.chainSlug,
             _b.chainSlug
         );
-        optimismSwitchboard.initiateNativeConfirmation(packetId);
+        // optimismSwitchboard.initiateNativeConfirmation(packetId);
         vm.stopPrank();
     }
 

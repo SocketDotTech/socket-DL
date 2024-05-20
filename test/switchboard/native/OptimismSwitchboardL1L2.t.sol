@@ -15,10 +15,8 @@ contract OptimismSwitchboardL1L2Test is Setup {
     uint256 confirmGasLimit_ = 100000;
     uint256 initiateGasLimit_ = 100000;
     uint256 executionOverhead_ = 100000;
-    address remoteNativeSwitchboard_ =
-        0x2D468C4d7e355a4ADe099802A61Ba536220fb3Cb;
     address crossDomainManagerAddress_ =
-        0x5086d1eEF304eb5284A0f6720f79403b4e9bE294;
+        0x58Cc85b8D04EA49cC6DBd3CbFFd00B4B8D6cb3ef;
 
     OptimismSwitchboard optimismSwitchboard;
     ICapacitor singleCapacitor;
@@ -26,10 +24,10 @@ contract OptimismSwitchboardL1L2Test is Setup {
     function setUp() external {
         initialize();
 
-        _a.chainSlug = uint32(uint256(5));
-        _b.chainSlug = uint32(uint256(420));
+        _a.chainSlug = uint32(uint256(11155111));
+        _b.chainSlug = uint32(uint256(11155420));
 
-        uint256 fork = vm.createFork(vm.envString("GOERLI_RPC"), 8546564);
+        uint256 fork = vm.createFork(vm.envString("SEPOLIA_RPC"));
         vm.selectFork(fork);
 
         uint256[] memory transmitterPrivateKeys = new uint256[](1);
@@ -53,7 +51,7 @@ contract OptimismSwitchboardL1L2Test is Setup {
             _a.chainSlug,
             msg.sender,
             _b.chainSlug,
-            0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1,
+            address(1),
             messageDetails
         );
 
