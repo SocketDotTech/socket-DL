@@ -2332,6 +2332,11 @@
           "capacitor": "0x59309f3dEa6449190Bdd22d19933986264344dae",
           "decapacitor": "0x9B5e26E853c8b3B618F08aE22f5030135808CbD4",
           "switchboard": "0xB9EDe9aaEaA40e35033ABBC872D141950d08cc4d"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x2f21d32F5A086207De60C59ea6C13e5585a2B224",
+          "decapacitor": "0x0dad85c83781f623E6E7c618c1EdeD95Cd156A46",
+          "switchboard": "0xEDF6dB2f3BC8deE014762e0141EE4CA19d685dBd"
         }
       },
       "11155111": {
@@ -2583,6 +2588,11 @@
           "capacitor": "0xe5d03904205e6457c77C5e57CF8BAc93E1f36Fc8",
           "decapacitor": "0xC8150b4b8310B9e876f2f19438f5Bd09Fcbf5Fa0",
           "switchboard": "0x501fCBa3e6F92b2D1d89038FeD56EdacaaF5f7c2"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x6cEcC44C06aFE7F56974C3D22a60783FF5056b61",
+          "decapacitor": "0xf430b7f96A2601Fd56D8A6fD385Db1A15E84d88A",
+          "switchboard": "0xd84fabe06806270Fb2dDFC2255102206e3B36865"
         }
       },
       "11155112": {
