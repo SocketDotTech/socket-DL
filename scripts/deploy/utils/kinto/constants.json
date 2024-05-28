@@ -1,6 +1,7 @@
 {
   "KINTO_DATA": {
     "chainId": 7887,
+    "rpcUrl": "https://kinto-mainnet.calderachain.xyz/http",
     "contracts": {
       "kintoID": {
         "address": "0xf369f78E3A0492CC4e96a90dae0728A38498e9c7",
@@ -16,7 +17,10 @@
           "function execute(address dest, uint256 value, bytes calldata func)",
           "function appWhitelist(address) view returns (bool)",
           "function setFunderWhitelist(address[] calldata newWhitelist, bool[] calldata flags)",
-          "function isFunderWhitelisted(address) view returns (bool)"
+          "function isFunderWhitelisted(address) view returns (bool)",
+          "function owners(uint256) view returns (address)",
+          "function signerPolicy() view returns (uint256)",
+          "function getOwnersCount() view returns (uint256)"
         ]
       },
       "factory": {

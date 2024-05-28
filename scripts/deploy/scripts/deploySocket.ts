@@ -44,7 +44,7 @@ export const deploySocket = async (
   };
   // @ts-ignore
   if (!isKinto(chainSlug)) socketOwner = socketSigner.address;
-  console.log("Socket owner: ", socketOwner);
+  console.log("Socket owner will be: ", socketOwner);
 
   try {
     const signatureVerifier: Contract = await getOrDeploy(
@@ -189,7 +189,11 @@ export const deploySocket = async (
         }
       );
       if (isKinto(chainSlug)) {
-        tx = await handleOps([txRequest], simulatorContract.signer);
+        tx = await handleOps(
+          process.env.SOCKET_OWNER_ADDRESS,
+          [txRequest],
+          process.env.SOCKET_SIGNER_KEY
+        );
       } else {
         tx = await (
           await simulatorContract.signer.sendTransaction(txRequest)

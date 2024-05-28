@@ -96,7 +96,11 @@ export const main = async () => {
           );
 
           if (isKinto(chain)) {
-            tx = await handleOps([txRequest], counter.signer);
+            tx = await handleOps(
+              process.env.SOCKET_OWNER_ADDRESS,
+              [txRequest],
+              process.env.SOCKET_SIGNER_KEY
+            );
           } else {
             tx = await (await counter.signer.sendTransaction(txRequest)).wait();
           }

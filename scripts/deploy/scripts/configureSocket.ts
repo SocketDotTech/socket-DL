@@ -76,7 +76,11 @@ export const setManagers = async (
     );
 
     if (isKinto(await socketSigner.getChainId())) {
-      tx = await handleOps([txRequest], socket.signer);
+      tx = await handleOps(
+        process.env.SOCKET_OWNER_ADDRESS,
+        [txRequest],
+        process.env.SOCKET_SIGNER_KEY
+      );
     } else {
       tx = await (await socket.signer.sendTransaction(txRequest)).wait();
     }
@@ -93,7 +97,11 @@ export const setManagers = async (
     );
 
     if (isKinto(await socketSigner.getChainId())) {
-      tx = await handleOps([txRequest], socket.signer);
+      tx = await handleOps(
+        process.env.SOCKET_OWNER_ADDRESS,
+        [txRequest],
+        process.env.SOCKET_SIGNER_KEY
+      );
     } else {
       tx = await (await socket.signer.sendTransaction(txRequest)).wait();
     }
@@ -177,7 +185,11 @@ export const configureExecutionManager = async (
       );
 
     if (isKinto(chain)) {
-      tx = await handleOps([txRequest], socketBatcherContract.signer);
+      tx = await handleOps(
+        process.env.SOCKET_OWNER_ADDRESS,
+        [txRequest],
+        process.env.SOCKET_SIGNER_KEY
+      );
     } else {
       tx = await (
         await socketBatcherContract.signer.sendTransaction(txRequest)
@@ -249,7 +261,11 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
               );
 
             if (isKinto(await socketSigner.getChainId())) {
-              tx = await handleOps([txRequest], contract.signer);
+              tx = await handleOps(
+                process.env.SOCKET_OWNER_ADDRESS,
+                [txRequest],
+                process.env.SOCKET_SIGNER_KEY
+              );
             } else {
               tx = await (
                 await contract.signer.sendTransaction(txRequest)
@@ -279,7 +295,11 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
               );
 
             if (isKinto(await socketSigner.getChainId())) {
-              tx = await handleOps([txRequest], contract.signer);
+              tx = await handleOps(
+                process.env.SOCKET_OWNER_ADDRESS,
+                [txRequest],
+                process.env.SOCKET_SIGNER_KEY
+              );
             } else {
               tx = await (
                 await contract.signer.sendTransaction(txRequest)

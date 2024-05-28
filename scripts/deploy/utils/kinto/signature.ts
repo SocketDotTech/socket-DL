@@ -9,8 +9,9 @@ import {
 } from "ethers/lib/utils";
 import { Address } from "hardhat-deploy/dist/types";
 import { KINTO_DATA } from "./constants.json";
-import { getProviderFromChainSlug } from "../../../constants";
-import { ChainId, ChainSlug } from "../../../../src";
+import TrezorSigner from "./trezorProvider";
+import { LedgerSigner } from "@ethers-ext/signer-ledger";
+import HIDTransport from "@ledgerhq/hw-transport-node-hid";
 
 const packUserOpForSig = (userOp) => {
   return defaultAbiCoder.encode(
@@ -52,9 +53,39 @@ const getUserOpHash = async (userOp, entryPointAddress, chainId) => {
   );
 };
 
-const signUserOp = async (userOp, entryPointAddress, chainId, privateKeys) => {
+const signUserOp = async (
+  kintoWalletAddr: Address,
+  userOp: object,
+  entryPointAddress: Address,
+  chainId: number,
+  privateKeys: string[]
+) => {
+  const provider = getKintoProvider();
+  const kintoWallet = new ethers.Contract(
+    kintoWalletAddr,
+    KINTO_DATA.contracts.kintoWallet.abi,
+    provider
+  );
+
+  // prepare hash to sign
   const hash = await getUserOpHash(userOp, entryPointAddress, chainId);
   const ethSignedHash = hashMessage(arrayify(hash));
+
+  // check policy and required signers
+  const policy = await kintoWallet.signerPolicy();
+  const ownersLength = await kintoWallet.getOwnersCount();
+  const requiredSigners =
+    policy == 3 ? ownersLength : policy == 1 ? 1 : ownersLength - 1;
+
+  const keysLength = ["TREZOR", "LEDGER"].includes(process.env.HW_TYPE)
+    ? privateKeys.length + 1
+    : privateKeys.length + 0;
+  if (keysLength < requiredSigners) {
+    console.error(
+      `Not enough private keys provided. Required ${requiredSigners}, got ${privateKeys.length}`
+    );
+    return;
+  }
 
   let signature = "0x";
   for (const privateKey of privateKeys) {
@@ -62,14 +93,45 @@ const signUserOp = async (userOp, entryPointAddress, chainId, privateKeys) => {
     const sig = signingKey.signDigest(ethSignedHash);
     signature += joinSignature(sig).slice(2); // remove initial '0x'
   }
+
+  // sign with hardware wallet if available
+  const hwSignature = await signWithHw(hash, process.env.HW_TYPE);
+  signature += (hwSignature as string).slice(2);
   return signature;
 };
 
+const signWithHw = async (hash: string, hwType: string): Promise<string> => {
+  const provider = getKintoProvider();
+  if (hwType === "TREZOR") {
+    try {
+      console.log("\nUsing Trezor as second signer...");
+      const trezorSigner = new TrezorSigner(provider);
+      const signer = await trezorSigner.getAddress();
+      console.log("- Signing with", signer);
+
+      return await trezorSigner.signMessage(hash);
+    } catch (e) {
+      console.error("- Could not sign with Trezor", e);
+    }
+  }
+  if (hwType === "LEDGER") {
+    try {
+      console.log("\nUsing Ledger as second signer...");
+      // @ts-ignore
+      const ledger = new LedgerSigner(HIDTransport, provider);
+      const signer = await ledger.getAddress();
+      console.log("- Signing with", signer);
+
+      return await ledger.signMessage(hash);
+    } catch (e) {
+      console.error("- Could not sign with Ledger", e);
+    }
+  }
+  console.log("\nWARNING: No hardware wallet detected. To use one, set HW_TYPE env variable to LEDGER or TREZOR.");
+};
+
 const sign = async (privateKey: Address, chainId: number): Promise<string> => {
-  const wallet = new ethers.Wallet(
-    privateKey,
-    getProviderFromChainSlug(chainId)
-  );
+  const wallet = new ethers.Wallet(privateKey, getKintoProvider());
   const kintoID = new ethers.Contract(
     KINTO_DATA.contracts.kintoID.address,
     KINTO_DATA.contracts.kintoID.abi,
@@ -104,4 +166,8 @@ const sign = async (privateKey: Address, chainId: number): Promise<string> => {
   return signature;
 };
 
-export { signUserOp, sign };
+const getKintoProvider = () => {
+  return new ethers.providers.StaticJsonRpcProvider(KINTO_DATA.rpcUrl);
+};
+
+export { getKintoProvider, signUserOp, sign };

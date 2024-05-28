@@ -24,7 +24,7 @@ import {
 } from "@ethersproject/abstract-provider";
 import { Address } from "hardhat-deploy/dist/types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { signUserOp } from "./signature";
+import { getKintoProvider, signUserOp } from "./signature";
 import { KINTO_DATA } from "./constants.json";
 
 // gas estimation helpers
@@ -59,20 +59,24 @@ type UserOpGasParams = {
 // deployer utils
 
 const deployOnKinto = async (
+  kintoWalletAddr: Address,
   contractName: string,
   args: Array<string>,
-  signer: SignerWithAddress | Wallet
+  privateKey: string
 ): Promise<Contract> => {
   let contractAddr: Address;
   const argTypes = await extractArgTypes(contractName);
+  const signer = new Wallet(privateKey, getKintoProvider());
+  signer.privateKey;
 
   // if the contract inherits from Socket's custom 2-step Ownable contract, we deploy it via KintoDeployer
   if (await isOwnable(contractName)) {
     contractAddr = await deployWithDeployer(
+      kintoWalletAddr,
       contractName,
       argTypes,
       args,
-      signer
+      privateKey
     );
   } else {
     // otherwise, we deploy it via Kinto's factory
@@ -80,22 +84,31 @@ const deployOnKinto = async (
       contractName,
       argTypes,
       args,
-      signer
+      privateKey
     );
   }
 
   // whitelist contract on Socket's kinto wallet
-  await whitelistApp(contractAddr, signer);
+  await whitelistApp(kintoWalletAddr, contractAddr, privateKey);
+
   return (await ethers.getContractFactory(contractName))
     .attach(contractAddr)
     .connect(signer);
 };
 
-const getOrDeployDeployer = async (signer: SignerWithAddress | Wallet) => {
+const getOrDeployDeployer = async (
+  kintoWalletAddr: Address,
+  privateKey: string
+) => {
   let deployer = KINTO_DATA.contracts.deployer.address;
   if (!deployer || deployer === "0x") {
     // if deployer address is not set, deploy it and save it
-    deployer = await deployWithKintoFactory("KintoDeployer", [], [], signer);
+    deployer = await deployWithKintoFactory(
+      "KintoDeployer",
+      [],
+      [],
+      privateKey
+    );
 
     // write address in constants.ts using fs
     KINTO_DATA.contracts.deployer.address = deployer;
@@ -103,24 +116,27 @@ const getOrDeployDeployer = async (signer: SignerWithAddress | Wallet) => {
     fs.writeFileSync(filePath, JSON.stringify({ KINTO_DATA }, null, 2));
 
     // whitelist KintoDeployer on Socket's kinto wallet
-    await whitelistApp(deployer, signer);
+    await whitelistApp(kintoWalletAddr, deployer, privateKey);
   }
   return deployer;
 };
 
 const deployWithDeployer = async (
+  kintoWalletAddr: Address,
   contractName: string,
   argTypes: Array<any>,
   args: Array<any>,
-  signer: SignerWithAddress | Wallet
+  privateKey: string
 ): Promise<Address> => {
-  const chainId = await signer.getChainId();
   const { contracts: kinto, userOpGasParams } = KINTO_DATA;
-  const deployer = await getOrDeployDeployer(signer);
+  const signer = new Wallet(privateKey, getKintoProvider());
+  const chainId = await signer.getChainId();
+
+  const deployer = await getOrDeployDeployer(kintoWalletAddr, privateKey);
   console.log(`Deployer address: ${deployer}`);
 
   const kintoWallet = new ethers.Contract(
-    process.env.SOCKET_OWNER_ADDRESS,
+    kintoWalletAddr,
     kinto.kintoWallet.abi,
     signer
   );
@@ -177,7 +193,8 @@ const deployWithDeployer = async (
     entryPoint.address,
     paymasterAddr,
     nonce,
-    executeCalldata
+    executeCalldata,
+    privateKey
   );
 
   // compute the contract address
@@ -212,7 +229,8 @@ const deployWithDeployer = async (
       entryPoint.address,
       paymasterAddr,
       nonce,
-      executeCalldata
+      executeCalldata,
+      privateKey
     );
 
     //// (3). claim ownership
@@ -235,7 +253,8 @@ const deployWithDeployer = async (
       entryPoint.address,
       paymasterAddr,
       nonce,
-      calldataClaimOwner
+      calldataClaimOwner,
+      privateKey
     );
   }
 
@@ -261,7 +280,7 @@ const deployWithDeployer = async (
   // if (paymasterBalance.lt(ethMaxCost)) throw new Error(`Paymaster balance ${paymasterBalance} is less than the required ETH max cost ${ethMaxCost.toString()}`);
 
   // submit user operation to the EntryPoint
-  await handleOps(userOps, signer);
+  await handleOps(kintoWalletAddr, userOps, signer, privateKey);
 
   console.log(`- ${name} contract deployed @ ${contractAddr}`);
   try {
@@ -279,8 +298,9 @@ const deployWithKintoFactory = async (
   contractName: string,
   argTypes: Array<any>,
   args: Array<any>,
-  signer: SignerWithAddress | Wallet
+  privateKey: string
 ): Promise<Address> => {
+  const signer = new Wallet(privateKey, getKintoProvider());
   console.log(`\nDeploying ${contractName} contract using Kinto's factory`);
   const factory = new ethers.Contract(
     KINTO_DATA.contracts.factory.address,
@@ -319,12 +339,14 @@ const deployWithKintoFactory = async (
 const isKinto = (chainId: number): boolean => chainId === KINTO_DATA.chainId;
 
 const handleOps = async (
+  kintoWalletAddr: Address,
   userOps: PopulatedTransaction[] | UserOperation[],
-  signer: Signer | Wallet,
+  privateKey: string,
   gasParams: GasParams = {},
   withPaymaster = false
 ): Promise<TransactionReceipt> => {
   const { contracts: kinto } = KINTO_DATA;
+  const signer = new Wallet(privateKey, getKintoProvider());
 
   const entryPoint = new ethers.Contract(
     kinto.entryPoint.address,
@@ -337,7 +359,7 @@ const handleOps = async (
     signer
   );
   const kintoWallet = new ethers.Contract(
-    process.env.SOCKET_OWNER_ADDRESS,
+    kintoWalletAddr,
     kinto.kintoWallet.abi,
     signer
   );
@@ -360,7 +382,8 @@ const handleOps = async (
         entryPoint.address,
         withPaymaster ? paymaster.address : "0x",
         nonce,
-        calldata
+        calldata,
+        privateKey
       );
       nonce = nonce.add(1);
     }
@@ -389,12 +412,15 @@ const handleOps = async (
 };
 
 const whitelistApp = async (
+  kintoWalletAddr: Address,
   app: Address,
-  signer: SignerWithAddress | Wallet
+  privateKey: string
 ): Promise<TransactionReceipt> => {
   const { contracts: kinto } = KINTO_DATA;
+  const signer = new Wallet(privateKey, getKintoProvider());
+
   const kintoWallet = new ethers.Contract(
-    process.env.SOCKET_OWNER_ADDRESS,
+    kintoWalletAddr,
     kinto.kintoWallet.abi,
     signer
   );
@@ -411,20 +437,22 @@ const whitelistApp = async (
       }
     );
 
-    const tx = await handleOps([txRequest], signer);
+    const tx = await handleOps(kintoWalletAddr, [txRequest], privateKey);
     console.log(`- Contract succesfully whitelisted on Kinto Wallet`);
     return tx;
   }
 };
 
 const setFunderWhitelist = async (
+  kintoWalletAddr: Address,
   funders: Address[],
   isWhitelisted: boolean[],
-  signer: SignerWithAddress | Wallet
+  signer: SignerWithAddress | Wallet,
+  privateKey: string
 ) => {
   const { contracts: kinto } = KINTO_DATA;
   const kintoWallet = new ethers.Contract(
-    process.env.SOCKET_OWNER_ADDRESS,
+    kintoWalletAddr,
     kinto.kintoWallet.abi,
     signer
   );
@@ -457,7 +485,7 @@ const setFunderWhitelist = async (
     isWhitelisted
   );
 
-  const tx = await handleOps([txRequest], signer);
+  const tx = await handleOps(kintoWalletAddr, [txRequest], privateKey);
   console.log(`- Funders whitelist succesfully updated`);
   return tx;
 };
@@ -532,7 +560,8 @@ const createUserOp = async (
   entryPoint: Address,
   paymaster: Address,
   nonce: BigNumber,
-  callData: string
+  callData: string,
+  privateKey: string
 ): Promise<UserOperation> => {
   const { callGasLimit, verificationGasLimit, preVerificationGas } =
     KINTO_DATA.userOpGasParams as UserOpGasParams;
@@ -550,8 +579,14 @@ const createUserOp = async (
     signature: hexlify([]),
   };
 
-  const privateKeys = [`0x${process.env.SOCKET_SIGNER_KEY}`];
-  userOp.signature = await signUserOp(userOp, entryPoint, chainId, privateKeys);
+  const privateKeys = [`0x${privateKey}`];
+  userOp.signature = await signUserOp(
+    sender,
+    userOp,
+    entryPoint,
+    chainId,
+    privateKeys
+  );
   return userOp;
 };
 

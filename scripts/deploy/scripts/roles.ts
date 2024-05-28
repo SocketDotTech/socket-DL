@@ -163,7 +163,11 @@ const executeRoleTransactions = async (
         [roles, slugs, addresses]
       );
 
-      tx = await handleOps([txRequest], wallet);
+      tx = await handleOps(
+        process.env.SOCKET_OWNER_ADDRESS,
+        [txRequest],
+        process.env.SOCKET_SIGNER_KEY
+      );
     } else {
       tx = await (await wallet.sendTransaction(txRequest)).wait();
     }
@@ -196,7 +200,11 @@ const executeOtherTransactions = async (
       ...overrides(chainSlug),
     } as PopulatedTransaction;
     if (isKinto(chainSlug)) {
-      tx = await handleOps([txRequest], wallet);
+      tx = await handleOps(
+        process.env.SOCKET_OWNER_ADDRESS,
+        [txRequest],
+        process.env.SOCKET_SIGNER_KEY
+      );
     } else {
       tx = await (await wallet.sendTransaction(txRequest)).wait();
     }

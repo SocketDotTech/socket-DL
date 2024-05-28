@@ -85,7 +85,12 @@ export async function deployContractWithArgs(
   try {
     let contract: Contract;
     if (isKinto(await signer.getChainId())) {
-      contract = await deployOnKinto(contractName, args, signer);
+      contract = await deployOnKinto(
+        process.env.SOCKET_OWNER_ADDRESS,
+        contractName,
+        args,
+        process.env.SOCKET_SIGNER_KEY
+      );
     } else {
       const Contract: ContractFactory = await ethers.getContractFactory(
         contractName
