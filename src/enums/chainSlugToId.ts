@@ -41,4 +41,7 @@ export const ChainSlugToId = {
   [ChainSlug.BOB]: ChainId.BOB,
   [ChainSlug.KINTO]: ChainId.KINTO,
   [ChainSlug.KINTO_DEVNET]: ChainId.KINTO_DEVNET,
+  [ChainSlug.SIPHER_FUNKI_TESTNET]: ChainId.SIPHER_FUNKI_TESTNET,
+  [ChainSlug.WINR]: ChainId.WINR,
+  [ChainSlug.BLAST]: ChainId.BLAST,
 };

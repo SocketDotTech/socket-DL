@@ -39,4 +39,7 @@ export enum HardhatChainName {
   BOB = "bob",
   KINTO = "kinto",
   KINTO_DEVNET = "kinto_devnet",
+  SIPHER_FUNKI_TESTNET = "sipher_funki_testnet",
+  WINR = "winr",
+  BLAST = "blast",
 }

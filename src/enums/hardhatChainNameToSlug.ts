@@ -41,4 +41,7 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.BOB]: ChainSlug.BOB,
   [HardhatChainName.KINTO]: ChainSlug.KINTO,
   [HardhatChainName.KINTO_DEVNET]: ChainSlug.KINTO_DEVNET,
+  [HardhatChainName.SIPHER_FUNKI_TESTNET]: ChainSlug.SIPHER_FUNKI_TESTNET,
+  [HardhatChainName.WINR]: ChainSlug.WINR,
+  [HardhatChainName.BLAST]: ChainSlug.BLAST,
 };

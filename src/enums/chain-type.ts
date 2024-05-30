@@ -14,6 +14,8 @@ export const opStackL2Chain = [
   ChainSlug.MANTLE,
   ChainSlug.POLYNOMIAL_TESTNET,
   ChainSlug.BOB,
+  ChainSlug.SIPHER_FUNKI_TESTNET,
+  ChainSlug.BLAST,
 ];
 
 export const arbL3Chains = [
@@ -22,6 +24,7 @@ export const arbL3Chains = [
   ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.KINTO,
   ChainSlug.KINTO_DEVNET,
+  ChainSlug.WINR,
 ];
 
 export const arbChains = [

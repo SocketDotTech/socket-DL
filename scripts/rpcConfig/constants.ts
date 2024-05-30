@@ -51,6 +51,9 @@ export const rpcs = {
   [ChainSlug.KINTO]: checkEnvVar("KINTO_RPC"),
   [ChainSlug.KINTO_DEVNET]: checkEnvVar("KINTO_DEVNET_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
+  [ChainSlug.SIPHER_FUNKI_TESTNET]: checkEnvVar("KINTO_RPC"),
+  [ChainSlug.WINR]: checkEnvVar("KINTO_RPC"),
+  [ChainSlug.BLAST]: checkEnvVar("KINTO_RPC"),
 };
 
 export const explorers = {
@@ -59,6 +62,9 @@ export const explorers = {
   [ChainSlug.HOOK]: "https://hook.calderaexplorer.xyz",
   [ChainSlug.MANTLE]: "https://explorer.mantle.xyz",
   [ChainSlug.REYA]: "https://explorer.reya.network",
+  [ChainSlug.SIPHER_FUNKI_TESTNET]: "https://sepolia-sandbox.funkichain.com",
+  [ChainSlug.WINR]: "https://explorerl2new-winr-mainnet-0.t.conduit.xyz",
+  [ChainSlug.BLAST]: "https://blastscan.io",
 };
 
 export const icons = {
@@ -107,6 +113,9 @@ export const confirmations = {
   [ChainSlug.BOB]: 0,
   [ChainSlug.KINTO]: 0,
   [ChainSlug.KINTO_DEVNET]: 0,
+  [ChainSlug.SIPHER_FUNKI_TESTNET]: 0,
+  [ChainSlug.WINR]: 0,
+  [ChainSlug.BLAST]: 0,
 };
 
 export const prodBatcherSupportedChainSlugs = [
@@ -129,7 +138,7 @@ export const prodBatcherSupportedChainSlugs = [
   ChainSlug.OPTIMISM_SEPOLIA,
   // ChainSlug.MODE_TESTNET,
   ChainSlug.BASE,
-  // ChainSlug.MODE,
+  ChainSlug.MODE,
   // ChainSlug.ANCIENT8_TESTNET2,
   ChainSlug.HOOK_TESTNET,
   ChainSlug.REYA_CRONOS,
@@ -138,6 +147,9 @@ export const prodBatcherSupportedChainSlugs = [
   ChainSlug.BOB,
   ChainSlug.KINTO,
   ChainSlug.KINTO_DEVNET,
+  ChainSlug.SIPHER_FUNKI_TESTNET,
+  ChainSlug.WINR,
+  ChainSlug.BLAST,
 ];
 
 export const prodFeesUpdaterSupportedChainSlugs = (): ChainSlug[] => {

@@ -40,4 +40,7 @@ export enum ChainSlug {
   BOB = ChainId.BOB,
   KINTO = ChainId.KINTO,
   KINTO_DEVNET = ChainId.KINTO_DEVNET,
+  SIPHER_FUNKI_TESTNET = ChainId.SIPHER_FUNKI_TESTNET,
+  WINR = ChainId.WINR,
+  BLAST = ChainId.BLAST,
 }
