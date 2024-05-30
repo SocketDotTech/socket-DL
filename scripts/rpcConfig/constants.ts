@@ -10,7 +10,7 @@ export function checkEnvVar(envVar: string) {
   return value;
 }
 
-export const prodVersion = "prod-1.0.15";
+export const prodVersion = "prod-1.0.16";
 export const devVersion = "dev-1.0.1";
 
 export const rpcs = {
