@@ -9,6 +9,8 @@ import "../interfaces/ISocket.sol";
 import "../interfaces/ICapacitor.sol";
 import "../switchboard/default-switchboards/FastSwitchboard.sol";
 import "../interfaces/INativeRelay.sol";
+import "../interfaces/IExecutionManager.sol";
+
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
 /**
@@ -142,10 +144,21 @@ contract SocketBatcher is AccessControl {
      * @param fees The total fees needed
      * @param signature The signature of the packet data.
      */
-    struct SetFeesRequest {
+    struct SetTransmissionFeesRequest {
         uint256 nonce;
         uint32 dstChainSlug;
         uint128 fees;
+        bytes signature;
+        bytes4 functionSelector;
+    }
+
+    struct SetExecutionFeesRequest {
+        uint256 nonce;
+        uint32 dstChainSlug;
+        uint128 gasPrice;
+        uint128 perByteCost;
+        uint256 overhead;
+        uint256 fees;
         bytes signature;
         bytes4 functionSelector;
     }
@@ -180,19 +193,19 @@ contract SocketBatcher is AccessControl {
     /**
      * @notice sets fees in batch for transmit manager
      * @param contractAddress_ address of contract to set fees
-     * @param setFeesRequests_ the list of requests
+     * @param setTransmissionFeesRequests_ the list of requests
      */
     function setTransmissionFeesBatch(
         address contractAddress_,
-        SetFeesRequest[] calldata setFeesRequests_
+        SetTransmissionFeesRequest[] calldata setTransmissionFeesRequests_
     ) external {
-        uint256 feeRequestLength = setFeesRequests_.length;
+        uint256 feeRequestLength = setTransmissionFeesRequests_.length;
         for (uint256 index = 0; index < feeRequestLength; ) {
             ITransmitManager(contractAddress_).setTransmissionFees(
-                setFeesRequests_[index].nonce,
-                setFeesRequests_[index].dstChainSlug,
-                setFeesRequests_[index].fees,
-                setFeesRequests_[index].signature
+                setTransmissionFeesRequests_[index].nonce,
+                setTransmissionFeesRequests_[index].dstChainSlug,
+                setTransmissionFeesRequests_[index].fees,
+                setTransmissionFeesRequests_[index].signature
             );
             unchecked {
                 ++index;
@@ -207,7 +220,7 @@ contract SocketBatcher is AccessControl {
      */
     function setExecutionFeesBatch(
         address contractAddress_,
-        SetFeesRequest[] calldata setFeesRequests_
+        SetExecutionFeesRequest[] calldata setFeesRequests_
     ) external {
         uint256 feeRequestLength = setFeesRequests_.length;
         for (uint256 index = 0; index < feeRequestLength; ) {
@@ -218,7 +231,11 @@ contract SocketBatcher is AccessControl {
                 IExecutionManager(contractAddress_).setExecutionFees(
                     setFeesRequests_[index].nonce,
                     setFeesRequests_[index].dstChainSlug,
-                    setFeesRequests_[index].fees,
+                    IExecutionManager.ExecutionFeesParam(
+                        setFeesRequests_[index].gasPrice,
+                        setFeesRequests_[index].perByteCost,
+                        setFeesRequests_[index].overhead
+                    ),
                     setFeesRequests_[index].signature
                 );
 
