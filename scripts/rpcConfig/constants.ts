@@ -10,7 +10,7 @@ export function checkEnvVar(envVar: string) {
   return value;
 }
 
-export const prodVersion = "prod-1.0.16";
+export const prodVersion = "prod-1.0.17";
 export const devVersion = "dev-1.0.1";
 
 export const rpcs = {
@@ -51,9 +51,9 @@ export const rpcs = {
   [ChainSlug.KINTO]: checkEnvVar("KINTO_RPC"),
   [ChainSlug.KINTO_DEVNET]: checkEnvVar("KINTO_DEVNET_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
-  [ChainSlug.SIPHER_FUNKI_TESTNET]: checkEnvVar("KINTO_RPC"),
-  [ChainSlug.WINR]: checkEnvVar("KINTO_RPC"),
-  [ChainSlug.BLAST]: checkEnvVar("KINTO_RPC"),
+  [ChainSlug.SIPHER_FUNKI_TESTNET]: checkEnvVar("SIPHER_FUNKI_TESTNET_RPC"),
+  [ChainSlug.WINR]: checkEnvVar("WINR_RPC"),
+  [ChainSlug.BLAST]: checkEnvVar("BLAST_RPC"),
 };
 
 export const explorers = {
