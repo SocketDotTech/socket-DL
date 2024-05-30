@@ -14,7 +14,6 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.SX_NETWORK,
   ChainSlug.AEVO_TESTNET,
   ChainSlug.SEPOLIA,
-  ChainSlug.POLYGON_MUMBAI,
   ChainSlug.LYRA_TESTNET,
   ChainSlug.SX_NETWORK_TESTNET,
   ChainSlug.ARBITRUM_SEPOLIA,
@@ -27,4 +26,5 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.REYA_CRONOS,
   ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.POLYNOMIAL_TESTNET,
+  ChainSlug.BOB,
 ];

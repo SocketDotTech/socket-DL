@@ -14,7 +14,6 @@ export const ChainSlugToKey = {
   [ChainSlug.GOERLI]: HardhatChainName.GOERLI,
   [ChainSlug.SEPOLIA]: HardhatChainName.SEPOLIA,
   [ChainSlug.POLYGON_MAINNET]: HardhatChainName.POLYGON_MAINNET,
-  [ChainSlug.POLYGON_MUMBAI]: HardhatChainName.POLYGON_MUMBAI,
   [ChainSlug.AEVO_TESTNET]: HardhatChainName.AEVO_TESTNET,
   [ChainSlug.AEVO]: HardhatChainName.AEVO,
   [ChainSlug.HARDHAT]: HardhatChainName.HARDHAT,
@@ -39,4 +38,7 @@ export const ChainSlugToKey = {
   [ChainSlug.REYA]: HardhatChainName.REYA,
   [ChainSlug.SYNDR_SEPOLIA_L3]: HardhatChainName.SYNDR_SEPOLIA_L3,
   [ChainSlug.POLYNOMIAL_TESTNET]: HardhatChainName.POLYNOMIAL_TESTNET,
+  [ChainSlug.BOB]: HardhatChainName.BOB,
+  [ChainSlug.KINTO]: HardhatChainName.KINTO,
+  [ChainSlug.KINTO_DEVNET]: HardhatChainName.KINTO_DEVNET,
 };

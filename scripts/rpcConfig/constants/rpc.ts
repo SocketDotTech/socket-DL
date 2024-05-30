@@ -37,7 +37,6 @@ export const rpcs = {
   [ChainSlug.ARBITRUM_SEPOLIA]: checkEnvVar("ARBITRUM_SEPOLIA_RPC"),
   [ChainSlug.OPTIMISM_SEPOLIA]: checkEnvVar("OPTIMISM_SEPOLIA_RPC"),
   [ChainSlug.SEPOLIA]: checkEnvVar("SEPOLIA_RPC"),
-  [ChainSlug.POLYGON_MUMBAI]: checkEnvVar("POLYGON_MUMBAI_RPC"),
   [ChainSlug.ARBITRUM_GOERLI]: checkEnvVar("ARBITRUM_GOERLI_RPC"),
   [ChainSlug.AEVO_TESTNET]: checkEnvVar("AEVO_TESTNET_RPC"),
   [ChainSlug.LYRA_TESTNET]: checkEnvVar("LYRA_TESTNET_RPC"),
@@ -56,6 +55,8 @@ export const rpcs = {
   [ChainSlug.REYA_CRONOS]: checkEnvVar("REYA_CRONOS_RPC"),
   [ChainSlug.SYNDR_SEPOLIA_L3]: checkEnvVar("SYNDR_SEPOLIA_L3_RPC"),
   [ChainSlug.POLYNOMIAL_TESTNET]: checkEnvVar("POLYNOMIAL_TESTNET_RPC"),
+  [ChainSlug.BOB]: checkEnvVar("BOB_RPC"),
+  [ChainSlug.KINTO]: checkEnvVar("KINTO_RPC"),
+  [ChainSlug.KINTO_DEVNET]: checkEnvVar("KINTO_DEVNET_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
-  [ChainSlug.BSC_TESTNET]: checkEnvVar("BSC_TESTNET_RPC"),
 };

@@ -36,9 +36,8 @@ console.log(
 
 export const chains: Array<ChainSlug> = [
   // ChainSlug.GOERLI,
-  ChainSlug.ARBITRUM_SEPOLIA,
-  ChainSlug.OPTIMISM_SEPOLIA,
-  // ChainSlug.POLYGON_MUMBAI,
+  // ChainSlug.ARBITRUM_SEPOLIA,
+  // ChainSlug.OPTIMISM_SEPOLIA,
   // ChainSlug.SX_NETWORK_TESTNET,
   // ChainSlug.SX_NETWORK,
   // ChainSlug.MODE_TESTNET,
@@ -55,7 +54,7 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.POLYGON_MAINNET,
   // ChainSlug.LYRA,
   // ChainSlug.BSC,
-  // ChainSlug.BASE,
+  ChainSlug.BASE,
   // ChainSlug.MODE,
   // ChainSlug.ANCIENT8_TESTNET,
   // ChainSlug.ANCIENT8_TESTNET2,
@@ -65,8 +64,9 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.PARALLEL,
   // ChainSlug.MANTLE,
   // ChainSlug.REYA_CRONOS,
-  // ChainSlug.REYA,
-  ChainSlug.POLYNOMIAL_TESTNET,
+  ChainSlug.REYA,
+  // ChainSlug.POLYNOMIAL_TESTNET,
+  // ChainSlug.BOB,
 ];
 
 export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
@@ -113,6 +113,12 @@ export const executorAddresses = {
   [DeploymentMode.DEV]: "0x5ea69806b1df5dbdc6c1a78c662682ca48f9524d", // kms
   [DeploymentMode.SURGE]: "0x3051Aa7F267bF425A4e8bF766750D60391F014B4",
   [DeploymentMode.PROD]: "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
+};
+
+export const ownerAddresses = {
+  [DeploymentMode.DEV]: "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+  [DeploymentMode.SURGE]: "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+  [DeploymentMode.PROD]: "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
 };
 
 export const overrides = (
@@ -175,12 +181,6 @@ export const overrides = (
       type,
       gasLimit,
       gasPrice: 200_000_000_000,
-    };
-  } else if (chain == ChainSlug.POLYGON_MUMBAI) {
-    return {
-      type: 1,
-      gasLimit: 3000000,
-      gasPrice: 10_000_000_000,
     };
   } else if (chain == ChainSlug.SEPOLIA) {
     return {
@@ -258,9 +258,27 @@ export const overrides = (
     return {
       type: 1,
       // gasLimit: 20000000,
-      gasPrice: 0,
+      gasPrice: 100_000_000,
     };
   } else if (chain == ChainSlug.POLYNOMIAL_TESTNET) {
+    return {
+      type,
+      gasLimit: 4_000_000,
+      gasPrice,
+    };
+  } else if (chain == ChainSlug.BOB) {
+    return {
+      type: 1,
+      gasLimit: 4_000_000,
+      gasPrice: 100_000_000,
+    };
+  } else if (chain == ChainSlug.KINTO) {
+    return {
+      type,
+      gasLimit: 4_000_000,
+      gasPrice,
+    };
+  } else if (chain == ChainSlug.KINTO_DEVNET) {
     return {
       type,
       gasLimit: 4_000_000,

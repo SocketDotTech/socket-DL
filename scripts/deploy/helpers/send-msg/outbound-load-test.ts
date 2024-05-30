@@ -18,10 +18,11 @@ import {
   hardhatChainNameToSlug,
 } from "../../../../src";
 import { sleep } from "@socket.tech/dl-common";
+import { formatEther } from "ethers/lib/utils";
 
 const deployedAddressPath = path.join(
   __dirname,
-  `/../../../deployments/${mode}_addresses.json`
+  `/../../../../deployments/${mode}_addresses.json`
 );
 
 // batch outbound contract:
@@ -149,7 +150,7 @@ export const main = async () => {
       remoteChainSlug,
       counterAddress
     );
-
+    console.log("fees : ", value.toString(), formatEther(value));
     if (WAIT_FOR_TX) {
       await confirmAndWait(
         signer,
@@ -251,6 +252,7 @@ const confirmAndWait = async (
         numOfRequests,
         {
           value: BigNumber.from(value).mul(numOfRequests),
+          ...overrides(chainSlug),
         }
       );
 

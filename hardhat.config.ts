@@ -72,7 +72,6 @@ if (isProduction) {
     ),
     [HardhatChainName.ARBITRUM]: getChainConfig(ChainSlug.ARBITRUM),
     [HardhatChainName.BSC]: getChainConfig(ChainSlug.BSC),
-    [HardhatChainName.BSC_TESTNET]: getChainConfig(ChainSlug.BSC_TESTNET),
     [HardhatChainName.GOERLI]: getChainConfig(ChainSlug.GOERLI),
     [HardhatChainName.MAINNET]: getChainConfig(ChainSlug.MAINNET),
     [HardhatChainName.OPTIMISM]: getChainConfig(ChainSlug.OPTIMISM),
@@ -110,6 +109,9 @@ if (isProduction) {
     [HardhatChainName.POLYNOMIAL_TESTNET]: getChainConfig(
       ChainSlug.POLYNOMIAL_TESTNET
     ),
+    [HardhatChainName.BOB]: getChainConfig(ChainId.BOB),
+    [HardhatChainName.KINTO]: getChainConfig(ChainId.KINTO),
+    [HardhatChainName.KINTO_DEVNET]: getChainConfig(ChainId.KINTO_DEVNET),
   };
 }
 
@@ -149,6 +151,8 @@ const config: HardhatUserConfig = {
       mantle: process.env.MANTLE_API_KEY || "",
       reya: process.env.REYA_API_KEY || "",
       syndrSepoliaL3: process.env.SYNDR_API_KEY || "",
+      kinto: process.env.KINTO_API_KEY || "",
+      kinto_devnet: process.env.KINTO_DEVNET_API_KEY || "",
     },
     customChains: [
       {
@@ -173,6 +177,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.basescan.org/api",
           browserURL: "https://basescan.org/",
+        },
+      },
+      {
+        network: "kinto_devnet",
+        chainId: ChainId.KINTO_DEVNET,
+        urls: {
+          apiURL: "https://kinto-upgrade-dev-2.explorer.caldera.xyz/api",
+          browserURL: "https://kinto-upgrade-dev-2.explorer.caldera.xyz",
+        },
+      },
+      {
+        network: "kinto",
+        chainId: ChainId.KINTO,
+        urls: {
+          apiURL: "https://explorer.kinto.xyz/api",
+          browserURL: "https://explorer.kinto.xyz",
         },
       },
     ],

@@ -91,6 +91,7 @@ export const getTxData = async (): Promise<TxData> => {
 
   const txData: TxData = {};
   for (const chainSlug of allChainSlugs) {
+    console.log(`Getting tx data for ${chainSlug}`);
     const packetInfo = await getPacketInfo(
       chainSlug,
       addresses[chainSlug]?.["CapacitorSimulator"]

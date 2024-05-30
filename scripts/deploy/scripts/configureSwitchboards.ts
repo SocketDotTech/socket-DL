@@ -33,7 +33,7 @@ export const configureSwitchboards = async (
 ) => {
   try {
     await Promise.all(
-      chains.map(async (chain) => {
+      filterChains.map(async (chain) => {
         if (!addresses[chain]) return;
 
         const providerInstance = getProviderFromChainSlug(
@@ -48,7 +48,8 @@ export const configureSwitchboards = async (
 
         const list = isTestnet(chain) ? TestnetIds : MainnetIds;
         const siblingSlugs: ChainSlug[] = list.filter(
-          (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
+          (chainSlug) =>
+            chainSlug !== chain && filterSiblingChains.includes(chainSlug)
         );
 
         await configureExecutionManager(
@@ -64,14 +65,14 @@ export const configureSwitchboards = async (
 
         const integrations = addr["integrations"] ?? {};
         const integrationList = Object.keys(integrations).filter((chain) =>
-          chains.includes(parseInt(chain) as ChainSlug)
+          filterSiblingChains.includes(parseInt(chain) as ChainSlug)
         );
 
         console.log(`Configuring for ${chain}`);
 
         for (let sibling of integrationList) {
-          const config = integrations[sibling][IntegrationTypes.native];
-          if (!config) continue;
+          const nativeConfig = integrations[sibling][IntegrationTypes.native];
+          if (!nativeConfig) continue;
 
           const siblingSwitchboard = getSwitchboardAddressFromAllAddresses(
             addresses,
@@ -80,11 +81,10 @@ export const configureSwitchboards = async (
             IntegrationTypes.native
           );
 
-          if (!siblingSwitchboard) continue;
-
+          if (!siblingNativeSwitchboard) continue;
           addr = await registerSwitchboardForSibling(
-            config["switchboard"],
-            siblingSwitchboard,
+            nativeConfig["switchboard"],
+            siblingNativeSwitchboard,
             sibling,
             capacitorType,
             maxPacketLength,

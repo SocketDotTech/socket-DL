@@ -30,17 +30,30 @@ export const buildEnvFile = async (
   ownerAddress: string,
   pk: string
 ) => {
-  const addressesPath = configFilePath + ".env.example";
-  const outputExists = fs.existsSync(addressesPath);
+  const envPath = configFilePath + ".env";
+  const envExists = fs.existsSync(envPath);
 
   let configsString = "";
-  if (outputExists) {
-    configsString = fs.readFileSync(addressesPath, "utf-8");
+  if (envExists) {
+    configsString = fs.readFileSync(envPath, "utf-8");
+  } else {
+    const envPath = configFilePath + ".env.example";
+    configsString = fs.readFileSync(envPath, "utf-8");
   }
 
-  configsString =
-    configsString +
-    `\nDEPLOYMENT_MODE="prod"\nSOCKET_OWNER_ADDRESS=${ownerAddress}\nSOCKET_SIGNER_KEY=${pk}\nNEW_RPC=${rpc}\n`;
+  if (!configsString.includes("SOCKET_OWNER_ADDRESS") || !envExists) {
+    configsString += `\nSOCKET_OWNER_ADDRESS="${ownerAddress}"`;
+  }
+
+  if (
+    (!configsString.includes("SOCKET_SIGNER_KEY") || !envExists) &&
+    pk &&
+    pk.length
+  ) {
+    configsString += `\nSOCKET_SIGNER_KEY="${pk}"`;
+  }
+
+  configsString += `\nNEW_RPC="${rpc}"\n`;
   await writeFile(".env", configsString);
 };
 

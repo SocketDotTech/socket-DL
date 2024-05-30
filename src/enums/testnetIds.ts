@@ -3,7 +3,6 @@ import { ChainSlug } from "./chainSlug";
 export const TestnetIds: ChainSlug[] = [
   ChainSlug.GOERLI,
   ChainSlug.SEPOLIA,
-  ChainSlug.POLYGON_MUMBAI,
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.ARBITRUM_SEPOLIA,
   ChainSlug.OPTIMISM_GOERLI,
@@ -22,4 +21,5 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.REYA_CRONOS,
   ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.POLYNOMIAL_TESTNET,
+  ChainSlug.KINTO_DEVNET,
 ];

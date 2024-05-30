@@ -20,10 +20,14 @@ import {
 } from "../../src";
 import {
   confirmations,
-  batcherSupportedChainSlugs,
+  devVersion,
+  explorers,
+  icons,
+  prodBatcherSupportedChainSlugs,
+  prodFeesUpdaterSupportedChainSlugs,
+  prodVersion,
   rpcs,
   version,
-  prodFeesUpdaterSupportedChainSlugs,
 } from "./constants";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
 
@@ -82,13 +86,15 @@ const getChainData = async (
 ): Promise<S3ChainConfig> => {
   return {
     rpc: rpcs[chainSlug],
-    chainName: chainSlugToHardhatChainName[chainSlug].toString(),
+    explorer: explorers[chainSlug],
+    chainName: chainSlugToHardhatChainName[chainSlug],
     blockNumber: getBlockNumber(deploymentMode, chainSlug),
     siblings: getSiblings(deploymentMode, chainSlug),
     chainTxData: await getChainTxData(chainSlug, txData),
     nativeToken: getCurrency(chainSlug),
     chainType: getChainType(chainSlug),
     confirmations: confirmations[chainSlug],
+    icon: icons[chainSlug],
   };
 };
 
@@ -113,7 +119,6 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
     ChainSlug.ARBITRUM_SEPOLIA,
     ChainSlug.OPTIMISM_SEPOLIA,
     ChainSlug.SEPOLIA,
-    ChainSlug.POLYGON_MUMBAI,
   ];
 
   return {
@@ -144,7 +149,6 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
       ChainSlug.MAINNET,
       ChainSlug.GOERLI,
       ChainSlug.SEPOLIA,
-      ChainSlug.POLYGON_MUMBAI,
       ChainSlug.LYRA_TESTNET,
       ChainSlug.ARBITRUM_SEPOLIA,
       ChainSlug.OPTIMISM_SEPOLIA,
