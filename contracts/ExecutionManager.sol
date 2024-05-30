@@ -25,7 +25,10 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
      * @param siblingChainSlug The destination chain slug for which the executionFees is updated
      * @param executionFees The new executionFees
      */
-    event ExecutionFeesSet(uint256 siblingChainSlug, uint128 executionFees);
+    event ExecutionFeesSet(
+        uint256 siblingChainSlug,
+        ExecutionFeesParam executionFees
+    );
 
     /**
      * @notice Emitted when the relativeNativeTokenPrice is updated
@@ -111,9 +114,6 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     // transmitter => nextNonce
     mapping(address => uint256) public nextNonce;
 
-    // remoteChainSlug => executionFees
-    mapping(uint32 => uint128) public executionFees;
-
     // transmit manager => chain slug => switchboard fees collected
     mapping(address => mapping(uint32 => uint128)) public transmissionMinFees;
 
@@ -128,6 +128,9 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     // supported max amount of native value to send with message
     // chain slug => max msg value threshold
     mapping(uint32 => uint256) public msgValueMaxThreshold;
+
+    // remoteChainSlug => ExecutionFeesParam
+    mapping(uint32 => ExecutionFeesParam) public executionFees;
 
     // triggered when nonce in signature is invalid
     error InvalidNonce();
@@ -319,17 +322,51 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     // decodes and validates the msg value if it is under given transfer limits and calculates
     // the total fees needed for execution for given payload size and msg value.
     function _getMinFees(
-        uint256,
+        uint256 msgGasLimit,
         uint256 payloadSize_,
         bytes32 executionParams_,
         uint32 siblingChainSlug_
     ) internal view returns (uint128) {
-        if (payloadSize_ > 3000) revert PayloadTooLarge();
+        uint256 totalNativeValue = _calculateExecutionFees(
+            msgGasLimit,
+            payloadSize_,
+            siblingChainSlug_
+        ) + _calculateMsgValueFees(siblingChainSlug_, executionParams_);
 
+        if (totalNativeValue >= type(uint128).max) revert FeesTooHigh();
+        return uint128(totalNativeValue);
+    }
+
+    function _calculateExecutionFees(
+        uint256 msgGasLimit,
+        uint256 payloadSize_,
+        uint32 siblingChainSlug_
+    ) internal view returns (uint256 totalFees) {
+        ExecutionFeesParam memory executionFeesParam = executionFees[
+            siblingChainSlug_
+        ];
+
+        // fees = L1 fees + L2 fees
+        // L1 fees = gasLimit * gasPrice
+        // L2 fees depends on the payload size and how chain calculates the tx fees
+        // to simplify, an overhead and perByteCost is updated on contract through external cron
+        // and fees is calculated as : payloadSize * perByteCost + overhead
+        totalFees =
+            msgGasLimit *
+            executionFeesParam.gasPrice +
+            executionFeesParam.overhead +
+            payloadSize_ *
+            executionFeesParam.perByteCost;
+    }
+
+    function _calculateMsgValueFees(
+        uint32 siblingChainSlug_,
+        bytes32 executionParams_
+    ) internal view returns (uint256 msgValueRequiredOnSrcChain) {
         uint256 params = uint256(executionParams_);
         uint8 paramType = uint8(params >> 248);
 
-        if (paramType == 0) return executionFees[siblingChainSlug_];
+        if (paramType == 0) return 0;
         uint256 msgValue = uint256(uint248(params));
 
         if (msgValue < msgValueMinThreshold[siblingChainSlug_])
@@ -337,15 +374,9 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         if (msgValue > msgValueMaxThreshold[siblingChainSlug_])
             revert MsgValueTooHigh();
 
-        uint256 msgValueRequiredOnSrcChain = (relativeNativeTokenPrice[
-            siblingChainSlug_
-        ] * msgValue) / 1e18;
-
-        uint256 totalNativeValue = msgValueRequiredOnSrcChain +
-            executionFees[siblingChainSlug_];
-
-        if (totalNativeValue >= type(uint128).max) revert FeesTooHigh();
-        return uint128(totalNativeValue);
+        msgValueRequiredOnSrcChain =
+            (relativeNativeTokenPrice[siblingChainSlug_] * msgValue) /
+            1e18;
     }
 
     /**
@@ -379,7 +410,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     function setExecutionFees(
         uint256 nonce_,
         uint32 siblingChainSlug_,
-        uint128 executionFees_,
+        ExecutionFeesParam calldata executionFees_,
         bytes calldata signature_
     ) external override {
         address feesUpdater = signatureVerifier__.recoverSigner(
