@@ -8,6 +8,7 @@ export enum NativeTokens {
   "sx-network-2" = "sx-network-2",
   "mantle" = "mantle",
   "no-token" = "no-token",
+  "winr" = "winr-protocol",
 }
 
 export const getCurrency = (chainSlug: ChainSlug) => {
@@ -25,6 +26,9 @@ export const getCurrency = (chainSlug: ChainSlug) => {
 
     case ChainSlug.MANTLE:
       return NativeTokens.mantle;
+
+    case ChainSlug.WINR:
+      return NativeTokens.winr;
 
     default:
       return NativeTokens.ethereum;
