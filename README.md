@@ -158,7 +158,7 @@ It is recommended to setup the ide to work with solidity development. In case of
 
 We really appreciate and value any form of contribution to Socket Data Layer Contracts. As a contributor, you are expected to fork this repository, work on your own fork and then submit pull requests. The PRs are expected to have a proper description to make reviewing easy. The code is expected to be properly linted and tested.
 
-Smart contracts manage value and are highly vulnerable to errors and attacks. We have very strict guidlines, please make sure to follow these -
+Smart contracts manage value and are highly vulnerable to errors and attacks. We have very strict guidelines, please make sure to follow these -
 
 ### Simple and Modular
 
