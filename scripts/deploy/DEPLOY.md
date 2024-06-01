@@ -23,7 +23,7 @@ There are three different modes for deployment (prod, dev, and surge) which are 
 
 ### Setup overrides
 
-Each blockchain have separate nuances when sending transaction. For example, ethers don't have proper gas estimation for type 2 transactions on polygon. Arbitrum have inconsistent gas limits. To add any overrides for these properties, add them in overrides onject in `config.ts`.
+Each blockchain has separate nuances when sending transaction. For example, ethers don't have proper gas estimation for type 2 transactions on polygon. Arbitrum has inconsistent gas limits. To add any overrides for these properties, add them in overrides object in `config.ts`.
 
 ### Deploy Socket
 
