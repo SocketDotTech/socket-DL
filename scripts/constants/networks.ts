@@ -209,6 +209,21 @@ export function getJsonRpcUrl(chain: HardhatChainName | ChainId): string {
       jsonRpcUrl = process.env.KINTO_DEVNET_RPC as string;
       break;
 
+    case HardhatChainName.SIPHER_FUNKI_TESTNET:
+    case ChainId.SIPHER_FUNKI_TESTNET:
+      jsonRpcUrl = process.env.SIPHER_FUNKI_TESTNET_RPC as string;
+      break;
+
+    case HardhatChainName.WINR:
+    case ChainId.WINR:
+      jsonRpcUrl = process.env.WINR_RPC as string;
+      break;
+
+    case HardhatChainName.BLAST:
+    case ChainId.BLAST:
+      jsonRpcUrl = process.env.BLAST_RPC as string;
+      break;
+
     default:
       if (process.env.NEW_RPC) {
         jsonRpcUrl = process.env.NEW_RPC as string;

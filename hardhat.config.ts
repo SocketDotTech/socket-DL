@@ -99,6 +99,11 @@ if (isProduction) {
     [HardhatChainName.BOB]: getChainConfig(ChainId.BOB),
     [HardhatChainName.KINTO]: getChainConfig(ChainId.KINTO),
     [HardhatChainName.KINTO_DEVNET]: getChainConfig(ChainId.KINTO_DEVNET),
+    [HardhatChainName.SIPHER_FUNKI_TESTNET]: getChainConfig(
+      ChainId.SIPHER_FUNKI_TESTNET
+    ),
+    [HardhatChainName.WINR]: getChainConfig(ChainId.WINR),
+    [HardhatChainName.BLAST]: getChainConfig(ChainId.BLAST),
   };
 }
 
@@ -129,7 +134,7 @@ const config: HardhatUserConfig = {
       modeTestnet: process.env.MODE_API_KEY || "",
       victionTestnet: process.env.VICTION_API_KEY || "",
       base: process.env.BASESCAN_API_KEY || "",
-      mode: process.env.MODE_API_KEY || "",
+      mode: process.env.MODE_API_KEY || "none",
       ancient8Testnet: process.env.ANCIENT8_API_KEY || "",
       ancient8Testnet2: process.env.ANCIENT8_API_KEY || "",
       hookTestnet: process.env.HOOK_API_KEY || "",
@@ -140,6 +145,9 @@ const config: HardhatUserConfig = {
       syndrSepoliaL3: process.env.SYNDR_API_KEY || "",
       kinto: process.env.KINTO_API_KEY || "",
       kinto_devnet: process.env.KINTO_DEVNET_API_KEY || "",
+      sipher_funki_testnet: "none",
+      winr: "none",
+      blast: process.env.BLASTSCAN_API_KEY || "",
     },
     customChains: [
       {
@@ -180,6 +188,38 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorer.kinto.xyz/api",
           browserURL: "https://explorer.kinto.xyz",
+        },
+      },
+      {
+        network: "sipher_funki_testnet",
+        chainId: ChainId.SIPHER_FUNKI_TESTNET,
+        urls: {
+          apiURL: "https://sepolia-sandbox.funkichain.com/api",
+          browserURL: "https://sepolia-sandbox.funkichain.com",
+        },
+      },
+      {
+        network: "winr",
+        chainId: ChainId.WINR,
+        urls: {
+          apiURL: "https://explorerl2new-winr-mainnet-0.t.conduit.xyz/api",
+          browserURL: "https://explorerl2new-winr-mainnet-0.t.conduit.xyz",
+        },
+      },
+      {
+        network: "blast",
+        chainId: ChainId.BLAST,
+        urls: {
+          apiURL: "https://api.blastscan.io/api",
+          browserURL: "https://blastscan.io",
+        },
+      },
+      {
+        network: "mode",
+        chainId: ChainId.MODE,
+        urls: {
+          apiURL: "https://explorer.mode.network/api",
+          browserURL: "https://explorer.mode.network",
         },
       },
     ],
