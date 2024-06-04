@@ -17,4 +17,6 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.SX_NETWORK,
   ChainSlug.BOB,
   ChainSlug.KINTO,
+  ChainSlug.WINR,
+  ChainSlug.BLAST,
 ];
