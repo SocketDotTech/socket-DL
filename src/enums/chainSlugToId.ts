@@ -9,7 +9,6 @@ export const ChainSlugToId = {
   [ChainSlug.OPTIMISM_GOERLI]: ChainId.OPTIMISM_GOERLI,
   [ChainSlug.OPTIMISM_SEPOLIA]: ChainId.OPTIMISM_SEPOLIA,
   [ChainSlug.BSC]: ChainId.BSC,
-  [ChainSlug.BSC_TESTNET]: ChainId.BSC_TESTNET,
   [ChainSlug.MAINNET]: ChainId.MAINNET,
   [ChainSlug.GOERLI]: ChainId.GOERLI,
   [ChainSlug.SEPOLIA]: ChainId.SEPOLIA,

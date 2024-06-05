@@ -46,7 +46,6 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.LYRA_TESTNET,
   // ChainSlug.SEPOLIA,
   // ChainSlug.XAI_TESTNET,
-  // ChainSlug.CDK_TESTNET,
   // ChainSlug.AEVO,
   ChainSlug.MAINNET,
   ChainSlug.ARBITRUM,

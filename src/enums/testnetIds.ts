@@ -7,7 +7,6 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.ARBITRUM_SEPOLIA,
   ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.OPTIMISM_SEPOLIA,
-  ChainSlug.BSC_TESTNET,
   ChainSlug.AEVO_TESTNET,
   ChainSlug.LYRA_TESTNET,
   ChainSlug.XAI_TESTNET,

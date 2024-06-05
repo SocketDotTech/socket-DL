@@ -55,12 +55,6 @@ function getRemappings() {
 let liveNetworks = {};
 if (isProduction) {
   liveNetworks = {
-    [HardhatChainName.ARBITRUM_GOERLI]: getChainConfig(
-      ChainSlug.ARBITRUM_GOERLI
-    ),
-    [HardhatChainName.OPTIMISM_GOERLI]: getChainConfig(
-      ChainSlug.OPTIMISM_GOERLI
-    ),
     [HardhatChainName.ARBITRUM_SEPOLIA]: getChainConfig(
       ChainSlug.ARBITRUM_SEPOLIA
     ),
@@ -109,14 +103,14 @@ if (isProduction) {
     [HardhatChainName.POLYNOMIAL_TESTNET]: getChainConfig(
       ChainSlug.POLYNOMIAL_TESTNET
     ),
-    [HardhatChainName.BOB]: getChainConfig(ChainId.BOB),
-    [HardhatChainName.KINTO]: getChainConfig(ChainId.KINTO),
-    [HardhatChainName.KINTO_DEVNET]: getChainConfig(ChainId.KINTO_DEVNET),
+    [HardhatChainName.BOB]: getChainConfig(ChainSlug.BOB),
+    [HardhatChainName.KINTO]: getChainConfig(ChainSlug.KINTO),
+    [HardhatChainName.KINTO_DEVNET]: getChainConfig(ChainSlug.KINTO_DEVNET),
     [HardhatChainName.SIPHER_FUNKI_TESTNET]: getChainConfig(
-      ChainId.SIPHER_FUNKI_TESTNET
+      ChainSlug.SIPHER_FUNKI_TESTNET
     ),
-    [HardhatChainName.WINR]: getChainConfig(ChainId.WINR),
-    [HardhatChainName.BLAST]: getChainConfig(ChainId.BLAST),
+    [HardhatChainName.WINR]: getChainConfig(ChainSlug.WINR),
+    [HardhatChainName.BLAST]: getChainConfig(ChainSlug.BLAST),
   };
 }
 

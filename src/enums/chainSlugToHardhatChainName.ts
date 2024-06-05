@@ -9,7 +9,6 @@ export const chainSlugToHardhatChainName = {
   [ChainSlug.OPTIMISM_GOERLI]: HardhatChainName.OPTIMISM_GOERLI,
   [ChainSlug.OPTIMISM_SEPOLIA]: HardhatChainName.OPTIMISM_SEPOLIA,
   [ChainSlug.BSC]: HardhatChainName.BSC,
-  [ChainSlug.BSC_TESTNET]: HardhatChainName.BSC_TESTNET,
   [ChainSlug.MAINNET]: HardhatChainName.MAINNET,
   [ChainSlug.GOERLI]: HardhatChainName.GOERLI,
   [ChainSlug.SEPOLIA]: HardhatChainName.SEPOLIA,

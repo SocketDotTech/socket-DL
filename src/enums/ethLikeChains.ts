@@ -5,7 +5,6 @@ export const ethLikeChains = [
   ChainSlug.MAINNET,
   ChainSlug.BSC,
   ChainSlug.POLYGON_MAINNET,
-  ChainSlug.POLYGON_MUMBAI,
   ChainSlug.SEPOLIA,
   ChainSlug.SX_NETWORK,
   ChainSlug.SX_NETWORK_TESTNET,
@@ -16,5 +15,4 @@ export const ethLikeChains = [
   ChainSlug.GOERLI,
   ChainSlug.VICTION_TESTNET,
   ChainSlug.SYNDR_SEPOLIA_L3,
-  ChainSlug.BSC_TESTNET,
 ];
