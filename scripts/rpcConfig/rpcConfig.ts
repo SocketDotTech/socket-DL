@@ -20,12 +20,10 @@ import {
 } from "../../src";
 import {
   confirmations,
-  devVersion,
   explorers,
   icons,
-  prodBatcherSupportedChainSlugs,
+  batcherSupportedChainSlugs,
   prodFeesUpdaterSupportedChainSlugs,
-  prodVersion,
   rpcs,
   version,
 } from "./constants";

@@ -34,4 +34,10 @@ export const confirmations = {
   [ChainSlug.REYA]: 0,
   [ChainSlug.SYNDR_SEPOLIA_L3]: 1,
   [ChainSlug.POLYNOMIAL_TESTNET]: 1,
+  [ChainSlug.BOB]: 0,
+  [ChainSlug.KINTO]: 0,
+  [ChainSlug.KINTO_DEVNET]: 0,
+  [ChainSlug.SIPHER_FUNKI_TESTNET]: 0,
+  [ChainSlug.WINR]: 0,
+  [ChainSlug.BLAST]: 0,
 };

@@ -19,7 +19,12 @@ export const prodFeesUpdaterSupportedChainSlugs = (): ChainSlug[] => {
     }
   });
 
-  return [...feesUpdaterSupportedChainSlugs, ChainSlug.POLYNOMIAL_TESTNET];
+  return [
+    ...feesUpdaterSupportedChainSlugs,
+    ChainSlug.POLYNOMIAL_TESTNET,
+    ChainSlug.KINTO_DEVNET,
+    ChainSlug.ARBITRUM_SEPOLIA,
+  ];
 };
 
 export const rpcs = {
@@ -59,4 +64,7 @@ export const rpcs = {
   [ChainSlug.KINTO]: checkEnvVar("KINTO_RPC"),
   [ChainSlug.KINTO_DEVNET]: checkEnvVar("KINTO_DEVNET_RPC"),
   [ChainSlug.CDK_TESTNET]: checkEnvVar("CDK_TESTNET_RPC"),
+  [ChainSlug.SIPHER_FUNKI_TESTNET]: checkEnvVar("SIPHER_FUNKI_TESTNET_RPC"),
+  [ChainSlug.WINR]: checkEnvVar("WINR_RPC"),
+  [ChainSlug.BLAST]: checkEnvVar("BLAST_RPC"),
 };

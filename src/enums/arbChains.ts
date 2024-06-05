@@ -5,4 +5,6 @@ export const arbChains = [
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.ARBITRUM_SEPOLIA,
   ChainSlug.PARALLEL,
+  ChainSlug.REYA_CRONOS,
+  ChainSlug.REYA,
 ];

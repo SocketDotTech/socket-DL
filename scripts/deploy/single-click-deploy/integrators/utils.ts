@@ -77,28 +77,28 @@ export const updateSDK = async (
 
   await updateFile(
     "hardhatChainName.ts",
-    `,\n  ${chainName.toUpperCase()} = "${chainName.toLowerCase()}",\n}\n`,
-    ",\n}"
+    `,\n  ${chainName.toUpperCase()} = "${chainName.toLowerCase()}",\n};\n`,
+    ",\n};"
   );
   await updateFile(
     "chainId.ts",
-    `,\n  ${chainName.toUpperCase()} = ${chainId},\n}\n`,
-    ",\n}"
+    `,\n  ${chainName.toUpperCase()} = ${chainId},\n};\n`,
+    ",\n};"
   );
   await updateFile(
     "chainSlug.ts",
-    `,\n  ${chainName.toUpperCase()} = ChainId.${chainName.toUpperCase()},\n}\n`,
-    ",\n}"
+    `,\n  ${chainName.toUpperCase()} = ChainId.${chainName.toUpperCase()},\n};\n`,
+    ",\n};"
   );
   await updateFile(
     "chainSlugToKey.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: HardhatChainName.${chainName.toUpperCase()},\n}\n`,
-    ",\n}"
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: HardhatChainName.${chainName.toUpperCase()},\n};\n`,
+    ",\n};"
   );
   await updateFile(
     "chainSlugToId.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: ChainId.${chainName.toUpperCase()},\n}\n`,
-    ",\n}"
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: ChainId.${chainName.toUpperCase()},\n};\n`,
+    ",\n};"
   );
   await updateFile(
     "hardhatChainNameToSlug.ts",
@@ -107,55 +107,55 @@ export const updateSDK = async (
   );
   await updateFile(
     "chainSlugToHardhatChainName.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: [HardhatChainName.${chainName.toUpperCase()}],\n}\n`,
-    ",\n}"
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: [HardhatChainName.${chainName.toUpperCase()}],\n};\n`,
+    ",\n};"
   );
 
   if (isNewNative) {
     await updateFile(
       "native-tokens.ts",
-      `,\n  "${nativeToken.toLowerCase()} = "${nativeToken.toLowerCase()}",\n}\n`,
-      ",\n}"
+      `,\n  "${nativeToken.toLowerCase()} = "${nativeToken.toLowerCase()}",\n};\n`,
+      ",\n};"
     );
   }
 
   if (nativeToken !== NativeTokens.ethereum) {
     await updateFile(
       "currency.ts",
-      `,\n  [ChainSlug.${chainName.toUpperCase()}]: NativeTokens["${nativeToken}"],\n}\n`,
-      ",\n}"
+      `,\n  [ChainSlug.${chainName.toUpperCase()}]: NativeTokens["${nativeToken}"],\n};\n`,
+      ",\n};"
     );
   }
 
   if (chainType === 0) {
     await updateFile(
       "arbChains.ts",
-      `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
-      ",\n]"
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
     );
   } else if (chainType === 1) {
     await updateFile(
       "arbL3Chains.ts",
-      `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
-      ",\n]"
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
     );
   } else if (chainType === 2) {
     await updateFile(
       "opStackChains.ts",
-      `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
-      ",\n]"
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
     );
   } else if (chainType === 3) {
     await updateFile(
       "polygonCDKChains.ts",
-      `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
-      ",\n]"
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
     );
   } else {
     await updateFile(
       "ethLikeChains.ts",
-      `,\n  ChainSlug.${chainName.toUpperCase()},\n]`,
-      ",\n]"
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
     );
   }
 
