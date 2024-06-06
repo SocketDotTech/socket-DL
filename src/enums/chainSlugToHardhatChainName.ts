@@ -43,4 +43,5 @@ export const chainSlugToHardhatChainName = {
   [ChainSlug.SIPHER_FUNKI_TESTNET]: HardhatChainName.SIPHER_FUNKI_TESTNET,
   [ChainSlug.WINR]: HardhatChainName.WINR,
   [ChainSlug.BLAST]: HardhatChainName.BLAST,
+  [ChainSlug.BSC_TESTNET]: [HardhatChainName.BSC_TESTNET],
 };

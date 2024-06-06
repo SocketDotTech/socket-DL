@@ -11,7 +11,11 @@ const main = async () => {
   try {
     const { response, isAlreadyAdded } = await addChainToSDK();
     if (!isAlreadyAdded) {
-      await updateConstants(response.chainName, response.explorer, response.icon);
+      await updateConstants(
+        response.chainName,
+        response.explorer,
+        response.icon
+      );
     }
 
     appendToEnvFile(

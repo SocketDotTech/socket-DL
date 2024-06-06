@@ -40,4 +40,5 @@ export const confirmations = {
   [ChainSlug.SIPHER_FUNKI_TESTNET]: 0,
   [ChainSlug.WINR]: 0,
   [ChainSlug.BLAST]: 0,
+  [ChainSlug.BSC_TESTNET]: 1,
 };

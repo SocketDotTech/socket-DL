@@ -40,4 +40,5 @@ export enum ChainId {
   SIPHER_FUNKI_TESTNET = 3397901,
   WINR = 777777,
   BLAST = 81457,
+  BSC_TESTNET = 97,
 }

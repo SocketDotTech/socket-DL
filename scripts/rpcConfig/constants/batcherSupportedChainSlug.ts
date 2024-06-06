@@ -32,4 +32,5 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.SIPHER_FUNKI_TESTNET,
   ChainSlug.WINR,
   ChainSlug.BLAST,
+  ChainSlug.BSC_TESTNET,
 ];

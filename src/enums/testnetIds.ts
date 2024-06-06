@@ -22,4 +22,5 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.POLYNOMIAL_TESTNET,
   ChainSlug.KINTO_DEVNET,
   ChainSlug.SIPHER_FUNKI_TESTNET,
+  ChainSlug.BSC_TESTNET,
 ];

@@ -6,4 +6,5 @@ export const icons = {
   [ChainSlug.HOOK]: "",
   [ChainSlug.MANTLE]: "",
   [ChainSlug.REYA]: "",
+  [ChainSlug.BSC_TESTNET]: "https://testnet.bscscan.com/",
 };

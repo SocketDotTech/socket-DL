@@ -42,4 +42,5 @@ export enum ChainSlug {
   SIPHER_FUNKI_TESTNET = ChainId.SIPHER_FUNKI_TESTNET,
   WINR = ChainId.WINR,
   BLAST = ChainId.BLAST,
+  BSC_TESTNET = ChainId.BSC_TESTNET,
 }

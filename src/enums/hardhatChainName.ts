@@ -41,4 +41,5 @@ export enum HardhatChainName {
   SIPHER_FUNKI_TESTNET = "sipher_funki_testnet",
   WINR = "winr",
   BLAST = "blast",
+  BSC_TESTNET = "bsc_testnet",
 }

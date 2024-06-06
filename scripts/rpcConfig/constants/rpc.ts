@@ -67,4 +67,5 @@ export const rpcs = {
   [ChainSlug.SIPHER_FUNKI_TESTNET]: checkEnvVar("SIPHER_FUNKI_TESTNET_RPC"),
   [ChainSlug.WINR]: checkEnvVar("WINR_RPC"),
   [ChainSlug.BLAST]: checkEnvVar("BLAST_RPC"),
+  [ChainSlug.BSC_TESTNET]: checkEnvVar("BSC_TESTNET_RPC"),
 };

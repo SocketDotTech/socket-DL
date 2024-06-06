@@ -43,12 +43,12 @@ export const updateConstants = async (
   );
   await updateFile(
     "icons.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: "${explorer}",\n};`,
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: "${icon}",\n};`,
     ",\n};"
   );
   await updateFile(
     "explorers.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: "${icon}",\n};`,
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: "${explorer}",\n};`,
     ",\n};"
   );
 
