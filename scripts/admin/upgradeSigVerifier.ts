@@ -12,7 +12,7 @@ import {
   deployContractWithArgs,
 } from "../deploy/utils";
 import { Contract } from "ethers";
-import { mode } from "../deploy/config";
+import { mode } from "../deploy/config/config";
 
 export const main = async () => {
   try {

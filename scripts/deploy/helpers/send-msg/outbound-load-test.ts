@@ -11,17 +11,18 @@ import { getProviderFromChainSlug } from "../../../constants";
 import SocketABI from "../../../../out/Socket.sol/Socket.json";
 
 import path from "path";
-import { mode } from "../../config";
+import { mode } from "../../config/config";
 import {
   CORE_CONTRACTS,
-  ChainSlug,
   HardhatChainName,
   hardhatChainNameToSlug,
 } from "../../../../src";
+import { sleep } from "@socket.tech/dl-common";
+import { formatEther } from "ethers/lib/utils";
 
 const deployedAddressPath = path.join(
   __dirname,
-  `/../../../deployments/${mode}_addresses.json`
+  `/../../../../deployments/${mode}_addresses.json`
 );
 
 // batch outbound contract:
@@ -149,7 +150,7 @@ export const main = async () => {
       remoteChainSlug,
       counterAddress
     );
-
+    console.log("fees : ", value.toString(), formatEther(value));
     if (WAIT_FOR_TX) {
       await confirmAndWait(
         signer,
@@ -251,6 +252,7 @@ const confirmAndWait = async (
         numOfRequests,
         {
           value: BigNumber.from(value).mul(numOfRequests),
+          ...overrides(chainSlug),
         }
       );
 
@@ -273,9 +275,6 @@ const confirmAndWait = async (
     }
   }
 };
-
-const sleep = (delay: any) =>
-  new Promise((resolve) => setTimeout(resolve, delay));
 
 main()
   .then(() => process.exit(0))

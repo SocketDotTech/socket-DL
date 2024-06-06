@@ -7,7 +7,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { utils, constants } from "ethers";
 import { getInstance, getChainSlug, deployedAddressPath } from "../../utils";
 import { Contract } from "ethers";
-import { mode } from "../../config";
+import { mode } from "../../config/config";
 
 const remoteChainSlug = "";
 

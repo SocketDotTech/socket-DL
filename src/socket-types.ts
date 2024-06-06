@@ -1,4 +1,4 @@
-import { ChainSlug, MainnetIds, TestnetIds } from "./enums";
+import { ChainSlug, MainnetIds, NativeTokens, TestnetIds } from "./enums";
 
 export const L1Ids: ChainSlug[] = [
   ChainSlug.MAINNET,
@@ -7,7 +7,6 @@ export const L1Ids: ChainSlug[] = [
 ];
 
 export const L2Ids: ChainSlug[] = [
-  ChainSlug.POLYGON_MUMBAI,
   ChainSlug.ARBITRUM_GOERLI,
   ChainSlug.OPTIMISM_GOERLI,
   ChainSlug.ARBITRUM_SEPOLIA,
@@ -103,6 +102,9 @@ export interface ChainSocketAddresses {
   SocketBatcher: string;
   integrations?: Integrations;
   OpenExecutionManager?: string;
+  SocketSimulator?: string;
+  SimulatorUtils?: string;
+  SwitchboardSimulator?: string;
 }
 
 export type DeploymentAddresses = {
@@ -196,21 +198,50 @@ export const REQUIRED_CHAIN_ROLES = {
   OptimisticSwitchboard: [ROLES.WATCHER_ROLE, ROLES.FEES_UPDATER_ROLE],
 };
 
+export enum ChainType {
+  opStackL2Chain = "opStackL2Chain",
+  arbL3Chain = "arbL3Chain",
+  arbChain = "arbChain",
+  polygonCDKChain = "polygonCDKChain",
+  default = "default",
+}
+
+export type TxData = {
+  [chainSlug in ChainSlug]?: ChainTxData;
+};
+
+export interface ChainTxData {
+  sealTxData: any[];
+  proposeTxData: any[];
+  attestTxData: any[];
+  owner: string;
+}
+
+export interface S3ChainConfig {
+  rpc: string;
+  blockNumber: number;
+  confirmations: number;
+  siblings: ChainSlug[];
+  chainName: string;
+  eventBlockRange?: number;
+  nativeToken?: NativeTokens;
+  chainType?: ChainType;
+  chainTxData?: ChainTxData;
+  explorer?: string;
+  icon?: string;
+}
+
 export type S3Config = {
+  version: string;
   chainSlugToId: { [chainSlug: number]: number };
   addresses: DeploymentAddresses;
   testnetIds: ChainSlug[];
   mainnetIds: ChainSlug[];
   chains: {
-    [chainSlug in ChainSlug]?: {
-      rpc: string;
-      blockNumber: number;
-      confirmations: number;
-      siblings: ChainSlug[];
-      eventBlockRange?: number;
-    };
+    [chainSlug in ChainSlug]?: S3ChainConfig;
   };
   batcherSupportedChainSlugs: ChainSlug[];
   watcherSupportedChainSlugs: ChainSlug[];
   nativeSupportedChainSlugs: ChainSlug[];
+  feeUpdaterSupportedChainSlugs: ChainSlug[];
 };

@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import { writeFile } from "fs/promises";
 
-import { ChainId, ChainSlug } from "../../../../src";
+import { ChainId, ChainSlug, ChainType, NativeTokens } from "../../../../src";
 import { ChainConfig, ChainConfigs } from "../../../constants";
 
 const configFilePath = path.join(__dirname, `/../../../../`);
@@ -30,25 +30,40 @@ export const buildEnvFile = async (
   ownerAddress: string,
   pk: string
 ) => {
-  const addressesPath = configFilePath + ".env.example";
-  const outputExists = fs.existsSync(addressesPath);
+  const envPath = configFilePath + ".env";
+  const envExists = fs.existsSync(envPath);
 
   let configsString = "";
-  if (outputExists) {
-    configsString = fs.readFileSync(addressesPath, "utf-8");
+  if (envExists) {
+    configsString = fs.readFileSync(envPath, "utf-8");
+  } else {
+    const envPath = configFilePath + ".env.example";
+    configsString = fs.readFileSync(envPath, "utf-8");
   }
 
-  configsString =
-    configsString +
-    `\nDEPLOYMENT_MODE="prod"\nSOCKET_OWNER_ADDRESS=${ownerAddress}\nSOCKET_SIGNER_KEY=${pk}\nNEW_RPC=${rpc}\n`;
+  if (!configsString.includes("SOCKET_OWNER_ADDRESS") || !envExists) {
+    configsString += `\nSOCKET_OWNER_ADDRESS="${ownerAddress}"`;
+  }
+
+  if (
+    (!configsString.includes("SOCKET_SIGNER_KEY") || !envExists) &&
+    pk &&
+    pk.length
+  ) {
+    configsString += `\nSOCKET_SIGNER_KEY="${pk}"`;
+  }
+
+  configsString += `\nNEW_RPC="${rpc}"\n`;
   await writeFile(".env", configsString);
-  console.log("Created env");
 };
 
 export const updateSDK = async (
   chainName: string,
   chainId: number,
-  isMainnet: boolean
+  nativeToken: string,
+  chainType: number,
+  isMainnet: boolean,
+  isNewNative: boolean
 ) => {
   if (!fs.existsSync(enumFolderPath)) {
     throw new Error(`Folder not found! ${enumFolderPath}`);
@@ -90,6 +105,59 @@ export const updateSDK = async (
     `,\n  [HardhatChainName.${chainName.toUpperCase()}]: ChainSlug.${chainName.toUpperCase()},\n};\n`,
     ",\n};"
   );
+  await updateFile(
+    "chainSlugToHardhatChainName.ts",
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: [HardhatChainName.${chainName.toUpperCase()}],\n};\n`,
+    ",\n};"
+  );
+
+  if (isNewNative) {
+    await updateFile(
+      "native-tokens.ts",
+      `,\n  "${nativeToken.toLowerCase()} = "${nativeToken.toLowerCase()}",\n}\n`,
+      ",\n}"
+    );
+  }
+
+  if (nativeToken !== NativeTokens.ethereum) {
+    await updateFile(
+      "currency.ts",
+      `,\n  [ChainSlug.${chainName.toUpperCase()}]: NativeTokens["${nativeToken}"],\n};\n`,
+      ",\n};"
+    );
+  }
+
+  if (chainType === 0) {
+    await updateFile(
+      "arbChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
+    );
+  } else if (chainType === 1) {
+    await updateFile(
+      "arbL3Chains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
+    );
+  } else if (chainType === 2) {
+    await updateFile(
+      "opStackChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
+    );
+  } else if (chainType === 3) {
+    await updateFile(
+      "polygonCDKChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
+    );
+  } else {
+    await updateFile(
+      "ethLikeChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
+    );
+  }
 
   if (isMainnet) {
     await updateFile(

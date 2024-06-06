@@ -6,16 +6,13 @@ import {
   isTestnet,
   isMainnet,
 } from "../../src";
-import { mode, overrides } from "../deploy/config";
-import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { UN_TRIP_PATH_SIG_IDENTIFIER, checkRole, getSiblings } from "../common";
+import { mode, overrides } from "../deploy/config/config";
 import {
   getAllAddresses,
   DeploymentAddresses,
   ROLES,
 } from "@socket.tech/dl-core";
 import dotenv from "dotenv";
-import { getSwitchboardInstance } from "../common";
 
 dotenv.config();
 export const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;

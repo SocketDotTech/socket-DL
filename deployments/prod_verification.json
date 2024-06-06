@@ -1,6 +1,45 @@
 {
   "1": [
     [
+      "0xfB6daF96202Bd3815b2e602464Adc10317634066",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0xCA16185A1072E84D74931e605fCE0A843445C31e",
+        1,
+        1000,
+        "0xf1ABF110d1B6ff0E2e8C05dd64FBF9eBA4d8af98"
+      ]
+    ],
+    [
+      "0x63c10c00B47b9b418EC0F651b3763B6a692a0416",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0xCA16185A1072E84D74931e605fCE0A843445C31e",
+        "0xf1ABF110d1B6ff0E2e8C05dd64FBF9eBA4d8af98",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        1
+      ]
+    ],
+    [
+      "0xCA16185A1072E84D74931e605fCE0A843445C31e",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        1,
+        1,
+        "0x5C71beE4a6b0D617D8c3d107D331292741789E27",
+        "0xf1ABF110d1B6ff0E2e8C05dd64FBF9eBA4d8af98",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
+    [
       "0x139f39DC7dC05F7aC2DB3DB6af4f2e1a9De7c287",
       "OptimismSwitchboard",
       "contracts/switchboard/native/OptimismSwitchboard.sol",
@@ -341,6 +380,45 @@
   ],
   "10": [
     [
+      "0xBd69f42D91c57Fe6aC84D1e57fc5c84428b86056",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0xE8bfE5106aa542c4Fe3158c8E789B1697fa6c70c",
+        10,
+        1000,
+        "0xbb1f202095BE99000038D8d207C7E6f0F85a3925"
+      ]
+    ],
+    [
+      "0xBA9C93014648Fc64A0beaC857B95C0fF22DA4F97",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0xE8bfE5106aa542c4Fe3158c8E789B1697fa6c70c",
+        "0xbb1f202095BE99000038D8d207C7E6f0F85a3925",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        10
+      ]
+    ],
+    [
+      "0xE8bfE5106aa542c4Fe3158c8E789B1697fa6c70c",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        10,
+        10,
+        "0x3e89c061BF570B0678C7792BBfFC6bAA9d580Dc5",
+        "0xbb1f202095BE99000038D8d207C7E6f0F85a3925",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
+    [
       "0x208cB87549740B4eb32043D0471A153ED1c54408",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
@@ -665,6 +743,61 @@
     ]
   ],
   "137": [
+    [
+      "0xDEf0bfBdf7530C75AB3C73f8d2F64d9eaA7aA98e",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0xB15F962BBAd0015f5a9A51e9ef39aeDa45bb83fc",
+        137,
+        1000,
+        "0x2F04a8f11691Db9e0EE08BF44a7712aF8273720D"
+      ]
+    ],
+    [
+      "0x61Ce6673B00b2F0281E8b95C6B68c8275865FF34",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0xB15F962BBAd0015f5a9A51e9ef39aeDa45bb83fc",
+        "0x2F04a8f11691Db9e0EE08BF44a7712aF8273720D",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        137
+      ]
+    ],
+    [
+      "0xB15F962BBAd0015f5a9A51e9ef39aeDa45bb83fc",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        137,
+        137,
+        "0x8AFacb9b98d01cd8D1FD45ae1d9A8e4F12C7673e",
+        "0x2F04a8f11691Db9e0EE08BF44a7712aF8273720D",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
+    [
+      "0xedc8EB31d5aea1Cbdca7Bd1E0C56a04Af5B9375f",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        137,
+        137,
+        "0x8AFacb9b98d01cd8D1FD45ae1d9A8e4F12C7673e",
+        "0x2F04a8f11691Db9e0EE08BF44a7712aF8273720D",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
     [
       "0x69Adf49285c25d9f840c577A0e3cb134caF944D3",
       "SocketBatcher",
@@ -1361,6 +1494,45 @@
     ]
   ],
   "1024": [
+    [
+      "0x5bA62006442bC42e28E3E5147A5221Be723ca1DE",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
+        "0x320Cd79c54927Fe130427bD4492b6c6068D075E3",
+        1024,
+        1000,
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0xb515E9E6E6aBA44bBEC72FBF6B1a18DDB6bec68e",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0x320Cd79c54927Fe130427bD4492b6c6068D075E3",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
+        1024
+      ]
+    ],
+    [
+      "0x320Cd79c54927Fe130427bD4492b6c6068D075E3",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        1024,
+        1024,
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
     [
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",
@@ -2062,6 +2234,45 @@
   ],
   "42161": [
     [
+      "0xd4FD62Ab60794d1Bdcb3EcF302FB3c0aF9D0fB34",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x3f8F21Dd6Efe362Ef49ECB636824a7a2aFc3a26d",
+        42161,
+        1000,
+        "0x9879a2b15722374243843DDdb79e5E6872aA74B8"
+      ]
+    ],
+    [
+      "0xfc63Fa6d0F1dc6E3b36b19Bc3424d349037a5562",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0x3f8F21Dd6Efe362Ef49ECB636824a7a2aFc3a26d",
+        "0x9879a2b15722374243843DDdb79e5E6872aA74B8",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        42161
+      ]
+    ],
+    [
+      "0x3f8F21Dd6Efe362Ef49ECB636824a7a2aFc3a26d",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        42161,
+        42161,
+        "0xcDA819182c2BBE351644eD5D429280ab98004B4e",
+        "0x9879a2b15722374243843DDdb79e5E6872aA74B8",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
+    [
       "0x107e182815C5e164E05F0C2CF478acE44FD468A8",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
@@ -2174,6 +2385,135 @@
     ],
     [
       "0x9879a2b15722374243843DDdb79e5E6872aA74B8",
+      "SignatureVerifier",
+      "contracts/utils/SignatureVerifier.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ]
+  ],
+  "60808": [
+    [
+      "0x040993fbF458b95871Cd2D73Ee2E09F4AF6d56bB",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
+        60808,
+        1000,
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0x852C5DE08b9beB014caD171C16B12a8D7456ea3f",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        60808
+      ]
+    ],
+    [
+      "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        60808,
+        60808,
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
+    [
+      "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0x565810cbfa3Cf1390963E5aFa2fB953795686339"]
+    ],
+    [
+      "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
+      "OptimisticSwitchboard",
+      "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        60808,
+        7200,
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0x8f9EaEe5c5df888aBA3c1Ab19689a0660d042c6d",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        60808,
+        7200,
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0xbDf50eAe568ECef74796ed6022a0d453e8432410",
+      "TransmitManager",
+      "contracts/TransmitManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        60808,
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0xc317144DE60E6bC9455363bB09852C00bd14CD61",
+      "ExecutionManager",
+      "contracts/ExecutionManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        60808,
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+      "Socket",
+      "contracts/socket/Socket.sol",
+      [
+        60808,
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+        "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "IMLI"
+      ]
+    ],
+    [
+      "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+      "CapacitorFactory",
+      "contracts/CapacitorFactory.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
+    ],
+    [
+      "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+      "Hasher",
+      "contracts/utils/Hasher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
@@ -2311,6 +2651,135 @@
       ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ],
+  "80008": [
+    [
+      "0xBE51D38547992293c89CC589105784ab60b004A9",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x852C5DE08b9beB014caD171C16B12a8D7456ea3f",
+        80008,
+        1000,
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3"
+      ]
+    ],
+    [
+      "0x040993fbF458b95871Cd2D73Ee2E09F4AF6d56bB",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0x852C5DE08b9beB014caD171C16B12a8D7456ea3f",
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        80008
+      ]
+    ],
+    [
+      "0x852C5DE08b9beB014caD171C16B12a8D7456ea3f",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        80008,
+        80008,
+        "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
+    [
+      "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0xc317144DE60E6bC9455363bB09852C00bd14CD61"]
+    ],
+    [
+      "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
+      "OptimisticSwitchboard",
+      "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0xc317144DE60E6bC9455363bB09852C00bd14CD61",
+        80008,
+        7200,
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3"
+      ]
+    ],
+    [
+      "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0xc317144DE60E6bC9455363bB09852C00bd14CD61",
+        80008,
+        7200,
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3"
+      ]
+    ],
+    [
+      "0x8f9EaEe5c5df888aBA3c1Ab19689a0660d042c6d",
+      "TransmitManager",
+      "contracts/TransmitManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        80008,
+        "0xc317144DE60E6bC9455363bB09852C00bd14CD61",
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3"
+      ]
+    ],
+    [
+      "0xbDf50eAe568ECef74796ed6022a0d453e8432410",
+      "ExecutionManager",
+      "contracts/ExecutionManager.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        80008,
+        "0xc317144DE60E6bC9455363bB09852C00bd14CD61",
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3"
+      ]
+    ],
+    [
+      "0xc317144DE60E6bC9455363bB09852C00bd14CD61",
+      "Socket",
+      "contracts/socket/Socket.sol",
+      [
+        80008,
+        "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+        "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "IMLI"
+      ]
+    ],
+    [
+      "0x565810cbfa3Cf1390963E5aFa2fB953795686339",
+      "CapacitorFactory",
+      "contracts/CapacitorFactory.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34", 10]
+    ],
+    [
+      "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+      "Hasher",
+      "contracts/utils/Hasher.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ],
+    [
+      "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+      "SignatureVerifier",
+      "contracts/utils/SignatureVerifier.sol",
+      ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ]
+  ],
   "421613": [
     [
       "0x7043637C53c7fFc96227a1943be0BeeA2baef242",
@@ -2444,6 +2913,45 @@
   ],
   "421614": [
     [
+      "0x096d01d8e4FEc2f71af5856aCc9E70B5E104B06f",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x3c903b4D5327C6665dE1EA64890399381C280dB5",
+        421614,
+        1000,
+        "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A"
+      ]
+    ],
+    [
+      "0x04fB309B00e82d0265D057785b1d18F771F4402A",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0x3c903b4D5327C6665dE1EA64890399381C280dB5",
+        "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        421614
+      ]
+    ],
+    [
+      "0x3c903b4D5327C6665dE1EA64890399381C280dB5",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        421614,
+        421614,
+        "0x9814d1E6751ADAE2D60fF16f987ae02a25C87224",
+        "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
+    [
       "0xA7f7e4fE8E4cdDCD9969Bd3fbcFF67000CD7DE47",
       "Counter",
       "contracts/examples/Counter.sol",
@@ -2532,6 +3040,45 @@
     ]
   ],
   "444444": [
+    [
+      "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+        444444,
+        1000,
+        "0x845a6f4Be829e5D11906cc2eb2f8ccd39E8848a6"
+      ]
+    ],
+    [
+      "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+        "0x845a6f4Be829e5D11906cc2eb2f8ccd39E8848a6",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        444444
+      ]
+    ],
+    [
+      "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        444444,
+        444444,
+        "0xfC96858aFda5F0F846679E00D0Dd6dda35C4026e",
+        "0x845a6f4Be829e5D11906cc2eb2f8ccd39E8848a6",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
     [
       "0x87614638D9A452ffF21Ac9581Dc4d3030bd7E5db",
       "Counter",
@@ -2622,6 +3169,45 @@
     ]
   ],
   "11155111": [
+    [
+      "0xA78426325b5e32Affd5f4Bc8ab6575B24DCB1762",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x88618fD449836578a6FA6d19a256E21b7cac792b",
+        11155111,
+        1000,
+        "0x10d9DA6AE85eff6D582A91829f78bde2a3EC2dCC"
+      ]
+    ],
+    [
+      "0xb72ef406330853C86e2Dbb003e422CaEe27E0Fcd",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0x88618fD449836578a6FA6d19a256E21b7cac792b",
+        "0x10d9DA6AE85eff6D582A91829f78bde2a3EC2dCC",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        11155111
+      ]
+    ],
+    [
+      "0x88618fD449836578a6FA6d19a256E21b7cac792b",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        11155111,
+        11155111,
+        "0x6ddF1d6B719323236f58B4c61D30E523fce1Fe06",
+        "0x10d9DA6AE85eff6D582A91829f78bde2a3EC2dCC",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
     [
       "0x1d43076909Ca139BFaC4EbB7194518bE3638fc76",
       "Counter",
@@ -2908,6 +3494,45 @@
     ]
   ],
   "11155420": [
+    [
+      "0xDfD12C02B718e2a9Ec97852A5B22A8f9aE194Cd0",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0xfB0EAB1261bB71254D4a8cC6DBF151b53D34781C",
+        11155420,
+        1000,
+        "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A"
+      ]
+    ],
+    [
+      "0x0a3451e8546458Dfd60D81f90d2E495398E58F87",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0xfB0EAB1261bB71254D4a8cC6DBF151b53D34781C",
+        "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        11155420
+      ]
+    ],
+    [
+      "0xfB0EAB1261bB71254D4a8cC6DBF151b53D34781C",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        11155420,
+        11155420,
+        "0x9814d1E6751ADAE2D60fF16f987ae02a25C87224",
+        "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
     [
       "0xD9e492C3899aC768F67aD9AdC0Ce88aAB5463f60",
       "Counter",
@@ -3359,6 +3984,45 @@
     ]
   ],
   "1324967486": [
+    [
+      "0x47E136cf4A96e1afa72e19022f9699Bbaa1BE60e",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x1Aba89fC7ff67D27ccaa51893c46FD1e5fEE924B",
+        1324967486,
+        1000,
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf"
+      ]
+    ],
+    [
+      "0xc5a5Ac67fff82Da72d1F862f1363E2b217a2A61A",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0x1Aba89fC7ff67D27ccaa51893c46FD1e5fEE924B",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        1324967486
+      ]
+    ],
+    [
+      "0x1Aba89fC7ff67D27ccaa51893c46FD1e5fEE924B",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        1324967486,
+        1324967486,
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+        "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
+        {
+          "dev": "IMLI",
+          "surge": "IMLI",
+          "prod": "IMLI"
+        }
+      ]
+    ],
     [
       "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
       "Counter",

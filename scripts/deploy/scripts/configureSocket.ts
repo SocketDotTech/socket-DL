@@ -19,7 +19,7 @@ import {
   executionManagerVersion,
   overrides,
   msgValueMaxThreshold,
-} from "../config";
+} from "../config/config";
 
 export const registerSwitchboards = async (
   chain: ChainSlug,
@@ -165,7 +165,7 @@ export const configureExecutionManager = async (
 export const setupPolygonNativeSwitchboard = async (addresses) => {
   try {
     let srcChains = Object.keys(addresses)
-      .filter((chain) => ["5", "1", "80001", "137"].includes(chain))
+      .filter((chain) => ["1", "137"].includes(chain))
       .map((c) => parseInt(c) as ChainSlug);
 
     await Promise.all(

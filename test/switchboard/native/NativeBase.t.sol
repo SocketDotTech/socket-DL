@@ -31,7 +31,7 @@ contract NativeBaseSwitchboardTest is Setup {
 
         // taking optimism switchboard to test base
         uint256 fork = vm.createFork(
-            vm.envString("OPTIMISM_GOERLI_RPC"),
+            vm.envString("OPTIMISM_SEPOLIA_RPC"),
             5911043
         );
         vm.selectFork(fork);

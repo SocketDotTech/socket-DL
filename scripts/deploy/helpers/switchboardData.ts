@@ -7,7 +7,7 @@ import {
 } from "../../../src";
 import { toLowerCase } from "../utils";
 
-import { mode } from "../config";
+import { mode } from "../config/config";
 import path from "path";
 import fs from "fs";
 

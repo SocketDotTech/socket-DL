@@ -1,30 +1,41 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import * as fs from "fs";
-import { DeploymentMode } from "../../src";
+import { DeploymentMode, TxData } from "../../src";
 import dotenv from "dotenv";
-import { config } from "./rpcConfig";
+import { generateDevConfig, generateProdConfig } from "./rpcConfig";
+import { getTxData } from "./txdata-builder/generate-calldata";
 dotenv.config();
 
 const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
-
 const s3Client = new S3Client({
   region: "us-east-1",
 });
-
-const jsonString = JSON.stringify(config, null, 2); // Use null and 2 for pretty formatting
 
 // File path for the JSON file
 const fileName = deploymentMode + "RpcConfig.json";
 const localFilePath = fileName;
 
-// Write the JSON string to the local file
-fs.writeFileSync(localFilePath, jsonString);
-
-const bucketName = "socket-dl-" + deploymentMode;
+const bucketName = "socket-ll-" + deploymentMode;
 const s3FileKey = fileName; // File key in S3
+
+const createConfig = async () => {
+  console.log("getting tx data");
+  const txData: TxData = await getTxData();
+
+  console.log("generating config");
+  const config =
+    deploymentMode === "prod"
+      ? await generateProdConfig(txData)
+      : await generateDevConfig(txData);
+  const jsonString = JSON.stringify(config, null, 2); // Use null and 2 for pretty formatting
+
+  // Write the JSON string to the local file
+  fs.writeFileSync(localFilePath, jsonString);
+};
 
 const uploadToS3 = async () => {
   try {
+    await createConfig();
     const fileBuffer = fs.readFileSync(localFilePath);
 
     // Create an S3 PUT operation command
@@ -46,6 +57,5 @@ const uploadToS3 = async () => {
   }
 };
 
-uploadToS3();
-
 // npx ts-node scripts/rpcConfig/uploadS3Config.ts
+uploadToS3();

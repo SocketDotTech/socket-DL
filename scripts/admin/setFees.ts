@@ -7,7 +7,7 @@ import {
   DeploymentMode,
   CORE_CONTRACTS,
 } from "../../src";
-import { mode, overrides } from "../deploy/config";
+import { mode, overrides } from "../deploy/config/config";
 import { getProviderFromChainSlug } from "../constants";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { getInstance } from "../deploy/utils";

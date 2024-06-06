@@ -6,13 +6,16 @@ import { Address } from "hardhat-deploy/dist/types";
 import path from "path";
 import fs from "fs";
 import {
+  ChainSlugToId,
   ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
   DeploymentMode,
 } from "../../../src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { overrides } from "../config";
+import { overrides } from "../config/config";
+import { getJsonRpcUrl } from "../../constants";
+import { HardhatNetworkAccountUserConfig } from "hardhat/types";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
@@ -118,9 +121,6 @@ export const verify = async (
 
   return false;
 };
-
-export const sleep = (delay: number) =>
-  new Promise((resolve) => setTimeout(resolve, delay * 1000));
 
 export const getInstance = async (
   contractName: string,

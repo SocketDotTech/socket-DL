@@ -18,7 +18,13 @@ import fs from "fs";
 
 import "./tasks/accounts";
 import { getJsonRpcUrl } from "./scripts/constants/networks";
-import { ChainId, HardhatChainName, hardhatChainNameToSlug } from "./src";
+import {
+  ChainId,
+  ChainSlug,
+  ChainSlugToId,
+  HardhatChainName,
+  hardhatChainNameToSlug,
+} from "./src";
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -30,11 +36,11 @@ const isProduction = process.env.NODE_ENV === "production";
 const privateKey: HardhatNetworkAccountUserConfig = process.env
   .SOCKET_SIGNER_KEY as unknown as HardhatNetworkAccountUserConfig;
 
-function getChainConfig(chainId: ChainId): NetworkUserConfig {
+function getChainConfig(chainSlug: ChainSlug): NetworkUserConfig {
   return {
     accounts: [`0x${privateKey}`],
-    chainId,
-    url: getJsonRpcUrl(chainId),
+    chainId: ChainSlugToId[chainSlug],
+    url: getJsonRpcUrl(chainSlug),
   };
 }
 
@@ -49,51 +55,62 @@ function getRemappings() {
 let liveNetworks = {};
 if (isProduction) {
   liveNetworks = {
-    [HardhatChainName.ARBITRUM_GOERLI]: getChainConfig(ChainId.ARBITRUM_GOERLI),
-    [HardhatChainName.OPTIMISM_GOERLI]: getChainConfig(ChainId.OPTIMISM_GOERLI),
     [HardhatChainName.ARBITRUM_SEPOLIA]: getChainConfig(
-      ChainId.ARBITRUM_SEPOLIA
+      ChainSlug.ARBITRUM_SEPOLIA
     ),
     [HardhatChainName.OPTIMISM_SEPOLIA]: getChainConfig(
-      ChainId.OPTIMISM_SEPOLIA
+      ChainSlug.OPTIMISM_SEPOLIA
     ),
-    [HardhatChainName.POLYGON_MAINNET]: getChainConfig(ChainId.POLYGON_MAINNET),
-    [HardhatChainName.ARBITRUM]: getChainConfig(ChainId.ARBITRUM),
-    [HardhatChainName.BSC]: getChainConfig(ChainId.BSC),
-    [HardhatChainName.GOERLI]: getChainConfig(ChainId.GOERLI),
-    [HardhatChainName.MAINNET]: getChainConfig(ChainId.MAINNET),
-    [HardhatChainName.OPTIMISM]: getChainConfig(ChainId.OPTIMISM),
-    [HardhatChainName.POLYGON_MUMBAI]: getChainConfig(ChainId.POLYGON_MUMBAI),
-    [HardhatChainName.BSC_TESTNET]: getChainConfig(ChainId.BSC_TESTNET),
-    [HardhatChainName.SEPOLIA]: getChainConfig(ChainId.SEPOLIA),
-    [HardhatChainName.AEVO_TESTNET]: getChainConfig(ChainId.AEVO_TESTNET),
-    [HardhatChainName.AEVO]: getChainConfig(ChainId.AEVO),
-    [HardhatChainName.LYRA_TESTNET]: getChainConfig(ChainId.LYRA_TESTNET),
-    [HardhatChainName.LYRA]: getChainConfig(ChainId.LYRA),
-    [HardhatChainName.XAI_TESTNET]: getChainConfig(ChainId.XAI_TESTNET),
+    [HardhatChainName.POLYGON_MAINNET]: getChainConfig(
+      ChainSlug.POLYGON_MAINNET
+    ),
+    [HardhatChainName.ARBITRUM]: getChainConfig(ChainSlug.ARBITRUM),
+    [HardhatChainName.BSC]: getChainConfig(ChainSlug.BSC),
+    [HardhatChainName.GOERLI]: getChainConfig(ChainSlug.GOERLI),
+    [HardhatChainName.MAINNET]: getChainConfig(ChainSlug.MAINNET),
+    [HardhatChainName.OPTIMISM]: getChainConfig(ChainSlug.OPTIMISM),
+    [HardhatChainName.SEPOLIA]: getChainConfig(ChainSlug.SEPOLIA),
+    [HardhatChainName.AEVO_TESTNET]: getChainConfig(ChainSlug.AEVO_TESTNET),
+    [HardhatChainName.AEVO]: getChainConfig(ChainSlug.AEVO),
+    [HardhatChainName.LYRA_TESTNET]: getChainConfig(ChainSlug.LYRA_TESTNET),
+    [HardhatChainName.LYRA]: getChainConfig(ChainSlug.LYRA),
+    [HardhatChainName.XAI_TESTNET]: getChainConfig(ChainSlug.XAI_TESTNET),
     [HardhatChainName.SX_NETWORK_TESTNET]: getChainConfig(
-      ChainId.SX_NETWORK_TESTNET
+      ChainSlug.SX_NETWORK_TESTNET
     ),
-    [HardhatChainName.SX_NETWORK]: getChainConfig(ChainId.SX_NETWORK),
-    [HardhatChainName.MODE_TESTNET]: getChainConfig(ChainId.MODE_TESTNET),
-    [HardhatChainName.VICTION_TESTNET]: getChainConfig(ChainId.VICTION_TESTNET),
-    [HardhatChainName.BASE]: getChainConfig(ChainId.BASE),
-    [HardhatChainName.MODE]: getChainConfig(ChainId.MODE),
+    [HardhatChainName.SX_NETWORK]: getChainConfig(ChainSlug.SX_NETWORK),
+    [HardhatChainName.MODE_TESTNET]: getChainConfig(ChainSlug.MODE_TESTNET),
+    [HardhatChainName.VICTION_TESTNET]: getChainConfig(
+      ChainSlug.VICTION_TESTNET
+    ),
+    [HardhatChainName.BASE]: getChainConfig(ChainSlug.BASE),
+    [HardhatChainName.MODE]: getChainConfig(ChainSlug.MODE),
     [HardhatChainName.ANCIENT8_TESTNET]: getChainConfig(
-      ChainId.ANCIENT8_TESTNET
+      ChainSlug.ANCIENT8_TESTNET
     ),
     [HardhatChainName.ANCIENT8_TESTNET2]: getChainConfig(
-      ChainId.ANCIENT8_TESTNET2
+      ChainSlug.ANCIENT8_TESTNET2
     ),
-    [HardhatChainName.HOOK_TESTNET]: getChainConfig(ChainId.HOOK_TESTNET),
-    [HardhatChainName.HOOK]: getChainConfig(ChainId.HOOK),
-    [HardhatChainName.PARALLEL]: getChainConfig(ChainId.PARALLEL),
-    [HardhatChainName.MANTLE]: getChainConfig(ChainId.MANTLE),
-    [HardhatChainName.REYA_CRONOS]: getChainConfig(ChainId.REYA_CRONOS),
-    [HardhatChainName.REYA]: getChainConfig(ChainId.REYA),
+    [HardhatChainName.HOOK_TESTNET]: getChainConfig(ChainSlug.HOOK_TESTNET),
+    [HardhatChainName.HOOK]: getChainConfig(ChainSlug.HOOK),
+    [HardhatChainName.PARALLEL]: getChainConfig(ChainSlug.PARALLEL),
+    [HardhatChainName.MANTLE]: getChainConfig(ChainSlug.MANTLE),
+    [HardhatChainName.REYA_CRONOS]: getChainConfig(ChainSlug.REYA_CRONOS),
+    [HardhatChainName.REYA]: getChainConfig(ChainSlug.REYA),
     [HardhatChainName.SYNDR_SEPOLIA_L3]: getChainConfig(
-      ChainId.SYNDR_SEPOLIA_L3
+      ChainSlug.SYNDR_SEPOLIA_L3
     ),
+    [HardhatChainName.POLYNOMIAL_TESTNET]: getChainConfig(
+      ChainSlug.POLYNOMIAL_TESTNET
+    ),
+    [HardhatChainName.BOB]: getChainConfig(ChainSlug.BOB),
+    [HardhatChainName.KINTO]: getChainConfig(ChainSlug.KINTO),
+    [HardhatChainName.KINTO_DEVNET]: getChainConfig(ChainSlug.KINTO_DEVNET),
+    [HardhatChainName.SIPHER_FUNKI_TESTNET]: getChainConfig(
+      ChainSlug.SIPHER_FUNKI_TESTNET
+    ),
+    [HardhatChainName.WINR]: getChainConfig(ChainSlug.WINR),
+    [HardhatChainName.BLAST]: getChainConfig(ChainSlug.BLAST),
   };
 }
 
@@ -116,7 +133,6 @@ const config: HardhatUserConfig = {
       optimisticEthereum: process.env.OPTIMISM_API_KEY || "",
       optimisticTestnet: process.env.OPTIMISM_API_KEY || "",
       polygon: process.env.POLYGONSCAN_API_KEY || "",
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
       aevoTestnet: process.env.AEVO_API_KEY || "",
       lyraTestnet: process.env.LYRA_API_KEY || "",
       lyra: process.env.LYRA_API_KEY || "",
@@ -125,7 +141,7 @@ const config: HardhatUserConfig = {
       modeTestnet: process.env.MODE_API_KEY || "",
       victionTestnet: process.env.VICTION_API_KEY || "",
       base: process.env.BASESCAN_API_KEY || "",
-      mode: process.env.MODE_API_KEY || "",
+      mode: process.env.MODE_API_KEY || "none",
       ancient8Testnet: process.env.ANCIENT8_API_KEY || "",
       ancient8Testnet2: process.env.ANCIENT8_API_KEY || "",
       hookTestnet: process.env.HOOK_API_KEY || "",
@@ -134,6 +150,11 @@ const config: HardhatUserConfig = {
       mantle: process.env.MANTLE_API_KEY || "",
       reya: process.env.REYA_API_KEY || "",
       syndrSepoliaL3: process.env.SYNDR_API_KEY || "",
+      kinto: process.env.KINTO_API_KEY || "",
+      kinto_devnet: process.env.KINTO_DEVNET_API_KEY || "",
+      sipher_funki_testnet: "none",
+      winr: "none",
+      blast: process.env.BLASTSCAN_API_KEY || "",
     },
     customChains: [
       {
@@ -158,6 +179,54 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.basescan.org/api",
           browserURL: "https://basescan.org/",
+        },
+      },
+      {
+        network: "kinto_devnet",
+        chainId: ChainId.KINTO_DEVNET,
+        urls: {
+          apiURL: "https://kinto-upgrade-dev-2.explorer.caldera.xyz/api",
+          browserURL: "https://kinto-upgrade-dev-2.explorer.caldera.xyz",
+        },
+      },
+      {
+        network: "kinto",
+        chainId: ChainId.KINTO,
+        urls: {
+          apiURL: "https://explorer.kinto.xyz/api",
+          browserURL: "https://explorer.kinto.xyz",
+        },
+      },
+      {
+        network: "sipher_funki_testnet",
+        chainId: ChainId.SIPHER_FUNKI_TESTNET,
+        urls: {
+          apiURL: "https://sepolia-sandbox.funkichain.com/api",
+          browserURL: "https://sepolia-sandbox.funkichain.com",
+        },
+      },
+      {
+        network: "winr",
+        chainId: ChainId.WINR,
+        urls: {
+          apiURL: "https://explorerl2new-winr-mainnet-0.t.conduit.xyz/api",
+          browserURL: "https://explorerl2new-winr-mainnet-0.t.conduit.xyz",
+        },
+      },
+      {
+        network: "blast",
+        chainId: ChainId.BLAST,
+        urls: {
+          apiURL: "https://api.blastscan.io/api",
+          browserURL: "https://blastscan.io",
+        },
+      },
+      {
+        network: "mode",
+        chainId: ChainId.MODE,
+        urls: {
+          apiURL: "https://explorer.mode.network/api",
+          browserURL: "https://explorer.mode.network",
         },
       },
     ],
