@@ -1,26 +1,24 @@
 import { providers, Wallet } from "ethers";
 import { CrossChainMessenger, MessageStatus } from "@eth-optimism/sdk";
 import { getJsonRpcUrl } from "../../constants";
-import { ChainKey } from "../../../src";
+import { HardhatChainName, ChainId } from "../../../src";
 
 // get providers for source and destination
-const localChain = ChainKey.GOERLI;
-const remoteChain = ChainKey.OPTIMISM_GOERLI;
+const l1ChainId = ChainId.SEPOLIA;
+const l2ChainId = ChainId.OPTIMISM_SEPOLIA;
 
 const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
-const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
+const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1ChainId));
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 
 const sealTxHash = "";
 
 export const main = async () => {
   const crossChainMessenger = new CrossChainMessenger({
-    l1ChainId: 5,
-    l2ChainId: 420,
+    l1ChainId,
+    l2ChainId,
     l1SignerOrProvider: l1Wallet,
-    l2SignerOrProvider: new providers.JsonRpcProvider(
-      getJsonRpcUrl(remoteChain)
-    ),
+    l2SignerOrProvider: new providers.JsonRpcProvider(getJsonRpcUrl(l2ChainId)),
   });
 
   const status = await crossChainMessenger.getMessageStatus(sealTxHash);
@@ -40,6 +38,7 @@ export const main = async () => {
   }
 };
 
+// npx ts-node scripts/native-bridge-helpers/optimism/l2tol1Relay.ts
 main()
   .then(() => process.exit(0))
   .catch((error: Error) => {
