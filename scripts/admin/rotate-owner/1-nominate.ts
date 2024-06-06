@@ -7,12 +7,12 @@ import {
   getAllAddresses,
   isMainnet,
   isTestnet,
-} from "../../src";
-import { mode, overrides } from "../deploy/config";
-import OwnableArtifact from "../../out/Ownable.sol/Ownable.json";
-import { getProviderFromChainSlug } from "../constants";
+} from "../../../src";
+import { mode, overrides } from "../../deploy/config";
+import OwnableArtifact from "../../../out/Ownable.sol/Ownable.json";
+import { getProviderFromChainSlug } from "../../constants";
 import { Signer, Wallet, ethers } from "ethers";
-import { Ownable } from "../../typechain-types/utils/Ownable";
+import { Ownable } from "../../../typechain-types/utils/Ownable";
 
 dotenvConfig();
 
@@ -21,15 +21,15 @@ dotenvConfig();
  *
  * --newowner       Specify the new owner to be nominated.
  *                  This flag is required.
- *                  Eg. npx --newowner=0x5f34 ts-node scripts/admin/nominateOwner.ts
+ *                  Eg. npx --newowner=0x5f34 ts-node scripts/admin/rotate-owner/1-nominate.ts
  *
  * --sendtx         Send nominate tx along with ownership check.
  *                  Default is only check owner, nominee.
- *                  Eg. npx --newowner=0x5f34 --sendtx ts-node scripts/admin/nominateOwner.ts
+ *                  Eg. npx --newowner=0x5f34 --sendtx ts-node scripts/admin/rotate-owner/1-nominate.ts
  *
  * --chains         Run only for specified chains.
  *                  Default is all chains.
- *                  Eg. npx --newowner=0x5f34 --chains=10,2999 ts-node scripts/admin/nominateOwner.ts
+ *                  Eg. npx --newowner=0x5f34 --chains=10,2999 ts-node scripts/admin/rotate-owner/1-nominate.ts
  *
  * --testnets       Run for testnets.
  *                  Default is false.
@@ -83,7 +83,7 @@ export const main = async () => {
       // startBlock field ignored since it is not contract
       // integrations iterated later since it is an object
       const contractList = Object.keys(chainAddresses).filter(
-        (key) => !["startBlock", "integrations"].includes(key)
+        (key) => !["startBlock", "integrations", "Counter"].includes(key)
       );
       for (const contractName of contractList) {
         const contractAddress = chainAddresses[contractName];
@@ -110,6 +110,15 @@ export const main = async () => {
           if (decapAddress) {
             const label = `${chainSlug}-${it}-${sibling}, Decap`;
             await checkAndNominate(decapAddress, signer, chainSlug, label);
+          }
+
+          if (it === IntegrationTypes.native) {
+            const sbAddress =
+              chainAddresses.integrations[sibling][it]?.switchboard;
+            if (sbAddress) {
+              const label = `${chainSlug}-${it}-${sibling}, Switchboard`;
+              await checkAndNominate(sbAddress, signer, chainSlug, label);
+            }
           }
         }
       }
