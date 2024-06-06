@@ -14,7 +14,11 @@ import {
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { socketOwner, executionManagerVersion, overrides } from "../config";
+import {
+  socketOwner,
+  executionManagerVersion,
+  overrides,
+} from "../config/config";
 import { maxAllowedPacketLength } from "../../constants";
 
 let allDeployed = false;
@@ -202,6 +206,7 @@ export const deploySocket = async (
     deployUtils.currentChainSlug,
     deployUtils.mode
   );
+
   return {
     allDeployed,
     deployedAddresses: deployUtils.addresses,

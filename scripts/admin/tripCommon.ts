@@ -6,7 +6,7 @@ import {
   isTestnet,
   isMainnet,
 } from "../../src";
-import { mode, overrides } from "../deploy/config";
+import { mode, overrides } from "../deploy/config/config";
 import {
   getAllAddresses,
   DeploymentAddresses,

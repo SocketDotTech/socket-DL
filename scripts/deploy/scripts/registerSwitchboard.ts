@@ -3,7 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { createObj, getInstance } from "../utils";
 import { ChainSlug, ChainSocketAddresses } from "../../../src";
-import { initialPacketCount, overrides } from "../config";
+import { initialPacketCount, overrides } from "../config/config";
 
 export default async function registerSwitchboardForSibling(
   switchBoardAddress: string,

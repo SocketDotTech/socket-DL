@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import { writeFile } from "fs/promises";
 
-import { ChainId, ChainSlug } from "../../../../src";
+import { ChainId, ChainSlug, ChainType, NativeTokens } from "../../../../src";
 import { ChainConfig, ChainConfigs } from "../../../constants";
 
 const configFilePath = path.join(__dirname, `/../../../../`);
@@ -55,13 +55,15 @@ export const buildEnvFile = async (
 
   configsString += `\nNEW_RPC="${rpc}"\n`;
   await writeFile(".env", configsString);
-  console.log("Created env");
 };
 
 export const updateSDK = async (
   chainName: string,
   chainId: number,
-  isMainnet: boolean
+  nativeToken: string,
+  chainType: number,
+  isMainnet: boolean,
+  isNewNative: boolean
 ) => {
   if (!fs.existsSync(enumFolderPath)) {
     throw new Error(`Folder not found! ${enumFolderPath}`);
@@ -105,9 +107,57 @@ export const updateSDK = async (
   );
   await updateFile(
     "chainSlugToHardhatChainName.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: HardhatChainName.${chainName.toUpperCase()},\n};\n`,
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: [HardhatChainName.${chainName.toUpperCase()}],\n};\n`,
     ",\n};"
   );
+
+  if (isNewNative) {
+    await updateFile(
+      "native-tokens.ts",
+      `,\n  "${nativeToken.toLowerCase()} = "${nativeToken.toLowerCase()}",\n}\n`,
+      ",\n}"
+    );
+  }
+
+  if (nativeToken !== NativeTokens.ethereum) {
+    await updateFile(
+      "currency.ts",
+      `,\n  [ChainSlug.${chainName.toUpperCase()}]: NativeTokens["${nativeToken}"],\n};\n`,
+      ",\n};"
+    );
+  }
+
+  if (chainType === 0) {
+    await updateFile(
+      "arbChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
+    );
+  } else if (chainType === 1) {
+    await updateFile(
+      "arbL3Chains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
+    );
+  } else if (chainType === 2) {
+    await updateFile(
+      "opStackChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
+    );
+  } else if (chainType === 3) {
+    await updateFile(
+      "polygonCDKChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
+    );
+  } else {
+    await updateFile(
+      "ethLikeChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
+    );
+  }
 
   if (isMainnet) {
     await updateFile(

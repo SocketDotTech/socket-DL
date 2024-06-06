@@ -10,7 +10,7 @@ import {
   socketOwner,
   transmitterAddresses,
   watcherAddresses,
-} from "./config";
+} from "./config/config";
 import {
   getCapacitorAddress,
   getChainRoleHash,
@@ -26,7 +26,6 @@ import {
   NativeSwitchboard,
   hardhatChainNameToSlug,
   getAllAddresses,
-  ChainSlugToKey,
 } from "../../src";
 
 async function checkNative(

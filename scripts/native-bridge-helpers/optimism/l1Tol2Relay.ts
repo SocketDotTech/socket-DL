@@ -7,7 +7,7 @@ import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { getInstance, deployedAddressPath } from "../../deploy/utils";
 import { packPacketId } from "../../deploy/utils/packetId";
 import { getJsonRpcUrl } from "../../constants";
-import { mode } from "../../deploy/config";
+import { mode } from "../../deploy/config/config";
 import {
   HardhatChainName,
   hardhatChainNameToSlug,

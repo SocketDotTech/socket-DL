@@ -3,7 +3,7 @@ dotenvConfig();
 
 import { ChainSocketAddresses, ChainSlug } from "../../../src";
 import { getAddresses } from "../../deploy/utils";
-import { mode } from "../../deploy/config";
+import { mode } from "../../deploy/config/config";
 
 // npx ts-node scripts/deploy/get-integrations.ts
 export const getIntegrationsForAChainSlug = async (chainSlug: ChainSlug) => {

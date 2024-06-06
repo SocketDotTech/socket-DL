@@ -10,7 +10,7 @@ import {
   ROLES,
 } from "../../../../src";
 import { checkAndUpdateRoles } from "../../scripts/roles";
-import { executionManagerVersion, mode } from "../../config";
+import { executionManagerVersion, mode } from "../../config/config";
 import {
   configureExecutionManager,
   registerSwitchboards,

@@ -20,18 +20,18 @@ import {
 } from "../../src";
 import {
   confirmations,
-  devVersion,
   explorers,
   icons,
-  prodBatcherSupportedChainSlugs,
+  batcherSupportedChainSlugs,
   prodFeesUpdaterSupportedChainSlugs,
-  prodVersion,
   rpcs,
+  version,
 } from "./constants";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
 
 import dotenv from "dotenv";
 dotenv.config();
+
 export const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
 const addresses = getAllAddresses(deploymentMode);
 
@@ -85,7 +85,7 @@ const getChainData = async (
   return {
     rpc: rpcs[chainSlug],
     explorer: explorers[chainSlug],
-    chainName: chainSlugToHardhatChainName[chainSlug],
+    chainName: chainSlugToHardhatChainName[chainSlug].toString(),
     blockNumber: getBlockNumber(deploymentMode, chainSlug),
     siblings: getSiblings(deploymentMode, chainSlug),
     chainTxData: await getChainTxData(chainSlug, txData),
@@ -120,7 +120,7 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
   ];
 
   return {
-    version: devVersion,
+    version: `dev-${version[DeploymentMode.DEV]}`,
     chains: await getAllChainData(batcherSupportedChainSlugs, txData),
     batcherSupportedChainSlugs: batcherSupportedChainSlugs,
     watcherSupportedChainSlugs: batcherSupportedChainSlugs,
@@ -135,10 +135,10 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
 
 export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
   return {
-    version: prodVersion,
-    chains: await getAllChainData(prodBatcherSupportedChainSlugs, txData),
-    batcherSupportedChainSlugs: prodBatcherSupportedChainSlugs,
-    watcherSupportedChainSlugs: prodBatcherSupportedChainSlugs,
+    version: `prod-${version[DeploymentMode.PROD]}`,
+    chains: await getAllChainData(batcherSupportedChainSlugs, txData),
+    batcherSupportedChainSlugs: batcherSupportedChainSlugs,
+    watcherSupportedChainSlugs: batcherSupportedChainSlugs,
     nativeSupportedChainSlugs: [
       ChainSlug.ARBITRUM,
       ChainSlug.OPTIMISM,

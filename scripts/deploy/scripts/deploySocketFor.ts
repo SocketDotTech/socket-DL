@@ -8,14 +8,14 @@ import {
   DeploymentAddresses,
   getAllAddresses,
 } from "../../../src";
-import { mode } from "../config";
+import { mode } from "../config/config";
+import { storeAddresses } from "../utils";
 
 export const deployForChains = async (
   chains: ChainSlug[]
-): Promise<ChainSocketAddresses[]> => {
-  let deployedAddresses: ChainSocketAddresses[] = [];
+): Promise<DeploymentAddresses> => {
+  let addresses: DeploymentAddresses;
   try {
-    let addresses: DeploymentAddresses;
     try {
       addresses = getAllAddresses(mode);
     } catch (error) {
@@ -44,16 +44,18 @@ export const deployForChains = async (
             chainAddresses
           );
 
+          await storeAddresses(results.deployedAddresses, chain, mode);
+
           allDeployed = results.allDeployed;
           chainAddresses = results.deployedAddresses;
-
-          deployedAddresses[chain] = chainAddresses;
+          addresses[chain] = results.deployedAddresses;
         }
       })
     );
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
+    throw error;
   }
 
-  return deployedAddresses;
+  return addresses;
 };
