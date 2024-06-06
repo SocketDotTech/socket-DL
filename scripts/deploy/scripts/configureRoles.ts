@@ -9,11 +9,11 @@ import {
 } from "../../../src";
 import {
   mode,
-  socketOwner,
   transmitterAddresses,
   watcherAddresses,
   executorAddresses,
   executionManagerVersion,
+  ownerAddresses,
 } from "../config/config";
 import { checkAndUpdateRoles } from "./roles";
 import { sleep } from "@socket.tech/dl-common";
@@ -26,7 +26,7 @@ export const configureRoles = async (
   chains: ChainSlug[],
   sendTransaction: boolean
 ) => {
-  let ownerAddress = "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34";
+  let ownerAddress = ownerAddresses[mode];
   let executorAddress = executorAddresses[mode];
   let transmitterAddress = transmitterAddresses[mode];
   let watcherAddress = watcherAddresses[mode];

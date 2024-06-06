@@ -9,7 +9,11 @@ import { version, rpcs } from "./constants";
 const constantFolderPath = path.join(__dirname, `/constants/`);
 export const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
 
-export const updateConstants = async (chainName: string) => {
+export const updateConstants = async (
+  chainName: string,
+  explorer?: string,
+  icon?: string
+) => {
   if (!fs.existsSync(constantFolderPath)) {
     throw new Error(`Folder not found! ${constantFolderPath}`);
   }
@@ -24,18 +28,28 @@ export const updateConstants = async (chainName: string) => {
 
   await updateFile(
     "rpc.ts",
-    `,\n    [ChainSlug.${chainName.toUpperCase()}]: checkEnvVar("${chainName.toUpperCase()}_RPC"),\n};`,
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: checkEnvVar("${chainName.toUpperCase()}_RPC"),\n};`,
     ",\n};"
   );
   await updateFile(
     "confirmations.ts",
-    `,\n    [ChainSlug.${chainName.toUpperCase()}]: 1,\n};`,
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: 1,\n};`,
     ",\n};"
   );
   await updateFile(
     "batcherSupportedChainSlug.ts",
-    `,\n    ChainSlug.${chainName.toUpperCase()},\n];`,
+    `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
     ",\n];"
+  );
+  await updateFile(
+    "icons.ts",
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: "${explorer}",\n};`,
+    ",\n};"
+  );
+  await updateFile(
+    "explorers.ts",
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: "${icon}",\n};`,
+    ",\n};"
   );
 
   await updateVersion();

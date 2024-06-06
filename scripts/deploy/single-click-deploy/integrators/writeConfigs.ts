@@ -68,6 +68,16 @@ export async function addChainToSDK() {
       message: "Select the native token",
       choices: currencyChoices,
     },
+    {
+      name: "explorer",
+      type: "text",
+      message: "Enter the block explorer url",
+    },
+    {
+      name: "icon",
+      type: "text",
+      message: "Enter the icon url",
+    },
   ]);
   response.rpc = rpcResponse.rpc;
   response.chainName = rpcResponse.chainName;

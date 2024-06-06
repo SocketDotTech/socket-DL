@@ -77,18 +77,18 @@ export const updateSDK = async (
 
   await updateFile(
     "hardhatChainName.ts",
-    `,\n  ${chainName.toUpperCase()} = "${chainName.toLowerCase()}",\n};\n`,
-    ",\n};"
+    `,\n  ${chainName.toUpperCase()} = "${chainName.toLowerCase()}",\n}\n`,
+    ",\n}"
   );
   await updateFile(
     "chainId.ts",
-    `,\n  ${chainName.toUpperCase()} = ${chainId},\n};\n`,
-    ",\n};"
+    `,\n  ${chainName.toUpperCase()} = ${chainId},\n}\n`,
+    ",\n}"
   );
   await updateFile(
     "chainSlug.ts",
-    `,\n  ${chainName.toUpperCase()} = ChainId.${chainName.toUpperCase()},\n};\n`,
-    ",\n};"
+    `,\n  ${chainName.toUpperCase()} = ChainId.${chainName.toUpperCase()},\n}\n`,
+    ",\n}"
   );
   await updateFile(
     "chainSlugToKey.ts",
@@ -114,8 +114,8 @@ export const updateSDK = async (
   if (isNewNative) {
     await updateFile(
       "native-tokens.ts",
-      `,\n  "${nativeToken.toLowerCase()} = "${nativeToken.toLowerCase()}",\n};\n`,
-      ",\n};"
+      `,\n  "${nativeToken.toLowerCase()} = "${nativeToken.toLowerCase()}",\n}\n`,
+      ",\n}"
     );
   }
 

@@ -31,8 +31,7 @@ const main = async () => {
       },
     ]);
 
-    const chains = configResponse.chains;
-
+    const chains = [...configResponse.chains, chain];
     let addresses: DeploymentAddresses = await deployForChains(chains);
 
     if (chains.length === 0) {

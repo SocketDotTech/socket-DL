@@ -33,7 +33,7 @@ export const configureSwitchboards = async (
 ) => {
   try {
     await Promise.all(
-      filterChains.map(async (chain) => {
+      chains.map(async (chain) => {
         if (!addresses[chain]) return;
 
         const providerInstance = getProviderFromChainSlug(
@@ -49,7 +49,7 @@ export const configureSwitchboards = async (
         const list = isTestnet(chain) ? TestnetIds : MainnetIds;
         const siblingSlugs: ChainSlug[] = list.filter(
           (chainSlug) =>
-            chainSlug !== chain && filterSiblingChains.includes(chainSlug)
+            chainSlug !== chain && chains.includes(chainSlug)
         );
 
         await configureExecutionManager(
@@ -65,7 +65,7 @@ export const configureSwitchboards = async (
 
         const integrations = addr["integrations"] ?? {};
         const integrationList = Object.keys(integrations).filter((chain) =>
-          filterSiblingChains.includes(parseInt(chain) as ChainSlug)
+          chains.includes(parseInt(chain) as ChainSlug)
         );
 
         console.log(`Configuring for ${chain}`);
@@ -81,10 +81,10 @@ export const configureSwitchboards = async (
             IntegrationTypes.native
           );
 
-          if (!siblingNativeSwitchboard) continue;
+          if (!siblingSwitchboard) continue;
           addr = await registerSwitchboardForSibling(
             nativeConfig["switchboard"],
-            siblingNativeSwitchboard,
+            siblingSwitchboard,
             sibling,
             capacitorType,
             maxPacketLength,
@@ -115,7 +115,6 @@ export const configureSwitchboards = async (
         );
 
         addresses[chain] = addr;
-
         console.log(`Configuring for ${chain} - COMPLETED`);
       })
     );
@@ -124,6 +123,7 @@ export const configureSwitchboards = async (
     await setupPolygonNativeSwitchboard(addresses);
   } catch (error) {
     console.log("Error while sending transaction", error);
+    throw error;
   }
 
   return addresses;

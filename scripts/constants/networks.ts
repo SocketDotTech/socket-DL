@@ -29,7 +29,6 @@ export const rpcKeys = (chainSlug: ChainSlug) => {
 
 export function getJsonRpcUrl(chain: ChainSlug): string {
   let chainRpcKey = rpcKeys(chain);
-  console.log(chain, chainRpcKey);
   if (!chainRpcKey) throw Error(`Chain ${chain} not found in rpcKey`);
   let rpc = process.env[chainRpcKey];
   if (!rpc) {

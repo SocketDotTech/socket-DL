@@ -54,6 +54,7 @@ export const deployForChains = async (
     );
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
+    throw error;
   }
 
   return addresses;

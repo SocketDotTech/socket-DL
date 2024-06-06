@@ -1,5 +1,5 @@
 import { Contract, Wallet, constants } from "ethers";
-import { DeployParams, getInstance, getOrDeploy } from "../utils";
+import { DeployParams, getInstance, getOrDeploy, storeAddresses } from "../utils";
 
 import {
   CORE_CONTRACTS,
@@ -195,6 +195,8 @@ export const deploySocket = async (
   } catch (error) {
     console.log("Error in deploying setup contracts", error);
   }
+
+  await storeAddresses(deployUtils.addresses, deployUtils.currentChainSlug, deployUtils.mode);
 
   return {
     allDeployed,

@@ -118,7 +118,7 @@ export const executorAddresses = {
 };
 
 export const ownerAddresses = {
-  [DeploymentMode.DEV]: "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+  [DeploymentMode.DEV]: socketOwner,
   [DeploymentMode.SURGE]: "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
   [DeploymentMode.PROD]: "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
 };

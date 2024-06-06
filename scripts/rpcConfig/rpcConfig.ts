@@ -85,7 +85,7 @@ const getChainData = async (
   return {
     rpc: rpcs[chainSlug],
     explorer: explorers[chainSlug],
-    chainName: chainSlugToHardhatChainName[chainSlug],
+    chainName: chainSlugToHardhatChainName[chainSlug].toString(),
     blockNumber: getBlockNumber(deploymentMode, chainSlug),
     siblings: getSiblings(deploymentMode, chainSlug),
     chainTxData: await getChainTxData(chainSlug, txData),
