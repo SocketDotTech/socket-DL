@@ -1,9 +1,10 @@
+import { ChainSlug } from "../../../src/enums/chainSlug";
+
 import {
-  ChainFinalityInfo,
-  ChainSlug,
   FinalityBucket,
   FinalityType,
-} from "../../../src";
+  ChainFinalityInfo,
+} from "../../../src/socket-types";
 
 export const finality: {
   [chainSlug in ChainSlug]?: ChainFinalityInfo;

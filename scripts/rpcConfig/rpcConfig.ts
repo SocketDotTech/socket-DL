@@ -26,8 +26,8 @@ import {
   prodFeesUpdaterSupportedChainSlugs,
   rpcs,
   version,
+  finality,
 } from "./constants";
-import { finality } from "./constants/finality";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
 
 import dotenv from "dotenv";
