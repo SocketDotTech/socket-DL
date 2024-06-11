@@ -1,5 +1,5 @@
 import { DeploymentMode } from "./socket-types";
-
+export * from "../scripts/rpcConfig/constants";
 export * from "./socket-types";
 export * from "./enums";
 export * from "./addresses";

@@ -27,6 +27,7 @@ import {
   rpcs,
   version,
 } from "./constants";
+import { finality } from "./constants/finality";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
 
 import dotenv from "dotenv";
@@ -92,6 +93,7 @@ const getChainData = async (
     nativeToken: getCurrency(chainSlug),
     chainType: getChainType(chainSlug),
     confirmations: confirmations[chainSlug],
+    finalityInfo: finality[chainSlug],
     icon: icons[chainSlug],
   };
 };

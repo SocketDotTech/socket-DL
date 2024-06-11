@@ -206,6 +206,36 @@ export enum ChainType {
   default = "default",
 }
 
+export enum FinalityBucket {
+  fast = "fast",
+  medium = "medium",
+  slow = "slow",
+}
+
+export enum FinalityType {
+  block = "block",
+  time = "time"
+}
+
+export type ChainFinalityInfo = {
+  type: FinalityType;
+  defaultBucket: FinalityBucket;
+  [FinalityBucket.fast]:{
+    block: number;
+    time: number;
+  };
+  [FinalityBucket.medium]:{
+    block: number;
+    time: number;
+  };
+  [FinalityBucket.slow]:{
+    block: number;
+    time: number;
+  };
+  }
+
+
+
 export type TxData = {
   [chainSlug in ChainSlug]?: ChainTxData;
 };
@@ -229,6 +259,7 @@ export interface S3ChainConfig {
   chainTxData?: ChainTxData;
   explorer?: string;
   icon?: string;
+  finalityInfo?: ChainFinalityInfo;
 }
 
 export type S3Config = {
