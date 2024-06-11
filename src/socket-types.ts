@@ -207,14 +207,15 @@ export enum ChainType {
 }
 
 export enum FinalityBucket {
-  fast = "fast",
-  medium = "medium",
-  slow = "slow",
+  fast = 1,
+  medium = 2,
+  slow = 3,
 }
 
 export enum FinalityType {
-  block = "block",
-  time = "time",
+  bucket = 1,
+  block = 2,
+  time = 3,
 }
 
 export type ChainFinalityInfo = {
