@@ -214,27 +214,25 @@ export enum FinalityBucket {
 
 export enum FinalityType {
   block = "block",
-  time = "time"
+  time = "time",
 }
 
 export type ChainFinalityInfo = {
   type: FinalityType;
   defaultBucket: FinalityBucket;
-  [FinalityBucket.fast]:{
+  [FinalityBucket.fast]: {
     block: number;
     time: number;
   };
-  [FinalityBucket.medium]:{
+  [FinalityBucket.medium]: {
     block: number;
     time: number;
   };
-  [FinalityBucket.slow]:{
+  [FinalityBucket.slow]: {
     block: number;
     time: number;
   };
-  }
-
-
+};
 
 export type TxData = {
   [chainSlug in ChainSlug]?: ChainTxData;
