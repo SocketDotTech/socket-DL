@@ -26,7 +26,7 @@ import {
   prodFeesUpdaterSupportedChainSlugs,
   rpcs,
   version,
-  finality,
+  getFinality,
 } from "./constants";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
 
@@ -93,7 +93,7 @@ const getChainData = async (
     nativeToken: getCurrency(chainSlug),
     chainType: getChainType(chainSlug),
     confirmations: confirmations[chainSlug],
-    finalityInfo: finality[chainSlug],
+    finalityInfo: getFinality(chainSlug),
     icon: icons[chainSlug],
   };
 };
