@@ -21,7 +21,6 @@ export const batcherSupportedChainSlugs = [
   // ChainSlug.MODE_TESTNET,
   ChainSlug.BASE,
   ChainSlug.MODE,
-  // ChainSlug.ANCIENT8_TESTNET2,
   ChainSlug.HOOK_TESTNET,
   ChainSlug.REYA_CRONOS,
   ChainSlug.SYNDR_SEPOLIA_L3,
