@@ -5,5 +5,6 @@ export enum NativeTokens {
   "binancecoin" = "binancecoin",
   "sx-network-2" = "sx-network-2",
   "mantle" = "mantle",
+  "winr" = "winr-protocol",
   "no-token" = "no-token",
 }
