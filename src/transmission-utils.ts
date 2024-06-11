@@ -5,9 +5,9 @@ export const decodeTransmissionParams = (transmissionParam: string) => {
     throw new Error("Invalid transmission param length");
   }
   transmissionParam = transmissionParam.replace("0x", "");
-  const version = parseInt("0x" + transmissionParam.slice(0, 2));
+  const version = parseInt("0x" + transmissionParam.slice(0, 2)); // version 1
   const finalityType = parseInt("0x" + transmissionParam.slice(2, 4)); // bucket, block, time
-  const value = parseInt("0x" + transmissionParam.slice(4, 12));
+  const value = parseInt("0x" + transmissionParam.slice(4, 12)); // bucket (see FinalityBucket enum), block (block number), time value in seconds
 
   return { version, finalityType, value };
 };
