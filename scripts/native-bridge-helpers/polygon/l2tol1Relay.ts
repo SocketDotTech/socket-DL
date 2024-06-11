@@ -74,7 +74,7 @@ export class SocketRelaySigner extends Signer {
 
 import { getJsonRpcUrl } from "../../constants";
 import { deployedAddressPath, getInstance } from "../../deploy/utils";
-import { mode, socketOwner } from "../../deploy/config";
+import { mode, socketOwner } from "../../deploy/config/config";
 import {
   HardhatChainName,
   hardhatChainNameToSlug,

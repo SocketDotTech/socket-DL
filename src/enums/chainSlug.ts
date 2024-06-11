@@ -8,7 +8,6 @@ export enum ChainSlug {
   OPTIMISM_GOERLI = ChainId.OPTIMISM_GOERLI,
   OPTIMISM_SEPOLIA = ChainId.OPTIMISM_SEPOLIA,
   BSC = ChainId.BSC,
-  BSC_TESTNET = ChainId.BSC_TESTNET,
   MAINNET = ChainId.MAINNET,
   GOERLI = ChainId.GOERLI,
   SEPOLIA = ChainId.SEPOLIA,
@@ -43,4 +42,5 @@ export enum ChainSlug {
   SIPHER_FUNKI_TESTNET = ChainId.SIPHER_FUNKI_TESTNET,
   WINR = ChainId.WINR,
   BLAST = ChainId.BLAST,
+  BSC_TESTNET = ChainId.BSC_TESTNET,
 }

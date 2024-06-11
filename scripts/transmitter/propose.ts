@@ -9,7 +9,7 @@ import { getProviderFromChainSlug } from "../constants/networks";
 
 import { CORE_CONTRACTS, ChainSlug } from "@socket.tech/dl-core";
 import { getInstance } from "../deploy/utils";
-import { mode, overrides } from "../deploy/config";
+import { mode, overrides } from "../deploy/config/config";
 
 export const VERSION_HASH = utils.id(version[mode]);
 

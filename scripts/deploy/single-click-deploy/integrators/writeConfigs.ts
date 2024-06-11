@@ -4,9 +4,12 @@ import prompts from "prompts";
 
 import { updateSDK, buildEnvFile, updateConfig } from "./utils";
 import {
+  ChainId,
   ChainSlug,
+  ChainType,
   DeploymentMode,
   MainnetIds,
+  NativeTokens,
   TestnetIds,
 } from "../../../../src";
 import {
@@ -14,11 +17,13 @@ import {
   ownerAddresses,
   transmitterAddresses,
   watcherAddresses,
-} from "../../config";
+} from "../../config/config";
 import { RoleOwners } from "../../../constants";
 
-export async function writeConfigs() {
-  const response = await prompts([
+export async function addChainToSDK() {
+  const currencyChoices = [...Object.keys(NativeTokens), "other"];
+
+  const rpcResponse = await prompts([
     {
       name: "rpc",
       type: "text",
@@ -31,12 +36,83 @@ export async function writeConfigs() {
       message:
         "Enter chain name (without spaces, use underscore instead of spaces)",
     },
+  ]);
+
+  const chainId = await getChainId(rpcResponse.rpc);
+
+  const filteredChain = Object.values(ChainId).filter((c) => c == chainId);
+  if (filteredChain.length > 0) {
+    console.log("Chain already added!");
+    return {
+      response: { rpc: rpcResponse.rpc, chainName: rpcResponse.chainName },
+      chainId,
+      isAlreadyAdded: true,
+    };
+  }
+
+  const response = await prompts([
     {
       name: "isMainnet",
       type: "toggle",
       message: "Is it a mainnet?",
     },
+    {
+      name: "chainType",
+      type: "select",
+      message: "Select the rollup type (select default if not)",
+      choices: [...Object.keys(ChainType)],
+    },
+    {
+      name: "currency",
+      type: "select",
+      message: "Select the native token",
+      choices: currencyChoices,
+    },
+    {
+      name: "explorer",
+      type: "text",
+      message: "Enter the block explorer url",
+    },
+    {
+      name: "icon",
+      type: "text",
+      message: "Enter the icon url",
+    },
   ]);
+  response.rpc = rpcResponse.rpc;
+  response.chainName = rpcResponse.chainName;
+
+  let isNewNative = false;
+  let currency = currencyChoices[response.currency];
+  if (response.currency == currencyChoices.length - 1) {
+    const currencyPromptResponse = await prompts([
+      {
+        name: "coingeckoId",
+        type: "text",
+        message: "Enter coingecko id of your token",
+        validate: validateCoingeckoId,
+      },
+    ]);
+
+    isNewNative = true;
+    currency = currencyPromptResponse.coingeckoId;
+  }
+
+  // update types and enums
+  await updateSDK(
+    response.chainName,
+    chainId,
+    currency,
+    response.chainType,
+    response.isMainnet,
+    isNewNative
+  );
+
+  return { response, chainId, isAlreadyAdded: false };
+}
+
+export async function writeConfigs() {
+  const { response, chainId } = await addChainToSDK();
 
   const chainOptions = response.isMainnet ? MainnetIds : TestnetIds;
   const choices = chainOptions.map((chain) => ({
@@ -121,10 +197,6 @@ export async function writeConfigs() {
     },
   ]);
 
-  // update types and enums
-  const chainId = await getChainId(response.rpc);
-  await updateSDK(response.chainName, chainId, response.isMainnet);
-
   // update env and config
   const roleOwners: RoleOwners = {
     ownerAddress: "",
@@ -180,6 +252,15 @@ export async function writeConfigs() {
 
   await buildEnvFile(response.rpc, roleOwners.ownerAddress, pk);
 }
+
+const validateCoingeckoId = async (coingeckoId: string) => {
+  if (!coingeckoId) {
+    return "Invalid coingecko Id";
+  }
+
+  // todo use either public api key or a list cached somewhere in dl updated frequently
+  return true;
+};
 
 const validateRpc = async (rpcUrl: string) => {
   if (!rpcUrl) {

@@ -6,7 +6,6 @@ export enum ChainId {
   OPTIMISM_GOERLI = 420,
   OPTIMISM_SEPOLIA = 11155420,
   BSC = 56,
-  BSC_TESTNET = 97,
   MAINNET = 1,
   GOERLI = 5,
   SEPOLIA = 11155111,
@@ -41,4 +40,5 @@ export enum ChainId {
   SIPHER_FUNKI_TESTNET = 3397901,
   WINR = 777777,
   BLAST = 81457,
+  BSC_TESTNET = 97,
 }

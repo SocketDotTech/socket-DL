@@ -7,7 +7,7 @@ import { L1ToL2MessageGasEstimator } from "@arbitrum/sdk/dist/lib/message/L1ToL2
 
 import { getInstance } from "../../deploy/utils";
 import { getJsonRpcUrl } from "../../constants";
-import { mode, socketOwner } from "../../deploy/config";
+import { mode, socketOwner } from "../../deploy/config/config";
 import {
   HardhatChainName,
   IntegrationTypes,

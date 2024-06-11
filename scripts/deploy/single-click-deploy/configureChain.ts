@@ -15,7 +15,7 @@ import {
   mode,
   newRoleStatus,
   sendTransaction,
-} from "../config";
+} from "../config/config";
 import { registerSwitchboards } from "../scripts/configureSocket";
 import {
   ChainConfigs,

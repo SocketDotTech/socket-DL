@@ -1,12 +1,7 @@
-import fs from "fs";
 import { Wallet } from "ethers";
 
-import { getProviderFromChainSlug } from "../constants";
-import {
-  deployedAddressPath,
-  getSwitchboardAddress,
-  storeAllAddresses,
-} from "./utils";
+import { getProviderFromChainSlug } from "../../constants";
+import { storeAllAddresses } from "../utils";
 import {
   CORE_CONTRACTS,
   ChainSlug,
@@ -15,35 +10,30 @@ import {
   IntegrationTypes,
   MainnetIds,
   TestnetIds,
+  getSwitchboardAddressFromAllAddresses,
   isTestnet,
-} from "../../src";
-import registerSwitchboardForSibling from "./scripts/registerSwitchboard";
+} from "../../../src";
+import registerSwitchboardForSibling from "./registerSwitchboard";
 import {
   capacitorType,
   maxPacketLength,
   mode,
   executionManagerVersion,
-  filterSiblingChains,
-  filterChains,
-} from "./config";
+} from "../config/config";
 import {
   configureExecutionManager,
   registerSwitchboards,
   setManagers,
   setupPolygonNativeSwitchboard,
-} from "./scripts/configureSocket";
+} from "./configureSocket";
 
-export const main = async () => {
+export const configureSwitchboards = async (
+  addresses: DeploymentAddresses,
+  chains: ChainSlug[]
+) => {
   try {
-    if (!fs.existsSync(deployedAddressPath(mode))) {
-      throw new Error("addresses.json not found");
-    }
-    let addresses: DeploymentAddresses = JSON.parse(
-      fs.readFileSync(deployedAddressPath(mode), "utf-8")
-    );
-
     await Promise.all(
-      filterChains.map(async (chain) => {
+      chains.map(async (chain) => {
         if (!addresses[chain]) return;
 
         const providerInstance = getProviderFromChainSlug(
@@ -58,8 +48,7 @@ export const main = async () => {
 
         const list = isTestnet(chain) ? TestnetIds : MainnetIds;
         const siblingSlugs: ChainSlug[] = list.filter(
-          (chainSlug) =>
-            chainSlug !== chain && filterSiblingChains.includes(chainSlug)
+          (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
         );
 
         await configureExecutionManager(
@@ -75,7 +64,7 @@ export const main = async () => {
 
         const integrations = addr["integrations"] ?? {};
         const integrationList = Object.keys(integrations).filter((chain) =>
-          filterSiblingChains.includes(parseInt(chain) as ChainSlug)
+          chains.includes(parseInt(chain) as ChainSlug)
         );
 
         console.log(`Configuring for ${chain}`);
@@ -84,16 +73,17 @@ export const main = async () => {
           const nativeConfig = integrations[sibling][IntegrationTypes.native];
           if (!nativeConfig) continue;
 
-          const siblingNativeSwitchboard = getSwitchboardAddress(
+          const siblingSwitchboard = getSwitchboardAddressFromAllAddresses(
+            addresses,
             chain,
-            IntegrationTypes.native,
-            addresses?.[sibling]
+            parseInt(sibling) as ChainSlug,
+            IntegrationTypes.native
           );
 
-          if (!siblingNativeSwitchboard) continue;
+          if (!siblingSwitchboard) continue;
           addr = await registerSwitchboardForSibling(
             nativeConfig["switchboard"],
-            siblingNativeSwitchboard,
+            siblingSwitchboard,
             sibling,
             capacitorType,
             maxPacketLength,
@@ -124,7 +114,6 @@ export const main = async () => {
         );
 
         addresses[chain] = addr;
-
         console.log(`Configuring for ${chain} - COMPLETED`);
       })
     );
@@ -133,12 +122,8 @@ export const main = async () => {
     await setupPolygonNativeSwitchboard(addresses);
   } catch (error) {
     console.log("Error while sending transaction", error);
+    throw error;
   }
-};
 
-main()
-  .then(() => process.exit(0))
-  .catch((error: Error) => {
-    console.error(error);
-    process.exit(1);
-  });
+  return addresses;
+};

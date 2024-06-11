@@ -1,9 +1,14 @@
 import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
-import { ChainSlug, DeploymentMode, CORE_CONTRACTS, version } from "../../src";
+import {
+  ChainSlug,
+  DeploymentMode,
+  CORE_CONTRACTS,
+  version,
+} from "../../../src";
 import { BigNumberish, utils } from "ethers";
-import chainConfig from "../../chainConfig.json";
+import chainConfig from "../../../chainConfig.json";
 
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
@@ -37,12 +42,10 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.SX_NETWORK,
   // ChainSlug.MODE_TESTNET,
   // ChainSlug.VICTION_TESTNET,
-  // ChainSlug.BSC_TESTNET,
   // ChainSlug.AEVO_TESTNET,
   // ChainSlug.LYRA_TESTNET,
   // ChainSlug.SEPOLIA,
   // ChainSlug.XAI_TESTNET,
-  // ChainSlug.CDK_TESTNET,
   // ChainSlug.AEVO,
   ChainSlug.MAINNET,
   ChainSlug.ARBITRUM,
@@ -115,7 +118,7 @@ export const executorAddresses = {
 };
 
 export const ownerAddresses = {
-  [DeploymentMode.DEV]: "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+  [DeploymentMode.DEV]: socketOwner,
   [DeploymentMode.SURGE]: "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
   [DeploymentMode.PROD]: "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
 };
@@ -161,12 +164,6 @@ export const overrides = (
     return {
       type,
       gasLimit: 3000000,
-      gasPrice,
-    };
-  } else if (chain == ChainSlug.BSC_TESTNET) {
-    return {
-      type,
-      gasLimit,
       gasPrice,
     };
   } else if (chain == ChainSlug.MAINNET) {
