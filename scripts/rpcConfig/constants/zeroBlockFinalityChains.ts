@@ -1,4 +1,4 @@
-import { ChainSlug } from "../../../src";
+import { ChainSlug } from "../../../src/enums/chainSlug";
 
 export const chainsWithZeroBlockFinality = [
   ChainSlug.REYA,
