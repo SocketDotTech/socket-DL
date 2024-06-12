@@ -214,30 +214,19 @@ export enum FinalityBucket {
 
 export enum TransmissionParamFinalityType {
   bucket = 1,
-  block = 2,
-  time = 3,
 }
 
-export enum BucketFinalityType {
+export enum ChainFinalityType {
   block = 1,
   time = 2,
 }
 
 export type ChainFinalityInfo = {
-  type: BucketFinalityType;
+  type: ChainFinalityType;
   defaultBucket: FinalityBucket;
-  [FinalityBucket.fast]: {
-    block: number;
-    time: number;
-  };
-  [FinalityBucket.medium]: {
-    block: number;
-    time: number;
-  };
-  [FinalityBucket.slow]: {
-    block: number;
-    time: number;
-  };
+  [FinalityBucket.fast]:number;
+  [FinalityBucket.medium]:number;
+  [FinalityBucket.slow]:number;
 };
 
 export type TxData = {

@@ -1,10 +1,10 @@
-import { BucketFinalityType } from "./socket-types";
+import { ChainFinalityType } from "./socket-types";
 
 /*
 Transmission param format:
 - first byte - version - current version is 1
-- 2nd  byte - finalityType - specify if using buckets, block, or time. (1: bucket, 2: block, 3: time)
-- next 4 bytes - value - bucket (1:fast, 2:medium, 3:slow), block (min block confirmations) or time (min time elapsed)
+- 2nd  byte - finalityType (1: bucket)
+- next 4 bytes - value - bucket (1:fast, 2:medium, 3:slow)
 
 eg : want to transmit message with slow speed - 
 transmissionParam = 0x0101000000030000000000000000000000000000000000000000000000000000
@@ -41,7 +41,7 @@ export const encodeTransmissionParams = (
 };
 
 export const isTxFinalized = (
-  type: BucketFinalityType,
+  type: ChainFinalityType,
   currentBlock: number,
   eventBlock: number,
   currentTime: number,
@@ -49,20 +49,31 @@ export const isTxFinalized = (
   finalityBlockDiff: number,
   finalityTimeDiff: number
 ) => {
-  if (type === BucketFinalityType.block) {
-    if (!currentBlock || !eventBlock || !finalityBlockDiff) {
-      console.log("Invalid data for block finality check");
-      return false;
+  if (type === ChainFinalityType.block) {
+    if (
+      currentBlock == null ||
+      currentBlock == undefined ||
+      eventBlock == null ||
+      eventBlock == undefined ||
+      finalityBlockDiff == null ||
+      finalityBlockDiff == undefined
+    ) {
+      throw new Error("Invalid data for block finality check");
     }
     return currentBlock - eventBlock >= finalityBlockDiff;
-  } else if (type === BucketFinalityType.time) {
-    if (!currentTime || !eventTime || !finalityTimeDiff) {
-      console.log("Invalid data for time finality check");
-      return false;
+  } else if (type === ChainFinalityType.time) {
+    if (
+      currentTime == null ||
+      currentTime == undefined ||
+      eventTime == null ||
+      eventTime == undefined ||
+      finalityTimeDiff == null ||
+      finalityTimeDiff == undefined
+    ) {
+      throw new Error("Invalid data for time finality check");
     }
     return currentTime - eventTime >= finalityTimeDiff;
   } else {
-    console.log("Invalid finality type");
-    return false;
+    throw new Error("Invalid finality type");
   }
 };

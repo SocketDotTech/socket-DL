@@ -1,5 +1,5 @@
 import { DeploymentMode } from "./socket-types";
-export { finality } from "../scripts/rpcConfig/constants/finality";
+export { getFinality } from "../scripts/rpcConfig/constants/finality";
 export * from "./socket-types";
 export * from "./enums";
 export * from "./addresses";
