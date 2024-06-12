@@ -224,9 +224,9 @@ export enum ChainFinalityType {
 export type ChainFinalityInfo = {
   type: ChainFinalityType;
   defaultBucket: FinalityBucket;
-  [FinalityBucket.fast]:number;
-  [FinalityBucket.medium]:number;
-  [FinalityBucket.slow]:number;
+  [FinalityBucket.fast]: number;
+  [FinalityBucket.medium]: number;
+  [FinalityBucket.slow]: number;
 };
 
 export type TxData = {
