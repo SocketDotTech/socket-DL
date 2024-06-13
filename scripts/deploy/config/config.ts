@@ -119,8 +119,8 @@ export const executorAddresses = {
 
 export const ownerAddresses = {
   [DeploymentMode.DEV]: socketOwner,
-  [DeploymentMode.SURGE]: "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
-  [DeploymentMode.PROD]: "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+  [DeploymentMode.SURGE]: "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+  [DeploymentMode.PROD]: "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
 };
 
 export const overrides = (
