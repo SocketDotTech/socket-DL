@@ -21,9 +21,9 @@ export const prodFeesUpdaterSupportedChainSlugs = (): ChainSlug[] => {
 
   return [
     ...feesUpdaterSupportedChainSlugs,
-    ChainSlug.POLYNOMIAL_TESTNET,
-    ChainSlug.KINTO_DEVNET,
-    ChainSlug.ARBITRUM_SEPOLIA,
+    // ChainSlug.POLYNOMIAL_TESTNET,
+    // ChainSlug.KINTO_DEVNET,
+    // ChainSlug.ARBITRUM_SEPOLIA,
   ];
 };
 
