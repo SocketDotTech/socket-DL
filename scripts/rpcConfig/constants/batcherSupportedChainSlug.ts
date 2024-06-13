@@ -32,4 +32,5 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.WINR,
   ChainSlug.BLAST,
   ChainSlug.BSC_TESTNET,
+  ChainSlug.POLYNOMIAL,
 ];

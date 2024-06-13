@@ -44,4 +44,5 @@ export const ChainSlugToId = {
   [ChainSlug.WINR]: ChainId.WINR,
   [ChainSlug.BLAST]: ChainId.BLAST,
   [ChainSlug.BSC_TESTNET]: ChainId.BSC_TESTNET,
+  [ChainSlug.POLYNOMIAL]: ChainId.POLYNOMIAL,
 };

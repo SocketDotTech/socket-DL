@@ -68,4 +68,5 @@ export const rpcs = {
   [ChainSlug.WINR]: checkEnvVar("WINR_RPC"),
   [ChainSlug.BLAST]: checkEnvVar("BLAST_RPC"),
   [ChainSlug.BSC_TESTNET]: checkEnvVar("BSC_TESTNET_RPC"),
+  [ChainSlug.POLYNOMIAL]: checkEnvVar("POLYNOMIAL_RPC"),
 };

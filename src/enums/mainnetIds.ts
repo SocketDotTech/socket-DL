@@ -19,4 +19,5 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.KINTO,
   ChainSlug.WINR,
   ChainSlug.BLAST,
+  ChainSlug.POLYNOMIAL,
 ];
