@@ -41,4 +41,5 @@ export const confirmations = {
   [ChainSlug.WINR]: 0,
   [ChainSlug.BLAST]: 0,
   [ChainSlug.BSC_TESTNET]: 1,
+  [ChainSlug.POLYNOMIAL]: 1,
 };

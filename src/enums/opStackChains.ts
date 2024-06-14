@@ -16,4 +16,5 @@ export const opStackL2Chain = [
   ChainSlug.BOB,
   ChainSlug.SIPHER_FUNKI_TESTNET,
   ChainSlug.BLAST,
+  ChainSlug.POLYNOMIAL,
 ];

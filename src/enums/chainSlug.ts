@@ -43,4 +43,5 @@ export enum ChainSlug {
   WINR = ChainId.WINR,
   BLAST = ChainId.BLAST,
   BSC_TESTNET = ChainId.BSC_TESTNET,
+  POLYNOMIAL = ChainId.POLYNOMIAL,
 }
