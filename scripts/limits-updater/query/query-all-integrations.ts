@@ -11,7 +11,7 @@ import {
   getAddresses,
   getChainSlugsFromDeployedAddresses,
 } from "../../deploy/utils";
-import { mode } from "../../deploy/config";
+import { mode } from "../../deploy/config/config";
 
 // npx ts-node scripts/limits-updater/query-all-integrations.ts
 export const main = async () => {

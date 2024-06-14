@@ -8,7 +8,7 @@ import {
   ChainSlug,
   IntegrationTypes,
 } from "../../../src";
-import { mode, chains } from "../config";
+import { mode, chains } from "../config/config";
 import { getProviderFromChainSlug } from "../../constants";
 import { encodePacketId } from "../utils/packetId";
 

@@ -9,7 +9,6 @@ export const ChainSlugToKey = {
   [ChainSlug.OPTIMISM_GOERLI]: HardhatChainName.OPTIMISM_GOERLI,
   [ChainSlug.OPTIMISM_SEPOLIA]: HardhatChainName.OPTIMISM_SEPOLIA,
   [ChainSlug.BSC]: HardhatChainName.BSC,
-  [ChainSlug.BSC_TESTNET]: HardhatChainName.BSC_TESTNET,
   [ChainSlug.MAINNET]: HardhatChainName.MAINNET,
   [ChainSlug.GOERLI]: HardhatChainName.GOERLI,
   [ChainSlug.SEPOLIA]: HardhatChainName.SEPOLIA,
@@ -41,4 +40,8 @@ export const ChainSlugToKey = {
   [ChainSlug.BOB]: HardhatChainName.BOB,
   [ChainSlug.KINTO]: HardhatChainName.KINTO,
   [ChainSlug.KINTO_DEVNET]: HardhatChainName.KINTO_DEVNET,
+  [ChainSlug.SIPHER_FUNKI_TESTNET]: HardhatChainName.SIPHER_FUNKI_TESTNET,
+  [ChainSlug.WINR]: HardhatChainName.WINR,
+  [ChainSlug.BLAST]: HardhatChainName.BLAST,
+  [ChainSlug.BSC_TESTNET]: HardhatChainName.BSC_TESTNET,
 };

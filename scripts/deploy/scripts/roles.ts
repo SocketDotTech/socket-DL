@@ -13,13 +13,12 @@ import {
   IntegrationTypes,
   isTestnet,
   isMainnet,
-  getAddresses,
+  DeploymentAddresses,
 } from "../../../src";
 import { getRoleHash, getChainRoleHash, getInstance } from "../utils";
 import { Wallet, ethers } from "ethers";
 import { getProviderFromChainSlug } from "../../constants";
-import { filterChains, mode } from "../config";
-import { overrides } from "../config";
+import { overrides } from "../config/config";
 import AccessControlExtendedABI from "@socket.tech/dl-core/artifacts/abi/AccessControlExtended.json";
 
 let roleStatus: any = {};
@@ -199,7 +198,7 @@ const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
   return [];
 };
 
-export const checkNativeSwitchboardRoles = async ({
+const checkNativeSwitchboardRoles = async ({
   chainSlug,
   provider,
   siblingSlugs,
@@ -207,6 +206,7 @@ export const checkNativeSwitchboardRoles = async ({
   filterRoles,
   userAddress,
   newRoleStatus,
+  filterChains,
 }: {
   chainSlug: ChainSlug;
   siblingSlugs: ChainSlug[];
@@ -215,6 +215,7 @@ export const checkNativeSwitchboardRoles = async ({
   filterRoles: ROLES[];
   userAddress: string;
   newRoleStatus: boolean;
+  filterChains: ChainSlug[];
 }) => {
   let contractName = CORE_CONTRACTS.NativeSwitchboard;
   await Promise.all(
@@ -276,7 +277,8 @@ export const checkNativeSwitchboardRoles = async ({
 };
 
 export const checkAndUpdateRoles = async (
-  params: checkAndUpdateRolesObj
+  params: checkAndUpdateRolesObj,
+  allAddresses: DeploymentAddresses
 ): Promise<{ params: checkAndUpdateRolesObj; roleStatus: any }> => {
   try {
     let {
@@ -299,18 +301,13 @@ export const checkAndUpdateRoles = async (
           return;
         roleStatus[chainSlug] = {};
         // roleStatus[chainSlug]["integrations"] = {};
-
-        let siblingSlugs = getSiblingSlugs(chainSlug);
-
-        let addresses: ChainSocketAddresses | undefined;
-        try {
-          addresses = await getAddresses(chainSlug, mode);
-        } catch (error) {
-          addresses = undefined;
-        }
-
+        const addresses = allAddresses[chainSlug];
         if (!addresses) return;
-        let provider = getProviderFromChainSlug(chainSlug as any as ChainSlug);
+
+        const siblingSlugs = getSiblingSlugs(chainSlug);
+        const provider = getProviderFromChainSlug(
+          chainSlug as any as ChainSlug
+        );
 
         let contractNames = Object.keys(REQUIRED_ROLES);
         await Promise.all(
@@ -329,6 +326,7 @@ export const checkAndUpdateRoles = async (
                 userAddress,
                 newRoleStatus,
                 filterRoles,
+                filterChains,
               });
               return;
             }

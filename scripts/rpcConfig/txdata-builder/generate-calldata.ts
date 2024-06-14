@@ -85,10 +85,9 @@ export const getTxData = async (): Promise<TxData> => {
     getProviderFromChainSlug(ChainSlug.SEPOLIA)
   );
   const addresses = getAllAddresses(deploymentMode);
-  const allChainSlugs: ChainSlug[] =
-    prodFeesUpdaterSupportedChainSlugs().filter(
-      (c) => addresses[c]?.["SocketSimulator"]
-    );
+  const allChainSlugs: ChainSlug[] = prodFeesUpdaterSupportedChainSlugs()
+    .map((c) => c as ChainSlug)
+    .filter((c) => addresses[c]?.["SocketSimulator"]);
 
   const txData: TxData = {};
   for (const chainSlug of allChainSlugs) {
