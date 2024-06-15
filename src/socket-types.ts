@@ -207,23 +207,16 @@ export enum ChainType {
 }
 
 export enum FinalityBucket {
-  fast = 1,
-  medium = 2,
-  slow = 3,
+  fast = 1, // latest
+  medium = 2, // safe
+  slow = 3, // finalized
 }
 
 export enum TransmissionParamFinalityType {
   bucket = 1,
 }
 
-export enum ChainFinalityType {
-  block = 1,
-  time = 2,
-}
-
 export type ChainFinalityInfo = {
-  type: ChainFinalityType;
-  defaultBucket: FinalityBucket;
   [FinalityBucket.fast]: number;
   [FinalityBucket.medium]: number;
   [FinalityBucket.slow]: number;
@@ -253,6 +246,7 @@ export interface S3ChainConfig {
   explorer?: string;
   icon?: string;
   finalityInfo?: ChainFinalityInfo;
+  defaultFinalityBucket?: FinalityBucket;
 }
 
 export type S3Config = {

@@ -1,5 +1,3 @@
-import { ChainFinalityType } from "./socket-types";
-
 /*
 Transmission param format:
 - first byte - version - current version is 1
@@ -41,39 +39,19 @@ export const encodeTransmissionParams = (
 };
 
 export const isTxFinalized = (
-  type: ChainFinalityType,
   currentBlock: number,
   eventBlock: number,
-  currentTime: number,
-  eventTime: number,
-  finalityBlockDiff: number,
-  finalityTimeDiff: number
+  finalityBlockDiff: number
 ) => {
-  if (type === ChainFinalityType.block) {
-    if (
-      currentBlock == null ||
-      currentBlock == undefined ||
-      eventBlock == null ||
-      eventBlock == undefined ||
-      finalityBlockDiff == null ||
-      finalityBlockDiff == undefined
-    ) {
-      throw new Error("Invalid data for block finality check");
-    }
-    return currentBlock - eventBlock >= finalityBlockDiff;
-  } else if (type === ChainFinalityType.time) {
-    if (
-      currentTime == null ||
-      currentTime == undefined ||
-      eventTime == null ||
-      eventTime == undefined ||
-      finalityTimeDiff == null ||
-      finalityTimeDiff == undefined
-    ) {
-      throw new Error("Invalid data for time finality check");
-    }
-    return currentTime - eventTime >= finalityTimeDiff;
-  } else {
-    throw new Error("Invalid finality type");
+  if (
+    currentBlock == null ||
+    currentBlock == undefined ||
+    eventBlock == null ||
+    eventBlock == undefined ||
+    finalityBlockDiff == null ||
+    finalityBlockDiff == undefined
+  ) {
+    throw new Error("Invalid data for block finality check");
   }
+  return currentBlock - eventBlock >= finalityBlockDiff;
 };
