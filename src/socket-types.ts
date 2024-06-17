@@ -214,6 +214,7 @@ export interface ChainTxData {
   sealTxData: any[];
   proposeTxData: any[];
   attestTxData: any[];
+  executeTxData: any[];
   owner: string;
 }
 

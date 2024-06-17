@@ -1,8 +1,8 @@
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { Contract, Wallet } from "ethers";
+import { Contract, Wallet, constants } from "ethers";
 
 import OwnableABIInterface from "@socket.tech/dl-core/artifacts/abi/Ownable.json";
-import { PacketInfo, VERSION_HASH, getPacketInfo } from "./util";
+import { PacketInfo, VERSION_HASH, getPacketInfo, packMessageId } from "./util";
 import { getProviderFromChainSlug } from "../../constants";
 import { deploymentMode } from "../rpcConfig";
 import { TxData, ChainSlug, getAllAddresses, ChainTxData } from "../../../src";
@@ -78,6 +78,35 @@ export const getAttestTxData = async (
   return attestBatchDataArgs;
 };
 
+export const getExecuteTxData = async (
+  chainSlug: ChainSlug,
+  signer: Wallet,
+  packetDetails: PacketInfo,
+  counterAddress: string
+) => {
+  const digest = keccak256(defaultAbiCoder.encode(["uint256"], ["0"]));
+  const signature = await signer.signMessage(arrayify(digest));
+  const msgId = packMessageId(chainSlug, counterAddress, "10");
+
+  const executionDetails = {
+    packetId: packetDetails.packetId,
+    proposalCount: 0,
+    executionGasLimit: 100000,
+    decapacitorProof: constants.HashZero,
+    signature,
+  };
+  const msgDetails = {
+    msgId,
+    executionFee: 100000,
+    minMsgGasLimit: 100000,
+    executionParams: constants.HashZero,
+    payload: constants.HashZero,
+  };
+
+  const executeBatchDataArgs = [executionDetails, msgDetails];
+  return executeBatchDataArgs;
+};
+
 export const getTxData = async (): Promise<TxData> => {
   // any provider, just for signing purpose
   const signer = new Wallet(
@@ -114,6 +143,13 @@ export const getTxData = async (): Promise<TxData> => {
       packetInfo,
       sbSimulatorAddress
     );
+    const executeTxData = await getExecuteTxData(
+      chainSlug,
+      signer,
+      packetInfo,
+      addresses[chainSlug]?.["Counter"]
+    );
+
     const simulatorContract = new Contract(
       sbSimulatorAddress,
       OwnableABIInterface,
@@ -125,6 +161,7 @@ export const getTxData = async (): Promise<TxData> => {
       sealTxData,
       proposeTxData,
       attestTxData,
+      executeTxData,
       owner,
     };
   }
