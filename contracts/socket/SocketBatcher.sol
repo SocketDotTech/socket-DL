@@ -163,8 +163,15 @@ contract SocketBatcher is AccessControl {
         bytes4 functionSelector;
     }
 
+    struct Call {
+        address target;
+        bytes callData;
+    }
+
     event FailedLogBytes(bytes reason);
     event FailedLog(string reason);
+
+    error MultiCallRevert();
 
     /**
      * @notice sets fees in batch for switchboards
@@ -682,5 +689,24 @@ contract SocketBatcher is AccessControl {
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
+    }
+
+    function multicall(
+        Call[] calldata calls
+    ) external view returns (uint256 blockNumber, bytes[] memory returnData) {
+        uint256 length = calls.length;
+        returnData = new bytes[](length);
+
+        for (uint256 index = 0; index < length; ) {
+            (bool success, bytes memory result) = calls[index]
+                .target
+                .staticcall(calls[index].callData);
+            if (!success) revert MultiCallRevert();
+            returnData[index] = result;
+
+            unchecked {
+                ++index;
+            }
+        }
     }
 }
