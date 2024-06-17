@@ -251,7 +251,13 @@ contract ExecutionManagerTest is Setup {
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
 
-        _setExecutionFees(_a, _b.chainSlug, type(uint128).max);
+        IExecutionManager.ExecutionFeesParam
+            memory executionFees = IExecutionManager.ExecutionFeesParam(
+                type(uint80).max,
+                type(uint80).max,
+                type(uint80).max
+            );
+        _setExecutionFees(_a, _b.chainSlug, executionFees);
 
         uint256 totalFees = _transmissionFees +
             type(uint128).max +
@@ -281,7 +287,13 @@ contract ExecutionManagerTest is Setup {
             uint256((uint256(paramType) << 248) | uint248(msgValue))
         );
 
-        _setExecutionFees(_a, _b.chainSlug, type(uint128).max);
+        IExecutionManager.ExecutionFeesParam
+            memory executionFees = IExecutionManager.ExecutionFeesParam(
+                type(uint80).max,
+                type(uint80).max,
+                type(uint80).max
+            );
+        _setExecutionFees(_a, _b.chainSlug, executionFees);
         _setRelativeNativeTokenPrice(
             _a,
             _b.chainSlug,

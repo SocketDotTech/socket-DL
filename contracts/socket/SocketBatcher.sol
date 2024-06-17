@@ -155,9 +155,9 @@ contract SocketBatcher is AccessControl {
     struct SetExecutionFeesRequest {
         uint256 nonce;
         uint32 dstChainSlug;
-        uint128 gasPrice;
-        uint128 perByteCost;
-        uint256 overhead;
+        uint80 gasPrice;
+        uint80 perByteCost;
+        uint80 overhead;
         uint256 fees;
         bytes signature;
         bytes4 functionSelector;

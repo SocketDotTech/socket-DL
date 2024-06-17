@@ -75,7 +75,6 @@ contract Setup is Test {
     uint256 internal _minMsgGasLimit = 30548;
     uint256 internal _sealGasLimit = 150000;
     uint128 internal _transmissionFees = 350000000000;
-    uint128 internal _executionFees = 110000000000;
     uint128 internal _switchboardFees = 100000;
     uint128 internal _verificationOverheadFees = 100000;
     uint256 internal _msgValueMaxThreshold = 1000;
@@ -210,7 +209,13 @@ contract Setup is Test {
             _socketOwner
         );
 
-        _setExecutionFees(cc_, remoteChainSlug_, _executionFees);
+        IExecutionManager.ExecutionFeesParam
+            memory executionFees = IExecutionManager.ExecutionFeesParam(
+                type(uint80).max,
+                type(uint80).max,
+                type(uint80).max
+            );
+        _setExecutionFees(cc_, remoteChainSlug_, executionFees);
         _setMsgValueMaxThreshold(cc_, remoteChainSlug_, _msgValueMaxThreshold);
         _setRelativeNativeTokenPrice(
             cc_,
@@ -307,7 +312,7 @@ contract Setup is Test {
     function _setExecutionFees(
         ChainContext storage cc_,
         uint32 remoteChainSlug_,
-        uint128 executionFees_
+        IExecutionManager.ExecutionFeesParam memory executionFees_
     ) internal {
         //set ExecutionFees for remoteChainSlug
         bytes32 feesUpdateDigest = keccak256(
