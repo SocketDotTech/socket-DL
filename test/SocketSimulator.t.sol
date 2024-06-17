@@ -67,7 +67,6 @@ contract Setup is Test {
     uint256 internal _minMsgGasLimit = 30548;
     uint256 internal _sealGasLimit = 150000;
     uint128 internal _transmissionFees = 350000000000;
-    uint128 internal _executionFees = 110000000000;
     uint128 internal _switchboardFees = 100000;
     uint128 internal _verificationOverheadFees = 100000;
     uint256 internal _msgValueMaxThreshold = 1000;
@@ -181,11 +180,7 @@ contract Setup is Test {
             cc_.sigVerifier__
         );
 
-        cc_.socket__.setup(
-            address(1),
-            address(cc_.switchboard__),
-            address(cc_.utils__)
-        );
+        cc_.socket__.setup(address(cc_.switchboard__), address(cc_.utils__));
 
         vm.stopPrank();
     }
@@ -461,5 +456,25 @@ contract Setup is Test {
 
         hoax(_socketOwner);
         _a.switchboard__.attest(packetId, 0, root, sig);
+
+        hoax(_socketOwner);
+        bytes32 msgId = _packMessageId(_a.chainSlug, address(12345), 10);
+
+        _a.socket__.execute(
+            ISocket.ExecutionDetails(
+                packetId,
+                uint256(0),
+                uint256(100000),
+                bytes(""),
+                sig
+            ),
+            ISocket.MessageDetails(
+                msgId,
+                1 ether,
+                uint256(100000),
+                bytes32(0),
+                bytes("random")
+            )
+        );
     }
 }

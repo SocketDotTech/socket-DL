@@ -161,4 +161,32 @@ contract SwitchboardSimulator is AccessControlExtended {
             attestations[root]
         );
     }
+
+    function allowPacket(
+        bytes32 root_,
+        bytes32 packetId_,
+        uint256 proposalCount_,
+        uint32 srcChainSlug_,
+        uint256 proposeTime_
+    ) external view returns (bool) {
+        uint64 packetCount = uint64(uint256(packetId_));
+
+        // any relevant trips triggered or invalid packet count.
+        if (
+            isGlobalTipped ||
+            isPathTripped[srcChainSlug_] ||
+            isProposalTripped[packetId_][proposalCount_] ||
+            packetCount < initialPacketCount[srcChainSlug_]
+        ) return false;
+
+        // root has enough attestations
+        if (isRootValid[root_]) return true;
+
+        // this makes packets valid even if all watchers have not attested
+        // used to make the system work when watchers are inactive due to infra etc problems
+        if (block.timestamp - proposeTime_ < timeoutInSeconds) return true;
+
+        // not enough attestations and timeout not hit
+        return false;
+    }
 }
