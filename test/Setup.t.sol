@@ -85,6 +85,10 @@ contract Setup is Test {
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
 
+    uint80 internal gasPrice = 1 gwei;
+    uint80 internal perByteCost = 50 gwei;
+    uint80 internal overhead = 10 gwei;
+
     bytes32 internal _transmissionParams = bytes32(0);
     bool isExecutionOpen = false;
 
@@ -211,9 +215,9 @@ contract Setup is Test {
 
         IExecutionManager.ExecutionFeesParam
             memory executionFees = IExecutionManager.ExecutionFeesParam(
-                type(uint80).max,
-                type(uint80).max,
-                type(uint80).max
+                gasPrice,
+                perByteCost,
+                overhead
             );
         _setExecutionFees(cc_, remoteChainSlug_, executionFees);
         _setMsgValueMaxThreshold(cc_, remoteChainSlug_, _msgValueMaxThreshold);

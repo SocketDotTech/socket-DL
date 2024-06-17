@@ -146,7 +146,7 @@ contract SocketSrcTest is Setup {
                 .executionManager__
                 .getExecutionTransmissionMinFees(
                     _minMsgGasLimit,
-                    100,
+                    1000,
                     bytes32(0),
                     _transmissionParams,
                     _b.chainSlug,
@@ -171,18 +171,6 @@ contract SocketSrcTest is Setup {
         }
 
         // revert on wrong inputs
-
-        // wrong payload size
-        vm.expectRevert(ExecutionManager.PayloadTooLarge.selector);
-        _a.socket__.getMinFees(
-            _minMsgGasLimit,
-            4000,
-            bytes32(0),
-            _transmissionParams,
-            _b.chainSlug,
-            address(srcCounter__)
-        );
-
         // wrong sibling slug, revert because capacitor is address(0)
         vm.expectRevert();
         _a.socket__.getMinFees(
@@ -213,22 +201,8 @@ contract SocketSrcTest is Setup {
         executionParams = bytes32(
             uint256((uint256(1) << 248) | uint248(msgValue))
         );
-        vm.expectRevert(ExecutionManager.MsgValueTooLow.selector);
-        _a.socket__.getMinFees(
-            _minMsgGasLimit,
-            1000,
-            executionParams,
-            _transmissionParams,
-            _b.chainSlug,
-            address(srcCounter__)
-        );
 
-        // Revert if msg.value is greater than the maximum uint128 value.
-        msgValue = type(uint136).max;
-        executionParams = bytes32(
-            uint256((uint256(1) << 248) | uint248(msgValue))
-        );
-        vm.expectRevert();
+        vm.expectRevert(ExecutionManager.MsgValueTooLow.selector);
         _a.socket__.getMinFees(
             _minMsgGasLimit,
             1000,

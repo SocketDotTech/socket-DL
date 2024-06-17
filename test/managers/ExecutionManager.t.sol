@@ -5,7 +5,6 @@ import "../Setup.t.sol";
 
 contract ExecutionManagerTest is Setup {
     ExecutionManager internal executionManager;
-
     event FeesWithdrawn(address account_, uint256 value_);
 
     function setUp() public {
@@ -53,8 +52,14 @@ contract ExecutionManagerTest is Setup {
             bChainSlug
         );
 
+        uint256 executionFees = minMsgGasLimit *
+            gasPrice +
+            overhead +
+            payloadSize *
+            perByteCost;
+
         //assert actual and expected data
-        assertEq(minFees, _executionFees);
+        assertEq(minFees, executionFees);
     }
 
     function testGetTransmissionExecutionFees() public {
@@ -73,7 +78,14 @@ contract ExecutionManagerTest is Setup {
             );
 
         //assert actual and expected data
-        assertEq(executionFees, _executionFees);
+
+        uint256 executionFeesCalc = minMsgGasLimit *
+            gasPrice +
+            overhead +
+            payloadSize *
+            perByteCost;
+
+        assertEq(executionFees, executionFeesCalc);
         assertEq(transmissionFees, _transmissionFees);
     }
 
@@ -140,25 +152,15 @@ contract ExecutionManagerTest is Setup {
             bChainSlug
         );
 
+        uint256 executionFeesCalc = minMsgGasLimit *
+            gasPrice +
+            overhead +
+            payloadSize *
+            perByteCost;
+
         assertEq(
             minFees,
-            _executionFees + (msgValue * _relativeNativeTokenPrice) / 1e18
-        );
-    }
-
-    function testGetMinFeesWithPayloadTooLong() public {
-        uint256 minMsgGasLimit = 100000;
-        uint256 payloadSize = 10000;
-        bytes32 executionParams = bytes32(
-            uint256((uint256(1) << 224) | uint224(100))
-        );
-
-        vm.expectRevert(ExecutionManager.PayloadTooLarge.selector);
-        executionManager.getMinFees(
-            minMsgGasLimit,
-            payloadSize,
-            executionParams,
-            bChainSlug
+            executionFeesCalc + (msgValue * _relativeNativeTokenPrice) / 1e18
         );
     }
 
@@ -208,10 +210,16 @@ contract ExecutionManagerTest is Setup {
             uint128 storedTransmissionFees
         ) = executionManager.totalExecutionAndTransmissionFees(bChainSlug);
 
+        uint256 executionFeesCalc = minMsgGasLimit *
+            gasPrice +
+            overhead +
+            payloadSize *
+            perByteCost;
+
         assertEq(storedTransmissionFees, _transmissionFees);
         assertEq(
             storedExecutionFees,
-            _executionFees + _verificationOverheadFees
+            executionFeesCalc + _verificationOverheadFees
         );
         assertEq(
             executionManager.totalSwitchboardFees(
@@ -227,8 +235,14 @@ contract ExecutionManagerTest is Setup {
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
 
+        uint256 executionFeesCalc = minMsgGasLimit *
+            gasPrice +
+            overhead +
+            payloadSize *
+            perByteCost;
+
         uint256 totalFees = _transmissionFees +
-            _executionFees +
+            executionFeesCalc +
             type(uint128).max + //_switchboardFees
             _verificationOverheadFees;
 
@@ -253,9 +267,9 @@ contract ExecutionManagerTest is Setup {
 
         IExecutionManager.ExecutionFeesParam
             memory executionFees = IExecutionManager.ExecutionFeesParam(
-                type(uint80).max,
-                type(uint80).max,
-                type(uint80).max
+                gasPrice,
+                perByteCost,
+                overhead
             );
         _setExecutionFees(_a, _b.chainSlug, executionFees);
 
@@ -278,9 +292,9 @@ contract ExecutionManagerTest is Setup {
         );
     }
 
-    function testPayAndCheckFeesWithExecutionFeeSetTooHigh() public {
+    function testPayAndCheckFeesWithExecutionFeeTooHigh() public {
         uint256 minMsgGasLimit = 100000;
-        uint256 payloadSize = 1000;
+        uint256 payloadSize = type(uint128).max;
         uint256 msgValue = 1000;
         uint8 paramType = 1;
         bytes32 executionParams = bytes32(
@@ -446,8 +460,14 @@ contract ExecutionManagerTest is Setup {
         uint256 payloadSize = 1000;
         bytes32 executionParams = bytes32(0);
 
+        uint256 executionFeesCalc = minMsgGasLimit *
+            gasPrice +
+            overhead +
+            payloadSize *
+            perByteCost;
+
         uint256 totalFees = _transmissionFees +
-            _executionFees +
+            executionFeesCalc +
             _switchboardFees +
             _verificationOverheadFees;
 

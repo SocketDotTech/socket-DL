@@ -141,9 +141,6 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     // triggered when msg value more than max threshold
     error MsgValueTooHigh();
 
-    // triggered when payload is larger than expected limit
-    error PayloadTooLarge();
-
     // triggered when msg value is not enough
     error InsufficientMsgValue();
 
