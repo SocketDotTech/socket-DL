@@ -20,7 +20,7 @@ import {
   FinalityBucket,
 } from "../../src";
 import {
-  confirmations,
+  reSyncInterval,
   explorers,
   icons,
   batcherSupportedChainSlugs,
@@ -94,7 +94,7 @@ const getChainData = async (
     chainTxData: await getChainTxData(chainSlug, txData),
     nativeToken: getCurrency(chainSlug),
     chainType: getChainType(chainSlug),
-    confirmations: getConfirmations(chainSlug),
+    reSyncInterval: getReSyncInterval(chainSlug),
     finalityInfo: getFinality(chainSlug),
     defaultFinalityBucket: getDefaultFinalityBucket(chainSlug),
     icon: icons[chainSlug],
@@ -170,6 +170,6 @@ export const getDefaultFinalityBucket = (
   return defaultFinalityBucket[chainSlug] ?? FinalityBucket.fast;
 };
 
-export const getConfirmations = (chainSlug: ChainSlug) => {
-  return confirmations[chainSlug] ?? 0;
+export const getReSyncInterval = (chainSlug: ChainSlug) => {
+  return reSyncInterval[chainSlug] ?? 0;
 };

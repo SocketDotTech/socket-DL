@@ -13,7 +13,7 @@ export const finalityOverrides: {
 } = {
   [ChainSlug.POLYGON_MAINNET]: {
     [FinalityBucket.fast]: 64,
-    [FinalityBucket.medium]: 150,
-    [FinalityBucket.slow]: 256,
+    [FinalityBucket.medium]: 256,
+    [FinalityBucket.slow]: 1000,
   },
 };

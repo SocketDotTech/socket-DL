@@ -236,7 +236,7 @@ export interface ChainTxData {
 export interface S3ChainConfig {
   rpc: string;
   blockNumber: number;
-  confirmations: number;
+  reSyncInterval: number;
   siblings: ChainSlug[];
   chainName: string;
   eventBlockRange?: number;
