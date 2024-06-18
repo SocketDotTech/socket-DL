@@ -293,8 +293,8 @@ contract ExecutionManagerTest is Setup {
     }
 
     function testPayAndCheckFeesWithExecutionFeeTooHigh() public {
-        uint256 minMsgGasLimit = 100000;
-        uint256 payloadSize = type(uint128).max;
+        uint256 minMsgGasLimit = type(uint128).max;
+        uint256 payloadSize = 1000;
         uint256 msgValue = 1000;
         uint8 paramType = 1;
         bytes32 executionParams = bytes32(
@@ -318,6 +318,14 @@ contract ExecutionManagerTest is Setup {
         _a.executionManager__.getMinFees(
             minMsgGasLimit,
             payloadSize,
+            executionParams,
+            _b.chainSlug
+        );
+
+        vm.expectRevert(ExecutionManager.PayloadTooLarge.selector);
+        _a.executionManager__.getMinFees(
+            minMsgGasLimit,
+            6000,
             executionParams,
             _b.chainSlug
         );

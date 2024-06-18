@@ -16,6 +16,8 @@ import {FEES_UPDATE_SIG_IDENTIFIER, RELATIVE_NATIVE_TOKEN_PRICE_UPDATE_SIG_IDENT
  * access control.
  */
 contract ExecutionManager is IExecutionManager, AccessControlExtended {
+    uint256 private constant PAYLOAD_LIMIT = 5000;
+
     ISignatureVerifier public immutable signatureVerifier__;
     ISocket public immutable socket__;
     uint32 public immutable chainSlug;
@@ -154,6 +156,8 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
     error FeesTooHigh();
 
     error OnlySocket();
+
+    error PayloadTooLarge();
 
     /**
      * @dev Constructor for ExecutionManager contract
@@ -324,6 +328,7 @@ contract ExecutionManager is IExecutionManager, AccessControlExtended {
         bytes32 executionParams_,
         uint32 siblingChainSlug_
     ) internal view returns (uint128) {
+        if (payloadSize_ > PAYLOAD_LIMIT) revert PayloadTooLarge();
         uint256 totalNativeValue = _calculateExecutionFees(
             msgGasLimit,
             payloadSize_,

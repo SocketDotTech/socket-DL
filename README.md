@@ -133,6 +133,7 @@ It is recommended to setup the ide to work with solidity development. In case of
 | InsufficientFees()          | 0x8d53e553 |
 | InvalidMsgValue()           | 0x1841b4e1 |
 | FeesTooHigh()               | 0xc9034e18 |
+| PayloadTooLarge()           | 0x492f620d |
 | InvalidBatchSize()          | 0x7862e959 |
 | InsufficientMessageLength() | 0xbcfdc01d |
 | InvalidPacketLength()       | 0x5a375a8e |
