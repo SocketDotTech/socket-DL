@@ -206,6 +206,22 @@ export enum ChainType {
   default = "default",
 }
 
+export enum FinalityBucket {
+  fast = 1, // latest
+  medium = 2, // safe
+  slow = 3, // finalized
+}
+
+export enum TransmissionParamFinalityType {
+  bucket = 1,
+}
+
+export type ChainFinalityInfo = {
+  [FinalityBucket.fast]: number;
+  [FinalityBucket.medium]: number;
+  [FinalityBucket.slow]: number;
+};
+
 export type TxData = {
   [chainSlug in ChainSlug]?: ChainTxData;
 };
@@ -220,7 +236,7 @@ export interface ChainTxData {
 export interface S3ChainConfig {
   rpc: string;
   blockNumber: number;
-  confirmations: number;
+  reSyncInterval: number;
   siblings: ChainSlug[];
   chainName: string;
   eventBlockRange?: number;
@@ -229,6 +245,8 @@ export interface S3ChainConfig {
   chainTxData?: ChainTxData;
   explorer?: string;
   icon?: string;
+  finalityInfo?: ChainFinalityInfo;
+  defaultFinalityBucket?: FinalityBucket;
 }
 
 export type S3Config = {

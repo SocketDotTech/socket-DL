@@ -9,15 +9,16 @@ import {
   isTestnet,
   isMainnet,
   CORE_CONTRACTS,
+  DeploymentMode,
 } from "../../../../src";
 import { getAddresses, getRelayUrl, getRelayAPIKEY } from "../../utils";
 import { BigNumber, Contract, ethers } from "ethers";
 import Counter from "../../../../out/Counter.sol/Counter.json";
 import Socket from "../../../../out/Socket.sol/Socket.json";
 
-import { chains, mode, overrides } from "../../config";
 import { getProviderFromChainSlug } from "../../../constants/networks";
 import { formatEther } from "ethers/lib/utils";
+import { chains, mode, overrides } from "../../config/config";
 
 interface RequestObj {
   to: string;
@@ -28,6 +29,10 @@ interface RequestObj {
   gasLimit: string | number | undefined;
 }
 
+const API_BASE_URL =
+  mode == DeploymentMode.DEV
+    ? "https://raf5spoep4.execute-api.us-east-1.amazonaws.com/dev/v1"
+    : "https://prod.dlapi.socket.tech";
 const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
   console.log(chainSlug, isMainnet(chainSlug));
   if (isTestnet(chainSlug))
@@ -208,7 +213,7 @@ export const sendMessagesToAllPaths = async (params: {
                   provider
                 );
                 console.log(
-                  `Track message here: https://prod.dlapi.socket.tech/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${response?.hash}`
+                  `Track message here: ${API_BASE_URL}/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${response?.hash}`
                 );
               })
             );

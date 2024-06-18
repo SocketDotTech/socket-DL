@@ -56,6 +56,7 @@
   "scripts": {
     "lint": "prettier \"./**\" --write",
     "build": "hardhat export-abi && tsc --project lib.tsconfig.json",
+    "tsc": "tsc --project lib.tsconfig.json",
     "abi": "hardhat export-abi",
     "compile": "forge build",
     "test": "prettier --write $(git diff --name-only --diff-filter d | xargs) && forge test",
