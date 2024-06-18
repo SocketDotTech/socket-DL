@@ -17,7 +17,6 @@ import {
   arbL3Chains,
   polygonCDKChains,
   S3ChainConfig,
-  ChainFinalityInfo,
   FinalityBucket,
 } from "../../src";
 import {
@@ -28,7 +27,7 @@ import {
   prodFeesUpdaterSupportedChainSlugs,
   rpcs,
   version,
-  finalityOverrides,
+  getFinality,
 } from "./constants";
 import { defaultFinalityBucket } from "./constants/defaultFinalityBucket";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
@@ -163,10 +162,6 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
     addresses,
     chainSlugToId: ChainSlugToId,
   };
-};
-
-export const getFinality = (chainSlug: ChainSlug): ChainFinalityInfo => {
-  return finalityOverrides[chainSlug];
 };
 
 export const getDefaultFinalityBucket = (
