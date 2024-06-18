@@ -11,4 +11,5 @@ export const explorers = {
   [ChainSlug.BLAST]: "https://blastscan.io",
   [ChainSlug.BSC_TESTNET]:
     "https://testnet.bscscan.com/assets/bsc/images/svg/logos/logo-light.svg?v=24.5.5.0",
+  [ChainSlug.POLYNOMIAL]: "https://explorer.polynomial.fi",
 };

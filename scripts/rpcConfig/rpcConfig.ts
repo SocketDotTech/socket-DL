@@ -17,16 +17,19 @@ import {
   arbL3Chains,
   polygonCDKChains,
   S3ChainConfig,
+  FinalityBucket,
 } from "../../src";
 import {
-  confirmations,
+  reSyncInterval,
   explorers,
   icons,
   batcherSupportedChainSlugs,
   prodFeesUpdaterSupportedChainSlugs,
   rpcs,
   version,
+  getFinality,
 } from "./constants";
+import { defaultFinalityBucket } from "./constants/defaultFinalityBucket";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
 
 import dotenv from "dotenv";
@@ -91,7 +94,10 @@ const getChainData = async (
     chainTxData: await getChainTxData(chainSlug, txData),
     nativeToken: getCurrency(chainSlug),
     chainType: getChainType(chainSlug),
-    confirmations: confirmations[chainSlug],
+    reSyncInterval: getReSyncInterval(chainSlug),
+    confirmations: getReSyncInterval(chainSlug),
+    finalityInfo: getFinality(chainSlug),
+    defaultFinalityBucket: getDefaultFinalityBucket(chainSlug),
     icon: icons[chainSlug],
   };
 };
@@ -157,4 +163,14 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
     addresses,
     chainSlugToId: ChainSlugToId,
   };
+};
+
+export const getDefaultFinalityBucket = (
+  chainSlug: ChainSlug
+): FinalityBucket => {
+  return defaultFinalityBucket[chainSlug] ?? FinalityBucket.fast;
+};
+
+export const getReSyncInterval = (chainSlug: ChainSlug) => {
+  return reSyncInterval[chainSlug] ?? 0;
 };

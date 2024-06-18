@@ -44,4 +44,5 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.WINR]: ChainSlug.WINR,
   [HardhatChainName.BLAST]: ChainSlug.BLAST,
   [HardhatChainName.BSC_TESTNET]: ChainSlug.BSC_TESTNET,
+  [HardhatChainName.POLYNOMIAL]: ChainSlug.POLYNOMIAL,
 };
