@@ -1,14 +1,14 @@
 import hre from "hardhat";
 import fs from "fs";
 
-import { deploymentsPath, verify } from "./utils/utils";
+import { deploymentsPath, storeUnVerifiedParams, verify } from "./utils/utils";
 import { mode } from "./config/config";
 import { HardhatChainName, ChainSlugToKey, ChainSlug } from "../../src";
 
 export type VerifyParams = {
   [chain in HardhatChainName]?: VerifyArgs[];
 };
-type VerifyArgs = [string, string, string, any[]];
+export type VerifyArgs = [string, string, string, any[]];
 
 /**
  * Deploys network-independent socket contracts
@@ -31,14 +31,21 @@ export const main = async () => {
 
       hre.changeNetwork(ChainSlugToKey[chain]);
       const chainParams: VerifyArgs[] = verificationParams[chain];
+      const unverifiedChainParams: VerifyArgs[] = [];
       if (chainParams.length) {
         const len = chainParams.length;
-        for (let index = 0; index < len!; index++)
-          await verify(...chainParams[index]);
+        for (let index = 0; index < len!; index++) {
+          const res = await verify(...chainParams[index]);
+          if (!res) {
+            unverifiedChainParams.push(chainParams[index]);
+          }
+        }
       }
+
+      await storeUnVerifiedParams(unverifiedChainParams, chain, mode);
     }
   } catch (error) {
-    console.log("Error in deploying setup contracts", error);
+    console.log("Error in verifying contracts", error);
   }
 };
 
