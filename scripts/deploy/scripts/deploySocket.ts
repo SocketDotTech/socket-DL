@@ -177,7 +177,6 @@ export const deploySocket = async (
     let capacitor = await simulatorContract.capacitor();
     if (capacitor == constants.AddressZero) {
       const tx = await simulatorContract.setup(
-        counter.address,
         switchboardSimulator.address,
         simulatorUtils.address,
         {

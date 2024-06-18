@@ -12,16 +12,31 @@ import prompts from "prompts";
 
 const main = async () => {
   try {
-    const chainSlugs = Object.keys(ChainSlug);
-    const chain = ChainSlug[chainSlugs[chainSlugs.length - 1]];
+    const response = await prompts([
+      {
+        name: "chainType",
+        type: "select",
+        message: "Select chains network type",
+        choices: [
+          {
+            title: "Mainnet",
+            value: "mainnet",
+          },
+          {
+            title: "Testnet",
+            value: "testnet",
+          },
+        ],
+      },
+    ]);
 
-    const isMainnet = MainnetIds.includes(chain);
-    const chainOptions = isMainnet ? MainnetIds : TestnetIds;
+    const chainOptions =
+      response.chainType === "mainnet" ? MainnetIds : TestnetIds;
     let choices = chainOptions.map((chain) => ({
       title: chain.toString(),
       value: chain,
     }));
-    choices = choices.filter((c) => c.value !== chain);
+
     const configResponse = await prompts([
       {
         name: "chains",
@@ -31,7 +46,7 @@ const main = async () => {
       },
     ]);
 
-    const chains = [...configResponse.chains, chain];
+    const chains = [...configResponse.chains];
     let addresses: DeploymentAddresses = await deployForChains(chains);
 
     if (chains.length === 0) {
