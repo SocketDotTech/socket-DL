@@ -14,8 +14,7 @@ import {
 } from "../../../src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { overrides } from "../config/config";
-import { getJsonRpcUrl } from "../../constants";
-import { HardhatNetworkAccountUserConfig } from "hardhat/types";
+import { VerifyArgs } from "../verify";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
@@ -117,6 +116,7 @@ export const verify = async (
     return true;
   } catch (error) {
     console.log("Error during verification", error);
+    if (error.toString().includes("Contract source code already verified")) return true;
   }
 
   return false;
@@ -160,6 +160,33 @@ export const storeAddresses = async (
   fs.writeFileSync(
     addressesPath,
     JSON.stringify(deploymentAddresses, null, 2) + "\n"
+  );
+};
+
+export const storeUnVerifiedParams = async (
+  verifyParams: VerifyArgs[],
+  chainSlug: ChainSlug,
+  mode: DeploymentMode
+) => {
+  if (!fs.existsSync(deploymentsPath)) {
+    await fs.promises.mkdir(deploymentsPath, { recursive: true });
+  }
+
+  const verificationPath = deploymentsPath + `${mode}_verification.json`;
+  const outputExists = fs.existsSync(verificationPath);
+  let verificationDetails: object = {};
+  if (outputExists) {
+    const verificationDetailsString = fs.readFileSync(
+      verificationPath,
+      "utf-8"
+    );
+    verificationDetails = JSON.parse(verificationDetailsString);
+  }
+
+  verificationDetails[chainSlug] = verifyParams;
+  fs.writeFileSync(
+    verificationPath,
+    JSON.stringify(verificationDetails, null, 2) + "\n"
   );
 };
 
