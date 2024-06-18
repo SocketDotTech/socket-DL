@@ -1,66 +1,9 @@
 {
-  "80001": {
-    "SignatureVerifier": "0xec3676F6ED5E8ee0E58d3528F3E49584AafbE9B4",
-    "Hasher": "0x2b850B0537905EE1e66767163F545894A92ED023",
-    "CapacitorFactory": "0x1DE584eD6961B094B3693320FE821250E34e26E0",
-    "Socket": "0xe887a374e0b2Fe3c744E2E48eA6d25301cE92302",
-    "ExecutionManager": "0x93ca44E75F241f50AED3db3584210Cb3Ddefd06e",
-    "TransmitManager": "0x3c753c9d7225e0A7323b51e1a404751fDA2d4737",
-    "FastSwitchboard": "0x8e264AD8774000f01763516014d7297289504353",
-    "OptimisticSwitchboard": "0x0D772152A457a0Bf2E38Fb40B6B58b3a288D476F",
-    "integrations": {
-      "5": {
-        "NATIVE_BRIDGE": {
-          "switchboard": "0xd9E48Ba803aF6aFb0107C912C6cede3DB86955F4"
-        }
-      },
-      "421614": {
-        "FAST": {
-          "capacitor": "0xd30c735Fb4aC17ffe61ebaaD09315d1CA5efAeaC",
-          "decapacitor": "0x1cfb3Af25db65D06507C64b0de9111bD8CA8c9F1",
-          "switchboard": "0x8e264AD8774000f01763516014d7297289504353"
-        },
-        "OPTIMISTIC": {
-          "capacitor": "0xe1B2D61353004e2cFD365AB5dF8Ae3ff83b91730",
-          "decapacitor": "0xeC234eC86076c3220F886792826E63d682226fBa",
-          "switchboard": "0x0D772152A457a0Bf2E38Fb40B6B58b3a288D476F"
-        }
-      },
-      "11155111": {
-        "FAST": {
-          "capacitor": "0xdF85f667d90BA2e64363fAAD3148ca49230E174B",
-          "decapacitor": "0x58820e37dF1558235705C22aC4cDc368f6950fB6",
-          "switchboard": "0x8e264AD8774000f01763516014d7297289504353"
-        },
-        "OPTIMISTIC": {
-          "capacitor": "0x21CAF0cA2d7DA62E42f55205DF3774C31129d1F9",
-          "decapacitor": "0x2aE05Dd0B0624775e801C5C39d59304457Dc98A2",
-          "switchboard": "0x0D772152A457a0Bf2E38Fb40B6B58b3a288D476F"
-        }
-      },
-      "11155420": {
-        "FAST": {
-          "capacitor": "0x08Fa51C6838aD0C405c50e232F844ad31569f58e",
-          "decapacitor": "0x649c9BD14c91826b43cd46176906eF6e19D2D3e7",
-          "switchboard": "0x8e264AD8774000f01763516014d7297289504353"
-        },
-        "OPTIMISTIC": {
-          "capacitor": "0x97bB537006e28Ae07d1b2f74b4336938DA414BF8",
-          "decapacitor": "0x4974834065E57ef9ae9ee4A9483c7b18a67a989E",
-          "switchboard": "0x0D772152A457a0Bf2E38Fb40B6B58b3a288D476F"
-        }
-      }
-    },
-    "SocketBatcher": "0xF491865F724E772D0a8Cdd7DdC722ECf39f14856",
-    "Counter": "0xE68Cd9d09F5B4792d03F41C0Ffb3Abde30B0557A",
-    "startBlock": 42752334
-  },
   "421614": {
     "SignatureVerifier": "0x6E9AdDdfA6705CA6910e710b66DAF8E536A811ab",
     "Hasher": "0xe4B01eF3008dD214E0641B07dCf8421c812B8bb5",
     "CapacitorFactory": "0x8Cf0E341512CFa238063C88120C5eCbaA58c5F51",
     "Socket": "0xE22dc865c5821b66a28Ea9D8a715f156D25aa5B9",
-    "ExecutionManager": "0x4ed5112662a2e9FE481c42a904dd3B0C4d485005",
     "TransmitManager": "0xA115Bb34Fa1134605956E1ec2deA7F292b55f141",
     "FastSwitchboard": "0x5a2472E00e04C367F47FA920e8bA5784501f3BE3",
     "OptimisticSwitchboard": "0x5A2A82b86388a292ad96438a2CE1d3404D6aCfC5",
@@ -107,16 +50,20 @@
         }
       }
     },
-    "SocketBatcher": "0xcB62E6B7b4E3e5bB52dcD80184847ccEd18eFa51",
     "Counter": "0x38d8B3b68D765dF7D49779D08C38BDD1fFF83B32",
-    "startBlock": 1430665
+    "startBlock": 1430665,
+    "ExecutionManager": "0x95BC00E721480c98dE80C5e59521c1c4E8d1BfBc",
+    "SocketSimulator": "0x8E23CF75ab2bc6437041f6347e859C4816f5a28D",
+    "SimulatorUtils": "0x4B882c8A1009c0a4fd80151FEb6d1a3656C49C9a",
+    "SwitchboardSimulator": "0x96c5Af5684AD79d324e0E72968618733908A67D6",
+    "CapacitorSimulator": "0xCEe39C678B18B1f5677CC46C451A5e6ffEff28c1",
+    "SocketBatcher": "0xBb96eEc2C2fa0d7a3fFbb2D014333b40bA0C32E3"
   },
   "11155111": {
     "SignatureVerifier": "0xCEB721BF38F373FBf60dB0816d32e7CDd557B4E4",
     "Hasher": "0xd0015Bd355A58A10642D456eCa4B315fC634A2eE",
     "CapacitorFactory": "0xd0e3066e9a9C9834c67D8c6570d9F58552e7a0DE",
     "Socket": "0xE7F78bE5F1BC60A1A92F9fD4633B20d8E3E571c3",
-    "ExecutionManager": "0xC62c9E28D5ADc5E490fbfAeB9f75CDD80a20Bd33",
     "TransmitManager": "0x8a0941ae6Fa062861Fa201A637715e4dBb28EcA2",
     "FastSwitchboard": "0x70ee25aE4896533E49F8c564E1196EB242f204c6",
     "OptimisticSwitchboard": "0xF1AfbD7E0307378E887E5A7B84182f426dC04E44",
@@ -173,16 +120,20 @@
         }
       }
     },
-    "SocketBatcher": "0x0c0Df3BD6b1C3C2b26b56836be50b10b51B7C64d",
     "Counter": "0xcb3Dc795B49Ad83E90eBE3F6a5Cfa41ba8830776",
-    "startBlock": 4751228
+    "startBlock": 4751228,
+    "ExecutionManager": "0x78E9EcA8889A6b6016CE5b56cD872bfB6F1Ba41f",
+    "SocketSimulator": "0xFAE13FC12a111CD31Ea02Ae554A59Fb18fD45127",
+    "SimulatorUtils": "0x255f9F9aB7eE46cb59a2Ed57a852304faD701C8d",
+    "SwitchboardSimulator": "0xd7D1dc1B8aB82E14b896fF980a0fd3B035E0c9E3",
+    "CapacitorSimulator": "0x244745e0B5258085805f3d4ce503c7d7b2090F2a",
+    "SocketBatcher": "0x966666947C098b39f763e1Ee5AAE04c2278ee320"
   },
   "11155420": {
     "SignatureVerifier": "0x6E9AdDdfA6705CA6910e710b66DAF8E536A811ab",
     "Hasher": "0xe4B01eF3008dD214E0641B07dCf8421c812B8bb5",
     "CapacitorFactory": "0x8Cf0E341512CFa238063C88120C5eCbaA58c5F51",
     "Socket": "0xE22dc865c5821b66a28Ea9D8a715f156D25aa5B9",
-    "ExecutionManager": "0x4ed5112662a2e9FE481c42a904dd3B0C4d485005",
     "TransmitManager": "0xA115Bb34Fa1134605956E1ec2deA7F292b55f141",
     "FastSwitchboard": "0x5a2472E00e04C367F47FA920e8bA5784501f3BE3",
     "OptimisticSwitchboard": "0x5A2A82b86388a292ad96438a2CE1d3404D6aCfC5",
@@ -229,8 +180,13 @@
         }
       }
     },
-    "SocketBatcher": "0xcB62E6B7b4E3e5bB52dcD80184847ccEd18eFa51",
     "Counter": "0x38d8B3b68D765dF7D49779D08C38BDD1fFF83B32",
-    "startBlock": 4476114
+    "startBlock": 4476114,
+    "ExecutionManager": "0x5bA62006442bC42e28E3E5147A5221Be723ca1DE",
+    "SocketSimulator": "0x7539351956f3271CdaF1fb1a440CA9BE2BfbF2ED",
+    "SimulatorUtils": "0x3cD9C9Aa2f262339Cc994466a12F9A4c7A267827",
+    "SwitchboardSimulator": "0x98bBfbdDA0f32c411b1cE821B495aAb1bD43C680",
+    "CapacitorSimulator": "0xcb9A3B43Bf9a8411758199Ea7024124fDf9326EE",
+    "SocketBatcher": "0xFAE13FC12a111CD31Ea02Ae554A59Fb18fD45127"
   }
 }
