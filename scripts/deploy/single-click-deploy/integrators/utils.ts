@@ -127,25 +127,26 @@ export const updateSDK = async (
     );
   }
 
-  if (chainType === 0) {
+  const chainTypeInString = Object.keys(ChainType)[chainType];
+  if (chainTypeInString === ChainType.arbChain) {
     await updateFile(
       "arbChains.ts",
       `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
       ",\n];"
     );
-  } else if (chainType === 1) {
+  } else if (chainTypeInString === ChainType.arbL3Chain) {
     await updateFile(
       "arbL3Chains.ts",
       `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
       ",\n];"
     );
-  } else if (chainType === 2) {
+  } else if (chainTypeInString === ChainType.opStackL2Chain) {
     await updateFile(
       "opStackChains.ts",
       `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
       ",\n];"
     );
-  } else if (chainType === 3) {
+  } else if (chainTypeInString === ChainType.polygonCDKChain) {
     await updateFile(
       "polygonCDKChains.ts",
       `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
