@@ -237,6 +237,7 @@ export interface S3ChainConfig {
   rpc: string;
   blockNumber: number;
   reSyncInterval: number;
+  confirmations: number;
   siblings: ChainSlug[];
   chainName: string;
   eventBlockRange?: number;

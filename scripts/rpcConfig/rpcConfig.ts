@@ -95,6 +95,7 @@ const getChainData = async (
     nativeToken: getCurrency(chainSlug),
     chainType: getChainType(chainSlug),
     reSyncInterval: getReSyncInterval(chainSlug),
+    confirmations: getReSyncInterval(chainSlug),
     finalityInfo: getFinality(chainSlug),
     defaultFinalityBucket: getDefaultFinalityBucket(chainSlug),
     icon: icons[chainSlug],
