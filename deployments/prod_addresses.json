@@ -144,6 +144,18 @@
           "switchboard": "0xEaa15Fd42D68b8334a3BB1E9bF8cA85BaBE83790"
         }
       },
+      "8008": {
+        "FAST": {
+          "capacitor": "0xa9eD5316345b4B1522A42420D71A75160eF622d7",
+          "decapacitor": "0x9f4d553014FD1B3D464D89215a28fAECAfC6f3c6",
+          "switchboard": "0xD5a83a40F262E2247e6566171f9ADc76b745F5cD"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x720fe9D1Be9523964110A9482C16C410559DA02b",
+          "decapacitor": "0x9F19A207B0a62983197FaB0b71CE2BC9AB45B649",
+          "switchboard": "0xEaa15Fd42D68b8334a3BB1E9bF8cA85BaBE83790"
+        }
+      },
       "8453": {
         "FAST": {
           "capacitor": "0x1f06BAf9ff58Db17970803ce03463096654A3795",
@@ -223,12 +235,12 @@
       }
     },
     "SocketBatcher": "0xCFf802cCA1D506b3C4ac1eeb61233062a1B9f568",
-    "Counter": "0x7a6Edde81cdD9d75BC10D87C490b132c08bD426D",
     "startBlock": 19398570,
     "SocketSimulator": "0xCA16185A1072E84D74931e605fCE0A843445C31e",
     "SimulatorUtils": "0x63c10c00B47b9b418EC0F651b3763B6a692a0416",
     "SwitchboardSimulator": "0xfB6daF96202Bd3815b2e602464Adc10317634066",
-    "CapacitorSimulator": "0x792AA5719F1f9A1e4C2dB3A09f582F296B649E81"
+    "CapacitorSimulator": "0x792AA5719F1f9A1e4C2dB3A09f582F296B649E81",
+    "Counter": "0xb40FdECfCa4EF29CACc37222Ce4dB1fd0f561a00"
   },
   "5": {
     "SignatureVerifier": "0x0b59efeE594469Ae31954940eFFfF2192bCD8422",
@@ -1755,6 +1767,18 @@
     "CapacitorSimulator": "0xD7B34Db1477797FA2Dff890afBa88a00eb89b9eE",
     "startBlock": 119805,
     "integrations": {
+      "1": {
+        "FAST": {
+          "capacitor": "0xdF24b92Ad07D39344B1abA69a8acbb5DEa5BA08a",
+          "decapacitor": "0x03bCf41D18Cd8AA7D4b13DCc8574150329e6D130",
+          "switchboard": "0xb4Ef469c9d8317851270346070dA0ecE24616E6b"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0xF6f648CF8164Dd7Ec04C0dba8fc91e7b66A154C0",
+          "decapacitor": "0xc014b5C95B790b35acbeE3E4D7807Bd556FddebE",
+          "switchboard": "0x0CC93650bF4D98237628DACf87f94E443956D8dF"
+        }
+      },
       "10": {
         "FAST": {
           "capacitor": "0xfDab5AD9dD96deb42f093510641a325dB65cAD10",
