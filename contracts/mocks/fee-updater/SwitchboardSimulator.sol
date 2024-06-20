@@ -180,7 +180,7 @@ contract SwitchboardSimulator is AccessControlExtended {
         ) return false;
 
         // root has enough attestations
-        if (isRootValid[root_]) return true;
+        if (!isRootValid[root_]) return true;
 
         // this makes packets valid even if all watchers have not attested
         // used to make the system work when watchers are inactive due to infra etc problems
