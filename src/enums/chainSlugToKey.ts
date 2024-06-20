@@ -45,4 +45,5 @@ export const ChainSlugToKey = {
   [ChainSlug.BLAST]: HardhatChainName.BLAST,
   [ChainSlug.BSC_TESTNET]: HardhatChainName.BSC_TESTNET,
   [ChainSlug.POLYNOMIAL]: HardhatChainName.POLYNOMIAL,
+  [ChainSlug.SYNDR]: HardhatChainName.SYNDR,
 };

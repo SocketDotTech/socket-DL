@@ -8,4 +8,5 @@ export const icons = {
   [ChainSlug.REYA]: "",
   [ChainSlug.BSC_TESTNET]: "https://testnet.bscscan.com/",
   [ChainSlug.POLYNOMIAL]: "",
+  [ChainSlug.SYNDR]: "",
 };

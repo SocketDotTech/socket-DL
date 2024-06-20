@@ -7,4 +7,5 @@ export const arbL3Chains = [
   ChainSlug.KINTO,
   ChainSlug.KINTO_DEVNET,
   ChainSlug.WINR,
+  ChainSlug.SYNDR,
 ];
