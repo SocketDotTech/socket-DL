@@ -138,9 +138,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.ARBITRUM_SEPOLIA) {
     return {
-      type: 1,
-      gasLimit: 50_000_000,
-      gasPrice: 1_867_830_000,
+      // type: 1,
+      // gasLimit: 50_000_000,
+      // gasPrice: 1_867_830_000,
     };
   } else if (chain == ChainSlug.OPTIMISM) {
     return {
@@ -156,9 +156,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.OPTIMISM_SEPOLIA) {
     return {
-      type: 1,
-      gasLimit: 5_000_000,
-      gasPrice: 4_000_000_000,
+      // type: 1,
+      // gasLimit: 5_000_000,
+      // gasPrice: 4_000_000_000,
     };
   } else if (chain == ChainSlug.BSC) {
     return {

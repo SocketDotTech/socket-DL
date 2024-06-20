@@ -6,7 +6,7 @@ import { PacketInfo, VERSION_HASH, getPacketInfo, packMessageId } from "./util";
 import { getProviderFromChainSlug } from "../../constants";
 import { deploymentMode } from "../rpcConfig";
 import { TxData, ChainSlug, getAllAddresses, ChainTxData } from "../../../src";
-import { prodFeesUpdaterSupportedChainSlugs } from "../constants";
+import { feesUpdaterSupportedChainSlugs } from "../constants/feesUpdaterChainSlugs";
 
 const randomPrivateKey =
   "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
@@ -81,12 +81,15 @@ export const getAttestTxData = async (
 export const getExecuteTxData = async (
   chainSlug: ChainSlug,
   signer: Wallet,
-  packetDetails: PacketInfo,
-  counterAddress: string
+  packetDetails: PacketInfo
 ) => {
   const digest = keccak256(defaultAbiCoder.encode(["uint256"], ["0"]));
   const signature = await signer.signMessage(arrayify(digest));
-  const msgId = packMessageId(chainSlug, counterAddress, "10");
+  const msgId = packMessageId(
+    chainSlug,
+    "0x0000000000000000000000000000000000003039",
+    "0"
+  );
 
   const executionDetails = {
     packetId: packetDetails.packetId,
@@ -100,7 +103,7 @@ export const getExecuteTxData = async (
     executionFee: 100000,
     minMsgGasLimit: 100000,
     executionParams: constants.HashZero,
-    payload: constants.HashZero,
+    payload: signature,
   };
 
   const executeBatchDataArgs = [executionDetails, msgDetails];
@@ -114,7 +117,7 @@ export const getTxData = async (): Promise<TxData> => {
     getProviderFromChainSlug(ChainSlug.SEPOLIA)
   );
   const addresses = getAllAddresses(deploymentMode);
-  const allChainSlugs: ChainSlug[] = prodFeesUpdaterSupportedChainSlugs()
+  const allChainSlugs: ChainSlug[] = feesUpdaterSupportedChainSlugs()
     .map((c) => c as ChainSlug)
     .filter((c) => addresses[c]?.["SocketSimulator"]);
 
@@ -143,12 +146,7 @@ export const getTxData = async (): Promise<TxData> => {
       packetInfo,
       sbSimulatorAddress
     );
-    const executeTxData = await getExecuteTxData(
-      chainSlug,
-      signer,
-      packetInfo,
-      addresses[chainSlug]?.["Counter"]
-    );
+    const executeTxData = await getExecuteTxData(chainSlug, signer, packetInfo);
 
     const simulatorContract = new Contract(
       sbSimulatorAddress,

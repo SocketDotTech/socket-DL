@@ -60,9 +60,7 @@
       "0xfBfD20CCaf09B9B5f275441C794A57C7Bb9BA29B",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B"
-      ]
+      ["0xdE7f7a699F8504641eceF544B0fbc0740C37E69B"]
     ],
     [
       "0x687Aa9BA5CBD26F6553d7C34461F3db12781E34F",
@@ -79,10 +77,7 @@
       "0x86a8d161403B9867961677D36104830859BAB796",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
-        10
-      ]
+      ["0xdE7f7a699F8504641eceF544B0fbc0740C37E69B", 10]
     ],
     [
       "0xf47103263296eFebc7B8DD4d5410e15d7B59FceF",
@@ -116,9 +111,7 @@
       "0xFAE13FC12a111CD31Ea02Ae554A59Fb18fD45127",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B"
-      ]
+      ["0xdE7f7a699F8504641eceF544B0fbc0740C37E69B"]
     ],
     [
       "0x9A4f5494d48581472619ec3f1aD8d323eA71b754",
@@ -135,10 +128,7 @@
       "0xd0580065858313f0300eBb6e7970cD3699323985",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
-        10
-      ]
+      ["0xdE7f7a699F8504641eceF544B0fbc0740C37E69B", 10]
     ],
     [
       "0x5bA62006442bC42e28E3E5147A5221Be723ca1DE",
@@ -172,17 +162,13 @@
       "0x38d8B3b68D765dF7D49779D08C38BDD1fFF83B32",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xE22dc865c5821b66a28Ea9D8a715f156D25aa5B9"
-      ]
+      ["0xE22dc865c5821b66a28Ea9D8a715f156D25aa5B9"]
     ],
     [
       "0xcB62E6B7b4E3e5bB52dcD80184847ccEd18eFa51",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x4ed5112662a2e9FE481c42a904dd3B0C4d485005",
@@ -199,10 +185,7 @@
       "0x8Cf0E341512CFa238063C88120C5eCbaA58c5F51",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0xb49553A6D6597808ac069f1E5a44eE6773DD0b86",
@@ -219,10 +202,7 @@
       "0x919a93E0cFa7b962f1bb1353a049a6f427A6a5D4",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ]
   ],
   "11155111": [
@@ -290,17 +270,13 @@
       "0xcb3Dc795B49Ad83E90eBE3F6a5Cfa41ba8830776",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xE7F78bE5F1BC60A1A92F9fD4633B20d8E3E571c3"
-      ]
+      ["0xE7F78bE5F1BC60A1A92F9fD4633B20d8E3E571c3"]
     ],
     [
       "0x0c0Df3BD6b1C3C2b26b56836be50b10b51B7C64d",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0xC62c9E28D5ADc5E490fbfAeB9f75CDD80a20Bd33",
@@ -317,10 +293,7 @@
       "0xd0e3066e9a9C9834c67D8c6570d9F58552e7a0DE",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ]
   ],
   "11155420": [
@@ -340,9 +313,7 @@
       "0xFAE13FC12a111CD31Ea02Ae554A59Fb18fD45127",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B"
-      ]
+      ["0xdE7f7a699F8504641eceF544B0fbc0740C37E69B"]
     ],
     [
       "0x98bBfbdDA0f32c411b1cE821B495aAb1bD43C680",
@@ -409,17 +380,13 @@
       "0x38d8B3b68D765dF7D49779D08C38BDD1fFF83B32",
       "Counter",
       "contracts/examples/Counter.sol",
-      [
-        "0xE22dc865c5821b66a28Ea9D8a715f156D25aa5B9"
-      ]
+      ["0xE22dc865c5821b66a28Ea9D8a715f156D25aa5B9"]
     ],
     [
       "0xcB62E6B7b4E3e5bB52dcD80184847ccEd18eFa51",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x237D48550Be202C47Ce96E16Aef50149A09F2A0D",
@@ -496,26 +463,19 @@
       "0x8Cf0E341512CFa238063C88120C5eCbaA58c5F51",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0xe4B01eF3008dD214E0641B07dCf8421c812B8bb5",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x6E9AdDdfA6705CA6910e710b66DAF8E536A811ab",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x5C9ae38ebe47Ef0E8711eAdFC6E17b1e589C91dF",
@@ -579,26 +539,19 @@
       "0x919a93E0cFa7b962f1bb1353a049a6f427A6a5D4",
       "CapacitorFactory",
       "contracts/CapacitorFactory.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa",
-        10
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa", 10]
     ],
     [
       "0x330A8c38A015954DdC53FB1303352eDaC030902a",
       "Hasher",
       "contracts/utils/Hasher.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ],
     [
       "0x62AbC07A0F7Bfa7AE049dd867a65F21227193872",
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
-      [
-        "0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"
-      ]
+      ["0x752B38FA38F53dF7fa60e6113CFd9094b7e040Aa"]
     ]
   ]
 }

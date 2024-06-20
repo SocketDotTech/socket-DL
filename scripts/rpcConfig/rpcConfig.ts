@@ -24,12 +24,12 @@ import {
   explorers,
   icons,
   batcherSupportedChainSlugs,
-  prodFeesUpdaterSupportedChainSlugs,
   rpcs,
   version,
   getFinality,
 } from "./constants";
 import { defaultFinalityBucket } from "./constants/defaultFinalityBucket";
+import { feesUpdaterSupportedChainSlugs } from "./constants/feesUpdaterChainSlugs";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
 
 import dotenv from "dotenv";
@@ -119,11 +119,7 @@ const getAllChainData = async (
 };
 
 export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
-  const batcherSupportedChainSlugs = [
-    ChainSlug.ARBITRUM_SEPOLIA,
-    ChainSlug.OPTIMISM_SEPOLIA,
-    ChainSlug.SEPOLIA,
-  ];
+  const batcherSupportedChainSlugs = feesUpdaterSupportedChainSlugs();
 
   return {
     version: `dev-${version[DeploymentMode.DEV]}`,
@@ -131,6 +127,7 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
     batcherSupportedChainSlugs: batcherSupportedChainSlugs,
     watcherSupportedChainSlugs: batcherSupportedChainSlugs,
     nativeSupportedChainSlugs: [],
+    oldEMVersionChainSlugs: [],
     feeUpdaterSupportedChainSlugs: batcherSupportedChainSlugs,
     testnetIds: TestnetIds,
     mainnetIds: MainnetIds,
@@ -157,7 +154,8 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
       ChainSlug.ARBITRUM_SEPOLIA,
       ChainSlug.OPTIMISM_SEPOLIA,
     ],
-    feeUpdaterSupportedChainSlugs: prodFeesUpdaterSupportedChainSlugs(),
+    feeUpdaterSupportedChainSlugs: feesUpdaterSupportedChainSlugs(),
+    oldEMVersionChainSlugs: [],
     testnetIds: TestnetIds,
     mainnetIds: MainnetIds,
     addresses,
@@ -174,3 +172,5 @@ export const getDefaultFinalityBucket = (
 export const getReSyncInterval = (chainSlug: ChainSlug) => {
   return reSyncInterval[chainSlug] ?? 0;
 };
+
+export const getOldEMVersionChains = async () => {};

@@ -102,6 +102,7 @@ export interface ChainSocketAddresses {
   SocketBatcher: string;
   integrations?: Integrations;
   OpenExecutionManager?: string;
+  ExecutionManagerDynamic?: string;
   SocketSimulator?: string;
   SimulatorUtils?: string;
   SwitchboardSimulator?: string;
@@ -264,4 +265,5 @@ export type S3Config = {
   watcherSupportedChainSlugs: ChainSlug[];
   nativeSupportedChainSlugs: ChainSlug[];
   feeUpdaterSupportedChainSlugs: ChainSlug[];
+  oldEMVersionChainSlugs: ChainSlug[];
 };
