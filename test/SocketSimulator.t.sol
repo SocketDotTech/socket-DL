@@ -443,23 +443,9 @@ contract Setup is Test {
             bytes memory sig
         ) = _getLatestSignature(address(capacitor));
 
-        hoax(_socketOwner);
-        _a.socket__.seal(1, address(capacitor), sig);
-
-        hoax(_socketOwner);
-        _a.socket__.proposeForSwitchboard(
-            packetId,
-            root,
-            address(_a.switchboard__),
-            sig
-        );
-
-        hoax(_socketOwner);
-        _a.switchboard__.attest(packetId, 0, root, sig);
-
-        hoax(_socketOwner);
         bytes32 msgId = _packMessageId(_a.chainSlug, address(12345), 10);
 
+        hoax(_socketOwner);
         _a.socket__.execute(
             ISocket.ExecutionDetails(
                 packetId,
@@ -476,5 +462,19 @@ contract Setup is Test {
                 bytes("random")
             )
         );
+
+        hoax(_socketOwner);
+        _a.socket__.seal(1, address(capacitor), sig);
+
+        hoax(_socketOwner);
+        _a.socket__.proposeForSwitchboard(
+            packetId,
+            root,
+            address(_a.switchboard__),
+            sig
+        );
+
+        hoax(_socketOwner);
+        _a.switchboard__.attest(packetId, 0, root, sig);
     }
 }

@@ -1,16 +1,10 @@
 {
   "421614": [
     [
-      "0x80335566E2B110f8E4dFbD5A181D83953dF39Bfa",
-      "SwitchboardSimulator",
-      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
-      [
-        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
-        "0x8E23CF75ab2bc6437041f6347e859C4816f5a28D",
-        421614,
-        1000,
-        "0x6E9AdDdfA6705CA6910e710b66DAF8E536A811ab"
-      ]
+      "0x975e8E5248E5E925122FAA35ACFC0aAa0341b9c4",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0xE22dc865c5821b66a28Ea9D8a715f156D25aa5B9"]
     ],
     [
       "0x8E23CF75ab2bc6437041f6347e859C4816f5a28D",
@@ -207,16 +201,10 @@
   ],
   "11155111": [
     [
-      "0x4001cf824b4FdbBFDFDbc28D32E7ab1aeB870a8f",
-      "SwitchboardSimulator",
-      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
-      [
-        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
-        "0xFAE13FC12a111CD31Ea02Ae554A59Fb18fD45127",
-        11155111,
-        1000,
-        "0xCEB721BF38F373FBf60dB0816d32e7CDd557B4E4"
-      ]
+      "0x043b8b299A5A308449437f05826ceCa048A60680",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0xE7F78bE5F1BC60A1A92F9fD4633B20d8E3E571c3"]
     ],
     [
       "0xFAE13FC12a111CD31Ea02Ae554A59Fb18fD45127",
@@ -298,6 +286,23 @@
   ],
   "11155420": [
     [
+      "0xFdBd64cde1D29a3D71871fB450EfbB54B23eB611",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0xE22dc865c5821b66a28Ea9D8a715f156D25aa5B9"]
+    ],
+    [
+      "0x5bA62006442bC42e28E3E5147A5221Be723ca1DE",
+      "ExecutionManager",
+      "contracts/ExecutionManager.sol",
+      [
+        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
+        11155420,
+        "0xE22dc865c5821b66a28Ea9D8a715f156D25aa5B9",
+        "0x6E9AdDdfA6705CA6910e710b66DAF8E536A811ab"
+      ]
+    ],
+    [
       "0x539185BcC71149dF6BDE1ceB66EA80625adFC14F",
       "SwitchboardSimulator",
       "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
@@ -352,17 +357,6 @@
           "surge": "IMLI",
           "prod": "IMLI"
         }
-      ]
-    ],
-    [
-      "0x5bA62006442bC42e28E3E5147A5221Be723ca1DE",
-      "ExecutionManager",
-      "contracts/ExecutionManager.sol",
-      [
-        "0xdE7f7a699F8504641eceF544B0fbc0740C37E69B",
-        11155420,
-        "0xE22dc865c5821b66a28Ea9D8a715f156D25aa5B9",
-        "0x6E9AdDdfA6705CA6910e710b66DAF8E536A811ab"
       ]
     ],
     [

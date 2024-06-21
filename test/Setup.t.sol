@@ -12,7 +12,7 @@ import "../contracts/switchboard/default-switchboards/FastSwitchboard.sol";
 import "../contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol";
 
 import "../contracts/TransmitManager.sol";
-import "../contracts/ExecutionManager.sol";
+import "../contracts/ExecutionManagerDF.sol";
 import "../contracts/OpenExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
 import "../contracts/utils/AccessRoles.sol";
@@ -113,7 +113,7 @@ contract Setup is Test {
         SignatureVerifier sigVerifier__;
         CapacitorFactory capacitorFactory__;
         TransmitManager transmitManager__;
-        ExecutionManager executionManager__;
+        ExecutionManagerDF executionManager__;
         SocketConfigContext[] configs__;
     }
 
@@ -561,7 +561,7 @@ contract Setup is Test {
                 cc_.sigVerifier__
             );
         } else {
-            cc_.executionManager__ = new ExecutionManager(
+            cc_.executionManager__ = new ExecutionManagerDF(
                 deployer_,
                 cc_.chainSlug,
                 cc_.socket__,

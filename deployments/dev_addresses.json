@@ -50,14 +50,14 @@
         }
       }
     },
-    "Counter": "0x38d8B3b68D765dF7D49779D08C38BDD1fFF83B32",
     "startBlock": 1430665,
     "ExecutionManager": "0x95BC00E721480c98dE80C5e59521c1c4E8d1BfBc",
     "SocketSimulator": "0x8E23CF75ab2bc6437041f6347e859C4816f5a28D",
     "SimulatorUtils": "0x4B882c8A1009c0a4fd80151FEb6d1a3656C49C9a",
     "CapacitorSimulator": "0x0FC594d30a1D3A2128BFAc51D26547d20D012f61",
     "SocketBatcher": "0xBb96eEc2C2fa0d7a3fFbb2D014333b40bA0C32E3",
-    "SwitchboardSimulator": "0x80335566E2B110f8E4dFbD5A181D83953dF39Bfa"
+    "SwitchboardSimulator": "0x80335566E2B110f8E4dFbD5A181D83953dF39Bfa",
+    "Counter": "0x975e8E5248E5E925122FAA35ACFC0aAa0341b9c4"
   },
   "11155111": {
     "SignatureVerifier": "0xCEB721BF38F373FBf60dB0816d32e7CDd557B4E4",
@@ -120,14 +120,14 @@
         }
       }
     },
-    "Counter": "0xcb3Dc795B49Ad83E90eBE3F6a5Cfa41ba8830776",
     "startBlock": 4751228,
     "ExecutionManager": "0x78E9EcA8889A6b6016CE5b56cD872bfB6F1Ba41f",
     "SocketSimulator": "0xFAE13FC12a111CD31Ea02Ae554A59Fb18fD45127",
     "SimulatorUtils": "0x255f9F9aB7eE46cb59a2Ed57a852304faD701C8d",
     "CapacitorSimulator": "0x7b4028983fA2259dBfaB8610CFfB35a6Bd6aFC6B",
     "SocketBatcher": "0x966666947C098b39f763e1Ee5AAE04c2278ee320",
-    "SwitchboardSimulator": "0x4001cf824b4FdbBFDFDbc28D32E7ab1aeB870a8f"
+    "SwitchboardSimulator": "0x4001cf824b4FdbBFDFDbc28D32E7ab1aeB870a8f",
+    "Counter": "0x043b8b299A5A308449437f05826ceCa048A60680"
   },
   "11155420": {
     "SignatureVerifier": "0x6E9AdDdfA6705CA6910e710b66DAF8E536A811ab",
@@ -180,13 +180,13 @@
         }
       }
     },
-    "Counter": "0x38d8B3b68D765dF7D49779D08C38BDD1fFF83B32",
     "startBlock": 4476114,
     "ExecutionManager": "0x5bA62006442bC42e28E3E5147A5221Be723ca1DE",
     "SocketSimulator": "0x7539351956f3271CdaF1fb1a440CA9BE2BfbF2ED",
     "SimulatorUtils": "0x3cD9C9Aa2f262339Cc994466a12F9A4c7A267827",
     "CapacitorSimulator": "0x327d2145e3B008a530264f84FfE932d2B9e36d73",
     "SocketBatcher": "0xFAE13FC12a111CD31Ea02Ae554A59Fb18fD45127",
-    "SwitchboardSimulator": "0x539185BcC71149dF6BDE1ceB66EA80625adFC14F"
+    "SwitchboardSimulator": "0x539185BcC71149dF6BDE1ceB66EA80625adFC14F",
+    "Counter": "0xFdBd64cde1D29a3D71871fB450EfbB54B23eB611"
   }
 }

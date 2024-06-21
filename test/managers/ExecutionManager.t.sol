@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import "../Setup.t.sol";
 
 contract ExecutionManagerTest is Setup {
-    ExecutionManager internal executionManager;
+    ExecutionManagerDF internal executionManager;
     event FeesWithdrawn(address account_, uint256 value_);
 
     function setUp() public {
@@ -98,7 +98,7 @@ contract ExecutionManagerTest is Setup {
             uint256((uint256(paramType) << 248) | uint248(msgValue))
         );
 
-        vm.expectRevert(ExecutionManager.MsgValueTooHigh.selector);
+        vm.expectRevert(ExecutionManagerDF.MsgValueTooHigh.selector);
         executionManager.getMinFees(
             minMsgGasLimit,
             payloadSize,
@@ -107,7 +107,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         // also reverts if an unknown sibling slug is used
-        vm.expectRevert(ExecutionManager.MsgValueTooHigh.selector);
+        vm.expectRevert(ExecutionManagerDF.MsgValueTooHigh.selector);
         executionManager.getMinFees(
             minMsgGasLimit,
             payloadSize,
@@ -127,7 +127,7 @@ contract ExecutionManagerTest is Setup {
 
         _setMsgValueMinThreshold(_a, bChainSlug, _msgValueMinThreshold);
 
-        vm.expectRevert(ExecutionManager.MsgValueTooLow.selector);
+        vm.expectRevert(ExecutionManagerDF.MsgValueTooLow.selector);
         executionManager.getMinFees(
             minMsgGasLimit,
             payloadSize,
@@ -314,7 +314,7 @@ contract ExecutionManagerTest is Setup {
             _relativeNativeTokenPrice
         );
 
-        vm.expectRevert(ExecutionManager.FeesTooHigh.selector);
+        vm.expectRevert(ExecutionManagerDF.FeesTooHigh.selector);
         _a.executionManager__.getMinFees(
             minMsgGasLimit,
             payloadSize,
@@ -322,7 +322,7 @@ contract ExecutionManagerTest is Setup {
             _b.chainSlug
         );
 
-        vm.expectRevert(ExecutionManager.PayloadTooLarge.selector);
+        vm.expectRevert(ExecutionManagerDF.PayloadTooLarge.selector);
         _a.executionManager__.getMinFees(
             minMsgGasLimit,
             6000,
@@ -337,7 +337,7 @@ contract ExecutionManagerTest is Setup {
         bytes32 executionParams = bytes32(0);
         deal(_feesPayer, type(uint256).max);
         hoax(_feesPayer);
-        vm.expectRevert(ExecutionManager.InvalidMsgValue.selector);
+        vm.expectRevert(ExecutionManagerDF.InvalidMsgValue.selector);
         _a.executionManager__.payAndCheckFees{value: type(uint128).max}(
             minMsgGasLimit,
             payloadSize,
@@ -371,7 +371,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         vm.startPrank(_socketOwner);
-        vm.expectRevert(ExecutionManager.InsufficientFees.selector);
+        vm.expectRevert(ExecutionManagerDF.InsufficientFees.selector);
         executionManager.withdrawExecutionFees(
             bChainSlug,
             type(uint128).max,
@@ -407,7 +407,7 @@ contract ExecutionManagerTest is Setup {
 
         uint128 amount = 100;
 
-        vm.expectRevert(ExecutionManager.InsufficientFees.selector);
+        vm.expectRevert(ExecutionManagerDF.InsufficientFees.selector);
         executionManager.withdrawTransmissionFees(
             bChainSlug,
             type(uint128).max
@@ -436,7 +436,7 @@ contract ExecutionManagerTest is Setup {
 
         uint128 amount = 100;
 
-        vm.expectRevert(ExecutionManager.InsufficientFees.selector);
+        vm.expectRevert(ExecutionManagerDF.InsufficientFees.selector);
         executionManager.withdrawSwitchboardFees(
             bChainSlug,
             _socketOwner,

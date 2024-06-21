@@ -187,7 +187,7 @@ contract SocketSrcTest is Setup {
         bytes32 executionParams = bytes32(
             uint256((uint256(1) << 248) | uint248(msgValue))
         );
-        vm.expectRevert(ExecutionManager.MsgValueTooHigh.selector);
+        vm.expectRevert(ExecutionManagerDF.MsgValueTooHigh.selector);
         _a.socket__.getMinFees(
             _minMsgGasLimit,
             1000,
@@ -202,7 +202,7 @@ contract SocketSrcTest is Setup {
             uint256((uint256(1) << 248) | uint248(msgValue))
         );
 
-        vm.expectRevert(ExecutionManager.MsgValueTooLow.selector);
+        vm.expectRevert(ExecutionManagerDF.MsgValueTooLow.selector);
         _a.socket__.getMinFees(
             _minMsgGasLimit,
             1000,

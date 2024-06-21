@@ -102,7 +102,7 @@ export interface ChainSocketAddresses {
   SocketBatcher: string;
   integrations?: Integrations;
   OpenExecutionManager?: string;
-  ExecutionManagerDynamic?: string;
+  ExecutionManagerDF?: string;
   SocketSimulator?: string;
   SimulatorUtils?: string;
   SwitchboardSimulator?: string;
@@ -127,6 +127,7 @@ export enum ROLES {
 export enum CORE_CONTRACTS {
   CapacitorFactory = "CapacitorFactory",
   ExecutionManager = "ExecutionManager",
+  ExecutionManagerDF = "ExecutionManagerDF",
   OpenExecutionManager = "OpenExecutionManager",
   Hasher = "Hasher",
   SignatureVerifier = "SignatureVerifier",
