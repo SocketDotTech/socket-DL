@@ -1,14 +1,10 @@
-import {
-  ChainSlug,
-  DeploymentAddresses,
-  MainnetIds,
-  TestnetIds,
-} from "../../src";
+import { DeploymentAddresses, MainnetIds, TestnetIds } from "../../src";
 import { configureRoles } from "./scripts/configureRoles";
 import { deployForChains } from "./scripts/deploySocketFor";
 import { configureSwitchboards } from "./scripts/configureSwitchboards";
 import { connectPlugs } from "./scripts/connect";
 import prompts from "prompts";
+import { executionManagerVersion } from "./config/config";
 
 const main = async () => {
   try {
@@ -47,14 +43,21 @@ const main = async () => {
     ]);
 
     const chains = [...configResponse.chains];
-    let addresses: DeploymentAddresses = await deployForChains(chains);
+    let addresses: DeploymentAddresses = await deployForChains(
+      chains,
+      executionManagerVersion
+    );
 
     if (chains.length === 0) {
       console.log("No siblings selected!");
       return;
     }
-    await configureRoles(addresses, chains, true);
-    addresses = await configureSwitchboards(addresses, chains);
+    await configureRoles(addresses, chains, true, executionManagerVersion);
+    addresses = await configureSwitchboards(
+      addresses,
+      chains,
+      executionManagerVersion
+    );
     await connectPlugs(addresses, chains);
   } catch (error) {
     console.log("Error:", error);

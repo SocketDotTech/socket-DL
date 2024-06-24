@@ -16,7 +16,6 @@ import { arrayify, defaultAbiCoder, keccak256, id } from "ethers/lib/utils";
 import {
   capacitorType,
   maxPacketLength,
-  executionManagerVersion,
   overrides,
   msgValueMaxThreshold,
 } from "../config/config";

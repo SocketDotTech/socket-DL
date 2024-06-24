@@ -14,12 +14,7 @@ import {
   isTestnet,
 } from "../../../src";
 import registerSwitchboardForSibling from "./registerSwitchboard";
-import {
-  capacitorType,
-  maxPacketLength,
-  mode,
-  executionManagerVersion,
-} from "../config/config";
+import { capacitorType, maxPacketLength, mode } from "../config/config";
 import {
   configureExecutionManager,
   registerSwitchboards,
@@ -29,7 +24,8 @@ import {
 
 export const configureSwitchboards = async (
   addresses: DeploymentAddresses,
-  chains: ChainSlug[]
+  chains: ChainSlug[],
+  executionManagerVersion: string
 ) => {
   try {
     await Promise.all(

@@ -1,4 +1,9 @@
-import { ChainSlug, IntegrationTypes } from "../../../src";
+import {
+  ChainSlug,
+  ChainSocketAddresses,
+  IntegrationTypes,
+  Integrations,
+} from "../../../src";
 
 function getSwitchboardAddress(
   chainSlug: ChainSlug | string,
@@ -36,5 +41,18 @@ function getDecapacitorAddress(
     "decapacitor"
   ];
 }
+
+export const getSiblings = (addresses: ChainSocketAddresses): ChainSlug[] => {
+  try {
+    const integrations: Integrations = addresses.integrations;
+    if (!integrations) return [] as ChainSlug[];
+
+    return Object.keys(integrations).map(
+      (chainSlug) => parseInt(chainSlug) as ChainSlug
+    );
+  } catch (error) {
+    return [] as ChainSlug[];
+  }
+};
 
 export { getSwitchboardAddress, getCapacitorAddress, getDecapacitorAddress };

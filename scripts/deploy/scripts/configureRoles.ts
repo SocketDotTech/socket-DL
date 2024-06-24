@@ -12,7 +12,6 @@ import {
   transmitterAddresses,
   watcherAddresses,
   executorAddresses,
-  executionManagerVersion,
   ownerAddresses,
 } from "../config/config";
 import { checkAndUpdateRoles } from "./roles";
@@ -24,7 +23,8 @@ const newRoleStatus = true;
 export const configureRoles = async (
   addresses: DeploymentAddresses,
   chains: ChainSlug[],
-  sendTransaction: boolean
+  sendTransaction: boolean,
+  executionManagerVersion: string
 ) => {
   let ownerAddress = ownerAddresses[mode];
   let executorAddress = executorAddresses[mode];

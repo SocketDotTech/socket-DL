@@ -14,11 +14,7 @@ import {
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import {
-  socketOwner,
-  executionManagerVersion,
-  overrides,
-} from "../config/config";
+import { socketOwner, overrides } from "../config/config";
 import { maxAllowedPacketLength } from "../../constants";
 
 let allDeployed = false;
@@ -32,6 +28,7 @@ export interface ReturnObj {
  * Deploys network-independent socket contracts
  */
 export const deploySocket = async (
+  executionManagerVersion: string,
   socketSigner: SignerWithAddress | Wallet,
   chainSlug: number,
   currentMode: DeploymentMode,
