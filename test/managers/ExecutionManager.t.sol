@@ -53,7 +53,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         uint256 executionFees = minMsgGasLimit *
-            gasPrice +
+            perGasCost +
             overhead +
             payloadSize *
             perByteCost;
@@ -80,7 +80,7 @@ contract ExecutionManagerTest is Setup {
         //assert actual and expected data
 
         uint256 executionFeesCalc = minMsgGasLimit *
-            gasPrice +
+            perGasCost +
             overhead +
             payloadSize *
             perByteCost;
@@ -153,7 +153,7 @@ contract ExecutionManagerTest is Setup {
         );
 
         uint256 executionFeesCalc = minMsgGasLimit *
-            gasPrice +
+            perGasCost +
             overhead +
             payloadSize *
             perByteCost;
@@ -211,7 +211,7 @@ contract ExecutionManagerTest is Setup {
         ) = executionManager.totalExecutionAndTransmissionFees(bChainSlug);
 
         uint256 executionFeesCalc = minMsgGasLimit *
-            gasPrice +
+            perGasCost +
             overhead +
             payloadSize *
             perByteCost;
@@ -236,7 +236,7 @@ contract ExecutionManagerTest is Setup {
         bytes32 executionParams = bytes32(0);
 
         uint256 executionFeesCalc = minMsgGasLimit *
-            gasPrice +
+            perGasCost +
             overhead +
             payloadSize *
             perByteCost;
@@ -267,7 +267,7 @@ contract ExecutionManagerTest is Setup {
 
         IExecutionManager.ExecutionFeesParam
             memory executionFees = IExecutionManager.ExecutionFeesParam(
-                gasPrice,
+                perGasCost,
                 perByteCost,
                 overhead
             );
@@ -469,7 +469,7 @@ contract ExecutionManagerTest is Setup {
         bytes32 executionParams = bytes32(0);
 
         uint256 executionFeesCalc = minMsgGasLimit *
-            gasPrice +
+            perGasCost +
             overhead +
             payloadSize *
             perByteCost;

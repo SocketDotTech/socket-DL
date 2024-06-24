@@ -8,8 +8,8 @@ pragma solidity 0.8.19;
  */
 interface IExecutionManager {
     struct ExecutionFeesParam {
-        // for calculating gasPrice * gasLimit
-        uint80 gasPrice;
+        // for calculating perGasCost * gasLimit
+        uint80 perGasCost;
         // for calculating cost for executing payload (needed for rollups)
         uint80 perByteCost;
         // additional cost (differs based on chain)

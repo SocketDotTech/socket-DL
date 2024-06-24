@@ -85,7 +85,7 @@ contract Setup is Test {
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
 
-    uint80 internal gasPrice = 1 gwei;
+    uint80 internal perGasCost = 1 gwei;
     uint80 internal perByteCost = 50 gwei;
     uint80 internal overhead = 10 gwei;
 
@@ -215,7 +215,7 @@ contract Setup is Test {
 
         IExecutionManager.ExecutionFeesParam
             memory executionFees = IExecutionManager.ExecutionFeesParam(
-                gasPrice,
+                perGasCost,
                 perByteCost,
                 overhead
             );

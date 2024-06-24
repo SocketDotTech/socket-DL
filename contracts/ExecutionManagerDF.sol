@@ -349,13 +349,13 @@ contract ExecutionManagerDF is IExecutionManager, AccessControlExtended {
         ];
 
         // fees = L1 fees + L2 fees
-        // L1 fees = gasLimit * gasPrice
-        // L2 fees depends on the payload size and how chain calculates the tx fees
+        // fees for  = gasLimit * perGasCost
+        // layer 2 fees depends on the payload size and how chain calculates the tx fees
         // to simplify, an overhead and perByteCost is updated on contract through external cron
         // and fees is calculated as : payloadSize * perByteCost + overhead
         totalFees =
             msgGasLimit *
-            executionFeesParam.gasPrice +
+            executionFeesParam.perGasCost +
             executionFeesParam.overhead +
             payloadSize_ *
             executionFeesParam.perByteCost;
