@@ -267,4 +267,5 @@ export type S3Config = {
   nativeSupportedChainSlugs: ChainSlug[];
   feeUpdaterSupportedChainSlugs: ChainSlug[];
   oldEMVersionChainSlugs: ChainSlug[];
+  disabledDFFeeChains: ChainSlug[];
 };

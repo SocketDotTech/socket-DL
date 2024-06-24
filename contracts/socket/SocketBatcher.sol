@@ -13,6 +13,15 @@ import "../interfaces/IExecutionManager.sol";
 
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 
+interface IExecutionManagerOld {
+    function setExecutionFees(
+        uint256 nonce_,
+        uint32 siblingChainSlug_,
+        uint128 executionFees_,
+        bytes calldata signature_
+    ) external;
+}
+
 /**
  * @title SocketBatcher
  * @notice A contract that facilitates the batching of packets across chains. It manages requests for sealing, proposing, attesting, and executing packets across multiple chains.
@@ -231,6 +240,17 @@ contract SocketBatcher is AccessControl {
     ) external {
         uint256 feeRequestLength = setFeesRequests_.length;
         for (uint256 index = 0; index < feeRequestLength; ) {
+            if (
+                setFeesRequests_[index].functionSelector ==
+                IExecutionManagerOld.setExecutionFees.selector
+            )
+                IExecutionManagerOld(contractAddress_).setExecutionFees(
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    uint128(setFeesRequests_[index].fees),
+                    setFeesRequests_[index].signature
+                );
+
             if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setExecutionFees.selector

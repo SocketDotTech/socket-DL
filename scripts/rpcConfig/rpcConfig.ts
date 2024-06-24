@@ -18,6 +18,8 @@ import {
   polygonCDKChains,
   S3ChainConfig,
   FinalityBucket,
+  DeploymentAddresses,
+  ChainSocketAddresses,
 } from "../../src";
 import {
   reSyncInterval,
@@ -36,7 +38,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
-const addresses = getAllAddresses(deploymentMode);
+const addresses: DeploymentAddresses = getAllAddresses(deploymentMode);
 
 const getBlockNumber = (
   deploymentMode: DeploymentMode,
@@ -67,6 +69,22 @@ const getSiblings = (
   } catch (error) {
     return [] as ChainSlug[];
   }
+};
+
+const getOldEMVersionChainSlugs = (): ChainSlug[] => {
+  let chains: ChainSlug[] = [];
+  try {
+    Object.keys(addresses).map((chain) => {
+      const chainAddress: ChainSocketAddresses = addresses[chain];
+      if (!chainAddress.ExecutionManagerDF)
+        chains.push(parseInt(chain) as ChainSlug);
+    });
+
+    console.log(chains);
+  } catch (error) {
+    return [] as ChainSlug[];
+  }
+  return chains;
 };
 
 const getChainType = (chainSlug: ChainSlug) => {
@@ -114,7 +132,6 @@ const getAllChainData = async (
   await Promise.all(
     chainSlugs.map(async (c) => (chains[c] = await getChainData(c, txData)))
   );
-
   return chains;
 };
 
@@ -127,12 +144,13 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
     batcherSupportedChainSlugs: batcherSupportedChainSlugs,
     watcherSupportedChainSlugs: batcherSupportedChainSlugs,
     nativeSupportedChainSlugs: [],
-    oldEMVersionChainSlugs: [],
     feeUpdaterSupportedChainSlugs: batcherSupportedChainSlugs,
     testnetIds: TestnetIds,
     mainnetIds: MainnetIds,
     addresses,
     chainSlugToId: ChainSlugToId,
+    oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
+    disabledDFFeeChains: [],
   };
 };
 
@@ -155,11 +173,12 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
       ChainSlug.OPTIMISM_SEPOLIA,
     ],
     feeUpdaterSupportedChainSlugs: feesUpdaterSupportedChainSlugs(),
-    oldEMVersionChainSlugs: [],
     testnetIds: TestnetIds,
     mainnetIds: MainnetIds,
     addresses,
     chainSlugToId: ChainSlugToId,
+    oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
+    disabledDFFeeChains: [],
   };
 };
 
@@ -172,5 +191,3 @@ export const getDefaultFinalityBucket = (
 export const getReSyncInterval = (chainSlug: ChainSlug) => {
   return reSyncInterval[chainSlug] ?? 0;
 };
-
-export const getOldEMVersionChains = async () => {};
