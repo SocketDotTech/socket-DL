@@ -10,6 +10,6 @@ export const explorers = {
   [ChainSlug.WINR]: "https://explorerl2new-winr-mainnet-0.t.conduit.xyz",
   [ChainSlug.BLAST]: "https://blastscan.io",
   [ChainSlug.BSC_TESTNET]:
-    "https://testnet.bscscan.com/assets/bsc/images/svg/logos/logo-light.svg?v=24.5.5.0",
+    "https://testnet.bscscan.com/",
   [ChainSlug.POLYNOMIAL]: "https://explorer.polynomial.fi",
 };
