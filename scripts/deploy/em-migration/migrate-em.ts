@@ -2,19 +2,91 @@ require("dotenv").config();
 import {
   CORE_CONTRACTS,
   ChainSlug,
+  ChainSocketAddresses,
   DeploymentAddresses,
-  DeploymentMode,
   MainnetIds,
+  ROLES,
   TestnetIds,
   getAllAddresses,
 } from "../../../src";
 import { configureRoles } from "../scripts/configureRoles";
-import { configureSwitchboards } from "../scripts/configureSwitchboards";
 import { deployForChains } from "../scripts/deploySocketFor";
 import prompts from "prompts";
+import { checkAndUpdateRoles } from "../scripts/roles";
+import {
+  executorAddresses,
+  mode,
+  ownerAddresses,
+  transmitterAddresses,
+} from "../config/config";
+import {
+  configureExecutionManager,
+  setManagers,
+} from "../scripts/configureSocket";
+import { Wallet } from "ethers";
+import { getProviderFromChainSlug } from "../../constants";
+import { storeAllAddresses } from "../utils";
 
-const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
 const emVersion = CORE_CONTRACTS.ExecutionManagerDF;
+
+export const configureExecutionManagers = async (
+  chains: ChainSlug[],
+  addresses
+) => {
+  try {
+    await Promise.all(
+      chains.map(async (chain) => {
+        const providerInstance = getProviderFromChainSlug(
+          chain as any as ChainSlug
+        );
+        const socketSigner: Wallet = new Wallet(
+          process.env.SOCKET_SIGNER_KEY as string,
+          providerInstance
+        );
+
+        let addr: ChainSocketAddresses = addresses[chain]!;
+
+        // todo: take siblings from address json
+        const siblingSlugs: ChainSlug[] = [];
+        //   list.filter(
+        //   (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
+        // );
+
+        await configureExecutionManager(
+          emVersion,
+          addr[emVersion]!,
+          addr[CORE_CONTRACTS.SocketBatcher],
+          chain,
+          siblingSlugs,
+          socketSigner
+        );
+
+        await setManagers(addr, socketSigner, emVersion);
+      })
+    );
+  } catch (error) {}
+};
+
+const deleteOldContracts = async (chains: ChainSlug[]) => {
+  try {
+    const addresses: DeploymentAddresses = getAllAddresses(mode);
+    await Promise.all(
+      Object.keys(addresses).map(async (chain) => {
+        if (chains.includes(parseInt(chain) as ChainSlug)) {
+          addresses[chain].SocketSimulator = "";
+          addresses[chain].SimulatorUtils = "";
+          addresses[chain].SwitchboardSimulator = "";
+          addresses[chain].Counter = "";
+          addresses[chain].SocketBatcher = "";
+        }
+      })
+    );
+
+    await storeAllAddresses(addresses, mode);
+  } catch (error) {
+    console.log("Error:", error);
+  }
+};
 
 const deploy = async (chains: ChainSlug[]) => {
   try {
@@ -22,7 +94,36 @@ const deploy = async (chains: ChainSlug[]) => {
       chains,
       emVersion
     );
-    await configureRoles(addresses, chains, true, emVersion);
+
+    await checkAndUpdateRoles(
+      {
+        userSpecificRoles: [
+          {
+            userAddress: ownerAddresses[mode],
+            filterRoles: [
+              ROLES.RESCUE_ROLE,
+              ROLES.GOVERNANCE_ROLE,
+              ROLES.WITHDRAW_ROLE,
+              ROLES.FEES_UPDATER_ROLE,
+            ],
+          },
+          {
+            userAddress: transmitterAddresses[mode],
+            filterRoles: [ROLES.FEES_UPDATER_ROLE],
+          },
+          {
+            userAddress: executorAddresses[mode],
+            filterRoles: [ROLES.EXECUTOR_ROLE],
+          },
+        ],
+        contractName: emVersion,
+        filterChains: chains,
+        filterSiblingChains: chains,
+        sendTransaction: true,
+        newRoleStatus: true,
+      },
+      addresses
+    );
   } catch (error) {
     console.log("Error:", error);
   }
@@ -34,7 +135,8 @@ const configure = async (chains: ChainSlug[]) => {
       chains,
       emVersion
     );
-    await configureSwitchboards(addresses, chains, emVersion);
+
+    await configureExecutionManagers(chains, addresses);
   } catch (error) {
     console.log("Error:", error);
   }
@@ -54,6 +156,10 @@ const main = async () => {
         {
           title: "Configure",
           value: "configure",
+        },
+        {
+          title: "Delete",
+          value: "delete",
         },
       ],
     },
@@ -98,6 +204,9 @@ const main = async () => {
       break;
     case "deploy":
       await deploy(chains);
+      break;
+    case "delete":
+      await deleteOldContracts(chains);
       break;
     case "exit":
       process.exit(0);

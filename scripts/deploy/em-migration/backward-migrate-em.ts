@@ -2,12 +2,19 @@ import {
   CORE_CONTRACTS,
   DeploymentAddresses,
   MainnetIds,
+  ROLES,
   TestnetIds,
 } from "../../../src";
-import { configureRoles } from "../scripts/configureRoles";
-import { configureSwitchboards } from "../scripts/configureSwitchboards";
 import { deployForChains } from "../scripts/deploySocketFor";
 import prompts from "prompts";
+import { checkAndUpdateRoles } from "../scripts/roles";
+import {
+  executorAddresses,
+  mode,
+  ownerAddresses,
+  transmitterAddresses,
+} from "../config/config";
+import { configureExecutionManagers } from "./migrate-em";
 
 const deploy = async () => {
   try {
@@ -53,8 +60,36 @@ const deploy = async () => {
       emVersion
     );
 
-    await configureRoles(addresses, chains, true, emVersion);
-    await configureSwitchboards(addresses, chains, emVersion);
+    await checkAndUpdateRoles(
+      {
+        userSpecificRoles: [
+          {
+            userAddress: ownerAddresses[mode],
+            filterRoles: [
+              ROLES.RESCUE_ROLE,
+              ROLES.GOVERNANCE_ROLE,
+              ROLES.WITHDRAW_ROLE,
+              ROLES.FEES_UPDATER_ROLE,
+            ],
+          },
+          {
+            userAddress: transmitterAddresses[mode],
+            filterRoles: [ROLES.FEES_UPDATER_ROLE],
+          },
+          {
+            userAddress: executorAddresses[mode],
+            filterRoles: [ROLES.EXECUTOR_ROLE],
+          },
+        ],
+        contractName: emVersion,
+        filterChains: chains,
+        filterSiblingChains: chains,
+        sendTransaction: true,
+        newRoleStatus: true,
+      },
+      addresses
+    );
+    await configureExecutionManagers(chains, addresses);
   } catch (error) {
     console.log("Error:", error);
   }
