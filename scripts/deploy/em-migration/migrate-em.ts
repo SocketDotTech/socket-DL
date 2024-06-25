@@ -26,6 +26,7 @@ import {
 import { Wallet } from "ethers";
 import { getProviderFromChainSlug } from "../../constants";
 import { storeAllAddresses } from "../utils";
+import { getSiblingsFromAddresses } from "../../common";
 
 const emVersion = CORE_CONTRACTS.ExecutionManagerDF;
 
@@ -46,11 +47,7 @@ export const configureExecutionManagers = async (
 
         let addr: ChainSocketAddresses = addresses[chain]!;
 
-        // todo: take siblings from address json
-        const siblingSlugs: ChainSlug[] = [];
-        //   list.filter(
-        //   (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
-        // );
+        const siblingSlugs: ChainSlug[] = getSiblingsFromAddresses(addr);
 
         await configureExecutionManager(
           emVersion,
@@ -64,7 +61,10 @@ export const configureExecutionManagers = async (
         await setManagers(addr, socketSigner, emVersion);
       })
     );
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 };
 
 const deleteOldContracts = async (chains: ChainSlug[]) => {
