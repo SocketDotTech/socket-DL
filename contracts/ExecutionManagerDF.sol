@@ -28,7 +28,7 @@ contract ExecutionManagerDF is IExecutionManager, AccessControlExtended {
      * @param executionFees The new executionFees
      */
     event ExecutionFeesSet(
-        uint256 siblingChainSlug,
+        uint32 siblingChainSlug,
         ExecutionFeesParam executionFees
     );
 

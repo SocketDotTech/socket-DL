@@ -25,7 +25,7 @@ contract ExecutionManager is AccessControlExtended {
      * @param siblingChainSlug The destination chain slug for which the executionFees is updated
      * @param executionFees The new executionFees
      */
-    event ExecutionFeesSet(uint256 siblingChainSlug, uint128 executionFees);
+    event ExecutionFeesSet(uint32 siblingChainSlug, uint128 executionFees);
 
     /**
      * @notice Emitted when the relativeNativeTokenPrice is updated

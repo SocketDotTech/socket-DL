@@ -164,7 +164,7 @@ contract SocketBatcher is AccessControl {
     struct SetExecutionFeesRequest {
         uint256 nonce;
         uint32 dstChainSlug;
-        uint80 gasPrice;
+        uint80 perGasCost;
         uint80 perByteCost;
         uint80 overhead;
         uint256 fees;
@@ -259,7 +259,7 @@ contract SocketBatcher is AccessControl {
                     setFeesRequests_[index].nonce,
                     setFeesRequests_[index].dstChainSlug,
                     IExecutionManager.ExecutionFeesParam(
-                        setFeesRequests_[index].gasPrice,
+                        setFeesRequests_[index].perGasCost,
                         setFeesRequests_[index].perByteCost,
                         setFeesRequests_[index].overhead
                     ),
