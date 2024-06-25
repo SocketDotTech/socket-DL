@@ -1,6 +1,7 @@
 require("dotenv").config();
 import {
   CORE_CONTRACTS,
+  ChainSlug,
   DeploymentAddresses,
   DeploymentMode,
   MainnetIds,
@@ -15,43 +16,8 @@ import prompts from "prompts";
 const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
 const emVersion = CORE_CONTRACTS.ExecutionManagerDF;
 
-const deploy = async () => {
+const deploy = async (chains: ChainSlug[]) => {
   try {
-    const response = await prompts([
-      {
-        name: "chainType",
-        type: "select",
-        message: "Select chains network type",
-        choices: [
-          {
-            title: "Mainnet",
-            value: "mainnet",
-          },
-          {
-            title: "Testnet",
-            value: "testnet",
-          },
-        ],
-      },
-    ]);
-
-    const chainOptions =
-      response.chainType === "mainnet" ? MainnetIds : TestnetIds;
-    let choices = chainOptions.map((chain) => ({
-      title: chain.toString(),
-      value: chain,
-    }));
-
-    const configResponse = await prompts([
-      {
-        name: "chains",
-        type: "multiselect",
-        message: "Select sibling chains to connect",
-        choices,
-      },
-    ]);
-
-    const chains = [...configResponse.chains];
     const addresses: DeploymentAddresses = await deployForChains(
       chains,
       emVersion
@@ -62,12 +28,13 @@ const deploy = async () => {
   }
 };
 
-const configure = async () => {
+const configure = async (chains: ChainSlug[]) => {
   try {
-    let addresses: DeploymentAddresses = getAllAddresses(deploymentMode);
-    const chains = [...MainnetIds, ...TestnetIds];
-
-    addresses = await configureSwitchboards(addresses, chains, emVersion);
+    const addresses: DeploymentAddresses = await deployForChains(
+      chains,
+      emVersion
+    );
+    await configureSwitchboards(addresses, chains, emVersion);
   } catch (error) {
     console.log("Error:", error);
   }
@@ -90,14 +57,47 @@ const main = async () => {
         },
       ],
     },
+    {
+      name: "chainType",
+      type: "select",
+      message: "Select chains network type",
+      choices: [
+        {
+          title: "Mainnet",
+          value: "mainnet",
+        },
+        {
+          title: "Testnet",
+          value: "testnet",
+        },
+      ],
+    },
   ]);
+
+  const chainOptions =
+    response.chainType === "mainnet" ? MainnetIds : TestnetIds;
+  let choices = chainOptions.map((chain) => ({
+    title: chain.toString(),
+    value: chain,
+  }));
+
+  const configResponse = await prompts([
+    {
+      name: "chains",
+      type: "multiselect",
+      message: "Select sibling chains to connect",
+      choices,
+    },
+  ]);
+
+  const chains = [...configResponse.chains];
 
   switch (response.action) {
     case "configure":
-      await configure();
+      await configure(chains);
       break;
     case "deploy":
-      await deploy();
+      await deploy(chains);
       break;
     case "exit":
       process.exit(0);

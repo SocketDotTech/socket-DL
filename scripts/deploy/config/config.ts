@@ -172,12 +172,6 @@ export const overrides = (
       gasLimit: 4_000_000,
       gasPrice: 30_000_000_000,
     };
-  } else if (chain == ChainSlug.GOERLI) {
-    return {
-      type,
-      gasLimit: 3_000_000,
-      gasPrice,
-    };
   } else if (chain == ChainSlug.POLYGON_MAINNET) {
     return {
       type,
@@ -186,9 +180,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.SEPOLIA) {
     return {
-      // type,
-      // gasLimit: 2_000_000,
-      // gasPrice: 250_000_000_000,
+      // type: 1,
+      gasLimit: 2_000_000,
+      // gasPrice: 180_000_000_000,
     };
   } else if (chain == ChainSlug.AEVO_TESTNET) {
     return {
@@ -209,12 +203,6 @@ export const overrides = (
       // gasPrice: 100_000_000,
     };
   } else if (chain == ChainSlug.LYRA) {
-    return {
-      // type: 1,
-      // gasLimit,
-      // gasPrice: 100_000_000,
-    };
-  } else if (chain == ChainSlug.XAI_TESTNET) {
     return {
       // type: 1,
       // gasLimit,
@@ -243,12 +231,6 @@ export const overrides = (
       type: 1,
       gasLimit: 500_000_000,
       gasPrice: 1_000_000,
-    };
-  } else if (chain == ChainSlug.VICTION_TESTNET) {
-    return {
-      // type: 1,
-      // gasLimit,
-      // gasPrice: 100_000_000,
     };
   } else if (chain == ChainSlug.HOOK) {
     return {
