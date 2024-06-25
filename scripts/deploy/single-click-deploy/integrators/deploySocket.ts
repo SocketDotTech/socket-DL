@@ -64,7 +64,7 @@ export const deploySocket = async () => {
     socketSigner
   );
 
-  await setManagers(addresses[chain], socketSigner);
+  await setManagers(addresses[chain], socketSigner, executionManagerVersion);
 
   let allAddresses: DeploymentAddresses = JSON.parse(
     fs.readFileSync(deployedAddressPath(mode), "utf-8")

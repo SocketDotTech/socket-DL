@@ -21,6 +21,7 @@ import {
   DeploymentAddresses,
   ChainSocketAddresses,
 } from "../../src";
+import { getSiblings } from "../common";
 import {
   reSyncInterval,
   explorers,
@@ -52,28 +53,10 @@ const getBlockNumber = (
   }
 };
 
-const getSiblings = (
-  deploymentMode: DeploymentMode,
-  chainSlug: ChainSlug
-): ChainSlug[] => {
-  try {
-    const integrations: Integrations = getAddresses(
-      chainSlug,
-      deploymentMode
-    ).integrations;
-    if (!integrations) return [] as ChainSlug[];
-
-    return Object.keys(integrations).map(
-      (chainSlug) => parseInt(chainSlug) as ChainSlug
-    );
-  } catch (error) {
-    return [] as ChainSlug[];
-  }
-};
-
 const getOldEMVersionChainSlugs = (): ChainSlug[] => {
   let chains: ChainSlug[] = [];
   try {
+    if (chains.length !== 0) return chains;
     Object.keys(addresses).map((chain) => {
       const chainAddress: ChainSocketAddresses = addresses[chain];
       if (!chainAddress.ExecutionManagerDF)

@@ -25,7 +25,7 @@ import {
 export const configureSwitchboards = async (
   addresses: DeploymentAddresses,
   chains: ChainSlug[],
-  executionManagerVersion: string
+  executionManagerVersion: CORE_CONTRACTS
 ) => {
   try {
     await Promise.all(
@@ -56,7 +56,7 @@ export const configureSwitchboards = async (
           socketSigner
         );
 
-        await setManagers(addr, socketSigner);
+        await setManagers(addr, socketSigner, executionManagerVersion);
 
         const integrations = addr["integrations"] ?? {};
         const integrationList = Object.keys(integrations).filter((chain) =>

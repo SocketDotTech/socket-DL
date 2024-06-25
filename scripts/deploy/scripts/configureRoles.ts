@@ -24,7 +24,7 @@ export const configureRoles = async (
   addresses: DeploymentAddresses,
   chains: ChainSlug[],
   sendTransaction: boolean,
-  executionManagerVersion: string
+  executionManagerVersion: CORE_CONTRACTS
 ) => {
   let ownerAddress = ownerAddresses[mode];
   let executorAddress = executorAddresses[mode];

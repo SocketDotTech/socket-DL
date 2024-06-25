@@ -15,7 +15,7 @@ import { getJsonRpcUrl } from "../../constants";
 import SocketABI from "../../../artifacts/contracts/socket/SocketBase.sol/SocketBase.json";
 import EMABI from "../../../artifacts/contracts/ExecutionManager.sol/ExecutionManager.json";
 import EMDFABI from "../../../artifacts/contracts/ExecutionManagerDF.sol/ExecutionManagerDF.json";
-import { getSiblings } from "../utils";
+import { getSiblingsFromAddresses } from "../../common";
 
 const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
 const addresses: DeploymentAddresses = getAllAddresses(deploymentMode);
@@ -46,7 +46,7 @@ const checkEMFees = async (
     EMABI.abi,
     provider
   );
-  const siblings = getSiblings(chainAddresses);
+  const siblings = getSiblingsFromAddresses(chainAddresses);
 
   await Promise.all(
     siblings.map(async (sibling) => {
@@ -69,7 +69,7 @@ const checkEMDFFees = async (
     EMDFABI.abi,
     provider
   );
-  const siblings = getSiblings(chainAddresses);
+  const siblings = getSiblingsFromAddresses(chainAddresses);
 
   await Promise.all(
     siblings.map(async (sibling) => {
@@ -169,4 +169,5 @@ const main = async () => {
   await runTests(configResponse.emVersion, configResponse.chains);
 };
 
+// npx hardhat run scripts/deploy/em-migration/check-migration.ts
 main();

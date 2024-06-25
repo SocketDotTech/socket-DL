@@ -55,7 +55,8 @@ export const registerSwitchboards = async (
 
 export const setManagers = async (
   addr: ChainSocketAddresses,
-  socketSigner: Wallet
+  socketSigner: Wallet,
+  executionManagerVersion: CORE_CONTRACTS
 ) => {
   const socket = (
     await getInstance(CORE_CONTRACTS.Socket, addr.Socket)
