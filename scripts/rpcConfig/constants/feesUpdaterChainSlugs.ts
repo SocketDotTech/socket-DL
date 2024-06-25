@@ -1,11 +1,16 @@
 import { batcherSupportedChainSlugs } from "./batcherSupportedChainSlug";
-import { ChainSlug, DeploymentMode, MainnetIds } from "../../../src";
+import {
+  ChainSlug,
+  DeploymentMode,
+  MainnetIds,
+  TestnetIds,
+} from "../../../src";
 import { mode } from "../../deploy/config/config";
 
 export const feesUpdaterSupportedChainSlugs = (): ChainSlug[] => {
   if (mode === DeploymentMode.PROD) {
     const feesUpdaterSupportedChainSlugs = [];
-    MainnetIds.forEach((m) => {
+    [...MainnetIds, ...TestnetIds].forEach((m) => {
       if (batcherSupportedChainSlugs.includes(m)) {
         feesUpdaterSupportedChainSlugs.push(m);
       }
