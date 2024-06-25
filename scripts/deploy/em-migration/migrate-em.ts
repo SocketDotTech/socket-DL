@@ -54,7 +54,7 @@ const deploy = async () => {
     const chains = [...configResponse.chains];
     const addresses: DeploymentAddresses = await deployForChains(
       chains,
-      CORE_CONTRACTS.ExecutionManagerDF
+      emVersion
     );
     await configureRoles(addresses, chains, true, emVersion);
   } catch (error) {
@@ -92,7 +92,7 @@ const main = async () => {
     },
   ]);
 
-  switch (response.option) {
+  switch (response.action) {
     case "configure":
       await configure();
       break;
@@ -104,10 +104,11 @@ const main = async () => {
   }
 };
 
+// npx hardhat run scripts/deploy/em-migration/migrate-em.ts
 main();
 
 // run this script, select deploy and upload s3 config
 // run the fees updater for new EM
-// check if fees set on all EMs for all paths
+// check if fees set on all EMs for all paths with ./check-migration script
 // run the script again for configuration
 // run the ./check-migration script to test if all chains have latest EM

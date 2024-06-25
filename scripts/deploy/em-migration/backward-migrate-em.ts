@@ -65,4 +65,4 @@ deploy();
 
 // run this script, update s3 config version and upload s3 config
 // run em fees updater
-// run the ./check-migration script to test if new EM is set
+// run the ./check-migration script to test if new EM is set and it has initial fees

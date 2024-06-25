@@ -239,22 +239,22 @@ contract SocketBatcher is AccessControl {
         SetExecutionFeesRequest[] calldata setFeesRequests_
     ) external {
         uint256 feeRequestLength = setFeesRequests_.length;
+
         for (uint256 index = 0; index < feeRequestLength; ) {
             if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManagerOld.setExecutionFees.selector
-            )
+            ) {
                 IExecutionManagerOld(contractAddress_).setExecutionFees(
                     setFeesRequests_[index].nonce,
                     setFeesRequests_[index].dstChainSlug,
                     uint128(setFeesRequests_[index].fees),
                     setFeesRequests_[index].signature
                 );
-
-            if (
+            } else if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setExecutionFees.selector
-            )
+            ) {
                 IExecutionManager(contractAddress_).setExecutionFees(
                     setFeesRequests_[index].nonce,
                     setFeesRequests_[index].dstChainSlug,
@@ -265,39 +265,37 @@ contract SocketBatcher is AccessControl {
                     ),
                     setFeesRequests_[index].signature
                 );
-
-            if (
+            } else if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setRelativeNativeTokenPrice.selector
-            )
+            ) {
                 IExecutionManager(contractAddress_).setRelativeNativeTokenPrice(
-                    setFeesRequests_[index].nonce,
-                    setFeesRequests_[index].dstChainSlug,
-                    setFeesRequests_[index].fees,
-                    setFeesRequests_[index].signature
-                );
-
-            if (
+                        setFeesRequests_[index].nonce,
+                        setFeesRequests_[index].dstChainSlug,
+                        setFeesRequests_[index].fees,
+                        setFeesRequests_[index].signature
+                    );
+            } else if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setMsgValueMaxThreshold.selector
-            )
+            ) {
                 IExecutionManager(contractAddress_).setMsgValueMaxThreshold(
                     setFeesRequests_[index].nonce,
                     setFeesRequests_[index].dstChainSlug,
                     setFeesRequests_[index].fees,
                     setFeesRequests_[index].signature
                 );
-
-            if (
+            } else if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setMsgValueMinThreshold.selector
-            )
+            ) {
                 IExecutionManager(contractAddress_).setMsgValueMinThreshold(
                     setFeesRequests_[index].nonce,
                     setFeesRequests_[index].dstChainSlug,
                     setFeesRequests_[index].fees,
                     setFeesRequests_[index].signature
                 );
+            }
 
             unchecked {
                 ++index;

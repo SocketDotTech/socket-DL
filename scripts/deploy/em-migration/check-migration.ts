@@ -29,10 +29,9 @@ const checkEM = async (
   // Create a contract instance
   const socketContract = new Contract(socketAddress, SocketABI.abi, provider);
   const em = await socketContract.executionManager__();
-  if (expectedEMAddress.toLowerCase() != em.toLowerCase())
+  if (expectedEMAddress.toLowerCase() != em.toLowerCase()) {
     console.log(`❌ EM not matching for ${chain}`);
-
-  console.log(`✅ EM matching for ${chain}`);
+  } else console.log(`✅ EM matching for ${chain}`);
 };
 
 const checkEMFees = async (
@@ -51,9 +50,12 @@ const checkEMFees = async (
   await Promise.all(
     siblings.map(async (sibling) => {
       const fees = await emContract.executionFees(sibling);
-      if (fees != 0) console.log(`✅ EM fees set for pair ${chain}-${sibling}`);
-
-      console.log(`❌ EM fees set to 0 for pair ${chain}-${sibling}, ${fees}`);
+      if (fees != 0) {
+        console.log(`✅ EM fees set for pair ${chain}-${sibling}`);
+      } else
+        console.log(
+          `❌ EM fees set to 0 for pair ${chain}-${sibling}, ${fees}`
+        );
     })
   );
 };
@@ -75,14 +77,19 @@ const checkEMDFFees = async (
     siblings.map(async (sibling) => {
       const fees = await emContract.executionFees(sibling);
 
-      if (fees.perGasCost.eq(BigNumber.from(0)))
+      if (fees.perGasCost.eq(BigNumber.from(0))) {
         console.log(`❌ EM fees set to 0 for pair ${chain}-${sibling}: {
         perGasCost: ${fees.perGasCost},
         perByteCost: ${fees.perByteCost},
         overhead: ${fees.overhead}
       }`);
-
-      console.log(`✅ EM fees set for pair ${chain}-${sibling}`);
+      } else {
+        console.log(`✅ EM fees set for pair ${chain}-${sibling}, {
+          perGasCost: ${fees.perGasCost},
+          perByteCost: ${fees.perByteCost},
+          overhead: ${fees.overhead}
+      }`);
+      }
     })
   );
 };
