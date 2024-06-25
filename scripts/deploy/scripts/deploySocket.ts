@@ -136,7 +136,7 @@ export const deploySocket = async (
         chainSlug,
         hasher.address,
         signatureVerifier.address,
-        version,
+        version[deployUtils.mode],
       ],
       deployUtils
     );

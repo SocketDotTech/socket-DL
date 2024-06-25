@@ -5,13 +5,16 @@ dotenvConfig();
 import { Contract, Wallet, ethers } from "ethers";
 import { mode, overrides } from "../deploy/config/config";
 import { getProviderFromChainSlug } from "../constants";
+
 import {
-  getAllAddresses,
+  ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
   IntegrationTypes,
-} from "@socket.tech/dl-core";
-import { ChainSlug, isMainnet, isTestnet } from "../../src";
+  getAllAddresses,
+  isMainnet,
+  isTestnet,
+} from "../../src";
 import { formatEther } from "ethers/lib/utils";
 
 /**

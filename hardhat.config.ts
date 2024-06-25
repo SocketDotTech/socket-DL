@@ -110,6 +110,8 @@ if (isProduction) {
       ChainSlug.SIPHER_FUNKI_TESTNET
     ),
     [HardhatChainName.WINR]: getChainConfig(ChainSlug.WINR),
+    [HardhatChainName.POLYNOMIAL]: getChainConfig(ChainSlug.POLYNOMIAL),
+    [HardhatChainName.SYNDR]: getChainConfig(ChainSlug.SYNDR),
     [HardhatChainName.BLAST]: getChainConfig(ChainSlug.BLAST),
   };
 }
@@ -154,6 +156,8 @@ const config: HardhatUserConfig = {
       kinto_devnet: process.env.KINTO_DEVNET_API_KEY || "",
       sipher_funki_testnet: "none",
       winr: "none",
+      polynomial: "none",
+      syndr: "none",
       blast: process.env.BLASTSCAN_API_KEY || "",
     },
     customChains: [
@@ -211,6 +215,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorerl2new-winr-mainnet-0.t.conduit.xyz/api",
           browserURL: "https://explorerl2new-winr-mainnet-0.t.conduit.xyz",
+        },
+      },
+      {
+        network: "polynomial",
+        chainId: ChainId.POLYNOMIAL,
+        urls: {
+          apiURL: "https://explorer.polynomial.fi/api",
+          browserURL: "https://explorer.polynomial.fi",
+        },
+      },
+      {
+        network: "syndr",
+        chainId: ChainId.SYNDR,
+        urls: {
+          apiURL: "https://explorer.syndr.com/api",
+          browserURL: "https://explorer.syndr.com",
         },
       },
       {
