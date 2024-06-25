@@ -137,7 +137,7 @@ export const configureExecutionManager = async (
           signature,
           dstChainSlug: siblingSlug,
           nonce: nextNonce++,
-          gasPrice: 0,
+          perGasCost: 0,
           perByteCost: 0,
           overhead: 0,
           fees: msgValueMaxThreshold(siblingSlug),

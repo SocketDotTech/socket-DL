@@ -75,9 +75,9 @@ const checkEMDFFees = async (
     siblings.map(async (sibling) => {
       const fees = await emContract.executionFees(sibling);
 
-      if (fees.gasPrice.eq(BigNumber.from(0)))
+      if (fees.perGasCost.eq(BigNumber.from(0)))
         console.log(`❌ EM fees set to 0 for pair ${chain}-${sibling}: {
-        gasPrice: ${fees.gasPrice},
+        perGasCost: ${fees.perGasCost},
         perByteCost: ${fees.perByteCost},
         overhead: ${fees.overhead}
       }`);
