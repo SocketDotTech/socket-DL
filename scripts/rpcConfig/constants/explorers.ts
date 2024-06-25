@@ -9,7 +9,7 @@ export const explorers = {
   [ChainSlug.SIPHER_FUNKI_TESTNET]: "https://sepolia-sandbox.funkichain.com",
   [ChainSlug.WINR]: "https://explorerl2new-winr-mainnet-0.t.conduit.xyz",
   [ChainSlug.BLAST]: "https://blastscan.io",
-  [ChainSlug.BSC_TESTNET]:
-    "https://testnet.bscscan.com/assets/bsc/images/svg/logos/logo-light.svg?v=24.5.5.0",
+  [ChainSlug.BSC_TESTNET]: "https://testnet.bscscan.com/",
   [ChainSlug.POLYNOMIAL]: "https://explorer.polynomial.fi",
+  [ChainSlug.SYNDR]: "https://explorer.syndr.com/",
 };
