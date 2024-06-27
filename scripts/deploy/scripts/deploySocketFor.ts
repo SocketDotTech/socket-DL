@@ -12,7 +12,8 @@ import { mode } from "../config/config";
 import { storeAddresses } from "../utils";
 
 export const deployForChains = async (
-  chains: ChainSlug[]
+  chains: ChainSlug[],
+  executionManagerVersion: string
 ): Promise<DeploymentAddresses> => {
   let addresses: DeploymentAddresses;
   try {
@@ -38,6 +39,7 @@ export const deployForChains = async (
 
         while (!allDeployed) {
           const results: ReturnObj = await deploySocket(
+            executionManagerVersion,
             signer,
             chain,
             mode,

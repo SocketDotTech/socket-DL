@@ -42,4 +42,5 @@ export enum ChainId {
   BLAST = 81457,
   BSC_TESTNET = 97,
   POLYNOMIAL = 8008,
+  SYNDR = 404,
 }

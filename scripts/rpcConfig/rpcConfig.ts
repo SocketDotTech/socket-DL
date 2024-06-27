@@ -18,25 +18,28 @@ import {
   polygonCDKChains,
   S3ChainConfig,
   FinalityBucket,
+  DeploymentAddresses,
+  ChainSocketAddresses,
 } from "../../src";
+import { getSiblings } from "../common";
 import {
   explorers,
   icons,
   batcherSupportedChainSlugs,
-  prodFeesUpdaterSupportedChainSlugs,
   rpcs,
   version,
   getFinality,
   getReSyncInterval,
   getDefaultFinalityBucket,
 } from "./constants";
+import { feesUpdaterSupportedChainSlugs } from "./constants/feesUpdaterChainSlugs";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
 
 import dotenv from "dotenv";
 dotenv.config();
 
 export const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
-const addresses = getAllAddresses(deploymentMode);
+const addresses: DeploymentAddresses = getAllAddresses(deploymentMode);
 
 const getBlockNumber = (
   deploymentMode: DeploymentMode,
@@ -50,23 +53,21 @@ const getBlockNumber = (
   }
 };
 
-const getSiblings = (
-  deploymentMode: DeploymentMode,
-  chainSlug: ChainSlug
-): ChainSlug[] => {
+const getOldEMVersionChainSlugs = (): ChainSlug[] => {
+  let chains: ChainSlug[] = [];
   try {
-    const integrations: Integrations = getAddresses(
-      chainSlug,
-      deploymentMode
-    ).integrations;
-    if (!integrations) return [] as ChainSlug[];
+    if (chains.length !== 0) return chains;
+    Object.keys(addresses).map((chain) => {
+      const chainAddress: ChainSocketAddresses = addresses[chain];
+      if (!chainAddress.ExecutionManagerDF)
+        chains.push(parseInt(chain) as ChainSlug);
+    });
 
-    return Object.keys(integrations).map(
-      (chainSlug) => parseInt(chainSlug) as ChainSlug
-    );
+    console.log(chains);
   } catch (error) {
     return [] as ChainSlug[];
   }
+  return chains;
 };
 
 const getChainType = (chainSlug: ChainSlug) => {
@@ -114,16 +115,11 @@ const getAllChainData = async (
   await Promise.all(
     chainSlugs.map(async (c) => (chains[c] = await getChainData(c, txData)))
   );
-
   return chains;
 };
 
 export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
-  const batcherSupportedChainSlugs = [
-    ChainSlug.ARBITRUM_SEPOLIA,
-    ChainSlug.OPTIMISM_SEPOLIA,
-    ChainSlug.SEPOLIA,
-  ];
+  const batcherSupportedChainSlugs = feesUpdaterSupportedChainSlugs();
 
   return {
     version: `dev-${version[DeploymentMode.DEV]}`,
@@ -136,6 +132,8 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
     mainnetIds: MainnetIds,
     addresses,
     chainSlugToId: ChainSlugToId,
+    oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
+    disabledDFFeeChains: [],
   };
 };
 
@@ -157,10 +155,12 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
       ChainSlug.ARBITRUM_SEPOLIA,
       ChainSlug.OPTIMISM_SEPOLIA,
     ],
-    feeUpdaterSupportedChainSlugs: prodFeesUpdaterSupportedChainSlugs(),
+    feeUpdaterSupportedChainSlugs: feesUpdaterSupportedChainSlugs(),
     testnetIds: TestnetIds,
     mainnetIds: MainnetIds,
     addresses,
     chainSlugToId: ChainSlugToId,
+    oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
+    disabledDFFeeChains: [],
   };
 };

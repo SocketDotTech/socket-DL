@@ -43,7 +43,7 @@ export const deploySocket = async () => {
 
   if (!siblings || !roleOwners) throw new Error("Setup not proper!!");
 
-  const addresses = await deployForChains([chain]);
+  const addresses = await deployForChains([chain], executionManagerVersion);
   if (!addresses[chain]) throw new Error("Address not deployed!");
 
   // grant all roles for new chain
@@ -64,7 +64,7 @@ export const deploySocket = async () => {
     socketSigner
   );
 
-  await setManagers(addresses[chain], socketSigner);
+  await setManagers(addresses[chain], socketSigner, executionManagerVersion);
 
   let allAddresses: DeploymentAddresses = JSON.parse(
     fs.readFileSync(deployedAddressPath(mode), "utf-8")

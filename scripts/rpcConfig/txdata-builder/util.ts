@@ -1,4 +1,4 @@
-import { Contract, ethers, utils } from "ethers";
+import { BigNumber, Contract, ethers, utils } from "ethers";
 
 import { packPacketId } from "@socket.tech/dl-common";
 
@@ -7,6 +7,7 @@ import SocketSimulatorABI from "@socket.tech/dl-core/artifacts/abi/SocketSimulat
 import SwitchboardSimulatorABI from "@socket.tech/dl-core/artifacts/abi/SwitchboardSimulator.json";
 import { getProviderFromChainSlug } from "../../constants";
 import { version, ChainSlug } from "../../../src";
+import { hexZeroPad } from "@ethersproject/bytes";
 
 export const simulatorAbiInterface = new ethers.utils.Interface(
   SocketSimulatorABI
@@ -45,3 +46,18 @@ export async function getPacketInfo(
     capacitor: capacitorAddress,
   };
 }
+
+export const packMessageId = (
+  chainSlug: number,
+  plugAddr: string,
+  msgCount: string
+): string => {
+  const nonce = BigNumber.from(msgCount).toHexString();
+  const nonceHex =
+    nonce.length <= 16 ? hexZeroPad(nonce, 8).substring(2) : nonce.substring(2);
+
+  const slug = BigNumber.from(chainSlug).toHexString();
+  const slugHex = slug.length <= 10 ? hexZeroPad(slug, 4) : slug;
+  const id = slugHex + plugAddr.substring(2) + nonceHex;
+  return id.toLowerCase();
+};

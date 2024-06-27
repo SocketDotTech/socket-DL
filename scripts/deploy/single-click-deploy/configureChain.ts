@@ -10,12 +10,7 @@ import {
   ROLES,
 } from "../../../src";
 import { checkAndUpdateRoles } from "../scripts/roles";
-import {
-  executionManagerVersion,
-  mode,
-  newRoleStatus,
-  sendTransaction,
-} from "../config/config";
+import { mode, newRoleStatus, sendTransaction } from "../config/config";
 import { registerSwitchboards } from "../scripts/configureSocket";
 import {
   ChainConfigs,

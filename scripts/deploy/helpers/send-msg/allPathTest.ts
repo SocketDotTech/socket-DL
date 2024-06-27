@@ -105,7 +105,7 @@ export const sendMessagesToAllPaths = async (params: {
   count: number;
 }) => {
   const amount = 100;
-  const msgGasLimit = "100000"; // update this when add fee logic for dst gas limit
+  const msgGasLimit = "200000"; // update this when add fee logic for dst gas limit
   try {
     let { senderChains, receiverChains, count } = params;
 
@@ -157,7 +157,7 @@ export const sendMessagesToAllPaths = async (params: {
 
             // value = 100
             let executionParams =
-              "0x0100000000000000000000000000000000000000000000000000000000000000";
+              "0x0000000000000000000000000000000000000000000000000000000000000000";
             let transmissionParams =
               "0x0101000000010000000000000000000000000000000000000000000000000000";
             let data = counter.interface.encodeFunctionData(
@@ -174,7 +174,7 @@ export const sendMessagesToAllPaths = async (params: {
             let to = counter.address;
             let value = await socket.getMinFees(
               msgGasLimit,
-              100, // payload size
+              Math.ceil(data.length / 2), // payload size
               executionParams,
               transmissionParams,
               siblingSlug,

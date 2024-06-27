@@ -31,11 +31,7 @@ export const updateConstants = async (
     `,\n  [ChainSlug.${chainName.toUpperCase()}]: checkEnvVar("${chainName.toUpperCase()}_RPC"),\n};`,
     ",\n};"
   );
-  await updateFile(
-    "confirmations.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: 1,\n};`,
-    ",\n};"
-  );
+
   await updateFile(
     "batcherSupportedChainSlug.ts",
     `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,

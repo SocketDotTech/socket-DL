@@ -7,6 +7,15 @@ pragma solidity 0.8.19;
  * @dev It is also responsible for collecting all the socket fees, which can then be pulled by others
  */
 interface IExecutionManager {
+    struct ExecutionFeesParam {
+        // for calculating perGasCost * gasLimit
+        uint80 perGasCost;
+        // for calculating cost for executing payload (needed for rollups)
+        uint80 perByteCost;
+        // additional cost (differs based on chain)
+        uint80 overhead;
+    }
+
     /**
      * @notice Returns the executor of the packed message and whether the executor is authorized
      * @param packedMessage The message packed with payload, fees and config
@@ -108,7 +117,7 @@ interface IExecutionManager {
     function setExecutionFees(
         uint256 nonce_,
         uint32 siblingChainSlug_,
-        uint128 executionFees_,
+        ExecutionFeesParam calldata executionFees_,
         bytes calldata signature_
     ) external;
 
