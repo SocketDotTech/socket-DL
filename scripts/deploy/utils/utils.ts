@@ -116,7 +116,8 @@ export const verify = async (
     return true;
   } catch (error) {
     console.log("Error during verification", error);
-    if (error.toString().includes("Contract source code already verified")) return true;
+    if (error.toString().includes("Contract source code already verified"))
+      return true;
   }
 
   return false;

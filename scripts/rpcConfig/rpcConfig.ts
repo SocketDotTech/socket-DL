@@ -20,7 +20,6 @@ import {
   FinalityBucket,
 } from "../../src";
 import {
-  reSyncInterval,
   explorers,
   icons,
   batcherSupportedChainSlugs,
@@ -28,8 +27,9 @@ import {
   rpcs,
   version,
   getFinality,
+  getReSyncInterval,
+  getDefaultFinalityBucket,
 } from "./constants";
-import { defaultFinalityBucket } from "./constants/defaultFinalityBucket";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
 
 import dotenv from "dotenv";
@@ -163,14 +163,4 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
     addresses,
     chainSlugToId: ChainSlugToId,
   };
-};
-
-export const getDefaultFinalityBucket = (
-  chainSlug: ChainSlug
-): FinalityBucket => {
-  return defaultFinalityBucket[chainSlug] ?? FinalityBucket.fast;
-};
-
-export const getReSyncInterval = (chainSlug: ChainSlug) => {
-  return reSyncInterval[chainSlug] ?? 0;
 };
