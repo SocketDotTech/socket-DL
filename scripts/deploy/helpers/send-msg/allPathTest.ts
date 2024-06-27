@@ -31,9 +31,8 @@ interface RequestObj {
 
 const API_BASE_URL =
   mode == DeploymentMode.DEV
-    ? "https://raf5spoep4.execute-api.us-east-1.amazonaws.com/dev/v1"
-    : "https://prod.dlapi.socket.tech";
-
+    ? process.env.DL_API_DEV_URL
+    : process.env.DL_API_PROD_URL;
 const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {
   console.log(chainSlug, isMainnet(chainSlug));
   if (isTestnet(chainSlug))
@@ -160,16 +159,16 @@ export const sendMessagesToAllPaths = async (params: {
             let executionParams =
               "0x0000000000000000000000000000000000000000000000000000000000000000";
             let transmissionParams =
-              "0x0000000000000000000000000000000000000000000000000000000000000000";
+              "0x0101000000010000000000000000000000000000000000000000000000000000";
             let data = counter.interface.encodeFunctionData(
               "remoteAddOperation",
               [
                 siblingSlug,
                 amount,
                 msgGasLimit,
-                // executionParams,
-                ethers.constants.HashZero,
-                ethers.constants.HashZero,
+                executionParams,
+                // ethers.constants.HashZero,
+                transmissionParams,
               ]
             );
             let to = counter.address;
@@ -191,7 +190,7 @@ export const sendMessagesToAllPaths = async (params: {
             const gasLimit: number | string | undefined =
               chainSlug === ChainSlug.ARBITRUM ||
               chainSlug === ChainSlug.ARBITRUM_SEPOLIA
-                ? 200000
+                ? 2000000
                 : overrides(chainSlug)?.gasLimit
                 ? overrides(chainSlug).gasLimit.toString()
                 : undefined;
