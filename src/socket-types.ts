@@ -102,6 +102,7 @@ export interface ChainSocketAddresses {
   SocketBatcher: string;
   integrations?: Integrations;
   OpenExecutionManager?: string;
+  ExecutionManagerDF?: string;
   SocketSimulator?: string;
   SimulatorUtils?: string;
   SwitchboardSimulator?: string;
@@ -126,6 +127,7 @@ export enum ROLES {
 export enum CORE_CONTRACTS {
   CapacitorFactory = "CapacitorFactory",
   ExecutionManager = "ExecutionManager",
+  ExecutionManagerDF = "ExecutionManagerDF",
   OpenExecutionManager = "OpenExecutionManager",
   Hasher = "Hasher",
   SignatureVerifier = "SignatureVerifier",
@@ -141,6 +143,12 @@ export enum CORE_CONTRACTS {
 export const REQUIRED_ROLES = {
   CapacitorFactory: [ROLES.RESCUE_ROLE],
   ExecutionManager: [
+    ROLES.WITHDRAW_ROLE,
+    ROLES.RESCUE_ROLE,
+    ROLES.GOVERNANCE_ROLE,
+    ROLES.EXECUTOR_ROLE,
+  ],
+  ExecutionManagerDF: [
     ROLES.WITHDRAW_ROLE,
     ROLES.RESCUE_ROLE,
     ROLES.GOVERNANCE_ROLE,
@@ -192,6 +200,7 @@ export const REQUIRED_ROLES = {
 export const REQUIRED_CHAIN_ROLES = {
   TransmitManager: [ROLES.TRANSMITTER_ROLE, ROLES.FEES_UPDATER_ROLE],
   [CORE_CONTRACTS.ExecutionManager]: [ROLES.FEES_UPDATER_ROLE],
+  [CORE_CONTRACTS.ExecutionManagerDF]: [ROLES.FEES_UPDATER_ROLE],
   [CORE_CONTRACTS.OpenExecutionManager]: [ROLES.FEES_UPDATER_ROLE],
   FastSwitchboard: [ROLES.WATCHER_ROLE, ROLES.FEES_UPDATER_ROLE],
   FastSwitchboard2: [ROLES.WATCHER_ROLE, ROLES.FEES_UPDATER_ROLE],
@@ -230,6 +239,7 @@ export interface ChainTxData {
   sealTxData: any[];
   proposeTxData: any[];
   attestTxData: any[];
+  executeTxData: any[];
   owner: string;
 }
 
@@ -263,4 +273,6 @@ export type S3Config = {
   watcherSupportedChainSlugs: ChainSlug[];
   nativeSupportedChainSlugs: ChainSlug[];
   feeUpdaterSupportedChainSlugs: ChainSlug[];
+  oldEMVersionChainSlugs: ChainSlug[];
+  disabledDFFeeChains: ChainSlug[];
 };

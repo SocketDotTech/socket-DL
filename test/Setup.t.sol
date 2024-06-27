@@ -12,7 +12,7 @@ import "../contracts/switchboard/default-switchboards/FastSwitchboard.sol";
 import "../contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol";
 
 import "../contracts/TransmitManager.sol";
-import "../contracts/ExecutionManager.sol";
+import "../contracts/ExecutionManagerDF.sol";
 import "../contracts/OpenExecutionManager.sol";
 import "../contracts/CapacitorFactory.sol";
 import "../contracts/utils/AccessRoles.sol";
@@ -75,7 +75,6 @@ contract Setup is Test {
     uint256 internal _minMsgGasLimit = 30548;
     uint256 internal _sealGasLimit = 150000;
     uint128 internal _transmissionFees = 350000000000;
-    uint128 internal _executionFees = 110000000000;
     uint128 internal _switchboardFees = 100000;
     uint128 internal _verificationOverheadFees = 100000;
     uint256 internal _msgValueMaxThreshold = 1000;
@@ -85,6 +84,10 @@ contract Setup is Test {
     uint256 internal _executionOverhead = 50000;
     uint256 internal _capacitorType = 1;
     uint256 internal constant DEFAULT_BATCH_LENGTH = 1;
+
+    uint80 internal perGasCost = 1 gwei;
+    uint80 internal perByteCost = 50 gwei;
+    uint80 internal overhead = 10 gwei;
 
     bytes32 internal _transmissionParams = bytes32(0);
     bool isExecutionOpen = false;
@@ -110,7 +113,7 @@ contract Setup is Test {
         SignatureVerifier sigVerifier__;
         CapacitorFactory capacitorFactory__;
         TransmitManager transmitManager__;
-        ExecutionManager executionManager__;
+        ExecutionManagerDF executionManager__;
         SocketConfigContext[] configs__;
     }
 
@@ -210,7 +213,13 @@ contract Setup is Test {
             _socketOwner
         );
 
-        _setExecutionFees(cc_, remoteChainSlug_, _executionFees);
+        IExecutionManager.ExecutionFeesParam
+            memory executionFees = IExecutionManager.ExecutionFeesParam(
+                perGasCost,
+                perByteCost,
+                overhead
+            );
+        _setExecutionFees(cc_, remoteChainSlug_, executionFees);
         _setMsgValueMaxThreshold(cc_, remoteChainSlug_, _msgValueMaxThreshold);
         _setRelativeNativeTokenPrice(
             cc_,
@@ -307,7 +316,7 @@ contract Setup is Test {
     function _setExecutionFees(
         ChainContext storage cc_,
         uint32 remoteChainSlug_,
-        uint128 executionFees_
+        IExecutionManager.ExecutionFeesParam memory executionFees_
     ) internal {
         //set ExecutionFees for remoteChainSlug
         bytes32 feesUpdateDigest = keccak256(
@@ -552,7 +561,7 @@ contract Setup is Test {
                 cc_.sigVerifier__
             );
         } else {
-            cc_.executionManager__ = new ExecutionManager(
+            cc_.executionManager__ = new ExecutionManagerDF(
                 deployer_,
                 cc_.chainSlug,
                 cc_.socket__,

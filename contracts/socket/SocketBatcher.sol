@@ -9,7 +9,18 @@ import "../interfaces/ISocket.sol";
 import "../interfaces/ICapacitor.sol";
 import "../switchboard/default-switchboards/FastSwitchboard.sol";
 import "../interfaces/INativeRelay.sol";
+import "../interfaces/IExecutionManager.sol";
+
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
+
+interface IExecutionManagerOld {
+    function setExecutionFees(
+        uint256 nonce_,
+        uint32 siblingChainSlug_,
+        uint128 executionFees_,
+        bytes calldata signature_
+    ) external;
+}
 
 /**
  * @title SocketBatcher
@@ -142,7 +153,7 @@ contract SocketBatcher is AccessControl {
      * @param fees The total fees needed
      * @param signature The signature of the packet data.
      */
-    struct SetFeesRequest {
+    struct SetTransmissionFeesRequest {
         uint256 nonce;
         uint32 dstChainSlug;
         uint128 fees;
@@ -150,8 +161,26 @@ contract SocketBatcher is AccessControl {
         bytes4 functionSelector;
     }
 
+    struct SetExecutionFeesRequest {
+        uint256 nonce;
+        uint32 dstChainSlug;
+        uint80 perGasCost;
+        uint80 perByteCost;
+        uint80 overhead;
+        uint256 fees;
+        bytes signature;
+        bytes4 functionSelector;
+    }
+
+    struct Call {
+        address target;
+        bytes callData;
+    }
+
     event FailedLogBytes(bytes reason);
     event FailedLog(string reason);
+
+    error MultiCallRevert();
 
     /**
      * @notice sets fees in batch for switchboards
@@ -180,19 +209,19 @@ contract SocketBatcher is AccessControl {
     /**
      * @notice sets fees in batch for transmit manager
      * @param contractAddress_ address of contract to set fees
-     * @param setFeesRequests_ the list of requests
+     * @param setTransmissionFeesRequests_ the list of requests
      */
     function setTransmissionFeesBatch(
         address contractAddress_,
-        SetFeesRequest[] calldata setFeesRequests_
+        SetTransmissionFeesRequest[] calldata setTransmissionFeesRequests_
     ) external {
-        uint256 feeRequestLength = setFeesRequests_.length;
+        uint256 feeRequestLength = setTransmissionFeesRequests_.length;
         for (uint256 index = 0; index < feeRequestLength; ) {
             ITransmitManager(contractAddress_).setTransmissionFees(
-                setFeesRequests_[index].nonce,
-                setFeesRequests_[index].dstChainSlug,
-                setFeesRequests_[index].fees,
-                setFeesRequests_[index].signature
+                setTransmissionFeesRequests_[index].nonce,
+                setTransmissionFeesRequests_[index].dstChainSlug,
+                setTransmissionFeesRequests_[index].fees,
+                setTransmissionFeesRequests_[index].signature
             );
             unchecked {
                 ++index;
@@ -207,53 +236,66 @@ contract SocketBatcher is AccessControl {
      */
     function setExecutionFeesBatch(
         address contractAddress_,
-        SetFeesRequest[] calldata setFeesRequests_
+        SetExecutionFeesRequest[] calldata setFeesRequests_
     ) external {
         uint256 feeRequestLength = setFeesRequests_.length;
+
         for (uint256 index = 0; index < feeRequestLength; ) {
             if (
                 setFeesRequests_[index].functionSelector ==
+                IExecutionManagerOld.setExecutionFees.selector
+            ) {
+                IExecutionManagerOld(contractAddress_).setExecutionFees(
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    uint128(setFeesRequests_[index].fees),
+                    setFeesRequests_[index].signature
+                );
+            } else if (
+                setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setExecutionFees.selector
-            )
+            ) {
                 IExecutionManager(contractAddress_).setExecutionFees(
                     setFeesRequests_[index].nonce,
                     setFeesRequests_[index].dstChainSlug,
-                    setFeesRequests_[index].fees,
+                    IExecutionManager.ExecutionFeesParam(
+                        setFeesRequests_[index].perGasCost,
+                        setFeesRequests_[index].perByteCost,
+                        setFeesRequests_[index].overhead
+                    ),
                     setFeesRequests_[index].signature
                 );
-
-            if (
+            } else if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setRelativeNativeTokenPrice.selector
-            )
+            ) {
                 IExecutionManager(contractAddress_).setRelativeNativeTokenPrice(
-                    setFeesRequests_[index].nonce,
-                    setFeesRequests_[index].dstChainSlug,
-                    setFeesRequests_[index].fees,
-                    setFeesRequests_[index].signature
-                );
-
-            if (
+                        setFeesRequests_[index].nonce,
+                        setFeesRequests_[index].dstChainSlug,
+                        setFeesRequests_[index].fees,
+                        setFeesRequests_[index].signature
+                    );
+            } else if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setMsgValueMaxThreshold.selector
-            )
+            ) {
                 IExecutionManager(contractAddress_).setMsgValueMaxThreshold(
                     setFeesRequests_[index].nonce,
                     setFeesRequests_[index].dstChainSlug,
                     setFeesRequests_[index].fees,
                     setFeesRequests_[index].signature
                 );
-
-            if (
+            } else if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setMsgValueMinThreshold.selector
-            )
+            ) {
                 IExecutionManager(contractAddress_).setMsgValueMinThreshold(
                     setFeesRequests_[index].nonce,
                     setFeesRequests_[index].dstChainSlug,
                     setFeesRequests_[index].fees,
                     setFeesRequests_[index].signature
                 );
+            }
 
             unchecked {
                 ++index;
@@ -665,5 +707,24 @@ contract SocketBatcher is AccessControl {
         uint256 amount_
     ) external onlyRole(RESCUE_ROLE) {
         RescueFundsLib.rescueFunds(token_, rescueTo_, amount_);
+    }
+
+    function multicall(
+        Call[] calldata calls
+    ) external view returns (uint256 blockNumber, bytes[] memory returnData) {
+        uint256 length = calls.length;
+        returnData = new bytes[](length);
+
+        for (uint256 index = 0; index < length; ) {
+            (bool success, bytes memory result) = calls[index]
+                .target
+                .staticcall(calls[index].callData);
+            if (!success) revert MultiCallRevert();
+            returnData[index] = result;
+
+            unchecked {
+                ++index;
+            }
+        }
     }
 }

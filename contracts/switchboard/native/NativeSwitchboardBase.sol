@@ -5,7 +5,6 @@ import "../../interfaces/ISocket.sol";
 import "../../interfaces/ISwitchboard.sol";
 import "../../interfaces/ICapacitor.sol";
 import "../../interfaces/ISignatureVerifier.sol";
-import "../../interfaces/IExecutionManager.sol";
 import "../../libraries/RescueFundsLib.sol";
 import "../../utils/AccessControlExtended.sol";
 

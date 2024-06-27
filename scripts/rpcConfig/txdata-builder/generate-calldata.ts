@@ -1,12 +1,12 @@
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { Contract, Wallet } from "ethers";
+import { Contract, Wallet, constants } from "ethers";
 
 import OwnableABIInterface from "@socket.tech/dl-core/artifacts/abi/Ownable.json";
-import { PacketInfo, VERSION_HASH, getPacketInfo } from "./util";
+import { PacketInfo, VERSION_HASH, getPacketInfo, packMessageId } from "./util";
 import { getProviderFromChainSlug } from "../../constants";
 import { deploymentMode } from "../rpcConfig";
 import { TxData, ChainSlug, getAllAddresses, ChainTxData } from "../../../src";
-import { prodFeesUpdaterSupportedChainSlugs } from "../constants";
+import { feesUpdaterSupportedChainSlugs } from "../constants/feesUpdaterChainSlugs";
 
 const randomPrivateKey =
   "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
@@ -78,6 +78,38 @@ export const getAttestTxData = async (
   return attestBatchDataArgs;
 };
 
+export const getExecuteTxData = async (
+  chainSlug: ChainSlug,
+  signer: Wallet,
+  packetDetails: PacketInfo
+) => {
+  const digest = keccak256(defaultAbiCoder.encode(["uint256"], ["0"]));
+  const signature = await signer.signMessage(arrayify(digest));
+  const msgId = packMessageId(
+    chainSlug,
+    "0x0000000000000000000000000000000000003039",
+    "0"
+  );
+
+  const executionDetails = {
+    packetId: packetDetails.packetId,
+    proposalCount: 0,
+    executionGasLimit: 100000,
+    decapacitorProof: constants.HashZero,
+    signature,
+  };
+  const msgDetails = {
+    msgId,
+    executionFee: 100000,
+    minMsgGasLimit: 100000,
+    executionParams: constants.HashZero,
+    payload: signature,
+  };
+
+  const executeBatchDataArgs = [executionDetails, msgDetails];
+  return executeBatchDataArgs;
+};
+
 export const getTxData = async (): Promise<TxData> => {
   // any provider, just for signing purpose
   const signer = new Wallet(
@@ -85,7 +117,7 @@ export const getTxData = async (): Promise<TxData> => {
     getProviderFromChainSlug(ChainSlug.SEPOLIA)
   );
   const addresses = getAllAddresses(deploymentMode);
-  const allChainSlugs: ChainSlug[] = prodFeesUpdaterSupportedChainSlugs()
+  const allChainSlugs: ChainSlug[] = feesUpdaterSupportedChainSlugs()
     .map((c) => c as ChainSlug)
     .filter((c) => addresses[c]?.["SocketSimulator"]);
 
@@ -114,6 +146,8 @@ export const getTxData = async (): Promise<TxData> => {
       packetInfo,
       sbSimulatorAddress
     );
+    const executeTxData = await getExecuteTxData(chainSlug, signer, packetInfo);
+
     const simulatorContract = new Contract(
       sbSimulatorAddress,
       OwnableABIInterface,
@@ -125,6 +159,7 @@ export const getTxData = async (): Promise<TxData> => {
       sealTxData,
       proposeTxData,
       attestTxData,
+      executeTxData,
       owner,
     };
   }

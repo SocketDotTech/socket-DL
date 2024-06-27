@@ -169,7 +169,7 @@ contract TransmitManagerTest is Setup {
             _socketOwnerPrivateKey
         );
 
-        ExecutionManager em = ExecutionManager(
+        ExecutionManagerDF em = ExecutionManagerDF(
             address(_a.socket__.executionManager__())
         );
 

@@ -38,6 +38,8 @@ contract SocketSimulator is AccessControl {
     bytes32 public immutable version;
     uint32 public immutable chainSlug;
     uint32 public immutable siblingChain;
+    address constant plug = address(12345);
+
     mapping(address => uint32) public capacitorToSlug;
 
     mapping(bytes32 => uint256) public proposalCount;
@@ -103,22 +105,18 @@ contract SocketSimulator is AccessControl {
         signatureVerifier__ = ISignatureVerifier(signatureVerifier_);
     }
 
-    function setup(
-        address plug_,
-        address switchboard_,
-        address utils_
-    ) external onlyOwner {
+    function setup(address switchboard_, address utils_) external onlyOwner {
         utils__ = ISimulatorUtils(utils_);
 
         bytes32 packedMessage = hasher__.packMessage(
             chainSlug,
-            plug_,
+            plug,
             siblingChain,
-            plug_,
+            plug,
             ISocket.MessageDetails(
                 bytes32(
                     (uint256(chainSlug) << 224) |
-                        (uint256(uint160(plug_)) << 64) |
+                        (uint256(uint160(plug)) << 64) |
                         0
                 ),
                 0,
@@ -129,10 +127,10 @@ contract SocketSimulator is AccessControl {
         );
 
         capacitor = new SingleCapacitor(address(this), msg.sender);
-        PlugConfig storage plugConfig = _plugConfigs[plug_][siblingChain];
+        PlugConfig storage plugConfig = _plugConfigs[plug][siblingChain];
 
         capacitorToSlug[address(capacitor)] = siblingChain;
-        plugConfig.siblingPlug = plug_;
+        plugConfig.siblingPlug = plug;
         plugConfig.capacitor__ = capacitor;
         plugConfig.decapacitor__ = new SingleDecapacitor(msg.sender);
         plugConfig.inboundSwitchboard__ = ISwitchboard(switchboard_);
@@ -270,6 +268,7 @@ contract SocketSimulator is AccessControl {
 
         // verify message was part of the packet and
         // authenticated by respective switchboard
+
         _verify(
             executionDetails_.packetId,
             executionDetails_.proposalCount,
@@ -338,10 +337,10 @@ contract SocketSimulator is AccessControl {
         ISocket.MessageDetails memory messageDetails_
     ) internal {
         // NOTE: external un-trusted call
-        IPlug(localPlug_).inbound{gas: executionGasLimit_, value: msg.value}(
-            remoteChainSlug_,
-            messageDetails_.payload
-        );
+        // IPlug(localPlug_).inbound{gas: executionGasLimit_, value: msg.value}(
+        //     remoteChainSlug_,
+        //     messageDetails_.payload
+        // );
 
         utils__.updateExecutionFees(
             executor_,

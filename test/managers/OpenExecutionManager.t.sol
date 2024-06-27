@@ -10,7 +10,6 @@ contract OpenExecutionManagerTest is Setup {
     event FeesWithdrawn(address account_, uint256 value_);
     error MsgValueTooLow();
     error MsgValueTooHigh();
-    error PayloadTooLarge();
     error InsufficientMsgValue();
 
     function setUp() public {

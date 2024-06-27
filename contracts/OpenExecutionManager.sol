@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.19;
-import "./ExecutionManager.sol";
+import "./ExecutionManagerDF.sol";
 
 /**
  * @title OpenExecutionManager
  * @dev ExecutionManager contract with open execution
  */
-contract OpenExecutionManager is ExecutionManager {
+contract OpenExecutionManager is ExecutionManagerDF {
     /**
      * @dev Constructor for OpenExecutionManager contract
      * @param owner_ Address of the contract owner
@@ -19,7 +19,7 @@ contract OpenExecutionManager is ExecutionManager {
         uint32 chainSlug_,
         ISocket socket_,
         ISignatureVerifier signatureVerifier_
-    ) ExecutionManager(owner_, chainSlug_, socket_, signatureVerifier_) {}
+    ) ExecutionManagerDF(owner_, chainSlug_, socket_, signatureVerifier_) {}
 
     /**
      * @notice This function allows all executors.

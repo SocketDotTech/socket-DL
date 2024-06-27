@@ -16,7 +16,6 @@ import { arrayify, defaultAbiCoder, keccak256, id } from "ethers/lib/utils";
 import {
   capacitorType,
   maxPacketLength,
-  executionManagerVersion,
   overrides,
   msgValueMaxThreshold,
 } from "../config/config";
@@ -56,7 +55,8 @@ export const registerSwitchboards = async (
 
 export const setManagers = async (
   addr: ChainSocketAddresses,
-  socketSigner: Wallet
+  socketSigner: Wallet,
+  executionManagerVersion: CORE_CONTRACTS
 ) => {
   const socket = (
     await getInstance(CORE_CONTRACTS.Socket, addr.Socket)
@@ -138,6 +138,9 @@ export const configureExecutionManager = async (
           signature,
           dstChainSlug: siblingSlug,
           nonce: nextNonce++,
+          perGasCost: 0,
+          perByteCost: 0,
+          overhead: 0,
           fees: msgValueMaxThreshold(siblingSlug),
           functionSelector: "0xa1885700", // setMsgValueMaxThreshold
         };

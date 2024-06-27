@@ -8,11 +8,11 @@ import {
   isMainnet,
   isTestnet,
 } from "../../../src";
-import { mode, overrides } from "../../deploy/config";
+import { mode, overrides } from "../../deploy/config/config";
 import OwnableArtifact from "../../../out/Ownable.sol/Ownable.json";
 import { getProviderFromChainSlug } from "../../constants";
 import { Signer, Wallet, ethers } from "ethers";
-import { Ownable } from "../../../typechain-types/utils/Ownable";
+import { Ownable } from "../../../typechain-types/contracts/utils/Ownable";
 
 dotenvConfig();
 
