@@ -1844,7 +1844,8 @@
     },
     "SocketSimulator": "0xf4B9Cddc9d326F6e01A1A61b8eF3Df44F1E08449",
     "SimulatorUtils": "0xb07F38FD7e8703100294c257f0A403cEb569bBdD",
-    "SwitchboardSimulator": "0x8145cDEf14Eb07613BC0e6f689A093B41d34FEEf"
+    "SwitchboardSimulator": "0x8145cDEf14Eb07613BC0e6f689A093B41d34FEEf",
+    "CapacitorSimulator": "0x7a7F0B8B738FaA8f0630a92a3652DEbB0eB457E7"
   },
   "7887": {
     "SignatureVerifier": "0x56Ac0e336f0c3620dCaF8d361E8E14eA73C31f5d",
