@@ -84,14 +84,6 @@ const deleteOldContracts = async (chains: ChainSlug[]) => {
   }
 };
 
-const deploySimulators = async (chains: ChainSlug[]) => {
-  try {
-    await deployForChains(chains, emVersion);
-  } catch (error) {
-    console.log("Error:", error);
-  }
-};
-
 const deploy = async (chains: ChainSlug[]) => {
   try {
     const addresses: DeploymentAddresses = await deployForChains(
@@ -165,10 +157,6 @@ const main = async () => {
           title: "Delete",
           value: "delete",
         },
-        {
-          title: "DeploySimulators",
-          value: "DeploySimulators",
-        },
       ],
     },
     {
@@ -215,9 +203,6 @@ const main = async () => {
       break;
     case "delete":
       await deleteOldContracts(chains);
-      break;
-    case "DeploySimulators":
-      await deploySimulators(chains);
       break;
     case "exit":
       process.exit(0);
