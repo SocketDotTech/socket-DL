@@ -138,9 +138,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.ARBITRUM_SEPOLIA) {
     return {
-      // type: 1,
-      // gasLimit: 50_000_000,
-      // gasPrice: 1_867_830_000,
+      type: 1,
+      gasLimit: 50_000_000,
+      gasPrice: 200_000_000,
     };
   } else if (chain == ChainSlug.OPTIMISM) {
     return {
@@ -163,14 +163,14 @@ export const overrides = (
   } else if (chain == ChainSlug.BSC) {
     return {
       type,
-      gasLimit: 3000000,
+      gasLimit: 6_000_000,
       gasPrice,
     };
   } else if (chain == ChainSlug.MAINNET) {
     return {
       // type: 1,
-      gasLimit: 4_000_000,
-      gasPrice: 30_000_000_000,
+      gasLimit: 6_000_000,
+      gasPrice: 5_000_000_000,
     };
   } else if (chain == ChainSlug.POLYGON_MAINNET) {
     return {
@@ -235,7 +235,7 @@ export const overrides = (
   } else if (chain == ChainSlug.HOOK) {
     return {
       // type: 1,
-      gasLimit: 3_000_000,
+      gasLimit: 7_000_000,
       // gasPrice: 100000000,
     };
   } else if (chain == ChainSlug.REYA_CRONOS) {
@@ -291,6 +291,12 @@ export const overrides = (
       // type,
       // gasLimit,
       // gasPrice,
+    };
+  } else if (chain == ChainSlug.MANTLE) {
+    return {
+      type: 1,
+      gasLimit: 10_000_000_000,
+      gasPrice: 30_000_000,
     };
   } else if (chainConfig[chain] && chainConfig[chain].overrides) {
     return chainConfig[chain].overrides!;
