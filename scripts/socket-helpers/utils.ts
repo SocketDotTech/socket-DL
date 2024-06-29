@@ -3,10 +3,10 @@ import { defaultAbiCoder } from "ethers/lib/utils";
 import PlugABI from "@socket.tech/dl-core/artifacts/abi/IPlug.json";
 
 export type TxData = {
-  from: string,
-  to: string,
-  data: string
-}
+  from: string;
+  to: string;
+  data: string;
+};
 
 export type Inputs = {
   amount: string;
@@ -18,7 +18,7 @@ export type Inputs = {
 export type ChainDetails = {
   srcChainSlug: number;
   dstChainSlug: number;
-}
+};
 
 export const abiInterface = new utils.Interface(PlugABI);
 
