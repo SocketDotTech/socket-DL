@@ -9,7 +9,6 @@ import {
   TestnetIds,
   getAllAddresses,
 } from "../../../src";
-import { configureRoles } from "../scripts/configureRoles";
 import { deployForChains } from "../scripts/deploySocketFor";
 import prompts from "prompts";
 import { checkAndUpdateRoles } from "../scripts/roles";
@@ -73,9 +72,6 @@ const deleteOldContracts = async (chains: ChainSlug[]) => {
     await Promise.all(
       Object.keys(addresses).map(async (chain) => {
         if (chains.includes(parseInt(chain) as ChainSlug)) {
-          addresses[chain].SocketSimulator = "";
-          addresses[chain].SimulatorUtils = "";
-          addresses[chain].SwitchboardSimulator = "";
           addresses[chain].Counter = "";
           addresses[chain].SocketBatcher = "";
         }
@@ -83,6 +79,14 @@ const deleteOldContracts = async (chains: ChainSlug[]) => {
     );
 
     await storeAllAddresses(addresses, mode);
+  } catch (error) {
+    console.log("Error:", error);
+  }
+};
+
+const deploySimulators = async (chains: ChainSlug[]) => {
+  try {
+    await deployForChains(chains, emVersion);
   } catch (error) {
     console.log("Error:", error);
   }
@@ -161,6 +165,10 @@ const main = async () => {
           title: "Delete",
           value: "delete",
         },
+        {
+          title: "DeploySimulators",
+          value: "DeploySimulators",
+        },
       ],
     },
     {
@@ -207,6 +215,9 @@ const main = async () => {
       break;
     case "delete":
       await deleteOldContracts(chains);
+      break;
+    case "DeploySimulators":
+      await deploySimulators(chains);
       break;
     case "exit":
       process.exit(0);
