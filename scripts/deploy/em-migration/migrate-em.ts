@@ -27,7 +27,7 @@ import { getProviderFromChainSlug } from "../../constants";
 import { storeAllAddresses } from "../utils";
 import { getSiblingsFromAddresses } from "../../common";
 
-const emVersion = CORE_CONTRACTS.ExecutionManagerDF;
+const emVersion = CORE_CONTRACTS.ExecutionManager;
 
 export const configureExecutionManagers = async (
   chains: ChainSlug[],
