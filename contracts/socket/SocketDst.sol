@@ -247,7 +247,7 @@ abstract contract SocketDst is SocketBase {
         PlugConfig memory plugConfig_,
         bytes memory decapacitorProof_
     ) internal {
-        // NOTE: is the the first un-trusted call in the system, another one is Plug.inbound
+        // NOTE: is the first un-trusted call in the system, another one is Plug.inbound
         if (
             !ISwitchboard(plugConfig_.inboundSwitchboard__).allowPacket(
                 packetRoot_,

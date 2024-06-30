@@ -44,13 +44,13 @@ import { Contract } from "ethers";
  * --testnets       Run for testnets.
  *                  Default is false.
  * 
- * --integration  Run for sepcified integration type. Can be fast or optimistic.
+ * --integration  Run for specified integration type. Can be fast or optimistic.
  *                  Default is fast.
  */
 
 const main = async () => {
   if (trip && untrip) {
-    console.log("both trip and untrip flags cant be passed. pass one of them.");
+    console.log("both trip and untrip flags can't be passed. pass one of them.");
     return;
   }
   if (!trip && !untrip) {
