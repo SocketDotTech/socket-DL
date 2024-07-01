@@ -11,14 +11,21 @@ import { getProviderFromChainSlug } from "../../../constants";
 import SocketABI from "../../../../out/Socket.sol/Socket.json";
 
 import path from "path";
-import { mode } from "../../config/config";
+import { mode, overrides } from "../../config/config";
 import {
   CORE_CONTRACTS,
+  DeploymentMode,
   HardhatChainName,
   hardhatChainNameToSlug,
 } from "../../../../src";
 import { sleep } from "@socket.tech/dl-common";
 import { formatEther } from "ethers/lib/utils";
+import { ChainSlug } from "@socket.tech/dl-core";
+
+const API_BASE_URL =
+  mode == DeploymentMode.DEV
+    ? process.env.DL_API_DEV_URL
+    : process.env.DL_API_PROD_URL;
 
 const deployedAddressPath = path.join(
   __dirname,
@@ -31,10 +38,14 @@ const helperContractAddress = {
   11155111: "0x91C27Cad374246314E756f8Aa2f62F433d6F102C",
   80001: "0x7d96De5fa59F61457da325649bcF2B4e500055Ad",
   421613: "0x60c3A0bCEa43F5aaf8743a41351C0a7b982aE01E",
+  [ChainSlug.ARBITRUM_SEPOLIA]: "0x2c3E3Ff54d82cA96BBB2F4529bee114eB200e3F0",
+  [ChainSlug.OPTIMISM_SEPOLIA]: "0x4B882c8A1009c0a4fd80151FEb6d1a3656C49C9a",
   420: "0xD21e53E568FD904c2599E41aFC2434ea11b38A2e",
   5: "0x28f26c101e3F694f1d03D477b4f34F8835141611",
 };
 
+const payload =
+  "0xbad314e77c9e165fb6cdad2b69ae15ea10f47a976480a84ea0ef9a8b8817b997000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000";
 const helperABI = [
   {
     inputs: [
@@ -58,6 +69,11 @@ const helperABI = [
         name: "totalMsgs_",
         type: "uint256",
       },
+      {
+        internalType: "bytes",
+        name: "payload",
+        type: "bytes",
+      },
     ],
     name: "remoteAddOperationBatch",
     outputs: [],
@@ -66,15 +82,15 @@ const helperABI = [
   },
 ];
 
-const WAIT_FOR_TX = false;
+const WAIT_FOR_TX = true;
 const totalIterations = 10;
 
 // usage:
-// npx ts-node scripts/deploy/scripts/outbound-load-test.ts --chain optimism-goerli --remoteChain arbitrum-goerli --numOfRequests 10 --waitTime 6
+// npx ts-node scripts/deploy/helpers/send-msg/outbound-load-test.ts --chain arbitrum_sepolia --remoteChain optimism_sepolia --numOfRequests 10 --waitTime 6
 
 export const main = async () => {
   const amount = 100;
-  const msgGasLimit = "100000";
+  const msgGasLimit = "0";
   let remoteChainSlug;
 
   try {
@@ -110,17 +126,25 @@ export const main = async () => {
 
     const chain = argv.chain as HardhatChainName;
     const chainSlug = hardhatChainNameToSlug[chain];
-
     const providerInstance = getProviderFromChainSlug(chainSlug);
 
+    if (!process.env.LOAD_TEST_PRIVATE_KEY) {
+      console.error("LOAD_TEST_PRIVATE_KEY not found in env");
+      return;
+    }
     const signer = new ethers.Wallet(
-      process.env.SOCKET_SIGNER_KEY as string,
+      process.env.LOAD_TEST_PRIVATE_KEY as string,
       providerInstance
     );
-
+    console.log("signer address : ", signer.address);
+    console.log(
+      "signer balance on chain ",
+      chainSlug,
+      " is ",
+      formatEther(await signer.getBalance())
+    );
     const remoteChain = argv.remoteChain as HardhatChainName;
     remoteChainSlug = hardhatChainNameToSlug[remoteChain];
-
     const numOfRequests = argv.numOfRequests as number;
     const waitTime = argv.waitTime as number;
 
@@ -129,7 +153,10 @@ export const main = async () => {
     );
 
     const counterAddress = config[chainSlug]["Counter"];
-
+    if (!helperContractAddress[chainSlug]) {
+      console.log("helperContractAddress not found for ", chainSlug);
+      return;
+    }
     const helper: Contract = new ethers.Contract(
       helperContractAddress[chainSlug],
       helperABI,
@@ -151,31 +178,19 @@ export const main = async () => {
       counterAddress
     );
     console.log("fees : ", value.toString(), formatEther(value));
-    if (WAIT_FOR_TX) {
-      await confirmAndWait(
-        signer,
-        helper,
-        remoteChainSlug,
-        amount,
-        msgGasLimit,
-        numOfRequests,
-        value,
-        waitTime,
-        chainSlug
-      );
-    } else {
-      await sendAndWait(
-        signer,
-        helper,
-        remoteChainSlug,
-        amount,
-        msgGasLimit,
-        numOfRequests,
-        value,
-        waitTime,
-        chainSlug
-      );
-    }
+
+    await sendTx(
+      signer,
+      helper,
+      remoteChainSlug,
+      amount,
+      msgGasLimit,
+      numOfRequests,
+      value,
+      waitTime,
+      chainSlug,
+      WAIT_FOR_TX
+    );
   } catch (error) {
     console.log(
       `Error while sending remoteAddOperation with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}`
@@ -185,7 +200,7 @@ export const main = async () => {
   }
 };
 
-const sendAndWait = async (
+const sendTx = async (
   signer,
   helper,
   remoteChainSlug,
@@ -194,9 +209,14 @@ const sendAndWait = async (
   numOfRequests,
   value,
   waitTime,
-  chainSlug
+  chainSlug,
+  waitForConfirmation: boolean
 ) => {
   const nonce = await signer.getTransactionCount();
+  console.log(
+    "total value: ",
+    formatEther(BigNumber.from(value).mul(numOfRequests))
+  );
 
   for (let index = 0; index < totalIterations; index++) {
     const tx = await helper
@@ -206,6 +226,7 @@ const sendAndWait = async (
         amount,
         msgGasLimit,
         numOfRequests,
+        payload,
         {
           value: BigNumber.from(value).mul(numOfRequests),
           nonce: nonce + index,
@@ -220,56 +241,13 @@ const sendAndWait = async (
       }`
     );
     console.log(
-      `Track here: https://6il289myzb.execute-api.us-east-1.amazonaws.com/dev/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${tx.hash
-        .toString()
-        .toLowerCase()}`
+      `Track here: ${API_BASE_URL}/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${tx?.hash}`
     );
 
-    if (waitTime && waitTime > 0) {
-      await sleep(waitTime);
+    if (waitForConfirmation) {
+      await tx.wait();
+      console.log(`remoteAddOperation-tx with hash: ${tx.hash} confirmed`);
     }
-  }
-};
-
-const confirmAndWait = async (
-  signer,
-  helper,
-  remoteChainSlug,
-  amount,
-  msgGasLimit,
-  numOfRequests,
-  value,
-  waitTime,
-  chainSlug
-) => {
-  for (let i = 0; i < totalIterations; i++) {
-    const tx = await helper
-      .connect(signer)
-      .remoteAddOperationBatch(
-        remoteChainSlug,
-        amount,
-        msgGasLimit,
-        numOfRequests,
-        {
-          value: BigNumber.from(value).mul(numOfRequests),
-          ...overrides(chainSlug),
-        }
-      );
-
-    await tx.wait();
-    console.log(
-      `remoteAddOperation-tx with hash: ${
-        tx.hash
-      } was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}, value: ${
-        value * numOfRequests
-      }`
-    );
-    console.log(
-      `Track here: https://6il289myzb.execute-api.us-east-1.amazonaws.com/dev/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${tx.hash
-        .toString()
-        .toLowerCase()}`
-    );
-
     if (waitTime && waitTime > 0) {
       await sleep(waitTime);
     }
