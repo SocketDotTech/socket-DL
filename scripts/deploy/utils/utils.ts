@@ -274,6 +274,15 @@ export const getRelayAPIKEY = (mode: DeploymentMode) => {
   }
 };
 
+export const getAPIBaseURL = (mode: DeploymentMode) => {
+  switch (mode) {
+    case DeploymentMode.PROD:
+      return process.env.DL_API_PROD_URL;
+    default:
+      return process.env.DL_API_DEV_URL;
+  }
+};
+
 export const getAddresses = async (
   chainSlug: ChainSlug,
   mode = DeploymentMode.DEV
