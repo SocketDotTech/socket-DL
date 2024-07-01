@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { getRelayAPIKEY, getRelayUrl } from "./utils";
 import { axiosPost } from "@socket.tech/dl-common";
 import { mode } from "../config/config";
@@ -9,13 +9,14 @@ interface RequestObj {
   data: string;
   chainSlug: number;
   value?: string | BigNumber;
-  gasPrice?: string | BigNumber | undefined;
-  gasLimit: string | number | undefined;
+  gasPrice?: BigNumberish;
+  gasLimit?: BigNumberish;
+  type?: number;
 }
 
 export const relayTx = async (params: RequestObj) => {
   try {
-    let { to, data, chainSlug, gasPrice, value, gasLimit } = params;
+    let { to, data, chainSlug, gasPrice, value, type, gasLimit } = params;
     let url = await getRelayUrl(mode);
     let config = {
       headers: {
@@ -29,6 +30,7 @@ export const relayTx = async (params: RequestObj) => {
       chainId: ChainSlugToId[chainSlug],
       gasLimit,
       gasPrice,
+      type,
       sequential: false,
       source: "LoadTester",
     };
