@@ -1,4 +1,5 @@
 import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
 import {
   ChainSlug,
   MainnetIds,
@@ -6,9 +7,6 @@ import {
   isMainnet,
   isTestnet,
 } from "../../../../src";
-dotenvConfig();
-
-import { chains } from "../../config/config";
 import { sendCounterBridgeMsg } from "./utils";
 
 const getSiblingSlugs = (chainSlug: ChainSlug): ChainSlug[] => {

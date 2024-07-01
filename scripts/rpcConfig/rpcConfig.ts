@@ -23,15 +23,15 @@ import {
 } from "../../src";
 import { getSiblings } from "../common";
 import {
-  reSyncInterval,
   explorers,
   icons,
   batcherSupportedChainSlugs,
   rpcs,
   version,
   getFinality,
+  getReSyncInterval,
+  getDefaultFinalityBucket,
 } from "./constants";
-import { defaultFinalityBucket } from "./constants/defaultFinalityBucket";
 import { feesUpdaterSupportedChainSlugs } from "./constants/feesUpdaterChainSlugs";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
 
@@ -163,14 +163,4 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
     oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
     disabledDFFeeChains: [],
   };
-};
-
-export const getDefaultFinalityBucket = (
-  chainSlug: ChainSlug
-): FinalityBucket => {
-  return defaultFinalityBucket[chainSlug] ?? FinalityBucket.fast;
-};
-
-export const getReSyncInterval = (chainSlug: ChainSlug) => {
-  return reSyncInterval[chainSlug] ?? 0;
 };

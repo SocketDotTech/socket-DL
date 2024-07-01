@@ -156,6 +156,7 @@ const config: HardhatUserConfig = {
       kinto_devnet: process.env.KINTO_DEVNET_API_KEY || "",
       sipher_funki_testnet: "none",
       winr: "none",
+      reya_cronos: "none",
       polynomial: "none",
       syndr: "none",
       blast: process.env.BLASTSCAN_API_KEY || "",
@@ -215,6 +216,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorerl2new-winr-mainnet-0.t.conduit.xyz/api",
           browserURL: "https://explorerl2new-winr-mainnet-0.t.conduit.xyz",
+        },
+      },
+      {
+        network: "reya_cronos",
+        chainId: ChainId.REYA_CRONOS,
+        urls: {
+          apiURL: "https://reya-cronos.blockscout.com//api",
+          browserURL: "https://reya-cronos.blockscout.com/",
         },
       },
       {
