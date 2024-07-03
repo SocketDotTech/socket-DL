@@ -1,6 +1,8 @@
 import { Contract, utils } from "ethers";
 import { defaultAbiCoder } from "ethers/lib/utils";
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import PlugABI from "@socket.tech/dl-core/artifacts/abi/IPlug.json";
+import { ChainSlug } from "../../src";
 
 export type TxData = {
   from: string;
@@ -16,8 +18,8 @@ export type Inputs = {
 };
 
 export type ChainDetails = {
-  srcChainSlug: number;
-  dstChainSlug: number;
+  srcChainSlug: ChainSlug;
+  dstChainSlug: ChainSlug;
 };
 
 export const abiInterface = new utils.Interface(PlugABI);
@@ -40,8 +42,7 @@ const ConnectorABI = [
 
 export const getPayload = async (
   inputs: Inputs,
-  connectorAddress: string,
-  provider,
+  provider: StaticJsonRpcProvider,
   withoutHook?: boolean
 ) => {
   let payload;
@@ -52,7 +53,7 @@ export const getPayload = async (
     );
   } else {
     const connectorContract = new Contract(
-      connectorAddress,
+      inputs.connectorPlug,
       ConnectorABI,
       provider
     );

@@ -6,9 +6,10 @@ import {
   NODE_INTERFACE_ADDRESS,
 } from "@arbitrum/sdk/dist/lib/dataEntities/constants";
 import { TxData } from "./utils";
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 export const getArbitrumGasLimitEstimate = async (
-  provider,
+  provider: StaticJsonRpcProvider,
   txData: TxData
 ): Promise<BigNumber> => {
   const arbGasInfo = ArbGasInfo__factory.connect(ARB_GAS_INFO, provider);
@@ -29,8 +30,14 @@ export const getArbitrumGasLimitEstimate = async (
   const l2GasUsed = gasEstimateComponents.gasEstimate.sub(
     gasEstimateComponents.gasEstimateForL1
   );
+
+  // Size in bytes of the calldata to post on L1
   const L1S = 140 + utils.hexDataLength(txData.data);
+
+  // Estimated L1 gas cost
   const L1C = gasComponents[1].mul(L1S);
+
+  // Extra buffer
   const B = L1C.div(gasComponents[5]);
 
   // G (Gas Limit) = l2GasUsed + B

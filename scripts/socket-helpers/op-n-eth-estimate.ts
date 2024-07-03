@@ -1,10 +1,11 @@
 import { BigNumber } from "ethers";
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { asL2Provider } from "@eth-optimism/sdk";
 import { TxData } from "./utils";
 
 // Get optimism gas limit from the SDK
-export const getOptimismGasLimitEstimate = async (
-  provider,
+export const getOpAndEthGasLimitEstimate = async (
+  provider: StaticJsonRpcProvider,
   txData: TxData
 ): Promise<BigNumber> => {
   const l2Provider = asL2Provider(provider);
