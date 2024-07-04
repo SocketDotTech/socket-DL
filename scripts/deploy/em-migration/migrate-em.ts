@@ -9,7 +9,6 @@ import {
   TestnetIds,
   getAllAddresses,
 } from "../../../src";
-import { configureRoles } from "../scripts/configureRoles";
 import { deployForChains } from "../scripts/deploySocketFor";
 import prompts from "prompts";
 import { checkAndUpdateRoles } from "../scripts/roles";
@@ -73,9 +72,6 @@ const deleteOldContracts = async (chains: ChainSlug[]) => {
     await Promise.all(
       Object.keys(addresses).map(async (chain) => {
         if (chains.includes(parseInt(chain) as ChainSlug)) {
-          addresses[chain].SocketSimulator = "";
-          addresses[chain].SimulatorUtils = "";
-          addresses[chain].SwitchboardSimulator = "";
           addresses[chain].Counter = "";
           addresses[chain].SocketBatcher = "";
         }
