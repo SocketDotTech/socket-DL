@@ -28,7 +28,7 @@ export const updateConstants = async (
 
   await updateFile(
     "rpc.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: checkEnvVar("${chainName.toUpperCase()}_RPC"),\n};`,
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: checkEnvValue("${chainName.toUpperCase()}_RPC"),\n};`,
     ",\n};"
   );
 

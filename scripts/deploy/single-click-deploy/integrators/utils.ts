@@ -114,7 +114,7 @@ export const updateSDK = async (
   if (isNewNative) {
     await updateFile(
       "native-tokens.ts",
-      `,\n  "${nativeToken.toLowerCase()} = "${nativeToken.toLowerCase()}",\n}\n`,
+      `,\n  "${nativeToken.toLowerCase()}" = "${nativeToken.toLowerCase()}",\n}\n`,
       ",\n}"
     );
   }

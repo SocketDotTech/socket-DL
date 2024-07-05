@@ -12,4 +12,5 @@ export const explorers = {
   [ChainSlug.BSC_TESTNET]: "https://testnet.bscscan.com/",
   [ChainSlug.POLYNOMIAL]: "https://explorer.polynomial.fi",
   [ChainSlug.SYNDR]: "https://explorer.syndr.com/",
+  [ChainSlug.NEOX_TESTNET]: "https://xt3scan.ngd.network/",
 };

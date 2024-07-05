@@ -44,4 +44,5 @@ export enum HardhatChainName {
   BSC_TESTNET = "bsc_testnet",
   POLYNOMIAL = "polynomial",
   SYNDR = "syndr",
+  NEOX_TESTNET = "neox_testnet",
 }

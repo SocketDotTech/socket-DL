@@ -10,4 +10,5 @@ export const icons = {
     "https://testnet.bscscan.com/assets/bsc/images/svg/logos/logo-light.svg?v=24.5.5.0",
   [ChainSlug.POLYNOMIAL]: "",
   [ChainSlug.SYNDR]: "",
+  [ChainSlug.NEOX_TESTNET]: "",
 };

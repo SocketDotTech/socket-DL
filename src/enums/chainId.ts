@@ -43,4 +43,5 @@ export enum ChainId {
   BSC_TESTNET = 97,
   POLYNOMIAL = 8008,
   SYNDR = 404,
+  NEOX_TESTNET = 12227331,
 }
