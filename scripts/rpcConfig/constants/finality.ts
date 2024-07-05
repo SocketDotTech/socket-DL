@@ -16,4 +16,9 @@ export const finalityOverrides: {
     [FinalityBucket.medium]: 256,
     [FinalityBucket.slow]: 1000,
   },
+  [ChainSlug.NEOX_TESTNET]: {
+    [FinalityBucket.fast]: 1,
+    [FinalityBucket.medium]: 10,
+    [FinalityBucket.slow]: 100,
+  },
 };
