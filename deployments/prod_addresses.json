@@ -3597,10 +3597,12 @@
     "OptimisticSwitchboard": "0xFCd8ebA25c0e0973Fd131b6bF77fd8dAEcCaC75B",
     "Counter": "0x21abD53f1150b6DFA1111E4F2b7536F6eaA48538",
     "SocketBatcher": "0x602029526b76C5116957aa360472B1141314AB7f",
-    "SocketSimulator": "",
-    "SimulatorUtils": "",
-    "SwitchboardSimulator": "",
-    "ExecutionManagerDF": "0xec4f19e2F2251F1E24a9275551Eb82367c65A03f"
+    "SocketSimulator": "0xc164a23492585E98c9dac0547CEbB36980A1dbD1",
+    "SimulatorUtils": "0x1FA7AB72BbE747C56FcFcbC66B53c75848a7B7BD",
+    "SwitchboardSimulator": "0x58900B39387633A0a0C80D1dBDFe879F20b4F2fb",
+    "ExecutionManagerDF": "0xec4f19e2F2251F1E24a9275551Eb82367c65A03f",
+    "CapacitorSimulator": "0xfbAe186C595D3949CB8891E4E0955A3c1619b100",
+    "startBlock": 17829631
   },
   "11155420": {
     "SignatureVerifier": "0x47140353947Bc127c9cf36fabd61112C8Fb8db2A",

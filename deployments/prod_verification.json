@@ -5191,6 +5191,41 @@
   ],
   "11155112": [
     [
+      "0x58900B39387633A0a0C80D1dBDFe879F20b4F2fb",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0xc164a23492585E98c9dac0547CEbB36980A1dbD1",
+        11155112,
+        1000,
+        "0x7E3D0FAC82b9d5a67906f7028Aa4a70d582011b2"
+      ]
+    ],
+    [
+      "0x1FA7AB72BbE747C56FcFcbC66B53c75848a7B7BD",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0xc164a23492585E98c9dac0547CEbB36980A1dbD1",
+        "0x7E3D0FAC82b9d5a67906f7028Aa4a70d582011b2",
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        11155112
+      ]
+    ],
+    [
+      "0xc164a23492585E98c9dac0547CEbB36980A1dbD1",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        11155112,
+        11155112,
+        "0xfE6189763f6351A0C0A9C3C211Af5Bbc230500CE",
+        "0x7E3D0FAC82b9d5a67906f7028Aa4a70d582011b2",
+        "IMLI"
+      ]
+    ],
+    [
       "0x602029526b76C5116957aa360472B1141314AB7f",
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
