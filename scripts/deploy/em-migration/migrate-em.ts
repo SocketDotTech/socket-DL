@@ -73,6 +73,10 @@ const deleteOldContracts = async (chains: ChainSlug[]) => {
         if (chains.includes(parseInt(chain) as ChainSlug)) {
           addresses[chain].Counter = "";
           addresses[chain].SocketBatcher = "";
+          addresses[chain].SocketSimulator = "";
+          addresses[chain].SimulatorUtils = "";
+          addresses[chain].SwitchboardSimulator = "";
+          addresses[chain].CapacitorSimulator = "";
         }
       })
     );

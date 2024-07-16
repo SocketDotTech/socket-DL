@@ -180,9 +180,9 @@ export const overrides = (
     };
   } else if (chain == ChainSlug.SEPOLIA) {
     return {
-      // type: 1,
+      type: 1,
       gasLimit: 2_000_000,
-      // gasPrice: 180_000_000_000,
+      gasPrice: 50_000_000_000,
     };
   } else if (chain == ChainSlug.AEVO_TESTNET) {
     return {
@@ -242,7 +242,7 @@ export const overrides = (
     return {
       type: 1,
       // gasLimit: 200000,
-      gasPrice: 0,
+      gasPrice: 100_000_000,
     };
   } else if (chain == ChainSlug.REYA) {
     return {
@@ -297,6 +297,12 @@ export const overrides = (
       type: 1,
       gasLimit: 10_000_000_000,
       gasPrice: 30_000_000,
+    };
+  } else if (chain == ChainSlug.NEOX_TESTNET) {
+    return {
+      type: 1,
+      gasLimit: 1_000_000,
+      gasPrice: 212_000_000_000,
     };
   } else if (chainConfig[chain] && chainConfig[chain].overrides) {
     return chainConfig[chain].overrides!;
