@@ -26,6 +26,7 @@ import { Wallet } from "ethers";
 import { getProviderFromChainSlug } from "../../constants";
 import { storeAllAddresses } from "../utils";
 import { getSiblingsFromAddresses } from "../../common";
+import { connectPlugs } from "../scripts/connect";
 
 const emVersion = CORE_CONTRACTS.ExecutionManagerDF;
 
@@ -151,6 +152,8 @@ const configure = async (chains: ChainSlug[]) => {
       chains,
       emVersion
     );
+
+    await connectPlugs(addresses, chains);
 
     await configureExecutionManagers(chains, addresses);
   } catch (error) {
