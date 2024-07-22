@@ -63,7 +63,9 @@ export const setManagers = async (
   ).connect(socketSigner);
 
   let tx;
-  const currentEM = await socket.executionManager__();
+  const currentEM = await socket.executionManager__({
+    ...overrides(await socketSigner.getChainId()),
+  });
   if (
     currentEM.toLowerCase() !== addr[executionManagerVersion]?.toLowerCase()
   ) {
@@ -74,7 +76,9 @@ export const setManagers = async (
     await tx.wait();
   }
 
-  const currentTM = await socket.transmitManager__();
+  const currentTM = await socket.transmitManager__({
+    ...overrides(await socketSigner.getChainId()),
+  });
   if (currentTM.toLowerCase() !== addr.TransmitManager?.toLowerCase()) {
     tx = await socket.setTransmitManager(addr.TransmitManager, {
       ...overrides(await socketSigner.getChainId()),
@@ -101,14 +105,17 @@ export const configureExecutionManager = async (
     ).connect(socketSigner);
 
     let nextNonce = (
-      await executionManagerContract.nextNonce(socketSigner.address)
+      await executionManagerContract.nextNonce(socketSigner.address, {
+        ...overrides(chain),
+      })
     ).toNumber();
 
     let requests: any = [];
     await Promise.all(
       siblingSlugs.map(async (siblingSlug) => {
         let currentValue = await executionManagerContract.msgValueMaxThreshold(
-          siblingSlug
+          siblingSlug,
+          { ...overrides(chain) }
         );
 
         if (

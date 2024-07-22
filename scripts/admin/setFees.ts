@@ -38,7 +38,9 @@ const main = async () => {
     verificationOverheadFees
   );
 
-  const nonce = await switchboard.nextNonce(switchboard.signer.getAddress());
+  const nonce = await switchboard.nextNonce(switchboard.signer.getAddress(), {
+    ...overrides(chain),
+  });
   const digest = keccak256(
     defaultAbiCoder.encode(
       [

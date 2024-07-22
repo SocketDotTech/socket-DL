@@ -295,7 +295,7 @@ export const overrides = (
   } else if (chain == ChainSlug.MANTLE) {
     return {
       type: 1,
-      gasLimit: 10_000_000_000,
+      gasLimit: 100_000_000_000,
       gasPrice: 30_000_000,
     };
   } else if (chain == ChainSlug.NEOX_TESTNET) {
