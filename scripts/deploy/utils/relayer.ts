@@ -2,7 +2,7 @@ import { BigNumber, BigNumberish } from "ethers";
 import { getRelayAPIKEY, getRelayUrl } from "./utils";
 import { axiosPost } from "@socket.tech/dl-common";
 import { mode } from "../config/config";
-import { ChainSlugToId } from "@socket.tech/dl-core";
+import { ChainSlugToId } from "../../../src";
 
 interface RequestObj {
   to: string;

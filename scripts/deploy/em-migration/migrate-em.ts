@@ -45,8 +45,7 @@ export const configureExecutionManagers = async (
         );
 
         let addr: ChainSocketAddresses = addresses[chain]!;
-
-        const siblingSlugs: ChainSlug[] = getSiblingsFromAddresses(addr);
+        const siblingSlugs = chains.filter((c) => c !== chain);
 
         await configureExecutionManager(
           emVersion,
@@ -89,6 +88,23 @@ const deploy = async (chains: ChainSlug[]) => {
     const addresses: DeploymentAddresses = await deployForChains(
       chains,
       emVersion
+    );
+
+    await checkAndUpdateRoles(
+      {
+        userSpecificRoles: [
+          {
+            userAddress: ownerAddresses[mode],
+            filterRoles: [ROLES.RESCUE_ROLE, ROLES.GOVERNANCE_ROLE],
+          },
+        ],
+        contractName: CORE_CONTRACTS.Socket,
+        filterChains: chains,
+        filterSiblingChains: chains,
+        sendTransaction: true,
+        newRoleStatus: true,
+      },
+      addresses
     );
 
     await checkAndUpdateRoles(

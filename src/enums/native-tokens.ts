@@ -7,4 +7,5 @@ export enum NativeTokens {
   "mantle" = "mantle",
   "winr" = "winr-protocol",
   "no-token" = "no-token",
+  "gas" = "gas",
 }

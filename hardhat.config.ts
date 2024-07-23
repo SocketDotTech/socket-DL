@@ -113,6 +113,7 @@ if (isProduction) {
     [HardhatChainName.POLYNOMIAL]: getChainConfig(ChainSlug.POLYNOMIAL),
     [HardhatChainName.SYNDR]: getChainConfig(ChainSlug.SYNDR),
     [HardhatChainName.BLAST]: getChainConfig(ChainSlug.BLAST),
+    [HardhatChainName.NEOX_TESTNET]: getChainConfig(ChainSlug.NEOX_TESTNET),
   };
 }
 
@@ -160,6 +161,7 @@ const config: HardhatUserConfig = {
       polynomial: "none",
       syndr: "none",
       blast: process.env.BLASTSCAN_API_KEY || "",
+      neox_testnet: "none",
     },
     customChains: [
       {
@@ -256,6 +258,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorer.mode.network/api",
           browserURL: "https://explorer.mode.network",
+        },
+      },
+      {
+        network: "mode",
+        chainId: ChainId.NEOX_TESTNET,
+        urls: {
+          apiURL: "https://xt3scan.ngd.network/api",
+          browserURL: "https://xt3scan.ngd.network",
         },
       },
     ],
