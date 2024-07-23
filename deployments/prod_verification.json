@@ -3560,6 +3560,64 @@
   ],
   "34443": [
     [
+      "0x0E20397CaeAb9423939618003DB58d9119740301",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x2C75A88aF2d873FE4267eA3B4F0C7B8eee7F7e3A",
+        34443,
+        1000,
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3"
+      ]
+    ],
+    [
+      "0xF5d08060A15B2a66C3bC81CaC77203Da14e4C28E",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0x2C75A88aF2d873FE4267eA3B4F0C7B8eee7F7e3A",
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        34443
+      ]
+    ],
+    [
+      "0x2C75A88aF2d873FE4267eA3B4F0C7B8eee7F7e3A",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        34443,
+        34443,
+        "0x8537307810fC40F4073A12a38554D4Ff78EfFf41",
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
+        "IMLI"
+      ]
+    ],
+    [
+      "0x933544D1916D8ABC93B1055050A74B174b4DFdc3",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0xc317144DE60E6bC9455363bB09852C00bd14CD61"]
+    ],
+    [
+      "0xc82a8F36BEb1F513328E51a072A4Ac5f55674CBa",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836"]
+    ],
+    [
+      "0xfB9dF8073bD6Fea7Ba2e6E17f3b457c24C060Df1",
+      "ExecutionManagerDF",
+      "contracts/ExecutionManagerDF.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        34443,
+        "0xc317144DE60E6bC9455363bB09852C00bd14CD61",
+        "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3"
+      ]
+    ],
+    [
       "0x68Ce3Fe82f9a2e94d062a7bEF110ceFD69936C8f",
       "SwitchboardSimulator",
       "contracts/mocks/fee-updater/SwitchboardSimulator.sol",

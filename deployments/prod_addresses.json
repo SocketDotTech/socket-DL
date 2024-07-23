@@ -2257,8 +2257,8 @@
     "TransmitManager": "0x8f9EaEe5c5df888aBA3c1Ab19689a0660d042c6d",
     "FastSwitchboard": "0x57D1Aeafb6a2b7Bd4954e47a556622161A8c0A65",
     "OptimisticSwitchboard": "0xaa3d9fA3aB930aE635b001d00C612aa5b14d750e",
-    "SocketBatcher": "0xd286595d2e3D879596FAB51f83A702D10a6db27b",
-    "Counter": "0xA7649aa944b7Dce781859C18913c2Dc8A97f03e4",
+    "SocketBatcher": "0xc82a8F36BEb1F513328E51a072A4Ac5f55674CBa",
+    "Counter": "0x933544D1916D8ABC93B1055050A74B174b4DFdc3",
     "startBlock": 1149427,
     "integrations": {
       "1": {
@@ -2346,10 +2346,11 @@
         }
       }
     },
-    "SocketSimulator": "0x210Dc92f453A2620FcF09BDa76e45bb7138111D9",
-    "SimulatorUtils": "0xb4f28c1aeed8f9B5871dcE0134b16fAf8aC67A2D",
-    "SwitchboardSimulator": "0x68Ce3Fe82f9a2e94d062a7bEF110ceFD69936C8f",
-    "CapacitorSimulator": "0x9C530c48D1FD6282c2b2d8c9fE91B041fff7Ca5b"
+    "SocketSimulator": "0x2C75A88aF2d873FE4267eA3B4F0C7B8eee7F7e3A",
+    "SimulatorUtils": "0xF5d08060A15B2a66C3bC81CaC77203Da14e4C28E",
+    "SwitchboardSimulator": "0x0E20397CaeAb9423939618003DB58d9119740301",
+    "CapacitorSimulator": "0x056CCBf501C27F6c7b77320a65185D3e91d9d4F9",
+    "ExecutionManagerDF": "0xfB9dF8073bD6Fea7Ba2e6E17f3b457c24C060Df1"
   },
   "42161": {
     "SignatureVerifier": "0x9879a2b15722374243843DDdb79e5E6872aA74B8",
