@@ -13,8 +13,8 @@ export const disabledDFFeeChains = [
   ChainSlug.REYA,
   ChainSlug.BASE,
   ChainSlug.KINTO,
-  ChainSlug.WINR,
+  // ChainSlug.WINR,
   ChainSlug.BLAST,
-  ChainSlug.POLYNOMIAL,
+  // ChainSlug.POLYNOMIAL,
   ChainSlug.SYNDR,
 ];
