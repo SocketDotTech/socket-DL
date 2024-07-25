@@ -123,6 +123,12 @@ export const ownerAddresses = {
   [DeploymentMode.PROD]: "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
 };
 
+export const hexagateTripRoleOwners = {
+  [DeploymentMode.DEV]: "0x081871d78fe7c35c774ce3b4d4ba6592519db223",
+  [DeploymentMode.SURGE]: "0x081871d78fe7c35c774ce3b4d4ba6592519db223",
+  [DeploymentMode.PROD]: "0x081871d78fe7c35c774ce3b4d4ba6592519db223",
+};
+
 export const overrides = (
   chain: ChainSlug | number
 ): {
