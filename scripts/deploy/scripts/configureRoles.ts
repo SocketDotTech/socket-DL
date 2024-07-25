@@ -13,6 +13,7 @@ import {
   watcherAddresses,
   executorAddresses,
   ownerAddresses,
+  hexagateTripRoleOwners,
 } from "../config/config";
 import { checkAndUpdateRoles } from "./roles";
 import { sleep } from "@socket.tech/dl-common";
@@ -30,6 +31,7 @@ export const configureRoles = async (
   let executorAddress = executorAddresses[mode];
   let transmitterAddress = transmitterAddresses[mode];
   let watcherAddress = watcherAddresses[mode];
+  let hexagateTripRoleOwner = hexagateTripRoleOwners[mode];
 
   let summary: { params: any; roleStatus: any }[] = [];
   let s;
@@ -135,6 +137,10 @@ export const configureRoles = async (
           ],
         },
         {
+          userAddress: hexagateTripRoleOwner,
+          filterRoles: [ROLES.TRIP_ROLE],
+        },
+        {
           userAddress: transmitterAddress,
           filterRoles: [ROLES.FEES_UPDATER_ROLE],
         },
@@ -171,6 +177,10 @@ export const configureRoles = async (
           ],
         },
         {
+          userAddress: hexagateTripRoleOwner,
+          filterRoles: [ROLES.TRIP_ROLE],
+        },
+        {
           userAddress: transmitterAddress,
           filterRoles: [ROLES.FEES_UPDATER_ROLE], // all roles
         },
@@ -205,6 +215,10 @@ export const configureRoles = async (
             ROLES.RESCUE_ROLE,
             ROLES.FEES_UPDATER_ROLE,
           ], // all roles
+        },
+        {
+          userAddress: hexagateTripRoleOwner,
+          filterRoles: [ROLES.TRIP_ROLE],
         },
         {
           userAddress: transmitterAddress,
