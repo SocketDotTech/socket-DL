@@ -31,6 +31,7 @@ import {
   getFinality,
   getReSyncInterval,
   getDefaultFinalityBucket,
+  disabledDFFeeChains,
 } from "./constants";
 import { feesUpdaterSupportedChainSlugs } from "./constants/feesUpdaterChainSlugs";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
@@ -133,7 +134,7 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
     addresses,
     chainSlugToId: ChainSlugToId,
     oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
-    disabledDFFeeChains: [],
+    disabledDFFeeChains,
   };
 };
 
@@ -161,6 +162,6 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
     addresses,
     chainSlugToId: ChainSlugToId,
     oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
-    disabledDFFeeChains: [],
+    disabledDFFeeChains,
   };
 };
