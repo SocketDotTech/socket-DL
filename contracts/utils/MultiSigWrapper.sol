@@ -68,14 +68,6 @@ contract MultiSigWrapper is AccessControl {
         uint256 nonce
     );
 
-    event ConstantsUpdated(
-        uint256 safeTxGas_,
-        uint256 baseGas_,
-        uint256 gasPrice_,
-        address gasToken_,
-        address refundReceiver_
-    );
-
     event SafeUpdated(address safe_);
 
     /**
