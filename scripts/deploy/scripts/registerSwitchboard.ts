@@ -1,9 +1,10 @@
-import { Wallet, constants } from "ethers";
+import { constants } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { createObj, getInstance } from "../utils";
 import { ChainSlug, ChainSocketAddresses } from "../../../src";
 import { initialPacketCount, overrides } from "../config/config";
+import { SocketSigner } from "@socket.tech/dl-common";
 
 export default async function registerSwitchboardForSibling(
   switchBoardAddress: string,
@@ -11,7 +12,7 @@ export default async function registerSwitchboardForSibling(
   remoteChainSlug: string | ChainSlug,
   capacitorType: number,
   maxPacketLength: number,
-  signer: Wallet | SignerWithAddress,
+  signer: SocketSigner | SignerWithAddress,
   integrationType: string,
   config: ChainSocketAddresses
 ) {

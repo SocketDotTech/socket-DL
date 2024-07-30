@@ -1,4 +1,4 @@
-import { Contract, Wallet, constants } from "ethers";
+import { Contract, constants } from "ethers";
 import {
   DeployParams,
   getInstance,
@@ -13,9 +13,9 @@ import {
   version,
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { socketOwner, overrides } from "../config/config";
 import { maxAllowedPacketLength } from "../../constants";
+import { SocketSigner } from "@socket.tech/dl-common";
 
 let allDeployed = false;
 
@@ -29,7 +29,7 @@ export interface ReturnObj {
  */
 export const deploySocket = async (
   executionManagerVersion: string,
-  socketSigner: SignerWithAddress | Wallet,
+  socketSigner: SocketSigner,
   chainSlug: number,
   currentMode: DeploymentMode,
   deployedAddresses: ChainSocketAddresses
@@ -102,7 +102,7 @@ export const deploySocket = async (
     // switchboards deploy
     deployUtils.addresses = await deploySwitchboards(
       chainSlug,
-      socketSigner,
+      socketSigner as SocketSigner,
       deployUtils.addresses,
       currentMode
     );
@@ -123,6 +123,18 @@ export const deploySocket = async (
       deployUtils
     );
     deployUtils.addresses["Counter"] = counter.address;
+
+    // safe wrapper deployment
+    if (!deployUtils.addresses["Safe"])
+      deployUtils.addresses["Safe"] = constants.AddressZero;
+
+    const multisigWrapper: Contract = await getOrDeploy(
+      "Counter",
+      "contracts/utils/MultiSigWrapper.sol",
+      [socketOwner, deployUtils.addresses["Safe"]],
+      deployUtils
+    );
+    deployUtils.addresses["MultiSigWrapper"] = multisigWrapper.address;
 
     // simulators
     const socketSimulator: Contract = await getOrDeploy(

@@ -1,7 +1,4 @@
-import {
-  getDefaultIntegrationType,
-  getProviderFromChainSlug,
-} from "../../constants";
+import { getDefaultIntegrationType } from "../../constants";
 import { getInstance } from "../utils";
 import {
   ChainSlug,
@@ -12,9 +9,10 @@ import {
   TestnetIds,
   isTestnet,
 } from "../../../src";
-import { Contract, Wallet } from "ethers";
+import { Contract } from "ethers";
 import { getSwitchboardAddressFromAllAddresses } from "../../../src";
 import { overrides } from "../config/config";
+import { getSocketSigner } from "../utils/socket-signer";
 
 export const connectPlugs = async (
   addresses: DeploymentAddresses,
@@ -25,13 +23,9 @@ export const connectPlugs = async (
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
 
-        const providerInstance = getProviderFromChainSlug(chain);
-        const socketSigner: Wallet = new Wallet(
-          process.env.SOCKET_SIGNER_KEY as string,
-          providerInstance
-        );
-
         const addr: ChainSocketAddresses = addresses[chain]!;
+        const socketSigner = await getSocketSigner(chain, addr);
+
         if (!addr["integrations"]) return;
 
         const list = isTestnet(chain) ? TestnetIds : MainnetIds;

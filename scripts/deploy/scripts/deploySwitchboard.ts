@@ -12,12 +12,11 @@ import {
   ChainSlug,
 } from "../../../src";
 import { getSwitchboardDeployData } from "../switchboards";
-import { Wallet } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { SocketSigner } from "@socket.tech/dl-common";
 
 export default async function deploySwitchboards(
   chainSlug: ChainSlug,
-  signer: SignerWithAddress | Wallet,
+  signer: SocketSigner,
   sourceConfig: ChainSocketAddresses,
   mode: DeploymentMode
 ): Promise<ChainSocketAddresses> {
@@ -71,18 +70,19 @@ async function deploySwitchboard(
   integrationType: IntegrationTypes,
   chainSlug: ChainSlug,
   remoteChain: ChainSlug | string,
-  signer: SignerWithAddress | Wallet,
+  signer: SocketSigner,
   sourceConfig: ChainSocketAddresses,
   mode: DeploymentMode
 ): Promise<ChainSocketAddresses> {
   try {
+    let signerAddress: string = await signer.getAddress();
     const { contractName, args, path } = getSwitchboardDeployData(
       integrationType,
       chainSlug,
       remoteChain,
       sourceConfig[CORE_CONTRACTS.Socket],
       sourceConfig[CORE_CONTRACTS.SignatureVerifier],
-      signer.address
+      signerAddress
     );
 
     const switchboard = await deployContractWithArgs(

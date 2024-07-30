@@ -52,6 +52,7 @@ const main = async () => {
       console.log("No siblings selected!");
       return;
     }
+
     await configureRoles(addresses, chains, true, executionManagerVersion);
     addresses = await configureSwitchboards(
       addresses,

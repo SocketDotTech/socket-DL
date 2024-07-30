@@ -106,6 +106,8 @@ export interface ChainSocketAddresses {
   SocketSimulator?: string;
   SimulatorUtils?: string;
   SwitchboardSimulator?: string;
+  Safe?: string;
+  MultiSigWrapper?: string;
 }
 
 export type DeploymentAddresses = {
@@ -138,6 +140,7 @@ export enum CORE_CONTRACTS {
   FastSwitchboard2 = "FastSwitchboard2",
   OptimisticSwitchboard = "OptimisticSwitchboard",
   NativeSwitchboard = "NativeSwitchboard",
+  MultiSigWrapper = "MultiSigWrapper",
 }
 
 export const REQUIRED_ROLES = {

@@ -1,6 +1,6 @@
-import { Wallet, constants } from "ethers";
+import { constants } from "ethers";
 
-import { getProviderFromChainSlug, switchboards } from "../../constants";
+import { switchboards } from "../../constants";
 import { getInstance, getSwitchboardAddress } from "../utils";
 import {
   CORE_CONTRACTS,
@@ -19,6 +19,8 @@ import {
   overrides,
   msgValueMaxThreshold,
 } from "../config/config";
+import { SocketSigner } from "@socket.tech/dl-common";
+import { getSocketSigner } from "../utils/socket-signer";
 
 export const registerSwitchboards = async (
   chain: ChainSlug,
@@ -27,7 +29,7 @@ export const registerSwitchboards = async (
   integrationType: IntegrationTypes,
   addr: ChainSocketAddresses,
   addresses: DeploymentAddresses,
-  socketSigner: Wallet
+  socketSigner: SocketSigner
 ) => {
   for (let sibling of siblingSlugs) {
     const siblingSwitchboard = getSwitchboardAddress(
@@ -55,7 +57,7 @@ export const registerSwitchboards = async (
 
 export const setManagers = async (
   addr: ChainSocketAddresses,
-  socketSigner: Wallet,
+  socketSigner: SocketSigner,
   executionManagerVersion: CORE_CONTRACTS
 ) => {
   const socket = (
@@ -90,7 +92,7 @@ export const configureExecutionManager = async (
   socketBatcherAddress: string,
   chain: ChainSlug,
   siblingSlugs: ChainSlug[],
-  socketSigner: Wallet
+  socketSigner: SocketSigner
 ) => {
   try {
     console.log("configuring execution manager for ", chain, emAddress);
@@ -174,13 +176,9 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
     await Promise.all(
       srcChains.map(async (srcChain: ChainSlug) => {
         console.log(`Configuring for ${srcChain}`);
-
-        const providerInstance = getProviderFromChainSlug(
-          srcChain as any as ChainSlug
-        );
-        const socketSigner: Wallet = new Wallet(
-          process.env.SOCKET_SIGNER_KEY as string,
-          providerInstance
+        const socketSigner: SocketSigner = await getSocketSigner(
+          srcChain,
+          addresses[srcChain]
         );
 
         for (let dstChain in addresses[srcChain]?.["integrations"]) {

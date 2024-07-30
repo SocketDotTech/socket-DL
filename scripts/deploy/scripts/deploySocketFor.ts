@@ -1,7 +1,4 @@
-import { ethers } from "hardhat";
-import { Wallet } from "ethers";
 import { ReturnObj, deploySocket } from "../scripts/deploySocket";
-import { getProviderFromChainSlug } from "../../constants";
 import {
   ChainSlug,
   ChainSocketAddresses,
@@ -10,6 +7,8 @@ import {
 } from "../../../src";
 import { mode } from "../config/config";
 import { storeAddresses } from "../utils";
+import { SocketSigner } from "@socket.tech/dl-common";
+import { getSocketSigner } from "../utils/socket-signer";
 
 export const deployForChains = async (
   chains: ChainSlug[],
@@ -27,15 +26,14 @@ export const deployForChains = async (
       chains.map(async (chain: ChainSlug) => {
         let allDeployed = false;
 
-        const providerInstance = getProviderFromChainSlug(chain);
-        const signer: Wallet = new ethers.Wallet(
-          process.env.SOCKET_SIGNER_KEY as string,
-          providerInstance
-        );
-
         let chainAddresses: ChainSocketAddresses = addresses[chain]
           ? (addresses[chain] as ChainSocketAddresses)
           : ({} as ChainSocketAddresses);
+
+        const signer: SocketSigner = await getSocketSigner(
+          chain,
+          chainAddresses
+        );
 
         while (!allDeployed) {
           const results: ReturnObj = await deploySocket(

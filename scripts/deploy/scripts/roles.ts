@@ -16,10 +16,12 @@ import {
   DeploymentAddresses,
 } from "../../../src";
 import { getRoleHash, getChainRoleHash, getInstance } from "../utils";
-import { Wallet, ethers } from "ethers";
+import { ethers } from "ethers";
 import { getProviderFromChainSlug } from "../../constants";
 import { overrides } from "../config/config";
 import AccessControlExtendedABI from "@socket.tech/dl-core/artifacts/abi/AccessControlExtended.json";
+import { SocketSigner } from "@socket.tech/dl-common";
+import { getSocketSigner } from "../utils/socket-signer";
 
 let roleStatus: any = {};
 
@@ -104,7 +106,7 @@ const getRoleTxnData = (
 const executeRoleTransactions = async (
   chainSlug: ChainSlug,
   newRoleStatus: boolean,
-  wallet: Wallet
+  socketSigner: SocketSigner
 ) => {
   if (!roleTxns[chainSlug]) return;
   let contracts = Object.keys(roleTxns[chainSlug]!);
@@ -141,7 +143,7 @@ const executeRoleTransactions = async (
     } else {
       data = getRoleTxnData(roles, slugs, addresses, "REVOKE");
     }
-    let tx = await wallet.sendTransaction({
+    let tx = await socketSigner.sendTransaction({
       to: contractAddress,
       data,
       ...overrides(chainSlug),
@@ -160,14 +162,14 @@ const executeRoleTransactions = async (
 
 const executeOtherTransactions = async (
   chainSlug: ChainSlug,
-  wallet: Wallet
+  socketSigner: SocketSigner
 ) => {
   if (!otherTxns[chainSlug as any as keyof typeof otherTxns]) return;
 
   let txnDatas = otherTxns[chainSlug as any as keyof typeof otherTxns]!;
   for (let i = 0; i < txnDatas.length; i++) {
     let { to, data } = txnDatas[i];
-    let tx = await wallet.sendTransaction({
+    let tx = await socketSigner.sendTransaction({
       to,
       data,
       ...overrides(chainSlug),
@@ -180,14 +182,17 @@ const executeOtherTransactions = async (
 
 const executeTransactions = async (
   activeChainSlugs: ChainSlug[],
-  newRoleStatus: boolean
+  newRoleStatus: boolean,
+  allAddresses: DeploymentAddresses
 ) => {
   await Promise.all(
     activeChainSlugs.map(async (chainSlug) => {
-      let provider = getProviderFromChainSlug(chainSlug as any as ChainSlug);
-      let wallet = new Wallet(process.env.SOCKET_SIGNER_KEY!, provider);
-      await executeRoleTransactions(chainSlug, newRoleStatus, wallet);
-      await executeOtherTransactions(chainSlug, wallet);
+      const relaySigner = await getSocketSigner(
+        chainSlug,
+        allAddresses[chainSlug]
+      );
+      await executeRoleTransactions(chainSlug, newRoleStatus, relaySigner);
+      await executeOtherTransactions(chainSlug, relaySigner);
     })
   );
 };
@@ -484,7 +489,7 @@ export const checkAndUpdateRoles = async (
       ();
 
     if (sendTransaction)
-      await executeTransactions(activeChainSlugs, newRoleStatus);
+      await executeTransactions(activeChainSlugs, newRoleStatus, allAddresses);
 
     return { params, roleStatus };
   } catch (error) {

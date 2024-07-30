@@ -6,7 +6,6 @@ import { Address } from "hardhat-deploy/dist/types";
 import path from "path";
 import fs from "fs";
 import {
-  ChainSlugToId,
   ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
@@ -15,6 +14,7 @@ import {
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { overrides } from "../config/config";
 import { VerifyArgs } from "../verify";
+import { SocketSigner } from "@socket.tech/dl-common";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
@@ -35,7 +35,7 @@ export const getChainRoleHash = (role: string, chainSlug: number) =>
 export interface DeployParams {
   addresses: ChainSocketAddresses;
   mode: DeploymentMode;
-  signer: SignerWithAddress | Wallet;
+  signer: SignerWithAddress | SocketSigner | Wallet;
   currentChainSlug: number;
 }
 
@@ -81,7 +81,7 @@ export const getOrDeploy = async (
 export async function deployContractWithArgs(
   contractName: string,
   args: Array<any>,
-  signer: SignerWithAddress | Wallet
+  signer: SignerWithAddress | SocketSigner | Wallet
 ) {
   try {
     const Contract: ContractFactory = await ethers.getContractFactory(

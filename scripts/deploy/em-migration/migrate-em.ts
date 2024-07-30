@@ -22,10 +22,9 @@ import {
   configureExecutionManager,
   setManagers,
 } from "../scripts/configureSocket";
-import { Wallet } from "ethers";
-import { getProviderFromChainSlug } from "../../constants";
 import { storeAllAddresses } from "../utils";
-import { getSiblingsFromAddresses } from "../../common";
+import { SocketSigner } from "@socket.tech/dl-common";
+import { getSocketSigner } from "../utils/socket-signer";
 
 const emVersion = CORE_CONTRACTS.ExecutionManagerDF;
 
@@ -36,15 +35,9 @@ export const configureExecutionManagers = async (
   try {
     await Promise.all(
       chains.map(async (chain) => {
-        const providerInstance = getProviderFromChainSlug(
-          chain as any as ChainSlug
-        );
-        const socketSigner: Wallet = new Wallet(
-          process.env.SOCKET_SIGNER_KEY as string,
-          providerInstance
-        );
-
         let addr: ChainSocketAddresses = addresses[chain]!;
+        const socketSigner: SocketSigner = await getSocketSigner(chain, addr);
+
         const siblingSlugs = chains.filter((c) => c !== chain);
 
         await configureExecutionManager(
