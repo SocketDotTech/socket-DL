@@ -26,7 +26,7 @@ interface ICapacitor {
     /**
      * @notice returns the root of packet for given id
      * @param id the id assigned to packet
-     * @return root root hash corresponding to given id
+     * @return root hash corresponding to given id
      */
     function getRootByCount(uint64 id) external view returns (bytes32 root);
 
