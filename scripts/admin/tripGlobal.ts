@@ -126,7 +126,7 @@ const main = async () => {
       newTripStatus: !tripStatus,
       signature,
       nonce,
-      ...overrides(chain),
+      ...(await overrides(chain)),
     });
 
     if (sendTx) {
@@ -147,11 +147,11 @@ const sendTxn = async (
   let tx;
   if (trip)
     tx = await switchboard.tripGlobal(nonce, signature, {
-      ...overrides(chain),
+      ...(await overrides(chain)),
     });
   if (untrip)
     tx = await switchboard.unTrip(nonce, signature, {
-      ...overrides(chain),
+      ...(await overrides(chain)),
     });
   console.log(tx.hash);
 

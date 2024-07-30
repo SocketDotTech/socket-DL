@@ -64,24 +64,24 @@ export const setManagers = async (
 
   let tx;
   const currentEM = await socket.executionManager__({
-    ...overrides(await socketSigner.getChainId()),
+    ...(await overrides(await socketSigner.getChainId())),
   });
   if (
     currentEM.toLowerCase() !== addr[executionManagerVersion]?.toLowerCase()
   ) {
     tx = await socket.setExecutionManager(addr[executionManagerVersion], {
-      ...overrides(await socketSigner.getChainId()),
+      ...(await overrides(await socketSigner.getChainId())),
     });
     console.log("updateExecutionManager", tx.hash);
     await tx.wait();
   }
 
   const currentTM = await socket.transmitManager__({
-    ...overrides(await socketSigner.getChainId()),
+    ...(await overrides(await socketSigner.getChainId())),
   });
   if (currentTM.toLowerCase() !== addr.TransmitManager?.toLowerCase()) {
     tx = await socket.setTransmitManager(addr.TransmitManager, {
-      ...overrides(await socketSigner.getChainId()),
+      ...(await overrides(await socketSigner.getChainId())),
     });
     console.log("updateTransmitManager", tx.hash);
     await tx.wait();
@@ -106,7 +106,7 @@ export const configureExecutionManager = async (
 
     let nextNonce = (
       await executionManagerContract.nextNonce(socketSigner.address, {
-        ...overrides(chain),
+        ...(await overrides(chain)),
       })
     ).toNumber();
 
@@ -115,7 +115,7 @@ export const configureExecutionManager = async (
       siblingSlugs.map(async (siblingSlug) => {
         let currentValue = await executionManagerContract.msgValueMaxThreshold(
           siblingSlug,
-          { ...overrides(chain) }
+          { ...(await overrides(chain)) }
         );
 
         if (
@@ -163,7 +163,7 @@ export const configureExecutionManager = async (
     let tx = await socketBatcherContract.setExecutionFeesBatch(
       emAddress,
       requests,
-      { ...overrides(chain) }
+      { ...(await overrides(chain)) }
     );
     console.log("configured EM for ", chain, tx.hash);
     await tx.wait();
@@ -223,7 +223,7 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
             const tx = await sbContract
               .connect(socketSigner)
               .setFxChildTunnel(dstSwitchboardAddress, {
-                ...overrides(await socketSigner.getChainId()),
+                ...(await overrides(await socketSigner.getChainId())),
               });
             console.log(srcChain, tx.hash);
             await tx.wait();
@@ -241,7 +241,7 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
             const tx = await sbContract
               .connect(socketSigner)
               .setFxRootTunnel(dstSwitchboardAddress, {
-                ...overrides(await socketSigner.getChainId()),
+                ...(await overrides(await socketSigner.getChainId())),
               });
             console.log(srcChain, tx.hash);
             await tx.wait();
