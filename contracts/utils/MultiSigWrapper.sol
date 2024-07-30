@@ -6,6 +6,7 @@ import "../libraries/RescueFundsLib.sol";
 import "../utils/AccessControl.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
 import "safe-smart-account/common/Enum.sol";
+import "solady/utils/LibSort.sol";
 
 interface ISafe {
     function execTransaction(
@@ -43,15 +44,21 @@ interface ISafe {
  * @title MultiSigWrapper
  */
 contract MultiSigWrapper is AccessControl {
-    ISafe public safe;
-    mapping(bytes32 => bytes) public signatures;
+    using LibSort for address;
 
-    uint256 public safeTxGas = 0;
-    uint256 public baseGas = 0;
-    uint256 public gasPrice = 0;
-    address public gasToken = address(0);
-    address public refundReceiver = address(0);
-    Enum.Operation public operation = Enum.Operation.Call;
+    ISafe public safe;
+
+    mapping(bytes32 => address[]) public owners;
+    mapping(address => uint256) public lastNonce;
+
+    mapping(bytes32 => mapping(address => bytes)) public signatures;
+    struct GasParams {
+        uint256 safeTxGas;
+        uint256 baseGas;
+        uint256 gasPrice;
+        address gasToken;
+        address refundReceiver;
+    }
 
     event AddedTxHash(
         bytes32 txHash,
@@ -82,64 +89,141 @@ contract MultiSigWrapper is AccessControl {
     }
 
     function storeOrRelaySignatures(
+        address from_,
         address to_,
         uint256 nonce_,
         uint256 value_,
         bytes calldata data_,
         bytes memory signature_
     ) external {
+        uint256 threshold = safe.getThreshold();
+        lastNonce[from_] = nonce_;
+
+        GasParams memory gasParams;
+        if (threshold == 1)
+            return
+                _relay(
+                    to_,
+                    value_,
+                    Enum.Operation.Call,
+                    gasParams,
+                    data_,
+                    signature_
+                );
+
         bytes32 txHash = keccak256(
-            abi.encode(to_, value_, data_, operation, nonce_)
+            abi.encode(to_, value_, data_, Enum.Operation.Call, nonce_)
         );
 
-        bytes memory signs = abi.encodePacked(signatures[txHash], signature_);
-        signatures[txHash] = signs;
-        uint256 threshold = safe.getThreshold();
+        uint256 totalSignatures = _storeSignatures(txHash, from_, signature_);
 
-        if (signs.length >= threshold * 65)
-            safe.execTransaction(
+        if (totalSignatures >= threshold) {
+            _relay(
                 to_,
                 value_,
+                Enum.Operation.Call,
+                gasParams,
                 data_,
-                operation,
-                safeTxGas,
-                baseGas,
-                gasPrice,
-                gasToken,
-                payable(refundReceiver),
-                signs
+                _getSignatures(txHash, threshold)
             );
+        }
 
         emit AddedTxHash(txHash, to_, value_, data_, nonce_);
     }
 
-    /**
-     * @notice Update public constants
-     */
-    function updateConstants(
-        uint256 safeTxGas_,
-        uint256 baseGas_,
-        uint256 gasPrice_,
-        address gasToken_,
-        address refundReceiver_
-    ) external onlyOwner {
-        safeTxGas = safeTxGas_;
-        baseGas = baseGas_;
-        gasPrice = gasPrice_;
-        gasToken = gasToken_;
-        refundReceiver = refundReceiver_;
+    function storeOrRelaySignaturesWithOverrides(
+        address from_,
+        address to_,
+        uint256 nonce_,
+        uint256 value_,
+        Enum.Operation operation_,
+        GasParams calldata gasParams_,
+        bytes calldata data_,
+        bytes memory signature_
+    ) external {
+        uint256 threshold = safe.getThreshold();
+        lastNonce[from_] = nonce_;
 
-        emit ConstantsUpdated(
-            safeTxGas_,
-            baseGas_,
-            gasPrice_,
-            gasToken_,
-            refundReceiver_
+        if (threshold == 1)
+            return
+                _relay(to_, value_, operation_, gasParams_, data_, signature_);
+
+        bytes32 txHash = keccak256(
+            abi.encode(
+                to_,
+                value_,
+                data_,
+                operation_,
+                nonce_,
+                gasParams_.gasPrice
+            )
+        );
+        uint256 totalSignatures = _storeSignatures(txHash, from_, signature_);
+
+        if (totalSignatures >= threshold) {
+            _relay(
+                to_,
+                value_,
+                operation_,
+                gasParams_,
+                data_,
+                _getSignatures(txHash, threshold)
+            );
+        }
+
+        emit AddedTxHash(txHash, to_, value_, data_, nonce_);
+    }
+
+    function _storeSignatures(
+        bytes32 txHash_,
+        address from_,
+        bytes memory signature_
+    ) internal returns (uint256 totalSignatures) {
+        owners[txHash_].push(from_);
+        signatures[txHash_][from_] = signature_;
+        totalSignatures = owners[txHash_].length;
+    }
+
+    function _relay(
+        address to_,
+        uint256 value_,
+        Enum.Operation operation_,
+        GasParams memory gasParams_,
+        bytes calldata data_,
+        bytes memory signatures_
+    ) internal {
+        safe.execTransaction(
+            to_,
+            value_,
+            data_,
+            operation_,
+            gasParams_.safeTxGas,
+            gasParams_.baseGas,
+            gasParams_.gasPrice,
+            gasParams_.gasToken,
+            payable(gasParams_.refundReceiver),
+            signatures_
         );
     }
 
+    function _getSignatures(
+        bytes32 txHash_,
+        uint256 threshold_
+    ) internal returns (bytes memory signature) {
+        address[] memory txOwners = owners[txHash_];
+        LibSort.insertionSort(txOwners);
+        uint256 len = txOwners.length;
+
+        for (uint256 index = 0; index < len; index++) {
+            signature = abi.encodePacked(
+                signature,
+                signatures[txHash_][txOwners[index]]
+            );
+        }
+    }
+
     /**
-     * @notice Update public constants
+     * @notice Update safe address
      */
     function updateSafe(address safe_) external onlyOwner {
         safe = ISafe(safe_);
