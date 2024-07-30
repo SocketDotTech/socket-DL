@@ -4989,10 +4989,10 @@
     "@smithy/types" "^3.2.0"
     tslib "^2.6.2"
 
-"@socket.tech/dl-common@1.0.4-test.4":
-  version "1.0.4-test.4"
-  resolved "https://registry.yarnpkg.com/@socket.tech/dl-common/-/dl-common-1.0.4-test.4.tgz#310cb5529ae7444be55ea2399b3ffeb483f20fc0"
-  integrity sha512-zW/EkiS2QTd4csIP539Iic/fpqjwcX5dTL+WHxhDk7HwWwMaKfF/h8lOau1JGSX+oipBRG2ob6Wo4iY3PLi8zA==
+"@socket.tech/dl-common@^1.0.4-test.7":
+  version "1.0.4-test.7"
+  resolved "https://registry.yarnpkg.com/@socket.tech/dl-common/-/dl-common-1.0.4-test.7.tgz#4f1f6235c242092cf77bc2d2d606db5d1efc1430"
+  integrity sha512-XtbH4SuAtT76PtAYNXlHIpUIWCeU3+OpovBmNwijsJYL+oeIbKHTBuLmEw6Qhklzq9rHud/rXnZfecaIdws0pQ==
   dependencies:
     "@aws-sdk/client-eventbridge" "^3.449.0"
     "@aws-sdk/client-kms" "^3.454.0"
