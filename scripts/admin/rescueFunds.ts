@@ -189,7 +189,7 @@ export const main = async () => {
                 ETH_ADDRESS,
                 signer.address,
                 rescueAmount,
-                { ...overrides(parseInt(chainSlug)) }
+                { ...(await overrides(parseInt(chainSlug))) }
               );
               console.log(
                 `Rescuing ${rescueAmount} from ${contractAddr[index]} on ${chainSlug}: ${tx.hash}`

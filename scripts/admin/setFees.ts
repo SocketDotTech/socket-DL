@@ -39,7 +39,7 @@ const main = async () => {
   );
 
   const nonce = await switchboard.nextNonce(switchboard.signer.getAddress(), {
-    ...overrides(chain),
+    ...(await overrides(chain)),
   });
   const digest = keccak256(
     defaultAbiCoder.encode(
@@ -72,7 +72,7 @@ const main = async () => {
     switchboardFees,
     verificationOverheadFees,
     signature,
-    { ...overrides(chain) }
+    { ...(await overrides(chain)) }
   );
   console.log(tx.hash);
 

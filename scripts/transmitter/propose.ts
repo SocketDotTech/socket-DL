@@ -4,16 +4,16 @@ dotenvConfig();
 import { arrayify } from "@ethersproject/bytes";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { Contract, Wallet, utils } from "ethers";
-import { version, getAddresses } from "../../src/index";
+import { version, getAddresses, ChainSlug } from "../../src/index";
 import { getProviderFromChainSlug } from "../constants/networks";
 
-import { CORE_CONTRACTS, ChainSlug } from "@socket.tech/dl-core";
+import { CORE_CONTRACTS } from "@socket.tech/dl-core";
 import { getInstance } from "../deploy/utils";
 import { mode, overrides } from "../deploy/config/config";
 
 export const VERSION_HASH = utils.id(version[mode]);
 
-const chainSlug: ChainSlug = ChainSlug.OPTIMISM_GOERLI;
+const chainSlug: ChainSlug = ChainSlug.OPTIMISM_SEPOLIA;
 const packetId =
   "0x000138815c83e326c0b4380127dccf01c3b69ff4dd5c16ae0000000000000001";
 const root =
@@ -54,7 +54,7 @@ export const main = async () => {
     ).connect(signer);
 
     const tx = await socket.propose(packetId, root, signature, {
-      ...overrides(chainSlug),
+      ...(await overrides(chainSlug)),
     });
 
     console.log(`Proposing at tx hash: ${tx.hash}`);

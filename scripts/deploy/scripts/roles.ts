@@ -144,7 +144,7 @@ const executeRoleTransactions = async (
     let tx = await wallet.sendTransaction({
       to: contractAddress,
       data,
-      ...overrides(chainSlug),
+      ...(await overrides(chainSlug)),
     });
     console.log(
       `chain: ${chainSlug}`,
@@ -170,7 +170,7 @@ const executeOtherTransactions = async (
     let tx = await wallet.sendTransaction({
       to,
       data,
-      ...overrides(chainSlug),
+      ...(await overrides(chainSlug)),
     });
     console.log(`to: ${to}, txHash: ${tx?.hash}`);
     await tx.wait();
@@ -250,7 +250,7 @@ const checkNativeSwitchboardRoles = async ({
           let hasRole = await instance.callStatic["hasRole(bytes32,address)"](
             getRoleHash(role),
             userAddress,
-            { ...overrides(chainSlug) }
+            { ...(await overrides(chainSlug)) }
           );
 
           if (!roleStatus[chainSlug][pseudoContractName]["global"])
@@ -354,7 +354,9 @@ export const checkAndUpdateRoles = async (
                   return;
                 let hasRole = await instance.callStatic[
                   "hasRole(bytes32,address)"
-                ](getRoleHash(role), userAddress, { ...overrides(chainSlug) });
+                ](getRoleHash(role), userAddress, {
+                  ...(await overrides(chainSlug)),
+                });
                 if (isRoleChanged(hasRole, newRoleStatus)) {
                   if (!roleStatus[chainSlug][contractName!]["global"]) {
                     roleStatus[chainSlug][contractName!]["global"] = [];
@@ -409,7 +411,7 @@ export const checkAndUpdateRoles = async (
                     ](
                       getChainRoleHash(role, Number(siblingSlug)),
                       userAddress,
-                      { ...overrides(chainSlug) }
+                      { ...(await overrides(chainSlug)) }
                     );
 
                     if (isRoleChanged(hasRole, newRoleStatus)) {
