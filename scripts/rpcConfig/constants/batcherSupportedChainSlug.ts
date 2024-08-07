@@ -34,5 +34,7 @@ export const batcherSupportedChainSlugs = [
   // ChainSlug.BSC_TESTNET,
   ChainSlug.POLYNOMIAL,
   ChainSlug.SYNDR,
-  ChainSlug.NEOX_TESTNET,
+  // ChainSlug.NEOX_TESTNET,
+  ChainSlug.NEOX_T4_TESTNET,
+  ChainSlug.NEOX,
 ];

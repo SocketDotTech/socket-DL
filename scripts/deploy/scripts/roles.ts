@@ -249,8 +249,7 @@ const checkNativeSwitchboardRoles = async ({
           if (filterRoles.length > 0 && !filterRoles.includes(role)) return;
           let hasRole = await instance.callStatic["hasRole(bytes32,address)"](
             getRoleHash(role),
-            userAddress,
-            { ...overrides(chainSlug) }
+            userAddress
           );
 
           if (!roleStatus[chainSlug][pseudoContractName]["global"])
@@ -354,7 +353,7 @@ export const checkAndUpdateRoles = async (
                   return;
                 let hasRole = await instance.callStatic[
                   "hasRole(bytes32,address)"
-                ](getRoleHash(role), userAddress, { ...overrides(chainSlug) });
+                ](getRoleHash(role), userAddress);
                 if (isRoleChanged(hasRole, newRoleStatus)) {
                   if (!roleStatus[chainSlug][contractName!]["global"]) {
                     roleStatus[chainSlug][contractName!]["global"] = [];
@@ -406,11 +405,7 @@ export const checkAndUpdateRoles = async (
                       return;
                     let hasRole = await instance.callStatic[
                       "hasRole(bytes32,address)"
-                    ](
-                      getChainRoleHash(role, Number(siblingSlug)),
-                      userAddress,
-                      { ...overrides(chainSlug) }
-                    );
+                    ](getChainRoleHash(role, Number(siblingSlug)), userAddress);
 
                     if (isRoleChanged(hasRole, newRoleStatus)) {
                       if (

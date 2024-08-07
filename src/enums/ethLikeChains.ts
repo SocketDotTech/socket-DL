@@ -17,4 +17,6 @@ export const ethLikeChains = [
   ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.BSC_TESTNET,
   ChainSlug.NEOX_TESTNET,
+  ChainSlug.NEOX_T4_TESTNET,
+  ChainSlug.NEOX,
 ];

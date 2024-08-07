@@ -1,7 +1,7 @@
 import { ChainSlug } from "../../../src";
 
 export const disabledDFFeeChains = [
-  ChainSlug.AEVO,
+  // ChainSlug.AEVO,
   ChainSlug.ARBITRUM,
   ChainSlug.OPTIMISM,
   ChainSlug.BSC,
@@ -9,7 +9,7 @@ export const disabledDFFeeChains = [
   ChainSlug.LYRA,
   ChainSlug.MAINNET,
   ChainSlug.MANTLE,
-  ChainSlug.HOOK,
+  // ChainSlug.HOOK,
   ChainSlug.REYA,
   ChainSlug.BASE,
   ChainSlug.KINTO,

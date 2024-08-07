@@ -119,8 +119,8 @@ export const executorAddresses = {
 
 export const ownerAddresses = {
   [DeploymentMode.DEV]: socketOwner,
-  [DeploymentMode.SURGE]: "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
-  [DeploymentMode.PROD]: "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+  [DeploymentMode.SURGE]: socketOwner,
+  [DeploymentMode.PROD]: socketOwner,
 };
 
 export const hexagateTripRoleOwners = {
@@ -304,11 +304,17 @@ export const overrides = (
       gasLimit: 100_000_000_000,
       gasPrice: 30_000_000,
     };
-  } else if (chain == ChainSlug.NEOX_TESTNET) {
+  } else if (chain == ChainSlug.NEOX_T4_TESTNET) {
     return {
       type: 1,
-      gasLimit: 1_000_000,
-      gasPrice: 212_000_000_000,
+      gasLimit: 6_000_000,
+      gasPrice: 40_000_000_000,
+    };
+  } else if (chain == ChainSlug.NEOX) {
+    return {
+      type: 1,
+      gasLimit: 6_000_000,
+      gasPrice: 40_000_000_000,
     };
   } else if (chainConfig[chain] && chainConfig[chain].overrides) {
     return chainConfig[chain].overrides!;

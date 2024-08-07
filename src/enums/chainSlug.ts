@@ -46,4 +46,6 @@ export enum ChainSlug {
   POLYNOMIAL = ChainId.POLYNOMIAL,
   SYNDR = ChainId.SYNDR,
   NEOX_TESTNET = ChainId.NEOX_TESTNET,
+  NEOX_T4_TESTNET = ChainId.NEOX_T4_TESTNET,
+  NEOX = ChainId.NEOX,
 }
