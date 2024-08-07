@@ -144,7 +144,7 @@ const executeRoleTransactions = async (
     let tx = await wallet.sendTransaction({
       to: contractAddress,
       data,
-      ...overrides(chainSlug),
+      ...(await overrides(chainSlug)),
     });
     console.log(
       `chain: ${chainSlug}`,
@@ -170,7 +170,7 @@ const executeOtherTransactions = async (
     let tx = await wallet.sendTransaction({
       to,
       data,
-      ...overrides(chainSlug),
+      ...(await overrides(chainSlug)),
     });
     console.log(`to: ${to}, txHash: ${tx?.hash}`);
     await tx.wait();

@@ -258,6 +258,11 @@ export interface S3ChainConfig {
   icon?: string;
   finalityInfo?: ChainFinalityInfo;
   defaultFinalityBucket?: FinalityBucket;
+  overrides?: {
+    type?: number;
+    gasPrice?: number;
+    gasLimit?: number;
+  };
 }
 
 export type S3Config = {
