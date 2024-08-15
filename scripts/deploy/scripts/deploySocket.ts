@@ -129,7 +129,7 @@ export const deploySocket = async (
       deployUtils.addresses["Safe"] = constants.AddressZero;
 
     const multisigWrapper: Contract = await getOrDeploy(
-      "Counter",
+      "MultiSigWrapper",
       "contracts/utils/MultiSigWrapper.sol",
       [socketOwner, deployUtils.addresses["Safe"]],
       deployUtils

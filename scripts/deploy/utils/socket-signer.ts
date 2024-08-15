@@ -12,7 +12,9 @@ import { mode } from "../config/config";
 
 export const getSocketSigner = async (
   chainSlug: number,
-  addresses: ChainSocketAddresses
+  addresses: ChainSocketAddresses,
+  useSafe: boolean = true,
+  useEOA: boolean = false
 ): Promise<SocketSigner> => {
   const provider = getProviderFromChainSlug(chainSlug);
   const wallet: Wallet = new Wallet(
@@ -20,10 +22,9 @@ export const getSocketSigner = async (
     provider
   );
 
-  if (addresses["Safe"]) {
+  if (addresses["Safe"] && useSafe) {
     const safeAddress = addresses["Safe"];
     const safeWrapperAddress = addresses[CORE_CONTRACTS.MultiSigWrapper];
-
     return new SocketSigner(
       provider,
       ChainSlugToId[chainSlug],
@@ -32,8 +33,8 @@ export const getSocketSigner = async (
       await getRelayUrl(mode),
       getRelayAPIKEY(mode),
       wallet,
-      true,
-      false
+      useSafe,
+      useEOA
     );
   } else
     return new SocketSigner(
@@ -44,7 +45,7 @@ export const getSocketSigner = async (
       "",
       "",
       wallet,
-      false,
-      true
+      useSafe,
+      useEOA
     );
 };

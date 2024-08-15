@@ -32,7 +32,9 @@ export const deployForChains = async (
 
         const signer: SocketSigner = await getSocketSigner(
           chain,
-          chainAddresses
+          chainAddresses,
+          false,
+          true
         );
 
         while (!allDeployed) {
