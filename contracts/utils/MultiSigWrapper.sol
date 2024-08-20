@@ -47,7 +47,6 @@ contract MultiSigWrapper is AccessControl {
     using LibSort for address;
 
     ISafe public safe;
-
     mapping(bytes32 => address[]) public owners;
     mapping(address => uint256) public lastNonce;
 
@@ -88,39 +87,18 @@ contract MultiSigWrapper is AccessControl {
         bytes calldata data_,
         bytes memory signature_
     ) external {
-        uint256 threshold = safe.getThreshold();
-        lastNonce[from_] = nonce_;
-
         GasParams memory gasParams;
-        if (threshold == 1)
-            return
-                _relay(
-                    to_,
-                    value_,
-                    Enum.Operation.Call,
-                    gasParams,
-                    data_,
-                    signature_
-                );
 
-        bytes32 txHash = keccak256(
-            abi.encode(to_, value_, data_, Enum.Operation.Call, nonce_)
+        _signOrRelay(
+            from_,
+            to_,
+            nonce_,
+            value_,
+            Enum.Operation.Call,
+            gasParams,
+            data_,
+            signature_
         );
-
-        uint256 totalSignatures = _storeSignatures(txHash, from_, signature_);
-
-        if (totalSignatures >= threshold) {
-            _relay(
-                to_,
-                value_,
-                Enum.Operation.Call,
-                gasParams,
-                data_,
-                _getSignatures(txHash, threshold)
-            );
-        }
-
-        emit AddedTxHash(txHash, to_, value_, data_, nonce_);
     }
 
     function storeOrRelaySignaturesWithOverrides(
@@ -133,6 +111,28 @@ contract MultiSigWrapper is AccessControl {
         bytes calldata data_,
         bytes memory signature_
     ) external {
+        _signOrRelay(
+            from_,
+            to_,
+            nonce_,
+            value_,
+            operation_,
+            gasParams_,
+            data_,
+            signature_
+        );
+    }
+
+    function _signOrRelay(
+        address from_,
+        address to_,
+        uint256 nonce_,
+        uint256 value_,
+        Enum.Operation operation_,
+        GasParams memory gasParams_,
+        bytes calldata data_,
+        bytes memory signature_
+    ) internal {
         uint256 threshold = safe.getThreshold();
         lastNonce[from_] = nonce_;
 
@@ -152,28 +152,17 @@ contract MultiSigWrapper is AccessControl {
         );
         uint256 totalSignatures = _storeSignatures(txHash, from_, signature_);
 
-        if (totalSignatures >= threshold) {
+        if (totalSignatures >= threshold)
             _relay(
                 to_,
                 value_,
                 operation_,
                 gasParams_,
                 data_,
-                _getSignatures(txHash, threshold)
+                _getSignatures(txHash)
             );
-        }
 
         emit AddedTxHash(txHash, to_, value_, data_, nonce_);
-    }
-
-    function _storeSignatures(
-        bytes32 txHash_,
-        address from_,
-        bytes memory signature_
-    ) internal returns (uint256 totalSignatures) {
-        owners[txHash_].push(from_);
-        signatures[txHash_][from_] = signature_;
-        totalSignatures = owners[txHash_].length;
     }
 
     function _relay(
@@ -198,10 +187,19 @@ contract MultiSigWrapper is AccessControl {
         );
     }
 
-    function _getSignatures(
+    function _storeSignatures(
         bytes32 txHash_,
-        uint256 threshold_
-    ) internal returns (bytes memory signature) {
+        address from_,
+        bytes memory signature_
+    ) internal returns (uint256 totalSignatures) {
+        owners[txHash_].push(from_);
+        signatures[txHash_][from_] = signature_;
+        totalSignatures = owners[txHash_].length;
+    }
+
+    function _getSignatures(
+        bytes32 txHash_
+    ) internal view returns (bytes memory signature) {
         address[] memory txOwners = owners[txHash_];
         LibSort.insertionSort(txOwners);
         uint256 len = txOwners.length;

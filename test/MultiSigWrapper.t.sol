@@ -9,13 +9,14 @@ contract MultiSigWrapperTestHelper is MultiSigWrapper {
     constructor(address owner_, address safe_) MultiSigWrapper(owner_, safe_) {}
 
     function publicGetSignatures(
-        bytes32 txHash_,
-        uint256 threshold_
-    ) external returns (bytes memory) {
-        return _getSignatures(txHash_, threshold_);
+        bytes32 txHash_
+    ) external view returns (bytes memory) {
+        return _getSignatures(txHash_);
     }
 
-    function getOwners(bytes32 txHash_) external returns (address[] memory) {
+    function getOwners(
+        bytes32 txHash_
+    ) external view returns (address[] memory) {
         return owners[txHash_];
     }
 }
@@ -128,7 +129,14 @@ contract MultiSigWrapperTest is Test {
         bytes memory signature3 = "0x6";
 
         bytes32 txHash = keccak256(
-            abi.encode(to, value, data, Enum.Operation.Call, mockSafe.nonce())
+            abi.encode(
+                to,
+                value,
+                data,
+                Enum.Operation.Call,
+                mockSafe.nonce(),
+                0
+            )
         );
 
         // Store first signature
@@ -173,10 +181,7 @@ contract MultiSigWrapperTest is Test {
         // assertEq(owner, addr3);
         assertEq(signature, signature3);
 
-        bytes memory combinedSign = multiSigWrapper.publicGetSignatures(
-            txHash,
-            3
-        );
+        bytes memory combinedSign = multiSigWrapper.publicGetSignatures(txHash);
         bytes memory expectedSign = abi.encodePacked(signature1, signature2);
         expectedSign = abi.encodePacked(expectedSign, signature3);
         assertEq(combinedSign, expectedSign);
@@ -205,7 +210,14 @@ contract MultiSigWrapperTest is Test {
         bytes memory signature3 = "0x6";
 
         bytes32 txHash = keccak256(
-            abi.encode(to, value, data, Enum.Operation.Call, mockSafe.nonce())
+            abi.encode(
+                to,
+                value,
+                data,
+                Enum.Operation.Call,
+                mockSafe.nonce(),
+                0
+            )
         );
 
         // Store third signature
@@ -244,10 +256,7 @@ contract MultiSigWrapperTest is Test {
         signature = multiSigWrapper.signatures(txHash, addr1);
         assertEq(signature, signature1);
 
-        bytes memory combinedSign = multiSigWrapper.publicGetSignatures(
-            txHash,
-            3
-        );
+        bytes memory combinedSign = multiSigWrapper.publicGetSignatures(txHash);
         bytes memory expectedSign = abi.encodePacked(signature1, signature2);
         expectedSign = abi.encodePacked(expectedSign, signature3);
         assertEq(combinedSign, expectedSign);
