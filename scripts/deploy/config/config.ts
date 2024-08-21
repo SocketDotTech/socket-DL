@@ -124,7 +124,7 @@ export const ownerAddresses = {
 export const hexagateTripRoleOwners = {
   [DeploymentMode.DEV]: "0x081871d78fe7c35c774ce3b4d4ba6592519db223",
   [DeploymentMode.SURGE]: "0x081871d78fe7c35c774ce3b4d4ba6592519db223",
-  [DeploymentMode.PROD]: "0x081871d78fe7c35c774ce3b4d4ba6592519db223",
+  [DeploymentMode.PROD]: "0xb810a120dd88746c039894bc6397508bdb762e86",
 };
 
 export const overrides = async (

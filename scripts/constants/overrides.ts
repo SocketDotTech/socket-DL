@@ -72,7 +72,7 @@ export const chainOverrides: {
     gasPrice: 100_000_000,
   },
   [ChainSlug.KINTO]: {
-    gasLimit: 4_000_000,
+    // gasLimit: 4_000_000,
   },
   [ChainSlug.KINTO_DEVNET]: {
     gasLimit: 4_000_000,
