@@ -49,4 +49,6 @@ export const chainSlugToHardhatChainName = {
   [ChainSlug.NEOX_TESTNET]: [HardhatChainName.NEOX_TESTNET],
   [ChainSlug.NEOX_T4_TESTNET]: [HardhatChainName.NEOX_T4_TESTNET],
   [ChainSlug.NEOX]: [HardhatChainName.NEOX],
+  [ChainSlug.GNOSIS]: [HardhatChainName.GNOSIS],
+  [ChainSlug.LINEA]: [HardhatChainName.LINEA],
 };

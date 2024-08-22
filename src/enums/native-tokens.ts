@@ -8,4 +8,5 @@ export enum NativeTokens {
   "winr" = "winr-protocol",
   "no-token" = "no-token",
   "gas" = "gas",
+  "dai" = "dai",
 }

@@ -46,4 +46,6 @@ export enum ChainId {
   NEOX_TESTNET = 12227331,
   NEOX_T4_TESTNET = 12227332,
   NEOX = 47763,
+  GNOSIS = 100,
+  LINEA = 59144,
 }

@@ -13,4 +13,6 @@ export const icons = {
   [ChainSlug.NEOX_TESTNET]: "",
   [ChainSlug.NEOX_T4_TESTNET]: "",
   [ChainSlug.NEOX]: "",
+  [ChainSlug.GNOSIS]: "",
+  [ChainSlug.LINEA]: "",
 };

@@ -49,4 +49,6 @@ export const ChainSlugToId = {
   [ChainSlug.NEOX_TESTNET]: ChainId.NEOX_TESTNET,
   [ChainSlug.NEOX_T4_TESTNET]: ChainId.NEOX_T4_TESTNET,
   [ChainSlug.NEOX]: ChainId.NEOX,
+  [ChainSlug.GNOSIS]: ChainId.GNOSIS,
+  [ChainSlug.LINEA]: ChainId.LINEA,
 };

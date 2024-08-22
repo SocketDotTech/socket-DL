@@ -47,4 +47,6 @@ export enum HardhatChainName {
   NEOX_TESTNET = "neox_testnet",
   NEOX_T4_TESTNET = "neox_t4_testnet",
   NEOX = "neox",
+  GNOSIS = "gnosis",
+  LINEA = "linea",
 }
