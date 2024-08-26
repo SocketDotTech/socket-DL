@@ -87,6 +87,12 @@ export const chainOverrides: {
     gasLimit: 1_000_000,
     gasPrice: 212_000_000_000,
   },
+  [ChainSlug.GNOSIS]: {
+    gasLimit: 15_000_000,
+  },
+  [ChainSlug.LINEA]: {
+    gasLimit: 10_000_000,
+  },
 };
 
 export const getOverrides = async (
