@@ -134,7 +134,7 @@ contract MultiSigWrapper is AccessControl {
         bytes memory signature_
     ) internal {
         uint256 threshold = safe.getThreshold();
-        lastNonce[from_] = nonce_;
+        lastNonce[to_] = nonce_;
 
         if (threshold == 1)
             return

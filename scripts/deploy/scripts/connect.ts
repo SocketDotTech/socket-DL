@@ -36,7 +36,7 @@ export const connectPlugs = async (
             chains.includes(chainSlug)
         );
 
-        const siblingIntegrationtype: IntegrationTypes[] = siblingSlugs.map(
+        const siblingIntegrationType: IntegrationTypes[] = siblingSlugs.map(
           (chainSlug) => {
             return getDefaultIntegrationType(chain, chainSlug);
           }
@@ -61,7 +61,7 @@ export const connectPlugs = async (
               addresses,
               chain,
               sibling,
-              siblingIntegrationtype[index]
+              siblingIntegrationType[index]
             );
           } catch (error) {
             console.log(error, " continuing");
@@ -87,7 +87,7 @@ export const connectPlugs = async (
           );
 
           console.log(
-            `Connecting counter of ${chain} for ${sibling} and ${siblingIntegrationtype[index]} at tx hash: ${tx.hash}`
+            `Connecting counter of ${chain} for ${sibling} and ${siblingIntegrationType[index]} at tx hash: ${tx.hash}`
           );
           await tx.wait();
         }
