@@ -68,6 +68,7 @@ contract MultiSigWrapper is AccessControl {
     );
 
     event SafeUpdated(address safe_);
+    event ResetNonce(address signer_, uint256 nonce_);
 
     /**
      * @notice initializes and grants RESCUE_ROLE to owner.
@@ -134,7 +135,7 @@ contract MultiSigWrapper is AccessControl {
         bytes memory signature_
     ) internal {
         uint256 threshold = safe.getThreshold();
-        lastNonce[to_] = nonce_;
+        lastNonce[from_] = nonce_;
 
         if (threshold == 1)
             return
@@ -218,6 +219,11 @@ contract MultiSigWrapper is AccessControl {
     function updateSafe(address safe_) external onlyOwner {
         safe = ISafe(safe_);
         emit SafeUpdated(safe_);
+    }
+
+    function resetNonce(uint256 nonce_) external {
+        lastNonce[msg.sender] = nonce_;
+        emit ResetNonce(msg.sender, nonce_);
     }
 
     function getNonce() external view returns (uint256) {
