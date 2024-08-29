@@ -44,4 +44,5 @@ export enum ChainId {
   POLYNOMIAL = 8008,
   SYNDR = 404,
   NEOX_TESTNET = 12227331,
+  BASE_SEPOLIA = 84532,
 }

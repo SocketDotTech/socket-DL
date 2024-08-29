@@ -24,4 +24,5 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.SIPHER_FUNKI_TESTNET,
   ChainSlug.BSC_TESTNET,
   ChainSlug.NEOX_TESTNET,
+  ChainSlug.BASE_SEPOLIA,
 ];

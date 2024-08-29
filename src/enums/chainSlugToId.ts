@@ -47,4 +47,5 @@ export const ChainSlugToId = {
   [ChainSlug.POLYNOMIAL]: ChainId.POLYNOMIAL,
   [ChainSlug.SYNDR]: ChainId.SYNDR,
   [ChainSlug.NEOX_TESTNET]: ChainId.NEOX_TESTNET,
+  [ChainSlug.BASE_SEPOLIA]: ChainId.BASE_SEPOLIA,
 };

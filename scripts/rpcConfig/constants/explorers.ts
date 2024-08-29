@@ -13,4 +13,5 @@ export const explorers = {
   [ChainSlug.POLYNOMIAL]: "https://explorer.polynomial.fi",
   [ChainSlug.SYNDR]: "https://explorer.syndr.com/",
   [ChainSlug.NEOX_TESTNET]: "https://xt3scan.ngd.network/",
+  [ChainSlug.BASE_SEPOLIA]: "https://sepolia.basescan.org/",
 };

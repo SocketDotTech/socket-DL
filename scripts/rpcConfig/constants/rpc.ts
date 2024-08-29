@@ -47,4 +47,5 @@ export const rpcs = {
   [ChainSlug.POLYNOMIAL]: checkEnvValue("POLYNOMIAL_RPC"),
   [ChainSlug.SYNDR]: checkEnvValue("SYNDR_RPC"),
   [ChainSlug.NEOX_TESTNET]: checkEnvValue("NEOX_TESTNET_RPC"),
+  [ChainSlug.BASE_SEPOLIA]: checkEnvValue("BASE_SEPOLIA_RPC"),
 };

@@ -47,4 +47,5 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.POLYNOMIAL]: ChainSlug.POLYNOMIAL,
   [HardhatChainName.SYNDR]: ChainSlug.SYNDR,
   [HardhatChainName.NEOX_TESTNET]: ChainSlug.NEOX_TESTNET,
+  [HardhatChainName.BASE_SEPOLIA]: ChainSlug.BASE_SEPOLIA,
 };

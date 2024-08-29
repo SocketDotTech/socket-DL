@@ -35,4 +35,5 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.POLYNOMIAL,
   ChainSlug.SYNDR,
   ChainSlug.NEOX_TESTNET,
+  ChainSlug.BASE_SEPOLIA,
 ];
