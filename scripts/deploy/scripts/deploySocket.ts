@@ -31,6 +31,7 @@ export const deploySocket = async (
   executionManagerVersion: string,
   socketSigner: SocketSigner,
   chainSlug: number,
+  useSafe: boolean,
   currentMode: DeploymentMode,
   deployedAddresses: ChainSocketAddresses
 ): Promise<ReturnObj> => {
@@ -42,10 +43,28 @@ export const deploySocket = async (
   };
 
   try {
+    // safe wrapper deployment
+    const safe: Contract = await getOrDeploy(
+      "SafeL2",
+      "contracts/utils/SafeL2.sol",
+      [],
+      deployUtils
+    );
+    deployUtils.addresses["SafeL2"] = safe.address;
+
+    const multisigWrapper: Contract = await getOrDeploy(
+      "MultiSigWrapper",
+      "contracts/utils/MultiSigWrapper.sol",
+      [socketOwner, deployUtils.addresses["SafeL2"]],
+      deployUtils
+    );
+    deployUtils.addresses["MultiSigWrapper"] = multisigWrapper.address;
+
+    const owner = useSafe ? deployUtils.addresses["SafeL2"] : socketOwner;
     const signatureVerifier: Contract = await getOrDeploy(
       CORE_CONTRACTS.SignatureVerifier,
       "contracts/utils/SignatureVerifier.sol",
-      [socketOwner],
+      [owner],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.SignatureVerifier] =
@@ -54,7 +73,7 @@ export const deploySocket = async (
     const hasher: Contract = await getOrDeploy(
       CORE_CONTRACTS.Hasher,
       "contracts/utils/Hasher.sol",
-      [socketOwner],
+      [owner],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.Hasher] = hasher.address;
@@ -62,7 +81,7 @@ export const deploySocket = async (
     const capacitorFactory: Contract = await getOrDeploy(
       CORE_CONTRACTS.CapacitorFactory,
       "contracts/CapacitorFactory.sol",
-      [socketOwner, maxAllowedPacketLength],
+      [owner, maxAllowedPacketLength],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.CapacitorFactory] =
@@ -75,7 +94,7 @@ export const deploySocket = async (
         chainSlug,
         hasher.address,
         capacitorFactory.address,
-        socketOwner,
+        owner,
         version[deployUtils.mode],
       ],
       deployUtils
@@ -85,7 +104,7 @@ export const deploySocket = async (
     const executionManager: Contract = await getOrDeploy(
       executionManagerVersion,
       `contracts/${executionManagerVersion}.sol`,
-      [socketOwner, chainSlug, socket.address, signatureVerifier.address],
+      [owner, chainSlug, socket.address, signatureVerifier.address],
       deployUtils
     );
     deployUtils.addresses[executionManagerVersion] = executionManager.address;
@@ -93,7 +112,7 @@ export const deploySocket = async (
     const transmitManager: Contract = await getOrDeploy(
       CORE_CONTRACTS.TransmitManager,
       "contracts/TransmitManager.sol",
-      [socketOwner, chainSlug, socket.address, signatureVerifier.address],
+      [owner, chainSlug, socket.address, signatureVerifier.address],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.TransmitManager] =
@@ -102,6 +121,7 @@ export const deploySocket = async (
     // switchboards deploy
     deployUtils.addresses = await deploySwitchboards(
       chainSlug,
+      owner,
       socketSigner as SocketSigner,
       deployUtils.addresses,
       currentMode
@@ -110,7 +130,7 @@ export const deploySocket = async (
     const socketBatcher: Contract = await getOrDeploy(
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [socketOwner],
+      [owner],
       deployUtils
     );
     deployUtils.addresses["SocketBatcher"] = socketBatcher.address;
@@ -123,18 +143,6 @@ export const deploySocket = async (
       deployUtils
     );
     deployUtils.addresses["Counter"] = counter.address;
-
-    // safe wrapper deployment
-    if (!deployUtils.addresses["Safe"])
-      deployUtils.addresses["Safe"] = constants.AddressZero;
-
-    const multisigWrapper: Contract = await getOrDeploy(
-      "MultiSigWrapper",
-      "contracts/utils/MultiSigWrapper.sol",
-      [socketOwner, deployUtils.addresses["Safe"]],
-      deployUtils
-    );
-    deployUtils.addresses["MultiSigWrapper"] = multisigWrapper.address;
 
     // simulators
     const socketSimulator: Contract = await getOrDeploy(

@@ -32,7 +32,6 @@ const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
             let instance = Contract.attach(fastSwitchboardAddress).connect(
               provider
             );
-            // console.log(instance);÷\
             let result = await instance["totalWatchers(uint32)"](siblingChain);
 
             let digest = utils.keccak256(
@@ -49,7 +48,6 @@ const main = async (srcChains: ChainSlug[], dstChains: ChainSlug[]) => {
               )
             );
 
-            // console.log(result);
             data.push({
               chainSlug,
               siblingChain,

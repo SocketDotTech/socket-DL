@@ -31,6 +31,7 @@ interface checkAndUpdateRolesObj {
   userSpecificRoles: { userAddress: string; filterRoles: ROLES[] }[];
   filterChains: ChainSlug[];
   filterSiblingChains: ChainSlug[];
+  safeChains: ChainSlug[];
   contractName: CORE_CONTRACTS;
   newRoleStatus: boolean;
   sendTransaction: boolean;
@@ -140,18 +141,22 @@ const executeRoleTransactions = async (
     });
 
     if (!roles.length) continue;
-    console.log(chainSlug, contracts[0], roles.length);
     let data: string;
     if (newRoleStatus) {
       data = getRoleTxnData(roles, slugs, addresses, "GRANT");
     } else {
       data = getRoleTxnData(roles, slugs, addresses, "REVOKE");
     }
-    let tx = await socketSigner.sendTransaction({
+    const transaction = {
       to: contractAddress,
       data,
       ...overrides(chainSlug),
-    });
+    };
+
+    const isSubmitted = await socketSigner.isTxHashSubmitted(transaction);
+    if (isSubmitted) return;
+
+    const tx = await socketSigner.sendTransaction(transaction);
     console.log(
       `chain: ${chainSlug}`,
       " contract:",
@@ -173,11 +178,17 @@ const executeOtherTransactions = async (
   let txnDatas = otherTxns[chainSlug as any as keyof typeof otherTxns]!;
   for (let i = 0; i < txnDatas.length; i++) {
     let { to, data } = txnDatas[i];
-    let tx = await socketSigner.sendTransaction({
+
+    const transaction = {
       to,
       data,
       ...overrides(chainSlug),
-    });
+    };
+
+    const isSubmitted = await socketSigner.isTxHashSubmitted(transaction);
+    if (isSubmitted) return;
+
+    const tx = await socketSigner.sendTransaction(transaction);
     console.log(`to: ${to}, txHash: ${tx?.hash}`);
     await tx.wait();
     console.log(`txHash: ${tx?.hash} COMPLETE`);
@@ -186,6 +197,7 @@ const executeOtherTransactions = async (
 
 const executeTransactions = async (
   activeChainSlugs: ChainSlug[],
+  safeChains: ChainSlug[],
   newRoleStatus: boolean,
   allAddresses: DeploymentAddresses
 ) => {
@@ -193,7 +205,8 @@ const executeTransactions = async (
     activeChainSlugs.map(async (chainSlug) => {
       const relaySigner = await getSocketSigner(
         chainSlug,
-        allAddresses[chainSlug]
+        allAddresses[chainSlug],
+        safeChains.includes(chainSlug)
       );
       await executeRoleTransactions(chainSlug, newRoleStatus, relaySigner);
       await executeOtherTransactions(chainSlug, relaySigner);
@@ -258,18 +271,35 @@ const checkNativeSwitchboardRoles = async ({
 
         calls.push({
           target: instance.address,
-          calldata: instance.encodeFunctionData("hasRole(bytes32,address)", [
-            getRoleHash(role),
-            userAddress,
-          ]),
+          callData: instance.interface.encodeFunctionData(
+            "hasRole(bytes32,address)",
+            [getRoleHash(role), userAddress]
+          ),
         });
       });
       const result = await multicall(socketBatcherContract, calls);
 
-      requiredRoles.map(async (role, index) => {
-        if (isRoleChanged(result[index], newRoleStatus))
+      requiredRoles.map(async (role) => {
+        if (filterRoles.length > 0 && !filterRoles.includes(role)) return;
+
+        const callIndex = calls.findIndex(
+          (c) =>
+            c.callData ===
+            instance.interface.encodeFunctionData("hasRole(bytes32,address)", [
+              getRoleHash(role),
+              userAddress,
+            ])
+        );
+        if (callIndex === -1) throw Error("Role not found!");
+
+        const hasRole =
+          result[callIndex] ===
+          "0x0000000000000000000000000000000000000000000000000000000000000000"
+            ? false
+            : true;
+        if (isRoleChanged(hasRole, newRoleStatus))
           roleStatus[chainSlug][pseudoContractName]["global"].push({
-            hasRole: result[index],
+            hasRole,
             role,
             userAddress,
           });
@@ -278,7 +308,7 @@ const checkNativeSwitchboardRoles = async ({
           chainSlug,
           pseudoContractName,
           contractAddress!,
-          result[index],
+          hasRole,
           getRoleHash(role),
           0,
           userAddress,
@@ -298,6 +328,7 @@ export const checkAndUpdateRoles = async (
       sendTransaction,
       filterChains,
       filterSiblingChains,
+      safeChains,
       contractName,
       userSpecificRoles,
       newRoleStatus,
@@ -323,15 +354,18 @@ export const checkAndUpdateRoles = async (
 
         roleStatus[chainSlug] = {};
 
-        const siblingSlugs = getSiblingSlugs(chainSlug);
         const provider = getProviderFromChainSlug(
           chainSlug as any as ChainSlug
         );
 
         // In case of native switchboard, check for address under integrations->NATIVE_BRIDGE
         if (contractName === CORE_CONTRACTS.NativeSwitchboard) {
+          const siblingSlugs = getSiblingSlugs(chainSlug);
+
           for (let index = 0; index < userSpecificRoles.length; index++) {
             let { userAddress, filterRoles } = userSpecificRoles[index];
+            if (safeChains.includes(chainSlug))
+              userAddress = addresses["SafeL2"];
             await checkNativeSwitchboardRoles({
               chainSlug,
               provider,
@@ -374,14 +408,14 @@ export const checkAndUpdateRoles = async (
 
         userSpecificRoles.map(async (roleObj) => {
           let { userAddress, filterRoles } = roleObj;
-          if (filterRoles.length == 0) filterRoles = requiredRoles;
-          if (filterSiblingChains.length == 0)
-            filterSiblingChains = siblingSlugs;
+          if (safeChains.includes(chainSlug)) userAddress = addresses["SafeL2"];
+          const siblingSlugs = getSiblingSlugs(chainSlug);
 
-          filterRoles.map(async (role) => {
+          requiredRoles.map(async (role) => {
+            if (filterRoles.length > 0 && !filterRoles.includes(role)) return;
             chainCalls.push({
               target: instance.address,
-              calldata: instance.encodeFunctionData(
+              callData: instance.interface.encodeFunctionData(
                 "hasRole(bytes32,address)",
                 [getRoleHash(role), userAddress]
               ),
@@ -396,11 +430,18 @@ export const checkAndUpdateRoles = async (
             siblingSlugs.push(chainSlug);
           }
 
-          filterSiblingChains.map(async (siblingSlug) => {
-            filterRoles.map(async (role) => {
+          siblingSlugs.map(async (siblingSlug) => {
+            if (
+              filterSiblingChains.length > 0 &&
+              !filterSiblingChains.includes(siblingSlug)
+            )
+              return;
+            requiredChainRoles.map(async (role) => {
+              if (filterRoles.length > 0 && !filterRoles.includes(role)) return;
+
               siblingChainCalls.push({
                 target: instance.address,
-                calldata: instance.encodeFunctionData(
+                callData: instance.interface.encodeFunctionData(
                   "hasRole(bytes32,address)",
                   [getChainRoleHash(role, Number(siblingSlug)), userAddress]
                 ),
@@ -408,6 +449,7 @@ export const checkAndUpdateRoles = async (
             });
           });
         });
+
         const chainRoles = await multicall(socketBatcherContract, chainCalls);
         const siblingChainRoles = await multicall(
           socketBatcherContract,
@@ -416,17 +458,34 @@ export const checkAndUpdateRoles = async (
 
         userSpecificRoles.map(async (roleObj) => {
           let { userAddress, filterRoles } = roleObj;
-          if (filterRoles.length == 0) filterRoles = requiredRoles;
-          if (filterSiblingChains.length == 0)
-            filterSiblingChains = siblingSlugs;
+          if (safeChains.includes(chainSlug)) userAddress = addresses["SafeL2"];
 
-          filterRoles.map(async (role, index) => {
-            if (isRoleChanged(chainRoles[index], newRoleStatus)) {
+          const siblingSlugs = getSiblingSlugs(chainSlug);
+
+          requiredRoles.map(async (role) => {
+            if (filterRoles.length > 0 && !filterRoles.includes(role)) return;
+            const callIndex = chainCalls.findIndex(
+              (c) =>
+                c.callData ===
+                instance.interface.encodeFunctionData(
+                  "hasRole(bytes32,address)",
+                  [getRoleHash(role), userAddress]
+                )
+            );
+            if (callIndex === -1) throw Error("Role not found!");
+            const hasRole =
+              chainRoles[callIndex] ===
+              "0x0000000000000000000000000000000000000000000000000000000000000000"
+                ? false
+                : true;
+
+            if (isRoleChanged(hasRole, newRoleStatus)) {
               if (!roleStatus[chainSlug][contractName!]["global"]) {
                 roleStatus[chainSlug][contractName!]["global"] = [];
               }
+
               roleStatus[chainSlug][contractName]["global"].push({
-                hasRole: chainRoles[index],
+                hasRole,
                 role,
                 userAddress,
               });
@@ -436,7 +495,7 @@ export const checkAndUpdateRoles = async (
               chainSlug,
               contractName as CORE_CONTRACTS,
               contractAddress! as string,
-              chainRoles[index],
+              hasRole,
               getRoleHash(role),
               0, // keep slug as 0 for non-chain specific roles
               userAddress,
@@ -452,15 +511,45 @@ export const checkAndUpdateRoles = async (
             siblingSlugs.push(chainSlug);
           }
 
-          filterSiblingChains.map(async (siblingSlug) => {
-            requiredChainRoles.map(async (role, index) => {
-              if (isRoleChanged(siblingChainRoles[index], newRoleStatus)) {
+          siblingSlugs.map(async (siblingSlug) => {
+            if (
+              filterSiblingChains.length > 0 &&
+              !filterSiblingChains.includes(siblingSlug)
+            )
+              return;
+
+            requiredChainRoles.map(async (role) => {
+              if (filterRoles.length > 0 && !filterRoles.includes(role)) return;
+
+              const callIndex = siblingChainCalls.findIndex(
+                (c) =>
+                  c.callData ===
+                  instance.interface.encodeFunctionData(
+                    "hasRole(bytes32,address)",
+                    [getChainRoleHash(role, Number(siblingSlug)), userAddress]
+                  )
+              );
+              if (callIndex === -1)
+                throw Error(
+                  `Role not found!, ${getChainRoleHash(
+                    role,
+                    Number(siblingSlug)
+                  )}, ${userAddress}, ${siblingSlug}, ${role}`
+                );
+
+              const hasRole =
+                siblingChainRoles[callIndex] ===
+                "0x0000000000000000000000000000000000000000000000000000000000000000"
+                  ? false
+                  : true;
+
+              if (isRoleChanged(hasRole, newRoleStatus)) {
                 if (!roleStatus[chainSlug][contractName][siblingSlug]?.length)
                   roleStatus[chainSlug][contractName][siblingSlug] = [];
 
                 roleStatus[chainSlug][contractName][siblingSlug].push({
                   role,
-                  hasRole: siblingChainRoles[index],
+                  hasRole,
                   userAddress,
                 });
               }
@@ -471,7 +560,7 @@ export const checkAndUpdateRoles = async (
                 (contractName === CORE_CONTRACTS.FastSwitchboard ||
                   contractName === CORE_CONTRACTS.FastSwitchboard2) &&
                 role === ROLES.WATCHER_ROLE &&
-                isRoleChanged(siblingChainRoles[index], newRoleStatus)
+                isRoleChanged(hasRole, newRoleStatus)
               ) {
                 let data;
                 if (newRoleStatus) {
@@ -496,7 +585,7 @@ export const checkAndUpdateRoles = async (
                   chainSlug,
                   contractName as CORE_CONTRACTS,
                   contractAddress! as string,
-                  siblingChainRoles[index],
+                  hasRole,
                   getRoleHash(role),
                   Number(siblingSlug),
                   userAddress,
@@ -509,9 +598,13 @@ export const checkAndUpdateRoles = async (
       })
     );
 
-    console.log(JSON.stringify(roleStatus));
     if (sendTransaction)
-      await executeTransactions(activeChainSlugs, newRoleStatus, allAddresses);
+      await executeTransactions(
+        activeChainSlugs,
+        safeChains,
+        newRoleStatus,
+        allAddresses
+      );
 
     return { params, roleStatus };
   } catch (error) {

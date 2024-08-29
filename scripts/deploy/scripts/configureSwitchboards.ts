@@ -24,6 +24,7 @@ import { getSocketSigner } from "../utils/socket-signer";
 export const configureSwitchboards = async (
   addresses: DeploymentAddresses,
   chains: ChainSlug[],
+  safeChains: ChainSlug[],
   executionManagerVersion: CORE_CONTRACTS
 ) => {
   try {
@@ -31,21 +32,26 @@ export const configureSwitchboards = async (
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
         let addr: ChainSocketAddresses = addresses[chain]!;
-        const socketSigner: SocketSigner = await getSocketSigner(chain, addr);
+        const socketSigner: SocketSigner = await getSocketSigner(
+          chain,
+          addr,
+          safeChains.includes(chain)
+        );
 
         const list = isTestnet(chain) ? TestnetIds : MainnetIds;
         const siblingSlugs: ChainSlug[] = list.filter(
           (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
         );
 
-        await configureExecutionManager(
-          executionManagerVersion,
-          addr[executionManagerVersion]!,
-          addr[CORE_CONTRACTS.SocketBatcher],
-          chain,
-          siblingSlugs,
-          socketSigner
-        );
+        // todo: move to fees updater
+        // await configureExecutionManager(
+        //   executionManagerVersion,
+        //   addr[executionManagerVersion]!,
+        //   addr[CORE_CONTRACTS.SocketBatcher],
+        //   chain,
+        //   siblingSlugs,
+        //   socketSigner
+        // );
 
         await setManagers(addr, socketSigner, executionManagerVersion);
 
@@ -106,7 +112,7 @@ export const configureSwitchboards = async (
     );
 
     await storeAllAddresses(addresses, mode);
-    await setupPolygonNativeSwitchboard(addresses);
+    await setupPolygonNativeSwitchboard(addresses, safeChains);
   } catch (error) {
     console.log("Error while sending transaction", error);
     throw error;

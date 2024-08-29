@@ -23,13 +23,14 @@ const newRoleStatus = true;
 export const configureRoles = async (
   addresses: DeploymentAddresses,
   chains: ChainSlug[],
+  safeChains: ChainSlug[],
   sendTransaction: boolean,
   executionManagerVersion: CORE_CONTRACTS
 ) => {
-  let ownerAddress = ownerAddresses[mode];
   let executorAddress = executorAddresses[mode];
   let transmitterAddress = transmitterAddresses[mode];
   let watcherAddress = watcherAddresses[mode];
+  let ownerAddress = ownerAddresses[mode];
 
   let summary: { params: any; roleStatus: any }[] = [];
   let s;
@@ -59,6 +60,7 @@ export const configureRoles = async (
       contractName: executionManagerVersion,
       filterChains: chains,
       filterSiblingChains: chains,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },
@@ -89,6 +91,7 @@ export const configureRoles = async (
       contractName: CORE_CONTRACTS.TransmitManager,
       filterChains: chains,
       filterSiblingChains: chains,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },
@@ -110,6 +113,7 @@ export const configureRoles = async (
       contractName: CORE_CONTRACTS.Socket,
       filterChains: chains,
       filterSiblingChains: chains,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },
@@ -147,6 +151,7 @@ export const configureRoles = async (
       contractName: CORE_CONTRACTS.FastSwitchboard,
       filterChains: chains,
       filterSiblingChains: chains,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },
@@ -182,6 +187,7 @@ export const configureRoles = async (
       contractName: CORE_CONTRACTS.OptimisticSwitchboard,
       filterChains: chains,
       filterSiblingChains: chains,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },
@@ -214,6 +220,7 @@ export const configureRoles = async (
       contractName: CORE_CONTRACTS.NativeSwitchboard,
       filterChains: chains,
       filterSiblingChains: chains,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },

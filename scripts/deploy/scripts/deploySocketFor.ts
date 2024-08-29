@@ -12,6 +12,7 @@ import { getSocketSigner } from "../utils/socket-signer";
 
 export const deployForChains = async (
   chains: ChainSlug[],
+  safeChains: ChainSlug[],
   executionManagerVersion: string
 ): Promise<DeploymentAddresses> => {
   let addresses: DeploymentAddresses;
@@ -33,7 +34,7 @@ export const deployForChains = async (
         const signer: SocketSigner = await getSocketSigner(
           chain,
           chainAddresses,
-          false,
+          safeChains.includes(chain),
           true
         );
 
@@ -42,6 +43,7 @@ export const deployForChains = async (
             executionManagerVersion,
             signer,
             chain,
+            safeChains.includes(chain),
             mode,
             chainAddresses
           );

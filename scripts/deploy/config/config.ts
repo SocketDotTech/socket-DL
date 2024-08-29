@@ -181,7 +181,7 @@ export const overrides = (
   } else if (chain == ChainSlug.SEPOLIA) {
     return {
       // type: 1,
-      gasLimit: 2_000_000,
+      // gasLimit: 10_000_000,
       // gasPrice: 180_000_000_000,
     };
   } else if (chain == ChainSlug.AEVO_TESTNET) {

@@ -70,18 +70,36 @@ export const setManagers = async (
   if (
     currentEM.toLowerCase() !== addr[executionManagerVersion]?.toLowerCase()
   ) {
-    tx = await socket.setExecutionManager(addr[executionManagerVersion], {
+    const transaction = {
+      to: socket.address,
+      data: socket.encodeFunctionData("setExecutionManager(address)", [
+        addr[executionManagerVersion],
+      ]),
       ...overrides(await socketSigner.getChainId()),
-    });
+    };
+
+    const isSubmitted = await socketSigner.isTxHashSubmitted(transaction);
+    if (isSubmitted) return;
+
+    const tx = await socketSigner.sendTransaction(transaction);
     console.log("updateExecutionManager", tx.hash);
     await tx.wait();
   }
 
   const currentTM = await socket.transmitManager__();
   if (currentTM.toLowerCase() !== addr.TransmitManager?.toLowerCase()) {
-    tx = await socket.setTransmitManager(addr.TransmitManager, {
+    const transaction = {
+      to: socket.address,
+      data: socket.encodeFunctionData("setTransmitManager(address)", [
+        addr.TransmitManager,
+      ]),
       ...overrides(await socketSigner.getChainId()),
-    });
+    };
+
+    const isSubmitted = await socketSigner.isTxHashSubmitted(transaction);
+    if (isSubmitted) return;
+
+    const tx = await socketSigner.sendTransaction(transaction);
     console.log("updateTransmitManager", tx.hash);
     await tx.wait();
   }
@@ -117,27 +135,28 @@ export const configureExecutionManager = async (
     siblingSlugs.map((s) =>
       calls.push({
         target: executionManagerContract.address,
-        calldata: executionManagerContract.encodeFunctionData(
+        callData: executionManagerContract.interface.encodeFunctionData(
           "msgValueMaxThreshold",
           [s]
         ),
       })
     );
+
     const result = await multicall(socketBatcherContract, calls);
+    siblingSlugs.map(async (siblingSlug, index) => {
+      const currentValue = result[index];
+
+      if (
+        currentValue.toString() == msgValueMaxThreshold(siblingSlug)?.toString()
+      ) {
+        return;
+      }
+
+      siblingsToConfigure.push(siblingSlug);
+    });
 
     await Promise.all(
-      siblingSlugs.map(async (siblingSlug, index) => {
-        const currentValue = result[index];
-
-        if (
-          currentValue.toString() ==
-          msgValueMaxThreshold(siblingSlug)?.toString()
-        ) {
-          return;
-        }
-
-        siblingsToConfigure.push(siblingSlug);
-
+      siblingsToConfigure.map(async (siblingSlug) => {
         const digest = keccak256(
           defaultAbiCoder.encode(
             ["bytes32", "address", "uint32", "uint32", "uint256", "uint256"],
@@ -186,7 +205,7 @@ export const configureExecutionManager = async (
   }
 };
 
-export const setupPolygonNativeSwitchboard = async (addresses) => {
+export const setupPolygonNativeSwitchboard = async (addresses, safeChains) => {
   try {
     let srcChains = Object.keys(addresses)
       .filter((chain) => ["1", "137"].includes(chain))
@@ -198,7 +217,8 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
       console.log(`Configuring for ${srcChain}`);
       const socketSigner: SocketSigner = await getSocketSigner(
         srcChain,
-        addresses[srcChain]
+        addresses[srcChain],
+        safeChains.includes(srcChain)
       );
 
       for (let dstChain in addresses[srcChain]?.["integrations"]) {
@@ -220,6 +240,7 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
         const srcSwitchboardAddress =
           dstConfig?.[IntegrationTypes.native]["switchboard"];
 
+        let transaction;
         if (srcSwitchboardType === NativeSwitchboard.POLYGON_L1) {
           const sbContract = (
             await getInstance("PolygonL1Switchboard", srcSwitchboardAddress)
@@ -231,13 +252,13 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
             `Setting ${dstSwitchboardAddress} fx child tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
           );
 
-          const tx = await sbContract
-            .connect(socketSigner)
-            .setFxChildTunnel(dstSwitchboardAddress, {
-              ...overrides(await socketSigner.getChainId()),
-            });
-          console.log(srcChain, tx.hash);
-          await tx.wait();
+          transaction = {
+            to: sbContract.address,
+            data: sbContract.encodeFunctionData("setFxChildTunnel(address)", [
+              dstSwitchboardAddress,
+            ]),
+            ...overrides(await socketSigner.getChainId()),
+          };
         } else if (srcSwitchboardType === NativeSwitchboard.POLYGON_L2) {
           const sbContract = (
             await getInstance("PolygonL2Switchboard", srcSwitchboardAddress)
@@ -249,16 +270,23 @@ export const setupPolygonNativeSwitchboard = async (addresses) => {
             `Setting ${dstSwitchboardAddress} fx root tunnel in ${srcSwitchboardAddress} on networks ${srcChain}-${dstChain}`
           );
 
-          const tx = await sbContract
-            .connect(socketSigner)
-            .setFxRootTunnel(dstSwitchboardAddress, {
-              ...overrides(await socketSigner.getChainId()),
-            });
-          console.log(srcChain, tx.hash);
-          await tx.wait();
-        } else continue;
-      }
+          transaction = {
+            to: sbContract.address,
+            data: sbContract.encodeFunctionData("setFxRootTunnel(address)", [
+              dstSwitchboardAddress,
+            ]),
+            ...overrides(await socketSigner.getChainId()),
+          };
+        }
 
+        if (!transaction) continue;
+
+        const isSubmitted = await socketSigner.isTxHashSubmitted(transaction);
+        if (isSubmitted) return;
+        const tx = await socketSigner.sendTransaction(transaction);
+        console.log(srcSwitchboardType, tx.hash, srcChain, dstChain);
+        await tx.wait();
+      }
       console.log(
         `Configuring remote switchboards for ${srcChain} - COMPLETED`
       );

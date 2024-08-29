@@ -30,21 +30,28 @@ export default async function registerSwitchboardForSibling(
     );
 
     if (capacitor === constants.AddressZero) {
-      const registerTx = await switchboard.registerSiblingSlug(
-        remoteChainSlug,
-        maxPacketLength,
-        capacitorType,
-        initialPacketCount,
-        siblingSwitchBoardAddress,
-        {
-          ...overrides(await signer.getChainId()),
-        }
-      );
-      console.log(
-        `Registering Switchboard remoteChainSlug - ${remoteChainSlug} ${switchBoardAddress}: ${registerTx.hash}`
-      );
+      const transaction = {
+        to: switchboard.address,
+        data: switchboard.encodeFunctionData(
+          "registerSiblingSlug(uint32,uint256,uint256,uint256,address)",
+          [
+            remoteChainSlug,
+            maxPacketLength,
+            capacitorType,
+            initialPacketCount,
+            siblingSwitchBoardAddress,
+          ]
+        ),
+        ...overrides(await signer.getChainId()),
+      };
 
-      await registerTx.wait();
+      const isSubmitted = await signer.isTxHashSubmitted(transaction);
+      if (isSubmitted) return;
+      const tx = await signer.sendTransaction(transaction);
+      console.log(
+        `Registering Switchboard remoteChainSlug - ${remoteChainSlug} ${switchBoardAddress}: ${tx.hash}`
+      );
+      await tx.wait();
     }
 
     // get capacitor and decapacitor for config

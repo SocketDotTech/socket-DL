@@ -5,7 +5,7 @@ export const multicall = async (
   calls: { target: string; callData: string }[]
 ): Promise<any> => {
   try {
-    const result = await socketBatcher.multicall(calls);
+    const result = await socketBatcher.callStatic.multicall(calls);
     return result[1];
   } catch (error) {
     console.log("Error performing multicall:", error);

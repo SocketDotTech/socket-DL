@@ -46,7 +46,7 @@ contract MultiSigWrapper is AccessControl {
         bytes signature
     );
     event SafeUpdated(address safe_);
-    event ResetNonce(address signer_, uint256 nonce_);
+    event ResetNonce(address signer_, bytes32 nonce_);
 
     error InvalidNonce();
 
@@ -204,9 +204,14 @@ contract MultiSigWrapper is AccessControl {
         emit SafeUpdated(safe_);
     }
 
-    function resetNonce(uint256 nonce_) external {
-        lastNonce[msg.sender] = nonce_;
-        emit ResetNonce(msg.sender, nonce_);
+    function resetDataHash(bytes32 dataHash_) external {
+        uint256 oldNonce = safeParams[dataHash_][msg.sender].nonce;
+        delete safeParams[dataHash_][msg.sender];
+        delete owners[dataHash_][oldNonce];
+
+        uint256 nonce = safe.nonce();
+        lastNonce[msg.sender] = nonce > 0 ? nonce - 1 : nonce;
+        emit ResetNonce(msg.sender, dataHash_);
     }
 
     function getNonce() external view returns (uint256) {

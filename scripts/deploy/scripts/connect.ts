@@ -24,7 +24,7 @@ export const connectPlugs = async (
         if (!addresses[chain]) return;
 
         const addr: ChainSocketAddresses = addresses[chain]!;
-        const socketSigner = await getSocketSigner(chain, addr);
+        const socketSigner = await getSocketSigner(chain, addr, false);
 
         if (!addr["integrations"]) return;
 
@@ -51,6 +51,9 @@ export const connectPlugs = async (
         const socket: Contract = (
           await getInstance("Socket", addr["Socket"])
         ).connect(socketSigner);
+
+        const owner = await counter.owner();
+        if (owner.toLowerCase() !== socketSigner.address.toLowerCase()) return;
 
         for (let index = 0; index < siblingSlugs.length; index++) {
           const sibling = siblingSlugs[index];

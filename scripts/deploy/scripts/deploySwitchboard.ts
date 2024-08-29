@@ -16,6 +16,7 @@ import { SocketSigner } from "@socket.tech/dl-common";
 
 export default async function deploySwitchboards(
   chainSlug: ChainSlug,
+  owner: string,
   signer: SocketSigner,
   sourceConfig: ChainSocketAddresses,
   mode: DeploymentMode
@@ -26,6 +27,7 @@ export default async function deploySwitchboards(
       IntegrationTypes.fast,
       chainSlug,
       "",
+      owner,
       signer,
       updatedConfig,
       mode
@@ -36,6 +38,7 @@ export default async function deploySwitchboards(
       IntegrationTypes.optimistic,
       chainSlug,
       "",
+      owner,
       signer,
       updatedConfig,
       mode
@@ -56,6 +59,7 @@ export default async function deploySwitchboards(
         IntegrationTypes.native,
         chainSlug,
         siblings[index],
+        owner,
         signer,
         updatedConfig,
         mode
@@ -70,19 +74,19 @@ async function deploySwitchboard(
   integrationType: IntegrationTypes,
   chainSlug: ChainSlug,
   remoteChain: ChainSlug | string,
+  owner: string,
   signer: SocketSigner,
   sourceConfig: ChainSocketAddresses,
   mode: DeploymentMode
 ): Promise<ChainSocketAddresses> {
   try {
-    let signerAddress: string = await signer.getAddress();
     const { contractName, args, path } = getSwitchboardDeployData(
       integrationType,
       chainSlug,
       remoteChain,
       sourceConfig[CORE_CONTRACTS.Socket],
       sourceConfig[CORE_CONTRACTS.SignatureVerifier],
-      signerAddress
+      owner
     );
 
     const switchboard = await deployContractWithArgs(

@@ -17,7 +17,7 @@ export const getSwitchboardDeployData = (
   remoteChain: ChainSlug | string,
   socketAddress: string,
   sigVerifierAddress: string,
-  signerAddress: string
+  owner: string
 ) => {
   if (
     integrationType === IntegrationTypes.fast ||
@@ -27,14 +27,14 @@ export const getSwitchboardDeployData = (
       localChain,
       socketAddress,
       sigVerifierAddress,
-      signerAddress
+      owner
     );
   } else if (integrationType === IntegrationTypes.optimistic) {
     return optimisticSwitchboard(
       localChain,
       socketAddress,
       sigVerifierAddress,
-      signerAddress
+      owner
     );
   } else if (integrationType === IntegrationTypes.native) {
     const switchboardType =
@@ -44,14 +44,14 @@ export const getSwitchboardDeployData = (
         localChain,
         socketAddress,
         sigVerifierAddress,
-        signerAddress
+        owner
       );
     } else if (switchboardType === NativeSwitchboard.ARBITRUM_L2) {
       return arbitrumL2Switchboard(
         localChain,
         socketAddress,
         sigVerifierAddress,
-        signerAddress
+        owner
       );
     } else if (switchboardType === NativeSwitchboard.OPTIMISM) {
       return optimismSwitchboard(
@@ -59,21 +59,21 @@ export const getSwitchboardDeployData = (
         remoteChain as ChainSlug,
         socketAddress,
         sigVerifierAddress,
-        signerAddress
+        owner
       );
     } else if (switchboardType === NativeSwitchboard.POLYGON_L1) {
       return polygonL1Switchboard(
         localChain,
         socketAddress,
         sigVerifierAddress,
-        signerAddress
+        owner
       );
     } else if (switchboardType === NativeSwitchboard.POLYGON_L2) {
       return polygonL2Switchboard(
         localChain,
         socketAddress,
         sigVerifierAddress,
-        signerAddress
+        owner
       );
     } else {
       return { contractName: "", args: [], path: "" };

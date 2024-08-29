@@ -13,8 +13,8 @@ import { mode } from "../config/config";
 export const getSocketSigner = async (
   chainSlug: number,
   addresses: ChainSocketAddresses,
-  useSafe: boolean = true,
-  useEOA: boolean = false
+  useSafe: boolean = false,
+  useEOA: boolean = true
 ): Promise<SocketSigner> => {
   const provider = getProviderFromChainSlug(chainSlug);
   const wallet: Wallet = new Wallet(
@@ -22,30 +22,21 @@ export const getSocketSigner = async (
     provider
   );
 
-  if (addresses["Safe"] && useSafe) {
-    const safeAddress = addresses["Safe"];
-    const safeWrapperAddress = addresses[CORE_CONTRACTS.MultiSigWrapper];
-    return new SocketSigner(
-      provider,
-      ChainSlugToId[chainSlug],
-      safeAddress,
-      safeWrapperAddress,
-      await getRelayUrl(mode),
-      getRelayAPIKEY(mode),
-      wallet,
-      useSafe,
-      useEOA
-    );
-  } else
-    return new SocketSigner(
-      provider,
-      ChainSlugToId[chainSlug],
-      "",
-      "",
-      await getRelayUrl(mode),
-      getRelayAPIKEY(mode),
-      wallet,
-      useSafe,
-      useEOA
-    );
+  const safeAddress = addresses["SafeL2"] && useSafe ? addresses["SafeL2"] : "";
+  const safeWrapperAddress =
+    addresses["SafeL2"] && useSafe
+      ? addresses[CORE_CONTRACTS.MultiSigWrapper]
+      : "";
+
+  return new SocketSigner(
+    provider,
+    ChainSlugToId[chainSlug],
+    safeAddress,
+    safeWrapperAddress,
+    await getRelayUrl(mode),
+    getRelayAPIKEY(mode),
+    wallet,
+    useSafe,
+    useEOA
+  );
 };
