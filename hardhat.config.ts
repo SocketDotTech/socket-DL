@@ -114,6 +114,8 @@ if (isProduction) {
     [HardhatChainName.SYNDR]: getChainConfig(ChainSlug.SYNDR),
     [HardhatChainName.BLAST]: getChainConfig(ChainSlug.BLAST),
     [HardhatChainName.NEOX_TESTNET]: getChainConfig(ChainSlug.NEOX_TESTNET),
+    [HardhatChainName.GNOSIS]: getChainConfig(ChainSlug.GNOSIS),
+    [HardhatChainName.LINEA]: getChainConfig(ChainSlug.LINEA),
   };
 }
 
@@ -162,6 +164,8 @@ const config: HardhatUserConfig = {
       syndr: "none",
       blast: process.env.BLASTSCAN_API_KEY || "",
       neox_testnet: "none",
+      gnosis: process.env.GNOSISSCAN_API_KEY || "",
+      linea: process.env.LINEASCAN_API_KEY || "",
     },
     customChains: [
       {
@@ -266,6 +270,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://xt3scan.ngd.network/api",
           browserURL: "https://xt3scan.ngd.network",
+        },
+      },
+      {
+        network: "gnosis",
+        chainId: ChainId.GNOSIS,
+        urls: {
+          apiURL: "https://api.gnosisscan.io/api",
+          browserURL: "https://gnosisscan.io",
+        },
+      },
+      {
+        network: "linea",
+        chainId: ChainId.LINEA,
+        urls: {
+          apiURL: "https://api.lineascan.build/api",
+          browserURL: "https://lineascan.build",
         },
       },
     ],
