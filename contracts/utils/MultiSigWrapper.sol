@@ -5,52 +5,32 @@ import "../libraries/RescueFundsLib.sol";
 
 import "../utils/AccessControl.sol";
 import {RESCUE_ROLE} from "../utils/AccessRoles.sol";
-import "safe-smart-account/common/Enum.sol";
 import "solady/utils/LibSort.sol";
 
-interface ISafe {
-    function execTransaction(
-        address to,
-        uint256 value,
-        bytes calldata data,
-        Enum.Operation operation,
-        uint256 safeTxGas,
-        uint256 baseGas,
-        uint256 gasPrice,
-        address gasToken,
-        address payable refundReceiver,
-        bytes memory signatures
-    ) external payable returns (bool success);
-
-    function getThreshold() external view returns (uint256);
-
-    function nonce() external view returns (uint256);
-
-    function getTransactionHash(
-        address to,
-        uint256 value,
-        bytes calldata data,
-        Enum.Operation operation,
-        uint256 safeTxGas,
-        uint256 baseGas,
-        uint256 gasPrice,
-        address gasToken,
-        address refundReceiver,
-        uint256 _nonce
-    ) external view returns (bytes32);
-}
+import {ISafe, Enum} from "./SafeL2.sol";
 
 /**
  * @title MultiSigWrapper
+ * @dev if someone directly interacts with safe and increases the nonce, the owners
+ * will have to resubmit the pending txs with updated nonce here again.
+ * For new transactions, it should be handled off-chain.
  */
 contract MultiSigWrapper is AccessControl {
     using LibSort for address;
 
     ISafe public safe;
-    mapping(bytes32 => address[]) public owners;
+    // owners => last nonce used
     mapping(address => uint256) public lastNonce;
+    // data hash => nonce => owners list (as we can have same data for multiple nonces)
+    mapping(bytes32 => mapping(uint256 => address[])) public owners;
+    // data hash => signer => tx params
+    mapping(bytes32 => mapping(address => SafeParams)) public safeParams;
 
-    mapping(bytes32 => mapping(address => bytes)) public signatures;
+    struct SafeParams {
+        uint256 nonce;
+        bytes signatures;
+    }
+
     struct GasParams {
         uint256 safeTxGas;
         uint256 baseGas;
@@ -59,16 +39,16 @@ contract MultiSigWrapper is AccessControl {
         address refundReceiver;
     }
 
-    event AddedTxHash(
-        bytes32 txHash,
-        address to,
-        uint256 value,
-        bytes data,
-        uint256 nonce
+    event AddedTx(
+        bytes32 dataHash,
+        address from,
+        uint256 nonce,
+        bytes signature
     );
-
     event SafeUpdated(address safe_);
     event ResetNonce(address signer_, uint256 nonce_);
+
+    error InvalidNonce();
 
     /**
      * @notice initializes and grants RESCUE_ROLE to owner.
@@ -134,36 +114,33 @@ contract MultiSigWrapper is AccessControl {
         bytes calldata data_,
         bytes memory signature_
     ) internal {
-        uint256 threshold = safe.getThreshold();
-        lastNonce[from_] = nonce_;
+        uint256 threshold = _validateNonce(nonce_, from_);
+        bytes32 dataHash = keccak256(abi.encode(to_, value_, data_));
 
-        if (threshold == 1)
-            return
-                _relay(to_, value_, operation_, gasParams_, data_, signature_);
-
-        bytes32 txHash = keccak256(
-            abi.encode(
-                to_,
-                value_,
-                data_,
-                operation_,
+        bytes memory signs = signature_;
+        if (threshold > 1) {
+            uint256 totalSign = _storeSafeParams(
+                from_,
                 nonce_,
-                gasParams_.gasPrice
-            )
-        );
-        uint256 totalSignatures = _storeSignatures(txHash, from_, signature_);
-
-        if (totalSignatures >= threshold)
-            _relay(
-                to_,
-                value_,
-                operation_,
-                gasParams_,
-                data_,
-                _getSignatures(txHash)
+                dataHash,
+                signature_
             );
+            if (totalSign < threshold) return;
+            signs = _getSignatures(dataHash, nonce_);
+        }
 
-        emit AddedTxHash(txHash, to_, value_, data_, nonce_);
+        _relay(to_, value_, operation_, gasParams_, data_, signs);
+    }
+
+    function _validateNonce(
+        uint256 nonce_,
+        address from_
+    ) internal returns (uint256 threshold) {
+        if (safe.nonce() > nonce_ || lastNonce[from_] > nonce_)
+            revert InvalidNonce();
+
+        threshold = safe.getThreshold();
+        lastNonce[from_] = nonce_;
     }
 
     function _relay(
@@ -188,27 +165,33 @@ contract MultiSigWrapper is AccessControl {
         );
     }
 
-    function _storeSignatures(
-        bytes32 txHash_,
+    function _storeSafeParams(
         address from_,
+        uint256 nonce_,
+        bytes32 dataHash_,
         bytes memory signature_
     ) internal returns (uint256 totalSignatures) {
-        owners[txHash_].push(from_);
-        signatures[txHash_][from_] = signature_;
-        totalSignatures = owners[txHash_].length;
+        owners[dataHash_][nonce_].push(from_);
+
+        SafeParams storage _safeParams = safeParams[dataHash_][from_];
+        _safeParams.signatures = signature_;
+        _safeParams.nonce = nonce_;
+        totalSignatures = owners[dataHash_][nonce_].length;
+        emit AddedTx(dataHash_, from_, nonce_, signature_);
     }
 
     function _getSignatures(
-        bytes32 txHash_
+        bytes32 dataHash_,
+        uint256 nonce_
     ) internal view returns (bytes memory signature) {
-        address[] memory txOwners = owners[txHash_];
+        address[] memory txOwners = owners[dataHash_][nonce_];
         LibSort.insertionSort(txOwners);
         uint256 len = txOwners.length;
 
         for (uint256 index = 0; index < len; index++) {
             signature = abi.encodePacked(
                 signature,
-                signatures[txHash_][txOwners[index]]
+                safeParams[dataHash_][txOwners[index]].signatures
             );
         }
     }
@@ -228,6 +211,13 @@ contract MultiSigWrapper is AccessControl {
 
     function getNonce() external view returns (uint256) {
         return safe.nonce();
+    }
+
+    function getSignature(
+        bytes32 dataHash_,
+        address from_
+    ) public view returns (bytes memory) {
+        return safeParams[dataHash_][from_].signatures;
     }
 
     /**
