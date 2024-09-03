@@ -17,4 +17,6 @@ export const explorers = {
   [ChainSlug.NEOX]: "https://xexplorer.neo.org",
   [ChainSlug.GNOSIS]: "https://gnosisscan.io/",
   [ChainSlug.LINEA]: "https://lineascan.build/",
+  [ChainSlug.ZKEVM]: "https://zkevm.polygonscan.com/",
+  [ChainSlug.AVALANCHE]: "https://snowtrace.io/",
 };

@@ -21,4 +21,6 @@ export const ethLikeChains = [
   ChainSlug.NEOX,
   ChainSlug.GNOSIS,
   ChainSlug.LINEA,
+  ChainSlug.ZKEVM,
+  ChainSlug.AVALANCHE,
 ];

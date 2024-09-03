@@ -5,8 +5,6 @@ export enum HardhatChainName {
   OPTIMISM = "optimism",
   OPTIMISM_GOERLI = "optimism_goerli",
   OPTIMISM_SEPOLIA = "optimism_sepolia",
-  AVALANCHE = "avalanche",
-  AVALANCHE_TESTNET = "avalanche_testnet",
   BSC = "bsc",
   MAINNET = "mainnet",
   GOERLI = "goerli",
@@ -49,4 +47,6 @@ export enum HardhatChainName {
   NEOX = "neox",
   GNOSIS = "gnosis",
   LINEA = "linea",
+  ZKEVM = "zkevm",
+  AVALANCHE = "avalanche",
 }

@@ -16,7 +16,6 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.AEVO_TESTNET]: ChainSlug.AEVO_TESTNET,
   [HardhatChainName.AEVO]: ChainSlug.AEVO,
   [HardhatChainName.HARDHAT]: ChainSlug.HARDHAT,
-  [HardhatChainName.AVALANCHE]: ChainSlug.AVALANCHE,
   [HardhatChainName.LYRA_TESTNET]: ChainSlug.LYRA_TESTNET,
   [HardhatChainName.LYRA]: ChainSlug.LYRA,
   [HardhatChainName.XAI_TESTNET]: ChainSlug.XAI_TESTNET,
@@ -51,4 +50,6 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.NEOX]: ChainSlug.NEOX,
   [HardhatChainName.GNOSIS]: ChainSlug.GNOSIS,
   [HardhatChainName.LINEA]: ChainSlug.LINEA,
+  [HardhatChainName.ZKEVM]: ChainSlug.ZKEVM,
+  [HardhatChainName.AVALANCHE]: ChainSlug.AVALANCHE,
 };

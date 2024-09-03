@@ -51,4 +51,6 @@ export const rpcs = {
   [ChainSlug.NEOX]: checkEnvValue("NEOX_RPC"),
   [ChainSlug.GNOSIS]: checkEnvValue("GNOSIS_RPC"),
   [ChainSlug.LINEA]: checkEnvValue("LINEA_RPC"),
+  [ChainSlug.ZKEVM]: checkEnvValue("ZKEVM_RPC"),
+  [ChainSlug.AVALANCHE]: checkEnvValue("AVALANCHE_RPC"),
 };

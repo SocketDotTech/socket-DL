@@ -15,7 +15,6 @@ export enum ChainSlug {
   AEVO_TESTNET = ChainId.AEVO_TESTNET,
   AEVO = ChainId.AEVO,
   HARDHAT = ChainId.HARDHAT,
-  AVALANCHE = ChainId.AVALANCHE,
   LYRA_TESTNET = ChainId.LYRA_TESTNET,
   LYRA = ChainId.LYRA,
   XAI_TESTNET = 1399904803,
@@ -50,4 +49,6 @@ export enum ChainSlug {
   NEOX = ChainId.NEOX,
   GNOSIS = ChainId.GNOSIS,
   LINEA = ChainId.LINEA,
+  ZKEVM = ChainId.ZKEVM,
+  AVALANCHE = ChainId.AVALANCHE,
 }

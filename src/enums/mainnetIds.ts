@@ -24,4 +24,6 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.NEOX,
   ChainSlug.GNOSIS,
   ChainSlug.LINEA,
+  ChainSlug.ZKEVM,
+  ChainSlug.AVALANCHE,
 ];

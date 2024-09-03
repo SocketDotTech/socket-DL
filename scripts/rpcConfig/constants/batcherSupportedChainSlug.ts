@@ -39,4 +39,6 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.NEOX,
   ChainSlug.GNOSIS,
   ChainSlug.LINEA,
+  ChainSlug.ZKEVM,
+  ChainSlug.AVALANCHE,
 ];

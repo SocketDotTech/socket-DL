@@ -13,7 +13,6 @@ export enum ChainId {
   AEVO_TESTNET = 11155112,
   AEVO = 2999,
   HARDHAT = 31337,
-  AVALANCHE = 43114,
   LYRA_TESTNET = 901,
   LYRA = 957,
   XAI_TESTNET = 47279324479,
@@ -48,4 +47,6 @@ export enum ChainId {
   NEOX = 47763,
   GNOSIS = 100,
   LINEA = 59144,
+  ZKEVM = 1101,
+  AVALANCHE = 43114,
 }
