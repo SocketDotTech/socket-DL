@@ -17,4 +17,5 @@ export const icons = {
   [ChainSlug.LINEA]: "",
   [ChainSlug.ZKEVM]: "",
   [ChainSlug.AVALANCHE]: "",
+  [ChainSlug.XLAYER]: "",
 };

@@ -49,4 +49,5 @@ export enum HardhatChainName {
   LINEA = "linea",
   ZKEVM = "zkevm",
   AVALANCHE = "avalanche",
+  XLAYER = "xlayer",
 }

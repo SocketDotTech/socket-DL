@@ -53,4 +53,5 @@ export const rpcs = {
   [ChainSlug.LINEA]: checkEnvValue("LINEA_RPC"),
   [ChainSlug.ZKEVM]: checkEnvValue("ZKEVM_RPC"),
   [ChainSlug.AVALANCHE]: checkEnvValue("AVALANCHE_RPC"),
+  [ChainSlug.XLAYER]: checkEnvValue("XLAYER_RPC"),
 };

@@ -51,4 +51,5 @@ export enum ChainSlug {
   LINEA = ChainId.LINEA,
   ZKEVM = ChainId.ZKEVM,
   AVALANCHE = ChainId.AVALANCHE,
+  XLAYER = ChainId.XLAYER,
 }

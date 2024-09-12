@@ -14,4 +14,5 @@ export const Currency = {
   [ChainSlug.NEOX]: NativeTokens["gas"],
   [ChainSlug.GNOSIS]: NativeTokens["dai"],
   [ChainSlug.AVALANCHE]: NativeTokens["avalanche-2"],
+  [ChainSlug.XLAYER]: NativeTokens["okb"],
 };

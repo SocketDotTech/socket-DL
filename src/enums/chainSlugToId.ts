@@ -52,4 +52,5 @@ export const ChainSlugToId = {
   [ChainSlug.LINEA]: ChainId.LINEA,
   [ChainSlug.ZKEVM]: ChainId.ZKEVM,
   [ChainSlug.AVALANCHE]: ChainId.AVALANCHE,
+  [ChainSlug.XLAYER]: ChainId.XLAYER,
 };

@@ -49,4 +49,5 @@ export enum ChainId {
   LINEA = 59144,
   ZKEVM = 1101,
   AVALANCHE = 43114,
+  XLAYER = 196,
 }

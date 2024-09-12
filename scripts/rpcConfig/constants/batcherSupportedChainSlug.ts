@@ -41,4 +41,5 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.LINEA,
   ChainSlug.ZKEVM,
   ChainSlug.AVALANCHE,
+  ChainSlug.XLAYER,
 ];

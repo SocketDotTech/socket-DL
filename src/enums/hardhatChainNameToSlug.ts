@@ -52,4 +52,5 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.LINEA]: ChainSlug.LINEA,
   [HardhatChainName.ZKEVM]: ChainSlug.ZKEVM,
   [HardhatChainName.AVALANCHE]: ChainSlug.AVALANCHE,
+  [HardhatChainName.XLAYER]: ChainSlug.XLAYER,
 };
