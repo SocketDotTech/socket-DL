@@ -9,5 +9,5 @@ export enum NativeTokens {
   "no-token" = "no-token",
   "gas" = "gas",
   "dai" = "dai",
-  "avalanche" = "avalanche",
+  "avalanche-2" = "avalanche-2",
 }

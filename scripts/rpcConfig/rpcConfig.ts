@@ -150,7 +150,6 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
       ChainSlug.POLYGON_MAINNET,
       ChainSlug.LYRA,
       ChainSlug.MAINNET,
-      ChainSlug.GOERLI,
       ChainSlug.SEPOLIA,
       ChainSlug.LYRA_TESTNET,
       ChainSlug.ARBITRUM_SEPOLIA,

@@ -13,5 +13,5 @@ export const Currency = {
   [ChainSlug.NEOX_T4_TESTNET]: NativeTokens["gas"],
   [ChainSlug.NEOX]: NativeTokens["gas"],
   [ChainSlug.GNOSIS]: NativeTokens["dai"],
-  [ChainSlug.AVALANCHE]: NativeTokens["avalanche"],
+  [ChainSlug.AVALANCHE]: NativeTokens["avalanche-2"],
 };
