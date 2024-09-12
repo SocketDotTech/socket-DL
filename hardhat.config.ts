@@ -116,6 +116,8 @@ if (isProduction) {
     [HardhatChainName.NEOX_TESTNET]: getChainConfig(ChainSlug.NEOX_TESTNET),
     [HardhatChainName.GNOSIS]: getChainConfig(ChainSlug.GNOSIS),
     [HardhatChainName.LINEA]: getChainConfig(ChainSlug.LINEA),
+    [HardhatChainName.ZKEVM]: getChainConfig(ChainSlug.ZKEVM),
+    [HardhatChainName.AVALANCHE]: getChainConfig(ChainSlug.AVALANCHE),
   };
 }
 
@@ -165,6 +167,8 @@ const config: HardhatUserConfig = {
       neox_testnet: "none",
       gnosis: process.env.GNOSISSCAN_API_KEY || "",
       linea: process.env.LINEASCAN_API_KEY || "",
+      zkevm: process.env.ZKEVM_API_KEY || "",
+      avalanche: process.env.SNOWTRACE_API_KEY || "",
     },
     customChains: [
       {
@@ -285,6 +289,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.lineascan.build/api",
           browserURL: "https://lineascan.build",
+        },
+      },
+      {
+        network: "zkevm",
+        chainId: ChainId.ZKEVM,
+        urls: {
+          apiURL: "https://api-zkevm.polygonscan.com/api",
+          browserURL: "https://zkevm.polygonscan.com/",
+        },
+      },
+      {
+        network: "avalanche",
+        chainId: ChainId.AVALANCHE,
+        urls: {
+          apiURL: "https://api.snowtrace.io//api",
+          browserURL: "https://snowtrace.io/",
         },
       },
     ],
