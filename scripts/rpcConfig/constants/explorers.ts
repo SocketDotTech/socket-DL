@@ -15,4 +15,9 @@ export const explorers = {
   [ChainSlug.NEOX_TESTNET]: "https://xt3scan.ngd.network/",
   [ChainSlug.NEOX_T4_TESTNET]: "https://xt4scan.ngd.network/",
   [ChainSlug.NEOX]: "https://xexplorer.neo.org",
+  [ChainSlug.GNOSIS]: "https://gnosisscan.io/",
+  [ChainSlug.LINEA]: "https://lineascan.build/",
+  [ChainSlug.ZKEVM]: "https://zkevm.polygonscan.com/",
+  [ChainSlug.AVALANCHE]: "https://snowtrace.io/",
+  [ChainSlug.XLAYER]: "https://www.okx.com/web3/explorer/xlayer",
 };

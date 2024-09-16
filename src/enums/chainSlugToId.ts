@@ -16,7 +16,6 @@ export const ChainSlugToId = {
   [ChainSlug.AEVO_TESTNET]: ChainId.AEVO_TESTNET,
   [ChainSlug.AEVO]: ChainId.AEVO,
   [ChainSlug.HARDHAT]: ChainId.HARDHAT,
-  [ChainSlug.AVALANCHE]: ChainId.AVALANCHE,
   [ChainSlug.LYRA_TESTNET]: ChainId.LYRA_TESTNET,
   [ChainSlug.LYRA]: ChainId.LYRA,
   [ChainSlug.XAI_TESTNET]: ChainId.XAI_TESTNET,
@@ -49,4 +48,9 @@ export const ChainSlugToId = {
   [ChainSlug.NEOX_TESTNET]: ChainId.NEOX_TESTNET,
   [ChainSlug.NEOX_T4_TESTNET]: ChainId.NEOX_T4_TESTNET,
   [ChainSlug.NEOX]: ChainId.NEOX,
+  [ChainSlug.GNOSIS]: ChainId.GNOSIS,
+  [ChainSlug.LINEA]: ChainId.LINEA,
+  [ChainSlug.ZKEVM]: ChainId.ZKEVM,
+  [ChainSlug.AVALANCHE]: ChainId.AVALANCHE,
+  [ChainSlug.XLAYER]: ChainId.XLAYER,
 };

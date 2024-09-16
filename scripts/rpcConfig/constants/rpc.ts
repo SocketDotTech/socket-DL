@@ -49,4 +49,9 @@ export const rpcs = {
   [ChainSlug.NEOX_TESTNET]: checkEnvValue("NEOX_TESTNET_RPC"),
   [ChainSlug.NEOX_T4_TESTNET]: checkEnvValue("NEOX_T4_TESTNET_RPC"),
   [ChainSlug.NEOX]: checkEnvValue("NEOX_RPC"),
+  [ChainSlug.GNOSIS]: checkEnvValue("GNOSIS_RPC"),
+  [ChainSlug.LINEA]: checkEnvValue("LINEA_RPC"),
+  [ChainSlug.ZKEVM]: checkEnvValue("ZKEVM_RPC"),
+  [ChainSlug.AVALANCHE]: checkEnvValue("AVALANCHE_RPC"),
+  [ChainSlug.XLAYER]: checkEnvValue("XLAYER_RPC"),
 };

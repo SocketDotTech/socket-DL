@@ -73,7 +73,7 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.BLAST,
 ];
 
-export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
+export const executionManagerVersion = CORE_CONTRACTS.ExecutionManagerDF;
 export const sendTransaction = true;
 export const newRoleStatus = true;
 export const filterChains: number[] = chains;

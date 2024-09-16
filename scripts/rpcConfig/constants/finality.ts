@@ -31,4 +31,9 @@ export const finalityOverrides: {
     [FinalityBucket.medium]: 10,
     [FinalityBucket.slow]: 100,
   },
+  [ChainSlug.LINEA]: {
+    [FinalityBucket.fast]: 1,
+    [FinalityBucket.medium]: 10,
+    [FinalityBucket.slow]: 100,
+  },
 };

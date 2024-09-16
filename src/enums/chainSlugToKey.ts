@@ -16,7 +16,6 @@ export const ChainSlugToKey = {
   [ChainSlug.AEVO_TESTNET]: HardhatChainName.AEVO_TESTNET,
   [ChainSlug.AEVO]: HardhatChainName.AEVO,
   [ChainSlug.HARDHAT]: HardhatChainName.HARDHAT,
-  [ChainSlug.AVALANCHE]: HardhatChainName.AVALANCHE,
   [ChainSlug.LYRA_TESTNET]: HardhatChainName.LYRA_TESTNET,
   [ChainSlug.LYRA]: HardhatChainName.LYRA,
   [ChainSlug.XAI_TESTNET]: HardhatChainName.XAI_TESTNET,
@@ -49,4 +48,9 @@ export const ChainSlugToKey = {
   [ChainSlug.NEOX_TESTNET]: HardhatChainName.NEOX_TESTNET,
   [ChainSlug.NEOX_T4_TESTNET]: HardhatChainName.NEOX_T4_TESTNET,
   [ChainSlug.NEOX]: HardhatChainName.NEOX,
+  [ChainSlug.GNOSIS]: HardhatChainName.GNOSIS,
+  [ChainSlug.LINEA]: HardhatChainName.LINEA,
+  [ChainSlug.ZKEVM]: HardhatChainName.ZKEVM,
+  [ChainSlug.AVALANCHE]: HardhatChainName.AVALANCHE,
+  [ChainSlug.XLAYER]: HardhatChainName.XLAYER,
 };
