@@ -34,7 +34,7 @@ export const deployForChains = async (
         const signer: SocketSigner = await getSocketSigner(
           chain,
           chainAddresses,
-          safeChains.includes(chain),
+          false,
           true
         );
 
