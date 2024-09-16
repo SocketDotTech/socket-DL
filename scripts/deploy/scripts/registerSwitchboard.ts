@@ -1,9 +1,8 @@
-import { Wallet, constants } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-
+import { constants } from "ethers";
 import { createObj, getInstance } from "../utils";
 import { ChainSlug, ChainSocketAddresses } from "../../../src";
 import { initialPacketCount, overrides } from "../config/config";
+import { SocketSigner } from "@socket.tech/dl-common";
 
 export default async function registerSwitchboardForSibling(
   switchBoardAddress: string,
@@ -11,7 +10,7 @@ export default async function registerSwitchboardForSibling(
   remoteChainSlug: string | ChainSlug,
   capacitorType: number,
   maxPacketLength: number,
-  signer: Wallet | SignerWithAddress,
+  signer: SocketSigner,
   integrationType: string,
   config: ChainSocketAddresses
 ) {
@@ -25,34 +24,52 @@ export default async function registerSwitchboardForSibling(
       await getInstance("FastSwitchboard", switchBoardAddress)
     ).connect(signer);
 
+    // send overrides while reading capacitor to avoid errors on mantle chain
+    // some chains give balance error if gas price is used with from address as zero
+    // therefore override from address as well
     let capacitor = await socket.capacitors__(
       switchBoardAddress,
-      remoteChainSlug
+      remoteChainSlug,
+      { ...(await overrides(await signer.getChainId())), from: socketOwner }
     );
 
     if (capacitor === constants.AddressZero) {
-      const registerTx = await switchboard.registerSiblingSlug(
-        remoteChainSlug,
-        maxPacketLength,
-        capacitorType,
-        initialPacketCount,
-        siblingSwitchBoardAddress,
-        {
-          ...overrides(await signer.getChainId()),
-        }
-      );
-      console.log(
-        `Registering Switchboard remoteChainSlug - ${remoteChainSlug} ${switchBoardAddress}: ${registerTx.hash}`
-      );
+      const transaction = {
+        to: switchboard.address,
+        data: switchboard.encodeFunctionData(
+          "registerSiblingSlug(uint32,uint256,uint256,uint256,address)",
+          [
+            remoteChainSlug,
+            maxPacketLength,
+            capacitorType,
+            initialPacketCount,
+            siblingSwitchBoardAddress,
+          ]
+        ),
+        ...overrides(await signer.getChainId()),
+      };
 
-      await registerTx.wait();
+      const isSubmitted = await signer.isTxHashSubmitted(transaction);
+      if (isSubmitted) return;
+      const tx = await signer.sendTransaction(transaction);
+      console.log(
+        `Registering Switchboard remoteChainSlug - ${remoteChainSlug} ${switchBoardAddress}: ${tx.hash}`
+      );
+      await tx.wait();
     }
 
     // get capacitor and decapacitor for config
-    capacitor = await socket.capacitors__(switchBoardAddress, remoteChainSlug);
+    // send overrides while reading capacitor/decapacitor to avoid errors on mantle chain
+    // some chains give balance error if gas price is used with from address as zero
+    // therefore override from address as well
+    capacitor = await socket.capacitors__(switchBoardAddress, remoteChainSlug, {
+      ...(await overrides(await signer.getChainId())),
+      from: socketOwner,
+    });
     const decapacitor = await socket.decapacitors__(
       switchBoardAddress,
-      remoteChainSlug
+      remoteChainSlug,
+      { ...(await overrides(await signer.getChainId())), from: socketOwner }
     );
 
     config = setCapacitorPair(

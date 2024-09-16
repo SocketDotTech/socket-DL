@@ -6,4 +6,5 @@ export const polygonCDKChains = [
   ChainSlug.SX_NETWORK_TESTNET,
   ChainSlug.SX_NETWORK,
   ChainSlug.XAI_TESTNET,
+  ChainSlug.XLAYER,
 ];

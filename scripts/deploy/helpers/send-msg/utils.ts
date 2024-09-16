@@ -124,7 +124,7 @@ export const sendCounterBridgeMsg = async (
     `fees for path ${chainSlug}-${siblingSlug} is ${formatEther(value)} ETH`
   );
 
-  const { gasLimit, gasPrice, type } = overrides(chainSlug);
+  const { gasLimit, gasPrice, type } = await overrides(chainSlug);
   // console.log({to, data, value, gasLimit});
   let response = await relayTx({
     to,

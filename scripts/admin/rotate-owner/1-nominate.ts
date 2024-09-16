@@ -162,7 +162,7 @@ const checkAndNominate = async (
   if (sendTx) {
     console.log(`✨ ${label}: Nominating`);
     const tx = await contract.nominateOwner(newOwner, {
-      ...overrides(parseInt(chainSlug)),
+      ...(await overrides(parseInt(chainSlug))),
     });
     const receipt = await tx.wait();
     console.log(`🚀 ${label}: Done: ${receipt.transactionHash}`);

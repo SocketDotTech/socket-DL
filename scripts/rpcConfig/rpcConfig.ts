@@ -1,36 +1,36 @@
 import {
-  ChainSlug,
-  getAddresses,
-  Integrations,
-  DeploymentMode,
-  S3Config,
-  ChainSlugToId,
-  TestnetIds,
-  MainnetIds,
-  getAllAddresses,
-  ChainType,
-  TxData,
-  chainSlugToHardhatChainName,
-  getCurrency,
-  opStackL2Chain,
   arbChains,
   arbL3Chains,
+  ChainSlug,
+  chainSlugToHardhatChainName,
+  ChainSlugToId,
+  ChainSocketAddresses,
+  ChainType,
+  DeploymentAddresses,
+  DeploymentMode,
+  getAddresses,
+  getAllAddresses,
+  getCurrency,
+  MainnetIds,
+  opStackL2Chain,
   polygonCDKChains,
   S3ChainConfig,
-  FinalityBucket,
-  DeploymentAddresses,
-  ChainSocketAddresses,
+  S3Config,
+  TestnetIds,
+  TxData,
 } from "../../src";
 import { getSiblings } from "../common";
+import { chainOverrides } from "../constants/overrides";
 import {
-  explorers,
-  icons,
   batcherSupportedChainSlugs,
-  rpcs,
-  version,
+  disabledDFFeeChains,
+  explorers,
+  getDefaultFinalityBucket,
   getFinality,
   getReSyncInterval,
-  getDefaultFinalityBucket,
+  icons,
+  rpcs,
+  version,
 } from "./constants";
 import { feesUpdaterSupportedChainSlugs } from "./constants/feesUpdaterChainSlugs";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
@@ -100,6 +100,7 @@ const getChainData = async (
     finalityInfo: getFinality(chainSlug),
     defaultFinalityBucket: getDefaultFinalityBucket(chainSlug),
     icon: icons[chainSlug],
+    overrides: chainOverrides[chainSlug],
   };
 };
 
@@ -133,7 +134,7 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
     addresses,
     chainSlugToId: ChainSlugToId,
     oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
-    disabledDFFeeChains: [],
+    disabledDFFeeChains,
   };
 };
 
@@ -149,7 +150,6 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
       ChainSlug.POLYGON_MAINNET,
       ChainSlug.LYRA,
       ChainSlug.MAINNET,
-      ChainSlug.GOERLI,
       ChainSlug.SEPOLIA,
       ChainSlug.LYRA_TESTNET,
       ChainSlug.ARBITRUM_SEPOLIA,
@@ -161,6 +161,6 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
     addresses,
     chainSlugToId: ChainSlugToId,
     oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
-    disabledDFFeeChains: [],
+    disabledDFFeeChains,
   };
 };

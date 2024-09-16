@@ -8,14 +8,12 @@ export const optimismSwitchboard = (
   remoteChainSlug: ChainSlug,
   socketAddress: string,
   sigVerifierAddress: string,
-  signerAddress: string
+  owner: string
 ) => {
   let crossDomainMessengerAddress: string;
   if (isL1(chainSlug)) {
-    console.log(chainSlug, remoteChainSlug);
     crossDomainMessengerAddress =
       bridgeConsts.crossDomainMessenger[remoteChainSlug][chainSlug];
-    console.log(crossDomainMessengerAddress);
   } else {
     crossDomainMessengerAddress =
       bridgeConsts.crossDomainMessenger[chainSlug][chainSlug];
@@ -30,7 +28,7 @@ export const optimismSwitchboard = (
     args: [
       chainSlug,
       receiveGasLimit,
-      signerAddress,
+      owner,
       socketAddress,
       crossDomainMessengerAddress,
       sigVerifierAddress,

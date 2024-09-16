@@ -5,7 +5,7 @@ export const polygonL1Switchboard = (
   chainSlug: ChainSlug,
   socketAddress: string,
   sigVerifierAddress: string,
-  signerAddress: string
+  owner: string
 ) => {
   return {
     contractName: "PolygonL1Switchboard",
@@ -13,7 +13,7 @@ export const polygonL1Switchboard = (
       chainSlug,
       bridgeConsts.checkpointManager[chainSlug],
       bridgeConsts.fxRoot[chainSlug],
-      signerAddress,
+      owner,
       socketAddress,
       sigVerifierAddress,
     ],

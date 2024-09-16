@@ -6,15 +6,14 @@ import { Address } from "hardhat-deploy/dist/types";
 import path from "path";
 import fs from "fs";
 import {
-  ChainSlugToId,
   ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
   DeploymentMode,
 } from "../../../src";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { overrides } from "../config/config";
 import { VerifyArgs } from "../verify";
+import { SocketSigner } from "@socket.tech/dl-common";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
@@ -35,7 +34,7 @@ export const getChainRoleHash = (role: string, chainSlug: number) =>
 export interface DeployParams {
   addresses: ChainSocketAddresses;
   mode: DeploymentMode;
-  signer: SignerWithAddress | Wallet;
+  signer: SocketSigner;
   currentChainSlug: number;
 }
 
@@ -81,14 +80,16 @@ export const getOrDeploy = async (
 export async function deployContractWithArgs(
   contractName: string,
   args: Array<any>,
-  signer: SignerWithAddress | Wallet
+  signer: SocketSigner
 ) {
   try {
-    const Contract: ContractFactory = await ethers.getContractFactory(
-      contractName
+    const contractFactory: ContractFactory = await ethers.getContractFactory(
+      contractName,
+      signer
     );
+
     // gasLimit is set to undefined to not use the value set in overrides
-    const contract: Contract = await Contract.connect(signer).deploy(...args, {
+    const contract: Contract = await contractFactory.deploy(...args, {
       ...overrides(await signer.getChainId()),
     });
     await contract.deployed();

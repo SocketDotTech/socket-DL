@@ -19,17 +19,28 @@ dotenvConfig();
 /**
  * Usage
  *
- * --sendtx         Send claim tx along with ownership check.
+ * --newowner       Specify the new owner to be nominated.
+ *                  This flag is required.
+ *                  Eg. npx --newowner=0x5f34 ts-node scripts/admin/rotate-owner/1-nominate.ts
+ *
+ * --sendtx         Send nominate tx along with ownership check.
  *                  Default is only check owner, nominee.
- *                  Eg. npx --sendtx ts-node scripts/admin/rotate-owner/claim.ts
+ *                  Eg. npx --newowner=0x5f34 --sendtx ts-node scripts/admin/rotate-owner/1-nominate.ts
  *
  * --chains         Run only for specified chains.
  *                  Default is all chains.
- *                  Eg. npx --chains=10,2999 ts-node scripts/admin/rotate-owner/claim.ts
+ *                  Eg. npx --newowner=0x5f34 --chains=10,2999 ts-node scripts/admin/rotate-owner/1-nominate.ts
  *
  * --testnets       Run for testnets.
  *                  Default is false.
  */
+
+// let newOwner = process.env.npm_config_newowner;
+// if (!newOwner) {
+//   console.error("Error: newowner flag is required");
+//   process.exit(1);
+// }
+// newOwner = newOwner.toLowerCase();
 
 const signerKey = process.env.SOCKET_SIGNER_KEY;
 if (!signerKey) {
@@ -64,6 +75,12 @@ export const main = async () => {
     filteredChainSlugs.map(async (chainSlug) => {
       let chainAddresses: ChainSocketAddresses = addresses[chainSlug];
 
+      let newOwner = chainAddresses["SafeL2"];
+      if (!newOwner) {
+        console.log(`❗ ${chainSlug}: SafeL2 address not found`);
+        return;
+      }
+
       const provider = getProviderFromChainSlug(
         parseInt(chainSlug) as ChainSlug
       );
@@ -77,7 +94,13 @@ export const main = async () => {
       for (const contractName of contractList) {
         const contractAddress = chainAddresses[contractName];
         const label = `${chainSlug}, ${contractName}`;
-        await checkAndClaim(contractAddress, signer, chainSlug, label);
+        await checkAndNominate(
+          contractAddress,
+          signer,
+          chainSlug,
+          label,
+          newOwner
+        );
       }
 
       // iterate over integrations to check caps and decaps
@@ -91,14 +114,26 @@ export const main = async () => {
             chainAddresses.integrations[sibling][it]?.capacitor;
           if (capAddress) {
             const label = `${chainSlug}-${it}-${sibling}, Cap`;
-            await checkAndClaim(capAddress, signer, chainSlug, label);
+            await checkAndNominate(
+              capAddress,
+              signer,
+              chainSlug,
+              label,
+              newOwner
+            );
           }
 
           const decapAddress =
             chainAddresses.integrations[sibling][it]?.decapacitor;
           if (decapAddress) {
             const label = `${chainSlug}-${it}-${sibling}, Decap`;
-            await checkAndClaim(decapAddress, signer, chainSlug, label);
+            await checkAndNominate(
+              decapAddress,
+              signer,
+              chainSlug,
+              label,
+              newOwner
+            );
           }
 
           if (it === IntegrationTypes.native) {
@@ -106,7 +141,13 @@ export const main = async () => {
               chainAddresses.integrations[sibling][it]?.switchboard;
             if (sbAddress) {
               const label = `${chainSlug}-${it}-${sibling}, Switchboard`;
-              await checkAndClaim(sbAddress, signer, chainSlug, label);
+              await checkAndNominate(
+                sbAddress,
+                signer,
+                chainSlug,
+                label,
+                newOwner
+              );
             }
           }
         }
@@ -115,11 +156,12 @@ export const main = async () => {
   );
 };
 
-const checkAndClaim = async (
+const checkAndNominate = async (
   contractAddress: string,
   signer: Signer,
   chainSlug: string,
-  label: string
+  label: string,
+  newOwner: string
 ) => {
   label = label.padEnd(45);
   const contract = new ethers.Contract(
@@ -133,25 +175,30 @@ const checkAndClaim = async (
 
   console.log(` - ${label}: Checking: ${owner}, ${nominee}`);
 
-  if (signerAddress === owner) {
+  if (newOwner === owner) {
     console.log(` ✔ ${label}: Already claimed`);
     return;
   }
 
-  if (signerAddress !== nominee) {
-    console.log(`❗ ${label}: Signer is not current nominee`);
+  if (newOwner === nominee) {
+    console.log(` ✔ ${label}: Already nominated`);
+    return;
+  }
+
+  if (signerAddress !== owner) {
+    console.log(`❗ ${label}: Signer is not current owner`);
     return;
   }
 
   if (sendTx) {
-    console.log(`✨ ${label}: Claiming`);
-    const tx = await contract.claimOwner({
+    console.log(`✨ ${label}: Nominating`);
+    const tx = await contract.nominateOwner(newOwner, {
       ...(await overrides(parseInt(chainSlug))),
     });
     const receipt = await tx.wait();
     console.log(`🚀 ${label}: Done: ${receipt.transactionHash}`);
   } else {
-    console.log(`✨ ${label}: Needs claiming`);
+    console.log(`✨ ${label}: Needs nominating`);
   }
 };
 

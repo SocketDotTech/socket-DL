@@ -1,4 +1,4 @@
-import { Contract, Wallet, constants } from "ethers";
+import { Contract, constants } from "ethers";
 import {
   DeployParams,
   getInstance,
@@ -13,9 +13,9 @@ import {
   version,
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { socketOwner, overrides } from "../config/config";
 import { maxAllowedPacketLength } from "../../constants";
+import { SocketSigner } from "@socket.tech/dl-common";
 
 let allDeployed = false;
 
@@ -29,8 +29,9 @@ export interface ReturnObj {
  */
 export const deploySocket = async (
   executionManagerVersion: string,
-  socketSigner: SignerWithAddress | Wallet,
+  socketSigner: SocketSigner,
   chainSlug: number,
+  useSafe: boolean,
   currentMode: DeploymentMode,
   deployedAddresses: ChainSocketAddresses
 ): Promise<ReturnObj> => {
@@ -42,10 +43,28 @@ export const deploySocket = async (
   };
 
   try {
+    // safe wrapper deployment
+    const safe: Contract = await getOrDeploy(
+      "SafeL2",
+      "contracts/utils/SafeL2.sol",
+      [],
+      deployUtils
+    );
+    deployUtils.addresses["SafeL2"] = safe.address;
+
+    const multisigWrapper: Contract = await getOrDeploy(
+      "MultiSigWrapper",
+      "contracts/utils/MultiSigWrapper.sol",
+      [socketOwner, deployUtils.addresses["SafeL2"]],
+      deployUtils
+    );
+    deployUtils.addresses["MultiSigWrapper"] = multisigWrapper.address;
+
+    const owner = useSafe ? deployUtils.addresses["SafeL2"] : socketOwner;
     const signatureVerifier: Contract = await getOrDeploy(
       CORE_CONTRACTS.SignatureVerifier,
       "contracts/utils/SignatureVerifier.sol",
-      [socketOwner],
+      [owner],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.SignatureVerifier] =
@@ -54,7 +73,7 @@ export const deploySocket = async (
     const hasher: Contract = await getOrDeploy(
       CORE_CONTRACTS.Hasher,
       "contracts/utils/Hasher.sol",
-      [socketOwner],
+      [owner],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.Hasher] = hasher.address;
@@ -62,7 +81,7 @@ export const deploySocket = async (
     const capacitorFactory: Contract = await getOrDeploy(
       CORE_CONTRACTS.CapacitorFactory,
       "contracts/CapacitorFactory.sol",
-      [socketOwner, maxAllowedPacketLength],
+      [owner, maxAllowedPacketLength],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.CapacitorFactory] =
@@ -75,7 +94,7 @@ export const deploySocket = async (
         chainSlug,
         hasher.address,
         capacitorFactory.address,
-        socketOwner,
+        owner,
         version[deployUtils.mode],
       ],
       deployUtils
@@ -85,7 +104,7 @@ export const deploySocket = async (
     const executionManager: Contract = await getOrDeploy(
       executionManagerVersion,
       `contracts/${executionManagerVersion}.sol`,
-      [socketOwner, chainSlug, socket.address, signatureVerifier.address],
+      [owner, chainSlug, socket.address, signatureVerifier.address],
       deployUtils
     );
     deployUtils.addresses[executionManagerVersion] = executionManager.address;
@@ -93,7 +112,7 @@ export const deploySocket = async (
     const transmitManager: Contract = await getOrDeploy(
       CORE_CONTRACTS.TransmitManager,
       "contracts/TransmitManager.sol",
-      [socketOwner, chainSlug, socket.address, signatureVerifier.address],
+      [owner, chainSlug, socket.address, signatureVerifier.address],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.TransmitManager] =
@@ -102,7 +121,8 @@ export const deploySocket = async (
     // switchboards deploy
     deployUtils.addresses = await deploySwitchboards(
       chainSlug,
-      socketSigner,
+      owner,
+      socketSigner as SocketSigner,
       deployUtils.addresses,
       currentMode
     );
@@ -110,7 +130,7 @@ export const deploySocket = async (
     const socketBatcher: Contract = await getOrDeploy(
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [socketOwner],
+      [owner],
       deployUtils
     );
     deployUtils.addresses["SocketBatcher"] = socketBatcher.address;
@@ -172,14 +192,14 @@ export const deploySocket = async (
       await getInstance("SocketSimulator", socketSimulator.address)
     ).connect(deployUtils.signer);
     let capacitor = await simulatorContract.capacitor({
-      ...overrides(chainSlug),
+      ...(await overrides(chainSlug)),
     });
     if (capacitor == constants.AddressZero) {
       const tx = await simulatorContract.setup(
         switchboardSimulator.address,
         simulatorUtils.address,
         {
-          ...overrides(chainSlug),
+          ...(await overrides(chainSlug)),
         }
       );
       console.log(tx.hash, "setup for simulator");
@@ -187,7 +207,7 @@ export const deploySocket = async (
     }
 
     deployUtils.addresses["CapacitorSimulator"] =
-      await simulatorContract.capacitor({ ...overrides(chainSlug) });
+      await simulatorContract.capacitor({ ...(await overrides(chainSlug)) });
     deployUtils.addresses.startBlock = deployUtils.addresses.startBlock
       ? deployUtils.addresses.startBlock
       : await socketSigner.provider?.getBlockNumber();

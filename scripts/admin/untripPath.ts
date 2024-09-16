@@ -1,4 +1,4 @@
-import { Contract, Wallet, utils } from "ethers";
+import { Contract } from "ethers";
 import { IntegrationTypes, ChainSlug } from "../../src";
 import { mode, overrides } from "../deploy/config/config";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";
@@ -119,7 +119,7 @@ const main = async () => {
         newTripStatus: !tripStatus,
         signature,
         nonce,
-        ...overrides(chain),
+        ...(await overrides(chain)),
       });
 
       if (sendTx) {
@@ -138,7 +138,7 @@ const sendTxn = async (
   switchboard: Contract
 ) => {
   let tx = await switchboard.unTripPath(nonce, siblingChain, signature, {
-    ...overrides(chain),
+    ...(await overrides(chain)),
   });
   console.log(tx.hash);
 
