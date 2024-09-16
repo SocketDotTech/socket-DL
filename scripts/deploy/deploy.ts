@@ -56,7 +56,7 @@ const main = async () => {
 
     const safeResponse = await prompts([
       {
-        name: "safeChains",
+        name: "chains",
         type: "multiselect",
         message: "Select chains to use Safe as owner",
         choices,
