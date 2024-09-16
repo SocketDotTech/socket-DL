@@ -19,7 +19,7 @@ import {
 import { getRoleHash, getChainRoleHash, getInstance } from "../utils";
 import { ethers } from "ethers";
 import { getProviderFromChainSlug } from "../../constants";
-import { overrides } from "../config/config";
+import { overrides, socketOwner } from "../config/config";
 import AccessControlExtendedABI from "@socket.tech/dl-core/artifacts/abi/AccessControlExtended.json";
 import { SocketSigner } from "@socket.tech/dl-common";
 import { getSocketSigner } from "../utils/socket-signer";

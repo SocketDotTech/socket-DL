@@ -66,7 +66,9 @@ export const setManagers = async (
   ).connect(socketSigner);
 
   let tx;
-  const currentEM = await socket.executionManager__();
+  const currentEM = await socket.executionManager__({
+    ...(await overrides(await socketSigner.getChainId())),
+  });
   if (
     currentEM.toLowerCase() !== addr[executionManagerVersion]?.toLowerCase()
   ) {
@@ -86,7 +88,9 @@ export const setManagers = async (
     await tx.wait();
   }
 
-  const currentTM = await socket.transmitManager__();
+  const currentTM = await socket.transmitManager__({
+    ...(await overrides(await socketSigner.getChainId())),
+  });
   if (currentTM.toLowerCase() !== addr.TransmitManager?.toLowerCase()) {
     const transaction = {
       to: socket.address,
@@ -125,7 +129,9 @@ export const configureExecutionManager = async (
     ).connect(socketSigner);
 
     let nextNonce = (
-      await executionManagerContract.nextNonce(socketSigner.address)
+      await executionManagerContract.nextNonce(socketSigner.address, {
+        ...(await overrides(chain)),
+      })
     ).toNumber();
 
     const signatureMap = new Map<ChainSlug | number, string>();
@@ -196,7 +202,7 @@ export const configureExecutionManager = async (
     let tx = await socketBatcherContract.setExecutionFeesBatch(
       emAddress,
       requests,
-      { ...overrides(chain) }
+      { ...(await overrides(chain)) }
     );
     console.log("configured EM for ", chain, tx.hash);
     await tx.wait();

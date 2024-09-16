@@ -25,6 +25,7 @@ import {
 import { storeAllAddresses } from "../utils";
 import { SocketSigner } from "@socket.tech/dl-common";
 import { getSocketSigner } from "../utils/socket-signer";
+import { connectPlugs } from "../scripts/connect";
 
 const emVersion = CORE_CONTRACTS.ExecutionManagerDF;
 
@@ -66,6 +67,10 @@ const deleteOldContracts = async (chains: ChainSlug[]) => {
         if (chains.includes(parseInt(chain) as ChainSlug)) {
           addresses[chain].Counter = "";
           addresses[chain].SocketBatcher = "";
+          addresses[chain].SocketSimulator = "";
+          addresses[chain].SimulatorUtils = "";
+          addresses[chain].SwitchboardSimulator = "";
+          addresses[chain].CapacitorSimulator = "";
         }
       })
     );
@@ -140,6 +145,8 @@ const configure = async (chains: ChainSlug[]) => {
       chains,
       emVersion
     );
+
+    await connectPlugs(addresses, chains);
 
     await configureExecutionManagers(chains, addresses);
   } catch (error) {

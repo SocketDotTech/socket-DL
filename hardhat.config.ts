@@ -114,6 +114,10 @@ if (isProduction) {
     [HardhatChainName.SYNDR]: getChainConfig(ChainSlug.SYNDR),
     [HardhatChainName.BLAST]: getChainConfig(ChainSlug.BLAST),
     [HardhatChainName.NEOX_TESTNET]: getChainConfig(ChainSlug.NEOX_TESTNET),
+    [HardhatChainName.GNOSIS]: getChainConfig(ChainSlug.GNOSIS),
+    [HardhatChainName.LINEA]: getChainConfig(ChainSlug.LINEA),
+    [HardhatChainName.ZKEVM]: getChainConfig(ChainSlug.ZKEVM),
+    [HardhatChainName.AVALANCHE]: getChainConfig(ChainSlug.AVALANCHE),
   };
 }
 
@@ -127,7 +131,6 @@ const config: HardhatUserConfig = {
     apiKey: {
       arbitrumOne: process.env.ARBISCAN_API_KEY || "",
       arbitrumTestnet: process.env.ARBISCAN_API_KEY || "",
-      avalanche: process.env.SNOWTRACE_API_KEY || "",
       bsc: process.env.BSCSCAN_API_KEY || "",
       bscTestnet: process.env.BSCSCAN_API_KEY || "",
       goerli: process.env.ETHERSCAN_API_KEY || "",
@@ -162,6 +165,10 @@ const config: HardhatUserConfig = {
       syndr: "none",
       blast: process.env.BLASTSCAN_API_KEY || "",
       neox_testnet: "none",
+      gnosis: process.env.GNOSISSCAN_API_KEY || "",
+      linea: process.env.LINEASCAN_API_KEY || "",
+      zkevm: process.env.ZKEVM_API_KEY || "",
+      avalanche: process.env.SNOWTRACE_API_KEY || "",
     },
     customChains: [
       {
@@ -266,6 +273,38 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://xt3scan.ngd.network/api",
           browserURL: "https://xt3scan.ngd.network",
+        },
+      },
+      {
+        network: "gnosis",
+        chainId: ChainId.GNOSIS,
+        urls: {
+          apiURL: "https://api.gnosisscan.io/api",
+          browserURL: "https://gnosisscan.io",
+        },
+      },
+      {
+        network: "linea",
+        chainId: ChainId.LINEA,
+        urls: {
+          apiURL: "https://api.lineascan.build/api",
+          browserURL: "https://lineascan.build",
+        },
+      },
+      {
+        network: "zkevm",
+        chainId: ChainId.ZKEVM,
+        urls: {
+          apiURL: "https://api-zkevm.polygonscan.com/api",
+          browserURL: "https://zkevm.polygonscan.com/",
+        },
+      },
+      {
+        network: "avalanche",
+        chainId: ChainId.AVALANCHE,
+        urls: {
+          apiURL: "https://api.snowtrace.io//api",
+          browserURL: "https://snowtrace.io/",
         },
       },
     ],

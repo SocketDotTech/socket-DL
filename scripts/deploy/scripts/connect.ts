@@ -71,7 +71,9 @@ export const connectPlugs = async (
           }
           if (!switchboard) continue;
 
-          const configs = await socket.getPlugConfig(counter.address, sibling);
+          const configs = await socket.getPlugConfig(counter.address, sibling, {
+            ...(await overrides(chain)),
+          });
           if (
             configs["siblingPlug"].toLowerCase() ===
               siblingCounter?.toLowerCase() &&
@@ -86,7 +88,7 @@ export const connectPlugs = async (
             sibling,
             siblingCounter,
             switchboard,
-            { ...overrides(chain) }
+            { ...(await overrides(chain)) }
           );
 
           console.log(

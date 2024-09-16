@@ -10,4 +10,9 @@ export const Currency = {
   [ChainSlug.BSC_TESTNET]: NativeTokens["binancecoin"],
   [ChainSlug.WINR]: NativeTokens["winr"],
   [ChainSlug.NEOX_TESTNET]: NativeTokens["gas"],
+  [ChainSlug.NEOX_T4_TESTNET]: NativeTokens["gas"],
+  [ChainSlug.NEOX]: NativeTokens["gas"],
+  [ChainSlug.GNOSIS]: NativeTokens["dai"],
+  [ChainSlug.AVALANCHE]: NativeTokens["avalanche-2"],
+  [ChainSlug.XLAYER]: NativeTokens["okb"],
 };

@@ -11,5 +11,12 @@ export const icons = {
   [ChainSlug.POLYNOMIAL]: "",
   [ChainSlug.SYNDR]: "",
   [ChainSlug.NEOX_TESTNET]: "",
+  [ChainSlug.NEOX_T4_TESTNET]: "",
+  [ChainSlug.NEOX]: "",
+  [ChainSlug.GNOSIS]: "",
+  [ChainSlug.LINEA]: "",
+  [ChainSlug.ZKEVM]: "",
+  [ChainSlug.AVALANCHE]: "",
+  [ChainSlug.XLAYER]: "",
   [ChainSlug.BASE_SEPOLIA]: "",
 };

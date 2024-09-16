@@ -192,14 +192,14 @@ export const deploySocket = async (
       await getInstance("SocketSimulator", socketSimulator.address)
     ).connect(deployUtils.signer);
     let capacitor = await simulatorContract.capacitor({
-      ...overrides(chainSlug),
+      ...(await overrides(chainSlug)),
     });
     if (capacitor == constants.AddressZero) {
       const tx = await simulatorContract.setup(
         switchboardSimulator.address,
         simulatorUtils.address,
         {
-          ...overrides(chainSlug),
+          ...(await overrides(chainSlug)),
         }
       );
       console.log(tx.hash, "setup for simulator");
@@ -207,7 +207,7 @@ export const deploySocket = async (
     }
 
     deployUtils.addresses["CapacitorSimulator"] =
-      await simulatorContract.capacitor({ ...overrides(chainSlug) });
+      await simulatorContract.capacitor({ ...(await overrides(chainSlug)) });
     deployUtils.addresses.startBlock = deployUtils.addresses.startBlock
       ? deployUtils.addresses.startBlock
       : await socketSigner.provider?.getBlockNumber();
