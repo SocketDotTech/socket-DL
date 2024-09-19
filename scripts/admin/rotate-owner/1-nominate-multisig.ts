@@ -89,7 +89,14 @@ export const main = async () => {
       // startBlock field ignored since it is not contract
       // integrations iterated later since it is an object
       const contractList = Object.keys(chainAddresses).filter(
-        (key) => !["startBlock", "integrations", "Counter"].includes(key)
+        (key) =>
+          ![
+            "startBlock",
+            "integrations",
+            "Counter",
+            "SafeL2",
+            "MultiSigWrapper",
+          ].includes(key)
       );
       for (const contractName of contractList) {
         const contractAddress = chainAddresses[contractName];

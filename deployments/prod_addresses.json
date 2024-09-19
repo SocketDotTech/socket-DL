@@ -4197,7 +4197,9 @@
     "SimulatorUtils": "0xB0E7FDB68d67Bf8dD753B562c793185A7E019D2E",
     "SwitchboardSimulator": "0xB6A8A2290Dbca04e848404dFa8EA971e35e795e4",
     "CapacitorSimulator": "0x133Cd3e2a613607Ecdd0966faa1d7Bf3A3eb8F4f",
-    "ExecutionManagerDF": "0x200AF8FCdD5246D70B369A98143Ac8930A077B7A"
+    "ExecutionManagerDF": "0x200AF8FCdD5246D70B369A98143Ac8930A077B7A",
+    "SafeL2": "0x30b4a6E57a7A5a0079C201ed9f0B9a0b15F10280",
+    "MultiSigWrapper": "0x487d6D67AC31f194f96158ADB3511Fd776f19aA4"
   },
   "444444": {
     "SignatureVerifier": "0x845a6f4Be829e5D11906cc2eb2f8ccd39E8848a6",
@@ -4630,7 +4632,9 @@
     "SimulatorUtils": "0x44513d2C02e6fdcaFA012d53Ae767CC5d4A257e3",
     "SwitchboardSimulator": "0x74af6d7b484729384342dd68C60D73A3bF7081DF",
     "CapacitorSimulator": "0x0f06F1d9eC3EF0bcf1e791905aBBDDb5375821B9",
-    "ExecutionManagerDF": "0x2D7660F0CDfa50b5f800694F5AACe8830d71c2D4"
+    "ExecutionManagerDF": "0x2D7660F0CDfa50b5f800694F5AACe8830d71c2D4",
+    "SafeL2": "0x5A9e4208FEa3159A81eb9F15c82f6170b3c5DC3f",
+    "MultiSigWrapper": "0xf5cAdaA4769AA6c061224602b687affb5119D5e8"
   },
   "11155112": {
     "SignatureVerifier": "0x7E3D0FAC82b9d5a67906f7028Aa4a70d582011b2",
@@ -4939,7 +4943,9 @@
     "SimulatorUtils": "0x8f4EE8Ab18ED25f787BC81a8D5e7b1d0DeAe4322",
     "SwitchboardSimulator": "0x2eb0e1A4194204c6881eF13CdFE6e539b53564C9",
     "CapacitorSimulator": "0x532d1380a067292cf9fAdE3ECfc4061c5B47f8e6",
-    "ExecutionManagerDF": "0x92c7a51BD507736AC0Dda48b5F35A4AaD0c2Bb4D"
+    "ExecutionManagerDF": "0x92c7a51BD507736AC0Dda48b5F35A4AaD0c2Bb4D",
+    "SafeL2": "0x61c4aB6b05DaE9B4E3F5C16c8E2ec635a473526b",
+    "MultiSigWrapper": "0x91e4c4CE0B693058b7f5e05fAFD6cfC1Af75c76B"
   },
   "12227331": {
     "SignatureVerifier": "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",

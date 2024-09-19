@@ -5100,6 +5100,21 @@
   ],
   "421614": [
     [
+      "0x487d6D67AC31f194f96158ADB3511Fd776f19aA4",
+      "MultiSigWrapper",
+      "contracts/utils/MultiSigWrapper.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x30b4a6E57a7A5a0079C201ed9f0B9a0b15F10280"
+      ]
+    ],
+    [
+      "0x30b4a6E57a7A5a0079C201ed9f0B9a0b15F10280",
+      "SafeL2",
+      "contracts/utils/SafeL2.sol",
+      []
+    ],
+    [
       "0xB6A8A2290Dbca04e848404dFa8EA971e35e795e4",
       "SwitchboardSimulator",
       "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
@@ -6367,6 +6382,21 @@
   ],
   "11155111": [
     [
+      "0xf5cAdaA4769AA6c061224602b687affb5119D5e8",
+      "MultiSigWrapper",
+      "contracts/utils/MultiSigWrapper.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x5A9e4208FEa3159A81eb9F15c82f6170b3c5DC3f"
+      ]
+    ],
+    [
+      "0x5A9e4208FEa3159A81eb9F15c82f6170b3c5DC3f",
+      "SafeL2",
+      "contracts/utils/SafeL2.sol",
+      []
+    ],
+    [
       "0x74af6d7b484729384342dd68C60D73A3bF7081DF",
       "SwitchboardSimulator",
       "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
@@ -6801,6 +6831,21 @@
     ]
   ],
   "11155420": [
+    [
+      "0x91e4c4CE0B693058b7f5e05fAFD6cfC1Af75c76B",
+      "MultiSigWrapper",
+      "contracts/utils/MultiSigWrapper.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x61c4aB6b05DaE9B4E3F5C16c8E2ec635a473526b"
+      ]
+    ],
+    [
+      "0x61c4aB6b05DaE9B4E3F5C16c8E2ec635a473526b",
+      "SafeL2",
+      "contracts/utils/SafeL2.sol",
+      []
+    ],
     [
       "0x2eb0e1A4194204c6881eF13CdFE6e539b53564C9",
       "SwitchboardSimulator",
