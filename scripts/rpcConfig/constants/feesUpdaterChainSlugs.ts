@@ -10,7 +10,7 @@ import { mode } from "../../deploy/config/config";
 export const feesUpdaterSupportedChainSlugs = (): ChainSlug[] => {
   if (mode === DeploymentMode.PROD) {
     const feesUpdaterSupportedChainSlugs = [];
-    [...MainnetIds, ...TestnetIds].forEach((m) => {
+    [...MainnetIds].forEach((m) => {
       if (batcherSupportedChainSlugs.includes(m)) {
         feesUpdaterSupportedChainSlugs.push(m);
       }
