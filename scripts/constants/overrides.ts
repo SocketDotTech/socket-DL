@@ -66,9 +66,6 @@ export const chainOverrides: {
     gasLimit: 500_000_000,
     gasPrice: 1_000_000,
   },
-  [ChainSlug.HOOK]: {
-    gasLimit: 7_000_000,
-  },
   [ChainSlug.REYA_CRONOS]: {
     type: 1,
     gasPrice: 100_000_000,

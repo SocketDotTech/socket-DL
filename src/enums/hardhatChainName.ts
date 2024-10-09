@@ -25,8 +25,6 @@ export enum HardhatChainName {
   MODE = "mode",
   ANCIENT8_TESTNET = "ancient8_testnet",
   ANCIENT8_TESTNET2 = "ancient8_testnet2",
-  HOOK_TESTNET = "hook_testnet",
-  HOOK = "hook",
   PARALLEL = "parallel",
   MANTLE = "mantle",
   REYA_CRONOS = "reya_cronos",

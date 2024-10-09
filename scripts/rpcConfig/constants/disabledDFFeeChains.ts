@@ -9,7 +9,6 @@ export const disabledDFFeeChains = [
   // ChainSlug.LYRA,
   // ChainSlug.MAINNET,
   // ChainSlug.MANTLE,
-  // ChainSlug.HOOK,
   // ChainSlug.REYA,
   // ChainSlug.BASE,
   // ChainSlug.KINTO,
