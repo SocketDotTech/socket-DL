@@ -28,8 +28,6 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.MODE]: ChainSlug.MODE,
   [HardhatChainName.ANCIENT8_TESTNET]: ChainSlug.ANCIENT8_TESTNET,
   [HardhatChainName.ANCIENT8_TESTNET2]: ChainSlug.ANCIENT8_TESTNET2,
-  [HardhatChainName.HOOK_TESTNET]: ChainSlug.HOOK_TESTNET,
-  [HardhatChainName.HOOK]: ChainSlug.HOOK,
   [HardhatChainName.PARALLEL]: ChainSlug.PARALLEL,
   [HardhatChainName.MANTLE]: ChainSlug.MANTLE,
   [HardhatChainName.REYA_CRONOS]: ChainSlug.REYA_CRONOS,

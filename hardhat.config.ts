@@ -91,8 +91,6 @@ if (isProduction) {
     [HardhatChainName.ANCIENT8_TESTNET2]: getChainConfig(
       ChainSlug.ANCIENT8_TESTNET2
     ),
-    [HardhatChainName.HOOK_TESTNET]: getChainConfig(ChainSlug.HOOK_TESTNET),
-    [HardhatChainName.HOOK]: getChainConfig(ChainSlug.HOOK),
     [HardhatChainName.PARALLEL]: getChainConfig(ChainSlug.PARALLEL),
     [HardhatChainName.MANTLE]: getChainConfig(ChainSlug.MANTLE),
     [HardhatChainName.REYA_CRONOS]: getChainConfig(ChainSlug.REYA_CRONOS),
@@ -150,8 +148,6 @@ const config: HardhatUserConfig = {
       mode: process.env.MODE_API_KEY || "none",
       ancient8Testnet: process.env.ANCIENT8_API_KEY || "",
       ancient8Testnet2: process.env.ANCIENT8_API_KEY || "",
-      hookTestnet: process.env.HOOK_API_KEY || "",
-      hook: process.env.HOOK_API_KEY || "",
       parallelTestnet: process.env.PARALLEL_API_KEY || "",
       mantle: process.env.MANTLE_API_KEY || "",
       reya: process.env.REYA_API_KEY || "",
