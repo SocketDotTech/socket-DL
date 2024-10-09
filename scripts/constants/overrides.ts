@@ -46,10 +46,10 @@ export const chainOverrides: {
     gasPriceMultiplier: 1.5,
   },
   [ChainSlug.AEVO_TESTNET]: {
-    type: 2,
+    type: 1,
   },
   [ChainSlug.LYRA_TESTNET]: {
-    type: 2,
+    type: 1,
   },
   [ChainSlug.MODE_TESTNET]: {
     type: 1,
