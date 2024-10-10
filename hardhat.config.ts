@@ -116,6 +116,7 @@ if (isProduction) {
     [HardhatChainName.LINEA]: getChainConfig(ChainSlug.LINEA),
     [HardhatChainName.ZKEVM]: getChainConfig(ChainSlug.ZKEVM),
     [HardhatChainName.AVALANCHE]: getChainConfig(ChainSlug.AVALANCHE),
+    [HardhatChainName.MANTA_PACIFIC]: getChainConfig(ChainSlug.MANTA_PACIFIC),
   };
 }
 
@@ -165,6 +166,7 @@ const config: HardhatUserConfig = {
       linea: process.env.LINEASCAN_API_KEY || "",
       zkevm: process.env.ZKEVM_API_KEY || "",
       avalanche: process.env.SNOWTRACE_API_KEY || "",
+      manta_pacific: process.env.MANTA_PACIFIC_API_KEY || "none",
     },
     customChains: [
       {
@@ -264,7 +266,7 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: "mode",
+        network: "neox_testnet",
         chainId: ChainId.NEOX_TESTNET,
         urls: {
           apiURL: "https://xt3scan.ngd.network/api",
@@ -299,8 +301,16 @@ const config: HardhatUserConfig = {
         network: "avalanche",
         chainId: ChainId.AVALANCHE,
         urls: {
-          apiURL: "https://api.snowtrace.io//api",
+          apiURL: "https://api.snowtrace.io/api",
           browserURL: "https://snowtrace.io/",
+        },
+      },
+      {
+        network: "manta_pacific",
+        chainId: ChainId.MANTA_PACIFIC,
+        urls: {
+          apiURL: "https://pacific-explorer.manta.network/api",
+          browserURL: "https://pacific-explorer.manta.network/",
         },
       },
     ],

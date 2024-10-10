@@ -17,4 +17,5 @@ export const opStackL2Chain = [
   ChainSlug.SIPHER_FUNKI_TESTNET,
   ChainSlug.BLAST,
   ChainSlug.POLYNOMIAL,
+  ChainSlug.MANTA_PACIFIC,
 ];
