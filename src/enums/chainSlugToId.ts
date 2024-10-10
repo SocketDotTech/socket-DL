@@ -51,4 +51,5 @@ export const ChainSlugToId = {
   [ChainSlug.ZKEVM]: ChainId.ZKEVM,
   [ChainSlug.AVALANCHE]: ChainId.AVALANCHE,
   [ChainSlug.XLAYER]: ChainId.XLAYER,
+  [ChainSlug.MANTA_PACIFIC]: ChainId.MANTA_PACIFIC,
 };

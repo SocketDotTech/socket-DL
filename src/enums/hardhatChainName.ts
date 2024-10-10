@@ -48,4 +48,5 @@ export enum HardhatChainName {
   ZKEVM = "zkevm",
   AVALANCHE = "avalanche",
   XLAYER = "xlayer",
+  MANTA_PACIFIC = "manta_pacific",
 }

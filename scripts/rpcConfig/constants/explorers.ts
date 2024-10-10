@@ -19,4 +19,5 @@ export const explorers = {
   [ChainSlug.ZKEVM]: "https://zkevm.polygonscan.com/",
   [ChainSlug.AVALANCHE]: "https://snowtrace.io/",
   [ChainSlug.XLAYER]: "https://www.okx.com/web3/explorer/xlayer",
+  [ChainSlug.MANTA_PACIFIC]: "https://pacific-explorer.manta.network/",
 };
