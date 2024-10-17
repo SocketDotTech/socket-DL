@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import "../contracts/utils/MultiSigWrapper.sol";
+import "../contracts/utils/multisig/MultiSigWrapper.sol";
 import {MockSafe} from "../contracts/mocks/MockSafe.sol";
 
 contract MultiSigWrapperTestHelper is MultiSigWrapper {

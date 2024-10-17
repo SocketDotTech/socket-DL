@@ -1,4 +1,4 @@
-import { Contract, constants } from "ethers";
+import { Contract, Transaction, constants, utils } from "ethers";
 import {
   DeployParams,
   getInstance,
@@ -46,15 +46,30 @@ export const deploySocket = async (
     // safe wrapper deployment
     const safe: Contract = await getOrDeploy(
       "SafeL2",
-      "contracts/utils/SafeL2.sol",
+      "contracts/utils/multisig/SafeL2.sol",
       [],
       deployUtils
     );
     deployUtils.addresses["SafeL2"] = safe.address;
 
+    const safeProxyFactory: Contract = await getOrDeploy(
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      [],
+      deployUtils
+    );
+    deployUtils.addresses["SafeProxyFactory"] = safeProxyFactory.address;
+
+    const proxyAddress = await createSocketSafe(
+      safeProxyFactory,
+      safe.address,
+      [socketOwner]
+    );
+    deployUtils.addresses["SocketSafeProxy"] = proxyAddress;
+
     const multisigWrapper: Contract = await getOrDeploy(
       "MultiSigWrapper",
-      "contracts/utils/MultiSigWrapper.sol",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
       [socketOwner, deployUtils.addresses["SafeL2"]],
       deployUtils
     );
@@ -230,3 +245,55 @@ export const deploySocket = async (
     deployedAddresses: deployUtils.addresses,
   };
 };
+
+// Assuming you are in a contract context
+async function createSocketSafe(safeProxyFactory, safeAddress, owners) {
+  const addressZero = "0x0000000000000000000000000000000000000000";
+  const functionSignature =
+    "setup(address[],uint256,address,bytes,address,address,uint256,address)";
+  const functionSelector = utils.id(functionSignature).slice(0, 10);
+
+  const encodedParameters = utils.defaultAbiCoder.encode(
+    [
+      "address[]",
+      "uint256",
+      "address",
+      "bytes",
+      "address",
+      "address",
+      "uint256",
+      "address",
+    ],
+    [
+      owners,
+      owners.length,
+      addressZero,
+      "0x",
+      addressZero,
+      addressZero,
+      0,
+      addressZero,
+    ]
+  );
+  const encodedData = functionSelector + encodedParameters.slice(2); // Remove '0x' from encodedParameters
+
+  const tx = await safeProxyFactory.createChainSpecificProxyWithNonce(
+    safeAddress,
+    encodedData,
+    0
+  );
+  const receipt = await tx.wait();
+
+  const safeSetupEvent = receipt.events?.find(
+    (event: Event) => event.event === "ProxyCreation"
+  );
+
+  if (safeSetupEvent) {
+    const proxy = safeSetupEvent.args.proxy;
+    console.log(`Safe proxy: ${proxy}`);
+  } else {
+    console.log(
+      "Safe proxy created event not found in the transaction receipt"
+    );
+  }
+}
