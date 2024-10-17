@@ -90,7 +90,7 @@ export const chainOverrides: {
   },
   [ChainSlug.MANTLE]: {
     type: 1,
-    gasLimit: 100_000_000_000,
+    gasLimit: 10_000_000_000,
     gasPrice: 30_000_000,
   },
   [ChainSlug.NEOX_TESTNET]: {

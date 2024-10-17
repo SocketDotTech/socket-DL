@@ -117,6 +117,7 @@ if (isProduction) {
     [HardhatChainName.ZKEVM]: getChainConfig(ChainSlug.ZKEVM),
     [HardhatChainName.AVALANCHE]: getChainConfig(ChainSlug.AVALANCHE),
     [HardhatChainName.MANTA_PACIFIC]: getChainConfig(ChainSlug.MANTA_PACIFIC),
+    [HardhatChainName.OPBNB]: getChainConfig(ChainSlug.OPBNB),
   };
 }
 
@@ -167,6 +168,7 @@ const config: HardhatUserConfig = {
       zkevm: process.env.ZKEVM_API_KEY || "",
       avalanche: process.env.SNOWTRACE_API_KEY || "",
       manta_pacific: process.env.MANTA_PACIFIC_API_KEY || "none",
+      opbnb: process.env.OPBNB_API_KEY || "none",
     },
     customChains: [
       {
@@ -311,6 +313,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://pacific-explorer.manta.network/api",
           browserURL: "https://pacific-explorer.manta.network/",
+        },
+      },
+      {
+        network: "opbnb",
+        chainId: ChainId.OPBNB,
+        urls: {
+          apiURL: "https://api-opbnb.bscscan.com/api",
+          browserURL: "https://opbnb.bscscan.com/",
         },
       },
     ],

@@ -27,4 +27,5 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.AVALANCHE,
   ChainSlug.XLAYER,
   ChainSlug.MANTA_PACIFIC,
+  ChainSlug.OPBNB,
 ];

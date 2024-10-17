@@ -53,4 +53,5 @@ export const rpcs = {
   [ChainSlug.AVALANCHE]: checkEnvValue("AVALANCHE_RPC"),
   [ChainSlug.XLAYER]: checkEnvValue("XLAYER_RPC"),
   [ChainSlug.MANTA_PACIFIC]: checkEnvValue("MANTA_PACIFIC_RPC"),
+  [ChainSlug.OPBNB]: checkEnvValue("OPBNB_RPC"),
 };

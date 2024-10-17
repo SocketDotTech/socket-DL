@@ -20,4 +20,5 @@ export const explorers = {
   [ChainSlug.AVALANCHE]: "https://snowtrace.io/",
   [ChainSlug.XLAYER]: "https://www.okx.com/web3/explorer/xlayer",
   [ChainSlug.MANTA_PACIFIC]: "https://pacific-explorer.manta.network/",
+  [ChainSlug.OPBNB]: "https://opbnb.bscscan.com/",
 };

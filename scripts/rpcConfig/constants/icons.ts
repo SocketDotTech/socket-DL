@@ -18,4 +18,5 @@ export const icons = {
   [ChainSlug.AVALANCHE]: "",
   [ChainSlug.XLAYER]: "",
   [ChainSlug.MANTA_PACIFIC]: "",
+  [ChainSlug.OPBNB]: "",
 };

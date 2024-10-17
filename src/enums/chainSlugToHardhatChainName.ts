@@ -52,4 +52,5 @@ export const chainSlugToHardhatChainName = {
   [ChainSlug.AVALANCHE]: [HardhatChainName.AVALANCHE],
   [ChainSlug.XLAYER]: [HardhatChainName.XLAYER],
   [ChainSlug.MANTA_PACIFIC]: [HardhatChainName.MANTA_PACIFIC],
+  [ChainSlug.OPBNB]: [HardhatChainName.OPBNB],
 };
