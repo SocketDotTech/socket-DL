@@ -18,13 +18,13 @@ contract MockSafe {
         address to,
         uint256 value,
         bytes calldata data,
-        Enum.Operation operation,
-        uint256 safeTxGas,
-        uint256 baseGas,
-        uint256 gasPrice,
-        address gasToken,
-        address payable refundReceiver,
-        bytes memory signatures
+        Enum.Operation,
+        uint256,
+        uint256,
+        uint256,
+        address,
+        address payable,
+        bytes memory
     ) external payable returns (bool success) {
         lastTo = to;
         lastValue = value;
@@ -41,13 +41,13 @@ contract MockSafe {
         uint256 value,
         bytes calldata data,
         Enum.Operation operation,
-        uint256 safeTxGas,
-        uint256 baseGas,
-        uint256 gasPrice,
-        address gasToken,
-        address refundReceiver,
+        uint256,
+        uint256,
+        uint256,
+        address,
+        address,
         uint256 _nonce
-    ) external view returns (bytes32) {
+    ) external pure returns (bytes32) {
         return keccak256(abi.encode(to, value, data, operation, _nonce));
     }
 

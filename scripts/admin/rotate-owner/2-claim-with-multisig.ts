@@ -10,9 +10,9 @@ import {
 } from "../../../src";
 import { mode, overrides } from "../../deploy/config/config";
 import OwnableArtifact from "../../../out/Ownable.sol/Ownable.json";
-import { getProviderFromChainSlug } from "../../constants";
-import { Signer, Wallet, ethers } from "ethers";
+import { Signer, ethers } from "ethers";
 import { Ownable } from "../../../typechain-types/contracts/utils/Ownable";
+import { getSocketSigner } from "../../deploy/utils/socket-signer";
 
 dotenvConfig();
 
@@ -31,13 +31,7 @@ dotenvConfig();
  *                  Default is false.
  */
 
-const signerKey = process.env.SOCKET_SIGNER_KEY;
-if (!signerKey) {
-  console.error("Error: SOCKET_SIGNER_KEY is required");
-}
-
 const sendTx = process.env.npm_config_sendtx == "true";
-
 const testnets = process.env.npm_config_testnets == "true";
 const filterChainsParam = process.env.npm_config_chains
   ? process.env.npm_config_chains.split(",")
@@ -56,28 +50,40 @@ const filteredChainSlugs = !filterChainsParam
 
 const ownableABI = OwnableArtifact.abi;
 
-const wallet: Wallet = new ethers.Wallet(signerKey);
-const signerAddress = wallet.address.toLowerCase();
-
 export const main = async () => {
   await Promise.all(
     filteredChainSlugs.map(async (chainSlug) => {
       let chainAddresses: ChainSocketAddresses = addresses[chainSlug];
-
-      const provider = getProviderFromChainSlug(
-        parseInt(chainSlug) as ChainSlug
+      const signerAddress = chainAddresses["SafeL2"];
+      const signer = await getSocketSigner(
+        parseInt(chainSlug),
+        chainAddresses,
+        true,
+        false
       );
-      const signer = wallet.connect(provider);
 
       // startBlock field ignored since it is not contract
       // integrations iterated later since it is an object
       const contractList = Object.keys(chainAddresses).filter(
-        (key) => !["startBlock", "integrations", "Counter"].includes(key)
+        (key) =>
+          ![
+            "startBlock",
+            "integrations",
+            "Counter",
+            "SafeL2",
+            "MultiSigWrapper",
+          ].includes(key)
       );
       for (const contractName of contractList) {
         const contractAddress = chainAddresses[contractName];
         const label = `${chainSlug}, ${contractName}`;
-        await checkAndClaim(contractAddress, signer, chainSlug, label);
+        await checkAndClaim(
+          contractAddress,
+          signer,
+          chainSlug,
+          label,
+          signerAddress
+        );
       }
 
       // iterate over integrations to check caps and decaps
@@ -91,14 +97,26 @@ export const main = async () => {
             chainAddresses.integrations[sibling][it]?.capacitor;
           if (capAddress) {
             const label = `${chainSlug}-${it}-${sibling}, Cap`;
-            await checkAndClaim(capAddress, signer, chainSlug, label);
+            await checkAndClaim(
+              capAddress,
+              signer,
+              chainSlug,
+              label,
+              signerAddress
+            );
           }
 
           const decapAddress =
             chainAddresses.integrations[sibling][it]?.decapacitor;
           if (decapAddress) {
             const label = `${chainSlug}-${it}-${sibling}, Decap`;
-            await checkAndClaim(decapAddress, signer, chainSlug, label);
+            await checkAndClaim(
+              decapAddress,
+              signer,
+              chainSlug,
+              label,
+              signerAddress
+            );
           }
 
           if (it === IntegrationTypes.native) {
@@ -106,7 +124,13 @@ export const main = async () => {
               chainAddresses.integrations[sibling][it]?.switchboard;
             if (sbAddress) {
               const label = `${chainSlug}-${it}-${sibling}, Switchboard`;
-              await checkAndClaim(sbAddress, signer, chainSlug, label);
+              await checkAndClaim(
+                sbAddress,
+                signer,
+                chainSlug,
+                label,
+                signerAddress
+              );
             }
           }
         }
@@ -119,7 +143,8 @@ const checkAndClaim = async (
   contractAddress: string,
   signer: Signer,
   chainSlug: string,
-  label: string
+  label: string,
+  signerAddress: string
 ) => {
   label = label.padEnd(45);
   const contract = new ethers.Contract(

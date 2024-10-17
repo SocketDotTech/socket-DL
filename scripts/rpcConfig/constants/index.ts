@@ -6,3 +6,4 @@ export * from "./icons";
 export * from "./rpc";
 export * from "./version";
 export * from "./finality";
+export * from "./disabledDFFeeChains";

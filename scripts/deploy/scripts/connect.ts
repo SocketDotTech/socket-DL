@@ -1,7 +1,4 @@
-import {
-  getDefaultIntegrationType,
-  getProviderFromChainSlug,
-} from "../../constants";
+import { getDefaultIntegrationType } from "../../constants";
 import { getInstance } from "../utils";
 import {
   ChainSlug,
@@ -12,9 +9,10 @@ import {
   TestnetIds,
   isTestnet,
 } from "../../../src";
-import { Contract, Wallet } from "ethers";
+import { Contract } from "ethers";
 import { getSwitchboardAddressFromAllAddresses } from "../../../src";
 import { overrides } from "../config/config";
+import { getSocketSigner } from "../utils/socket-signer";
 
 export const connectPlugs = async (
   addresses: DeploymentAddresses,
@@ -25,13 +23,9 @@ export const connectPlugs = async (
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
 
-        const providerInstance = getProviderFromChainSlug(chain);
-        const socketSigner: Wallet = new Wallet(
-          process.env.SOCKET_SIGNER_KEY as string,
-          providerInstance
-        );
-
         const addr: ChainSocketAddresses = addresses[chain]!;
+        const socketSigner = await getSocketSigner(chain, addr, false);
+
         if (!addr["integrations"]) return;
 
         const list = isTestnet(chain) ? TestnetIds : MainnetIds;
@@ -42,7 +36,7 @@ export const connectPlugs = async (
             chains.includes(chainSlug)
         );
 
-        const siblingIntegrationtype: IntegrationTypes[] = siblingSlugs.map(
+        const siblingIntegrationType: IntegrationTypes[] = siblingSlugs.map(
           (chainSlug) => {
             return getDefaultIntegrationType(chain, chainSlug);
           }
@@ -58,6 +52,9 @@ export const connectPlugs = async (
           await getInstance("Socket", addr["Socket"])
         ).connect(socketSigner);
 
+        const owner = await counter.owner();
+        if (owner.toLowerCase() !== socketSigner.address.toLowerCase()) return;
+
         for (let index = 0; index < siblingSlugs.length; index++) {
           const sibling = siblingSlugs[index];
           const siblingCounter = addresses?.[sibling]?.["Counter"];
@@ -67,14 +64,16 @@ export const connectPlugs = async (
               addresses,
               chain,
               sibling,
-              siblingIntegrationtype[index]
+              siblingIntegrationType[index]
             );
           } catch (error) {
             console.log(error, " continuing");
           }
           if (!switchboard) continue;
 
-          const configs = await socket.getPlugConfig(counter.address, sibling);
+          const configs = await socket.getPlugConfig(counter.address, sibling, {
+            ...(await overrides(chain)),
+          });
           if (
             configs["siblingPlug"].toLowerCase() ===
               siblingCounter?.toLowerCase() &&
@@ -89,11 +88,11 @@ export const connectPlugs = async (
             sibling,
             siblingCounter,
             switchboard,
-            { ...overrides(chain) }
+            { ...(await overrides(chain)) }
           );
 
           console.log(
-            `Connecting counter of ${chain} for ${sibling} and ${siblingIntegrationtype[index]} at tx hash: ${tx.hash}`
+            `Connecting counter of ${chain} for ${sibling} and ${siblingIntegrationType[index]} at tx hash: ${tx.hash}`
           );
           await tx.wait();
         }

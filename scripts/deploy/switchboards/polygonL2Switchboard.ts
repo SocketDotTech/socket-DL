@@ -5,14 +5,14 @@ export const polygonL2Switchboard = (
   chainSlug: ChainSlug,
   socketAddress: string,
   sigVerifierAddress: string,
-  signerAddress: string
+  owner: string
 ) => {
   return {
     contractName: "PolygonL2Switchboard",
     args: [
       chainSlug,
       bridgeConsts.fxChild[chainSlug],
-      signerAddress,
+      owner,
       socketAddress,
       sigVerifierAddress,
     ],
