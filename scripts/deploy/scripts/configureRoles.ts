@@ -18,7 +18,7 @@ import {
 import { checkAndUpdateRoles } from "./roles";
 import { sleep } from "@socket.tech/dl-common";
 
-const sleepTime = 3000;
+const sleepTime = 10000;
 const newRoleStatus = true;
 
 export const configureRoles = async (

@@ -51,4 +51,5 @@ export enum ChainSlug {
   AVALANCHE = ChainId.AVALANCHE,
   XLAYER = ChainId.XLAYER,
   MANTA_PACIFIC = ChainId.MANTA_PACIFIC,
+  OPBNB = ChainId.OPBNB,
 }

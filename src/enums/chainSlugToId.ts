@@ -52,4 +52,5 @@ export const ChainSlugToId = {
   [ChainSlug.AVALANCHE]: ChainId.AVALANCHE,
   [ChainSlug.XLAYER]: ChainId.XLAYER,
   [ChainSlug.MANTA_PACIFIC]: ChainId.MANTA_PACIFIC,
+  [ChainSlug.OPBNB]: ChainId.OPBNB,
 };

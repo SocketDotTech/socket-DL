@@ -49,4 +49,5 @@ export enum ChainId {
   AVALANCHE = 43114,
   XLAYER = 196,
   MANTA_PACIFIC = 169,
+  OPBNB = 204,
 }

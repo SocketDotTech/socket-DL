@@ -49,4 +49,5 @@ export enum HardhatChainName {
   AVALANCHE = "avalanche",
   XLAYER = "xlayer",
   MANTA_PACIFIC = "manta_pacific",
+  OPBNB = "opbnb",
 }
