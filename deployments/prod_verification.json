@@ -5100,6 +5100,12 @@
   ],
   "421614": [
     [
+      "0x3553c0102684c20e2f8192d6F013c7242710b4b3",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
       "0x487d6D67AC31f194f96158ADB3511Fd776f19aA4",
       "MultiSigWrapper",
       "contracts/utils/MultiSigWrapper.sol",
@@ -6382,6 +6388,12 @@
   ],
   "11155111": [
     [
+      "0xD3F39174Ee7937381e19d682FfEa40968266FA3E",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
       "0xf5cAdaA4769AA6c061224602b687affb5119D5e8",
       "MultiSigWrapper",
       "contracts/utils/MultiSigWrapper.sol",
@@ -6831,6 +6843,18 @@
     ]
   ],
   "11155420": [
+    [
+      "0xDE418B9F4aCecC5b87B6f27BfFBaE8932473883e",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x765CFbB5efc15A384c24828e782DcffA3f9690fB",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
     [
       "0x91e4c4CE0B693058b7f5e05fAFD6cfC1Af75c76B",
       "MultiSigWrapper",

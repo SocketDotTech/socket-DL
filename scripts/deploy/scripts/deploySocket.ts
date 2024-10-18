@@ -1,4 +1,4 @@
-import { Contract, Transaction, constants, utils } from "ethers";
+import { Contract, Event, Transaction, constants, utils } from "ethers";
 import {
   DeployParams,
   getInstance,
@@ -60,12 +60,14 @@ export const deploySocket = async (
     );
     deployUtils.addresses["SafeProxyFactory"] = safeProxyFactory.address;
 
-    const proxyAddress = await createSocketSafe(
-      safeProxyFactory,
-      safe.address,
-      [socketOwner]
-    );
-    deployUtils.addresses["SocketSafeProxy"] = proxyAddress;
+    if (!deployUtils.addresses["SocketSafeProxy"]) {
+      const proxyAddress = await createSocketSafe(
+        safeProxyFactory,
+        safe.address,
+        [socketOwner]
+      );
+      deployUtils.addresses["SocketSafeProxy"] = proxyAddress;
+    }
 
     const multisigWrapper: Contract = await getOrDeploy(
       "MultiSigWrapper",
@@ -247,7 +249,11 @@ export const deploySocket = async (
 };
 
 // Assuming you are in a contract context
-async function createSocketSafe(safeProxyFactory, safeAddress, owners) {
+async function createSocketSafe(
+  safeProxyFactory: Contract,
+  safeAddress: string,
+  owners: string[]
+) {
   const addressZero = "0x0000000000000000000000000000000000000000";
   const functionSignature =
     "setup(address[],uint256,address,bytes,address,address,uint256,address)";
@@ -280,7 +286,10 @@ async function createSocketSafe(safeProxyFactory, safeAddress, owners) {
   const tx = await safeProxyFactory.createChainSpecificProxyWithNonce(
     safeAddress,
     encodedData,
-    0
+    0,
+    {
+      ...(await overrides(await safeProxyFactory.signer.getChainId())),
+    }
   );
   const receipt = await tx.wait();
 
@@ -290,9 +299,9 @@ async function createSocketSafe(safeProxyFactory, safeAddress, owners) {
 
   if (safeSetupEvent) {
     const proxy = safeSetupEvent.args.proxy;
-    console.log(`Safe proxy: ${proxy}`);
+    return proxy;
   } else {
-    console.log(
+    throw new Error(
       "Safe proxy created event not found in the transaction receipt"
     );
   }

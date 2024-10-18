@@ -65,10 +65,9 @@ export const getOrDeploy = async (
       deployUtils.mode
     );
   } else {
-    contract = await getInstance(
-      contractName,
-      deployUtils.addresses[contractName]
-    );
+    contract = (
+      await getInstance(contractName, deployUtils.addresses[contractName])
+    ).connect(deployUtils.signer);
     console.log(
       `${contractName} found on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
     );

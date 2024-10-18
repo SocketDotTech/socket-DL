@@ -365,7 +365,7 @@ export const checkAndUpdateRoles = async (
           for (let index = 0; index < userSpecificRoles.length; index++) {
             let { userAddress, filterRoles } = userSpecificRoles[index];
             if (safeChains.includes(chainSlug))
-              userAddress = addresses["SafeL2"];
+              userAddress = addresses["SocketSafeProxy"];
             await checkNativeSwitchboardRoles({
               chainSlug,
               provider,
@@ -408,7 +408,8 @@ export const checkAndUpdateRoles = async (
 
         userSpecificRoles.map(async (roleObj) => {
           let { userAddress, filterRoles } = roleObj;
-          if (safeChains.includes(chainSlug)) userAddress = addresses["SafeL2"];
+          if (safeChains.includes(chainSlug))
+            userAddress = addresses["SocketSafeProxy"];
           const siblingSlugs = getSiblingSlugs(chainSlug);
 
           requiredRoles.map(async (role) => {
@@ -458,7 +459,8 @@ export const checkAndUpdateRoles = async (
 
         userSpecificRoles.map(async (roleObj) => {
           let { userAddress, filterRoles } = roleObj;
-          if (safeChains.includes(chainSlug)) userAddress = addresses["SafeL2"];
+          if (safeChains.includes(chainSlug))
+            userAddress = addresses["SocketSafeProxy"];
 
           const siblingSlugs = getSiblingSlugs(chainSlug);
 

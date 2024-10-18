@@ -22,9 +22,10 @@ export const getSocketSigner = async (
     provider
   );
 
-  const safeAddress = addresses["SafeL2"] && useSafe ? addresses["SafeL2"] : "";
+  const safeAddress =
+    addresses["SocketSafeProxy"] && useSafe ? addresses["SocketSafeProxy"] : "";
   const safeWrapperAddress =
-    addresses["SafeL2"] && useSafe
+    addresses["SocketSafeProxy"] && useSafe
       ? addresses[CORE_CONTRACTS.MultiSigWrapper]
       : "";
 
