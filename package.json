@@ -27,7 +27,7 @@
     "@nomiclabs/hardhat-ethers": "^2.1.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.0",
     "@socket.tech/dl-core": "2.17.0-test.3",
-    "@socket.tech/dl-common": "1.0.4-test.11",
+    "@socket.tech/dl-common": "1.0.12-test.1",
     "@typechain/ethers-v5": "^10.0.0",
     "@typechain/hardhat": "^6.0.0",
     "@types/node": "^18.11.9",

@@ -54,7 +54,7 @@ export const main = async () => {
   await Promise.all(
     filteredChainSlugs.map(async (chainSlug) => {
       let chainAddresses: ChainSocketAddresses = addresses[chainSlug];
-      const signerAddress = chainAddresses["SafeL2"];
+      const signerAddress = chainAddresses["SocketSafeProxy"];
       const signer = await getSocketSigner(
         parseInt(chainSlug),
         chainAddresses,
@@ -71,6 +71,8 @@ export const main = async () => {
             "integrations",
             "Counter",
             "SafeL2",
+            "SocketSafeProxy",
+            "SafeProxyFactory",
             "MultiSigWrapper",
           ].includes(key)
       );
@@ -155,6 +157,7 @@ const checkAndClaim = async (
 
   const owner = (await contract.owner()).toLowerCase();
   const nominee = (await contract.nominee()).toLowerCase();
+  signerAddress = signerAddress.toLowerCase();
 
   console.log(` - ${label}: Checking: ${owner}, ${nominee}`);
 

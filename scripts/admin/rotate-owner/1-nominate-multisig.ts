@@ -75,9 +75,9 @@ export const main = async () => {
     filteredChainSlugs.map(async (chainSlug) => {
       let chainAddresses: ChainSocketAddresses = addresses[chainSlug];
 
-      let newOwner = chainAddresses["SafeL2"];
+      let newOwner = chainAddresses["SocketSafeProxy"];
       if (!newOwner) {
-        console.log(`❗ ${chainSlug}: SafeL2 address not found`);
+        console.log(`❗ ${chainSlug}: SocketSafeProxy address not found`);
         return;
       }
 
@@ -95,6 +95,8 @@ export const main = async () => {
             "integrations",
             "Counter",
             "SafeL2",
+            "SocketSafeProxy",
+            "SafeProxyFactory",
             "MultiSigWrapper",
           ].includes(key)
       );

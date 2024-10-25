@@ -106,8 +106,10 @@ export interface ChainSocketAddresses {
   SocketSimulator?: string;
   SimulatorUtils?: string;
   SwitchboardSimulator?: string;
-  Safe?: string;
   MultiSigWrapper?: string;
+  SafeL2?: string;
+  SafeProxyFactory?: string;
+  SocketSafeProxy?: string;
 }
 
 export type DeploymentAddresses = {
