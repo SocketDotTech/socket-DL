@@ -9,7 +9,6 @@ import {
 import { getProviderFromChainSlug } from "../constants";
 import FastSwitchboardABI from "@socket.tech/dl-core/artifacts/abi/FastSwitchboard.json";
 import NativeSwitchboardABI from "@socket.tech/dl-core/artifacts/abi/NativeSwitchboardBase.json";
-import { ROLES } from "@socket.tech/dl-core";
 import { getRoleHash } from "../deploy/utils/utils";
 
 const sbContracts: { [key: string]: Contract } = {};

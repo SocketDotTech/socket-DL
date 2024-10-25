@@ -98,8 +98,8 @@ const createContractAddrArray = (
 ): string[] => {
   let addresses: string[] = [];
 
-  if (chainAddresses.ExecutionManager)
-    addresses.push(chainAddresses.ExecutionManager);
+  if (chainAddresses.ExecutionManagerDF)
+    addresses.push(chainAddresses.ExecutionManagerDF);
   if (chainAddresses.OpenExecutionManager)
     addresses.push(chainAddresses.OpenExecutionManager);
 
@@ -189,7 +189,7 @@ export const main = async () => {
                 ETH_ADDRESS,
                 signer.address,
                 rescueAmount,
-                { ...overrides(parseInt(chainSlug)) }
+                { ...(await overrides(parseInt(chainSlug))) }
               );
               console.log(
                 `Rescuing ${rescueAmount} from ${contractAddr[index]} on ${chainSlug}: ${tx.hash}`

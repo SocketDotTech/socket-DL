@@ -270,11 +270,11 @@ contract SocketBatcher is AccessControl {
                 IExecutionManager.setRelativeNativeTokenPrice.selector
             ) {
                 IExecutionManager(contractAddress_).setRelativeNativeTokenPrice(
-                        setFeesRequests_[index].nonce,
-                        setFeesRequests_[index].dstChainSlug,
-                        setFeesRequests_[index].fees,
-                        setFeesRequests_[index].signature
-                    );
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    setFeesRequests_[index].fees,
+                    setFeesRequests_[index].signature
+                );
             } else if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setMsgValueMaxThreshold.selector
