@@ -53,4 +53,5 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.XLAYER]: ChainSlug.XLAYER,
   [HardhatChainName.MANTA_PACIFIC]: ChainSlug.MANTA_PACIFIC,
   [HardhatChainName.OPBNB]: ChainSlug.OPBNB,
+  [HardhatChainName.GEIST]: ChainSlug.GEIST,
 };

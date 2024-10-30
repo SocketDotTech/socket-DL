@@ -16,4 +16,5 @@ export const Currency = {
   [ChainSlug.AVALANCHE]: NativeTokens["avalanche-2"],
   [ChainSlug.XLAYER]: NativeTokens["okb"],
   [ChainSlug.OPBNB]: NativeTokens["binancecoin"],
+  [ChainSlug.GEIST]: NativeTokens["aavegotchi"],
 };

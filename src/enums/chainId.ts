@@ -50,4 +50,5 @@ export enum ChainId {
   XLAYER = 196,
   MANTA_PACIFIC = 169,
   OPBNB = 204,
+  GEIST = 63157,
 }

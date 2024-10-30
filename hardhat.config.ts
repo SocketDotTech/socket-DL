@@ -118,6 +118,7 @@ if (isProduction) {
     [HardhatChainName.AVALANCHE]: getChainConfig(ChainSlug.AVALANCHE),
     [HardhatChainName.MANTA_PACIFIC]: getChainConfig(ChainSlug.MANTA_PACIFIC),
     [HardhatChainName.OPBNB]: getChainConfig(ChainSlug.OPBNB),
+    [HardhatChainName.GEIST]: getChainConfig(ChainSlug.GEIST),
   };
 }
 
@@ -169,6 +170,7 @@ const config: HardhatUserConfig = {
       avalanche: process.env.SNOWTRACE_API_KEY || "",
       manta_pacific: process.env.MANTA_PACIFIC_API_KEY || "none",
       opbnb: process.env.OPBNB_API_KEY || "none",
+      geist: process.env.GEIST_API_KEY || "none",
     },
     customChains: [
       {
@@ -321,6 +323,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-opbnb.bscscan.com/api",
           browserURL: "https://opbnb.bscscan.com/",
+        },
+      },
+      {
+        network: "geist",
+        chainId: ChainId.GEIST,
+        urls: {
+          apiURL: "https://geist-mainnet.explorer.alchemy.com/api",
+          browserURL: "https://geist-mainnet.explorer.alchemy.com/",
         },
       },
     ],

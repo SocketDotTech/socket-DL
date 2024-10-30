@@ -42,4 +42,5 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.XLAYER,
   ChainSlug.MANTA_PACIFIC,
   ChainSlug.OPBNB,
+  ChainSlug.GEIST,
 ];

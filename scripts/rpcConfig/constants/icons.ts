@@ -19,4 +19,5 @@ export const icons = {
   [ChainSlug.XLAYER]: "",
   [ChainSlug.MANTA_PACIFIC]: "",
   [ChainSlug.OPBNB]: "",
+  [ChainSlug.GEIST]: "",
 };

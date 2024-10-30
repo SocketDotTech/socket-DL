@@ -52,4 +52,5 @@ export enum ChainSlug {
   XLAYER = ChainId.XLAYER,
   MANTA_PACIFIC = ChainId.MANTA_PACIFIC,
   OPBNB = ChainId.OPBNB,
+  GEIST = ChainId.GEIST,
 }

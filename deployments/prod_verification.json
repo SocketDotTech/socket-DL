@@ -4266,6 +4266,26 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
+  "63157": [
+    [
+      "0x22891c72dE565d884Dfd762B8df7C4632888a93A",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        63157,
+        63157,
+        "0xFe9DCb3dAba382f46F2Ce69ddEb3b5Df86d96f04",
+        "0x941f0ef5258604Fe10C76AE3858984CE0452b5f2",
+        "IMLI"
+      ]
+    ],
+    [
+      "0x5C4186D343EeF952c9ED886E45F8243edf0A503F",
+      "CapacitorFactory",
+      "contracts/CapacitorFactory.sol",
+      ["0x44A44837894B5eDC2Bde64567FC62599b3b88F4C", 10]
+    ]
+  ],
   "80001": [
     [
       "0x1F0F1FC746fcd4d59b6dBDDFf67a88cde70dAeE5",

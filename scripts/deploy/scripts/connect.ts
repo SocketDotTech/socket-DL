@@ -18,7 +18,8 @@ import { overrides } from "../config/config";
 
 export const connectPlugs = async (
   addresses: DeploymentAddresses,
-  chains: ChainSlug[]
+  chains: ChainSlug[],
+  siblings: ChainSlug[]
 ) => {
   try {
     await Promise.all(
@@ -34,15 +35,15 @@ export const connectPlugs = async (
         const addr: ChainSocketAddresses = addresses[chain]!;
         if (!addr["integrations"]) return;
 
-        const list = isTestnet(chain) ? TestnetIds : MainnetIds;
-        const siblingSlugs: ChainSlug[] = list.filter(
-          (chainSlug) =>
-            chainSlug !== chain &&
-            addresses?.[chainSlug]?.["Counter"] &&
-            chains.includes(chainSlug)
-        );
+        // const list = isTestnet(chain) ? TestnetIds : MainnetIds;
+        // const siblingSlugs: ChainSlug[] = list.filter(
+        //   (chainSlug) =>
+        //     chainSlug !== chain &&
+        //     addresses?.[chainSlug]?.["Counter"] &&
+        //     chains.includes(chainSlug)
+        // );
 
-        const siblingIntegrationtype: IntegrationTypes[] = siblingSlugs.map(
+        const siblingIntegrationtype: IntegrationTypes[] = siblings.map(
           (chainSlug) => {
             return getDefaultIntegrationType(chain, chainSlug);
           }
@@ -58,8 +59,8 @@ export const connectPlugs = async (
           await getInstance("Socket", addr["Socket"])
         ).connect(socketSigner);
 
-        for (let index = 0; index < siblingSlugs.length; index++) {
-          const sibling = siblingSlugs[index];
+        for (let index = 0; index < siblings.length; index++) {
+          const sibling = siblings[index];
           const siblingCounter = addresses?.[sibling]?.["Counter"];
           let switchboard;
           try {

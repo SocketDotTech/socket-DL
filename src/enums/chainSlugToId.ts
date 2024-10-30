@@ -53,4 +53,5 @@ export const ChainSlugToId = {
   [ChainSlug.XLAYER]: ChainId.XLAYER,
   [ChainSlug.MANTA_PACIFIC]: ChainId.MANTA_PACIFIC,
   [ChainSlug.OPBNB]: ChainId.OPBNB,
+  [ChainSlug.GEIST]: ChainId.GEIST,
 };
