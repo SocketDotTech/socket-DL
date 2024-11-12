@@ -52,6 +52,8 @@ export const ChainSlugToId = {
   [ChainSlug.AVALANCHE]: ChainId.AVALANCHE,
   [ChainSlug.XLAYER]: ChainId.XLAYER,
   [ChainSlug.MANTA_PACIFIC]: ChainId.MANTA_PACIFIC,
+  [ChainSlug.POLTER_TESTNET]: ChainId.POLTER_TESTNET,
+  [ChainSlug.POLYGON_AMOY]: ChainId.POLYGON_AMOY,
   [ChainSlug.OPBNB]: ChainId.OPBNB,
   [ChainSlug.GEIST]: ChainId.GEIST,
 };

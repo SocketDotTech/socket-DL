@@ -24,4 +24,6 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.BSC_TESTNET,
   ChainSlug.NEOX_TESTNET,
   ChainSlug.NEOX_T4_TESTNET,
+  ChainSlug.POLTER_TESTNET,
+  ChainSlug.POLYGON_AMOY,
 ];
