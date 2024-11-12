@@ -26,7 +26,7 @@ export const batcherSupportedChainSlugs = [
   // ChainSlug.BOB,
   ChainSlug.KINTO,
   // ChainSlug.KINTO_DEVNET,
-  ChainSlug.SIPHER_FUNKI_TESTNET,
+  // ChainSlug.SIPHER_FUNKI_TESTNET,
   ChainSlug.WINR,
   ChainSlug.BLAST,
   // ChainSlug.BSC_TESTNET,
@@ -41,4 +41,8 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.AVALANCHE,
   ChainSlug.XLAYER,
   ChainSlug.MANTA_PACIFIC,
+  ChainSlug.POLTER_TESTNET,
+  ChainSlug.POLYGON_AMOY,
+  ChainSlug.OPBNB,
+  ChainSlug.GEIST,
 ];

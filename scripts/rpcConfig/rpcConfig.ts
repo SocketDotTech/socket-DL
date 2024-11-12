@@ -62,8 +62,6 @@ const getOldEMVersionChainSlugs = (): ChainSlug[] => {
       if (!chainAddress.ExecutionManagerDF)
         chains.push(parseInt(chain) as ChainSlug);
     });
-
-    console.log(chains);
   } catch (error) {
     return [] as ChainSlug[];
   }
@@ -92,7 +90,7 @@ const getChainData = async (
     chainName: chainSlugToHardhatChainName[chainSlug].toString(),
     blockNumber: getBlockNumber(deploymentMode, chainSlug),
     siblings: getSiblings(deploymentMode, chainSlug),
-    chainTxData: await getChainTxData(chainSlug, txData),
+    chainTxData: getChainTxData(chainSlug, txData),
     nativeToken: getCurrency(chainSlug),
     chainType: getChainType(chainSlug),
     reSyncInterval: getReSyncInterval(chainSlug),
