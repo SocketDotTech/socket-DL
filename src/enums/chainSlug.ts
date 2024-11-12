@@ -53,4 +53,6 @@ export enum ChainSlug {
   MANTA_PACIFIC = ChainId.MANTA_PACIFIC,
   POLTER_TESTNET = ChainId.POLTER_TESTNET,
   POLYGON_AMOY = ChainId.POLYGON_AMOY,
+  OPBNB = ChainId.OPBNB,
+  GEIST = ChainId.GEIST,
 }

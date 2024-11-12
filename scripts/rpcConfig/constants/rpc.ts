@@ -55,4 +55,6 @@ export const rpcs = {
   [ChainSlug.MANTA_PACIFIC]: checkEnvValue("MANTA_PACIFIC_RPC"),
   [ChainSlug.POLTER_TESTNET]: checkEnvValue("POLTER_TESTNET_RPC"),
   [ChainSlug.POLYGON_AMOY]: checkEnvValue("POLYGON_AMOY_RPC"),
+  [ChainSlug.OPBNB]: checkEnvValue("OPBNB_RPC"),
+  [ChainSlug.GEIST]: checkEnvValue("GEIST_RPC"),
 };

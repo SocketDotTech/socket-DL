@@ -20,4 +20,6 @@ export const icons = {
   [ChainSlug.MANTA_PACIFIC]: "",
   [ChainSlug.POLTER_TESTNET]: "",
   [ChainSlug.POLYGON_AMOY]: "",
+  [ChainSlug.OPBNB]: "",
+  [ChainSlug.GEIST]: "",
 };

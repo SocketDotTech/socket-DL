@@ -17,4 +17,6 @@ export const Currency = {
   [ChainSlug.XLAYER]: NativeTokens["okb"],
   [ChainSlug.POLTER_TESTNET]: NativeTokens["aavegotchi"],
   [ChainSlug.POLYGON_AMOY]: NativeTokens["matic-network"],
+  [ChainSlug.OPBNB]: NativeTokens["binancecoin"],
+  [ChainSlug.GEIST]: NativeTokens["aavegotchi"],
 };

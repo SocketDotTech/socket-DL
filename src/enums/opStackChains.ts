@@ -19,4 +19,5 @@ export const opStackL2Chain = [
   ChainSlug.POLYNOMIAL,
   ChainSlug.MANTA_PACIFIC,
   ChainSlug.POLTER_TESTNET,
+  ChainSlug.OPBNB,
 ];

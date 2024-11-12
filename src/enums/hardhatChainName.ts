@@ -51,4 +51,6 @@ export enum HardhatChainName {
   MANTA_PACIFIC = "manta_pacific",
   POLTER_TESTNET = "polter_testnet",
   POLYGON_AMOY = "polygon_amoy",
+  OPBNB = "opbnb",
+  GEIST = "geist",
 }

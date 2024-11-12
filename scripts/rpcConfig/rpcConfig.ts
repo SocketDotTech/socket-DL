@@ -62,8 +62,6 @@ const getOldEMVersionChainSlugs = (): ChainSlug[] => {
       if (!chainAddress.ExecutionManagerDF)
         chains.push(parseInt(chain) as ChainSlug);
     });
-
-    console.log(chains);
   } catch (error) {
     return [] as ChainSlug[];
   }

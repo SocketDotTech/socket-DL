@@ -22,4 +22,6 @@ export const explorers = {
   [ChainSlug.MANTA_PACIFIC]: "https://pacific-explorer.manta.network/",
   [ChainSlug.POLTER_TESTNET]: "https://polter-testnet.explorer.alchemy.com/",
   [ChainSlug.POLYGON_AMOY]: "https://amoy.polygonscan.com/",
+  [ChainSlug.OPBNB]: "https://opbnb.bscscan.com/",
+  [ChainSlug.GEIST]: "https://geist-mainnet.explorer.alchemy.com/",
 };

@@ -51,4 +51,6 @@ export enum ChainId {
   MANTA_PACIFIC = 169,
   POLTER_TESTNET = 631571,
   POLYGON_AMOY = 80002,
+  OPBNB = 204,
+  GEIST = 63157,
 }
