@@ -49,4 +49,6 @@ export enum HardhatChainName {
   AVALANCHE = "avalanche",
   XLAYER = "xlayer",
   MANTA_PACIFIC = "manta_pacific",
+  POLTER_TESTNET = "polter_testnet",
+  POLYGON_AMOY = "polygon_amoy",
 }

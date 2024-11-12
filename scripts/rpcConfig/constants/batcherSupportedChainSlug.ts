@@ -41,4 +41,6 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.AVALANCHE,
   ChainSlug.XLAYER,
   ChainSlug.MANTA_PACIFIC,
+  ChainSlug.POLTER_TESTNET,
+  ChainSlug.POLYGON_AMOY,
 ];

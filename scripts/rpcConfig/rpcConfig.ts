@@ -92,7 +92,7 @@ const getChainData = async (
     chainName: chainSlugToHardhatChainName[chainSlug].toString(),
     blockNumber: getBlockNumber(deploymentMode, chainSlug),
     siblings: getSiblings(deploymentMode, chainSlug),
-    chainTxData: await getChainTxData(chainSlug, txData),
+    chainTxData: getChainTxData(chainSlug, txData),
     nativeToken: getCurrency(chainSlug),
     chainType: getChainType(chainSlug),
     reSyncInterval: getReSyncInterval(chainSlug),

@@ -20,4 +20,6 @@ export const explorers = {
   [ChainSlug.AVALANCHE]: "https://snowtrace.io/",
   [ChainSlug.XLAYER]: "https://www.okx.com/web3/explorer/xlayer",
   [ChainSlug.MANTA_PACIFIC]: "https://pacific-explorer.manta.network/",
+  [ChainSlug.POLTER_TESTNET]: "https://polter-testnet.explorer.alchemy.com/",
+  [ChainSlug.POLYGON_AMOY]: "https://amoy.polygonscan.com/",
 };
