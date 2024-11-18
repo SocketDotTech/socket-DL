@@ -1,6 +1,5 @@
 import { Wallet, utils } from "ethers";
 import { network, ethers, run } from "hardhat";
-
 import { ContractFactory, Contract } from "ethers";
 import { Address } from "hardhat-deploy/dist/types";
 import path from "path";
@@ -11,10 +10,14 @@ import {
   ChainSocketAddresses,
   DeploymentAddresses,
   DeploymentMode,
+  zkStackChain,
 } from "../../../src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { overrides } from "../config/config";
 import { VerifyArgs } from "../verify";
+import { chainIdToSlug, getZkWallet } from "../../constants";
+import { Deployer } from "@matterlabs/hardhat-zksync";
+import * as hre from "hardhat";
 
 export const deploymentsPath = path.join(__dirname, `/../../../deployments/`);
 
@@ -78,23 +81,76 @@ export const getOrDeploy = async (
   return contract;
 };
 
+// export async function deployContractWithArgs(
+//   contractName: string,
+//   args: Array<any>,
+//   signer: SignerWithAddress | Wallet
+// ) {
+//   try {
+//     const Contract: ContractFactory = await ethers.getContractFactory(
+//       contractName
+//     );
+//     // gasLimit is set to undefined to not use the value set in overrides
+//     const contract: Contract = await Contract.connect(signer).deploy(...args, {
+//       ...(await overrides(await signer.getChainId())),
+//     });
+//     await contract.deployed();
+//     return contract;
+//   } catch (error) {
+//     throw error;
+//   }
+// }
+
 export async function deployContractWithArgs(
   contractName: string,
   args: Array<any>,
   signer: SignerWithAddress | Wallet
-) {
+): Promise<Contract> {
   try {
-    const Contract: ContractFactory = await ethers.getContractFactory(
-      contractName
-    );
-    // gasLimit is set to undefined to not use the value set in overrides
-    const contract: Contract = await Contract.connect(signer).deploy(...args, {
-      ...(await overrides(await signer.getChainId())),
-    });
-    await contract.deployed();
-    return contract;
+    const chainId = (await signer.provider.getNetwork()).chainId;
+    const chainSlug = chainIdToSlug(chainId);
+    if (zkStackChain.includes(chainSlug)) {
+      const wallet = getZkWallet(chainSlug);
+      const deployer = new Deployer(hre, wallet);
+      const artifact = await deployer
+        .loadArtifact(contractName)
+        .catch((error) => {
+          if (
+            error?.message?.includes(
+              `Artifact for contract "${contractName}" not found.`
+            )
+          ) {
+            console.error(error.message);
+            throw `⛔️ Please make sure you have compiled your contracts or specified the correct contract name!`;
+          } else {
+            throw error;
+          }
+        });
+      const contract = await deployer.deploy(artifact, args);
+      const address = await contract.getAddress();
+      const Contract: ContractFactory = await ethers.getContractFactory(
+        contractName
+      );
+      // console.log(contract);
+      // contract.address = address;
+      return Contract.attach(address);
+    } else {
+      const Contract: ContractFactory = await ethers.getContractFactory(
+        contractName
+      );
+      const contract: Contract = await Contract.connect(signer).deploy(
+        ...args,
+        {
+          ...(await overrides(chainSlug)),
+        }
+      );
+      await contract.deployed();
+      return contract;
+    }
   } catch (error) {
-    throw error;
+    // throw error;
+    console.log(error);
+    process.exit(1);
   }
 }
 

@@ -56,4 +56,5 @@ export const ChainSlugToId = {
   [ChainSlug.POLYGON_AMOY]: ChainId.POLYGON_AMOY,
   [ChainSlug.OPBNB]: ChainId.OPBNB,
   [ChainSlug.GEIST]: ChainId.GEIST,
+  [ChainSlug.ZERO_SEPOLIA]: ChainId.ZERO_SEPOLIA,
 };

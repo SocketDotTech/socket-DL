@@ -56,4 +56,5 @@ export const ChainSlugToKey = {
   [ChainSlug.POLYGON_AMOY]: HardhatChainName.POLYGON_AMOY,
   [ChainSlug.OPBNB]: HardhatChainName.OPBNB,
   [ChainSlug.GEIST]: HardhatChainName.GEIST,
+  [ChainSlug.ZERO_SEPOLIA]: HardhatChainName.ZERO_SEPOLIA,
 };

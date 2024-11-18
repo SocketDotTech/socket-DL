@@ -18,6 +18,7 @@ import {
   S3Config,
   TestnetIds,
   TxData,
+  zkStackChain,
 } from "../../src";
 import { getSiblings } from "../common";
 import { chainOverrides } from "../constants/overrides";
@@ -76,6 +77,8 @@ const getChainType = (chainSlug: ChainSlug) => {
   } else if (arbL3Chains.includes(chainSlug)) {
     return ChainType.arbL3Chain;
   } else if (polygonCDKChains.includes(chainSlug)) {
+    return ChainType.zkStackChain;
+  } else if (zkStackChain.includes(chainSlug)) {
     return ChainType.polygonCDKChain;
   } else return ChainType.default;
 };

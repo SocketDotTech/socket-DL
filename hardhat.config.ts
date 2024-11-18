@@ -1,11 +1,12 @@
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
-import "@nomiclabs/hardhat-etherscan";
+// import "@nomiclabs/hardhat-etherscan";
 import "@typechain/hardhat";
 import "hardhat-preprocessor";
 import "hardhat-deploy";
 import "hardhat-abi-exporter";
 import "hardhat-change-network";
+import "@matterlabs/hardhat-zksync";
 
 import { config as dotenvConfig } from "dotenv";
 import type { HardhatUserConfig } from "hardhat/config";
@@ -340,6 +341,13 @@ const config: HardhatUserConfig = {
       chainId: hardhatChainNameToSlug[HardhatChainName.HARDHAT],
     },
     ...liveNetworks,
+    zeroTestnet: {
+      url: "https://zerion-testnet-proofs.rpc.caldera.xyz/http",
+      zksync: true,
+      ethNetwork: "sepolia",
+      verifyURL:
+        "https://api-explorer.zero.network/contract/contract_verification",
+    },
   },
   paths: {
     sources: "./contracts",
@@ -361,6 +369,10 @@ const config: HardhatUserConfig = {
         return line;
       },
     }),
+  },
+  zksolc: {
+    version: "latest", // Uses latest available in https://github.com/matter-labs/zksolc-bin
+    settings: {},
   },
   solidity: {
     version: "0.8.19",

@@ -13,4 +13,5 @@ export * from "./mainnetIds";
 export * from "./native-tokens";
 export * from "./opStackChains";
 export * from "./polygonCDKChains";
+export * from "./zkStackChain";
 export * from "./testnetIds";

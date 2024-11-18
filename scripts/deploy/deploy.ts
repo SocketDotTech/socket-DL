@@ -1,4 +1,9 @@
-import { DeploymentAddresses, MainnetIds, TestnetIds } from "../../src";
+import {
+  ChainSlug,
+  DeploymentAddresses,
+  MainnetIds,
+  TestnetIds,
+} from "../../src";
 import { configureRoles } from "./scripts/configureRoles";
 import { deployForChains } from "./scripts/deploySocketFor";
 import { configureSwitchboards } from "./scripts/configureSwitchboards";
@@ -8,30 +13,30 @@ import { executionManagerVersion } from "./config/config";
 
 const main = async () => {
   try {
-    const response = await prompts([
-      {
-        name: "chainType",
-        type: "select",
-        message: "Select chains network type",
-        choices: [
-          {
-            title: "Mainnet",
-            value: "mainnet",
-          },
-          {
-            title: "Testnet",
-            value: "testnet",
-          },
-        ],
-      },
-    ]);
+    // const response = await prompts([
+    //   {
+    //     name: "chainType",
+    //     type: "select",
+    //     message: "Select chains network type",
+    //     choices: [
+    //       {
+    //         title: "Mainnet",
+    //         value: "mainnet",
+    //       },
+    //       {
+    //         title: "Testnet",
+    //         value: "testnet",
+    //       },
+    //     ],
+    //   },
+    // ]);
 
-    const chainOptions =
-      response.chainType === "mainnet" ? MainnetIds : TestnetIds;
-    let choices = chainOptions.map((chain) => ({
-      title: chain.toString(),
-      value: chain,
-    }));
+    // const chainOptions =
+    //   response.chainType === "mainnet" ? MainnetIds : TestnetIds;
+    // let choices = chainOptions.map((chain) => ({
+    //   title: chain.toString(),
+    //   value: chain,
+    // }));
 
     const chainsResponse = await prompts([
       {

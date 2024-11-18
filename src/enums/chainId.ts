@@ -53,4 +53,5 @@ export enum ChainId {
   POLYGON_AMOY = 80002,
   OPBNB = 204,
   GEIST = 63157,
+  ZERO_SEPOLIA = 4457845,
 }
