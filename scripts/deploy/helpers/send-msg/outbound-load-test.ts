@@ -24,10 +24,9 @@ const deployedAddressPath = path.join(
 
 // batch outbound contract:
 const helperContractAddress = {
-  11155112: "0xF76E77186Ae85Fa0D5fce51D03e59b964fe7717A",
-  11155111: "0x91C27Cad374246314E756f8Aa2f62F433d6F102C",
-  [ChainSlug.ARBITRUM_SEPOLIA]: "0x2c3E3Ff54d82cA96BBB2F4529bee114eB200e3F0",
-  [ChainSlug.OPTIMISM_SEPOLIA]: "0x4B882c8A1009c0a4fd80151FEb6d1a3656C49C9a",
+  [ChainSlug.ARBITRUM_SEPOLIA]: "0xd206accf23905ac3325d2614981f79657923dbfe",
+  [ChainSlug.OPTIMISM_SEPOLIA]: "0xa57d28c0fd64a3b82f3f9b5a2ce65c46d1483884",
+  [ChainSlug.ARBITRUM]: "0x19ff5eb35bbf1525b29ae96167b0c94ac5387ded",
 };
 
 const payload =
@@ -37,11 +36,11 @@ const WAIT_FOR_TX = true;
 const totalIterations = 10;
 
 // usage:
-// npx ts-node scripts/deploy/helpers/send-msg/outbound-load-test.ts --chain arbitrum_sepolia --remoteChain optimism_sepolia --numOfRequests 10 --waitTime 6
+// time npx ts-node scripts/deploy/helpers/send-msg/outbound-load-test.ts --chain arbitrum_sepolia --remoteChain optimism_sepolia --numOfRequests 10 --waitTimeSecs 4
 
 export const main = async () => {
   const amount = 100;
-  const msgGasLimit = "0";
+  const msgGasLimit = "100000";
   let remoteChainSlug;
 
   try {
@@ -68,8 +67,8 @@ export const main = async () => {
         },
       })
       .option({
-        waitTime: {
-          description: "waitTime",
+        waitTimeSecs: {
+          description: "waitTimeSecs",
           type: "number",
           demandOption: false,
         },
@@ -97,7 +96,7 @@ export const main = async () => {
     const remoteChain = argv.remoteChain as HardhatChainName;
     remoteChainSlug = hardhatChainNameToSlug[remoteChain];
     const numOfRequests = argv.numOfRequests as number;
-    const waitTime = argv.waitTime as number;
+    const waitTimeSecs = argv.waitTimeSecs as number;
 
     const config: any = JSON.parse(
       fs.readFileSync(deployedAddressPath, "utf-8")
@@ -124,6 +123,7 @@ export const main = async () => {
       counterAddress
     );
     await sendTx(
+      counterAddress,
       signer,
       helper,
       remoteChainSlug,
@@ -131,7 +131,7 @@ export const main = async () => {
       msgGasLimit,
       numOfRequests,
       value,
-      waitTime,
+      waitTimeSecs,
       chainSlug,
       WAIT_FOR_TX
     );
@@ -145,6 +145,7 @@ export const main = async () => {
 };
 
 const sendTx = async (
+  counterAddress: string,
   signer,
   helper,
   remoteChainSlug,
@@ -152,7 +153,7 @@ const sendTx = async (
   msgGasLimit,
   numOfRequests,
   value,
-  waitTime,
+  waitTimeSecs,
   chainSlug,
   waitForConfirmation: boolean
 ) => {
@@ -163,14 +164,16 @@ const sendTx = async (
   );
 
   for (let index = 0; index < totalIterations; index++) {
+    console.log("========= starting iteration: ", index, " =========");
+    const start = Date.now();
     const tx = await helper
       .connect(signer)
       .remoteAddOperationBatch(
+        counterAddress,
         remoteChainSlug,
         amount,
         msgGasLimit,
         numOfRequests,
-        payload,
         {
           value: BigNumber.from(value).mul(numOfRequests),
           nonce: nonce + index,
@@ -182,7 +185,7 @@ const sendTx = async (
         tx.hash
       } was sent with ${amount} amount and ${msgGasLimit} gas limit to counter at ${remoteChainSlug}, value: ${
         value * numOfRequests
-      }`
+      } in ${Date.now() - start} ms`
     );
     console.log(
       `Track here: ${getAPIBaseURL(
@@ -194,8 +197,9 @@ const sendTx = async (
       await tx.wait();
       console.log(`remoteAddOperation-tx with hash: ${tx.hash} confirmed`);
     }
-    if (waitTime && waitTime > 0) {
-      await sleep(waitTime);
+    if (waitTimeSecs && waitTimeSecs > 0) {
+      console.log("waiting for ", waitTimeSecs, " secs...");
+      await sleep(waitTimeSecs * 1000);
     }
   }
 };
@@ -206,3 +210,42 @@ main()
     console.error(error);
     process.exit(1);
   });
+
+// Outbound load contract
+
+// pragma solidity 0.8.19;
+
+// interface ICounter {
+//     function remoteAddOperation(
+//         uint32 chainSlug_,
+//         uint256 amount_,
+//         uint256 minMsgGasLimit_,
+//         bytes32 executionParams_,
+//         bytes32 transmissionParams_
+//     ) external payable;
+// }
+
+// contract OutboundLoadTest {
+//     ICounter counter__;
+
+//     constructor() {}
+
+//     function remoteAddOperationBatch(
+//         address counter_,
+//         uint32 remoteChainSlug_,
+//         uint256 amount_,
+//         uint256 minMsgGasLimit_,
+//         uint256 totalMsgs
+//     ) external payable {
+//         counter__ = ICounter(counter_);
+//         for (uint256 i = 0; i < totalMsgs; i++) {
+//             counter__.remoteAddOperation{value: msg.value / totalMsgs}(
+//                 remoteChainSlug_,
+//                 amount_,
+//                 minMsgGasLimit_,
+//                 bytes32(0),
+//                 bytes32(0)
+//             );
+//         }
+//     }
+// }

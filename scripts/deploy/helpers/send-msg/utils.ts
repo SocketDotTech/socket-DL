@@ -1,5 +1,5 @@
 import { config as dotenvConfig } from "dotenv";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import Counter from "../../../../out/Counter.sol/Counter.json";
 import Socket from "../../../../out/Socket.sol/Socket.json";
 import { ChainSlug } from "../../../../src";
@@ -14,10 +14,20 @@ const counterAddAmount = 100;
 
 export const LoadTestHelperABI = [
   {
+    inputs: [],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
     inputs: [
       {
+        internalType: "address",
+        name: "counter_",
+        type: "address",
+      },
+      {
         internalType: "uint32",
-        name: "chainSlug_",
+        name: "remoteChainSlug_",
         type: "uint32",
       },
       {
@@ -27,18 +37,13 @@ export const LoadTestHelperABI = [
       },
       {
         internalType: "uint256",
-        name: "msgGasLimit_",
+        name: "minMsgGasLimit_",
         type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "totalMsgs_",
+        name: "totalMsgs",
         type: "uint256",
-      },
-      {
-        internalType: "bytes",
-        name: "payload",
-        type: "bytes",
       },
     ],
     name: "remoteAddOperationBatch",
@@ -82,7 +87,7 @@ export const getSocketFees = async (
   plugAddress: string
 ) => {
   const socket = await getSocketContract(chainSlug);
-  const value = await socket.getMinFees(
+  const value: BigNumber = await socket.getMinFees(
     msgGasLimit,
     payloadSize,
     executionParams,
@@ -120,11 +125,14 @@ export const sendCounterBridgeMsg = async (
     to
   );
 
+  const feesUSDValue = formatEther(value.mul(BigNumber.from(3000)));
   console.log(
-    `fees for path ${chainSlug}-${siblingSlug} is ${formatEther(value)} ETH`
+    `fees for path ${chainSlug}-${siblingSlug} is ${formatEther(
+      value
+    )} ETH, ${feesUSDValue} USD`
   );
 
-  const { gasLimit, gasPrice, type } = overrides(chainSlug);
+  const { gasLimit, gasPrice, type } = await overrides(chainSlug);
   // console.log({to, data, value, gasLimit});
   let response = await relayTx({
     to,
