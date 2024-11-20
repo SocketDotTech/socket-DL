@@ -342,7 +342,7 @@ const config: HardhatUserConfig = {
     },
     ...liveNetworks,
     zeroTestnet: {
-      url: "https://zerion-testnet-proofs.rpc.caldera.xyz/http",
+      url: process.env.ZERO_SEPOLIA_RPC,
       zksync: true,
       ethNetwork: "sepolia",
       verifyURL:

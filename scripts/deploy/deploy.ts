@@ -13,30 +13,30 @@ import { executionManagerVersion } from "./config/config";
 
 const main = async () => {
   try {
-    // const response = await prompts([
-    //   {
-    //     name: "chainType",
-    //     type: "select",
-    //     message: "Select chains network type",
-    //     choices: [
-    //       {
-    //         title: "Mainnet",
-    //         value: "mainnet",
-    //       },
-    //       {
-    //         title: "Testnet",
-    //         value: "testnet",
-    //       },
-    //     ],
-    //   },
-    // ]);
+    const response = await prompts([
+      {
+        name: "chainType",
+        type: "select",
+        message: "Select chains network type",
+        choices: [
+          {
+            title: "Mainnet",
+            value: "mainnet",
+          },
+          {
+            title: "Testnet",
+            value: "testnet",
+          },
+        ],
+      },
+    ]);
 
-    // const chainOptions =
-    //   response.chainType === "mainnet" ? MainnetIds : TestnetIds;
-    // let choices = chainOptions.map((chain) => ({
-    //   title: chain.toString(),
-    //   value: chain,
-    // }));
+    const chainOptions =
+      response.chainType === "mainnet" ? MainnetIds : TestnetIds;
+    let choices = chainOptions.map((chain) => ({
+      title: chain.toString(),
+      value: chain,
+    }));
 
     const chainsResponse = await prompts([
       {
@@ -56,6 +56,7 @@ const main = async () => {
     const chains = chainsResponse.chains;
     const siblings = chainsResponse.siblings;
     const allChains = [...chains, ...siblings];
+    console.log("allChains: ", allChains);
     let addresses: DeploymentAddresses = await deployForChains(
       allChains,
       executionManagerVersion
