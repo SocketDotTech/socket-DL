@@ -128,12 +128,13 @@ export async function deployContractWithArgs(
         });
       const contract = await deployer.deploy(artifact, args);
       const address = await contract.getAddress();
-      const Contract: ContractFactory = await ethers.getContractFactory(
+      const contractFactory: ContractFactory = await ethers.getContractFactory(
         contractName
       );
       // console.log(contract);
       // contract.address = address;
-      return Contract.attach(address);
+      const instance = contractFactory.attach(address);
+      return { ...instance, address };
     } else {
       const Contract: ContractFactory = await ethers.getContractFactory(
         contractName
@@ -182,8 +183,11 @@ export const verify = async (
 export const getInstance = async (
   contractName: string,
   address: Address
-): Promise<Contract> =>
-  (await ethers.getContractFactory(contractName)).attach(address);
+): Promise<Contract> => {
+  const artifact = await hre.artifacts.readArtifact(contractName);
+  const c = new Contract(address, artifact.abi);
+  return c;
+};
 
 export const getChainSlug = async (): Promise<number> => {
   if (network.config.chainId === undefined)

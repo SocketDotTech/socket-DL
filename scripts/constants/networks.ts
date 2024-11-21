@@ -61,15 +61,11 @@ export const getProviderFromChainName = (chainName: HardhatChainName) => {
 };
 
 export const getZkWallet = (chainSlug: ChainSlug) => {
-  console.log({ chainSlug });
   if (!zkStackChain.includes(chainSlug))
     throw new Error(`Chain ${chainSlug} is not a zkStack chain`);
   if (!process.env.SOCKET_SIGNER_KEY)
     throw new Error("SOCKET_SIGNER_KEY not set");
-
   const rpc = getJsonRpcUrl(chainSlug);
-  console.log({ rpc });
   const provider = new Provider(rpc);
-  console.log({ provider });
   return new zkWallet(process.env.SOCKET_SIGNER_KEY, provider);
 };
