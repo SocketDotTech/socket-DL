@@ -1,4 +1,9 @@
-import { DeploymentAddresses, MainnetIds, TestnetIds } from "../../src";
+import {
+  ChainSlug,
+  DeploymentAddresses,
+  MainnetIds,
+  TestnetIds,
+} from "../../src";
 import { configureRoles } from "./scripts/configureRoles";
 import { deployForChains } from "./scripts/deploySocketFor";
 import { configureSwitchboards } from "./scripts/configureSwitchboards";
@@ -51,6 +56,7 @@ const main = async () => {
     const chains = chainsResponse.chains;
     const siblings = chainsResponse.siblings;
     const allChains = [...chains, ...siblings];
+    console.log("allChains: ", allChains);
     let addresses: DeploymentAddresses = await deployForChains(
       allChains,
       executionManagerVersion

@@ -212,6 +212,7 @@ export enum ChainType {
   arbL3Chain = "arbL3Chain",
   arbChain = "arbChain",
   polygonCDKChain = "polygonCDKChain",
+  zkStackChain = "zkStackChain",
   default = "default",
 }
 

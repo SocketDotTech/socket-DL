@@ -55,4 +55,8 @@ export enum ChainSlug {
   POLYGON_AMOY = ChainId.POLYGON_AMOY,
   OPBNB = ChainId.OPBNB,
   GEIST = ChainId.GEIST,
+  ZERO_SEPOLIA = ChainId.ZERO_SEPOLIA,
+  ZERO = ChainId.ZERO,
+  ZKSYNC = ChainId.ZKSYNC,
+  ARENA_Z = ChainId.ARENA_Z,
 }

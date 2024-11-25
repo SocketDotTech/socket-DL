@@ -53,4 +53,8 @@ export enum HardhatChainName {
   POLYGON_AMOY = "polygon_amoy",
   OPBNB = "opbnb",
   GEIST = "geist",
+  ZERO_SEPOLIA = "zero_sepolia",
+  ZERO = "zero",
+  ZKSYNC = "zksync",
+  ARENA_Z = "arena_z",
 }

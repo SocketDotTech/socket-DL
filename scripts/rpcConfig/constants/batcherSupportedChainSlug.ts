@@ -45,4 +45,8 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.POLYGON_AMOY,
   ChainSlug.OPBNB,
   ChainSlug.GEIST,
+  // ChainSlug.ZERO_SEPOLIA,
+  ChainSlug.ZERO,
+  ChainSlug.ZKSYNC,
+  ChainSlug.ARENA_Z,
 ];

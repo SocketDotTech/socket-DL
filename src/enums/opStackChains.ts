@@ -20,4 +20,5 @@ export const opStackL2Chain = [
   ChainSlug.MANTA_PACIFIC,
   ChainSlug.POLTER_TESTNET,
   ChainSlug.OPBNB,
+  ChainSlug.ARENA_Z,
 ];

@@ -29,6 +29,7 @@ export const configureSwitchboards = async (
   executionManagerVersion: CORE_CONTRACTS
 ) => {
   try {
+    console.log("=========== configuring switchboards ===========");
     await Promise.all(
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
@@ -64,7 +65,7 @@ export const configureSwitchboards = async (
           siblings.includes(parseInt(chain) as ChainSlug)
         );
 
-        console.log(`Configuring for ${chain}`);
+        console.log(`Configuring switchboards for ${chain}`);
 
         for (let sibling of integrationList) {
           const nativeConfig = integrations[sibling][IntegrationTypes.native];

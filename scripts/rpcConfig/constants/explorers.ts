@@ -24,4 +24,8 @@ export const explorers = {
   [ChainSlug.POLYGON_AMOY]: "https://amoy.polygonscan.com/",
   [ChainSlug.OPBNB]: "https://opbnb.bscscan.com/",
   [ChainSlug.GEIST]: "https://geist-mainnet.explorer.alchemy.com/",
+  [ChainSlug.ZERO_SEPOLIA]: "https://explorer.zero.network/",
+  [ChainSlug.ZERO]: "https://zerion-explorer.vercel.app/",
+  [ChainSlug.ZKSYNC]: "https://explorer.zksync.io/",
+  [ChainSlug.ARENA_Z]: "https://explorer.arena-z.gg/",
 };

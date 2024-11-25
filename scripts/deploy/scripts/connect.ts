@@ -22,6 +22,7 @@ export const connectPlugs = async (
   siblings: ChainSlug[]
 ) => {
   try {
+    console.log("=========== connecting plugs ===========");
     await Promise.all(
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
@@ -49,7 +50,7 @@ export const connectPlugs = async (
           }
         );
 
-        console.log(`Configuring for ${chain}`);
+        console.log(`Connecting Counter for ${chain}`);
 
         const counter: Contract = (
           await getInstance("Counter", addr["Counter"])

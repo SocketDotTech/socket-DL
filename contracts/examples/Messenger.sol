@@ -33,7 +33,8 @@ contract Messenger is IPlug, Ownable(msg.sender) {
     }
 
     function removeGas(address payable receiver_) external onlyOwner {
-        receiver_.transfer(address(this).balance);
+        // receiver_.transfer(address(this).balance);
+        payable(receiver_).call{value: address(this).balance}("");
     }
 
     function sendLocalMessage(bytes32 message_) external {
