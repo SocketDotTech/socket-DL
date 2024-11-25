@@ -6,7 +6,7 @@ import "hardhat-preprocessor";
 import "hardhat-deploy";
 import "hardhat-abi-exporter";
 import "hardhat-change-network";
-import "@matterlabs/hardhat-zksync";
+// import "@matterlabs/hardhat-zksync";
 
 import { config as dotenvConfig } from "dotenv";
 import type { HardhatUserConfig } from "hardhat/config";
@@ -345,8 +345,19 @@ const config: HardhatUserConfig = {
       url: process.env.ZERO_SEPOLIA_RPC,
       zksync: true,
       ethNetwork: "sepolia",
-      verifyURL:
-        "https://api-explorer.zero.network/contract/contract_verification",
+      verifyURL: "https://zerion-testnet-proofs.explorer.caldera.xyz/api",
+    },
+    zero: {
+      url: process.env.ZERO_RPC,
+      zksync: true,
+      ethNetwork: "mainnet",
+      verifyURL: "https://zero-network.calderaexplorer.xyz/api",
+    },
+    zksync: {
+      url: process.env.ZKSYNC_RPC,
+      zksync: true,
+      ethNetwork: "mainnet",
+      verifyURL: "",
     },
   },
   paths: {

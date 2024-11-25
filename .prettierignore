@@ -25,3 +25,7 @@ yarn.lock
 .prettierrc
 scratchpad
 lcov.info
+
+artifacts-zk/
+cache_hardhat-zk/
+deployments-zk/

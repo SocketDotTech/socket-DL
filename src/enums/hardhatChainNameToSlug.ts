@@ -57,4 +57,7 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.OPBNB]: ChainSlug.OPBNB,
   [HardhatChainName.GEIST]: ChainSlug.GEIST,
   [HardhatChainName.ZERO_SEPOLIA]: ChainSlug.ZERO_SEPOLIA,
+  [HardhatChainName.ZERO]: ChainSlug.ZERO,
+  [HardhatChainName.ZKSYNC]: ChainSlug.ZKSYNC,
+  [HardhatChainName.ARENA_Z]: ChainSlug.ARENA_Z,
 };

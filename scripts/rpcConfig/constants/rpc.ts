@@ -58,4 +58,7 @@ export const rpcs = {
   [ChainSlug.OPBNB]: checkEnvValue("OPBNB_RPC"),
   [ChainSlug.GEIST]: checkEnvValue("GEIST_RPC"),
   [ChainSlug.ZERO_SEPOLIA]: checkEnvValue("ZERO_SEPOLIA_RPC"),
+  [ChainSlug.ZERO]: checkEnvValue("ZERO_RPC"),
+  [ChainSlug.ZKSYNC]: checkEnvValue("ZKSYNC_RPC"),
+  [ChainSlug.ARENA_Z]: checkEnvValue("ARENA_Z_RPC"),
 };
