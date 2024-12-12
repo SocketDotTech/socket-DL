@@ -36,4 +36,14 @@ export const finalityOverrides: {
     [FinalityBucket.medium]: 10,
     [FinalityBucket.high]: 100,
   },
+  [ChainSlug.ZERO]: {
+    [FinalityBucket.low]: 1,
+    [FinalityBucket.medium]: 2000,
+    [FinalityBucket.high]: 3000,
+  },
+  [ChainSlug.ZKSYNC]: {
+    [FinalityBucket.low]: 1,
+    [FinalityBucket.medium]: 2000,
+    [FinalityBucket.high]: 3000,
+  },
 };
