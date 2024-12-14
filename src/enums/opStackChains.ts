@@ -21,4 +21,5 @@ export const opStackL2Chain = [
   ChainSlug.POLTER_TESTNET,
   ChainSlug.OPBNB,
   ChainSlug.ARENA_Z,
+  ChainSlug.INK,
 ];

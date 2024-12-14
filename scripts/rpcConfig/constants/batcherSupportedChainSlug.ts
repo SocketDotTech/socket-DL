@@ -49,4 +49,5 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.ZERO,
   ChainSlug.ZKSYNC,
   ChainSlug.ARENA_Z,
+  ChainSlug.INK,
 ];

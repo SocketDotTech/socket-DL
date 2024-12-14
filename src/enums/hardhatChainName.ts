@@ -57,4 +57,5 @@ export enum HardhatChainName {
   ZERO = "zero",
   ZKSYNC = "zksync",
   ARENA_Z = "arena_z",
+  INK = "ink",
 }

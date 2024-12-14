@@ -28,4 +28,5 @@ export const explorers = {
   [ChainSlug.ZERO]: "https://zerion-explorer.vercel.app/",
   [ChainSlug.ZKSYNC]: "https://explorer.zksync.io/",
   [ChainSlug.ARENA_Z]: "https://explorer.arena-z.gg/",
+  [ChainSlug.INK]: "https://explorer.inkonchain.com/",
 };

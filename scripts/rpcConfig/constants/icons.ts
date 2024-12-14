@@ -26,4 +26,5 @@ export const icons = {
   [ChainSlug.ZERO]: "",
   [ChainSlug.ZKSYNC]: "",
   [ChainSlug.ARENA_Z]: "",
+  [ChainSlug.INK]: "",
 };

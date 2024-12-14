@@ -57,4 +57,5 @@ export enum ChainId {
   ZERO = 543210,
   ZKSYNC = 324,
   ARENA_Z = 7897,
+  INK = 57073,
 }
