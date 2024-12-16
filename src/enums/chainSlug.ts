@@ -60,4 +60,5 @@ export enum ChainSlug {
   ZKSYNC = ChainId.ZKSYNC,
   ARENA_Z = ChainId.ARENA_Z,
   INK = ChainId.INK,
+  SONIC = ChainId.SONIC,
 }

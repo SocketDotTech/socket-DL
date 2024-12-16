@@ -61,4 +61,5 @@ export const ChainSlugToId = {
   [ChainSlug.ZKSYNC]: ChainId.ZKSYNC,
   [ChainSlug.ARENA_Z]: ChainId.ARENA_Z,
   [ChainSlug.INK]: ChainId.INK,
+  [ChainSlug.SONIC]: ChainId.SONIC,
 };

@@ -61,4 +61,5 @@ export const chainSlugToHardhatChainName = {
   [ChainSlug.ZKSYNC]: HardhatChainName.ZKSYNC,
   [ChainSlug.ARENA_Z]: HardhatChainName.ARENA_Z,
   [ChainSlug.INK]: HardhatChainName.INK,
+  [ChainSlug.SONIC]: HardhatChainName.SONIC,
 };

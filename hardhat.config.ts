@@ -120,6 +120,7 @@ if (isProduction) {
     [HardhatChainName.MANTA_PACIFIC]: getChainConfig(ChainSlug.MANTA_PACIFIC),
     [HardhatChainName.OPBNB]: getChainConfig(ChainSlug.OPBNB),
     [HardhatChainName.GEIST]: getChainConfig(ChainSlug.GEIST),
+    [HardhatChainName.SONIC]: getChainConfig(ChainSlug.SONIC),
   };
 }
 
@@ -172,6 +173,7 @@ const config: HardhatUserConfig = {
       manta_pacific: process.env.MANTA_PACIFIC_API_KEY || "none",
       opbnb: process.env.OPBNB_API_KEY || "none",
       geist: process.env.GEIST_API_KEY || "none",
+      sonic: process.env.SONIC_API_KEY || "none",
     },
     customChains: [
       {
@@ -332,6 +334,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://geist-mainnet.explorer.alchemy.com/api",
           browserURL: "https://geist-mainnet.explorer.alchemy.com/",
+        },
+      },
+      {
+        network: "sonic",
+        chainId: ChainId.SONIC,
+        urls: {
+          apiURL: "https://api.soniclabs.com/api",
+          browserURL: "https://rpc.soniclabs.com/",
         },
       },
     ],

@@ -19,4 +19,5 @@ export const Currency = {
   [ChainSlug.POLYGON_AMOY]: NativeTokens["matic-network"],
   [ChainSlug.OPBNB]: NativeTokens["binancecoin"],
   [ChainSlug.GEIST]: NativeTokens["aavegotchi"],
+  [ChainSlug.SONIC]: NativeTokens["fantom"],
 };

@@ -29,4 +29,5 @@ export const explorers = {
   [ChainSlug.ZKSYNC]: "https://explorer.zksync.io/",
   [ChainSlug.ARENA_Z]: "https://explorer.arena-z.gg/",
   [ChainSlug.INK]: "https://explorer.inkonchain.com/",
+  [ChainSlug.SONIC]: "https://sonicscan.org/",
 };

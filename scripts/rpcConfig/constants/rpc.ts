@@ -62,4 +62,5 @@ export const rpcs = {
   [ChainSlug.ZKSYNC]: checkEnvValue("ZKSYNC_RPC"),
   [ChainSlug.ARENA_Z]: checkEnvValue("ARENA_Z_RPC"),
   [ChainSlug.INK]: checkEnvValue("INK_RPC"),
+  [ChainSlug.SONIC]: checkEnvValue("SONIC_RPC"),
 };
