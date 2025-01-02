@@ -16,7 +16,6 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.CDK_TESTNET,
   ChainSlug.ANCIENT8_TESTNET,
   ChainSlug.ANCIENT8_TESTNET2,
-  ChainSlug.HOOK_TESTNET,
   ChainSlug.REYA_CRONOS,
   ChainSlug.SYNDR_SEPOLIA_L3,
   ChainSlug.POLYNOMIAL_TESTNET,
@@ -25,5 +24,8 @@ export const TestnetIds: ChainSlug[] = [
   ChainSlug.BSC_TESTNET,
   ChainSlug.NEOX_TESTNET,
   ChainSlug.NEOX_T4_TESTNET,
+  ChainSlug.POLTER_TESTNET,
+  ChainSlug.POLYGON_AMOY,
+  ChainSlug.ZERO_SEPOLIA,
   ChainSlug.BASE_SEPOLIA,
 ];

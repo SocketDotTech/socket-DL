@@ -205,6 +205,7 @@ export const deploySocket = async (
       switchboardSimulator.address;
 
     // setup
+    console.log("starting setup : ", chainSlug);
     const simulatorContract = (
       await getInstance("SocketSimulator", socketSimulator.address)
     ).connect(deployUtils.signer);

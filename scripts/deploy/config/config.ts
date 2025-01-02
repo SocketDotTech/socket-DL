@@ -60,8 +60,6 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.ANCIENT8_TESTNET,
   // ChainSlug.ANCIENT8_TESTNET2,
   // ChainSlug.SYNDR_SEPOLIA_L3,
-  // ChainSlug.HOOK_TESTNET,
-  // ChainSlug.HOOK,
   // ChainSlug.PARALLEL,
   // ChainSlug.MANTLE,
   // ChainSlug.REYA_CRONOS,

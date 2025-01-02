@@ -11,4 +11,6 @@ export enum NativeTokens {
   "dai" = "dai",
   "avalanche-2" = "avalanche-2",
   "okb" = "okb",
+  "aavegotchi" = "aavegotchi",
+  "fantom" = "fantom",
 }

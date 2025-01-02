@@ -24,10 +24,12 @@ import { getSocketSigner } from "../utils/socket-signer";
 export const configureSwitchboards = async (
   addresses: DeploymentAddresses,
   chains: ChainSlug[],
+  siblings: ChainSlug[],
   safeChains: ChainSlug[],
   executionManagerVersion: CORE_CONTRACTS
 ) => {
   try {
+    console.log("=========== configuring switchboards ===========");
     await Promise.all(
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
@@ -38,29 +40,30 @@ export const configureSwitchboards = async (
           safeChains.includes(chain)
         );
 
-        const list = isTestnet(chain) ? TestnetIds : MainnetIds;
-        const siblingSlugs: ChainSlug[] = list.filter(
-          (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
-        );
+        let addr: ChainSocketAddresses = addresses[chain]!;
 
-        // todo: move to fees updater
-        // await configureExecutionManager(
-        //   executionManagerVersion,
-        //   addr[executionManagerVersion]!,
-        //   addr[CORE_CONTRACTS.SocketBatcher],
-        //   chain,
-        //   siblingSlugs,
-        //   socketSigner
+        // const list = isTestnet(chain) ? TestnetIds : MainnetIds;
+        // const siblingSlugs: ChainSlug[] = list.filter(
+        //   (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
         // );
+
+        await configureExecutionManager(
+          executionManagerVersion,
+          addr[executionManagerVersion]!,
+          addr[CORE_CONTRACTS.SocketBatcher],
+          chain,
+          siblings,
+          socketSigner
+        );
 
         await setManagers(addr, socketSigner, executionManagerVersion);
 
         const integrations = addr["integrations"] ?? {};
         const integrationList = Object.keys(integrations).filter((chain) =>
-          chains.includes(parseInt(chain) as ChainSlug)
+          siblings.includes(parseInt(chain) as ChainSlug)
         );
 
-        console.log(`Configuring for ${chain}`);
+        console.log(`Configuring switchboards for ${chain}`);
 
         for (let sibling of integrationList) {
           const nativeConfig = integrations[sibling][IntegrationTypes.native];
@@ -88,7 +91,7 @@ export const configureSwitchboards = async (
 
         addr = await registerSwitchboards(
           chain,
-          siblingSlugs,
+          siblings,
           CORE_CONTRACTS.FastSwitchboard,
           IntegrationTypes.fast,
           addr,
@@ -98,7 +101,7 @@ export const configureSwitchboards = async (
 
         addr = await registerSwitchboards(
           chain,
-          siblingSlugs,
+          siblings,
           CORE_CONTRACTS.OptimisticSwitchboard,
           IntegrationTypes.optimistic,
           addr,

@@ -12,28 +12,38 @@ export const finalityOverrides: {
   [chainSlug in ChainSlug]?: ChainFinalityInfo;
 } = {
   [ChainSlug.POLYGON_MAINNET]: {
-    [FinalityBucket.fast]: 64,
+    [FinalityBucket.low]: 64,
     [FinalityBucket.medium]: 256,
-    [FinalityBucket.slow]: 1000,
+    [FinalityBucket.high]: 1000,
   },
   [ChainSlug.NEOX_TESTNET]: {
-    [FinalityBucket.fast]: 1,
+    [FinalityBucket.low]: 1,
     [FinalityBucket.medium]: 10,
-    [FinalityBucket.slow]: 100,
+    [FinalityBucket.high]: 100,
   },
   [ChainSlug.NEOX_T4_TESTNET]: {
-    [FinalityBucket.fast]: 1,
+    [FinalityBucket.low]: 1,
     [FinalityBucket.medium]: 10,
-    [FinalityBucket.slow]: 100,
+    [FinalityBucket.high]: 100,
   },
   [ChainSlug.NEOX]: {
-    [FinalityBucket.fast]: 1,
+    [FinalityBucket.low]: 1,
     [FinalityBucket.medium]: 10,
-    [FinalityBucket.slow]: 100,
+    [FinalityBucket.high]: 100,
   },
   [ChainSlug.LINEA]: {
-    [FinalityBucket.fast]: 1,
+    [FinalityBucket.low]: 1,
     [FinalityBucket.medium]: 10,
-    [FinalityBucket.slow]: 100,
+    [FinalityBucket.high]: 100,
+  },
+  [ChainSlug.ZERO]: {
+    [FinalityBucket.low]: 1,
+    [FinalityBucket.medium]: 2000,
+    [FinalityBucket.high]: 3000,
+  },
+  [ChainSlug.ZKSYNC]: {
+    [FinalityBucket.low]: 1,
+    [FinalityBucket.medium]: 2000,
+    [FinalityBucket.high]: 3000,
   },
 };

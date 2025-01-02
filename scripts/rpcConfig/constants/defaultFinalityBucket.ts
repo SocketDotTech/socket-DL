@@ -5,7 +5,7 @@ import { FinalityBucket } from "../../../src/socket-types";
 export const getDefaultFinalityBucket = (
   chainSlug: ChainSlug
 ): FinalityBucket => {
-  return defaultFinalityBucket[chainSlug] ?? FinalityBucket.fast;
+  return defaultFinalityBucket[chainSlug] ?? FinalityBucket.low;
 };
 
 export const defaultFinalityBucket = {

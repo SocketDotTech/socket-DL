@@ -18,6 +18,7 @@ import {
   S3Config,
   TestnetIds,
   TxData,
+  zkStackChain,
 } from "../../src";
 import { getSiblings } from "../common";
 import { chainOverrides } from "../constants/overrides";
@@ -62,8 +63,6 @@ const getOldEMVersionChainSlugs = (): ChainSlug[] => {
       if (!chainAddress.ExecutionManagerDF)
         chains.push(parseInt(chain) as ChainSlug);
     });
-
-    console.log(chains);
   } catch (error) {
     return [] as ChainSlug[];
   }
@@ -78,6 +77,8 @@ const getChainType = (chainSlug: ChainSlug) => {
   } else if (arbL3Chains.includes(chainSlug)) {
     return ChainType.arbL3Chain;
   } else if (polygonCDKChains.includes(chainSlug)) {
+    return ChainType.zkStackChain;
+  } else if (zkStackChain.includes(chainSlug)) {
     return ChainType.polygonCDKChain;
   } else return ChainType.default;
 };
@@ -92,7 +93,7 @@ const getChainData = async (
     chainName: chainSlugToHardhatChainName[chainSlug].toString(),
     blockNumber: getBlockNumber(deploymentMode, chainSlug),
     siblings: getSiblings(deploymentMode, chainSlug),
-    chainTxData: await getChainTxData(chainSlug, txData),
+    chainTxData: getChainTxData(chainSlug, txData),
     nativeToken: getCurrency(chainSlug),
     chainType: getChainType(chainSlug),
     reSyncInterval: getReSyncInterval(chainSlug),

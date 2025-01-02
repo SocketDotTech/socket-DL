@@ -1,10 +1,11 @@
 import "@nomiclabs/hardhat-ethers";
-import "@nomiclabs/hardhat-etherscan";
+// import "@nomiclabs/hardhat-etherscan";
 import "@typechain/hardhat";
 import "hardhat-preprocessor";
 import "hardhat-deploy";
 import "hardhat-abi-exporter";
 import "hardhat-change-network";
+// import "@matterlabs/hardhat-zksync";
 
 import { config as dotenvConfig } from "dotenv";
 import type { HardhatUserConfig } from "hardhat/config";
@@ -90,8 +91,6 @@ if (isProduction) {
     [HardhatChainName.ANCIENT8_TESTNET2]: getChainConfig(
       ChainSlug.ANCIENT8_TESTNET2
     ),
-    [HardhatChainName.HOOK_TESTNET]: getChainConfig(ChainSlug.HOOK_TESTNET),
-    [HardhatChainName.HOOK]: getChainConfig(ChainSlug.HOOK),
     [HardhatChainName.PARALLEL]: getChainConfig(ChainSlug.PARALLEL),
     [HardhatChainName.MANTLE]: getChainConfig(ChainSlug.MANTLE),
     [HardhatChainName.REYA_CRONOS]: getChainConfig(ChainSlug.REYA_CRONOS),
@@ -117,6 +116,10 @@ if (isProduction) {
     [HardhatChainName.LINEA]: getChainConfig(ChainSlug.LINEA),
     [HardhatChainName.ZKEVM]: getChainConfig(ChainSlug.ZKEVM),
     [HardhatChainName.AVALANCHE]: getChainConfig(ChainSlug.AVALANCHE),
+    [HardhatChainName.MANTA_PACIFIC]: getChainConfig(ChainSlug.MANTA_PACIFIC),
+    [HardhatChainName.OPBNB]: getChainConfig(ChainSlug.OPBNB),
+    [HardhatChainName.GEIST]: getChainConfig(ChainSlug.GEIST),
+    [HardhatChainName.SONIC]: getChainConfig(ChainSlug.SONIC),
   };
 }
 
@@ -149,8 +152,6 @@ const config: HardhatUserConfig = {
       mode: process.env.MODE_API_KEY || "none",
       ancient8Testnet: process.env.ANCIENT8_API_KEY || "",
       ancient8Testnet2: process.env.ANCIENT8_API_KEY || "",
-      hookTestnet: process.env.HOOK_API_KEY || "",
-      hook: process.env.HOOK_API_KEY || "",
       parallelTestnet: process.env.PARALLEL_API_KEY || "",
       mantle: process.env.MANTLE_API_KEY || "",
       reya: process.env.REYA_API_KEY || "",
@@ -168,6 +169,10 @@ const config: HardhatUserConfig = {
       linea: process.env.LINEASCAN_API_KEY || "",
       zkevm: process.env.ZKEVM_API_KEY || "",
       avalanche: process.env.SNOWTRACE_API_KEY || "",
+      manta_pacific: process.env.MANTA_PACIFIC_API_KEY || "none",
+      opbnb: process.env.OPBNB_API_KEY || "none",
+      geist: process.env.GEIST_API_KEY || "none",
+      sonic: process.env.SONIC_API_KEY || "none",
     },
     customChains: [
       {
@@ -267,7 +272,7 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: "mode",
+        network: "neox_testnet",
         chainId: ChainId.NEOX_TESTNET,
         urls: {
           apiURL: "https://xt3scan.ngd.network/api",
@@ -302,8 +307,40 @@ const config: HardhatUserConfig = {
         network: "avalanche",
         chainId: ChainId.AVALANCHE,
         urls: {
-          apiURL: "https://api.snowtrace.io//api",
+          apiURL: "https://api.snowtrace.io/api",
           browserURL: "https://snowtrace.io/",
+        },
+      },
+      {
+        network: "manta_pacific",
+        chainId: ChainId.MANTA_PACIFIC,
+        urls: {
+          apiURL: "https://pacific-explorer.manta.network/api",
+          browserURL: "https://pacific-explorer.manta.network/",
+        },
+      },
+      {
+        network: "opbnb",
+        chainId: ChainId.OPBNB,
+        urls: {
+          apiURL: "https://api-opbnb.bscscan.com/api",
+          browserURL: "https://opbnb.bscscan.com/",
+        },
+      },
+      {
+        network: "geist",
+        chainId: ChainId.GEIST,
+        urls: {
+          apiURL: "https://geist-mainnet.explorer.alchemy.com/api",
+          browserURL: "https://geist-mainnet.explorer.alchemy.com/",
+        },
+      },
+      {
+        network: "sonic",
+        chainId: ChainId.SONIC,
+        urls: {
+          apiURL: "https://api.soniclabs.com/api",
+          browserURL: "https://rpc.soniclabs.com/",
         },
       },
     ],
@@ -313,6 +350,24 @@ const config: HardhatUserConfig = {
       chainId: hardhatChainNameToSlug[HardhatChainName.HARDHAT],
     },
     ...liveNetworks,
+    zeroTestnet: {
+      url: process.env.ZERO_SEPOLIA_RPC,
+      zksync: true,
+      ethNetwork: "sepolia",
+      verifyURL: "https://zerion-testnet-proofs.explorer.caldera.xyz/api",
+    },
+    zero: {
+      url: process.env.ZERO_RPC,
+      zksync: true,
+      ethNetwork: "mainnet",
+      verifyURL: "https://zero-network.calderaexplorer.xyz/api",
+    },
+    zksync: {
+      url: process.env.ZKSYNC_RPC,
+      zksync: true,
+      ethNetwork: "mainnet",
+      verifyURL: "",
+    },
   },
   paths: {
     sources: "./contracts",
@@ -334,6 +389,10 @@ const config: HardhatUserConfig = {
         return line;
       },
     }),
+  },
+  zksolc: {
+    version: "latest", // Uses latest available in https://github.com/matter-labs/zksolc-bin
+    settings: {},
   },
   solidity: {
     version: "0.8.19",

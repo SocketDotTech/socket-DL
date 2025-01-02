@@ -16,9 +16,11 @@ import { getSocketSigner } from "../utils/socket-signer";
 
 export const connectPlugs = async (
   addresses: DeploymentAddresses,
-  chains: ChainSlug[]
+  chains: ChainSlug[],
+  siblings: ChainSlug[]
 ) => {
   try {
+    console.log("=========== connecting plugs ===========");
     await Promise.all(
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
@@ -28,21 +30,21 @@ export const connectPlugs = async (
 
         if (!addr["integrations"]) return;
 
-        const list = isTestnet(chain) ? TestnetIds : MainnetIds;
-        const siblingSlugs: ChainSlug[] = list.filter(
-          (chainSlug) =>
-            chainSlug !== chain &&
-            addresses?.[chainSlug]?.["Counter"] &&
-            chains.includes(chainSlug)
-        );
+        // const list = isTestnet(chain) ? TestnetIds : MainnetIds;
+        // const siblingSlugs: ChainSlug[] = list.filter(
+        //   (chainSlug) =>
+        //     chainSlug !== chain &&
+        //     addresses?.[chainSlug]?.["Counter"] &&
+        //     chains.includes(chainSlug)
+        // );
 
-        const siblingIntegrationType: IntegrationTypes[] = siblingSlugs.map(
+        const siblingIntegrationtype: IntegrationTypes[] = siblings.map(
           (chainSlug) => {
             return getDefaultIntegrationType(chain, chainSlug);
           }
         );
 
-        console.log(`Configuring for ${chain}`);
+        console.log(`Connecting Counter for ${chain}`);
 
         const counter: Contract = (
           await getInstance("Counter", addr["Counter"])
@@ -55,8 +57,8 @@ export const connectPlugs = async (
         const owner = await counter.owner();
         if (owner.toLowerCase() !== socketSigner.address.toLowerCase()) return;
 
-        for (let index = 0; index < siblingSlugs.length; index++) {
-          const sibling = siblingSlugs[index];
+        for (let index = 0; index < siblings.length; index++) {
+          const sibling = siblings[index];
           const siblingCounter = addresses?.[sibling]?.["Counter"];
           let switchboard;
           try {

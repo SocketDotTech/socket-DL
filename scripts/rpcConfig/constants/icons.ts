@@ -3,7 +3,6 @@ import { ChainSlug } from "../../../src";
 export const icons = {
   [ChainSlug.AEVO]: "https://media.socket.tech/aevo.png",
   [ChainSlug.LYRA]: "https://media.socket.tech/lyra.png",
-  [ChainSlug.HOOK]: "https://media.socket.tech/hook.jpg",
   [ChainSlug.MANTLE]: "https://media.socket.tech/mantle.png",
   [ChainSlug.REYA]: "https://media.socket.tech/reya.png",
   [ChainSlug.BSC_TESTNET]:
@@ -18,5 +17,16 @@ export const icons = {
   [ChainSlug.ZKEVM]: "",
   [ChainSlug.AVALANCHE]: "",
   [ChainSlug.XLAYER]: "",
+  [ChainSlug.MANTA_PACIFIC]: "",
+  [ChainSlug.POLTER_TESTNET]: "",
+  [ChainSlug.POLYGON_AMOY]: "",
+  [ChainSlug.OPBNB]: "",
+  [ChainSlug.GEIST]: "",
+  [ChainSlug.ZERO_SEPOLIA]: "",
+  [ChainSlug.ZERO]: "",
+  [ChainSlug.ZKSYNC]: "",
+  [ChainSlug.ARENA_Z]: "",
+  [ChainSlug.INK]: "",
+  [ChainSlug.SONIC]: "",
   [ChainSlug.BASE_SEPOLIA]: "",
 };

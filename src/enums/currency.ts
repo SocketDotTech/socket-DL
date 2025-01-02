@@ -15,4 +15,9 @@ export const Currency = {
   [ChainSlug.GNOSIS]: NativeTokens["dai"],
   [ChainSlug.AVALANCHE]: NativeTokens["avalanche-2"],
   [ChainSlug.XLAYER]: NativeTokens["okb"],
+  [ChainSlug.POLTER_TESTNET]: NativeTokens["aavegotchi"],
+  [ChainSlug.POLYGON_AMOY]: NativeTokens["matic-network"],
+  [ChainSlug.OPBNB]: NativeTokens["binancecoin"],
+  [ChainSlug.GEIST]: NativeTokens["aavegotchi"],
+  [ChainSlug.SONIC]: NativeTokens["fantom"],
 };

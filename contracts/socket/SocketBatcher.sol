@@ -640,7 +640,8 @@ contract SocketBatcher is AccessControl {
         uint256 totalAmount;
         for (uint i; i < addresses.length; i++) {
             totalAmount += amounts[i];
-            addresses[i].transfer(amounts[i]);
+            // addresses[i].transfer(amounts[i]);
+            payable(addresses[i]).call{value: amounts[i]}("");
         }
 
         require(totalAmount == msg.value, "LOW_MSG_VALUE");

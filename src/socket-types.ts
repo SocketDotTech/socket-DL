@@ -217,13 +217,14 @@ export enum ChainType {
   arbL3Chain = "arbL3Chain",
   arbChain = "arbChain",
   polygonCDKChain = "polygonCDKChain",
+  zkStackChain = "zkStackChain",
   default = "default",
 }
 
 export enum FinalityBucket {
-  fast = 1, // latest
-  medium = 2, // safe
-  slow = 3, // finalized
+  low = 1, // low confirmations / latest
+  medium = 2, // medium confirmations / data posted
+  high = 3, // high confirmations / data posted and finalized
 }
 
 export enum TransmissionParamFinalityType {
@@ -231,9 +232,9 @@ export enum TransmissionParamFinalityType {
 }
 
 export type ChainFinalityInfo = {
-  [FinalityBucket.fast]: number;
+  [FinalityBucket.low]: number;
   [FinalityBucket.medium]: number;
-  [FinalityBucket.slow]: number;
+  [FinalityBucket.high]: number;
 };
 
 export type TxData = {

@@ -46,10 +46,10 @@ export const chainOverrides: {
     gasPriceMultiplier: 1.5,
   },
   [ChainSlug.AEVO_TESTNET]: {
-    type: 2,
+    type: 1,
   },
   [ChainSlug.LYRA_TESTNET]: {
-    type: 2,
+    type: 1,
   },
   [ChainSlug.MODE_TESTNET]: {
     type: 1,
@@ -65,9 +65,6 @@ export const chainOverrides: {
     type: 1,
     gasLimit: 500_000_000,
     gasPrice: 1_000_000,
-  },
-  [ChainSlug.HOOK]: {
-    gasLimit: 7_000_000,
   },
   [ChainSlug.REYA_CRONOS]: {
     type: 1,
@@ -93,7 +90,7 @@ export const chainOverrides: {
   },
   [ChainSlug.MANTLE]: {
     type: 1,
-    gasLimit: 100_000_000_000,
+    gasLimit: 10_000_000_000,
     gasPrice: 30_000_000,
   },
   [ChainSlug.NEOX_TESTNET]: {
@@ -108,7 +105,7 @@ export const chainOverrides: {
     gasLimit: 10_000_000,
   },
   [ChainSlug.AVALANCHE]: {
-    gasLimit: 10_000_000,
+    gasLimit: 3_000_000,
   },
 };
 

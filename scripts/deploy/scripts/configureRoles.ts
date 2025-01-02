@@ -18,12 +18,13 @@ import {
 import { checkAndUpdateRoles } from "./roles";
 import { sleep } from "@socket.tech/dl-common";
 
-const sleepTime = 3000;
+const sleepTime = 10000;
 const newRoleStatus = true;
 
 export const configureRoles = async (
   addresses: DeploymentAddresses,
   chains: ChainSlug[],
+  siblings: ChainSlug[],
   safeChains: ChainSlug[],
   sendTransaction: boolean,
   executionManagerVersion: CORE_CONTRACTS
@@ -61,7 +62,7 @@ export const configureRoles = async (
       ],
       contractName: executionManagerVersion,
       filterChains: chains,
-      filterSiblingChains: chains,
+      filterSiblingChains: siblings,
       safeChains,
       sendTransaction,
       newRoleStatus,
@@ -92,7 +93,7 @@ export const configureRoles = async (
       ],
       contractName: CORE_CONTRACTS.TransmitManager,
       filterChains: chains,
-      filterSiblingChains: chains,
+      filterSiblingChains: siblings,
       safeChains,
       sendTransaction,
       newRoleStatus,
@@ -114,7 +115,7 @@ export const configureRoles = async (
       ],
       contractName: CORE_CONTRACTS.Socket,
       filterChains: chains,
-      filterSiblingChains: chains,
+      filterSiblingChains: siblings,
       safeChains,
       sendTransaction,
       newRoleStatus,
@@ -156,7 +157,7 @@ export const configureRoles = async (
 
       contractName: CORE_CONTRACTS.FastSwitchboard,
       filterChains: chains,
-      filterSiblingChains: chains,
+      filterSiblingChains: siblings,
       safeChains,
       sendTransaction,
       newRoleStatus,
@@ -196,7 +197,7 @@ export const configureRoles = async (
       ],
       contractName: CORE_CONTRACTS.OptimisticSwitchboard,
       filterChains: chains,
-      filterSiblingChains: chains,
+      filterSiblingChains: siblings,
       safeChains,
       sendTransaction,
       newRoleStatus,
@@ -233,7 +234,7 @@ export const configureRoles = async (
       ],
       contractName: CORE_CONTRACTS.NativeSwitchboard,
       filterChains: chains,
-      filterSiblingChains: chains,
+      filterSiblingChains: siblings,
       safeChains,
       sendTransaction,
       newRoleStatus,

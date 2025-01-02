@@ -38,16 +38,25 @@ const main = async () => {
       value: chain,
     }));
 
-    const configResponse = await prompts([
+    const chainsResponse = await prompts([
       {
         name: "chains",
+        type: "multiselect",
+        message: "Select chains to connect",
+        choices,
+      },
+      {
+        name: "siblings",
         type: "multiselect",
         message: "Select sibling chains to connect",
         choices,
       },
     ]);
 
-    const chains = [...configResponse.chains];
+    const chains = chainsResponse.chains;
+    const siblings = chainsResponse.siblings;
+    const allChains = [...chains, ...siblings];
+    console.log("allChains: ", allChains);
 
     choices = chains.map((chain) => ({
       title: chain.toString(),
@@ -64,7 +73,7 @@ const main = async () => {
     ]);
 
     let addresses: DeploymentAddresses = await deployForChains(
-      chains,
+      allChains,
       safeResponse.chains,
       executionManagerVersion
     );
@@ -77,6 +86,7 @@ const main = async () => {
     await configureRoles(
       addresses,
       chains,
+      siblings,
       safeResponse.chains,
       true,
       executionManagerVersion
@@ -84,10 +94,11 @@ const main = async () => {
     addresses = await configureSwitchboards(
       addresses,
       chains,
+      siblings,
       safeResponse.chains,
       executionManagerVersion
     );
-    await connectPlugs(addresses, chains);
+    await connectPlugs(addresses, chains, siblings);
   } catch (error) {
     console.log("Error:", error);
   }

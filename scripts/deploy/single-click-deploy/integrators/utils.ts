@@ -107,7 +107,7 @@ export const updateSDK = async (
   );
   await updateFile(
     "chainSlugToHardhatChainName.ts",
-    `,\n  [ChainSlug.${chainName.toUpperCase()}]: [HardhatChainName.${chainName.toUpperCase()}],\n};\n`,
+    `,\n  [ChainSlug.${chainName.toUpperCase()}]: HardhatChainName.${chainName.toUpperCase()},\n};\n`,
     ",\n};"
   );
 
@@ -149,6 +149,12 @@ export const updateSDK = async (
   } else if (chainTypeInString === ChainType.polygonCDKChain) {
     await updateFile(
       "polygonCDKChains.ts",
+      `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
+      ",\n];"
+    );
+  } else if (chainTypeInString === ChainType.zkStackChain) {
+    await updateFile(
+      "zkStackChain.ts",
       `,\n  ChainSlug.${chainName.toUpperCase()},\n];`,
       ",\n];"
     );
