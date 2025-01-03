@@ -1,7 +1,7 @@
 import { constants } from "ethers";
 import { createObj, getInstance } from "../utils";
 import { ChainSlug, ChainSocketAddresses } from "../../../src";
-import { initialPacketCount, overrides } from "../config/config";
+import { initialPacketCount, overrides, socketOwner } from "../config/config";
 import { SocketSigner } from "@socket.tech/dl-common";
 
 export default async function registerSwitchboardForSibling(
@@ -46,7 +46,7 @@ export default async function registerSwitchboardForSibling(
             siblingSwitchBoardAddress,
           ]
         ),
-        ...overrides(await signer.getChainId()),
+        ...(await overrides(await signer.getChainId())),
       };
 
       const isSubmitted = await signer.isTxHashSubmitted(transaction);

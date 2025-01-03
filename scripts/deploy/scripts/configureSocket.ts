@@ -77,7 +77,7 @@ export const setManagers = async (
       data: socket.encodeFunctionData("setExecutionManager(address)", [
         addr[executionManagerVersion],
       ]),
-      ...overrides(await socketSigner.getChainId()),
+      ...(await overrides(await socketSigner.getChainId())),
     };
 
     const isSubmitted = await socketSigner.isTxHashSubmitted(transaction);
@@ -97,7 +97,7 @@ export const setManagers = async (
       data: socket.encodeFunctionData("setTransmitManager(address)", [
         addr.TransmitManager,
       ]),
-      ...overrides(await socketSigner.getChainId()),
+      ...(await overrides(await socketSigner.getChainId())),
     };
 
     const isSubmitted = await socketSigner.isTxHashSubmitted(transaction);
@@ -263,7 +263,7 @@ export const setupPolygonNativeSwitchboard = async (addresses, safeChains) => {
             data: sbContract.encodeFunctionData("setFxChildTunnel(address)", [
               dstSwitchboardAddress,
             ]),
-            ...overrides(await socketSigner.getChainId()),
+            ...(await overrides(await socketSigner.getChainId())),
           };
         } else if (srcSwitchboardType === NativeSwitchboard.POLYGON_L2) {
           const sbContract = (
@@ -281,7 +281,7 @@ export const setupPolygonNativeSwitchboard = async (addresses, safeChains) => {
             data: sbContract.encodeFunctionData("setFxRootTunnel(address)", [
               dstSwitchboardAddress,
             ]),
-            ...overrides(await socketSigner.getChainId()),
+            ...(await overrides(await socketSigner.getChainId())),
           };
         }
 

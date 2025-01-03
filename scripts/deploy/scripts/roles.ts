@@ -150,7 +150,7 @@ const executeRoleTransactions = async (
     const transaction = {
       to: contractAddress,
       data,
-      ...overrides(chainSlug),
+      ...(await overrides(chainSlug)),
     };
 
     const isSubmitted = await socketSigner.isTxHashSubmitted(transaction);
@@ -182,7 +182,7 @@ const executeOtherTransactions = async (
     const transaction = {
       to,
       data,
-      ...overrides(chainSlug),
+      ...(await overrides(chainSlug)),
     };
 
     const isSubmitted = await socketSigner.isTxHashSubmitted(transaction);

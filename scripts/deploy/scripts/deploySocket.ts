@@ -234,7 +234,11 @@ export const deploySocket = async (
     console.log(deployUtils.addresses);
     console.log("Contracts deployed!");
   } catch (error) {
-    console.log("Error in deploying setup contracts", error);
+    console.log(
+      "Error in deploying setup contracts for chain",
+      chainSlug,
+      error
+    );
   }
 
   await storeAddresses(

@@ -118,7 +118,7 @@ export async function deployContractWithArgs(
         signer
       );
       const contract: Contract = await contractFactory.deploy(...args, {
-        ...overrides(chainSlug),
+        ...(await overrides(chainSlug)),
       });
       await contract.deployed();
       return contract;
