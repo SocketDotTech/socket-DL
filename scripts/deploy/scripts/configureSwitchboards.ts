@@ -37,15 +37,9 @@ export const configureSwitchboards = async (
         const socketSigner: SocketSigner = await getSocketSigner(
           chain,
           addr,
-          safeChains.includes(chain)
+          safeChains.includes(chain),
+          !safeChains.includes(chain)
         );
-
-        let addr: ChainSocketAddresses = addresses[chain]!;
-
-        // const list = isTestnet(chain) ? TestnetIds : MainnetIds;
-        // const siblingSlugs: ChainSlug[] = list.filter(
-        //   (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
-        // );
 
         await configureExecutionManager(
           executionManagerVersion,

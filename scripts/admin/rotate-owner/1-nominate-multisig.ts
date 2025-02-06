@@ -184,17 +184,17 @@ const checkAndNominate = async (
 
   console.log(` - ${label}: Checking: ${owner}, ${nominee}`);
 
-  if (newOwner === owner) {
+  if (newOwner.toLowerCase() === owner.toLowerCase()) {
     console.log(` ✔ ${label}: Already claimed`);
     return;
   }
 
-  if (newOwner === nominee) {
+  if (newOwner.toLowerCase() === nominee.toLowerCase()) {
     console.log(` ✔ ${label}: Already nominated`);
     return;
   }
 
-  if (signerAddress !== owner) {
+  if (signerAddress.toLowerCase() !== owner.toLowerCase()) {
     console.log(`❗ ${label}: Signer is not current owner`);
     return;
   }

@@ -178,10 +178,13 @@ const checkAndClaim = async (
     });
     const receipt = await tx.wait();
     console.log(`🚀 ${label}: Done: ${receipt.transactionHash}`);
+    await wait(1000);
   } else {
     console.log(`✨ ${label}: Needs claiming`);
   }
 };
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 main()
   .then(() => process.exit(0))

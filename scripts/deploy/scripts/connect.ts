@@ -17,7 +17,8 @@ import { getSocketSigner } from "../utils/socket-signer";
 export const connectPlugs = async (
   addresses: DeploymentAddresses,
   chains: ChainSlug[],
-  siblings: ChainSlug[]
+  siblings: ChainSlug[],
+  safeChains: ChainSlug[]
 ) => {
   try {
     console.log("=========== connecting plugs ===========");
@@ -26,7 +27,12 @@ export const connectPlugs = async (
         if (!addresses[chain]) return;
 
         const addr: ChainSocketAddresses = addresses[chain]!;
-        const socketSigner = await getSocketSigner(chain, addr, false);
+        const socketSigner = await getSocketSigner(
+          chain,
+          addr,
+          safeChains.includes(chain),
+          !safeChains.includes(chain)
+        );
 
         if (!addr["integrations"]) return;
 

@@ -72,7 +72,7 @@ export const deploySocket = async (
     const multisigWrapper: Contract = await getOrDeploy(
       "MultiSigWrapper",
       "contracts/utils/multisig/MultiSigWrapper.sol",
-      [socketOwner, deployUtils.addresses["SafeL2"]],
+      [socketOwner, deployUtils.addresses["SocketSafeProxy"]],
       deployUtils
     );
     deployUtils.addresses["MultiSigWrapper"] = multisigWrapper.address;
@@ -205,7 +205,6 @@ export const deploySocket = async (
       switchboardSimulator.address;
 
     // setup
-    console.log("starting setup : ", chainSlug);
     const simulatorContract = (
       await getInstance("SocketSimulator", socketSimulator.address)
     ).connect(deployUtils.signer);

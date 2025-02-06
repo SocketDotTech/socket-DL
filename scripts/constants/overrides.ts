@@ -56,9 +56,9 @@ export const chainOverrides: {
     gasPrice: 100_000_000,
   },
   [ChainSlug.MODE]: {
-    type: 1,
-    gasLimit: 10_000_000,
-    gasPrice: 1_000_000,
+    // type: 1,
+    // gasLimit: 10_000_000,
+    // gasPrice: 1_000_000,
   },
 
   [ChainSlug.SYNDR_SEPOLIA_L3]: {
@@ -89,9 +89,9 @@ export const chainOverrides: {
     gasLimit: 4_000_000,
   },
   [ChainSlug.MANTLE]: {
-    type: 1,
-    gasLimit: 10_000_000_000,
-    gasPrice: 30_000_000,
+    // type: 1,
+    // gasLimit: 10_000_000_000,
+    // gasPrice: 30_000_000,
   },
   [ChainSlug.NEOX_TESTNET]: {
     type: 1,
@@ -105,7 +105,7 @@ export const chainOverrides: {
     gasLimit: 10_000_000,
   },
   [ChainSlug.AVALANCHE]: {
-    gasLimit: 3_000_000,
+    // gasLimit: 3_000_000,
   },
 };
 

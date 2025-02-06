@@ -224,7 +224,8 @@ export const setupPolygonNativeSwitchboard = async (addresses, safeChains) => {
       const socketSigner: SocketSigner = await getSocketSigner(
         srcChain,
         addresses[srcChain],
-        safeChains.includes(srcChain)
+        safeChains.includes(srcChain),
+        !safeChains.includes(srcChain)
       );
 
       for (let dstChain in addresses[srcChain]?.["integrations"]) {

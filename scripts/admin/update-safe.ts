@@ -97,7 +97,7 @@ const checkAndUpdate = async (
 
   const owner = (await wrapper.owner()).toLowerCase();
   const safe = (await wrapper.safe()).toLowerCase();
-  if (safe === newSafeAddress) {
+  if (safe === newSafeAddress.toLowerCase()) {
     console.log(` ✔ ${label}: Safe already updated`);
     return;
   }

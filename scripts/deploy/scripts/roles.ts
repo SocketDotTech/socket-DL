@@ -206,7 +206,8 @@ const executeTransactions = async (
       const relaySigner = await getSocketSigner(
         chainSlug,
         allAddresses[chainSlug],
-        safeChains.includes(chainSlug)
+        safeChains.includes(chainSlug),
+        !safeChains.includes(chainSlug)
       );
       await executeRoleTransactions(chainSlug, newRoleStatus, relaySigner);
       await executeOtherTransactions(chainSlug, relaySigner);
