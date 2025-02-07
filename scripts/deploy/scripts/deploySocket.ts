@@ -63,7 +63,7 @@ export const deploySocket = async (
     if (!deployUtils.addresses["SocketSafeProxy"]) {
       const proxyAddress = await createSocketSafe(
         safeProxyFactory,
-        safe.address,
+        deployUtils.addresses["SafeL2"],
         [socketOwner]
       );
       deployUtils.addresses["SocketSafeProxy"] = proxyAddress;
@@ -77,7 +77,9 @@ export const deploySocket = async (
     );
     deployUtils.addresses["MultiSigWrapper"] = multisigWrapper.address;
 
-    const owner = useSafe ? deployUtils.addresses["SafeL2"] : socketOwner;
+    const owner = useSafe
+      ? deployUtils.addresses["SocketSafeProxy"]
+      : socketOwner;
     const signatureVerifier: Contract = await getOrDeploy(
       CORE_CONTRACTS.SignatureVerifier,
       "contracts/utils/SignatureVerifier.sol",
