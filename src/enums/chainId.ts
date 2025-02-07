@@ -60,4 +60,5 @@ export enum ChainId {
   INK = 57073,
   SONIC = 146,
   BASE_SEPOLIA = 84532,
+  BERA = 80094,
 }
