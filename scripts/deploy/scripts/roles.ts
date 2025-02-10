@@ -291,7 +291,7 @@ const checkNativeSwitchboardRoles = async ({
               userAddress,
             ])
         );
-        if (callIndex === -1) throw Error("Role not found!");
+        if (callIndex === -1) throw Error("Role not found 1");
 
         const hasRole =
           result[callIndex] ===
@@ -365,8 +365,6 @@ export const checkAndUpdateRoles = async (
 
           for (let index = 0; index < userSpecificRoles.length; index++) {
             let { userAddress, filterRoles } = userSpecificRoles[index];
-            if (safeChains.includes(chainSlug))
-              userAddress = addresses["SocketSafeProxy"];
             await checkNativeSwitchboardRoles({
               chainSlug,
               provider,
@@ -409,8 +407,6 @@ export const checkAndUpdateRoles = async (
 
         userSpecificRoles.map(async (roleObj) => {
           let { userAddress, filterRoles } = roleObj;
-          if (safeChains.includes(chainSlug))
-            userAddress = addresses["SocketSafeProxy"];
           const siblingSlugs = getSiblingSlugs(chainSlug);
 
           requiredRoles.map(async (role) => {
@@ -460,8 +456,6 @@ export const checkAndUpdateRoles = async (
 
         userSpecificRoles.map(async (roleObj) => {
           let { userAddress, filterRoles } = roleObj;
-          if (safeChains.includes(chainSlug))
-            userAddress = addresses["SocketSafeProxy"];
 
           const siblingSlugs = getSiblingSlugs(chainSlug);
 
@@ -475,7 +469,7 @@ export const checkAndUpdateRoles = async (
                   [getRoleHash(role), userAddress]
                 )
             );
-            if (callIndex === -1) throw Error("Role not found!");
+            if (callIndex === -1) throw Error("Role not found 2");
             const hasRole =
               chainRoles[callIndex] ===
               "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -534,7 +528,7 @@ export const checkAndUpdateRoles = async (
               );
               if (callIndex === -1)
                 throw Error(
-                  `Role not found!, ${getChainRoleHash(
+                  `Role not found 3, ${getChainRoleHash(
                     role,
                     Number(siblingSlug)
                   )}, ${userAddress}, ${siblingSlug}, ${role}`

@@ -63,4 +63,5 @@ export const ChainSlugToId = {
   [ChainSlug.INK]: ChainId.INK,
   [ChainSlug.SONIC]: ChainId.SONIC,
   [ChainSlug.BASE_SEPOLIA]: ChainId.BASE_SEPOLIA,
+  [ChainSlug.BERA]: ChainId.BERA,
 };

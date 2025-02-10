@@ -13,4 +13,5 @@ export enum NativeTokens {
   "okb" = "okb",
   "aavegotchi" = "aavegotchi",
   "fantom" = "fantom",
+  "berachain-bera" = "berachain-bera",
 }

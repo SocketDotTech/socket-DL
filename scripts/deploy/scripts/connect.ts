@@ -72,7 +72,7 @@ export const connectPlugs = async (
               addresses,
               chain,
               sibling,
-              siblingIntegrationType[index]
+              siblingIntegrationtype[index]
             );
           } catch (error) {
             console.log(error, " continuing");
@@ -100,7 +100,7 @@ export const connectPlugs = async (
           );
 
           console.log(
-            `Connecting counter of ${chain} for ${sibling} and ${siblingIntegrationType[index]} at tx hash: ${tx.hash}`
+            `Connecting counter of ${chain} for ${sibling} and ${siblingIntegrationtype[index]} at tx hash: ${tx.hash}`
           );
           await tx.wait();
         }

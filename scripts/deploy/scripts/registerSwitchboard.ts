@@ -36,7 +36,7 @@ export default async function registerSwitchboardForSibling(
     if (capacitor === constants.AddressZero) {
       const transaction = {
         to: switchboard.address,
-        data: switchboard.encodeFunctionData(
+        data: switchboard.interface.encodeFunctionData(
           "registerSiblingSlug(uint32,uint256,uint256,uint256,address)",
           [
             remoteChainSlug,

@@ -52,4 +52,5 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.INK,
   ChainSlug.SONIC,
   // ChainSlug.BASE_SEPOLIA,
+  ChainSlug.BERA,
 ];

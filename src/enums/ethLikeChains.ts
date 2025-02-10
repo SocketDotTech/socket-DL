@@ -25,4 +25,5 @@ export const ethLikeChains = [
   ChainSlug.AVALANCHE,
   ChainSlug.POLYGON_AMOY,
   ChainSlug.SONIC,
+  ChainSlug.BERA,
 ];

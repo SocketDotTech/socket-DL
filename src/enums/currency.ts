@@ -20,4 +20,5 @@ export const Currency = {
   [ChainSlug.OPBNB]: NativeTokens["binancecoin"],
   [ChainSlug.GEIST]: NativeTokens["aavegotchi"],
   [ChainSlug.SONIC]: NativeTokens["fantom"],
+  [ChainSlug.BERA]: NativeTokens["berachain-bera"],
 };
