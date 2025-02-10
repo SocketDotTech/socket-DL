@@ -84,6 +84,10 @@ export async function deployContractWithArgs(
   args: Array<any>,
   signer: SocketSigner
 ): Promise<Contract> {
+  // this log line lets deployments on bera chain work
+  // rolling with it since its needed fast
+  // kekekekekekekekek
+  console.log("deploying contract", contractName, args);
   try {
     const chainId = (await signer.provider.getNetwork()).chainId;
     const chainSlug = chainIdToSlug(chainId);
