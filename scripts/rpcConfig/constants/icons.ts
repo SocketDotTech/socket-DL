@@ -30,4 +30,5 @@ export const icons = {
   [ChainSlug.SONIC]: "",
   [ChainSlug.BASE_SEPOLIA]: "",
   [ChainSlug.BERA]: "",
+  [ChainSlug.B3]: "",
 };

@@ -64,4 +64,5 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.SONIC]: ChainSlug.SONIC,
   [HardhatChainName.BASE_SEPOLIA]: ChainSlug.BASE_SEPOLIA,
   [HardhatChainName.BERA]: ChainSlug.BERA,
+  [HardhatChainName.B3]: ChainSlug.B3,
 };

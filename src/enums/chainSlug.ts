@@ -63,4 +63,5 @@ export enum ChainSlug {
   SONIC = ChainId.SONIC,
   BASE_SEPOLIA = ChainId.BASE_SEPOLIA,
   BERA = ChainId.BERA,
+  B3 = ChainId.B3,
 }

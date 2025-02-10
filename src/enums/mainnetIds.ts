@@ -35,4 +35,5 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.INK,
   ChainSlug.SONIC,
   ChainSlug.BERA,
+  ChainSlug.B3,
 ];

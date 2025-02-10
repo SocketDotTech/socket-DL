@@ -32,4 +32,5 @@ export const explorers = {
   [ChainSlug.SONIC]: "https://sonicscan.org/",
   [ChainSlug.BASE_SEPOLIA]: "https://sepolia.basescan.org/",
   [ChainSlug.BERA]: "https://berascan.com/",
+  [ChainSlug.B3]: "https://explorer.b3.fun/",
 };
