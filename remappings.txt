@@ -3,3 +3,5 @@ forge-std/=lib/forge-std/src/
 openzeppelin-contracts/=lib/openzeppelin-contracts/
 fx-portal/=lib/contracts/contracts/
 solmate/=lib/solmate/src/
+safe-smart-account/=lib/safe-smart-account/contracts/
+solady/=lib/solady/src/
