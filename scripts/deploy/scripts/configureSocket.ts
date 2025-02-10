@@ -74,9 +74,10 @@ export const setManagers = async (
   ) {
     const transaction = {
       to: socket.address,
-      data: socket.encodeFunctionData("setExecutionManager(address)", [
-        addr[executionManagerVersion],
-      ]),
+      data: socket.interface.encodeFunctionData(
+        "setExecutionManager(address)",
+        [addr[executionManagerVersion]]
+      ),
       ...(await overrides(await socketSigner.getChainId())),
     };
 
@@ -94,7 +95,7 @@ export const setManagers = async (
   if (currentTM.toLowerCase() !== addr.TransmitManager?.toLowerCase()) {
     const transaction = {
       to: socket.address,
-      data: socket.encodeFunctionData("setTransmitManager(address)", [
+      data: socket.interface.encodeFunctionData("setTransmitManager(address)", [
         addr.TransmitManager,
       ]),
       ...(await overrides(await socketSigner.getChainId())),
@@ -161,6 +162,7 @@ export const configureExecutionManager = async (
       siblingsToConfigure.push(siblingSlug);
     });
 
+    let requests: any = [];
     await Promise.all(
       siblingsToConfigure.map(async (siblingSlug) => {
         const digest = keccak256(
@@ -178,24 +180,35 @@ export const configureExecutionManager = async (
         );
 
         const signature = await socketSigner.signMessage(arrayify(digest));
-        signatureMap.set(siblingSlug, signature);
+        let request = {
+          signature,
+          dstChainSlug: siblingSlug,
+          nonce: nextNonce++,
+          perGasCost: 0,
+          perByteCost: 0,
+          overhead: 0,
+          fees: msgValueMaxThreshold(siblingSlug),
+          functionSelector: "0xa1885700", // setMsgValueMaxThreshold
+        };
+        requests.push(request);
+        // signatureMap.set(siblingSlug, signature);
       })
     );
 
-    let requests: any = [];
-    siblingsToConfigure.sort().map((siblingSlug) => {
-      let request = {
-        signature: signatureMap.get(siblingSlug),
-        dstChainSlug: siblingSlug,
-        nonce: nextNonce++,
-        perGasCost: 0,
-        perByteCost: 0,
-        overhead: 0,
-        fees: msgValueMaxThreshold(siblingSlug),
-        functionSelector: "0xa1885700", // setMsgValueMaxThreshold
-      };
-      requests.push(request);
-    });
+    // let requests: any = [];
+    // siblingsToConfigure.sort().map((siblingSlug) => {
+    //   let request = {
+    //     signature: signatureMap.get(siblingSlug),
+    //     dstChainSlug: siblingSlug,
+    //     nonce: nextNonce++,
+    //     perGasCost: 0,
+    //     perByteCost: 0,
+    //     overhead: 0,
+    //     fees: msgValueMaxThreshold(siblingSlug),
+    //     functionSelector: "0xa1885700", // setMsgValueMaxThreshold
+    //   };
+    //   requests.push(request);
+    // });
 
     if (requests.length === 0) return;
 
@@ -261,9 +274,10 @@ export const setupPolygonNativeSwitchboard = async (addresses, safeChains) => {
 
           transaction = {
             to: sbContract.address,
-            data: sbContract.encodeFunctionData("setFxChildTunnel(address)", [
-              dstSwitchboardAddress,
-            ]),
+            data: sbContract.interface.encodeFunctionData(
+              "setFxChildTunnel(address)",
+              [dstSwitchboardAddress]
+            ),
             ...(await overrides(await socketSigner.getChainId())),
           };
         } else if (srcSwitchboardType === NativeSwitchboard.POLYGON_L2) {
@@ -279,9 +293,10 @@ export const setupPolygonNativeSwitchboard = async (addresses, safeChains) => {
 
           transaction = {
             to: sbContract.address,
-            data: sbContract.encodeFunctionData("setFxRootTunnel(address)", [
-              dstSwitchboardAddress,
-            ]),
+            data: sbContract.interface.encodeFunctionData(
+              "setFxRootTunnel(address)",
+              [dstSwitchboardAddress]
+            ),
             ...(await overrides(await socketSigner.getChainId())),
           };
         }
