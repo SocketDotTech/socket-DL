@@ -9,6 +9,8 @@ import {
 } from "../../../src";
 import { BigNumberish, utils } from "ethers";
 import chainConfig from "../../../chainConfig.json";
+import { getOverrides } from "../../constants/overrides";
+import { getProviderFromChainSlug } from "../../constants";
 
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
@@ -58,8 +60,6 @@ export const chains: Array<ChainSlug> = [
   // ChainSlug.ANCIENT8_TESTNET,
   // ChainSlug.ANCIENT8_TESTNET2,
   // ChainSlug.SYNDR_SEPOLIA_L3,
-  // ChainSlug.HOOK_TESTNET,
-  // ChainSlug.HOOK,
   // ChainSlug.PARALLEL,
   // ChainSlug.MANTLE,
   // ChainSlug.REYA_CRONOS,
@@ -71,7 +71,7 @@ export const chains: Array<ChainSlug> = [
   ChainSlug.BLAST,
 ];
 
-export const executionManagerVersion = CORE_CONTRACTS.ExecutionManager;
+export const executionManagerVersion = CORE_CONTRACTS.ExecutionManagerDF;
 export const sendTransaction = true;
 export const newRoleStatus = true;
 export const filterChains: number[] = chains;
@@ -79,10 +79,6 @@ export const filterSiblingChains: number[] = chains;
 export const capacitorType = 1;
 export const maxPacketLength = 1;
 export const initialPacketCount = 0;
-
-export const gasLimit = undefined;
-export const gasPrice = undefined;
-export const type = 0;
 
 const MSG_VALUE_MAX_THRESHOLD = utils.parseEther("0.001");
 export const msgValueMaxThreshold = (chain: ChainSlug): BigNumberish => {
@@ -119,186 +115,25 @@ export const executorAddresses = {
 
 export const ownerAddresses = {
   [DeploymentMode.DEV]: socketOwner,
-  [DeploymentMode.SURGE]: "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
-  [DeploymentMode.PROD]: "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+  [DeploymentMode.SURGE]: socketOwner,
+  [DeploymentMode.PROD]: socketOwner,
 };
 
-export const overrides = (
+export const hexagateTripRoleOwners = {
+  [DeploymentMode.DEV]: "0x081871d78fe7c35c774ce3b4d4ba6592519db223",
+  [DeploymentMode.SURGE]: "0x081871d78fe7c35c774ce3b4d4ba6592519db223",
+  [DeploymentMode.PROD]: "0xb810a120dd88746c039894bc6397508bdb762e86",
+};
+
+export const overrides = async (
   chain: ChainSlug | number
-): {
+): Promise<{
   type?: number | undefined;
   gasLimit?: BigNumberish | undefined;
   gasPrice?: BigNumberish | undefined;
-} => {
-  if (chain == ChainSlug.ARBITRUM) {
-    return {
-      // type,
-      // gasLimit: 200_000_000,
-      // gasPrice,
-    };
-  } else if (chain == ChainSlug.ARBITRUM_SEPOLIA) {
-    return {
-      type: 1,
-      gasLimit: 50_000_000,
-      gasPrice: 200_000_000,
-    };
-  } else if (chain == ChainSlug.OPTIMISM) {
-    return {
-      // type,
-      // gasLimit: 4_000_000,
-      // gasPrice,
-    };
-  } else if (chain == ChainSlug.BASE) {
-    return {
-      // type,
-      // gasLimit: 2_000_000,
-      // gasPrice: 2_000_000_000,
-    };
-  } else if (chain == ChainSlug.OPTIMISM_SEPOLIA) {
-    return {
-      // type: 1,
-      // gasLimit: 5_000_000,
-      // gasPrice: 4_000_000_000,
-    };
-  } else if (chain == ChainSlug.BSC) {
-    return {
-      type,
-      gasLimit: 6_000_000,
-      gasPrice,
-    };
-  } else if (chain == ChainSlug.MAINNET) {
-    return {
-      // type: 1,
-      gasLimit: 6_000_000,
-      gasPrice: 5_000_000_000,
-    };
-  } else if (chain == ChainSlug.POLYGON_MAINNET) {
-    return {
-      type,
-      gasLimit,
-      gasPrice: 50_000_000_000,
-    };
-  } else if (chain == ChainSlug.SEPOLIA) {
-    return {
-      // type: 1,
-      gasLimit: 2_000_000,
-      // gasPrice: 180_000_000_000,
-    };
-  } else if (chain == ChainSlug.AEVO_TESTNET) {
-    return {
-      type: 2,
-      // gasLimit,
-      // gasPrice,
-    };
-  } else if (chain == ChainSlug.AEVO) {
-    return {
-      type: 1,
-      // gasLimit,
-      gasPrice: 100_000_000,
-    };
-  } else if (chain == ChainSlug.LYRA_TESTNET) {
-    return {
-      type: 2,
-      // gasLimit,
-      // gasPrice: 100_000_000,
-    };
-  } else if (chain == ChainSlug.LYRA) {
-    return {
-      // type: 1,
-      // gasLimit,
-      // gasPrice: 100_000_000,
-    };
-  } else if (chain == ChainSlug.SX_NETWORK_TESTNET) {
-    return {
-      // type: 1,
-      // gasLimit,
-      // gasPrice: 100_000_000,
-    };
-  } else if (chain == ChainSlug.MODE_TESTNET) {
-    return {
-      type: 1,
-      // gasLimit,
-      gasPrice: 100_000_000,
-    };
-  } else if (chain == ChainSlug.MODE) {
-    return {
-      type: 1,
-      gasLimit: 10_000_000,
-      gasPrice: 1_000_000,
-    };
-  } else if (chain == ChainSlug.SYNDR_SEPOLIA_L3) {
-    return {
-      type: 1,
-      gasLimit: 500_000_000,
-      gasPrice: 1_000_000,
-    };
-  } else if (chain == ChainSlug.HOOK) {
-    return {
-      // type: 1,
-      gasLimit: 7_000_000,
-      // gasPrice: 100000000,
-    };
-  } else if (chain == ChainSlug.REYA_CRONOS) {
-    return {
-      type: 1,
-      // gasLimit: 200000,
-      gasPrice: 0,
-    };
-  } else if (chain == ChainSlug.REYA) {
-    return {
-      type: 1,
-      // gasLimit: 20000000,
-      gasPrice: 100_000_000,
-    };
-  } else if (chain == ChainSlug.POLYNOMIAL_TESTNET) {
-    return {
-      type,
-      gasLimit: 4_000_000,
-      gasPrice,
-    };
-  } else if (chain == ChainSlug.BOB) {
-    return {
-      type: 1,
-      gasLimit: 4_000_000,
-      gasPrice: 100_000_000,
-    };
-  } else if (chain == ChainSlug.KINTO) {
-    return {
-      type,
-      gasLimit: 4_000_000,
-      gasPrice,
-    };
-  } else if (chain == ChainSlug.KINTO_DEVNET) {
-    return {
-      type,
-      gasLimit: 4_000_000,
-      gasPrice,
-    };
-  } else if (chain == ChainSlug.SIPHER_FUNKI_TESTNET) {
-    return {
-      // type,
-      // gasLimit,
-      // gasPrice,
-    };
-  } else if (chain == ChainSlug.WINR) {
-    return {
-      // type,
-      // gasLimit,
-      // gasPrice,
-    };
-  } else if (chain == ChainSlug.BLAST) {
-    return {
-      // type,
-      // gasLimit,
-      // gasPrice,
-    };
-  } else if (chain == ChainSlug.MANTLE) {
-    return {
-      type: 1,
-      gasLimit: 10_000_000_000,
-      gasPrice: 30_000_000,
-    };
-  } else if (chainConfig[chain] && chainConfig[chain].overrides) {
-    return chainConfig[chain].overrides!;
-  } else return { type, gasLimit, gasPrice };
+}> => {
+  if (chainConfig[chain]?.overrides) {
+    return chainConfig[chain].overrides;
+  }
+  return await getOverrides(chain, getProviderFromChainSlug(chain));
 };

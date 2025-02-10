@@ -18,7 +18,7 @@ import {
 import { getRoleHash, getChainRoleHash, getInstance } from "../utils";
 import { Wallet, ethers } from "ethers";
 import { getProviderFromChainSlug } from "../../constants";
-import { overrides } from "../config/config";
+import { overrides, socketOwner } from "../config/config";
 import AccessControlExtendedABI from "@socket.tech/dl-core/artifacts/abi/AccessControlExtended.json";
 
 let roleStatus: any = {};
@@ -144,7 +144,7 @@ const executeRoleTransactions = async (
     let tx = await wallet.sendTransaction({
       to: contractAddress,
       data,
-      ...overrides(chainSlug),
+      ...(await overrides(chainSlug)),
     });
     console.log(
       `chain: ${chainSlug}`,
@@ -170,7 +170,7 @@ const executeOtherTransactions = async (
     let tx = await wallet.sendTransaction({
       to,
       data,
-      ...overrides(chainSlug),
+      ...(await overrides(chainSlug)),
     });
     console.log(`to: ${to}, txHash: ${tx?.hash}`);
     await tx.wait();
@@ -247,9 +247,13 @@ const checkNativeSwitchboardRoles = async ({
       await Promise.all(
         requiredRoles.map(async (role) => {
           if (filterRoles.length > 0 && !filterRoles.includes(role)) return;
+          // send overrides while reading role to avoid errors on mantle chain
+          // some chains give balance error if gas price is used with from address as zero
+          // therefore override from address as well
           let hasRole = await instance.callStatic["hasRole(bytes32,address)"](
             getRoleHash(role),
-            userAddress
+            userAddress,
+            { ...(await overrides(chainSlug)), from: socketOwner }
           );
 
           if (!roleStatus[chainSlug][pseudoContractName]["global"])
@@ -351,9 +355,15 @@ export const checkAndUpdateRoles = async (
               requiredRoles.map(async (role) => {
                 if (filterRoles.length > 0 && !filterRoles.includes(role))
                   return;
+                // send overrides while reading role to avoid errors on mantle chain
+                // some chains give balance error if gas price is used with from address as zero
+                // therefore override from address as well
                 let hasRole = await instance.callStatic[
                   "hasRole(bytes32,address)"
-                ](getRoleHash(role), userAddress);
+                ](getRoleHash(role), userAddress, {
+                  ...(await overrides(chainSlug)),
+                  from: socketOwner,
+                });
                 if (isRoleChanged(hasRole, newRoleStatus)) {
                   if (!roleStatus[chainSlug][contractName!]["global"]) {
                     roleStatus[chainSlug][contractName!]["global"] = [];
@@ -403,9 +413,16 @@ export const checkAndUpdateRoles = async (
                   requiredChainRoles.map(async (role) => {
                     if (filterRoles.length > 0 && !filterRoles.includes(role))
                       return;
+                    // send overrides while reading role to avoid errors on mantle chain
+                    // some chains give balance error if gas price is used with from address as zero
+                    // therefore override from address as well
                     let hasRole = await instance.callStatic[
                       "hasRole(bytes32,address)"
-                    ](getChainRoleHash(role, Number(siblingSlug)), userAddress);
+                    ](
+                      getChainRoleHash(role, Number(siblingSlug)),
+                      userAddress,
+                      { ...(await overrides(chainSlug)), from: socketOwner }
+                    );
 
                     if (isRoleChanged(hasRole, newRoleStatus)) {
                       if (

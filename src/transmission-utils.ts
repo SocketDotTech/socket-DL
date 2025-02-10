@@ -2,12 +2,12 @@
 Transmission param format:
 - first byte - version - current version is 1
 - 2nd  byte - finalityType (1: bucket)
-- next 4 bytes - value - bucket (1:fast, 2:medium, 3:slow)
+- next 4 bytes - value - bucket (1:low, 2:medium, 3:high)
 
-eg : want to transmit message with slow speed - 
+eg : want to transmit message with high finality - 
 transmissionParam = 0x0101000000030000000000000000000000000000000000000000000000000000
 
-eg : want to transmit message with fast speed -
+eg : want to transmit message with low finality -
 transmissionParam = 0x0101000000010000000000000000000000000000000000000000000000000000
 
 if version is 0, or invalid finality type, or invalid value is mentioned, it will use the default Bucket for that chain

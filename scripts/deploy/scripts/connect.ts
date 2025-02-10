@@ -18,9 +18,11 @@ import { overrides } from "../config/config";
 
 export const connectPlugs = async (
   addresses: DeploymentAddresses,
-  chains: ChainSlug[]
+  chains: ChainSlug[],
+  siblings: ChainSlug[]
 ) => {
   try {
+    console.log("=========== connecting plugs ===========");
     await Promise.all(
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
@@ -34,21 +36,21 @@ export const connectPlugs = async (
         const addr: ChainSocketAddresses = addresses[chain]!;
         if (!addr["integrations"]) return;
 
-        const list = isTestnet(chain) ? TestnetIds : MainnetIds;
-        const siblingSlugs: ChainSlug[] = list.filter(
-          (chainSlug) =>
-            chainSlug !== chain &&
-            addresses?.[chainSlug]?.["Counter"] &&
-            chains.includes(chainSlug)
-        );
+        // const list = isTestnet(chain) ? TestnetIds : MainnetIds;
+        // const siblingSlugs: ChainSlug[] = list.filter(
+        //   (chainSlug) =>
+        //     chainSlug !== chain &&
+        //     addresses?.[chainSlug]?.["Counter"] &&
+        //     chains.includes(chainSlug)
+        // );
 
-        const siblingIntegrationtype: IntegrationTypes[] = siblingSlugs.map(
+        const siblingIntegrationtype: IntegrationTypes[] = siblings.map(
           (chainSlug) => {
             return getDefaultIntegrationType(chain, chainSlug);
           }
         );
 
-        console.log(`Configuring for ${chain}`);
+        console.log(`Connecting Counter for ${chain}`);
 
         const counter: Contract = (
           await getInstance("Counter", addr["Counter"])
@@ -58,8 +60,8 @@ export const connectPlugs = async (
           await getInstance("Socket", addr["Socket"])
         ).connect(socketSigner);
 
-        for (let index = 0; index < siblingSlugs.length; index++) {
-          const sibling = siblingSlugs[index];
+        for (let index = 0; index < siblings.length; index++) {
+          const sibling = siblings[index];
           const siblingCounter = addresses?.[sibling]?.["Counter"];
           let switchboard;
           try {
@@ -74,7 +76,9 @@ export const connectPlugs = async (
           }
           if (!switchboard) continue;
 
-          const configs = await socket.getPlugConfig(counter.address, sibling);
+          const configs = await socket.getPlugConfig(counter.address, sibling, {
+            ...(await overrides(chain)),
+          });
           if (
             configs["siblingPlug"].toLowerCase() ===
               siblingCounter?.toLowerCase() &&
@@ -89,7 +93,7 @@ export const connectPlugs = async (
             sibling,
             siblingCounter,
             switchboard,
-            { ...overrides(chain) }
+            { ...(await overrides(chain)) }
           );
 
           console.log(

@@ -23,10 +23,10 @@ jobs:
       - name: Install forge dependencies
         run: forge install
 
-      - name: Set Node.js 16.x
+      - name: Set Node.js 18.x
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 18.x
 
       - name: Run yarn install
         uses: borales/actions-yarn@v4

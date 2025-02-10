@@ -3,7 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { createObj, getInstance } from "../utils";
 import { ChainSlug, ChainSocketAddresses } from "../../../src";
-import { initialPacketCount, overrides } from "../config/config";
+import { initialPacketCount, overrides, socketOwner } from "../config/config";
 
 export default async function registerSwitchboardForSibling(
   switchBoardAddress: string,
@@ -25,9 +25,13 @@ export default async function registerSwitchboardForSibling(
       await getInstance("FastSwitchboard", switchBoardAddress)
     ).connect(signer);
 
+    // send overrides while reading capacitor to avoid errors on mantle chain
+    // some chains give balance error if gas price is used with from address as zero
+    // therefore override from address as well
     let capacitor = await socket.capacitors__(
       switchBoardAddress,
-      remoteChainSlug
+      remoteChainSlug,
+      { ...(await overrides(await signer.getChainId())), from: socketOwner }
     );
 
     if (capacitor === constants.AddressZero) {
@@ -38,7 +42,7 @@ export default async function registerSwitchboardForSibling(
         initialPacketCount,
         siblingSwitchBoardAddress,
         {
-          ...overrides(await signer.getChainId()),
+          ...(await overrides(await signer.getChainId())),
         }
       );
       console.log(
@@ -49,10 +53,17 @@ export default async function registerSwitchboardForSibling(
     }
 
     // get capacitor and decapacitor for config
-    capacitor = await socket.capacitors__(switchBoardAddress, remoteChainSlug);
+    // send overrides while reading capacitor/decapacitor to avoid errors on mantle chain
+    // some chains give balance error if gas price is used with from address as zero
+    // therefore override from address as well
+    capacitor = await socket.capacitors__(switchBoardAddress, remoteChainSlug, {
+      ...(await overrides(await signer.getChainId())),
+      from: socketOwner,
+    });
     const decapacitor = await socket.decapacitors__(
       switchBoardAddress,
-      remoteChainSlug
+      remoteChainSlug,
+      { ...(await overrides(await signer.getChainId())), from: socketOwner }
     );
 
     config = setCapacitorPair(

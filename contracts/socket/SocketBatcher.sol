@@ -270,11 +270,11 @@ contract SocketBatcher is AccessControl {
                 IExecutionManager.setRelativeNativeTokenPrice.selector
             ) {
                 IExecutionManager(contractAddress_).setRelativeNativeTokenPrice(
-                        setFeesRequests_[index].nonce,
-                        setFeesRequests_[index].dstChainSlug,
-                        setFeesRequests_[index].fees,
-                        setFeesRequests_[index].signature
-                    );
+                    setFeesRequests_[index].nonce,
+                    setFeesRequests_[index].dstChainSlug,
+                    setFeesRequests_[index].fees,
+                    setFeesRequests_[index].signature
+                );
             } else if (
                 setFeesRequests_[index].functionSelector ==
                 IExecutionManager.setMsgValueMaxThreshold.selector
@@ -640,7 +640,8 @@ contract SocketBatcher is AccessControl {
         uint256 totalAmount;
         for (uint i; i < addresses.length; i++) {
             totalAmount += amounts[i];
-            addresses[i].transfer(amounts[i]);
+            // addresses[i].transfer(amounts[i]);
+            payable(addresses[i]).call{value: amounts[i]}("");
         }
 
         require(totalAmount == msg.value, "LOW_MSG_VALUE");

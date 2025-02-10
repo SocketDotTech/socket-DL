@@ -31,3 +31,7 @@ devRpcConfig.ts
 devRpcConfig.json
 prodRpcConfig.ts
 prodRpcConfig.json
+
+artifacts-zk/
+cache_hardhat-zk/
+deployments-zk/

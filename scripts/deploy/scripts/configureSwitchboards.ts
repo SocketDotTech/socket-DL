@@ -25,9 +25,11 @@ import {
 export const configureSwitchboards = async (
   addresses: DeploymentAddresses,
   chains: ChainSlug[],
+  siblings: ChainSlug[],
   executionManagerVersion: CORE_CONTRACTS
 ) => {
   try {
+    console.log("=========== configuring switchboards ===========");
     await Promise.all(
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
@@ -42,17 +44,17 @@ export const configureSwitchboards = async (
 
         let addr: ChainSocketAddresses = addresses[chain]!;
 
-        const list = isTestnet(chain) ? TestnetIds : MainnetIds;
-        const siblingSlugs: ChainSlug[] = list.filter(
-          (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
-        );
+        // const list = isTestnet(chain) ? TestnetIds : MainnetIds;
+        // const siblingSlugs: ChainSlug[] = list.filter(
+        //   (chainSlug) => chainSlug !== chain && chains.includes(chainSlug)
+        // );
 
         await configureExecutionManager(
           executionManagerVersion,
           addr[executionManagerVersion]!,
           addr[CORE_CONTRACTS.SocketBatcher],
           chain,
-          siblingSlugs,
+          siblings,
           socketSigner
         );
 
@@ -60,10 +62,10 @@ export const configureSwitchboards = async (
 
         const integrations = addr["integrations"] ?? {};
         const integrationList = Object.keys(integrations).filter((chain) =>
-          chains.includes(parseInt(chain) as ChainSlug)
+          siblings.includes(parseInt(chain) as ChainSlug)
         );
 
-        console.log(`Configuring for ${chain}`);
+        console.log(`Configuring switchboards for ${chain}`);
 
         for (let sibling of integrationList) {
           const nativeConfig = integrations[sibling][IntegrationTypes.native];
@@ -91,7 +93,7 @@ export const configureSwitchboards = async (
 
         addr = await registerSwitchboards(
           chain,
-          siblingSlugs,
+          siblings,
           CORE_CONTRACTS.FastSwitchboard,
           IntegrationTypes.fast,
           addr,
@@ -101,7 +103,7 @@ export const configureSwitchboards = async (
 
         addr = await registerSwitchboards(
           chain,
-          siblingSlugs,
+          siblings,
           CORE_CONTRACTS.OptimisticSwitchboard,
           IntegrationTypes.optimistic,
           addr,

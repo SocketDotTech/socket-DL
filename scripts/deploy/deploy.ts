@@ -1,4 +1,9 @@
-import { DeploymentAddresses, MainnetIds, TestnetIds } from "../../src";
+import {
+  ChainSlug,
+  DeploymentAddresses,
+  MainnetIds,
+  TestnetIds,
+} from "../../src";
 import { configureRoles } from "./scripts/configureRoles";
 import { deployForChains } from "./scripts/deploySocketFor";
 import { configureSwitchboards } from "./scripts/configureSwitchboards";
@@ -33,18 +38,27 @@ const main = async () => {
       value: chain,
     }));
 
-    const configResponse = await prompts([
+    const chainsResponse = await prompts([
       {
         name: "chains",
+        type: "multiselect",
+        message: "Select chains to connect",
+        choices,
+      },
+      {
+        name: "siblings",
         type: "multiselect",
         message: "Select sibling chains to connect",
         choices,
       },
     ]);
 
-    const chains = [...configResponse.chains];
+    const chains = chainsResponse.chains;
+    const siblings = chainsResponse.siblings;
+    const allChains = [...chains, ...siblings];
+    console.log("allChains: ", allChains);
     let addresses: DeploymentAddresses = await deployForChains(
-      chains,
+      allChains,
       executionManagerVersion
     );
 
@@ -52,13 +66,20 @@ const main = async () => {
       console.log("No siblings selected!");
       return;
     }
-    await configureRoles(addresses, chains, true, executionManagerVersion);
+    await configureRoles(
+      addresses,
+      chains,
+      siblings,
+      true,
+      executionManagerVersion
+    );
     addresses = await configureSwitchboards(
       addresses,
       chains,
+      siblings,
       executionManagerVersion
     );
-    await connectPlugs(addresses, chains);
+    await connectPlugs(addresses, chains, siblings);
   } catch (error) {
     console.log("Error:", error);
   }

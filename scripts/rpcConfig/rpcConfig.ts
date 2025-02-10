@@ -1,36 +1,37 @@
 import {
-  ChainSlug,
-  getAddresses,
-  Integrations,
-  DeploymentMode,
-  S3Config,
-  ChainSlugToId,
-  TestnetIds,
-  MainnetIds,
-  getAllAddresses,
-  ChainType,
-  TxData,
-  chainSlugToHardhatChainName,
-  getCurrency,
-  opStackL2Chain,
   arbChains,
   arbL3Chains,
+  ChainSlug,
+  chainSlugToHardhatChainName,
+  ChainSlugToId,
+  ChainSocketAddresses,
+  ChainType,
+  DeploymentAddresses,
+  DeploymentMode,
+  getAddresses,
+  getAllAddresses,
+  getCurrency,
+  MainnetIds,
+  opStackL2Chain,
   polygonCDKChains,
   S3ChainConfig,
-  FinalityBucket,
-  DeploymentAddresses,
-  ChainSocketAddresses,
+  S3Config,
+  TestnetIds,
+  TxData,
+  zkStackChain,
 } from "../../src";
 import { getSiblings } from "../common";
+import { chainOverrides } from "../constants/overrides";
 import {
-  explorers,
-  icons,
   batcherSupportedChainSlugs,
-  rpcs,
-  version,
+  disabledDFFeeChains,
+  explorers,
+  getDefaultFinalityBucket,
   getFinality,
   getReSyncInterval,
-  getDefaultFinalityBucket,
+  icons,
+  rpcs,
+  version,
 } from "./constants";
 import { feesUpdaterSupportedChainSlugs } from "./constants/feesUpdaterChainSlugs";
 import { getChainTxData } from "./txdata-builder/generate-calldata";
@@ -62,8 +63,6 @@ const getOldEMVersionChainSlugs = (): ChainSlug[] => {
       if (!chainAddress.ExecutionManagerDF)
         chains.push(parseInt(chain) as ChainSlug);
     });
-
-    console.log(chains);
   } catch (error) {
     return [] as ChainSlug[];
   }
@@ -78,6 +77,8 @@ const getChainType = (chainSlug: ChainSlug) => {
   } else if (arbL3Chains.includes(chainSlug)) {
     return ChainType.arbL3Chain;
   } else if (polygonCDKChains.includes(chainSlug)) {
+    return ChainType.zkStackChain;
+  } else if (zkStackChain.includes(chainSlug)) {
     return ChainType.polygonCDKChain;
   } else return ChainType.default;
 };
@@ -92,7 +93,7 @@ const getChainData = async (
     chainName: chainSlugToHardhatChainName[chainSlug].toString(),
     blockNumber: getBlockNumber(deploymentMode, chainSlug),
     siblings: getSiblings(deploymentMode, chainSlug),
-    chainTxData: await getChainTxData(chainSlug, txData),
+    chainTxData: getChainTxData(chainSlug, txData),
     nativeToken: getCurrency(chainSlug),
     chainType: getChainType(chainSlug),
     reSyncInterval: getReSyncInterval(chainSlug),
@@ -100,6 +101,7 @@ const getChainData = async (
     finalityInfo: getFinality(chainSlug),
     defaultFinalityBucket: getDefaultFinalityBucket(chainSlug),
     icon: icons[chainSlug],
+    overrides: chainOverrides[chainSlug],
   };
 };
 
@@ -133,7 +135,7 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
     addresses,
     chainSlugToId: ChainSlugToId,
     oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
-    disabledDFFeeChains: [],
+    disabledDFFeeChains,
   };
 };
 
@@ -149,7 +151,6 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
       ChainSlug.POLYGON_MAINNET,
       ChainSlug.LYRA,
       ChainSlug.MAINNET,
-      ChainSlug.GOERLI,
       ChainSlug.SEPOLIA,
       ChainSlug.LYRA_TESTNET,
       ChainSlug.ARBITRUM_SEPOLIA,
@@ -161,6 +162,6 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
     addresses,
     chainSlugToId: ChainSlugToId,
     oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
-    disabledDFFeeChains: [],
+    disabledDFFeeChains,
   };
 };

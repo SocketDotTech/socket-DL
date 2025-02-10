@@ -145,7 +145,9 @@ const checkAndClaim = async (
 
   if (sendTx) {
     console.log(`✨ ${label}: Claiming`);
-    const tx = await contract.claimOwner({ ...overrides(parseInt(chainSlug)) });
+    const tx = await contract.claimOwner({
+      ...(await overrides(parseInt(chainSlug))),
+    });
     const receipt = await tx.wait();
     console.log(`🚀 ${label}: Done: ${receipt.transactionHash}`);
   } else {
