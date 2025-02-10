@@ -351,19 +351,19 @@ const config: HardhatUserConfig = {
     },
     ...liveNetworks,
     zeroTestnet: {
-      url: process.env.ZERO_SEPOLIA_RPC,
+      url: process.env.ZERO_SEPOLIA_RPC || "",
       zksync: true,
       ethNetwork: "sepolia",
       verifyURL: "https://zerion-testnet-proofs.explorer.caldera.xyz/api",
     },
     zero: {
-      url: process.env.ZERO_RPC,
+      url: process.env.ZERO_RPC || "",
       zksync: true,
       ethNetwork: "mainnet",
       verifyURL: "https://zero-network.calderaexplorer.xyz/api",
     },
     zksync: {
-      url: process.env.ZKSYNC_RPC,
+      url: process.env.ZKSYNC_RPC || "",
       zksync: true,
       ethNetwork: "mainnet",
       verifyURL: "",
