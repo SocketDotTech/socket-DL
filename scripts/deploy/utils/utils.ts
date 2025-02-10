@@ -5,16 +5,15 @@ import { Address } from "hardhat-deploy/dist/types";
 import path from "path";
 import fs from "fs";
 import {
-  ChainSlugToId,
   ChainSlug,
   ChainSocketAddresses,
   DeploymentAddresses,
   DeploymentMode,
   zkStackChain,
 } from "../../../src";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { overrides } from "../config/config";
 import { VerifyArgs } from "../verify";
+import { SocketSigner } from "@socket.tech/dl-common";
 import { chainIdToSlug, getZkWallet } from "../../constants";
 import { Deployer } from "@matterlabs/hardhat-zksync";
 import * as hre from "hardhat";
@@ -38,7 +37,7 @@ export const getChainRoleHash = (role: string, chainSlug: number) =>
 export interface DeployParams {
   addresses: ChainSocketAddresses;
   mode: DeploymentMode;
-  signer: SignerWithAddress | Wallet;
+  signer: SocketSigner;
   currentChainSlug: number;
 }
 
@@ -69,10 +68,9 @@ export const getOrDeploy = async (
       deployUtils.mode
     );
   } else {
-    contract = await getInstance(
-      contractName,
-      deployUtils.addresses[contractName]
-    );
+    contract = (
+      await getInstance(contractName, deployUtils.addresses[contractName])
+    ).connect(deployUtils.signer);
     console.log(
       `${contractName} found on ${deployUtils.currentChainSlug} for ${deployUtils.mode} at address ${contract.address}`
     );
@@ -81,34 +79,15 @@ export const getOrDeploy = async (
   return contract;
 };
 
-// export async function deployContractWithArgs(
-//   contractName: string,
-//   args: Array<any>,
-//   signer: SignerWithAddress | Wallet
-// ) {
-//   try {
-//     const Contract: ContractFactory = await ethers.getContractFactory(
-//       contractName
-//     );
-//     // gasLimit is set to undefined to not use the value set in overrides
-//     const contract: Contract = await Contract.connect(signer).deploy(...args, {
-//       ...(await overrides(await signer.getChainId())),
-//     });
-//     await contract.deployed();
-//     return contract;
-//   } catch (error) {
-//     throw error;
-//   }
-// }
-
 export async function deployContractWithArgs(
   contractName: string,
   args: Array<any>,
-  signer: SignerWithAddress | Wallet
+  signer: SocketSigner
 ): Promise<Contract> {
   try {
     const chainId = (await signer.provider.getNetwork()).chainId;
     const chainSlug = chainIdToSlug(chainId);
+
     if (zkStackChain.includes(chainSlug)) {
       const wallet = getZkWallet(chainSlug);
       const deployer = new Deployer(hre, wallet);
@@ -126,30 +105,25 @@ export async function deployContractWithArgs(
             throw error;
           }
         });
-      const contract = await deployer.deploy(artifact, args);
-      const address = await contract.getAddress();
+      const zkContract = await deployer.deploy(artifact, args);
+      const address = await zkContract.getAddress();
       const contractFactory: ContractFactory = await ethers.getContractFactory(
         contractName
       );
-      // console.log(contract);
-      // contract.address = address;
       const instance = contractFactory.attach(address);
       return { ...instance, address };
     } else {
-      const Contract: ContractFactory = await ethers.getContractFactory(
-        contractName
+      const contractFactory: ContractFactory = await ethers.getContractFactory(
+        contractName,
+        signer
       );
-      const contract: Contract = await Contract.connect(signer).deploy(
-        ...args,
-        {
-          ...(await overrides(chainSlug)),
-        }
-      );
+      const contract: Contract = await contractFactory.deploy(...args, {
+        ...(await overrides(chainSlug)),
+      });
       await contract.deployed();
       return contract;
     }
   } catch (error) {
-    // throw error;
     console.log(error);
     process.exit(1);
   }

@@ -9,8 +9,7 @@ npx ts-node scripts/deploy/writeChainConfig.ts
 npx hardhat run scripts/deploy/deploy.ts
 
 # publish package
-yarn build 
-
+yarn build
 npm publish
 
 # upload s3 config

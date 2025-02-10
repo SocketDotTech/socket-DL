@@ -1,4 +1,4 @@
-import { Contract, Wallet, constants } from "ethers";
+import { Contract, Event, Transaction, constants, utils } from "ethers";
 import {
   DeployParams,
   getInstance,
@@ -13,9 +13,9 @@ import {
   version,
 } from "../../../src";
 import deploySwitchboards from "./deploySwitchboard";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { socketOwner, overrides } from "../config/config";
 import { maxAllowedPacketLength } from "../../constants";
+import { SocketSigner } from "@socket.tech/dl-common";
 
 let allDeployed = false;
 
@@ -29,8 +29,9 @@ export interface ReturnObj {
  */
 export const deploySocket = async (
   executionManagerVersion: string,
-  socketSigner: SignerWithAddress | Wallet,
+  socketSigner: SocketSigner,
   chainSlug: number,
+  useSafe: boolean,
   currentMode: DeploymentMode,
   deployedAddresses: ChainSocketAddresses
 ): Promise<ReturnObj> => {
@@ -42,10 +43,45 @@ export const deploySocket = async (
   };
 
   try {
+    // safe wrapper deployment
+    const safe: Contract = await getOrDeploy(
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      [],
+      deployUtils
+    );
+    deployUtils.addresses["SafeL2"] = safe.address;
+
+    const safeProxyFactory: Contract = await getOrDeploy(
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      [],
+      deployUtils
+    );
+    deployUtils.addresses["SafeProxyFactory"] = safeProxyFactory.address;
+
+    if (!deployUtils.addresses["SocketSafeProxy"]) {
+      const proxyAddress = await createSocketSafe(
+        safeProxyFactory,
+        safe.address,
+        [socketOwner]
+      );
+      deployUtils.addresses["SocketSafeProxy"] = proxyAddress;
+    }
+
+    const multisigWrapper: Contract = await getOrDeploy(
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [socketOwner, deployUtils.addresses["SocketSafeProxy"]],
+      deployUtils
+    );
+    deployUtils.addresses["MultiSigWrapper"] = multisigWrapper.address;
+
+    const owner = useSafe ? deployUtils.addresses["SafeL2"] : socketOwner;
     const signatureVerifier: Contract = await getOrDeploy(
       CORE_CONTRACTS.SignatureVerifier,
       "contracts/utils/SignatureVerifier.sol",
-      [socketOwner],
+      [owner],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.SignatureVerifier] =
@@ -54,7 +90,7 @@ export const deploySocket = async (
     const hasher: Contract = await getOrDeploy(
       CORE_CONTRACTS.Hasher,
       "contracts/utils/Hasher.sol",
-      [socketOwner],
+      [owner],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.Hasher] = hasher.address;
@@ -62,7 +98,7 @@ export const deploySocket = async (
     const capacitorFactory: Contract = await getOrDeploy(
       CORE_CONTRACTS.CapacitorFactory,
       "contracts/CapacitorFactory.sol",
-      [socketOwner, maxAllowedPacketLength],
+      [owner, maxAllowedPacketLength],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.CapacitorFactory] =
@@ -75,7 +111,7 @@ export const deploySocket = async (
         chainSlug,
         hasher.address,
         capacitorFactory.address,
-        socketOwner,
+        owner,
         version[deployUtils.mode],
       ],
       deployUtils
@@ -85,7 +121,7 @@ export const deploySocket = async (
     const executionManager: Contract = await getOrDeploy(
       executionManagerVersion,
       `contracts/${executionManagerVersion}.sol`,
-      [socketOwner, chainSlug, socket.address, signatureVerifier.address],
+      [owner, chainSlug, socket.address, signatureVerifier.address],
       deployUtils
     );
     deployUtils.addresses[executionManagerVersion] = executionManager.address;
@@ -93,7 +129,7 @@ export const deploySocket = async (
     const transmitManager: Contract = await getOrDeploy(
       CORE_CONTRACTS.TransmitManager,
       "contracts/TransmitManager.sol",
-      [socketOwner, chainSlug, socket.address, signatureVerifier.address],
+      [owner, chainSlug, socket.address, signatureVerifier.address],
       deployUtils
     );
     deployUtils.addresses[CORE_CONTRACTS.TransmitManager] =
@@ -102,7 +138,8 @@ export const deploySocket = async (
     // switchboards deploy
     deployUtils.addresses = await deploySwitchboards(
       chainSlug,
-      socketSigner,
+      owner,
+      socketSigner as SocketSigner,
       deployUtils.addresses,
       currentMode
     );
@@ -110,7 +147,7 @@ export const deploySocket = async (
     const socketBatcher: Contract = await getOrDeploy(
       "SocketBatcher",
       "contracts/socket/SocketBatcher.sol",
-      [socketOwner],
+      [owner],
       deployUtils
     );
     deployUtils.addresses["SocketBatcher"] = socketBatcher.address;
@@ -168,7 +205,6 @@ export const deploySocket = async (
       switchboardSimulator.address;
 
     // setup
-    console.log("starting setup : ", chainSlug);
     const simulatorContract = (
       await getInstance("SocketSimulator", socketSimulator.address)
     ).connect(deployUtils.signer);
@@ -197,7 +233,11 @@ export const deploySocket = async (
     console.log(deployUtils.addresses);
     console.log("Contracts deployed!");
   } catch (error) {
-    console.log("Error in deploying setup contracts", error);
+    console.log(
+      "Error in deploying setup contracts for chain",
+      chainSlug,
+      error
+    );
   }
 
   await storeAddresses(
@@ -211,3 +251,62 @@ export const deploySocket = async (
     deployedAddresses: deployUtils.addresses,
   };
 };
+
+// Assuming you are in a contract context
+async function createSocketSafe(
+  safeProxyFactory: Contract,
+  safeAddress: string,
+  owners: string[]
+) {
+  const addressZero = "0x0000000000000000000000000000000000000000";
+  const functionSignature =
+    "setup(address[],uint256,address,bytes,address,address,uint256,address)";
+  const functionSelector = utils.id(functionSignature).slice(0, 10);
+
+  const encodedParameters = utils.defaultAbiCoder.encode(
+    [
+      "address[]",
+      "uint256",
+      "address",
+      "bytes",
+      "address",
+      "address",
+      "uint256",
+      "address",
+    ],
+    [
+      owners,
+      owners.length,
+      addressZero,
+      "0x",
+      addressZero,
+      addressZero,
+      0,
+      addressZero,
+    ]
+  );
+  const encodedData = functionSelector + encodedParameters.slice(2); // Remove '0x' from encodedParameters
+
+  const tx = await safeProxyFactory.createChainSpecificProxyWithNonce(
+    safeAddress,
+    encodedData,
+    0,
+    {
+      ...(await overrides(await safeProxyFactory.signer.getChainId())),
+    }
+  );
+  const receipt = await tx.wait();
+
+  const safeSetupEvent = receipt.events?.find(
+    (event: Event) => event.event === "ProxyCreation"
+  );
+
+  if (safeSetupEvent) {
+    const proxy = safeSetupEvent.args.proxy;
+    return proxy;
+  } else {
+    throw new Error(
+      "Safe proxy created event not found in the transaction receipt"
+    );
+  }
+}

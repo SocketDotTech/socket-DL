@@ -59,4 +59,5 @@ export enum ChainId {
   ARENA_Z = 7897,
   INK = 57073,
   SONIC = 146,
+  BASE_SEPOLIA = 84532,
 }

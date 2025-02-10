@@ -1,4 +1,4 @@
-import { Contract, Wallet, utils } from "ethers";
+import { Contract } from "ethers";
 import { IntegrationTypes, ChainSlug } from "../../src";
 import { mode, overrides } from "../deploy/config/config";
 import { arrayify, defaultAbiCoder, keccak256 } from "ethers/lib/utils";

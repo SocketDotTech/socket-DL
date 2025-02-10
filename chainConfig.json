@@ -27,11 +27,6 @@
       "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
       "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
     },
-    "overrides": {
-      "type": 1,
-      "gasLimit": 3000000,
-      "gasPrice": 10000000
-    },
     "siblings": [1, 42161, 10, 8453]
   },
   "60808": {
@@ -42,8 +37,7 @@
       "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
       "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
     },
-    "siblings": [42161, 10],
-    "overrides": {}
+    "siblings": [42161, 10]
   },
   "444444": {
     "roleOwners": {
@@ -53,8 +47,7 @@
       "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
       "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
     },
-    "siblings": [421614, 80001, 11155111],
-    "overrides": {}
+    "siblings": [421614, 80001, 11155111]
   },
   "2863311531": {
     "roleOwners": {
@@ -64,10 +57,6 @@
       "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
       "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
     },
-    "siblings": [421614, 11155420],
-    "overrides": {
-      "type": 1,
-      "gasPrice": 100000000
-    }
+    "siblings": [421614, 11155420]
   }
 }

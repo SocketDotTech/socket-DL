@@ -30,4 +30,5 @@ export const explorers = {
   [ChainSlug.ARENA_Z]: "https://explorer.arena-z.gg/",
   [ChainSlug.INK]: "https://explorer.inkonchain.com/",
   [ChainSlug.SONIC]: "https://sonicscan.org/",
+  [ChainSlug.BASE_SEPOLIA]: "https://sepolia.basescan.org/",
 };

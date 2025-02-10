@@ -57,8 +57,24 @@ const main = async () => {
     const siblings = chainsResponse.siblings;
     const allChains = [...chains, ...siblings];
     console.log("allChains: ", allChains);
+
+    choices = chains.map((chain) => ({
+      title: chain.toString(),
+      value: chain,
+    }));
+
+    const safeResponse = await prompts([
+      {
+        name: "chains",
+        type: "multiselect",
+        message: "Select chains to use Safe as owner",
+        choices,
+      },
+    ]);
+
     let addresses: DeploymentAddresses = await deployForChains(
       allChains,
+      safeResponse.chains,
       executionManagerVersion
     );
 
@@ -66,10 +82,12 @@ const main = async () => {
       console.log("No siblings selected!");
       return;
     }
+
     await configureRoles(
       addresses,
       chains,
       siblings,
+      safeResponse.chains,
       true,
       executionManagerVersion
     );
@@ -77,6 +95,7 @@ const main = async () => {
       addresses,
       chains,
       siblings,
+      safeResponse.chains,
       executionManagerVersion
     );
     await connectPlugs(addresses, chains, siblings);

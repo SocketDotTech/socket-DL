@@ -6,11 +6,16 @@ import {
   DeploymentMode,
   CORE_CONTRACTS,
   version,
+  ChainId,
 } from "../../../src";
 import { BigNumberish, utils } from "ethers";
 import chainConfig from "../../../chainConfig.json";
 import { getOverrides } from "../../constants/overrides";
-import { getProviderFromChainSlug } from "../../constants";
+import {
+  chainIdToSlug,
+  getProviderFromChainId,
+  getProviderFromChainSlug,
+} from "../../constants";
 
 export const mode = process.env.DEPLOYMENT_MODE as
   | DeploymentMode
@@ -126,7 +131,7 @@ export const hexagateTripRoleOwners = {
 };
 
 export const overrides = async (
-  chain: ChainSlug | number
+  chain: ChainSlug | ChainId
 ): Promise<{
   type?: number | undefined;
   gasLimit?: BigNumberish | undefined;
@@ -135,5 +140,15 @@ export const overrides = async (
   if (chainConfig[chain]?.overrides) {
     return chainConfig[chain].overrides;
   }
-  return await getOverrides(chain, getProviderFromChainSlug(chain));
+  try {
+    return await getOverrides(
+      chain as ChainSlug,
+      getProviderFromChainSlug(chain as ChainSlug)
+    );
+  } catch (error) {
+    return await getOverrides(
+      chainIdToSlug(chain as ChainId),
+      getProviderFromChainId(chain as ChainId)
+    );
+  }
 };

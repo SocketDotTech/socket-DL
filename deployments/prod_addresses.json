@@ -397,7 +397,11 @@
     "SimulatorUtils": "0xaA7dFC0a40206127fE4BEb9212aDe15a980b9E08",
     "SwitchboardSimulator": "0x880334B9a5B88e1257DC4Ee571813bE1D56C4538",
     "CapacitorSimulator": "0x37F7ae2114e652095AabE798ED1398c3Bca44DC4",
-    "ExecutionManagerDF": "0x98CAd9A205f1F7A7150241Ef2d565d1702BCe57C"
+    "ExecutionManagerDF": "0x98CAd9A205f1F7A7150241Ef2d565d1702BCe57C",
+    "SafeL2": "0xa8165F6a303A6C07Ce3C784b8ABCc595a04e6506",
+    "SafeProxyFactory": "0x8452A27F7523BAfE07c8Fd5BaFA53B5A7eD3aE00",
+    "SocketSafeProxy": "0xeeF6520437A6545b4F325F6675C4CD49812d457b",
+    "MultiSigWrapper": "0x8C9167AA4c755528FBd9cD30432A5Cf64E8c7FE0"
   },
   "5": {
     "SignatureVerifier": "0x0b59efeE594469Ae31954940eFFfF2192bCD8422",
@@ -878,7 +882,11 @@
     "SimulatorUtils": "0x7Fc2dE692a21282B034084b0C2C0D5955f295F2e",
     "SwitchboardSimulator": "0x0C2944DD1860325b08270a71BC24Ad45DE956E41",
     "CapacitorSimulator": "0x687ff064aE9BaD94C11AC4BadC81295A9Ffa5E89",
-    "ExecutionManagerDF": "0x1D56e8BF3050EE3bA387e84e399cBeaE8974aafe"
+    "ExecutionManagerDF": "0x1D56e8BF3050EE3bA387e84e399cBeaE8974aafe",
+    "SafeL2": "0x040758ff02716bFd8FA5FEF65C71641a640fd3F0",
+    "SafeProxyFactory": "0xC29AE19a421ff63A3efc549ec11B4c07b888e90A",
+    "SocketSafeProxy": "0xf7326EE263F8d2bFC311B45b3097e9d9C18c001F",
+    "MultiSigWrapper": "0x38a07b7A7a8D072E09bbBF2FA294D01A8af8b3dC"
   },
   "56": {
     "SignatureVerifier": "0x12E1dbCA1EC056421365bBdbC9e4Bd124c8F6760",
@@ -1174,7 +1182,11 @@
     "SimulatorUtils": "0xf0fA7929546aA1987b6ce47aC16A9F8921207F07",
     "SwitchboardSimulator": "0xDb53F6f92e9372C1d2DBF0670b1cDe5EfA70710b",
     "CapacitorSimulator": "0x5E2E3bE13942763468D8090b7171dBEbED84a50D",
-    "ExecutionManagerDF": "0xdF32FA09180F73E49C2531409d0DDa2Cd2df47Df"
+    "ExecutionManagerDF": "0xdF32FA09180F73E49C2531409d0DDa2Cd2df47Df",
+    "SafeL2": "0xBa2BfE778633372D16af24569B9ae0f91fBA19dd",
+    "SafeProxyFactory": "0xd8AA4C07820470E2f28BF96F40bc01cDB0338CFA",
+    "SocketSafeProxy": "0x761d245384bBBC8e03a8a18710fd7a1AD9882200",
+    "MultiSigWrapper": "0xA423B934b64316a206582Bb582043849F198d750"
   },
   "89": {
     "SignatureVerifier": "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
@@ -1412,7 +1424,11 @@
           "switchboard": "0x0CC93650bF4D98237628DACf87f94E443956D8dF"
         }
       }
-    }
+    },
+    "SafeL2": "0x6ee3907D1B9423584195979812379143B327fb48",
+    "SafeProxyFactory": "0xbaF4a260B47544C7f2F44aBb7f1Aea733f5Cb08c",
+    "SocketSafeProxy": "0xC230bB65C60684d0b3a5020D5ABD7629b304e6a7",
+    "MultiSigWrapper": "0x1D56e8BF3050EE3bA387e84e399cBeaE8974aafe"
   },
   "137": {
     "SignatureVerifier": "0x2F04a8f11691Db9e0EE08BF44a7712aF8273720D",
@@ -1737,7 +1753,11 @@
     "SimulatorUtils": "0x10C700641F48DA53434439BF2dA21A4C27091221",
     "SwitchboardSimulator": "0x3b103Ada40478B169095063fC4bABa667f20BA45",
     "CapacitorSimulator": "0x76fA03B93Ac9b48a66C38C6075C200b750E21923",
-    "ExecutionManagerDF": "0x5a0e01ED2be962a16cF56DFb6C3F252adED4483c"
+    "ExecutionManagerDF": "0x5a0e01ED2be962a16cF56DFb6C3F252adED4483c",
+    "SafeL2": "0xe49027b6e47dcFd9B059F7Ba13bd62e21E4e262A",
+    "SafeProxyFactory": "0x2d8d2905C252dF23cb62AEcaB3B317BF68Cf1137",
+    "SocketSafeProxy": "0x533250a06a5A7CB6Ac067Cf9c052c1CDb494A701",
+    "MultiSigWrapper": "0x0B0220c1a41F9f0eb0064278808354f3C4e9858e"
   },
   "146": {
     "SignatureVerifier": "0xc8a4D2fd77c155fd52e65Ab07F337aBF84495Ead",
@@ -1924,7 +1944,11 @@
           "switchboard": "0x0CC93650bF4D98237628DACf87f94E443956D8dF"
         }
       }
-    }
+    },
+    "SafeL2": "0x1C4E51f453df3208A01EE8AF9f6420FDf02D373a",
+    "SafeProxyFactory": "0xeA964e160dEaed1960E31a20c1fA57D079d4e616",
+    "SocketSafeProxy": "0xEE20ACE3AFC5F751B9c01dc43a24cE2cF669c812",
+    "MultiSigWrapper": "0xE0aCD26E4c97af97c893e66825BF798Fa83DBa56"
   },
   "169": {
     "SignatureVerifier": "0xc8a4D2fd77c155fd52e65Ab07F337aBF84495Ead",
@@ -2075,7 +2099,11 @@
           "switchboard": "0x0CC93650bF4D98237628DACf87f94E443956D8dF"
         }
       }
-    }
+    },
+    "SafeL2": "0x1945b1D31386178cc112F1C507E6bC39A29Ed6B3",
+    "SafeProxyFactory": "0x86b0335304132A56F90F0389C2d311F18E9208D0",
+    "SocketSafeProxy": "0xe62f23339a26D04fa56fD64962b45F4cBce78c38",
+    "MultiSigWrapper": "0xffe81B87bcDd6F816eC258050ABD03cB6Ea28D2E"
   },
   "196": {
     "SignatureVerifier": "0xc8a4D2fd77c155fd52e65Ab07F337aBF84495Ead",
@@ -2106,7 +2134,11 @@
           "switchboard": "0x0CC93650bF4D98237628DACf87f94E443956D8dF"
         }
       }
-    }
+    },
+    "SafeL2": "0x5DcD801E126DA7c918EEe0284399840Ae407CA5e",
+    "SafeProxyFactory": "0x665d762E810883Ed5b3faD8F7ea81317EDefEa5e",
+    "SocketSafeProxy": "0x46e21b41B7a02d4869570f13C54c55ae2e52ceA8",
+    "MultiSigWrapper": "0xf200705d32fD1ED4A840610B756F12570c0ddE39"
   },
   "204": {
     "SignatureVerifier": "0xc8a4D2fd77c155fd52e65Ab07F337aBF84495Ead",
@@ -2257,7 +2289,11 @@
           "switchboard": "0x0CC93650bF4D98237628DACf87f94E443956D8dF"
         }
       }
-    }
+    },
+    "SafeL2": "0xE2bB0b95646a0E499e9b9c29A7EC5BE5f3513F05",
+    "SafeProxyFactory": "0x0EE2cBeb853142E6d1BF46338A73999fD4023332",
+    "SocketSafeProxy": "0xA5474a90C77FDA66c103577930Ae930764b18c93",
+    "MultiSigWrapper": "0x1945b1D31386178cc112F1C507E6bC39A29Ed6B3"
   },
   "324": {
     "SignatureVerifier": "0x860957EB07d5a850313Cfb62b5B77a87E223a3E0",
@@ -2560,7 +2596,11 @@
     "SimulatorUtils": "0x0E20397CaeAb9423939618003DB58d9119740301",
     "SwitchboardSimulator": "0xB93bBbea105A1C93a2a443F1B44C1019e72565c1",
     "CapacitorSimulator": "0x78bCAf61bBc7c7Aab28bd931D91fc2B879917025",
-    "ExecutionManagerDF": "0xc82a8F36BEb1F513328E51a072A4Ac5f55674CBa"
+    "ExecutionManagerDF": "0xc82a8F36BEb1F513328E51a072A4Ac5f55674CBa",
+    "SafeL2": "0xffe81B87bcDd6F816eC258050ABD03cB6Ea28D2E",
+    "SafeProxyFactory": "0xdF32FA09180F73E49C2531409d0DDa2Cd2df47Df",
+    "SocketSafeProxy": "0x55593F81BFc8F979f21c93f15E0f62a78e277fc9",
+    "MultiSigWrapper": "0xF522AdbDBe0a7b6F6c96443bF9F5474B223AC80C"
   },
   "416": {
     "SignatureVerifier": "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
@@ -3134,7 +3174,11 @@
     "SwitchboardSimulator": "0xE2bB0b95646a0E499e9b9c29A7EC5BE5f3513F05",
     "CapacitorSimulator": "0xc4dBEF94ce53Fb5487b3CD1397E9a6342258F23c",
     "startBlock": 8525340,
-    "ExecutionManagerDF": "0x9e196dff347e2bB4116C4e409AA025d427eB8fC6"
+    "ExecutionManagerDF": "0x9e196dff347e2bB4116C4e409AA025d427eB8fC6",
+    "SafeL2": "0x1D79F3af314CA93F7d8B608c97336f41524D44ed",
+    "SafeProxyFactory": "0xE1208BFef6661cB4C2A03B46278A8a03de35fa91",
+    "SocketSafeProxy": "0x31F73Abc911710B4620aeE5c9DF681Bec1679e60",
+    "MultiSigWrapper": "0xb8d0Cd5816744FF556c2ead5c092cef7Ffe4d0BF"
   },
   "1024": {
     "SignatureVerifier": "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
@@ -3412,7 +3456,11 @@
           "switchboard": "0x0CC93650bF4D98237628DACf87f94E443956D8dF"
         }
       }
-    }
+    },
+    "SafeL2": "0x511B2cb97E3DD25083C1654c54b57EB1CF0824b7",
+    "SafeProxyFactory": "0xb1b93173FecaDBd89cb94F446a1E6bCEF50e8344",
+    "SocketSafeProxy": "0x827f2F900B23cB9913568d8DCcCB6AFEb99cE4ED",
+    "MultiSigWrapper": "0x3B250ef646f970Dc56AE8EebDdB01f7707e757fF"
   },
   "2999": {
     "SignatureVerifier": "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
@@ -3528,7 +3576,11 @@
     "SwitchboardSimulator": "0xb8d0Cd5816744FF556c2ead5c092cef7Ffe4d0BF",
     "CapacitorSimulator": "0xd68cD876bA1C7147eb9819e4eC1F48B61cE840f4",
     "startBlock": 4046505,
-    "ExecutionManagerDF": "0x1DE4928f1305704d069e23efc6EB1Fb446cf1135"
+    "ExecutionManagerDF": "0x1DE4928f1305704d069e23efc6EB1Fb446cf1135",
+    "SafeL2": "0x3B250ef646f970Dc56AE8EebDdB01f7707e757fF",
+    "SafeProxyFactory": "0xa4BC320775c0196176B5D4C31a76f7a1b6d89161",
+    "SocketSafeProxy": "0xC9BAD71ce40aDB00577bb92dcc101c2B8aCF49AD",
+    "MultiSigWrapper": "0x74EBb564b92A3F7AcfFeb8aF3b322831bF57ac22"
   },
   "5000": {
     "SignatureVerifier": "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
@@ -3740,7 +3792,11 @@
     "SimulatorUtils": "0xaf12f9A5EC621e14cF27c7B28f903539d9c3f7C8",
     "SwitchboardSimulator": "0x1Ac062d8dE227Ca4E7Df2A34E9489bC845b11773",
     "CapacitorSimulator": "0x232758a7bB7Be432DAc3b06018c0684bB64030C8",
-    "ExecutionManagerDF": "0xf18571A79d561D23E029eB5101FC885e40Fb62ca"
+    "ExecutionManagerDF": "0xf18571A79d561D23E029eB5101FC885e40Fb62ca",
+    "SafeL2": "0xc5697260cE121cb00bb99F5e7f5CCc59977040a6",
+    "SafeProxyFactory": "0x31B111B2197971fC982B1A507024Cc0d0E83273C",
+    "SocketSafeProxy": "0x4a285EdE06703683920A44a4d9fA011bFC8014E5",
+    "MultiSigWrapper": "0x4dC25D9d3ee57018998A50e912F40f6384947Ff5"
   },
   "7887": {
     "SignatureVerifier": "0x56Ac0e336f0c3620dCaF8d361E8E14eA73C31f5d",
@@ -3808,7 +3864,9 @@
         }
       }
     },
-    "ExecutionManagerDF": "0xc8a4D2fd77c155fd52e65Ab07F337aBF84495Ead"
+    "ExecutionManagerDF": "0xc8a4D2fd77c155fd52e65Ab07F337aBF84495Ead",
+    "SafeL2": "0x134633394c8Cef32a671B6Fed5e99b4B6466f4e4",
+    "SafeProxyFactory": "0x10eC45De78BDfE26Cefb953F604E18BF70904FBa"
   },
   "7897": {
     "SignatureVerifier": "0xc8a4D2fd77c155fd52e65Ab07F337aBF84495Ead",
@@ -3875,7 +3933,11 @@
           "switchboard": "0x0CC93650bF4D98237628DACf87f94E443956D8dF"
         }
       }
-    }
+    },
+    "SafeL2": "0x507d63C5325773ebA03c4652f3568356F6Fc0a3F",
+    "SafeProxyFactory": "0x1ae5a864f708d5118fC5a8dC54CafeDFCf20e00d",
+    "SocketSafeProxy": "0x1FFbC40Ac9db1452498E64176Dd081DB6C27fE3c",
+    "MultiSigWrapper": "0x5175B4fC72A33d1f9Fb48A0B955B6C24e9C30331"
   },
   "8008": {
     "SignatureVerifier": "0xc8a4D2fd77c155fd52e65Ab07F337aBF84495Ead",
@@ -3943,7 +4005,11 @@
     "SimulatorUtils": "0x68Ce3Fe82f9a2e94d062a7bEF110ceFD69936C8f",
     "SwitchboardSimulator": "0xDA27f00E7E35D9f396427457926D5420CA5FB948",
     "CapacitorSimulator": "0x5EDDe5A56e505c217DD82C1E9663673402dcC9AA",
-    "ExecutionManagerDF": "0x67CF51A4665c28ba1921ad8D269BC474F84208d5"
+    "ExecutionManagerDF": "0x67CF51A4665c28ba1921ad8D269BC474F84208d5",
+    "SafeL2": "0x36E06128dBFA24B2980CD4c8d4c63A93bFC2327B",
+    "SafeProxyFactory": "0xE2bB0b95646a0E499e9b9c29A7EC5BE5f3513F05",
+    "SocketSafeProxy": "0x00d8046365e0E3B9F6506903a39e17e6ecA8d18A",
+    "MultiSigWrapper": "0xAe96e8Bd18D1652154306B55b56c20aE545C054b"
   },
   "8453": {
     "SignatureVerifier": "0xA7f7e4fE8E4cdDCD9969Bd3fbcFF67000CD7DE47",
@@ -4287,7 +4353,11 @@
     "SimulatorUtils": "0x7eAE8a3F4186e3B5ABdD712093Bcd62115Eb7de2",
     "SwitchboardSimulator": "0x57cA482C7dc749B2A26747Ed2915560c2401262F",
     "CapacitorSimulator": "0xD9ef4524926F1Dd79C2C78Ef69084d24E60CDE59",
-    "ExecutionManagerDF": "0x31B111B2197971fC982B1A507024Cc0d0E83273C"
+    "ExecutionManagerDF": "0x31B111B2197971fC982B1A507024Cc0d0E83273C",
+    "SafeL2": "0xCe6A81cc7357584aa2760e1F24c73D1F29e64D60",
+    "SafeProxyFactory": "0x3304c48872C4b3B9b0CaC1aEcaB2aB8e8c8Aa9d1",
+    "SocketSafeProxy": "0x6E22E2F99d8965C0cFeB3dA41997a417CbfD7F1B",
+    "MultiSigWrapper": "0x38D1Ff7afc4C32bEe9d507652E4e5d639FF83AB9"
   },
   "34443": {
     "SignatureVerifier": "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
@@ -4439,7 +4509,11 @@
     "SimulatorUtils": "0xF5d08060A15B2a66C3bC81CaC77203Da14e4C28E",
     "SwitchboardSimulator": "0x0E20397CaeAb9423939618003DB58d9119740301",
     "CapacitorSimulator": "0x056CCBf501C27F6c7b77320a65185D3e91d9d4F9",
-    "ExecutionManagerDF": "0xfB9dF8073bD6Fea7Ba2e6E17f3b457c24C060Df1"
+    "ExecutionManagerDF": "0xfB9dF8073bD6Fea7Ba2e6E17f3b457c24C060Df1",
+    "SafeL2": "0x10C700641F48DA53434439BF2dA21A4C27091221",
+    "SafeProxyFactory": "0x3b103Ada40478B169095063fC4bABa667f20BA45",
+    "SocketSafeProxy": "0xf81456d6b70bFd558873cdAb15b4b48a7C5a8D50",
+    "MultiSigWrapper": "0xF34411eE2940Fe5fc6c6228130e2EeF12b1f3E49"
   },
   "42161": {
     "SignatureVerifier": "0x9879a2b15722374243843DDdb79e5E6872aA74B8",
@@ -4812,7 +4886,11 @@
     "SimulatorUtils": "0x188b69DB174033dB0e78af4C5036d0D5d7061F11",
     "SwitchboardSimulator": "0xc5697260cE121cb00bb99F5e7f5CCc59977040a6",
     "CapacitorSimulator": "0xebbfb1d4dbB4a868d04f4cEc88292e93f7E6A8d3",
-    "ExecutionManagerDF": "0x4ac0dD10eE6F29A897fDE3007c6239A6C654D5B3"
+    "ExecutionManagerDF": "0x4ac0dD10eE6F29A897fDE3007c6239A6C654D5B3",
+    "SafeL2": "0x27952a4ca6231BD45245C8596899996DbB6A0aAe",
+    "SafeProxyFactory": "0xd6c78A4abc35bD0C3671f28dF847102C6e85E6B7",
+    "SocketSafeProxy": "0x2944D2578a4a98530fb7da25A617bF7823854358",
+    "MultiSigWrapper": "0x24C63DE0CC6D6c25D09556065dFb86b86919C9d3"
   },
   "43114": {
     "SignatureVerifier": "0xbe7241e9D11EC2D1Ac86CE217c4A37b7aD1701cE",
@@ -4999,7 +5077,11 @@
           "switchboard": "0x525a6489a1df5fF1ae077fAf628E43b7F52298eF"
         }
       }
-    }
+    },
+    "SafeL2": "0xCD83F432491c3Ed08B34F74Df7341EEb060dB34e",
+    "SafeProxyFactory": "0xB2f07C30dF3bf4049428f5704397bE57dBAc35e9",
+    "SocketSafeProxy": "0x101DE40Aa93F6e0e7da8248E71998C0c179f9F9f",
+    "MultiSigWrapper": "0xb40FdECfCa4EF29CACc37222Ce4dB1fd0f561a00"
   },
   "43210": {
     "SignatureVerifier": "0x070B713eE5717B563Bc3008A154B044887821d44",
@@ -5086,7 +5168,11 @@
         }
       }
     },
-    "ExecutionManagerDF": "0x8Bc50b98B55F42DD3966e9b428AF3581386B7Fa6"
+    "ExecutionManagerDF": "0x8Bc50b98B55F42DD3966e9b428AF3581386B7Fa6",
+    "SafeL2": "0x1141efbA7aDed9eECAa27C785d9bd50C51E54c88",
+    "SafeProxyFactory": "0xb07B3CfB1F0AaB839cbf84D2FB9442DebDDbDd2a",
+    "SocketSafeProxy": "0x9c871cdb99B9cF6d472307cdA3667246b9e8EE07",
+    "MultiSigWrapper": "0x1Ac062d8dE227Ca4E7Df2A34E9489bC845b11773"
   },
   "57073": {
     "SignatureVerifier": "0xc8a4D2fd77c155fd52e65Ab07F337aBF84495Ead",
@@ -5273,7 +5359,11 @@
           "switchboard": "0x0CC93650bF4D98237628DACf87f94E443956D8dF"
         }
       }
-    }
+    },
+    "SafeL2": "0x928D2F08A579fEB13fe26c13d5F18fCff077743F",
+    "SafeProxyFactory": "0xd8c6fB10Fc47a4536C4b56f4529B4a49be235900",
+    "SocketSafeProxy": "0x3BCCb4F656F598eabcd54F4F584cfEc206489E1C",
+    "MultiSigWrapper": "0xc2588658629b897D61B45c87D67F1f823de46527"
   },
   "59144": {
     "SignatureVerifier": "0x09A03E0d298AA13a07A9a3e36a606d4F6a4b8bB7",
@@ -5484,7 +5574,11 @@
           "switchboard": "0x332901149A390D334498008449089f05fa273C3B"
         }
       }
-    }
+    },
+    "SafeL2": "0x43F3dD32d23B551ECBbB7c390368b960d168D063",
+    "SafeProxyFactory": "0x4dC25D9d3ee57018998A50e912F40f6384947Ff5",
+    "SocketSafeProxy": "0x24E906f8989E7EbD9418CD13d9e5788c98D6dd67",
+    "MultiSigWrapper": "0x7eAE8a3F4186e3B5ABdD712093Bcd62115Eb7de2"
   },
   "60808": {
     "SignatureVerifier": "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
@@ -5618,7 +5712,11 @@
           "switchboard": "0x06638c0799638d64c9AfbB132f94c451A35C7c09"
         }
       }
-    }
+    },
+    "SafeL2": "0x8AF70D097549D604d6D32E687dba243BAf2D9484",
+    "SafeProxyFactory": "0x1465F2619D793FDb2307321C5f977D55184C6B8c",
+    "MultiSigWrapper": "0xbF4CA7837E3AFe1702123d3FAee81D307273B4FE",
+    "SocketSafeProxy": "0xd3af1745B38c7e0E04A42aaD78F3a075D8239eaF"
   },
   "80008": {
     "SignatureVerifier": "0x2b42AFFD4b7C14d9B7C2579229495c052672Ccd3",
@@ -5826,7 +5924,11 @@
     "SimulatorUtils": "0x36E06128dBFA24B2980CD4c8d4c63A93bFC2327B",
     "SwitchboardSimulator": "0xE2bB0b95646a0E499e9b9c29A7EC5BE5f3513F05",
     "CapacitorSimulator": "0xc4dBEF94ce53Fb5487b3CD1397E9a6342258F23c",
-    "ExecutionManagerDF": "0xf8b6bb15890aeB2005db0B0B06734b594041c7D5"
+    "ExecutionManagerDF": "0xf8b6bb15890aeB2005db0B0B06734b594041c7D5",
+    "SafeL2": "0x3431fCFB44597f18E38744a3156a916A388BA4D0",
+    "SafeProxyFactory": "0x3B250ef646f970Dc56AE8EebDdB01f7707e757fF",
+    "SocketSafeProxy": "0x8b98B4709fB2a013d5Fc7E0575DDcC7eB157C83F",
+    "MultiSigWrapper": "0xc08203DDC09b0dbB5d1f1759093876Db7e3f8272"
   },
   "412346": {
     "SignatureVerifier": "0xbd0C1774D07a0468E09FDd68b4363dd83a5E2C83",
@@ -6141,7 +6243,11 @@
     "SimulatorUtils": "0xB0E7FDB68d67Bf8dD753B562c793185A7E019D2E",
     "SwitchboardSimulator": "0xB6A8A2290Dbca04e848404dFa8EA971e35e795e4",
     "CapacitorSimulator": "0x133Cd3e2a613607Ecdd0966faa1d7Bf3A3eb8F4f",
-    "ExecutionManagerDF": "0x200AF8FCdD5246D70B369A98143Ac8930A077B7A"
+    "ExecutionManagerDF": "0x200AF8FCdD5246D70B369A98143Ac8930A077B7A",
+    "SafeL2": "0x30b4a6E57a7A5a0079C201ed9f0B9a0b15F10280",
+    "MultiSigWrapper": "0x487d6D67AC31f194f96158ADB3511Fd776f19aA4",
+    "SafeProxyFactory": "0x3553c0102684c20e2f8192d6F013c7242710b4b3",
+    "SocketSafeProxy": "0x8edD122574BBe253d18a7082abba201bff9FAb1a"
   },
   "444444": {
     "SignatureVerifier": "0x845a6f4Be829e5D11906cc2eb2f8ccd39E8848a6",
@@ -6490,7 +6596,11 @@
     "SimulatorUtils": "0xC41A7A24CC415326195415ecF1AFfbAdFD808F70",
     "SwitchboardSimulator": "0x36E06128dBFA24B2980CD4c8d4c63A93bFC2327B",
     "CapacitorSimulator": "0x06eD6DeCed1A93b7F5e4B27de7Ceb814A9f696db",
-    "ExecutionManagerDF": "0x9e196dff347e2bB4116C4e409AA025d427eB8fC6"
+    "ExecutionManagerDF": "0x9e196dff347e2bB4116C4e409AA025d427eB8fC6",
+    "SafeL2": "0xB9a9268fB56286f6Cb8144751B08aCA991DB0cD0",
+    "SafeProxyFactory": "0x68b393f237478249e4fD37F78aff4862e9BffAb5",
+    "SocketSafeProxy": "0x3258A0AdFacBa80b53Ed79f4D2921cF2586d5063",
+    "MultiSigWrapper": "0x5a0e01ED2be962a16cF56DFb6C3F252adED4483c"
   },
   "11155111": {
     "SignatureVerifier": "0x10d9DA6AE85eff6D582A91829f78bde2a3EC2dCC",
@@ -6705,7 +6815,11 @@
     "SimulatorUtils": "0x44513d2C02e6fdcaFA012d53Ae767CC5d4A257e3",
     "SwitchboardSimulator": "0x74af6d7b484729384342dd68C60D73A3bF7081DF",
     "CapacitorSimulator": "0x0f06F1d9eC3EF0bcf1e791905aBBDDb5375821B9",
-    "ExecutionManagerDF": "0x2D7660F0CDfa50b5f800694F5AACe8830d71c2D4"
+    "ExecutionManagerDF": "0x2D7660F0CDfa50b5f800694F5AACe8830d71c2D4",
+    "SafeL2": "0x5A9e4208FEa3159A81eb9F15c82f6170b3c5DC3f",
+    "MultiSigWrapper": "0xf5cAdaA4769AA6c061224602b687affb5119D5e8",
+    "SafeProxyFactory": "0xD3F39174Ee7937381e19d682FfEa40968266FA3E",
+    "SocketSafeProxy": "0x1fba9f8c779ff83565602b454555e6c9d16b1768"
   },
   "11155112": {
     "SignatureVerifier": "0x7E3D0FAC82b9d5a67906f7028Aa4a70d582011b2",
@@ -6990,7 +7104,11 @@
     "SimulatorUtils": "0x8f4EE8Ab18ED25f787BC81a8D5e7b1d0DeAe4322",
     "SwitchboardSimulator": "0x2eb0e1A4194204c6881eF13CdFE6e539b53564C9",
     "CapacitorSimulator": "0x532d1380a067292cf9fAdE3ECfc4061c5B47f8e6",
-    "ExecutionManagerDF": "0x92c7a51BD507736AC0Dda48b5F35A4AaD0c2Bb4D"
+    "ExecutionManagerDF": "0x92c7a51BD507736AC0Dda48b5F35A4AaD0c2Bb4D",
+    "SafeL2": "0x61c4aB6b05DaE9B4E3F5C16c8E2ec635a473526b",
+    "MultiSigWrapper": "0x91e4c4CE0B693058b7f5e05fAFD6cfC1Af75c76B",
+    "SafeProxyFactory": "0xDE418B9F4aCecC5b87B6f27BfFBaE8932473883e",
+    "SocketSafeProxy": "0x40b29f0a58D92f4E3700C5302dE0f5a181321FA2"
   },
   "12227331": {
     "SignatureVerifier": "0x6D290609b3F5F02D52F28d97C75a443ED8564cBf",
@@ -7241,7 +7359,11 @@
     "SimulatorUtils": "0xCd76DaA4e6c6dd2FC503e821190AD7f15F5B8D84",
     "SwitchboardSimulator": "0x6873ED2dda63e44C2F655Dd093ceb6DCA96e5Fc3",
     "CapacitorSimulator": "0x5AA4D11e10B4650Cb0D3590aFbCe822e13960d10",
-    "ExecutionManagerDF": "0x1141efbA7aDed9eECAa27C785d9bd50C51E54c88"
+    "ExecutionManagerDF": "0x1141efbA7aDed9eECAa27C785d9bd50C51E54c88",
+    "SafeL2": "0x2d677BAB6FAF54f480176c84660e7A5AadC85E57",
+    "SafeProxyFactory": "0xC7952F73f1f4FF7F65b35d35CBCf2a8255da7438",
+    "SocketSafeProxy": "0x5E20c0060078c3336D055230CCdda10A16784B4a",
+    "MultiSigWrapper": "0x1BE2023b6E5C07c1205FB8e3E54E68262BF50E62"
   },
   "1399904803": {
     "SignatureVerifier": "0x03D51955216a7E6F301e0613515fA86A6f3d59A9",

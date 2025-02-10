@@ -61,4 +61,5 @@ export enum ChainSlug {
   ARENA_Z = ChainId.ARENA_Z,
   INK = ChainId.INK,
   SONIC = ChainId.SONIC,
+  BASE_SEPOLIA = ChainId.BASE_SEPOLIA,
 }

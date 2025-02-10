@@ -5,14 +5,14 @@ export const arbitrumL1Switchboard = (
   chainSlug: ChainSlug,
   socketAddress: string,
   sigVerifierAddress: string,
-  signerAddress: string
+  owner: string
 ) => {
   return {
     contractName: "ArbitrumL1Switchboard",
     args: [
       chainSlug,
       bridgeConsts.inbox[chainSlug],
-      signerAddress,
+      owner,
       socketAddress,
       bridgeConsts.bridge[chainSlug],
       bridgeConsts.outbox[chainSlug],

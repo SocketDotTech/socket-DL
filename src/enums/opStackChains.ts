@@ -22,4 +22,5 @@ export const opStackL2Chain = [
   ChainSlug.OPBNB,
   ChainSlug.ARENA_Z,
   ChainSlug.INK,
+  ChainSlug.BASE_SEPOLIA,
 ];

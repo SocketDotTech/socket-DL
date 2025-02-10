@@ -5,12 +5,12 @@ export const fastSwitchboard = (
   chainSlug: ChainSlug,
   socketAddress: string,
   sigVerifierAddress: string,
-  signerAddress: string
+  owner: string
 ) => {
   return {
     contractName: CORE_CONTRACTS.FastSwitchboard,
     args: [
-      signerAddress,
+      owner,
       socketAddress,
       chainSlug,
       timeout(chainSlug),

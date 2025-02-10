@@ -25,13 +25,14 @@ export const configureRoles = async (
   addresses: DeploymentAddresses,
   chains: ChainSlug[],
   siblings: ChainSlug[],
+  safeChains: ChainSlug[],
   sendTransaction: boolean,
   executionManagerVersion: CORE_CONTRACTS
 ) => {
-  let ownerAddress = ownerAddresses[mode];
   let executorAddress = executorAddresses[mode];
   let transmitterAddress = transmitterAddresses[mode];
   let watcherAddress = watcherAddresses[mode];
+  let ownerAddress = ownerAddresses[mode];
   let hexagateTripRoleOwner = hexagateTripRoleOwners[mode];
 
   let summary: { params: any; roleStatus: any }[] = [];
@@ -62,6 +63,7 @@ export const configureRoles = async (
       contractName: executionManagerVersion,
       filterChains: chains,
       filterSiblingChains: siblings,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },
@@ -92,6 +94,7 @@ export const configureRoles = async (
       contractName: CORE_CONTRACTS.TransmitManager,
       filterChains: chains,
       filterSiblingChains: siblings,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },
@@ -113,6 +116,7 @@ export const configureRoles = async (
       contractName: CORE_CONTRACTS.Socket,
       filterChains: chains,
       filterSiblingChains: siblings,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },
@@ -154,6 +158,7 @@ export const configureRoles = async (
       contractName: CORE_CONTRACTS.FastSwitchboard,
       filterChains: chains,
       filterSiblingChains: siblings,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },
@@ -193,6 +198,7 @@ export const configureRoles = async (
       contractName: CORE_CONTRACTS.OptimisticSwitchboard,
       filterChains: chains,
       filterSiblingChains: siblings,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },
@@ -229,6 +235,7 @@ export const configureRoles = async (
       contractName: CORE_CONTRACTS.NativeSwitchboard,
       filterChains: chains,
       filterSiblingChains: siblings,
+      safeChains,
       sendTransaction,
       newRoleStatus,
     },

@@ -5,12 +5,12 @@ export const optimisticSwitchboard = (
   chainSlug: ChainSlug,
   socketAddress: string,
   sigVerifierAddress: string,
-  signerAddress: string
+  owner: string
 ) => {
   return {
     contractName: CORE_CONTRACTS.OptimisticSwitchboard,
     args: [
-      signerAddress,
+      owner,
       socketAddress,
       chainSlug,
       timeout(chainSlug),

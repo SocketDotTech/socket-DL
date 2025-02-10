@@ -1,6 +1,27 @@
 {
   "1": [
     [
+      "0x8C9167AA4c755528FBd9cD30432A5Cf64E8c7FE0",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0xa8165F6a303A6C07Ce3C784b8ABCc595a04e6506"
+      ]
+    ],
+    [
+      "0x8452A27F7523BAfE07c8Fd5BaFA53B5A7eD3aE00",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0xa8165F6a303A6C07Ce3C784b8ABCc595a04e6506",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0x38a4418329E72580443e30AB374188b6Cea1f867",
       "SocketSimulator",
       "contracts/mocks/fee-updater/SocketSimulator.sol",
@@ -227,6 +248,33 @@
   ],
   "10": [
     [
+      "0x38a07b7A7a8D072E09bbBF2FA294D01A8af8b3dC",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x040758ff02716bFd8FA5FEF65C71641a640fd3F0"
+      ]
+    ],
+    [
+      "0xC29AE19a421ff63A3efc549ec11B4c07b888e90A",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x040758ff02716bFd8FA5FEF65C71641a640fd3F0",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
+      "0x1E8FAa44be025Fab9474078551EAd6d9590CF3F3",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0x540B35F5A42418061FB546C4149Fa534aA02a48C",
       "SocketSimulator",
       "contracts/mocks/fee-updater/SocketSimulator.sol",
@@ -328,6 +376,33 @@
     ]
   ],
   "56": [
+    [
+      "0xA423B934b64316a206582Bb582043849F198d750",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0xBa2BfE778633372D16af24569B9ae0f91fBA19dd"
+      ]
+    ],
+    [
+      "0xd8AA4C07820470E2f28BF96F40bc01cDB0338CFA",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0xBa2BfE778633372D16af24569B9ae0f91fBA19dd",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
+      "0x4Fa55D74032F43153405cd17C52479286C5ddC2C",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0xe8F4558f3051DaD88e65A3e15a285Ae1E0614A4B",
       "SocketSimulator",
@@ -538,6 +613,27 @@
   ],
   "100": [
     [
+      "0x1D56e8BF3050EE3bA387e84e399cBeaE8974aafe",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x6ee3907D1B9423584195979812379143B327fb48"
+      ]
+    ],
+    [
+      "0xbaF4a260B47544C7f2F44aBb7f1Aea733f5Cb08c",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x6ee3907D1B9423584195979812379143B327fb48",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0x525a6489a1df5fF1ae077fAf628E43b7F52298eF",
       "SocketSimulator",
       "contracts/mocks/fee-updater/SocketSimulator.sol",
@@ -557,6 +653,27 @@
     ]
   ],
   "137": [
+    [
+      "0x0B0220c1a41F9f0eb0064278808354f3C4e9858e",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0xe49027b6e47dcFd9B059F7Ba13bd62e21E4e262A"
+      ]
+    ],
+    [
+      "0x2d8d2905C252dF23cb62AEcaB3B317BF68Cf1137",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0xe49027b6e47dcFd9B059F7Ba13bd62e21E4e262A",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0x3b103Ada40478B169095063fC4bABa667f20BA45",
       "SwitchboardSimulator",
@@ -831,6 +948,45 @@
   ],
   "146": [
     [
+      "0xE0aCD26E4c97af97c893e66825BF798Fa83DBa56",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x1C4E51f453df3208A01EE8AF9f6420FDf02D373a"
+      ]
+    ],
+    [
+      "0xeA964e160dEaed1960E31a20c1fA57D079d4e616",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x1C4E51f453df3208A01EE8AF9f6420FDf02D373a",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
+      "0xf0fA7929546aA1987b6ce47aC16A9F8921207F07",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
+      "0xe8F4558f3051DaD88e65A3e15a285Ae1E0614A4B",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
+      "0xF522AdbDBe0a7b6F6c96443bF9F5474B223AC80C",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0xd9E3a8Ba9Be55919C5C0De6694e3103F5a35820E",
       "SwitchboardSimulator",
       "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
@@ -956,6 +1112,27 @@
   ],
   "169": [
     [
+      "0xffe81B87bcDd6F816eC258050ABD03cB6Ea28D2E",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x1945b1D31386178cc112F1C507E6bC39A29Ed6B3"
+      ]
+    ],
+    [
+      "0x86b0335304132A56F90F0389C2d311F18E9208D0",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x1945b1D31386178cc112F1C507E6bC39A29Ed6B3",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0x525a6489a1df5fF1ae077fAf628E43b7F52298eF",
       "SocketSimulator",
       "contracts/mocks/fee-updater/SocketSimulator.sol",
@@ -975,6 +1152,27 @@
     ]
   ],
   "196": [
+    [
+      "0xf200705d32fD1ED4A840610B756F12570c0ddE39",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x5DcD801E126DA7c918EEe0284399840Ae407CA5e"
+      ]
+    ],
+    [
+      "0x665d762E810883Ed5b3faD8F7ea81317EDefEa5e",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x5DcD801E126DA7c918EEe0284399840Ae407CA5e",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0xd9E3a8Ba9Be55919C5C0De6694e3103F5a35820E",
       "SwitchboardSimulator",
@@ -1100,6 +1298,27 @@
     ]
   ],
   "204": [
+    [
+      "0x1945b1D31386178cc112F1C507E6bC39A29Ed6B3",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0xE2bB0b95646a0E499e9b9c29A7EC5BE5f3513F05"
+      ]
+    ],
+    [
+      "0x0EE2cBeb853142E6d1BF46338A73999fD4023332",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0xE2bB0b95646a0E499e9b9c29A7EC5BE5f3513F05",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0x525a6489a1df5fF1ae077fAf628E43b7F52298eF",
       "SocketSimulator",
@@ -1380,6 +1599,33 @@
     ]
   ],
   "404": [
+    [
+      "0xF522AdbDBe0a7b6F6c96443bF9F5474B223AC80C",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0xffe81B87bcDd6F816eC258050ABD03cB6Ea28D2E"
+      ]
+    ],
+    [
+      "0xdF32FA09180F73E49C2531409d0DDa2Cd2df47Df",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0xffe81B87bcDd6F816eC258050ABD03cB6Ea28D2E",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
+      "0xCa43c4e7f07c0DCDBe1aCf67A770334653F9c98E",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0xB93bBbea105A1C93a2a443F1B44C1019e72565c1",
       "SwitchboardSimulator",
@@ -2153,6 +2399,27 @@
   ],
   "957": [
     [
+      "0xb8d0Cd5816744FF556c2ead5c092cef7Ffe4d0BF",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x1D79F3af314CA93F7d8B608c97336f41524D44ed"
+      ]
+    ],
+    [
+      "0xE1208BFef6661cB4C2A03B46278A8a03de35fa91",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x1D79F3af314CA93F7d8B608c97336f41524D44ed",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0xE2bB0b95646a0E499e9b9c29A7EC5BE5f3513F05",
       "SwitchboardSimulator",
       "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
@@ -2557,6 +2824,27 @@
   ],
   "1101": [
     [
+      "0x3B250ef646f970Dc56AE8EebDdB01f7707e757fF",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x511B2cb97E3DD25083C1654c54b57EB1CF0824b7"
+      ]
+    ],
+    [
+      "0xb1b93173FecaDBd89cb94F446a1E6bCEF50e8344",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x511B2cb97E3DD25083C1654c54b57EB1CF0824b7",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0x525a6489a1df5fF1ae077fAf628E43b7F52298eF",
       "SocketSimulator",
       "contracts/mocks/fee-updater/SocketSimulator.sol",
@@ -2666,6 +2954,27 @@
     ]
   ],
   "2999": [
+    [
+      "0x74EBb564b92A3F7AcfFeb8aF3b322831bF57ac22",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x3B250ef646f970Dc56AE8EebDdB01f7707e757fF"
+      ]
+    ],
+    [
+      "0xa4BC320775c0196176B5D4C31a76f7a1b6d89161",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x3B250ef646f970Dc56AE8EebDdB01f7707e757fF",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0xb8d0Cd5816744FF556c2ead5c092cef7Ffe4d0BF",
       "SwitchboardSimulator",
@@ -2931,6 +3240,27 @@
   ],
   "5000": [
     [
+      "0x4dC25D9d3ee57018998A50e912F40f6384947Ff5",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0xc5697260cE121cb00bb99F5e7f5CCc59977040a6"
+      ]
+    ],
+    [
+      "0x31B111B2197971fC982B1A507024Cc0d0E83273C",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0xc5697260cE121cb00bb99F5e7f5CCc59977040a6",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0x1Ac062d8dE227Ca4E7Df2A34E9489bC845b11773",
       "SwitchboardSimulator",
       "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
@@ -3123,7 +3453,42 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
+  "7887": [
+    [
+      "0x10eC45De78BDfE26Cefb953F604E18BF70904FBa",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x134633394c8Cef32a671B6Fed5e99b4B6466f4e4",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ]
+  ],
   "7897": [
+    [
+      "0x5175B4fC72A33d1f9Fb48A0B955B6C24e9C30331",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x507d63C5325773ebA03c4652f3568356F6Fc0a3F"
+      ]
+    ],
+    [
+      "0x1ae5a864f708d5118fC5a8dC54CafeDFCf20e00d",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x507d63C5325773ebA03c4652f3568356F6Fc0a3F",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0xd9E3a8Ba9Be55919C5C0De6694e3103F5a35820E",
       "SwitchboardSimulator",
@@ -3249,6 +3614,27 @@
     ]
   ],
   "8008": [
+    [
+      "0xAe96e8Bd18D1652154306B55b56c20aE545C054b",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x36E06128dBFA24B2980CD4c8d4c63A93bFC2327B"
+      ]
+    ],
+    [
+      "0xE2bB0b95646a0E499e9b9c29A7EC5BE5f3513F05",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x36E06128dBFA24B2980CD4c8d4c63A93bFC2327B",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0xDA27f00E7E35D9f396427457926D5420CA5FB948",
       "SwitchboardSimulator",
@@ -3482,6 +3868,27 @@
     ]
   ],
   "8453": [
+    [
+      "0x38D1Ff7afc4C32bEe9d507652E4e5d639FF83AB9",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0xCe6A81cc7357584aa2760e1F24c73D1F29e64D60"
+      ]
+    ],
+    [
+      "0x3304c48872C4b3B9b0CaC1aEcaB2aB8e8c8Aa9d1",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0xCe6A81cc7357584aa2760e1F24c73D1F29e64D60",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0x57cA482C7dc749B2A26747Ed2915560c2401262F",
       "SwitchboardSimulator",
@@ -3809,6 +4216,27 @@
   ],
   "34443": [
     [
+      "0xF34411eE2940Fe5fc6c6228130e2EeF12b1f3E49",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x10C700641F48DA53434439BF2dA21A4C27091221"
+      ]
+    ],
+    [
+      "0x3b103Ada40478B169095063fC4bABa667f20BA45",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x10C700641F48DA53434439BF2dA21A4C27091221",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0x0E20397CaeAb9423939618003DB58d9119740301",
       "SwitchboardSimulator",
       "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
@@ -4041,6 +4469,27 @@
     ]
   ],
   "42161": [
+    [
+      "0x24C63DE0CC6D6c25D09556065dFb86b86919C9d3",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x27952a4ca6231BD45245C8596899996DbB6A0aAe"
+      ]
+    ],
+    [
+      "0xd6c78A4abc35bD0C3671f28dF847102C6e85E6B7",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x27952a4ca6231BD45245C8596899996DbB6A0aAe",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0xc5697260cE121cb00bb99F5e7f5CCc59977040a6",
       "SwitchboardSimulator",
@@ -4338,6 +4787,27 @@
   ],
   "43114": [
     [
+      "0xb40FdECfCa4EF29CACc37222Ce4dB1fd0f561a00",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0xCD83F432491c3Ed08B34F74Df7341EEb060dB34e"
+      ]
+    ],
+    [
+      "0xB2f07C30dF3bf4049428f5704397bE57dBAc35e9",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0xCD83F432491c3Ed08B34F74Df7341EEb060dB34e",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0xb4Db1838d0B97BD58C7663b3E487eEbC9a996472",
       "SocketSimulator",
       "contracts/mocks/fee-updater/SocketSimulator.sol",
@@ -4483,6 +4953,27 @@
   ],
   "47763": [
     [
+      "0x1Ac062d8dE227Ca4E7Df2A34E9489bC845b11773",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x1141efbA7aDed9eECAa27C785d9bd50C51E54c88"
+      ]
+    ],
+    [
+      "0xb07B3CfB1F0AaB839cbf84D2FB9442DebDDbDd2a",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x1141efbA7aDed9eECAa27C785d9bd50C51E54c88",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0x8Bc50b98B55F42DD3966e9b428AF3581386B7Fa6",
       "ExecutionManagerDF",
       "contracts/ExecutionManagerDF.sol",
@@ -4619,6 +5110,27 @@
   ],
   "57073": [
     [
+      "0xc2588658629b897D61B45c87D67F1f823de46527",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x928D2F08A579fEB13fe26c13d5F18fCff077743F"
+      ]
+    ],
+    [
+      "0xd8c6fB10Fc47a4536C4b56f4529B4a49be235900",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x928D2F08A579fEB13fe26c13d5F18fCff077743F",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
       "0xd9E3a8Ba9Be55919C5C0De6694e3103F5a35820E",
       "SwitchboardSimulator",
       "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
@@ -4743,6 +5255,27 @@
     ]
   ],
   "59144": [
+    [
+      "0x7eAE8a3F4186e3B5ABdD712093Bcd62115Eb7de2",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x43F3dD32d23B551ECBbB7c390368b960d168D063"
+      ]
+    ],
+    [
+      "0x4dC25D9d3ee57018998A50e912F40f6384947Ff5",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x43F3dD32d23B551ECBbB7c390368b960d168D063",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0x58f1693e84B80799B85106c13fb759DB7C5EF35D",
       "SocketSimulator",
@@ -4892,6 +5425,27 @@
     ]
   ],
   "63157": [
+    [
+      "0xbF4CA7837E3AFe1702123d3FAee81D307273B4FE",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0x44A44837894B5eDC2Bde64567FC62599b3b88F4C",
+        "0x8AF70D097549D604d6D32E687dba243BAf2D9484"
+      ]
+    ],
+    [
+      "0x1465F2619D793FDb2307321C5f977D55184C6B8c",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x8AF70D097549D604d6D32E687dba243BAf2D9484",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0x22891c72dE565d884Dfd762B8df7C4632888a93A",
       "SocketSimulator",
@@ -5249,6 +5803,27 @@
     ]
   ],
   "81457": [
+    [
+      "0xc08203DDC09b0dbB5d1f1759093876Db7e3f8272",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x3431fCFB44597f18E38744a3156a916A388BA4D0"
+      ]
+    ],
+    [
+      "0x3B250ef646f970Dc56AE8EebDdB01f7707e757fF",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x3431fCFB44597f18E38744a3156a916A388BA4D0",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0xE2bB0b95646a0E499e9b9c29A7EC5BE5f3513F05",
       "SwitchboardSimulator",
@@ -5636,6 +6211,27 @@
     ]
   ],
   "421614": [
+    [
+      "0x3553c0102684c20e2f8192d6F013c7242710b4b3",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x487d6D67AC31f194f96158ADB3511Fd776f19aA4",
+      "MultiSigWrapper",
+      "contracts/utils/MultiSigWrapper.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x30b4a6E57a7A5a0079C201ed9f0B9a0b15F10280"
+      ]
+    ],
+    [
+      "0x30b4a6E57a7A5a0079C201ed9f0B9a0b15F10280",
+      "SafeL2",
+      "contracts/utils/SafeL2.sol",
+      []
+    ],
     [
       "0xB6A8A2290Dbca04e848404dFa8EA971e35e795e4",
       "SwitchboardSimulator",
@@ -6279,6 +6875,39 @@
     ]
   ],
   "777777": [
+    [
+      "0x5a0e01ED2be962a16cF56DFb6C3F252adED4483c",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0xB9a9268fB56286f6Cb8144751B08aCA991DB0cD0"
+      ]
+    ],
+    [
+      "0x68b393f237478249e4fD37F78aff4862e9BffAb5",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0xB9a9268fB56286f6Cb8144751B08aCA991DB0cD0",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
+      "0x45443364238Ffe9AA3E2F5af318531E679D5804f",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
+    [
+      "0xd8c6fB10Fc47a4536C4b56f4529B4a49be235900",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0x36E06128dBFA24B2980CD4c8d4c63A93bFC2327B",
       "SwitchboardSimulator",
@@ -7029,6 +7658,27 @@
   ],
   "11155111": [
     [
+      "0xD3F39174Ee7937381e19d682FfEa40968266FA3E",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0xf5cAdaA4769AA6c061224602b687affb5119D5e8",
+      "MultiSigWrapper",
+      "contracts/utils/MultiSigWrapper.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x5A9e4208FEa3159A81eb9F15c82f6170b3c5DC3f"
+      ]
+    ],
+    [
+      "0x5A9e4208FEa3159A81eb9F15c82f6170b3c5DC3f",
+      "SafeL2",
+      "contracts/utils/SafeL2.sol",
+      []
+    ],
+    [
       "0x74af6d7b484729384342dd68C60D73A3bF7081DF",
       "SwitchboardSimulator",
       "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
@@ -7463,6 +8113,33 @@
     ]
   ],
   "11155420": [
+    [
+      "0xDE418B9F4aCecC5b87B6f27BfFBaE8932473883e",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x765CFbB5efc15A384c24828e782DcffA3f9690fB",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x91e4c4CE0B693058b7f5e05fAFD6cfC1Af75c76B",
+      "MultiSigWrapper",
+      "contracts/utils/MultiSigWrapper.sol",
+      [
+        "0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34",
+        "0x61c4aB6b05DaE9B4E3F5C16c8E2ec635a473526b"
+      ]
+    ],
+    [
+      "0x61c4aB6b05DaE9B4E3F5C16c8E2ec635a473526b",
+      "SafeL2",
+      "contracts/utils/SafeL2.sol",
+      []
+    ],
     [
       "0x2eb0e1A4194204c6881eF13CdFE6e539b53564C9",
       "SwitchboardSimulator",
@@ -8223,6 +8900,27 @@
     ]
   ],
   "1324967486": [
+    [
+      "0x1BE2023b6E5C07c1205FB8e3E54E68262BF50E62",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x2d677BAB6FAF54f480176c84660e7A5AadC85E57"
+      ]
+    ],
+    [
+      "0xC7952F73f1f4FF7F65b35d35CBCf2a8255da7438",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x2d677BAB6FAF54f480176c84660e7A5AadC85E57",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ],
     [
       "0x6873ED2dda63e44C2F655Dd093ceb6DCA96e5Fc3",
       "SwitchboardSimulator",

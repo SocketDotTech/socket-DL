@@ -28,4 +28,5 @@ export const icons = {
   [ChainSlug.ARENA_Z]: "",
   [ChainSlug.INK]: "",
   [ChainSlug.SONIC]: "",
+  [ChainSlug.BASE_SEPOLIA]: "",
 };

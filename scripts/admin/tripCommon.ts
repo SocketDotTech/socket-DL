@@ -1,4 +1,4 @@
-import { BigNumberish, Contract, Wallet, utils } from "ethers";
+import { BigNumberish } from "ethers";
 import {
   IntegrationTypes,
   ChainSlug,
@@ -6,12 +6,8 @@ import {
   isTestnet,
   isMainnet,
 } from "../../src";
-import { mode, overrides } from "../deploy/config/config";
-import {
-  getAllAddresses,
-  DeploymentAddresses,
-  ROLES,
-} from "@socket.tech/dl-core";
+import { mode } from "../deploy/config/config";
+import { getAllAddresses, DeploymentAddresses } from "@socket.tech/dl-core";
 import dotenv from "dotenv";
 
 dotenv.config();

@@ -1,22 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.19;
 
-import "forge-std/Test.sol";
-import "../contracts/utils/MultiSigWrapper.sol";
-import "../contracts/mocks/MockSafe.sol";
+import {Test} from "forge-std/Test.sol";
+import "../contracts/utils/multisig/MultiSigWrapper.sol";
+import {MockSafe} from "../contracts/mocks/MockSafe.sol";
 
 contract MultiSigWrapperTestHelper is MultiSigWrapper {
     constructor(address owner_, address safe_) MultiSigWrapper(owner_, safe_) {}
 
     function publicGetSignatures(
-        bytes32 txHash_,
-        uint256 threshold_
-    ) external returns (bytes memory) {
-        return _getSignatures(txHash_, threshold_);
+        bytes32 dataHash_,
+        uint256 nonce_
+    ) external view returns (bytes memory) {
+        return _getSignatures(dataHash_, nonce_);
     }
 
-    function getOwners(bytes32 txHash_) external returns (address[] memory) {
-        return owners[txHash_];
+    function getOwners(
+        bytes32 dataHash_,
+        uint256 nonce_
+    ) external view returns (address[] memory) {
+        return owners[dataHash_][nonce_];
     }
 }
 
@@ -127,9 +130,7 @@ contract MultiSigWrapperTest is Test {
         bytes memory signature2 = "0x5";
         bytes memory signature3 = "0x6";
 
-        bytes32 txHash = keccak256(
-            abi.encode(to, value, data, Enum.Operation.Call, mockSafe.nonce())
-        );
+        bytes32 dataHash = keccak256(abi.encode(to, value, data));
 
         // Store first signature
         multiSigWrapper.storeOrRelaySignatures(
@@ -140,8 +141,11 @@ contract MultiSigWrapperTest is Test {
             data,
             signature1
         );
-        bytes memory signature = multiSigWrapper.signatures(txHash, addr1);
-        // address sigOwner = multiSigWrapper.owners(txHash, 1);
+        (, bytes memory signature) = multiSigWrapper.safeParams(
+            dataHash,
+            addr1
+        );
+        // address sigOwner = multiSigWrapper.owners(dataHash, 1);
         // assertEq(owner, addr1);
         assertEq(signature, signature1);
 
@@ -154,8 +158,8 @@ contract MultiSigWrapperTest is Test {
             data,
             signature2
         );
-        signature = multiSigWrapper.signatures(txHash, addr2);
-        // sigOwner = multiSigWrapper.owners(txHash, 2);
+        (, signature) = multiSigWrapper.safeParams(dataHash, addr2);
+        // sigOwner = multiSigWrapper.owners(dataHash, 2);
         // assertEq(owner, addr2);
         assertEq(signature, signature2);
 
@@ -168,14 +172,14 @@ contract MultiSigWrapperTest is Test {
             data,
             signature3
         );
-        signature = multiSigWrapper.signatures(txHash, addr3);
-        // sigOwner = multiSigWrapper.owners(txHash, 3);
+        (, signature) = multiSigWrapper.safeParams(dataHash, addr3);
+        // sigOwner = multiSigWrapper.owners(dataHash, 3);
         // assertEq(owner, addr3);
         assertEq(signature, signature3);
 
         bytes memory combinedSign = multiSigWrapper.publicGetSignatures(
-            txHash,
-            3
+            dataHash,
+            mockSafe.nonce()
         );
         bytes memory expectedSign = abi.encodePacked(signature1, signature2);
         expectedSign = abi.encodePacked(expectedSign, signature3);
@@ -204,9 +208,7 @@ contract MultiSigWrapperTest is Test {
         bytes memory signature2 = "0x5";
         bytes memory signature3 = "0x6";
 
-        bytes32 txHash = keccak256(
-            abi.encode(to, value, data, Enum.Operation.Call, mockSafe.nonce())
-        );
+        bytes32 dataHash = keccak256(abi.encode(to, value, data));
 
         // Store third signature
         multiSigWrapper.storeOrRelaySignatures(
@@ -217,7 +219,7 @@ contract MultiSigWrapperTest is Test {
             data,
             signature3
         );
-        bytes memory signature = multiSigWrapper.signatures(txHash, addr3);
+        bytes memory signature = multiSigWrapper.getSignature(dataHash, addr3);
         assertEq(signature, signature3);
 
         // Store second signature
@@ -229,7 +231,7 @@ contract MultiSigWrapperTest is Test {
             data,
             signature2
         );
-        signature = multiSigWrapper.signatures(txHash, addr2);
+        (, signature) = multiSigWrapper.safeParams(dataHash, addr2);
         assertEq(signature, signature2);
 
         // Store first signature
@@ -241,12 +243,12 @@ contract MultiSigWrapperTest is Test {
             data,
             signature1
         );
-        signature = multiSigWrapper.signatures(txHash, addr1);
+        (, signature) = multiSigWrapper.safeParams(dataHash, addr1);
         assertEq(signature, signature1);
 
         bytes memory combinedSign = multiSigWrapper.publicGetSignatures(
-            txHash,
-            3
+            dataHash,
+            mockSafe.nonce()
         );
         bytes memory expectedSign = abi.encodePacked(signature1, signature2);
         expectedSign = abi.encodePacked(expectedSign, signature3);

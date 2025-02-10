@@ -1,7 +1,4 @@
-import {
-  getDefaultIntegrationType,
-  getProviderFromChainSlug,
-} from "../../constants";
+import { getDefaultIntegrationType } from "../../constants";
 import { getInstance } from "../utils";
 import {
   ChainSlug,
@@ -12,14 +9,16 @@ import {
   TestnetIds,
   isTestnet,
 } from "../../../src";
-import { Contract, Wallet } from "ethers";
+import { Contract } from "ethers";
 import { getSwitchboardAddressFromAllAddresses } from "../../../src";
 import { overrides } from "../config/config";
+import { getSocketSigner } from "../utils/socket-signer";
 
 export const connectPlugs = async (
   addresses: DeploymentAddresses,
   chains: ChainSlug[],
-  siblings: ChainSlug[]
+  siblings: ChainSlug[],
+  safeChains: ChainSlug[]
 ) => {
   try {
     console.log("=========== connecting plugs ===========");
@@ -27,13 +26,14 @@ export const connectPlugs = async (
       chains.map(async (chain) => {
         if (!addresses[chain]) return;
 
-        const providerInstance = getProviderFromChainSlug(chain);
-        const socketSigner: Wallet = new Wallet(
-          process.env.SOCKET_SIGNER_KEY as string,
-          providerInstance
+        const addr: ChainSocketAddresses = addresses[chain]!;
+        const socketSigner = await getSocketSigner(
+          chain,
+          addr,
+          safeChains.includes(chain),
+          !safeChains.includes(chain)
         );
 
-        const addr: ChainSocketAddresses = addresses[chain]!;
         if (!addr["integrations"]) return;
 
         // const list = isTestnet(chain) ? TestnetIds : MainnetIds;
@@ -60,6 +60,9 @@ export const connectPlugs = async (
           await getInstance("Socket", addr["Socket"])
         ).connect(socketSigner);
 
+        const owner = await counter.owner();
+        if (owner.toLowerCase() !== socketSigner.address.toLowerCase()) return;
+
         for (let index = 0; index < siblings.length; index++) {
           const sibling = siblings[index];
           const siblingCounter = addresses?.[sibling]?.["Counter"];
@@ -69,7 +72,7 @@ export const connectPlugs = async (
               addresses,
               chain,
               sibling,
-              siblingIntegrationtype[index]
+              siblingIntegrationType[index]
             );
           } catch (error) {
             console.log(error, " continuing");
@@ -97,7 +100,7 @@ export const connectPlugs = async (
           );
 
           console.log(
-            `Connecting counter of ${chain} for ${sibling} and ${siblingIntegrationtype[index]} at tx hash: ${tx.hash}`
+            `Connecting counter of ${chain} for ${sibling} and ${siblingIntegrationType[index]} at tx hash: ${tx.hash}`
           );
           await tx.wait();
         }

@@ -63,4 +63,5 @@ export const rpcs = {
   [ChainSlug.ARENA_Z]: checkEnvValue("ARENA_Z_RPC"),
   [ChainSlug.INK]: checkEnvValue("INK_RPC"),
   [ChainSlug.SONIC]: checkEnvValue("SONIC_RPC"),
+  [ChainSlug.BASE_SEPOLIA]: checkEnvValue("BASE_SEPOLIA_RPC"),
 };

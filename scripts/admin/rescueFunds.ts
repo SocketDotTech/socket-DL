@@ -98,8 +98,8 @@ const createContractAddrArray = (
 ): string[] => {
   let addresses: string[] = [];
 
-  if (chainAddresses.ExecutionManager)
-    addresses.push(chainAddresses.ExecutionManager);
+  if (chainAddresses.ExecutionManagerDF)
+    addresses.push(chainAddresses.ExecutionManagerDF);
   if (chainAddresses.OpenExecutionManager)
     addresses.push(chainAddresses.OpenExecutionManager);
 

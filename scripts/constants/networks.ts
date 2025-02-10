@@ -20,7 +20,6 @@ import {
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
 
-export const chainSlugReverseMap = createReverseEnumMap(ChainSlug);
 function createReverseEnumMap(enumObj: any) {
   const reverseMap = new Map<string, string>();
   for (const [key, value] of Object.entries(enumObj)) {
@@ -28,9 +27,10 @@ function createReverseEnumMap(enumObj: any) {
   }
   return reverseMap;
 }
+export const chainIdReverseMap = createReverseEnumMap(ChainId);
 
 export const chainIdToSlug = (chainId: ChainId) => {
-  const chainName = chainSlugReverseMap.get(chainId.toString());
+  const chainName = chainIdReverseMap.get(chainId.toString());
   return ChainSlug[chainName as keyof typeof ChainSlug];
 };
 
@@ -54,6 +54,10 @@ export function getJsonRpcUrl(chain: ChainSlug): string {
 export const getProviderFromChainSlug = (chainSlug: ChainSlug) => {
   const jsonRpcUrl = getJsonRpcUrl(chainSlug);
   return new ethers.providers.StaticJsonRpcProvider(jsonRpcUrl);
+};
+
+export const getProviderFromChainId = (chainId: ChainId) => {
+  return getProviderFromChainSlug(chainIdToSlug(chainId));
 };
 
 export const getProviderFromChainName = (chainName: HardhatChainName) => {
