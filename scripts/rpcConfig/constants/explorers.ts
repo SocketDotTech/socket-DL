@@ -33,4 +33,5 @@ export const explorers = {
   [ChainSlug.BASE_SEPOLIA]: "https://sepolia.basescan.org/",
   [ChainSlug.BERA]: "https://berascan.com/",
   [ChainSlug.B3]: "https://explorer.b3.fun/",
+  [ChainSlug.UNICHAIN]: "https://unichain.blockscout.com/",
 };

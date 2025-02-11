@@ -62,4 +62,5 @@ export enum HardhatChainName {
   BASE_SEPOLIA = "base_sepolia",
   BERA = "bera",
   B3 = "b3",
+  UNICHAIN = "unichain",
 }
