@@ -62,4 +62,5 @@ export enum ChainId {
   BASE_SEPOLIA = 84532,
   BERA = 80094,
   B3 = 8333,
+  UNICHAIN = 130,
 }

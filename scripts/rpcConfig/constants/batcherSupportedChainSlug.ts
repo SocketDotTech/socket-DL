@@ -54,4 +54,5 @@ export const batcherSupportedChainSlugs = [
   // ChainSlug.BASE_SEPOLIA,
   ChainSlug.BERA,
   ChainSlug.B3,
+  ChainSlug.UNICHAIN,
 ];

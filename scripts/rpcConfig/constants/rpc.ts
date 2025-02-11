@@ -66,4 +66,5 @@ export const rpcs = {
   [ChainSlug.BASE_SEPOLIA]: checkEnvValue("BASE_SEPOLIA_RPC"),
   [ChainSlug.BERA]: checkEnvValue("BERA_RPC"),
   [ChainSlug.B3]: checkEnvValue("B3_RPC"),
+  [ChainSlug.UNICHAIN]: checkEnvValue("UNICHAIN_RPC"),
 };
