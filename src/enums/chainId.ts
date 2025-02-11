@@ -61,4 +61,5 @@ export enum ChainId {
   SONIC = 146,
   BASE_SEPOLIA = 84532,
   BERA = 80094,
+  B3 = 8333,
 }
