@@ -19,28 +19,17 @@ dotenvConfig();
 /**
  * Usage
  *
- * --newowner       Specify the new owner to be nominated.
- *                  This flag is required.
- *                  Eg. npx --newowner=0x5f34 ts-node scripts/admin/rotate-owner/1-nominate.ts
- *
  * --sendtx         Send nominate tx along with ownership check.
  *                  Default is only check owner, nominee.
- *                  Eg. npx --newowner=0x5f34 --sendtx ts-node scripts/admin/rotate-owner/1-nominate.ts
+ *                  Eg. npx --sendtx ts-node scripts/admin/rotate-owner/1-nominate-multisig.ts
  *
  * --chains         Run only for specified chains.
  *                  Default is all chains.
- *                  Eg. npx --newowner=0x5f34 --chains=10,2999 ts-node scripts/admin/rotate-owner/1-nominate.ts
+ *                  Eg. npx --chains=10,2999 ts-node scripts/admin/rotate-owner/1-nominate-multisig.ts
  *
  * --testnets       Run for testnets.
  *                  Default is false.
  */
-
-// let newOwner = process.env.npm_config_newowner;
-// if (!newOwner) {
-//   console.error("Error: newowner flag is required");
-//   process.exit(1);
-// }
-// newOwner = newOwner.toLowerCase();
 
 const signerKey = process.env.SOCKET_SIGNER_KEY;
 if (!signerKey) {
