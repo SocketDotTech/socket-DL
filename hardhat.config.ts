@@ -5,6 +5,7 @@ import "hardhat-preprocessor";
 import "hardhat-deploy";
 import "hardhat-abi-exporter";
 import "hardhat-change-network";
+import "@nomicfoundation/hardhat-verify";
 // import "@matterlabs/hardhat-zksync";
 
 import { config as dotenvConfig } from "dotenv";
@@ -120,6 +121,9 @@ if (isProduction) {
     [HardhatChainName.OPBNB]: getChainConfig(ChainSlug.OPBNB),
     [HardhatChainName.GEIST]: getChainConfig(ChainSlug.GEIST),
     [HardhatChainName.SONIC]: getChainConfig(ChainSlug.SONIC),
+    [HardhatChainName.BERA]: getChainConfig(ChainSlug.BERA),
+    [HardhatChainName.B3]: getChainConfig(ChainSlug.B3),
+    [HardhatChainName.UNICHAIN]: getChainConfig(ChainSlug.UNICHAIN),
   };
 }
 
@@ -172,7 +176,10 @@ const config: HardhatUserConfig = {
       manta_pacific: process.env.MANTA_PACIFIC_API_KEY || "none",
       opbnb: process.env.OPBNB_API_KEY || "none",
       geist: process.env.GEIST_API_KEY || "none",
-      sonic: process.env.SONIC_API_KEY || "none",
+      sonic: process.env.SONICSCAN_API_KEY || "",
+      berascan: process.env.BERASCAN_API_KEY || "",
+      b3: process.env.B3_API_KEY || "none",
+      unichain: process.env.UNICHAIN_API_KEY || "none",
     },
     customChains: [
       {
@@ -339,8 +346,32 @@ const config: HardhatUserConfig = {
         network: "sonic",
         chainId: ChainId.SONIC,
         urls: {
-          apiURL: "https://api.soniclabs.com/api",
-          browserURL: "https://rpc.soniclabs.com/",
+          apiURL: "https://api.sonicscan.org/api",
+          browserURL: "https://sonicscan.org/",
+        },
+      },
+      {
+        network: "berascan",
+        chainId: ChainId.BERA,
+        urls: {
+          apiURL: "https://api.berascan.com/api",
+          browserURL: "https://berascan.com/",
+        },
+      },
+      {
+        network: "b3",
+        chainId: ChainId.B3,
+        urls: {
+          apiURL: "https://explorer.b3.fun/api",
+          browserURL: "https://explorer.b3.fun/",
+        },
+      },
+      {
+        network: "unichain",
+        chainId: ChainId.UNICHAIN,
+        urls: {
+          apiURL: "https://unichain.blockscout.com/api",
+          browserURL: "https://unichain.blockscout.com/",
         },
       },
     ],
