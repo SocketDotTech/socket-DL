@@ -3,7 +3,7 @@ import { config as dotenvConfig } from "dotenv";
 dotenvConfig();
 
 import { Contract, Wallet, ethers } from "ethers";
-import { mode, overrides } from "../deploy/config/config";
+import { mode, overrides, ownerAddresses } from "../deploy/config/config";
 import { getProviderFromChainSlug } from "../constants";
 
 import {
@@ -16,6 +16,8 @@ import {
   isTestnet,
 } from "../../src";
 import { formatEther } from "ethers/lib/utils";
+import { getSocketSigner } from "../deploy/utils/socket-signer";
+import { deploymentMode } from "../rpcConfig/rpcConfig";
 
 /**
  * Usable flags
@@ -148,9 +150,12 @@ export const main = async () => {
         const providerInstance = getProviderFromChainSlug(
           parseInt(chainSlug) as ChainSlug
         );
-        const signer: Wallet = new ethers.Wallet(
-          process.env.SOCKET_SIGNER_KEY as string,
-          providerInstance
+
+        const signer = await getSocketSigner(
+          parseInt(chainSlug),
+          chainAddresses,
+          chainAddresses["SocketSafeProxy"] ? true : false,
+          true
         );
 
         const contractAddr = createContractAddrArray(chainAddresses);
@@ -187,7 +192,7 @@ export const main = async () => {
             try {
               const tx = await contractInstance.rescueFunds(
                 ETH_ADDRESS,
-                signer.address,
+                ownerAddresses[deploymentMode],
                 rescueAmount,
                 { ...(await overrides(parseInt(chainSlug))) }
               );
