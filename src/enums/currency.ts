@@ -21,4 +21,5 @@ export const Currency = {
   [ChainSlug.GEIST]: NativeTokens["aavegotchi"],
   [ChainSlug.SONIC]: NativeTokens["fantom"],
   [ChainSlug.BERA]: NativeTokens["berachain-bera"],
+  [ChainSlug.MONAD_TESTNET]: NativeTokens["monad"],
 };

@@ -34,4 +34,5 @@ export const explorers = {
   [ChainSlug.BERA]: "https://berascan.com/",
   [ChainSlug.B3]: "https://explorer.b3.fun/",
   [ChainSlug.UNICHAIN]: "https://unichain.blockscout.com/",
+  [ChainSlug.MONAD_TESTNET]: "https://monad-testnet.socialscan.io/",
 };

@@ -32,4 +32,5 @@ export const icons = {
   [ChainSlug.BERA]: "",
   [ChainSlug.B3]: "",
   [ChainSlug.UNICHAIN]: "",
+  [ChainSlug.MONAD_TESTNET]: "",
 };

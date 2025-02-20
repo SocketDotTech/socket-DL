@@ -14,4 +14,5 @@ export enum NativeTokens {
   "aavegotchi" = "aavegotchi",
   "fantom" = "fantom",
   "berachain-bera" = "berachain-bera",
+  "monad" = "monad",
 }

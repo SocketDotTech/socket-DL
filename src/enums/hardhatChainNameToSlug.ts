@@ -66,4 +66,5 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.BERA]: ChainSlug.BERA,
   [HardhatChainName.B3]: ChainSlug.B3,
   [HardhatChainName.UNICHAIN]: ChainSlug.UNICHAIN,
+  [HardhatChainName.MONAD_TESTNET]: ChainSlug.MONAD_TESTNET,
 };

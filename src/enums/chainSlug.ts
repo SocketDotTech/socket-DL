@@ -65,4 +65,5 @@ export enum ChainSlug {
   BERA = ChainId.BERA,
   B3 = ChainId.B3,
   UNICHAIN = ChainId.UNICHAIN,
+  MONAD_TESTNET = ChainId.MONAD_TESTNET,
 }

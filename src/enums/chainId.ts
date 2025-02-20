@@ -63,4 +63,5 @@ export enum ChainId {
   BERA = 80094,
   B3 = 8333,
   UNICHAIN = 130,
+  MONAD_TESTNET = 10143,
 }
