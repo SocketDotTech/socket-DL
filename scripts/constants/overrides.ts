@@ -33,6 +33,7 @@ export const chainOverrides: {
 
   [ChainSlug.POLYGON_MAINNET]: {
     gasPriceMultiplier: 2,
+    gasLimit: 3_000_000,
   },
   [ChainSlug.ZKEVM]: {
     gasPriceMultiplier: 1.3,
@@ -105,8 +106,8 @@ export const chainOverrides: {
     gasLimit: 10_000_000,
   },
   [ChainSlug.AVALANCHE]: {
-    // gasLimit: 3_000_000,
-    gasPriceMultiplier: 1.5,
+    gasLimit: 3_000_000,
+    gasPriceMultiplier: 1.1,
   },
 };
 
