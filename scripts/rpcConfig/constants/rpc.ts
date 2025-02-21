@@ -68,4 +68,5 @@ export const rpcs = {
   [ChainSlug.B3]: checkEnvValue("B3_RPC"),
   [ChainSlug.UNICHAIN]: checkEnvValue("UNICHAIN_RPC"),
   [ChainSlug.MONAD_TESTNET]: checkEnvValue("MONAD_TESTNET_RPC"),
+  [ChainSlug.SCROLL]: checkEnvValue("SCROLL_RPC"),
 };

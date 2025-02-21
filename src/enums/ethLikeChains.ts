@@ -27,4 +27,5 @@ export const ethLikeChains = [
   ChainSlug.SONIC,
   ChainSlug.BERA,
   ChainSlug.MONAD_TESTNET,
+  ChainSlug.SCROLL,
 ];

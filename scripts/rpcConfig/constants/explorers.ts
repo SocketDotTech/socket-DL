@@ -35,4 +35,5 @@ export const explorers = {
   [ChainSlug.B3]: "https://explorer.b3.fun/",
   [ChainSlug.UNICHAIN]: "https://unichain.blockscout.com/",
   [ChainSlug.MONAD_TESTNET]: "https://monad-testnet.socialscan.io/",
+  [ChainSlug.SCROLL]: "https://scrollscan.com/",
 };

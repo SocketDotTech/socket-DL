@@ -109,6 +109,9 @@ export const chainOverrides: {
     gasLimit: 3_000_000,
     gasPriceMultiplier: 1.1,
   },
+  [ChainSlug.SCROLL]: {
+    gasLimit: 3_000_000,
+  },
 };
 
 /**

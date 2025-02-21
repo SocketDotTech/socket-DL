@@ -64,4 +64,5 @@ export enum ChainId {
   B3 = 8333,
   UNICHAIN = 130,
   MONAD_TESTNET = 10143,
+  SCROLL = 534352,
 }
