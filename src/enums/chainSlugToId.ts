@@ -68,4 +68,5 @@ export const ChainSlugToId = {
   [ChainSlug.UNICHAIN]: ChainId.UNICHAIN,
   [ChainSlug.MONAD_TESTNET]: ChainId.MONAD_TESTNET,
   [ChainSlug.SCROLL]: ChainId.SCROLL,
+  [ChainSlug.SONEIUM]: ChainId.SONEIUM,
 };

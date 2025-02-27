@@ -38,4 +38,5 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.B3,
   ChainSlug.UNICHAIN,
   ChainSlug.SCROLL,
+  ChainSlug.SONEIUM,
 ];

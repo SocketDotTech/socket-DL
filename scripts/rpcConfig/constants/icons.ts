@@ -34,4 +34,5 @@ export const icons = {
   [ChainSlug.UNICHAIN]: "",
   [ChainSlug.MONAD_TESTNET]: "",
   [ChainSlug.SCROLL]: "",
+  [ChainSlug.SONEIUM]: "",
 };

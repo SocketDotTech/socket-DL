@@ -36,4 +36,5 @@ export const explorers = {
   [ChainSlug.UNICHAIN]: "https://unichain.blockscout.com/",
   [ChainSlug.MONAD_TESTNET]: "https://monad-testnet.socialscan.io/",
   [ChainSlug.SCROLL]: "https://scrollscan.com/",
+  [ChainSlug.SONEIUM]: "https://soneium.blockscout.com/",
 };

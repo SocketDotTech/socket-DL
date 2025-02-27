@@ -65,4 +65,5 @@ export enum HardhatChainName {
   UNICHAIN = "unichain",
   MONAD_TESTNET = "monad_testnet",
   SCROLL = "scroll",
+  SONEIUM = "soneium",
 }
