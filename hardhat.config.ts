@@ -124,6 +124,8 @@ if (isProduction) {
     [HardhatChainName.BERA]: getChainConfig(ChainSlug.BERA),
     [HardhatChainName.B3]: getChainConfig(ChainSlug.B3),
     [HardhatChainName.UNICHAIN]: getChainConfig(ChainSlug.UNICHAIN),
+    [HardhatChainName.SCROLL]: getChainConfig(ChainSlug.SCROLL),
+    [HardhatChainName.SONEIUM]: getChainConfig(ChainSlug.SONEIUM),
   };
 }
 
@@ -180,6 +182,8 @@ const config: HardhatUserConfig = {
       berascan: process.env.BERASCAN_API_KEY || "",
       b3: process.env.B3_API_KEY || "none",
       unichain: process.env.UNICHAIN_API_KEY || "none",
+      scroll: process.env.SCROLLSCAN_API_KEY || "",
+      soneium: process.env.SONEIUM_API_KEY || "none",
     },
     customChains: [
       {
@@ -372,6 +376,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://unichain.blockscout.com/api",
           browserURL: "https://unichain.blockscout.com/",
+        },
+      },
+      {
+        network: "scroll",
+        chainId: ChainId.SCROLL,
+        urls: {
+          apiURL: "https://api.scrollscan.com/api",
+          browserURL: "https://scrollscan.com/",
+        },
+      },
+      {
+        network: "soneium",
+        chainId: ChainId.SONEIUM,
+        urls: {
+          apiURL: "https://soneium.blockscout.com/api",
+          browserURL: "https://soneium.blockscout.com/",
         },
       },
     ],
