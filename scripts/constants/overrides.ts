@@ -107,10 +107,11 @@ export const chainOverrides: {
   },
   [ChainSlug.AVALANCHE]: {
     gasLimit: 3_000_000,
-    gasPriceMultiplier: 1.1,
+    gasPriceMultiplier: 2,
   },
   [ChainSlug.SCROLL]: {
     gasLimit: 3_000_000,
+    gasPriceMultiplier: 2,
   },
 };
 
