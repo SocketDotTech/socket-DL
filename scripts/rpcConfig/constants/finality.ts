@@ -46,4 +46,9 @@ export const finalityOverrides: {
     [FinalityBucket.medium]: 2000,
     [FinalityBucket.high]: 3000,
   },
+  [ChainSlug.SCROLL]: {
+    [FinalityBucket.low]: 1,
+    [FinalityBucket.medium]: 100,
+    [FinalityBucket.high]: 1024,
+  },
 };

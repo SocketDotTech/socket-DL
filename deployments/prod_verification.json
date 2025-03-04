@@ -2841,6 +2841,20 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
+  "1868": [
+    [
+      "0x6C593aD4C0Fa4E293a0f1240F9ca3CF0e8a28619",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x1F6bc87f3309B5D31Eb0BdaBE3ED7d3110d3B9c3",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
+    ]
+  ],
   "2999": [
     [
       "0x74EBb564b92A3F7AcfFeb8aF3b322831bF57ac22",
@@ -4126,6 +4140,152 @@
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
+    ]
+  ],
+  "10143": [
+    [
+      "0xB152AC07a21966981fef9341DA3146f8e08e22bC",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x09A03E0d298AA13a07A9a3e36a606d4F6a4b8bB7",
+        10143,
+        1000,
+        "0x9B8c323468AEC7A7Cb041CeD48F92559bFF33705"
+      ]
+    ],
+    [
+      "0xcd620187f4846ba5a42ab41270aC550467dc9FbB",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0x09A03E0d298AA13a07A9a3e36a606d4F6a4b8bB7",
+        "0x9B8c323468AEC7A7Cb041CeD48F92559bFF33705",
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        10143
+      ]
+    ],
+    [
+      "0x09A03E0d298AA13a07A9a3e36a606d4F6a4b8bB7",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        10143,
+        10143,
+        "0xb4Ef469c9d8317851270346070dA0ecE24616E6b",
+        "0x9B8c323468AEC7A7Cb041CeD48F92559bFF33705",
+        "IMLI"
+      ]
+    ],
+    [
+      "0x8c36353db4F3a2DDDeed38405199d13DCF8a1B82",
+      "Counter",
+      "contracts/examples/Counter.sol",
+      ["0xb3314456567986e657d4C65Ec9e8cB736B92d11D"]
+    ],
+    [
+      "0xb4Db1838d0B97BD58C7663b3E487eEbC9a996472",
+      "SocketBatcher",
+      "contracts/socket/SocketBatcher.sol",
+      ["0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836"]
+    ],
+    [
+      "0xd9E3a8Ba9Be55919C5C0De6694e3103F5a35820E",
+      "OptimisticSwitchboard",
+      "contracts/switchboard/default-switchboards/OptimisticSwitchboard.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0xb3314456567986e657d4C65Ec9e8cB736B92d11D",
+        10143,
+        7200,
+        "0x9B8c323468AEC7A7Cb041CeD48F92559bFF33705"
+      ]
+    ],
+    [
+      "0x3043Ad9C9e01664bc3A68477f0870Df35dC4bFf8",
+      "FastSwitchboard",
+      "contracts/switchboard/default-switchboards/FastSwitchboard.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0xb3314456567986e657d4C65Ec9e8cB736B92d11D",
+        10143,
+        7200,
+        "0x9B8c323468AEC7A7Cb041CeD48F92559bFF33705"
+      ]
+    ],
+    [
+      "0x525a6489a1df5fF1ae077fAf628E43b7F52298eF",
+      "TransmitManager",
+      "contracts/TransmitManager.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        10143,
+        "0xb3314456567986e657d4C65Ec9e8cB736B92d11D",
+        "0x9B8c323468AEC7A7Cb041CeD48F92559bFF33705"
+      ]
+    ],
+    [
+      "0x657e72B305Dc1c41e98d9efC2350EC10e3c83E21",
+      "ExecutionManagerDF",
+      "contracts/ExecutionManagerDF.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        10143,
+        "0xb3314456567986e657d4C65Ec9e8cB736B92d11D",
+        "0x9B8c323468AEC7A7Cb041CeD48F92559bFF33705"
+      ]
+    ],
+    [
+      "0xb3314456567986e657d4C65Ec9e8cB736B92d11D",
+      "Socket",
+      "contracts/socket/Socket.sol",
+      [
+        10143,
+        "0xb4Ef469c9d8317851270346070dA0ecE24616E6b",
+        "0x0CC93650bF4D98237628DACf87f94E443956D8dF",
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "IMLI"
+      ]
+    ],
+    [
+      "0x0CC93650bF4D98237628DACf87f94E443956D8dF",
+      "CapacitorFactory",
+      "contracts/CapacitorFactory.sol",
+      ["0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836", 10]
+    ],
+    [
+      "0xb4Ef469c9d8317851270346070dA0ecE24616E6b",
+      "Hasher",
+      "contracts/utils/Hasher.sol",
+      ["0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836"]
+    ],
+    [
+      "0x9B8c323468AEC7A7Cb041CeD48F92559bFF33705",
+      "SignatureVerifier",
+      "contracts/utils/SignatureVerifier.sol",
+      ["0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836"]
+    ],
+    [
+      "0x1CAdCd88fC148D3966eDe75D029937C886f66009",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x93552A3453eB6e3cEA58bFB15f0c207040370720"
+      ]
+    ],
+    [
+      "0x6C593aD4C0Fa4E293a0f1240F9ca3CF0e8a28619",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ],
+    [
+      "0x1F6bc87f3309B5D31Eb0BdaBE3ED7d3110d3B9c3",
+      "SafeL2",
+      "contracts/utils/multisig/SafeL2.sol",
+      []
     ]
   ],
   "34443": [
@@ -6699,6 +6859,32 @@
       "SignatureVerifier",
       "contracts/utils/SignatureVerifier.sol",
       ["0x78Deb9225c3F28D12922913Fec978e4dC90E1aa4"]
+    ]
+  ],
+  "534352": [
+    [
+      "0xcd620187f4846ba5a42ab41270aC550467dc9FbB",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        534352,
+        534352,
+        "0x0CC93650bF4D98237628DACf87f94E443956D8dF",
+        "0xb4Ef469c9d8317851270346070dA0ecE24616E6b",
+        "IMLI"
+      ]
+    ],
+    [
+      "0xb3314456567986e657d4C65Ec9e8cB736B92d11D",
+      "CapacitorFactory",
+      "contracts/CapacitorFactory.sol",
+      ["0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836", 10]
+    ],
+    [
+      "0xbe7241e9D11EC2D1Ac86CE217c4A37b7aD1701cE",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
     ]
   ],
   "543210": [
