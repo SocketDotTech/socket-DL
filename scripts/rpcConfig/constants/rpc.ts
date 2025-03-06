@@ -70,4 +70,5 @@ export const rpcs = {
   [ChainSlug.MONAD_TESTNET]: checkEnvValue("MONAD_TESTNET_RPC"),
   [ChainSlug.SCROLL]: checkEnvValue("SCROLL_RPC"),
   [ChainSlug.SONEIUM]: checkEnvValue("SONEIUM_RPC"),
+  [ChainSlug.SWELLCHAIN]: checkEnvValue("SWELLCHAIN_RPC"),
 };

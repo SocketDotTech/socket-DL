@@ -59,7 +59,7 @@ export const main = async () => {
         parseInt(chainSlug),
         chainAddresses,
         true,
-        false
+        true
       );
 
       // startBlock field ignored since it is not contract

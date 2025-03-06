@@ -58,4 +58,5 @@ export const batcherSupportedChainSlugs = [
   // ChainSlug.MONAD_TESTNET,
   ChainSlug.SCROLL,
   ChainSlug.SONEIUM,
+  ChainSlug.SWELLCHAIN,
 ];

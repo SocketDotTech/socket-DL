@@ -126,6 +126,7 @@ if (isProduction) {
     [HardhatChainName.UNICHAIN]: getChainConfig(ChainSlug.UNICHAIN),
     [HardhatChainName.SCROLL]: getChainConfig(ChainSlug.SCROLL),
     [HardhatChainName.SONEIUM]: getChainConfig(ChainSlug.SONEIUM),
+    [HardhatChainName.SWELLCHAIN]: getChainConfig(ChainSlug.SWELLCHAIN),
   };
 }
 
@@ -184,6 +185,7 @@ const config: HardhatUserConfig = {
       unichain: process.env.UNICHAIN_API_KEY || "none",
       scroll: process.env.SCROLLSCAN_API_KEY || "",
       soneium: process.env.SONEIUM_API_KEY || "none",
+      swellchain: process.env.SWELLCHAIN_API_KEY || "none",
     },
     customChains: [
       {
@@ -392,6 +394,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://soneium.blockscout.com/api",
           browserURL: "https://soneium.blockscout.com/",
+        },
+      },
+      {
+        network: "swellchain",
+        chainId: ChainId.SWELLCHAIN,
+        urls: {
+          apiURL: "https://explorer.swellnetwork.io/api",
+          browserURL: "https://explorer.swellnetwork.io/",
         },
       },
     ],
