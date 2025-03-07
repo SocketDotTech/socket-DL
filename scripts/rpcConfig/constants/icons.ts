@@ -35,4 +35,5 @@ export const icons = {
   [ChainSlug.MONAD_TESTNET]: "",
   [ChainSlug.SCROLL]: "",
   [ChainSlug.SONEIUM]: "",
+  [ChainSlug.SWELLCHAIN]: "",
 };

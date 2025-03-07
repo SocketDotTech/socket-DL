@@ -66,4 +66,5 @@ export enum ChainId {
   MONAD_TESTNET = 10143,
   SCROLL = 534352,
   SONEIUM = 1868,
+  SWELLCHAIN = 1923,
 }

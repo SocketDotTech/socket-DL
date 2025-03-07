@@ -2855,6 +2855,32 @@
       []
     ]
   ],
+  "1923": [
+    [
+      "0x8c36353db4F3a2DDDeed38405199d13DCF8a1B82",
+      "SocketSimulator",
+      "contracts/mocks/fee-updater/SocketSimulator.sol",
+      [
+        1923,
+        1923,
+        "0x9B8c323468AEC7A7Cb041CeD48F92559bFF33705",
+        "0x1CAdCd88fC148D3966eDe75D029937C886f66009",
+        "IMLI"
+      ]
+    ],
+    [
+      "0xb4Ef469c9d8317851270346070dA0ecE24616E6b",
+      "CapacitorFactory",
+      "contracts/CapacitorFactory.sol",
+      ["0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836", 10]
+    ],
+    [
+      "0x1F6bc87f3309B5D31Eb0BdaBE3ED7d3110d3B9c3",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ]
+  ],
   "2999": [
     [
       "0x74EBb564b92A3F7AcfFeb8aF3b322831bF57ac22",

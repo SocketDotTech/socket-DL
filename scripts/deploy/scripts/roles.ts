@@ -207,7 +207,8 @@ const executeTransactions = async (
         chainSlug,
         allAddresses[chainSlug],
         safeChains.includes(chainSlug),
-        !safeChains.includes(chainSlug)
+        // !safeChains.includes(chainSlug)
+        true
       );
       await executeRoleTransactions(chainSlug, newRoleStatus, relaySigner);
       await executeOtherTransactions(chainSlug, relaySigner);

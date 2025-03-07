@@ -69,4 +69,5 @@ export const ChainSlugToKey = {
   [ChainSlug.MONAD_TESTNET]: HardhatChainName.MONAD_TESTNET,
   [ChainSlug.SCROLL]: HardhatChainName.SCROLL,
   [ChainSlug.SONEIUM]: HardhatChainName.SONEIUM,
+  [ChainSlug.SWELLCHAIN]: HardhatChainName.SWELLCHAIN,
 };
