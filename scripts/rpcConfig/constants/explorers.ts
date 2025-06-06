@@ -38,4 +38,7 @@ export const explorers = {
   [ChainSlug.SCROLL]: "https://scrollscan.com/",
   [ChainSlug.SONEIUM]: "https://soneium.blockscout.com/",
   [ChainSlug.SWELLCHAIN]: "https://explorer.swellnetwork.io/",
+  [ChainSlug.WORLD_CHAIN]: "https://worldscan.org/",
+  [ChainSlug.PLUME]: "https://explorer.plume.org/",
+  [ChainSlug.KATANA]: "https://explorer.katanarpc.com",
 };

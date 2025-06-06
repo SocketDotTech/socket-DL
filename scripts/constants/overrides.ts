@@ -113,6 +113,9 @@ export const chainOverrides: {
     gasLimit: 3_000_000,
     gasPriceMultiplier: 2,
   },
+  [ChainSlug.PLUME]: {
+    gasLimit: 5_000_000,
+  },
 };
 
 /**

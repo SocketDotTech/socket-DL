@@ -67,4 +67,7 @@ export enum HardhatChainName {
   SCROLL = "scroll",
   SONEIUM = "soneium",
   SWELLCHAIN = "swellchain",
+  WORLD_CHAIN = "world_chain",
+  PLUME = "plume",
+  KATANA = "katana",
 }

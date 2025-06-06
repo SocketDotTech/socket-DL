@@ -69,4 +69,7 @@ export enum ChainSlug {
   SCROLL = ChainId.SCROLL,
   SONEIUM = ChainId.SONEIUM,
   SWELLCHAIN = ChainId.SWELLCHAIN,
+  WORLD_CHAIN = ChainId.WORLD_CHAIN,
+  PLUME = ChainId.PLUME,
+  KATANA = ChainId.KATANA,
 }

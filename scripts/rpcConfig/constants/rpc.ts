@@ -71,4 +71,7 @@ export const rpcs = {
   [ChainSlug.SCROLL]: checkEnvValue("SCROLL_RPC"),
   [ChainSlug.SONEIUM]: checkEnvValue("SONEIUM_RPC"),
   [ChainSlug.SWELLCHAIN]: checkEnvValue("SWELLCHAIN_RPC"),
+  [ChainSlug.WORLD_CHAIN]: checkEnvValue("WORLD_CHAIN_RPC"),
+  [ChainSlug.PLUME]: checkEnvValue("PLUME_RPC"),
+  [ChainSlug.KATANA]: checkEnvValue("KATANA_RPC"),
 };

@@ -27,4 +27,6 @@ export const opStackL2Chain = [
   ChainSlug.UNICHAIN,
   ChainSlug.SONEIUM,
   ChainSlug.SWELLCHAIN,
+  ChainSlug.WORLD_CHAIN,
+  ChainSlug.KATANA,
 ];
