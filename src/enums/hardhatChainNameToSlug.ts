@@ -70,4 +70,7 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.SCROLL]: ChainSlug.SCROLL,
   [HardhatChainName.SONEIUM]: ChainSlug.SONEIUM,
   [HardhatChainName.SWELLCHAIN]: ChainSlug.SWELLCHAIN,
+  [HardhatChainName.WORLD_CHAIN]: ChainSlug.WORLD_CHAIN,
+  [HardhatChainName.PLUME]: ChainSlug.PLUME,
+  [HardhatChainName.KATANA]: ChainSlug.KATANA,
 };

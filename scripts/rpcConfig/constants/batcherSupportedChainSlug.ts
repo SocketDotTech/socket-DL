@@ -59,4 +59,7 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.SCROLL,
   ChainSlug.SONEIUM,
   ChainSlug.SWELLCHAIN,
+  ChainSlug.WORLD_CHAIN,
+  ChainSlug.PLUME,
+  ChainSlug.KATANA,
 ];

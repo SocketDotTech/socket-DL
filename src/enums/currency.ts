@@ -22,4 +22,5 @@ export const Currency = {
   [ChainSlug.SONIC]: NativeTokens["fantom"],
   [ChainSlug.BERA]: NativeTokens["berachain-bera"],
   [ChainSlug.MONAD_TESTNET]: NativeTokens["monad"],
+  [ChainSlug.PLUME]: NativeTokens["plume"],
 };

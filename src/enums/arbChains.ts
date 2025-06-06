@@ -8,4 +8,5 @@ export const arbChains = [
   ChainSlug.REYA_CRONOS,
   ChainSlug.REYA,
   ChainSlug.GEIST,
+  ChainSlug.PLUME,
 ];

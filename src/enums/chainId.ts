@@ -67,4 +67,7 @@ export enum ChainId {
   SCROLL = 534352,
   SONEIUM = 1868,
   SWELLCHAIN = 1923,
+  WORLD_CHAIN = 480,
+  PLUME = 98866,
+  KATANA = 747474,
 }
