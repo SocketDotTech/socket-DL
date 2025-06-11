@@ -127,6 +127,9 @@ if (isProduction) {
     [HardhatChainName.SCROLL]: getChainConfig(ChainSlug.SCROLL),
     [HardhatChainName.SONEIUM]: getChainConfig(ChainSlug.SONEIUM),
     [HardhatChainName.SWELLCHAIN]: getChainConfig(ChainSlug.SWELLCHAIN),
+    [HardhatChainName.WORLD_CHAIN]: getChainConfig(ChainSlug.WORLD_CHAIN),
+    [HardhatChainName.PLUME]: getChainConfig(ChainSlug.PLUME),
+    [HardhatChainName.KATANA]: getChainConfig(ChainSlug.KATANA),
   };
 }
 
@@ -186,6 +189,9 @@ const config: HardhatUserConfig = {
       scroll: process.env.SCROLLSCAN_API_KEY || "",
       soneium: process.env.SONEIUM_API_KEY || "none",
       swellchain: process.env.SWELLCHAIN_API_KEY || "none",
+      world_chain: process.env.WORLDSCAN_API_KEY || "none",
+      plume: process.env.PLUME_API_KEY || "none",
+      katana: process.env.KATANA_API_KEY || "none",
     },
     customChains: [
       {
@@ -402,6 +408,30 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorer.swellnetwork.io/api",
           browserURL: "https://explorer.swellnetwork.io/",
+        },
+      },
+      {
+        network: "world_chain",
+        chainId: ChainId.WORLD_CHAIN,
+        urls: {
+          apiURL: "https://api.worldscan.org/api",
+          browserURL: "https://worldscan.org/",
+        },
+      },
+      {
+        network: "plume",
+        chainId: ChainId.PLUME,
+        urls: {
+          apiURL: "https://explorer.plume.org/api",
+          browserURL: "https://explorer.plume.org/",
+        },
+      },
+      {
+        network: "katana",
+        chainId: ChainId.KATANA,
+        urls: {
+          apiURL: "https://explorer.katanarpc.com/api",
+          browserURL: "https://explorer.katanarpc.com/",
         },
       },
     ],

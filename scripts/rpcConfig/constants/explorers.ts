@@ -40,5 +40,5 @@ export const explorers = {
   [ChainSlug.SWELLCHAIN]: "https://explorer.swellnetwork.io/",
   [ChainSlug.WORLD_CHAIN]: "https://worldscan.org/",
   [ChainSlug.PLUME]: "https://explorer.plume.org/",
-  [ChainSlug.KATANA]: "https://explorer.katanarpc.com",
+  [ChainSlug.KATANA]: "https://explorer.katanarpc.com/",
 };
