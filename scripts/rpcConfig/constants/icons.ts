@@ -39,4 +39,5 @@ export const icons = {
   [ChainSlug.WORLD_CHAIN]: "",
   [ChainSlug.PLUME]: "",
   [ChainSlug.KATANA]: "",
+  [ChainSlug.HYPEREVM]: "",
 };

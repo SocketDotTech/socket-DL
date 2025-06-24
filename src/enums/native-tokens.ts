@@ -16,4 +16,5 @@ export enum NativeTokens {
   "berachain-bera" = "berachain-bera",
   "monad" = "monad",
   "plume" = "plume",
+  "hyperliquid" = "hyperliquid",
 }

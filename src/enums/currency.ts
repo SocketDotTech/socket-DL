@@ -23,4 +23,5 @@ export const Currency = {
   [ChainSlug.BERA]: NativeTokens["berachain-bera"],
   [ChainSlug.MONAD_TESTNET]: NativeTokens["monad"],
   [ChainSlug.PLUME]: NativeTokens["plume"],
+  [ChainSlug.HYPEREVM]: NativeTokens["hyperliquid"],
 };

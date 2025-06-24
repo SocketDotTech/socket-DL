@@ -130,6 +130,7 @@ if (isProduction) {
     [HardhatChainName.WORLD_CHAIN]: getChainConfig(ChainSlug.WORLD_CHAIN),
     [HardhatChainName.PLUME]: getChainConfig(ChainSlug.PLUME),
     [HardhatChainName.KATANA]: getChainConfig(ChainSlug.KATANA),
+    [HardhatChainName.HYPEREVM]: getChainConfig(ChainSlug.HYPEREVM),
   };
 }
 
@@ -192,6 +193,7 @@ const config: HardhatUserConfig = {
       world_chain: process.env.WORLDSCAN_API_KEY || "none",
       plume: process.env.PLUME_API_KEY || "none",
       katana: process.env.KATANA_API_KEY || "none",
+      hyperevm: process.env.HYPEREVM_API_KEY || "none",
     },
     customChains: [
       {
@@ -432,6 +434,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorer.katanarpc.com/api",
           browserURL: "https://explorer.katanarpc.com/",
+        },
+      },
+      {
+        network: "hyperevm",
+        chainId: ChainId.HYPEREVM,
+        urls: {
+          apiURL: "https://www.hyperscan.com/api",
+          browserURL: "https://www.hyperscan.com/",
         },
       },
     ],

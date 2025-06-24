@@ -41,4 +41,5 @@ export const explorers = {
   [ChainSlug.WORLD_CHAIN]: "https://worldscan.org/",
   [ChainSlug.PLUME]: "https://explorer.plume.org/",
   [ChainSlug.KATANA]: "https://explorer.katanarpc.com/",
+  [ChainSlug.HYPEREVM]: "https://www.hyperscan.com/",
 };

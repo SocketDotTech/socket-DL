@@ -2561,6 +2561,75 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
+  "999": [
+    [
+      "0xcd620187f4846ba5a42ab41270aC550467dc9FbB",
+      "SwitchboardSimulator",
+      "contracts/mocks/fee-updater/SwitchboardSimulator.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x8c36353db4F3a2DDDeed38405199d13DCF8a1B82",
+        999,
+        1000,
+        "0x1CAdCd88fC148D3966eDe75D029937C886f66009"
+      ]
+    ],
+    [
+      "0x09A03E0d298AA13a07A9a3e36a606d4F6a4b8bB7",
+      "SimulatorUtils",
+      "contracts/mocks/fee-updater/SimulatorUtils.sol",
+      [
+        "0x8c36353db4F3a2DDDeed38405199d13DCF8a1B82",
+        "0x1CAdCd88fC148D3966eDe75D029937C886f66009",
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        999
+      ]
+    ],
+    [
+      "0xb3314456567986e657d4C65Ec9e8cB736B92d11D",
+      "ExecutionManagerDF",
+      "contracts/ExecutionManagerDF.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        999,
+        "0x0CC93650bF4D98237628DACf87f94E443956D8dF",
+        "0x1CAdCd88fC148D3966eDe75D029937C886f66009"
+      ]
+    ],
+    [
+      "0xb4Ef469c9d8317851270346070dA0ecE24616E6b",
+      "CapacitorFactory",
+      "contracts/CapacitorFactory.sol",
+      ["0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836", 10]
+    ],
+    [
+      "0x9B8c323468AEC7A7Cb041CeD48F92559bFF33705",
+      "Hasher",
+      "contracts/utils/Hasher.sol",
+      ["0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836"]
+    ],
+    [
+      "0x1CAdCd88fC148D3966eDe75D029937C886f66009",
+      "SignatureVerifier",
+      "contracts/utils/SignatureVerifier.sol",
+      ["0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836"]
+    ],
+    [
+      "0xbe7241e9D11EC2D1Ac86CE217c4A37b7aD1701cE",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x7c6F09D6970A4F575030Becb77f2B64a314E140b"
+      ]
+    ],
+    [
+      "0x1F6bc87f3309B5D31Eb0BdaBE3ED7d3110d3B9c3",
+      "SafeProxyFactory",
+      "contracts/utils/multisig/proxies/SafeProxyFactory.sol",
+      []
+    ]
+  ],
   "1024": [
     [
       "0xd0580065858313f0300eBb6e7970cD3699323985",
