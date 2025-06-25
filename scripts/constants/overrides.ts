@@ -116,6 +116,9 @@ export const chainOverrides: {
   [ChainSlug.PLUME]: {
     gasLimit: 5_000_000,
   },
+  [ChainSlug.SEI]: {
+    gasLimit: 5_000_000,
+  },
 };
 
 /**

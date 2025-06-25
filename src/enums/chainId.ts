@@ -71,4 +71,5 @@ export enum ChainId {
   PLUME = 98866,
   KATANA = 747474,
   HYPEREVM = 999,
+  SEI = 1329,
 }

@@ -73,4 +73,5 @@ export enum ChainSlug {
   PLUME = ChainId.PLUME,
   KATANA = ChainId.KATANA,
   HYPEREVM = ChainId.HYPEREVM,
+  SEI = ChainId.SEI,
 }

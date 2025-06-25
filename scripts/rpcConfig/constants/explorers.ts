@@ -42,4 +42,5 @@ export const explorers = {
   [ChainSlug.PLUME]: "https://explorer.plume.org/",
   [ChainSlug.KATANA]: "https://explorer.katanarpc.com/",
   [ChainSlug.HYPEREVM]: "https://www.hyperscan.com/",
+  [ChainSlug.SEI]: "https://seitrace.com/",
 };

@@ -17,4 +17,5 @@ export enum NativeTokens {
   "monad" = "monad",
   "plume" = "plume",
   "hyperliquid" = "hyperliquid",
+  "sei-network" = "sei-network",
 }

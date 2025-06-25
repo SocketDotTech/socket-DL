@@ -24,4 +24,5 @@ export const Currency = {
   [ChainSlug.MONAD_TESTNET]: NativeTokens["monad"],
   [ChainSlug.PLUME]: NativeTokens["plume"],
   [ChainSlug.HYPEREVM]: NativeTokens["hyperliquid"],
+  [ChainSlug.SEI]: NativeTokens["sei-network"],
 };

@@ -29,4 +29,5 @@ export const ethLikeChains = [
   ChainSlug.MONAD_TESTNET,
   ChainSlug.SCROLL,
   ChainSlug.HYPEREVM,
+  ChainSlug.SEI,
 ];

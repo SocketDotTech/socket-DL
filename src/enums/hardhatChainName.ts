@@ -71,4 +71,5 @@ export enum HardhatChainName {
   PLUME = "plume",
   KATANA = "katana",
   HYPEREVM = "hyperevm",
+  SEI = "sei",
 }

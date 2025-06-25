@@ -44,4 +44,5 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.PLUME,
   ChainSlug.KATANA,
   ChainSlug.HYPEREVM,
+  ChainSlug.SEI,
 ];
