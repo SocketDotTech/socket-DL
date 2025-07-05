@@ -264,8 +264,8 @@ const config: HardhatUserConfig = {
         network: "polynomial",
         chainId: ChainId.POLYNOMIAL,
         urls: {
-          apiURL: "https://explorer.polynomial.fi/api",
-          browserURL: "https://explorer.polynomial.fi",
+          apiURL: "https://polynomialscan.io/api",
+          browserURL: "https://polynomialscan.io",
         },
       },
       {
