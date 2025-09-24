@@ -18,4 +18,5 @@ export enum NativeTokens {
   "plume" = "plume",
   "hyperliquid" = "hyperliquid",
   "sei-network" = "sei-network",
+  "dogwifcoin" = "dogwifcoin",
 }

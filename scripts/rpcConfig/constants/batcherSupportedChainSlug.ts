@@ -64,4 +64,5 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.KATANA,
   ChainSlug.HYPEREVM,
   ChainSlug.SEI,
+  ChainSlug.PLASMA,
 ];

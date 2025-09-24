@@ -115,7 +115,7 @@ export async function deployContractWithArgs(
         contractName
       );
       const instance = contractFactory.attach(address);
-      return { ...instance, address };
+      return instance;
     } else {
       const contractFactory: ContractFactory = await ethers.getContractFactory(
         contractName,

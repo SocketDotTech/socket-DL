@@ -41,4 +41,5 @@ export const icons = {
   [ChainSlug.KATANA]: "",
   [ChainSlug.HYPEREVM]: "",
   [ChainSlug.SEI]: "",
+  [ChainSlug.PLASMA]: "",
 };

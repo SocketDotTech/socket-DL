@@ -76,4 +76,5 @@ export const rpcs = {
   [ChainSlug.KATANA]: checkEnvValue("KATANA_RPC"),
   [ChainSlug.HYPEREVM]: checkEnvValue("HYPEREVM_RPC"),
   [ChainSlug.SEI]: checkEnvValue("SEI_RPC"),
+  [ChainSlug.PLASMA]: checkEnvValue("PLASMA_RPC"),
 };
