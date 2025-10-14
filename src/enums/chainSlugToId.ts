@@ -75,4 +75,5 @@ export const ChainSlugToId = {
   [ChainSlug.KATANA]: ChainId.KATANA,
   [ChainSlug.HYPEREVM]: ChainId.HYPEREVM,
   [ChainSlug.SEI]: ChainId.SEI,
+  [ChainSlug.PLASMA]: ChainId.PLASMA,
 };

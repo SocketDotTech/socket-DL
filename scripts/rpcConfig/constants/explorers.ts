@@ -43,4 +43,5 @@ export const explorers = {
   [ChainSlug.KATANA]: "https://explorer.katanarpc.com/",
   [ChainSlug.HYPEREVM]: "https://www.hyperscan.com/",
   [ChainSlug.SEI]: "https://seitrace.com/",
+  [ChainSlug.PLASMA]: "https://plasmascan.to/",
 };

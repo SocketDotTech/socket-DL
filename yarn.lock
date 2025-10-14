@@ -5573,10 +5573,10 @@
     "@smithy/types" "^3.7.2"
     tslib "^2.6.2"
 
-"@socket.tech/dl-common@1.0.12-test.1":
-  version "1.0.12-test.1"
-  resolved "https://registry.yarnpkg.com/@socket.tech/dl-common/-/dl-common-1.0.12-test.1.tgz#f6ade70819de1a1f90c8eaf2aa47522d1c47d0fc"
-  integrity sha512-k+9lFd0noAD2qP+piwsijfUqKprUzzXjReCC0MvSt9cHC1zA97rEBqEmkHyi4zwv+RoJHZr8sHEInIDPrlfY0Q==
+"@socket.tech/dl-common@1.0.15":
+  version "1.0.15"
+  resolved "https://registry.yarnpkg.com/@socket.tech/dl-common/-/dl-common-1.0.15.tgz#a3a3eed7c01b1fb000b289ac157aff8ab287036b"
+  integrity sha512-X5w0h/AZyN0hHboDp9N3Cg3pcWA4IFS5+veCVQj/br36IBHKAoG6ASODDGu2VcreWfTEPIS9u6LfIGR9rlvnPw==
   dependencies:
     "@aws-sdk/client-eventbridge" "3.449.0"
     "@aws-sdk/client-kms" "3.454.0"

@@ -1,7 +1,7 @@
 {
   "name": "@socket.tech/dl-core",
   "license": "UNLICENSED",
-  "version": "2.42.0",
+  "version": "2.43.0",
   "description": "Smart contracts for socket data layer.",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -28,7 +28,7 @@
     "@nomicfoundation/hardhat-verify": "^2.0.12",
     "@nomiclabs/hardhat-ethers": "^2.1.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.0",
-    "@socket.tech/dl-common": "1.0.12-test.1",
+    "@socket.tech/dl-common": "1.0.15",
     "@socket.tech/dl-core": "2.17.0-test.3",
     "@typechain/ethers-v5": "^10.0.0",
     "@typechain/hardhat": "^6.0.0",

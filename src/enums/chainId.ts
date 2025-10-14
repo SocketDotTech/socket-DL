@@ -72,4 +72,5 @@ export enum ChainId {
   KATANA = 747474,
   HYPEREVM = 999,
   SEI = 1329,
+  PLASMA = 9745,
 }

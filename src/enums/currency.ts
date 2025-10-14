@@ -25,4 +25,5 @@ export const Currency = {
   [ChainSlug.PLUME]: NativeTokens["plume"],
   [ChainSlug.HYPEREVM]: NativeTokens["hyperliquid"],
   [ChainSlug.SEI]: NativeTokens["sei-network"],
+  [ChainSlug.PLASMA]: NativeTokens["dogwifcoin"],
 };

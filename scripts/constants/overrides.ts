@@ -119,6 +119,10 @@ export const chainOverrides: {
   [ChainSlug.SEI]: {
     gasLimit: 5_000_000,
   },
+  [ChainSlug.PLASMA]: {
+    gasLimit: 5_000_000,
+    gasPriceMultiplier: 0.00001,
+  },
 };
 
 /**
@@ -147,8 +151,8 @@ export const getOverrides = async (
     const multiplier =
       overrides.gasPriceMultiplier || DEFAULT_GAS_PRICE_MULTIPLIER;
     gasPrice = baseGasPrice
-      .mul(Math.round(multiplier * 1000))
-      .div(1000)
+      .mul(Math.round(multiplier * 100000))
+      .div(100000)
       .toNumber();
   }
 
