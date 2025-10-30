@@ -2,6 +2,7 @@
 export enum NativeTokens {
   "ethereum" = "ethereum",
   "matic-network" = "matic-network",
+  "polygon-ecosystem-token" = "polygon-ecosystem-token",
   "binancecoin" = "binancecoin",
   "sx-network-2" = "sx-network-2",
   "mantle" = "mantle",
