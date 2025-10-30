@@ -3,7 +3,7 @@ import { NativeTokens } from "./native-tokens";
 
 export const Currency = {
   [ChainSlug.BSC]: NativeTokens.binancecoin,
-  [ChainSlug.POLYGON_MAINNET]: NativeTokens["matic-network"],
+  [ChainSlug.POLYGON_MAINNET]: NativeTokens["polygon-ecosystem-token"],
   [ChainSlug.SX_NETWORK_TESTNET]: NativeTokens["sx-network-2"],
   [ChainSlug.SX_NETWORK]: NativeTokens["sx-network-2"],
   [ChainSlug.MANTLE]: NativeTokens.mantle,
@@ -16,7 +16,7 @@ export const Currency = {
   [ChainSlug.AVALANCHE]: NativeTokens["avalanche-2"],
   [ChainSlug.XLAYER]: NativeTokens["okb"],
   [ChainSlug.POLTER_TESTNET]: NativeTokens["aavegotchi"],
-  [ChainSlug.POLYGON_AMOY]: NativeTokens["matic-network"],
+  [ChainSlug.POLYGON_AMOY]: NativeTokens["polygon-ecosystem-token"],
   [ChainSlug.OPBNB]: NativeTokens["binancecoin"],
   [ChainSlug.GEIST]: NativeTokens["aavegotchi"],
   [ChainSlug.SONIC]: NativeTokens["fantom"],
