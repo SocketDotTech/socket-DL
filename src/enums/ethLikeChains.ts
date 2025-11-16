@@ -31,4 +31,5 @@ export const ethLikeChains = [
   ChainSlug.HYPEREVM,
   ChainSlug.SEI,
   ChainSlug.PLASMA,
+  ChainSlug.MONAD,
 ];

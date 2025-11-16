@@ -77,4 +77,5 @@ export const rpcs = {
   [ChainSlug.HYPEREVM]: checkEnvValue("HYPEREVM_RPC"),
   [ChainSlug.SEI]: checkEnvValue("SEI_RPC"),
   [ChainSlug.PLASMA]: checkEnvValue("PLASMA_RPC"),
+  [ChainSlug.MONAD]: checkEnvValue("MONAD_RPC"),
 };

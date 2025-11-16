@@ -42,4 +42,5 @@ export const icons = {
   [ChainSlug.HYPEREVM]: "",
   [ChainSlug.SEI]: "",
   [ChainSlug.PLASMA]: "",
+  [ChainSlug.MONAD]: "",
 };

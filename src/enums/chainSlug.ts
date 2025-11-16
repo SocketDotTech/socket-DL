@@ -75,4 +75,5 @@ export enum ChainSlug {
   HYPEREVM = ChainId.HYPEREVM,
   SEI = ChainId.SEI,
   PLASMA = ChainId.PLASMA,
+  MONAD = ChainId.MONAD,
 }

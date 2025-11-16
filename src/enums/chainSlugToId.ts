@@ -76,4 +76,5 @@ export const ChainSlugToId = {
   [ChainSlug.HYPEREVM]: ChainId.HYPEREVM,
   [ChainSlug.SEI]: ChainId.SEI,
   [ChainSlug.PLASMA]: ChainId.PLASMA,
+  [ChainSlug.MONAD]: ChainId.MONAD,
 };
