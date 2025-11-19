@@ -123,7 +123,7 @@ export const chainOverrides: {
   },
   [ChainSlug.PLASMA]: {
     gasLimit: 5_000_000,
-    gasPrice: 100_000_000,
+    gasPrice: 1_000_000_000,
     type: 2,
   },
   [ChainSlug.MONAD]: {

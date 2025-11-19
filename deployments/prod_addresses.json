@@ -8819,6 +8819,18 @@
           "switchboard": "0x3043Ad9C9e01664bc3A68477f0870Df35dC4bFf8"
         }
       },
+      "143": {
+        "FAST": {
+          "capacitor": "0x4123C2Ee60E747f90d89050a2085FBDAF388118a",
+          "decapacitor": "0x6e1e123D6e6f230cAa79f00fFBC31C479780FDF7",
+          "switchboard": "0x525a6489a1df5fF1ae077fAf628E43b7F52298eF"
+        },
+        "OPTIMISTIC": {
+          "capacitor": "0x82e4BEb7D2cDE18626beb713A60867a3910443B6",
+          "decapacitor": "0x3be49327346C441e0cD83944A623e2B1A2dD5b5F",
+          "switchboard": "0x3043Ad9C9e01664bc3A68477f0870Df35dC4bFf8"
+        }
+      },
       "146": {
         "FAST": {
           "capacitor": "0xe77960B5872416F0027a98eAbcE9fBaF5734Ad88",
