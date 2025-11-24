@@ -26,5 +26,5 @@ export const Currency = {
   [ChainSlug.HYPEREVM]: NativeTokens["hyperliquid"],
   [ChainSlug.SEI]: NativeTokens["sei-network"],
   [ChainSlug.PLASMA]: NativeTokens["plasma"],
-  [ChainSlug.MONAD]: NativeTokens["wormhole"],
+  [ChainSlug.MONAD]: NativeTokens["monad"],
 };
