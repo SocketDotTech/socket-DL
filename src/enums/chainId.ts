@@ -73,4 +73,5 @@ export enum ChainId {
   HYPEREVM = 999,
   SEI = 1329,
   PLASMA = 9745,
+  MONAD = 143,
 }

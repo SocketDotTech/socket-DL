@@ -28,11 +28,13 @@ export const chainOverrides: {
   },
   [ChainSlug.MAINNET]: {
     gasLimit: 6_000_000,
+    type: 2,
     gasPriceMultiplier: 1.25,
   },
 
   [ChainSlug.POLYGON_MAINNET]: {
     gasPriceMultiplier: 2,
+    type: 2,
     gasLimit: 3_000_000,
   },
   [ChainSlug.ZKEVM]: {
@@ -121,7 +123,11 @@ export const chainOverrides: {
   },
   [ChainSlug.PLASMA]: {
     gasLimit: 5_000_000,
-    gasPriceMultiplier: 0.00001,
+    gasPrice: 1_000_000_000,
+    type: 2,
+  },
+  [ChainSlug.MONAD]: {
+    gasLimit: 3_00_000,
   },
 };
 
@@ -134,9 +140,14 @@ export const chainOverrides: {
  *    a. Use `gasPriceMultiplier` from chainOverrides if provided
  *    b. If not, use DEFAULT_GAS_PRICE_MULTIPLIER
  *
+ * For EIP-1559 transactions (type 2):
+ * - Uses maxFeePerGas and maxPriorityFeePerGas instead of gasPrice
+ * - Multiplier applies to maxFeePerGas
+ * - maxPriorityFeePerGas = maxFeePerGas - baseFee
+ *
  * @param chainSlug - The chain identifier
  * @param provider - The network provider
- * @returns An object with gasLimit, gasPrice, and transaction type
+ * @returns An object with gasLimit, gasPrice/maxFeePerGas/maxPriorityFeePerGas, and transaction type
  */
 export const getOverrides = async (
   chainSlug: ChainSlug,
@@ -145,16 +156,40 @@ export const getOverrides = async (
   const overrides = chainOverrides[chainSlug] || {};
   const { gasLimit, type = defaultType } = overrides;
 
-  let gasPrice = overrides.gasPrice;
-  if (!gasPrice) {
-    const baseGasPrice = await provider.getGasPrice();
-    const multiplier =
-      overrides.gasPriceMultiplier || DEFAULT_GAS_PRICE_MULTIPLIER;
-    gasPrice = baseGasPrice
-      .mul(Math.round(multiplier * 100000))
-      .div(100000)
-      .toNumber();
-  }
+  if (type === 2) {
+    // EIP-1559 transaction
+    let maxFeePerGas = overrides.gasPrice;
+    if (!maxFeePerGas) {
+      const feeData = await provider.getFeeData();
+      const baseGasPrice =
+        feeData.maxFeePerGas || (await provider.getGasPrice());
+      const multiplier =
+        overrides.gasPriceMultiplier || DEFAULT_GAS_PRICE_MULTIPLIER;
+      maxFeePerGas = baseGasPrice
+        .mul(Math.round(multiplier * 100000))
+        .div(100000)
+        .toNumber();
+    }
 
-  return { gasLimit, gasPrice, type };
+    // Get base fee to calculate maxPriorityFeePerGas
+    const block = await provider.getBlock("latest");
+    const baseFee = block.baseFeePerGas?.toNumber() || 0;
+    const maxPriorityFeePerGas = Math.max(maxFeePerGas - baseFee, 0);
+console.log(chainSlug, gasLimit, maxFeePerGas, maxPriorityFeePerGas, type);
+    return { gasLimit, maxFeePerGas, maxPriorityFeePerGas, type };
+  } else {
+    // Legacy transaction (type 0 or 1)
+    let gasPrice = overrides.gasPrice;
+    if (!gasPrice) {
+      const baseGasPrice = await provider.getGasPrice();
+      const multiplier =
+        overrides.gasPriceMultiplier || DEFAULT_GAS_PRICE_MULTIPLIER;
+      gasPrice = baseGasPrice
+        .mul(Math.round(multiplier * 100000))
+        .div(100000)
+        .toNumber();
+    }
+
+    return { gasLimit, gasPrice, type };
+  }
 };

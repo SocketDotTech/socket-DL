@@ -73,4 +73,5 @@ export enum HardhatChainName {
   HYPEREVM = "hyperevm",
   SEI = "sei",
   PLASMA = "plasma",
+  MONAD = "monad",
 }

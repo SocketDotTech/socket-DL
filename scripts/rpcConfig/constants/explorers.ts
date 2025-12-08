@@ -44,4 +44,5 @@ export const explorers = {
   [ChainSlug.HYPEREVM]: "https://www.hyperscan.com/",
   [ChainSlug.SEI]: "https://seitrace.com/",
   [ChainSlug.PLASMA]: "https://plasmascan.to/",
+  [ChainSlug.MONAD]: "https://mainnet-beta.monvision.io/",
 };

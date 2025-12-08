@@ -20,4 +20,5 @@ export enum NativeTokens {
   "hyperliquid" = "hyperliquid",
   "sei-network" = "sei-network",
   "dogwifcoin" = "dogwifcoin",
+  "wormhole" = "wormhole",
 }

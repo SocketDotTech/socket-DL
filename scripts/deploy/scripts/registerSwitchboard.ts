@@ -53,7 +53,9 @@ export default async function registerSwitchboardForSibling(
       if (isSubmitted) return;
       const tx = await signer.sendTransaction(transaction);
       console.log(
-        `Registering Switchboard remoteChainSlug - ${remoteChainSlug} ${switchBoardAddress}: ${tx.hash}`
+        `Registering Switchboard on ${await signer.getChainId()} for remoteChainSlug - ${remoteChainSlug} ${switchBoardAddress}: ${
+          tx.hash
+        }`
       );
       await tx.wait();
     }
