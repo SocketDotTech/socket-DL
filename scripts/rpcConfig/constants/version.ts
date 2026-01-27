@@ -1,6 +1,6 @@
 import { DeploymentMode } from "../../../src";
 
 export const version = {
-  [DeploymentMode.DEV]: "1.0.5",
-  [DeploymentMode.PROD]: "1.0.115",
+  [DeploymentMode.DEV]: "1.0.6",
+  [DeploymentMode.PROD]: "1.0.116",
 };

@@ -175,7 +175,6 @@ export const getOverrides = async (
     const block = await provider.getBlock("latest");
     const baseFee = block.baseFeePerGas?.toNumber() || 0;
     const maxPriorityFeePerGas = Math.max(maxFeePerGas - baseFee, 0);
-console.log(chainSlug, gasLimit, maxFeePerGas, maxPriorityFeePerGas, type);
     return { gasLimit, maxFeePerGas, maxPriorityFeePerGas, type };
   } else {
     // Legacy transaction (type 0 or 1)
