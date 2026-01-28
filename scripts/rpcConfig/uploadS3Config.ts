@@ -1,4 +1,5 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
 import * as fs from "fs";
 import { DeploymentMode, TxData } from "../../src";
 import dotenv from "dotenv";
@@ -9,6 +10,11 @@ dotenv.config();
 const deploymentMode = process.env.DEPLOYMENT_MODE as DeploymentMode;
 const s3Client = new S3Client({
   region: "us-east-1",
+  maxAttempts: 5,
+  requestHandler: new NodeHttpHandler({
+    requestTimeout: 60000,
+    socketTimeout: 60000,
+  }),
 });
 
 // File path for the JSON file

@@ -102,7 +102,7 @@ export const chainOverrides: {
     gasPrice: 212_000_000_000,
   },
   [ChainSlug.GNOSIS]: {
-    gasLimit: 15_000_000,
+    gasLimit: 6_000_000,
   },
   [ChainSlug.LINEA]: {
     gasLimit: 10_000_000,
@@ -127,7 +127,11 @@ export const chainOverrides: {
     type: 2,
   },
   [ChainSlug.MONAD]: {
-    gasLimit: 3_00_000,
+    gasLimit: 5_000_000,
+  },
+  [ChainSlug.MEGAETH]: {
+    // gasLimit: 5_000_000,
+    // gasPrice: 2_000_000,
   },
 };
 
