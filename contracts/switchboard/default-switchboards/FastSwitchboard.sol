@@ -48,7 +48,7 @@ contract FastSwitchboard is SwitchboardBase {
     error AlreadyAttested();
 
     // Error emitted if grant/revoke is tried for watcher role using generic grant/revoke functions.
-    // Watcher role is handled seperately bacause totalWatchers and fees need to be updated along with role change.
+    // Watcher role is handled separately because totalWatchers and fees need to be updated along with role change.
     error InvalidRole();
 
     // Error emitted while attesting if root is zero or it doesnt match the root on socket for given proposal
@@ -228,7 +228,7 @@ contract FastSwitchboard is SwitchboardBase {
         Fees storage fees = fees[srcChainSlug_];
         uint128 watchersBefore = uint128(totalWatchers[srcChainSlug_]);
 
-        // edge case handled by calling setFees function after boorstrapping is done.
+        // edge case handled by calling setFees function after bootstrapping is done.
         if (watchersBefore != 0 && fees.switchboardFees != 0)
             fees.switchboardFees =
                 (fees.switchboardFees * (watchersBefore + 1)) /
