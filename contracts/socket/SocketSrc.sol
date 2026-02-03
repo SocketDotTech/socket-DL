@@ -17,12 +17,12 @@ abstract contract SocketSrc is SocketBase {
     ////////////////////////////////////////////////////////
 
     /**
-     * @dev Error triggerred when invalid capacitor address is provided
+     * @dev Error triggered when invalid capacitor address is provided
      */
     error InvalidCapacitorAddress();
 
     /**
-     * @dev Error triggerred when siblingPlug is not found
+     * @dev Error triggered when siblingPlug is not found
      */
     error PlugDisconnected();
 
@@ -92,7 +92,7 @@ abstract contract SocketSrc is SocketBase {
         // if no sibling plug is found for the given chain slug, revert
         if (plugConfig.siblingPlug == address(0)) revert PlugDisconnected();
 
-        // fetches auxillary details for the message from the plug config
+        // fetches auxiliary details for the message from the plug config
         plugConfig.capacitor__ = _plugConfigs[msg.sender][siblingChainSlug_]
             .capacitor__;
         plugConfig.outboundSwitchboard__ = _plugConfigs[msg.sender][
