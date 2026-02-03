@@ -51,7 +51,7 @@ contract FastSwitchboard is SwitchboardBase {
     // Watcher role is handled seperately bacause totalWatchers and fees need to be updated along with role change.
     error InvalidRole();
 
-    // Error emitted while attesting if root is zero or it doesnt match the root on socket for given proposal
+    // Error emitted while attesting if root is zero or it doesn't match the root on socket for given proposal
     // helps in cases where attest tx has been sent but root changes on socket due to reorgs.
     error InvalidRoot();
 
