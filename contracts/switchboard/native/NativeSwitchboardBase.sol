@@ -317,8 +317,8 @@ abstract contract NativeSwitchboardBase is ISwitchboard, AccessControlExtended {
     }
 
     /**
-     * @notice Allows a untripper to un trip the switchboard by providing a signature and a nonce.
-     * @dev To un trip, the untripper must have the UN_TRIP_ROLE.
+     * @notice Allows an untripper to untrip the switchboard by providing a signature and a nonce.
+     * @dev To untrip, the untripper must have the UN_TRIP_ROLE.
      * @param nonce_ The nonce to prevent replay attacks.
      * @param signature_ The signature created by the untripper.
      */
