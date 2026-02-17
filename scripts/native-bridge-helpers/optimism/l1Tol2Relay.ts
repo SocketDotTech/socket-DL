@@ -21,7 +21,9 @@ const ATTEST_GAS_LIMIT = 800000;
 const outboundTxHash = "";
 
 const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
-const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
+const l1Provider = new providers.JsonRpcProvider(
+  getJsonRpcUrl(hardhatChainNameToSlug[localChain])
+);
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 
 export const main = async () => {
@@ -45,7 +47,11 @@ export const main = async () => {
 
     // get socket contracts for both chains
     // counter l1, counter l2, seal, execute
-    const contracts = contractNames("", localChain, remoteChain);
+    const contracts = contractNames(
+      "",
+      hardhatChainNameToSlug[localChain],
+      hardhatChainNameToSlug[remoteChain]
+    );
 
     const l1Capacitor: Contract = (
       await getInstance(

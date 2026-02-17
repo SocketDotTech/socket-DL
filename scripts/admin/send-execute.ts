@@ -5,7 +5,7 @@ import {
   getAllAddresses,
   getOverrides,
 } from "../../src";
-import { mode, overrides } from "../deploy/config/config";
+import { mode } from "../deploy/config/config";
 import SocketArtifact from "../../out/Socket.sol/Socket.json";
 import { getProviderFromChainSlug } from "../constants";
 import { ethers, Wallet } from "ethers";
@@ -31,7 +31,8 @@ dotenvConfig();
 // Configuration object with execution and message details
 const EXECUTION_CONFIG = {
   executionDetails: {
-    packetId: "0x0000a4b129ebc834d24af22b9466a4150425354998c3e800000000000000cbe6", // Replace with actual packet ID
+    packetId:
+      "0x0000a4b129ebc834d24af22b9466a4150425354998c3e800000000000000cbe6", // Replace with actual packet ID
     proposalCount: "0", // Replace with actual proposal count
     executionGasLimit: "200000", // Replace with actual gas limit
     decapacitorProof: "0x", // Replace with actual proof
@@ -40,8 +41,10 @@ const EXECUTION_CONFIG = {
     msgId: "0x0000a4b126e5ce884875ea3776a57f0b225b1ea8d2e9beeb00000000000608cb", // Replace with actual message ID
     executionFee: "0", // Replace with actual execution fee
     minMsgGasLimit: "100000", // Replace with actual min gas limit
-    executionParams: "0x0000000000000000000000000000000000000000000000000000000000000000", // Replace with actual execution params
-    payload: "0x0000000000000000000000008cb4c89cc297e07c7a309af8b16cc2f5f62a3b1300000000000000000000000000000000000000000000000000000000062ebe4d", // Replace with actual payload
+    executionParams:
+      "0x0000000000000000000000000000000000000000000000000000000000000000", // Replace with actual execution params
+    payload:
+      "0x0000000000000000000000008cb4c89cc297e07c7a309af8b16cc2f5f62a3b1300000000000000000000000000000000000000000000000000000000062ebe4d", // Replace with actual payload
   },
   msgValue: "0", // ETH value to send with transaction (in wei)
 };
@@ -71,7 +74,9 @@ const addresses: DeploymentAddresses = getAllAddresses(mode);
 export const main = async () => {
   const destinationChain = parseInt(destinationChainSlug) as ChainSlug;
 
-  console.log(`\nProcessing execute transaction for chain: ${destinationChain}\n`);
+  console.log(
+    `\nProcessing execute transaction for chain: ${destinationChain}\n`
+  );
 
   // Get addresses from prod_addresses.json
   const destinationAddresses = addresses[destinationChain];
@@ -90,21 +95,31 @@ export const main = async () => {
   console.log("Execution Configuration:");
   console.log("  ExecutionDetails:");
   console.log(`    Packet ID: ${EXECUTION_CONFIG.executionDetails.packetId}`);
-  console.log(`    Proposal Count: ${EXECUTION_CONFIG.executionDetails.proposalCount}`);
-  console.log(`    Execution Gas Limit: ${EXECUTION_CONFIG.executionDetails.executionGasLimit}`);
-  console.log(`    Decapacitor Proof: ${EXECUTION_CONFIG.executionDetails.decapacitorProof}`);
+  console.log(
+    `    Proposal Count: ${EXECUTION_CONFIG.executionDetails.proposalCount}`
+  );
+  console.log(
+    `    Execution Gas Limit: ${EXECUTION_CONFIG.executionDetails.executionGasLimit}`
+  );
+  console.log(
+    `    Decapacitor Proof: ${EXECUTION_CONFIG.executionDetails.decapacitorProof}`
+  );
   console.log("  MessageDetails:");
   console.log(`    Message ID: ${EXECUTION_CONFIG.messageDetails.msgId}`);
-  console.log(`    Execution Fee: ${EXECUTION_CONFIG.messageDetails.executionFee}`);
-  console.log(`    Min Message Gas Limit: ${EXECUTION_CONFIG.messageDetails.minMsgGasLimit}`);
-  console.log(`    Execution Params: ${EXECUTION_CONFIG.messageDetails.executionParams}`);
+  console.log(
+    `    Execution Fee: ${EXECUTION_CONFIG.messageDetails.executionFee}`
+  );
+  console.log(
+    `    Min Message Gas Limit: ${EXECUTION_CONFIG.messageDetails.minMsgGasLimit}`
+  );
+  console.log(
+    `    Execution Params: ${EXECUTION_CONFIG.messageDetails.executionParams}`
+  );
   console.log(`    Payload: ${EXECUTION_CONFIG.messageDetails.payload}`);
   console.log(`  Message Value: ${EXECUTION_CONFIG.msgValue}\n`);
 
   // Get provider
-  const provider = getProviderFromChainSlug(
-    destinationChain
-  );
+  const provider = getProviderFromChainSlug(destinationChain);
 
   // Get Socket contract to access hasher
   const socketContract = new ethers.Contract(
@@ -119,15 +134,25 @@ export const main = async () => {
 
   // Get hasher contract
   const hasherAbi = [
-    "function packMessage(uint32 srcChainSlug_, address srcPlug_, uint32 dstChainSlug_, address dstPlug_, tuple(bytes32 msgId, uint256 executionFee, uint256 minMsgGasLimit, bytes32 executionParams, bytes payload) messageDetails_) external pure returns (bytes32)"
+    "function packMessage(uint32 srcChainSlug_, address srcPlug_, uint32 dstChainSlug_, address dstPlug_, tuple(bytes32 msgId, uint256 executionFee, uint256 minMsgGasLimit, bytes32 executionParams, bytes payload) messageDetails_) external pure returns (bytes32)",
   ];
-  const hasherContract = new ethers.Contract(hasherAddress, hasherAbi, provider);
+  const hasherContract = new ethers.Contract(
+    hasherAddress,
+    hasherAbi,
+    provider
+  );
 
   // Extract chain slug and plug from msgId
   // msgId format: chainSlug (32 bits) | plug (160 bits) | messageCount (64 bits)
   const msgIdBigInt = BigInt(EXECUTION_CONFIG.messageDetails.msgId);
-  const srcChainSlug = Number((msgIdBigInt >> BigInt(224)) & BigInt(0xFFFFFFFF));
-  const dstPlug = "0x" + ((msgIdBigInt >> BigInt(64)) & ((BigInt(1) << BigInt(160)) - BigInt(1))).toString(16).padStart(40, "0");
+  const srcChainSlug = Number(
+    (msgIdBigInt >> BigInt(224)) & BigInt(0xffffffff)
+  );
+  const dstPlug =
+    "0x" +
+    ((msgIdBigInt >> BigInt(64)) & ((BigInt(1) << BigInt(160)) - BigInt(1)))
+      .toString(16)
+      .padStart(40, "0");
 
   console.log(`\nExtracted from msgId:`);
   console.log(`  Source Chain Slug: ${srcChainSlug}`);
@@ -164,7 +189,9 @@ export const main = async () => {
 
   // Sign with KMS
   console.log("\nSigning packed message with AWS KMS...");
-  const signature = await kmsSigner.signMessage(ethers.utils.arrayify(packedMessage));
+  const signature = await kmsSigner.signMessage(
+    ethers.utils.arrayify(packedMessage)
+  );
   console.log("Signature:", signature);
 
   // Prepare transaction structs
@@ -223,7 +250,9 @@ export const main = async () => {
     console.log("Gas used:", receipt.gasUsed.toString());
   } else {
     console.log("To send the execute transaction, add --sendtx flag");
-    console.log("You can use the transaction details above to manually send, simulate, or audit the transaction.");
+    console.log(
+      "You can use the transaction details above to manually send, simulate, or audit the transaction."
+    );
   }
 
   console.log("\nScript completed.");

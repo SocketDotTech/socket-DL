@@ -112,7 +112,11 @@ export const main = async () => {
   const CHUNK_SIZE = 5000;
   const messageAddedEvents = [];
 
-  for (let currentBlock = fromBlock; currentBlock <= toBlock; currentBlock += CHUNK_SIZE) {
+  for (
+    let currentBlock = fromBlock;
+    currentBlock <= toBlock;
+    currentBlock += CHUNK_SIZE
+  ) {
     const chunkEnd = Math.min(currentBlock + CHUNK_SIZE - 1, toBlock);
     console.log(`Querying chunk: ${currentBlock} to ${chunkEnd}`);
 

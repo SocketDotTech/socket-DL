@@ -34,7 +34,7 @@ export const getSocketSigner = async (
     ChainSlugToId[chainSlug],
     safeAddress,
     safeWrapperAddress,
-    await getRelayUrl(mode),
+    `${await getRelayUrl(mode)}/relay`,
     getRelayAPIKEY(mode),
     wallet,
     useSafe,

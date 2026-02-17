@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import Counter from "../../../../out/Counter.sol/Counter.json";
 import Socket from "../../../../out/Socket.sol/Socket.json";
 import { ChainSlug } from "../../../../src";
-import { getAPIBaseURL, getAddresses, relayTx } from "../../utils";
+import { getAPIBaseURL, getAddresses, getStatus, relayTx } from "../../utils";
 dotenvConfig();
 
 import { formatEther } from "ethers/lib/utils";
@@ -129,15 +129,21 @@ export const sendCounterBridgeMsg = async (
   let response = await relayTx({
     to,
     data,
-    value,
-    gasLimit,
-    gasPrice,
+    value: value?.toString(),
+    gasLimit: gasLimit?.toString(),
+    gasPrice: gasPrice?.toString(),
     type,
     chainSlug,
   });
-  console.log(
-    `Track message here: ${getAPIBaseURL(
-      mode
-    )}/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${response?.hash}`
-  );
+
+  console.log(`Tx Id: ${response?.txId}`);
+  const txHash = await getStatus(response?.txId);
+
+  if (txHash) {
+    console.log(
+      `Track message here: ${getAPIBaseURL(
+        mode
+      )}/messages-from-tx?srcChainSlug=${chainSlug}&srcTxHash=${txHash}`
+    );
+  }
 };

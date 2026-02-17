@@ -91,7 +91,9 @@ export const main = async () => {
   const sourceChain = sourceChainSlug;
   const destinationChain = destinationChainSlug;
 
-  console.log(`\nProcessing attest for path: ${sourceChain} -> ${destinationChain}\n`);
+  console.log(
+    `\nProcessing attest for path: ${sourceChain} -> ${destinationChain}\n`
+  );
 
   // Get addresses from prod_addresses.json
   const destinationAddresses = addresses[destinationChain];
@@ -139,7 +141,13 @@ export const main = async () => {
   const messageHash = keccak256(
     defaultAbiCoder.encode(
       ["address", "uint32", "bytes32", "uint256", "bytes32"],
-      [switchboardAddress, parseInt(destinationChain), packetId, proposalCount, root]
+      [
+        switchboardAddress,
+        parseInt(destinationChain),
+        packetId,
+        proposalCount,
+        root,
+      ]
     )
   );
 
@@ -147,11 +155,15 @@ export const main = async () => {
 
   // Sign with KMS
   console.log("\nSigning with AWS KMS...");
-  const signature = await kmsSigner.signMessage(ethers.utils.arrayify(messageHash));
+  const signature = await kmsSigner.signMessage(
+    ethers.utils.arrayify(messageHash)
+  );
   console.log("Signature:", signature);
 
   // Prepare transaction data
-  const switchboardInterface = new ethers.utils.Interface(FastSwitchboardArtifact.abi);
+  const switchboardInterface = new ethers.utils.Interface(
+    FastSwitchboardArtifact.abi
+  );
   const calldata = switchboardInterface.encodeFunctionData("attest", [
     packetId,
     proposalCount,
@@ -193,7 +205,9 @@ export const main = async () => {
     console.log("Gas used:", receipt.gasUsed.toString());
   } else {
     console.log("To send the attest transaction, add --sendtx flag");
-    console.log("You can use the transaction details above to manually send, simulate, or audit the transaction.");
+    console.log(
+      "You can use the transaction details above to manually send, simulate, or audit the transaction."
+    );
   }
 
   console.log("\nScript completed.");
