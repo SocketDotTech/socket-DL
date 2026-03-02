@@ -220,7 +220,10 @@ export const configureExecutionManager = async (
     console.log("configured EM for ", chain, tx.hash);
     await tx.wait();
   } catch (error) {
-    console.log("error while configuring execution manager: ", error);
+    console.log(
+      `error while configuring execution manager: ${chain} ${socketSigner.chainId}`,
+      error
+    );
   }
 };
 
