@@ -5,7 +5,7 @@ import {
   getAllAddresses,
   getOverrides,
 } from "../../src";
-import { mode, overrides } from "../deploy/config/config";
+import { mode } from "../deploy/config/config";
 import SocketArtifact from "../../out/Socket.sol/Socket.json";
 import { getProviderFromChainSlug } from "../constants";
 import { ethers, Wallet } from "ethers";
@@ -37,9 +37,30 @@ dotenvConfig();
  *                  Eg. npx --sourcetxhash=0x123... --kmskeyid=abc-123  --sendtx ts-node scripts/admin/send-execute.ts
  */
 
-const sourceTxHash = process.env.npm_config_sourcetxhash;
-if (!sourceTxHash) {
-  console.error("Error: sourcetxhash flag is required");
+// Configuration object with execution and message details
+const EXECUTION_CONFIG = {
+  executionDetails: {
+    packetId:
+      "0x0000a4b129ebc834d24af22b9466a4150425354998c3e800000000000000cbe6", // Replace with actual packet ID
+    proposalCount: "0", // Replace with actual proposal count
+    executionGasLimit: "200000", // Replace with actual gas limit
+    decapacitorProof: "0x", // Replace with actual proof
+  },
+  messageDetails: {
+    msgId: "0x0000a4b126e5ce884875ea3776a57f0b225b1ea8d2e9beeb00000000000608cb", // Replace with actual message ID
+    executionFee: "0", // Replace with actual execution fee
+    minMsgGasLimit: "100000", // Replace with actual min gas limit
+    executionParams:
+      "0x0000000000000000000000000000000000000000000000000000000000000000", // Replace with actual execution params
+    payload:
+      "0x0000000000000000000000008cb4c89cc297e07c7a309af8b16cc2f5f62a3b1300000000000000000000000000000000000000000000000000000000062ebe4d", // Replace with actual payload
+  },
+  msgValue: "0", // ETH value to send with transaction (in wei)
+};
+
+const destinationChainSlug = process.env.npm_config_destination;
+if (!destinationChainSlug) {
+  console.error("Error: destination flag is required");
   process.exit(1);
 }
 
@@ -75,11 +96,9 @@ export const main = async () => {
     `\nFetching MessageOutbound event from source transaction: ${sourceTxHash}\n`
   );
 
-  // First, we need to get the transaction receipt to determine the source chain
-  // We'll try to fetch the receipt from all chains until we find it
-  let sourceChain: ChainSlug | undefined;
-  let sourceProvider: ethers.providers.Provider | undefined;
-  let txReceipt: ethers.providers.TransactionReceipt | undefined;
+  console.log(
+    `\nProcessing execute transaction for chain: ${destinationChain}\n`
+  );
 
   console.log("Searching for transaction across chains...");
   for (const [chainSlug, chainAddresses] of Object.entries(addresses)) {
@@ -150,6 +169,32 @@ export const main = async () => {
   console.log("Destination Addresses:");
   console.log(`  Socket: ${socketAddress}\n`);
 
+  console.log("Execution Configuration:");
+  console.log("  ExecutionDetails:");
+  console.log(`    Packet ID: ${EXECUTION_CONFIG.executionDetails.packetId}`);
+  console.log(
+    `    Proposal Count: ${EXECUTION_CONFIG.executionDetails.proposalCount}`
+  );
+  console.log(
+    `    Execution Gas Limit: ${EXECUTION_CONFIG.executionDetails.executionGasLimit}`
+  );
+  console.log(
+    `    Decapacitor Proof: ${EXECUTION_CONFIG.executionDetails.decapacitorProof}`
+  );
+  console.log("  MessageDetails:");
+  console.log(`    Message ID: ${EXECUTION_CONFIG.messageDetails.msgId}`);
+  console.log(
+    `    Execution Fee: ${EXECUTION_CONFIG.messageDetails.executionFee}`
+  );
+  console.log(
+    `    Min Message Gas Limit: ${EXECUTION_CONFIG.messageDetails.minMsgGasLimit}`
+  );
+  console.log(
+    `    Execution Params: ${EXECUTION_CONFIG.messageDetails.executionParams}`
+  );
+  console.log(`    Payload: ${EXECUTION_CONFIG.messageDetails.payload}`);
+  console.log(`  Message Value: ${EXECUTION_CONFIG.msgValue}\n`);
+
   // Get provider
   const provider = getProviderFromChainSlug(destinationChain);
 
@@ -174,10 +219,17 @@ export const main = async () => {
     provider
   );
 
-  // Use data from parsed event
-  const srcChainSlug = sourceChain;
-  const srcPlug = parsedEvent.args.localPlug;
-  const dstPlug = parsedEvent.args.dstPlug;
+  // Extract chain slug and plug from msgId
+  // msgId format: chainSlug (32 bits) | plug (160 bits) | messageCount (64 bits)
+  const msgIdBigInt = BigInt(EXECUTION_CONFIG.messageDetails.msgId);
+  const srcChainSlug = Number(
+    (msgIdBigInt >> BigInt(224)) & BigInt(0xffffffff)
+  );
+  const dstPlug =
+    "0x" +
+    ((msgIdBigInt >> BigInt(64)) & ((BigInt(1) << BigInt(160)) - BigInt(1)))
+      .toString(16)
+      .padStart(40, "0");
 
   // Get plug config to find siblingPlug (for verification)
   const plugConfig = await socketContract.getPlugConfig(dstPlug, srcChainSlug);

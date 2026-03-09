@@ -11,16 +11,20 @@ import {
 } from "../../../src";
 
 // https://goerli.arbiscan.io/txsExit to check message status
-const l1Chain = HardhatChainName.GOERLI;
-const l2Chain = HardhatChainName.ARBITRUM_GOERLI;
+const l1Chain = HardhatChainName.SEPOLIA;
+const l2Chain = HardhatChainName.ARBITRUM_SEPOLIA;
 const sealTxHash =
-  "0x0113020a1e3b9f814a78791b9719bf583bb0f25075cde1e754af99f1dcf137a7";
+  "0x4e8f4b180b2fbb5d06d637294776fda71025568bdb0cc31e2a430795e6481d54";
 
 import { mode } from "../../deploy/config/config";
 
 const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
-const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));
-const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l2Chain));
+const l1Provider = new providers.JsonRpcProvider(
+  getJsonRpcUrl(hardhatChainNameToSlug[l1Chain])
+);
+const l2Provider = new providers.JsonRpcProvider(
+  getJsonRpcUrl(hardhatChainNameToSlug[l2Chain])
+);
 
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 

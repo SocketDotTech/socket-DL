@@ -19,16 +19,20 @@ import { L1ToL2MessageStatus, L1TransactionReceipt } from "@arbitrum/sdk";
 // get providers for source and destination
 
 // replace following variables to initiate the txn
-const l1Chain = HardhatChainName.GOERLI;
-const l2Chain = HardhatChainName.ARBITRUM_GOERLI;
+const l1Chain = HardhatChainName.SEPOLIA;
+const l2Chain = HardhatChainName.ARBITRUM_SEPOLIA;
 const packetId =
   "0x00000005feb89935220606f3c3670ae510a74ab5750e810c0000000000000000";
 const root =
   "0xc8111d45052c1df62037b92c1fab7c23bda80a0854b81432aee514aaf5f6c440";
 
 const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
-const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));
-const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l2Chain));
+const l1Provider = new providers.JsonRpcProvider(
+  getJsonRpcUrl(hardhatChainNameToSlug[l1Chain])
+);
+const l2Provider = new providers.JsonRpcProvider(
+  getJsonRpcUrl(hardhatChainNameToSlug[l2Chain])
+);
 
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 const l2Wallet = new Wallet(walletPrivateKey, l2Provider);
