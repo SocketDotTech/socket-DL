@@ -1,6 +1,6 @@
 import { BigNumber, BigNumberish } from "ethers";
 import { getRelayAPIKEY, getRelayUrl } from "./utils";
-import { axiosPost } from "@socket.tech/dl-common";
+import { axiosGet, axiosPost } from "@socket.tech/dl-common";
 import { mode } from "../config/config";
 import { ChainSlugToId } from "../../../src";
 
@@ -17,7 +17,6 @@ interface RequestObj {
 export const relayTx = async (params: RequestObj) => {
   try {
     let { to, data, chainSlug, gasPrice, value, type, gasLimit } = params;
-    let url = await getRelayUrl(mode);
     let config = {
       headers: {
         "x-api-key": getRelayAPIKEY(mode),
@@ -34,7 +33,26 @@ export const relayTx = async (params: RequestObj) => {
       sequential: false,
       source: "LoadTester",
     };
-    let response = await axiosPost(url!, body, config);
+    let response = await axiosPost(
+      `${await getRelayUrl(mode)}/relay`,
+      body,
+      config
+    );
+    if (response?.success) return response?.data;
+    else {
+      console.log("error in relaying tx", response);
+      return { hash: "" };
+    }
+  } catch (error) {
+    console.log("uncaught error", error);
+  }
+};
+
+export const getStatus = async (txId: string) => {
+  try {
+    const response = await axiosGet(
+      `${await getRelayUrl(mode)}/status?txId=${txId}`
+    );
     if (response?.success) return response?.data;
     else {
       console.log("error in relaying tx", response);

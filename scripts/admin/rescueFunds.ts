@@ -18,6 +18,7 @@ import {
 import { formatEther } from "ethers/lib/utils";
 import { getSocketSigner } from "../deploy/utils/socket-signer";
 import { deploymentMode } from "../rpcConfig/rpcConfig";
+import { batcherSupportedChainSlugs } from "../rpcConfig/constants/batcherSupportedChainSlug";
 
 /**
  * Usable flags
@@ -67,6 +68,10 @@ const filterChains = process.env.npm_config_chains
 const maxRescueAmount = ethers.utils.parseEther(
   process.env.npm_config_amount || "0"
 );
+
+const safeChains = (process.env.SAFE_CHAINS || "")
+  .split(",")
+  .map((c) => parseInt(c) as ChainSlug);
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const rescueFundsABI = [
@@ -139,14 +144,17 @@ export const main = async () => {
   // parallelize chains
   await Promise.all(
     activeChainSlugs
-      .filter((c) => filterChains.includes(c))
+      .filter(
+        (c) =>
+          filterChains.includes(c) &&
+          batcherSupportedChainSlugs.includes(parseInt(c))
+      )
       .map(async (chainSlug) => {
         let chainAddresses: ChainSocketAddresses = addresses[chainSlug];
         if (!chainAddresses) {
           console.log("addresses not found for ", chainSlug, chainAddresses);
           return;
         }
-
         const providerInstance = getProviderFromChainSlug(
           parseInt(chainSlug) as ChainSlug
         );
@@ -154,7 +162,10 @@ export const main = async () => {
         const signer = await getSocketSigner(
           parseInt(chainSlug),
           chainAddresses,
-          chainAddresses["SocketSafeProxy"] ? true : false,
+          chainAddresses["SocketSafeProxy"] &&
+            safeChains.includes(parseInt(chainSlug))
+            ? true
+            : false,
           true
         );
 

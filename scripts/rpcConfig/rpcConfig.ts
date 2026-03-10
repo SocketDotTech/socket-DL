@@ -69,6 +69,75 @@ const getOldEMVersionChainSlugs = (): ChainSlug[] => {
   return chains;
 };
 
+/**
+ * Parses chain surcharge configuration from environment variable
+ * Format: "chainSlug:usdAmount,chainSlug:usdAmount,..."
+ * Example: "1324967486:2,1:1.5,42161:1"
+ *
+ * @returns Object mapping chain slug (as string) to USD surcharge amount
+ */
+const parseChainSurchargeFromEnv = (): { [chainSlug: string]: number } => {
+  const envVar = process.env.CHAIN_SURCHARGE_USD;
+
+  // If not set, return empty object
+  if (!envVar || envVar.trim() === "") {
+    return {};
+  }
+
+  const surchargeMap: { [chainSlug: string]: number } = {};
+
+  try {
+    // Split by comma to get individual chain:amount pairs
+    const pairs = envVar
+      .split(",")
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+
+    for (const pair of pairs) {
+      const [chainSlugStr, amountStr] = pair.split(":").map((s) => s.trim());
+
+      // Validate format
+      if (!chainSlugStr || !amountStr) {
+        console.warn(
+          `Invalid chain surcharge pair: "${pair}". Expected format: "chainSlug:amount"`
+        );
+        continue;
+      }
+
+      // Validate chain slug is a valid number
+      const chainSlug = parseInt(chainSlugStr);
+      if (isNaN(chainSlug) || chainSlug <= 0) {
+        console.warn(
+          `Invalid chain slug: "${chainSlugStr}". Must be a positive integer.`
+        );
+        continue;
+      }
+
+      // Validate amount is a valid positive number
+      const amount = parseFloat(amountStr);
+      if (isNaN(amount) || amount < 0) {
+        console.warn(
+          `Invalid surcharge amount: "${amountStr}". Must be a non-negative number.`
+        );
+        continue;
+      }
+
+      // Store with chain slug as string (JSON key requirement)
+      surchargeMap[chainSlugStr] = amount;
+    }
+
+    console.log(
+      `Parsed chain surcharge config: ${
+        Object.keys(surchargeMap).length
+      } chains with surcharges`
+    );
+    return surchargeMap;
+  } catch (error) {
+    console.error(`Error parsing CHAIN_SURCHARGE_USD: ${error}`);
+    return {};
+  }
+};
+
 const getChainType = (chainSlug: ChainSlug) => {
   if (opStackL2Chain.includes(chainSlug)) {
     return ChainType.opStackL2Chain;
@@ -136,6 +205,7 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
     chainSlugToId: ChainSlugToId,
     oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
     disabledDFFeeChains,
+    chainSurchargeUsdBySlug: parseChainSurchargeFromEnv(),
   };
 };
 
@@ -163,5 +233,6 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
     chainSlugToId: ChainSlugToId,
     oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
     disabledDFFeeChains,
+    chainSurchargeUsdBySlug: parseChainSurchargeFromEnv(),
   };
 };

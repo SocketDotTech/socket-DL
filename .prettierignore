@@ -16,7 +16,7 @@ scratchpad
 .gitignore
 .gitmodules
 .prettierignore
-deploy.sh
+*.sh
 foundry.toml
 LICENSE
 remappings.txt

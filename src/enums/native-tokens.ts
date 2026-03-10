@@ -21,4 +21,6 @@ export enum NativeTokens {
   "sei-network" = "sei-network",
   "dogwifcoin" = "dogwifcoin",
   "wormhole" = "wormhole",
+  "plasma" = "plasma",
+  "ethena-usde" = "ethena-usde",
 }

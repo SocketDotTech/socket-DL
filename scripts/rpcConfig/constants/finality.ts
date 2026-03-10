@@ -51,4 +51,9 @@ export const finalityOverrides: {
     [FinalityBucket.medium]: 100,
     [FinalityBucket.high]: 1024,
   },
+  [ChainSlug.ZKEVM]: {
+    [FinalityBucket.low]: 1,
+    [FinalityBucket.medium]: 10,
+    [FinalityBucket.high]: 100,
+  },
 };

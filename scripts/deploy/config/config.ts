@@ -135,7 +135,7 @@ export const overrides = async (
 ): Promise<{
   type?: number | undefined;
   gasLimit?: BigNumberish | undefined;
-  gasPrice?: BigNumberish | undefined;
+  gasPrice?: string | undefined;
 }> => {
   if (chainConfig[chain]?.overrides) {
     return chainConfig[chain].overrides;

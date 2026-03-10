@@ -3,7 +3,7 @@ import { config as dotenvConfig } from "dotenv";
 import { constants, providers, Wallet } from "ethers";
 import { CrossChainMessenger, MessageStatus } from "@eth-optimism/sdk";
 import { getJsonRpcUrl } from "../../constants";
-import { ChainId } from "../../../src";
+import { ChainId, hardhatChainNameToSlug } from "../../../src";
 import { resolve } from "path";
 import axios from "axios";
 
@@ -20,8 +20,12 @@ const initTxHash =
   "0x373611163c75ca063aae79fc7a8ef4a9d8e66603cc92997cbbcd2a18cbbcde37";
 
 const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
-const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1Chain));
-const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l2Chain));
+const l1Provider = new providers.JsonRpcProvider(
+  getJsonRpcUrl(hardhatChainNameToSlug[l1Chain])
+);
+const l2Provider = new providers.JsonRpcProvider(
+  getJsonRpcUrl(hardhatChainNameToSlug[l2Chain])
+);
 
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 

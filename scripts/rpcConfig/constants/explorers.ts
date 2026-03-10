@@ -45,4 +45,6 @@ export const explorers = {
   [ChainSlug.SEI]: "https://seitrace.com/",
   [ChainSlug.PLASMA]: "https://plasmascan.to/",
   [ChainSlug.MONAD]: "https://mainnet-beta.monvision.io/",
+  [ChainSlug.MEGAETH]: "https://megaeth.blockscout.com/",
+  [ChainSlug.ETHEREAL]: "https://explorer.ethereal.trade",
 };

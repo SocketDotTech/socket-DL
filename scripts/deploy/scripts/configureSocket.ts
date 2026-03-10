@@ -211,16 +211,18 @@ export const configureExecutionManager = async (
     // });
 
     if (requests.length === 0) return;
-
     let tx = await socketBatcherContract.setExecutionFeesBatch(
       emAddress,
       requests,
       { ...(await overrides(chain)) }
     );
-    console.log("configured EM for ", chain, tx.hash);
+    console.log("configured EM for ", chain, tx.txId);
     await tx.wait();
   } catch (error) {
-    console.log("error while configuring execution manager: ", error);
+    console.log(
+      `error while configuring execution manager: ${chain} ${socketSigner.chainId}`,
+      error
+    );
   }
 };
 

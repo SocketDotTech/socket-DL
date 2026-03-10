@@ -1,14 +1,20 @@
 import { providers, Wallet } from "ethers";
 import { CrossChainMessenger, MessageStatus } from "@eth-optimism/sdk";
 import { getJsonRpcUrl } from "../../constants";
-import { HardhatChainName, ChainId } from "../../../src";
+import {
+  HardhatChainName,
+  ChainId,
+  hardhatChainNameToSlug,
+} from "../../../src";
 
 // get providers for source and destination
 const l1ChainId = ChainId.SEPOLIA;
 const l2ChainId = ChainId.OPTIMISM_SEPOLIA;
 
 const walletPrivateKey = process.env.SOCKET_SIGNER_KEY!;
-const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(l1ChainId));
+const l1Provider = new providers.JsonRpcProvider(
+  getJsonRpcUrl(hardhatChainNameToSlug[l1ChainId])
+);
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider);
 
 const sealTxHash = "";
@@ -18,7 +24,9 @@ export const main = async () => {
     l1ChainId,
     l2ChainId,
     l1SignerOrProvider: l1Wallet,
-    l2SignerOrProvider: new providers.JsonRpcProvider(getJsonRpcUrl(l2ChainId)),
+    l2SignerOrProvider: new providers.JsonRpcProvider(
+      getJsonRpcUrl(hardhatChainNameToSlug[l2ChainId])
+    ),
   });
 
   const status = await crossChainMessenger.getMessageStatus(sealTxHash);

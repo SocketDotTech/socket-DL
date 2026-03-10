@@ -89,13 +89,14 @@ const remoteChain = HardhatChainName.MAINNET;
 
 const l2Provider = new providers.JsonRpcProvider(getJsonRpcUrl(localChain));
 const l1Provider = new providers.JsonRpcProvider(getJsonRpcUrl(remoteChain));
+
 const l1Signer = new SocketRelaySigner(
   l1Provider,
-  process.env.RELAYER_URL_DEV!
+  `${process.env.RELAYER_URL_DEV!}/relay`
 );
 const l2Signer = new SocketRelaySigner(
   l2Provider,
-  process.env.RELAYER_URL_DEV!
+  `${process.env.RELAYER_URL_DEV!}/relay`
 );
 
 export const main = async () => {

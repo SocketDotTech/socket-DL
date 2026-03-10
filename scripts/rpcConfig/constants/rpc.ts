@@ -78,4 +78,6 @@ export const rpcs = {
   [ChainSlug.SEI]: checkEnvValue("SEI_RPC"),
   [ChainSlug.PLASMA]: checkEnvValue("PLASMA_RPC"),
   [ChainSlug.MONAD]: checkEnvValue("MONAD_RPC"),
+  [ChainSlug.MEGAETH]: checkEnvValue("MEGAETH_RPC"),
+  [ChainSlug.ETHEREAL]: checkEnvValue("ETHEREAL_RPC"),
 };
