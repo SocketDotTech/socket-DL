@@ -44,4 +44,5 @@ export const icons = {
   [ChainSlug.PLASMA]: "",
   [ChainSlug.MONAD]: "",
   [ChainSlug.MEGAETH]: "",
+  [ChainSlug.ETHEREAL]: "",
 };

@@ -27,4 +27,5 @@ export const Currency = {
   [ChainSlug.SEI]: NativeTokens["sei-network"],
   [ChainSlug.PLASMA]: NativeTokens["plasma"],
   [ChainSlug.MONAD]: NativeTokens["monad"],
+  [ChainSlug.ETHEREAL]: NativeTokens["ethena-usde"],
 };

@@ -22,7 +22,7 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.MODE,
   ChainSlug.REYA_CRONOS,
   // ChainSlug.SYNDR_SEPOLIA_L3,
-  ChainSlug.POLYNOMIAL_TESTNET,
+  // ChainSlug.POLYNOMIAL_TESTNET,
   // ChainSlug.BOB,
   // ChainSlug.KINTO,
   // ChainSlug.KINTO_DEVNET,
@@ -30,7 +30,7 @@ export const batcherSupportedChainSlugs = [
   // ChainSlug.WINR,
   ChainSlug.BLAST,
   // ChainSlug.BSC_TESTNET,
-  ChainSlug.POLYNOMIAL,
+  // ChainSlug.POLYNOMIAL,
   // ChainSlug.SYNDR,
   // ChainSlug.NEOX_TESTNET,
   // ChainSlug.NEOX_T4_TESTNET,
@@ -67,4 +67,5 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.PLASMA,
   ChainSlug.MONAD,
   ChainSlug.MEGAETH,
+  ChainSlug.ETHEREAL,
 ];

@@ -1,5 +1,5 @@
 import { ChainSlug } from "../../src/enums/chainSlug";
-import { providers } from "ethers";
+import { BigNumberish, providers } from "ethers";
 
 const defaultType = 0;
 const DEFAULT_GAS_PRICE_MULTIPLIER = 1.05;
@@ -156,13 +156,19 @@ export const chainOverrides: {
 export const getOverrides = async (
   chainSlug: ChainSlug,
   provider: providers.StaticJsonRpcProvider
-) => {
+): Promise<{
+  type?: number | undefined;
+  gasLimit?: BigNumberish | undefined;
+  gasPrice?: string | undefined;
+  maxFeePerGas?: string | undefined;
+  maxPriorityFeePerGas?: string | undefined;
+}> => {
   const overrides = chainOverrides[chainSlug] || {};
   const { gasLimit, type = defaultType } = overrides;
 
   if (type === 2) {
     // EIP-1559 transaction
-    let maxFeePerGas = overrides.gasPrice;
+    let maxFeePerGas = overrides.gasPrice?.toString();
     if (!maxFeePerGas) {
       const feeData = await provider.getFeeData();
       const baseGasPrice =
@@ -172,17 +178,20 @@ export const getOverrides = async (
       maxFeePerGas = baseGasPrice
         .mul(Math.round(multiplier * 100000))
         .div(100000)
-        .toNumber();
+        .toString();
     }
 
     // Get base fee to calculate maxPriorityFeePerGas
     const block = await provider.getBlock("latest");
     const baseFee = block.baseFeePerGas?.toNumber() || 0;
-    const maxPriorityFeePerGas = Math.max(maxFeePerGas - baseFee, 0);
+    const maxPriorityFeePerGas = Math.max(
+      Number(maxFeePerGas) - baseFee,
+      0
+    ).toString();
     return { gasLimit, maxFeePerGas, maxPriorityFeePerGas, type };
   } else {
     // Legacy transaction (type 0 or 1)
-    let gasPrice = overrides.gasPrice;
+    let gasPrice = overrides.gasPrice?.toString();
     if (!gasPrice) {
       const baseGasPrice = await provider.getGasPrice();
       const multiplier =
@@ -190,7 +199,7 @@ export const getOverrides = async (
       gasPrice = baseGasPrice
         .mul(Math.round(multiplier * 100000))
         .div(100000)
-        .toNumber();
+        .toString();
     }
 
     return { gasLimit, gasPrice, type };

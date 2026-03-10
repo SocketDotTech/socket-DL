@@ -78,4 +78,5 @@ export const ChainSlugToId = {
   [ChainSlug.PLASMA]: ChainId.PLASMA,
   [ChainSlug.MONAD]: ChainId.MONAD,
   [ChainSlug.MEGAETH]: ChainId.MEGAETH,
+  [ChainSlug.ETHEREAL]: ChainId.ETHEREAL,
 };

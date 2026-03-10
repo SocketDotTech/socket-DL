@@ -22,4 +22,5 @@ export enum NativeTokens {
   "dogwifcoin" = "dogwifcoin",
   "wormhole" = "wormhole",
   "plasma" = "plasma",
+  "ethena-usde" = "ethena-usde",
 }
