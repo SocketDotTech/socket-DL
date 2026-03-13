@@ -146,7 +146,7 @@ abstract contract SwitchboardBase is ISwitchboard, AccessControlExtended {
     /**
      * @notice Signals sibling switchboard for given `siblingChainSlug_`.
      * @dev This function is expected to be only called by governance
-     * @param siblingChainSlug_ The slug of the sibling chain whos switchboard is being connected.
+     * @param siblingChainSlug_ The slug of the sibling chain whose switchboard is being connected.
      * @param siblingSwitchboard_ The switchboard address deployed on `siblingChainSlug_`
      */
     function updateSibling(
