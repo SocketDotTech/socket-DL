@@ -10,8 +10,8 @@ import {FEES_UPDATE_SIG_IDENTIFIER} from "./utils/SigIdentifiers.sol";
 
 /**
  * @title TransmitManager
- * @notice The TransmitManager contract managers transmitter which facilitates communication between chains
- * @dev This contract is responsible access control of transmitters and their fees
+ * @notice The TransmitManager contract manages transmitters which facilitate communication between chains
+ * @dev This contract is responsible for access control of transmitters and their fees
  * @dev This contract inherits AccessControlExtended which extends access control
  * @dev The transmission fees is collected in execution manager which can be pulled from it when needed
  */
