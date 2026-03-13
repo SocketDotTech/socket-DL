@@ -168,7 +168,7 @@ contract FastSwitchboard is SwitchboardBase {
             if (nonce_ != nextNonce[feesUpdater]++) revert InvalidNonce();
         }
 
-        // switchboardFees_ input is amount needed per watcher, multipled and stored on chain to avoid watcher set tracking offchain.
+        // switchboardFees_ input is amount needed per watcher, multiplied and stored on chain to avoid watcher set tracking offchain.
         // switchboardFees_ are paid to switchboard per packet
         // verificationOverheadFees_ are paid to executor per message
         Fees memory feesObject = Fees({
