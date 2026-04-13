@@ -1,5 +1,6 @@
 export * from "./batcherSupportedChainSlug";
 export * from "./reSyncInterval";
+export * from "./eventBlockRange";
 export * from "./defaultFinalityBucket";
 export * from "./explorers";
 export * from "./icons";
