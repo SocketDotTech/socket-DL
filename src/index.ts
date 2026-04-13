@@ -1,5 +1,6 @@
 import { DeploymentMode } from "./socket-types";
 export { getFinality } from "../scripts/rpcConfig/constants/finality";
+export { getEventBlockRange } from "../scripts/rpcConfig/constants/eventBlockRange";
 export { getDefaultFinalityBucket } from "../scripts/rpcConfig/constants/defaultFinalityBucket";
 export { getReSyncInterval } from "../scripts/rpcConfig/constants/reSyncInterval";
 export { getOverrides } from "../scripts/constants/overrides";
