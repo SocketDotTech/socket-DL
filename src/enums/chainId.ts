@@ -76,4 +76,5 @@ export enum ChainId {
   MONAD = 143,
   MEGAETH = 4326,
   ETHEREAL = 5064014,
+  RISE = 4153,
 }

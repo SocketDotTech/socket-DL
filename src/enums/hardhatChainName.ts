@@ -76,4 +76,5 @@ export enum HardhatChainName {
   MONAD = "monad",
   MEGAETH = "megaeth",
   ETHEREAL = "ethereal",
+  RISE = "rise",
 }

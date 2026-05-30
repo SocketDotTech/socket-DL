@@ -47,4 +47,5 @@ export const explorers = {
   [ChainSlug.MONAD]: "https://mainnet-beta.monvision.io/",
   [ChainSlug.MEGAETH]: "https://megaeth.blockscout.com/",
   [ChainSlug.ETHEREAL]: "https://explorer.ethereal.trade",
+  [ChainSlug.RISE]: "https://explorer.risechain.com/",
 };

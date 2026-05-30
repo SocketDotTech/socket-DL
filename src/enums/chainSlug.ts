@@ -78,4 +78,5 @@ export enum ChainSlug {
   MONAD = ChainId.MONAD,
   MEGAETH = ChainId.MEGAETH,
   ETHEREAL = ChainId.ETHEREAL,
+  RISE = ChainId.RISE,
 }

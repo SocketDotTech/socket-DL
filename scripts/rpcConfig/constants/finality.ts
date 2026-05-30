@@ -56,17 +56,20 @@ export const finalityOverrides: {
     [FinalityBucket.medium]: 10,
     [FinalityBucket.high]: 100,
   },
-  [ChainSlug.SEI]: { // to handle rpc rate limiting
+  [ChainSlug.SEI]: {
+    // to handle rpc rate limiting
     [FinalityBucket.low]: 1,
     [FinalityBucket.medium]: 10,
     [FinalityBucket.high]: 100,
   },
-  [ChainSlug.SWELLCHAIN]: { // to handle rpc rate limiting
+  [ChainSlug.SWELLCHAIN]: {
+    // to handle rpc rate limiting
     [FinalityBucket.low]: 1,
     [FinalityBucket.medium]: 10,
     [FinalityBucket.high]: 100,
   },
-  [ChainSlug.MONAD]: { // to handle rpc rate limiting
+  [ChainSlug.MONAD]: {
+    // to handle rpc rate limiting
     [FinalityBucket.low]: 1,
     [FinalityBucket.medium]: 10,
     [FinalityBucket.high]: 100,
