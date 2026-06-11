@@ -48,4 +48,5 @@ export const explorers = {
   [ChainSlug.MEGAETH]: "https://megaeth.blockscout.com/",
   [ChainSlug.ETHEREAL]: "https://explorer.ethereal.trade",
   [ChainSlug.RISE]: "https://explorer.risechain.com/",
+  [ChainSlug.FLARE]: "",
 };

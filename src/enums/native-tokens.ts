@@ -23,4 +23,5 @@ export enum NativeTokens {
   "wormhole" = "wormhole",
   "plasma" = "plasma",
   "ethena-usde" = "ethena-usde",
+  "flare-networks" = "flare-networks",
 }

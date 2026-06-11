@@ -28,4 +28,5 @@ export const Currency = {
   [ChainSlug.PLASMA]: NativeTokens["plasma"],
   [ChainSlug.MONAD]: NativeTokens["monad"],
   [ChainSlug.ETHEREAL]: NativeTokens["ethena-usde"],
+  [ChainSlug.FLARE]: NativeTokens["flare-networks"],
 };
