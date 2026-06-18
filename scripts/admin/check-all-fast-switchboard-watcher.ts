@@ -66,7 +66,10 @@ const chainFilter = chainFilterParam
 
 const addresses: DeploymentAddresses = getAllAddresses(mode);
 const supportedChains = new Set(batcherSupportedChainSlugs);
-const signerCache = new Map<ChainSlug, Awaited<ReturnType<typeof getSocketSigner>>>();
+const signerCache = new Map<
+  ChainSlug,
+  Awaited<ReturnType<typeof getSocketSigner>>
+>();
 const CHAIN_PARALLELISM = 10;
 
 const main = async () => {
@@ -75,15 +78,25 @@ const main = async () => {
   if (!operations.length) {
     console.log(
       `No FAST paths found in ${mode} mode where both chains are in batcherSupportedChainSlugs${
-        chainFilter ? ` and either source or destination is in ${Array.from(chainFilter).join(",")}` : ""
+        chainFilter
+          ? ` and either source or destination is in ${Array.from(
+              chainFilter
+            ).join(",")}`
+          : ""
       }`
     );
     return;
   }
 
   console.log(
-    `Checking ${operations.length} FAST path(s) where both chains are in batcherSupportedChainSlugs${
-      chainFilter ? ` and either source or destination is in ${Array.from(chainFilter).join(",")}` : ""
+    `Checking ${
+      operations.length
+    } FAST path(s) where both chains are in batcherSupportedChainSlugs${
+      chainFilter
+        ? ` and either source or destination is in ${Array.from(
+            chainFilter
+          ).join(",")}`
+        : ""
     }`
   );
 
@@ -203,8 +216,9 @@ const getCachedSigner = async (chainSlug: ChainSlug) => {
 };
 
 const checkWatcherRole = async (operation: WatcherCheckOp): Promise<number> => {
-  const executionChainAddresses =
-    addresses[operation.executionChainSlug] as ChainSocketAddresses;
+  const executionChainAddresses = addresses[
+    operation.executionChainSlug
+  ] as ChainSocketAddresses;
 
   if (
     !executionChainAddresses.SocketSafeProxy ||

@@ -4,7 +4,7 @@
       "ownerAddress": "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
       "executorAddress": "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
       "transmitterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5",
-      "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
+      "watcherAddress": "0xB7E6c2cDC968BbD957ca8065A14b5F52E1399167",
       "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
     },
     "siblings": [1, 137, 42161, 10, 56, 34443]
@@ -24,7 +24,7 @@
       "ownerAddress": "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
       "executorAddress": "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
       "transmitterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5",
-      "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
+      "watcherAddress": "0xB7E6c2cDC968BbD957ca8065A14b5F52E1399167",
       "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
     },
     "siblings": [1, 42161, 10, 8453]
@@ -34,7 +34,7 @@
       "ownerAddress": "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
       "executorAddress": "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
       "transmitterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5",
-      "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
+      "watcherAddress": "0xB7E6c2cDC968BbD957ca8065A14b5F52E1399167",
       "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
     },
     "siblings": [42161, 10]
@@ -44,7 +44,7 @@
       "ownerAddress": "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
       "executorAddress": "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
       "transmitterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5",
-      "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
+      "watcherAddress": "0xB7E6c2cDC968BbD957ca8065A14b5F52E1399167",
       "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
     },
     "siblings": [421614, 80001, 11155111]
@@ -54,7 +54,7 @@
       "ownerAddress": "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
       "executorAddress": "0x42639d8fd154b72472e149a7d5ac13fa280303d9",
       "transmitterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5",
-      "watcherAddress": "0x75ddddf61b8180d3837b7d8b98c062ca442e0e14",
+      "watcherAddress": "0xB7E6c2cDC968BbD957ca8065A14b5F52E1399167",
       "feeUpdaterAddress": "0xfbc5ea2525bb827979e4c33b237cd47bcb8f81c5"
     },
     "siblings": [421614, 11155420]

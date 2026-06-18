@@ -48,7 +48,9 @@ const main = async () => {
 };
 
 const checkAndSendNoop = async (chainSlug: ChainSlug) => {
-  const chainAddresses = addresses[chainSlug] as ChainSocketAddresses | undefined;
+  const chainAddresses = addresses[chainSlug] as
+    | ChainSocketAddresses
+    | undefined;
   if (!chainAddresses) {
     console.log(`❗ ${chainSlug}: No deployment addresses found`);
     return;
@@ -77,7 +79,9 @@ const checkAndSendNoop = async (chainSlug: ChainSlug) => {
 
   const tx = await signer.sendTransaction(transaction);
   console.log(
-    `📨 ${label}: Submitted via relayer${(tx as any).txId ? `, txId=${(tx as any).txId}` : ""}`
+    `📨 ${label}: Submitted via relayer${
+      (tx as any).txId ? `, txId=${(tx as any).txId}` : ""
+    }`
   );
   const receipt = await tx.wait();
   console.log(`🚀 ${label}: Done: ${receipt.transactionHash}`);

@@ -9,72 +9,25 @@ import { deployForChains } from "./scripts/deploySocketFor";
 import { configureSwitchboards } from "./scripts/configureSwitchboards";
 import { connectPlugs } from "./scripts/connect";
 import prompts from "prompts";
-import { executionManagerVersion } from "./config/config";
+import { chains, executionManagerVersion } from "./config/config";
 
 const main = async () => {
   try {
-    const response = await prompts([
-      {
-        name: "chainType",
-        type: "select",
-        message: "Select chains network type",
-        choices: [
-          {
-            title: "Mainnet",
-            value: "mainnet",
-          },
-          {
-            title: "Testnet",
-            value: "testnet",
-          },
-        ],
-      },
-    ]);
+    const chains = process.env.BUNGEE_CHAINS.split(",").map(
+      (c) => parseInt(c) as ChainSlug
+    );
 
-    const chainOptions =
-      response.chainType === "mainnet" ? MainnetIds : TestnetIds;
-    let choices = chainOptions.map((chain) => ({
-      title: chain.toString(),
-      value: chain,
-    }));
-
-    const chainsResponse = await prompts([
-      {
-        name: "chains",
-        type: "multiselect",
-        message: "Select chains to connect",
-        choices,
-      },
-      {
-        name: "siblings",
-        type: "multiselect",
-        message: "Select sibling chains to connect",
-        choices,
-      },
-    ]);
-
-    const chains = chainsResponse.chains;
-    const siblings = chainsResponse.siblings;
+    const siblings = process.env.BUNGEE_SIBLINGS.split(",").map(
+      (c) => parseInt(c) as ChainSlug
+    );
+    const safeChains = process.env.SAFE_CHAINS.split(",").map(
+      (c) => parseInt(c) as ChainSlug
+    );
     const allChains = [...chains, ...siblings];
-    console.log("allChains: ", allChains);
-
-    choices = chains.map((chain) => ({
-      title: chain.toString(),
-      value: chain,
-    }));
-
-    const safeResponse = await prompts([
-      {
-        name: "chains",
-        type: "multiselect",
-        message: "Select chains to use Safe as owner",
-        choices,
-      },
-    ]);
 
     let addresses: DeploymentAddresses = await deployForChains(
       allChains,
-      safeResponse.chains,
+      safeChains,
       executionManagerVersion
     );
 
@@ -83,22 +36,26 @@ const main = async () => {
       return;
     }
 
-    await configureRoles(
-      addresses,
-      chains,
-      siblings,
-      safeResponse.chains,
-      true,
-      executionManagerVersion
-    );
-    addresses = await configureSwitchboards(
-      addresses,
-      chains,
-      siblings,
-      safeResponse.chains,
-      executionManagerVersion
-    );
-    await connectPlugs(addresses, chains, siblings);
+    for (const chain of chains) {
+      await configureRoles(
+        addresses,
+        [chain],
+        siblings,
+        safeChains,
+        true,
+        executionManagerVersion
+      );
+    }
+    for (const sibling of siblings) {
+      addresses = await configureSwitchboards(
+        addresses,
+        chains,
+        [sibling],
+        safeChains,
+        executionManagerVersion
+      );
+    }
+    await connectPlugs(addresses, chains, siblings, []);
   } catch (error) {
     console.log("Error:", error);
   }

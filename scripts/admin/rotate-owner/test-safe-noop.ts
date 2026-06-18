@@ -38,9 +38,13 @@ export const main = async () => {
   const addresses: DeploymentAddresses = getAllAddresses(mode);
   let allChainSlugs: string[];
   if (testnets)
-    allChainSlugs = Object.keys(addresses).filter((c) => isTestnet(parseInt(c)));
+    allChainSlugs = Object.keys(addresses).filter((c) =>
+      isTestnet(parseInt(c))
+    );
   else
-    allChainSlugs = Object.keys(addresses).filter((c) => isMainnet(parseInt(c)));
+    allChainSlugs = Object.keys(addresses).filter((c) =>
+      isMainnet(parseInt(c))
+    );
 
   const filteredChainSlugs = !filterChainsParam
     ? allChainSlugs
@@ -52,13 +56,17 @@ export const main = async () => {
         addresses[chainSlug];
 
       if (!chainAddresses) {
-        console.error(`Error: no deployment addresses found for chain ${chainSlug}`);
+        console.error(
+          `Error: no deployment addresses found for chain ${chainSlug}`
+        );
         return;
       }
 
       const safeAddress = chainAddresses.SocketSafeProxy;
       if (!safeAddress) {
-        console.error(`Error: SocketSafeProxy not found for chain ${chainSlug}`);
+        console.error(
+          `Error: SocketSafeProxy not found for chain ${chainSlug}`
+        );
         return;
       }
 
@@ -98,7 +106,7 @@ export const main = async () => {
 
       const isSubmitted = await signer.isTxHashSubmitted(transaction);
       if (isSubmitted) {
-        console.log(`✔ ${chainSlug}: Tx already submitted`);
+        console.log(`🧨 ${chainSlug}: Tx already submitted`);
         return;
       }
 

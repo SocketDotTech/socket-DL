@@ -8,11 +8,7 @@ import {
   ROLES,
   getAllAddresses,
 } from "../../src";
-import {
-  executorAddresses,
-  mode,
-  overrides,
-} from "../deploy/config/config";
+import { executorAddresses, mode, overrides } from "../deploy/config/config";
 import { getSocketSigner } from "../deploy/utils/socket-signer";
 import { getRoleHash } from "../deploy/utils";
 import { ExecutionManagerDF__factory } from "../../typechain-types";
@@ -50,7 +46,8 @@ const chainSlugs = chainsParam.split(",").map((chain) => {
   return chainSlug as ChainSlug;
 });
 
-let executorAddress = process.env.npm_config_executor || executorAddresses[mode];
+let executorAddress =
+  process.env.npm_config_executor || executorAddresses[mode];
 if (!executorAddress) {
   console.error(`Error: executor address not configured for mode ${mode}`);
   process.exit(1);
@@ -73,7 +70,9 @@ const main = async () => {
 };
 
 const checkAndGrantExecutor = async (chainSlug: ChainSlug) => {
-  const chainAddresses = addresses[chainSlug] as ChainSocketAddresses | undefined;
+  const chainAddresses = addresses[chainSlug] as
+    | ChainSocketAddresses
+    | undefined;
   if (!chainAddresses) {
     console.log(`❗ ${chainSlug}: No deployment addresses found`);
     return;
@@ -124,7 +123,7 @@ const checkAndGrantExecutor = async (chainSlug: ChainSlug) => {
 
   const isSubmitted = await signer.isTxHashSubmitted(transaction);
   if (isSubmitted) {
-    console.log(` ✔ ${label}: Tx already submitted`);
+    console.log(` 🧨 ${label}: Tx already submitted`);
     return;
   }
 

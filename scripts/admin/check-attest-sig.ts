@@ -31,8 +31,7 @@ const main = async () => {
 
   // 1) signer recovery (from digest directly)
   const recovered = ethers.utils.recoverAddress(DIGEST, SIGNATURE);
-  const sigOk =
-    recovered.toLowerCase() === EXPECTED_SIGNER.toLowerCase();
+  const sigOk = recovered.toLowerCase() === EXPECTED_SIGNER.toLowerCase();
   console.log(`recovered: ${recovered}  match=${sigOk}`);
   if (!sigOk) return;
 
@@ -73,7 +72,9 @@ const main = async () => {
   );
   console.log(`digest rebuilt: ${rebuilt}  match=${rebuilt === DIGEST}`);
   if (rebuilt !== DIGEST) {
-    console.log("✗ digest mismatch — sig was made for a different sb/chain/root");
+    console.log(
+      "✗ digest mismatch — sig was made for a different sb/chain/root"
+    );
     return;
   }
 
@@ -90,7 +91,9 @@ const main = async () => {
   console.log(`already attested: ${already}`);
 
   const wouldWork = hasRole && !already;
-  console.log(wouldWork ? "✅ attest should succeed" : "❌ attest would revert");
+  console.log(
+    wouldWork ? "✅ attest should succeed" : "❌ attest would revert"
+  );
 };
 
 main().catch((e) => {

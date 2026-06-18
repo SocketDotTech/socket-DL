@@ -86,7 +86,9 @@ const siblingFilter = siblingFilterParam
 const addresses: DeploymentAddresses = getAllAddresses(mode);
 
 if (!addresses[targetChainSlug]) {
-  console.error(`Error: no deployment addresses found for chain ${targetChainSlug}`);
+  console.error(
+    `Error: no deployment addresses found for chain ${targetChainSlug}`
+  );
   process.exit(1);
 }
 
@@ -100,15 +102,21 @@ const main = async () => {
   if (!operations.length) {
     console.log(
       `No FAST paths found where chain ${targetChainSlug} is involved in ${mode} mode and both chains are in batcherSupportedChainSlugs${
-        siblingFilter ? ` for siblings ${Array.from(siblingFilter).join(",")}` : ""
+        siblingFilter
+          ? ` for siblings ${Array.from(siblingFilter).join(",")}`
+          : ""
       }`
     );
     return;
   }
 
   console.log(
-    `Found ${operations.length} FAST watcher grant(s) for chain ${targetChainSlug} where both chains are in batcherSupportedChainSlugs${
-      siblingFilter ? ` filtered to siblings ${Array.from(siblingFilter).join(",")}` : ""
+    `Found ${
+      operations.length
+    } FAST watcher grant(s) for chain ${targetChainSlug} where both chains are in batcherSupportedChainSlugs${
+      siblingFilter
+        ? ` filtered to siblings ${Array.from(siblingFilter).join(",")}`
+        : ""
     }`
   );
 
@@ -149,14 +157,18 @@ const getWatcherGrantOps = (
     });
   };
 
-  const outboundSiblings = Object.keys(targetChainAddresses?.integrations ?? {});
+  const outboundSiblings = Object.keys(
+    targetChainAddresses?.integrations ?? {}
+  );
   for (const sibling of outboundSiblings) {
     const siblingSlug = Number(sibling) as ChainSlug;
     if (!supportedChains.has(siblingSlug)) continue;
     if (siblingFilterSet && !siblingFilterSet.has(siblingSlug)) continue;
 
     const hasFastPath =
-      !!targetChainAddresses?.integrations?.[siblingSlug]?.[IntegrationTypes.fast];
+      !!targetChainAddresses?.integrations?.[siblingSlug]?.[
+        IntegrationTypes.fast
+      ];
 
     if (!hasFastPath) continue;
 
@@ -196,8 +208,9 @@ const getWatcherGrantOps = (
 };
 
 const checkAndGrantWatcher = async (operation: WatcherGrantOp) => {
-  const executionChainAddresses =
-    addresses[operation.executionChainSlug] as ChainSocketAddresses;
+  const executionChainAddresses = addresses[
+    operation.executionChainSlug
+  ] as ChainSocketAddresses;
 
   if (
     !executionChainAddresses.SocketSafeProxy ||
@@ -257,14 +270,16 @@ const checkAndGrantWatcher = async (operation: WatcherGrantOp) => {
 
   const isSubmitted = await signer.isTxHashSubmitted(transaction);
   if (isSubmitted) {
-    console.log(` ✔ ${label}: Tx already submitted`);
+    console.log(` 🧨 ${label}: Tx already submitted`);
     return;
   }
 
   console.log(`✨ ${label}: Granting watcher via Safe`);
   const tx = await signer.sendTransaction(transaction);
   console.log(
-    `📨 ${label}: Submitted via relayer${(tx as any).txId ? `, txId=${(tx as any).txId}` : ""}`
+    `📨 ${label}: Submitted via relayer${
+      (tx as any).txId ? `, txId=${(tx as any).txId}` : ""
+    }`
   );
   const receipt = await tx.wait();
   console.log(`🚀 ${label}: Done: ${receipt.transactionHash}`);

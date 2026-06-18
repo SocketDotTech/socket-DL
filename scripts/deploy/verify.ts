@@ -24,21 +24,43 @@ export const main = async () => {
     );
 
     const chains = Object.keys(verificationParams);
-    if (!chains) return;
+    if (!chains || chains.length === 0) {
+      console.log("No chains found in verification params");
+      return;
+    }
 
     for (let chainIndex = 0; chainIndex < chains.length; chainIndex++) {
       const chain = parseInt(chains[chainIndex]) as ChainSlug;
+      const networkName = ChainSlugToKey[chain];
 
-      hre.changeNetwork(ChainSlugToKey[chain]);
+      if (!networkName) {
+        console.log(`⚠️  Unknown chain slug: ${chain}, skipping...`);
+        continue;
+      }
+
+      console.log(
+        `\n🔍 Verifying contracts on chain ${chain} (${networkName})`
+      );
+
+      try {
+        hre.changeNetwork(networkName);
+      } catch (error) {
+        console.log(`❌ Failed to change network to ${networkName}:`, error);
+        continue;
+      }
+
       const chainParams: VerifyArgs[] = verificationParams[chain];
+      if (!chainParams || chainParams.length === 0) {
+        console.log(`⚠️  No contracts to verify for chain ${chain}`);
+        continue;
+      }
+
       const unverifiedChainParams: VerifyArgs[] = [];
-      if (chainParams.length) {
-        const len = chainParams.length;
-        for (let index = 0; index < len!; index++) {
-          const res = await verify(...chainParams[index]);
-          if (!res) {
-            unverifiedChainParams.push(chainParams[index]);
-          }
+      const len = chainParams.length;
+      for (let index = 0; index < len; index++) {
+        const res = await verify(...chainParams[index]);
+        if (!res) {
+          unverifiedChainParams.push(chainParams[index]);
         }
       }
 

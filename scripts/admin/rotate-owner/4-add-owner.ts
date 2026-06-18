@@ -98,7 +98,9 @@ const checkAndAddOwner = async (
   const currentThreshold = await safe.getThreshold();
 
   console.log(
-    ` - ${label}: Checking: threshold=${currentThreshold.toString()}, owners=${owners.join(",")}`
+    ` - ${label}: Checking: threshold=${currentThreshold.toString()}, owners=${owners.join(
+      ","
+    )}`
   );
 
   if (owners.includes(newOwner!)) {
@@ -124,7 +126,7 @@ const checkAndAddOwner = async (
 
   const isSubmitted = await signer.isTxHashSubmitted(transaction);
   if (isSubmitted) {
-    console.log(` ✔ ${label}: Tx already submitted`);
+    console.log(` 🧨 ${label}: Tx already submitted`);
     return;
   }
 

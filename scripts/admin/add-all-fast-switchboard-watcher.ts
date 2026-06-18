@@ -53,7 +53,10 @@ watcherAddress = watcherAddress.toLowerCase();
 const sendTx = process.env.npm_config_sendtx === "true";
 const addresses: DeploymentAddresses = getAllAddresses(mode);
 const supportedChains = new Set(batcherSupportedChainSlugs);
-const signerCache = new Map<ChainSlug, Awaited<ReturnType<typeof getSocketSigner>>>();
+const signerCache = new Map<
+  ChainSlug,
+  Awaited<ReturnType<typeof getSocketSigner>>
+>();
 const CHAIN_PARALLELISM = 10;
 
 const main = async () => {
@@ -171,8 +174,9 @@ const getCachedSigner = async (chainSlug: ChainSlug) => {
 };
 
 const checkAndGrantWatcher = async (operation: WatcherGrantOp) => {
-  const executionChainAddresses =
-    addresses[operation.executionChainSlug] as ChainSocketAddresses;
+  const executionChainAddresses = addresses[
+    operation.executionChainSlug
+  ] as ChainSocketAddresses;
 
   if (
     !executionChainAddresses.SocketSafeProxy ||
@@ -226,7 +230,7 @@ const checkAndGrantWatcher = async (operation: WatcherGrantOp) => {
 
   const isSubmitted = await signer.isTxHashSubmitted(transaction);
   if (isSubmitted) {
-    console.log(` ✔ ${label}: Tx already submitted`);
+    console.log(` 🧨 ${label}: Tx already submitted`);
     return;
   }
 

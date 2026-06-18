@@ -1,5 +1,5 @@
 import { ChainSlug } from "../../src/enums/chainSlug";
-import { BigNumberish, providers } from "ethers";
+import { BigNumber, BigNumberish, providers } from "ethers";
 
 const defaultType = 0;
 const DEFAULT_GAS_PRICE_MULTIPLIER = 1.05;
@@ -62,6 +62,7 @@ export const chainOverrides: {
     // type: 1,
     // gasLimit: 10_000_000,
     // gasPrice: 1_000_000,
+    gasPriceMultiplier: 20,
   },
 
   [ChainSlug.SYNDR_SEPOLIA_L3]: {
@@ -103,6 +104,7 @@ export const chainOverrides: {
   },
   [ChainSlug.GNOSIS]: {
     gasLimit: 6_000_000,
+    gasPrice: 1000000,
   },
   [ChainSlug.LINEA]: {
     gasLimit: 10_000_000,
@@ -113,7 +115,7 @@ export const chainOverrides: {
   },
   [ChainSlug.SCROLL]: {
     gasLimit: 3_000_000,
-    gasPriceMultiplier: 2,
+    gasPriceMultiplier: 20,
   },
   [ChainSlug.PLUME]: {
     gasLimit: 5_000_000,
@@ -132,6 +134,9 @@ export const chainOverrides: {
   [ChainSlug.MEGAETH]: {
     // gasLimit: 5_000_000,
     // gasPrice: 2_000_000,
+  },
+  [ChainSlug.FLARE]: {
+    gasLimit: 10_000_000,
   },
 };
 
@@ -168,8 +173,10 @@ export const getOverrides = async (
 
   if (type === 2) {
     // EIP-1559 transaction
-    let maxFeePerGas = overrides.gasPrice?.toString();
-    if (!maxFeePerGas) {
+    let maxFeePerGas: BigNumber;
+    if (overrides.gasPrice) {
+      maxFeePerGas = BigNumber.from(overrides.gasPrice);
+    } else {
       const feeData = await provider.getFeeData();
       const baseGasPrice =
         feeData.maxFeePerGas || (await provider.getGasPrice());
@@ -177,31 +184,34 @@ export const getOverrides = async (
         overrides.gasPriceMultiplier || DEFAULT_GAS_PRICE_MULTIPLIER;
       maxFeePerGas = baseGasPrice
         .mul(Math.round(multiplier * 100000))
-        .div(100000)
-        .toString();
+        .div(100000);
     }
 
     // Get base fee to calculate maxPriorityFeePerGas
     const block = await provider.getBlock("latest");
-    const baseFee = block.baseFeePerGas?.toNumber() || 0;
-    const maxPriorityFeePerGas = Math.max(
-      Number(maxFeePerGas) - baseFee,
-      0
-    ).toString();
-    return { gasLimit, maxFeePerGas, maxPriorityFeePerGas, type };
+    const baseFee = block.baseFeePerGas || BigNumber.from(0);
+    const priority = maxFeePerGas.sub(baseFee);
+    const maxPriorityFeePerGas = priority.isNegative()
+      ? BigNumber.from(0)
+      : priority;
+    return {
+      gasLimit,
+      maxFeePerGas: maxFeePerGas.toHexString(),
+      maxPriorityFeePerGas: maxPriorityFeePerGas.toHexString(),
+      type,
+    };
   } else {
     // Legacy transaction (type 0 or 1)
-    let gasPrice = overrides.gasPrice?.toString();
-    if (!gasPrice) {
+    let gasPrice: BigNumber;
+    if (overrides.gasPrice) {
+      gasPrice = BigNumber.from(overrides.gasPrice);
+    } else {
       const baseGasPrice = await provider.getGasPrice();
       const multiplier =
         overrides.gasPriceMultiplier || DEFAULT_GAS_PRICE_MULTIPLIER;
-      gasPrice = baseGasPrice
-        .mul(Math.round(multiplier * 100000))
-        .div(100000)
-        .toString();
+      gasPrice = baseGasPrice.mul(Math.round(multiplier * 100000)).div(100000);
     }
 
-    return { gasLimit, gasPrice, type };
+    return { gasLimit, gasPrice: gasPrice.toHexString(), type };
   }
 };

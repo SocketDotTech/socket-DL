@@ -99,7 +99,9 @@ const checkAndRemoveOwner = async (
   const currentThreshold = await safe.getThreshold();
 
   console.log(
-    ` - ${label}: Checking: threshold=${currentThreshold.toString()}, owners=${owners.join(",")}`
+    ` - ${label}: Checking: threshold=${currentThreshold.toString()}, owners=${owners.join(
+      ","
+    )}`
   );
 
   const ownerIndex = owners.indexOf(ownerToRemove!);
@@ -115,8 +117,7 @@ const checkAndRemoveOwner = async (
     return;
   }
 
-  const prevOwner =
-    ownerIndex === 0 ? SENTINEL_OWNERS : owners[ownerIndex - 1];
+  const prevOwner = ownerIndex === 0 ? SENTINEL_OWNERS : owners[ownerIndex - 1];
   const newThreshold = currentThreshold.sub(1);
 
   const transaction = {
@@ -139,7 +140,7 @@ const checkAndRemoveOwner = async (
 
   const isSubmitted = await signer.isTxHashSubmitted(transaction);
   if (isSubmitted) {
-    console.log(` ✔ ${label}: Tx already submitted`);
+    console.log(` 🧨 ${label}: Tx already submitted`);
     return;
   }
 
