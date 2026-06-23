@@ -81,4 +81,5 @@ export const hardhatChainNameToSlug = {
   [HardhatChainName.ETHEREAL]: ChainSlug.ETHEREAL,
   [HardhatChainName.RISE]: ChainSlug.RISE,
   [HardhatChainName.FLARE]: ChainSlug.FLARE,
+  [HardhatChainName.HEMI]: ChainSlug.HEMI,
 };

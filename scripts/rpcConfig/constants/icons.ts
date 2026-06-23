@@ -47,4 +47,5 @@ export const icons = {
   [ChainSlug.ETHEREAL]: "",
   [ChainSlug.RISE]: "",
   [ChainSlug.FLARE]: "",
+  [ChainSlug.HEMI]: "",
 };

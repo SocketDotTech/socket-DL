@@ -132,6 +132,7 @@ if (isProduction) {
     [HardhatChainName.KATANA]: getChainConfig(ChainSlug.KATANA),
     [HardhatChainName.HYPEREVM]: getChainConfig(ChainSlug.HYPEREVM),
     [HardhatChainName.MONAD]: getChainConfig(ChainSlug.MONAD),
+    [HardhatChainName.HEMI]: getChainConfig(ChainSlug.HEMI),
   };
 }
 
@@ -196,6 +197,7 @@ const config: HardhatUserConfig = {
       katana: process.env.KATANA_API_KEY || "none",
       hyperevm: process.env.HYPEREVM_API_KEY || "none",
       monad: process.env.ETHERSCAN_API_KEY || "none",
+      hemi: process.env.HEMI_API_KEY || "none",
     },
     customChains: [
       {
@@ -452,6 +454,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.etherscan.io/v2/api?chainid=143",
           browserURL: "https://monadscan.com/",
+        },
+      },
+      {
+        network: "hemi",
+        chainId: ChainId.HEMI,
+        urls: {
+          apiURL: "https://explorer.hemi.xyz/api",
+          browserURL: "https://explorer.hemi.xyz/",
         },
       },
     ],

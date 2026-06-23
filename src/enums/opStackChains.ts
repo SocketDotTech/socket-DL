@@ -31,4 +31,5 @@ export const opStackL2Chain = [
   ChainSlug.KATANA,
   ChainSlug.MEGAETH,
   ChainSlug.RISE,
+  ChainSlug.HEMI,
 ];

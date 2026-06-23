@@ -49,4 +49,5 @@ export const batcherSupportedChainSlugs = [
   ChainSlug.ETHEREAL,
   ChainSlug.RISE,
   ChainSlug.FLARE,
+  ChainSlug.HEMI,
 ];

@@ -23,7 +23,12 @@ export const main = async () => {
       fs.readFileSync(path, "utf-8")
     );
 
-    const chains = Object.keys(verificationParams);
+    let chains = Object.keys(verificationParams);
+    const chainSlugFilter = process.env.CHAIN_SLUG;
+    if (chainSlugFilter) {
+      chains = chains.filter((chain) => chain === chainSlugFilter);
+    }
+
     if (!chains || chains.length === 0) {
       console.log("No chains found in verification params");
       return;
@@ -42,11 +47,13 @@ export const main = async () => {
         `\n🔍 Verifying contracts on chain ${chain} (${networkName})`
       );
 
-      try {
-        hre.changeNetwork(networkName);
-      } catch (error) {
-        console.log(`❌ Failed to change network to ${networkName}:`, error);
-        continue;
+      if (hre.network.name !== networkName) {
+        try {
+          hre.changeNetwork(networkName);
+        } catch (error) {
+          console.log(`❌ Failed to change network to ${networkName}:`, error);
+          continue;
+        }
       }
 
       const chainParams: VerifyArgs[] = verificationParams[chain];

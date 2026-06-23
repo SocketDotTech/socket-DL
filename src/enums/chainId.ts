@@ -78,4 +78,5 @@ export enum ChainId {
   ETHEREAL = 5064014,
   RISE = 4153,
   FLARE = 14,
+  HEMI = 43111,
 }

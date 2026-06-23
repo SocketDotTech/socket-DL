@@ -51,4 +51,5 @@ export const MainnetIds: ChainSlug[] = [
   ChainSlug.ETHEREAL,
   ChainSlug.RISE,
   ChainSlug.FLARE,
+  ChainSlug.HEMI,
 ];

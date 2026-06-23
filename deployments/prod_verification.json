@@ -3268,6 +3268,15 @@
   ],
   "957": [
     [
+      "0x19c81f13dacAd87bd5BdB7113311B5Aed9C8087a",
+      "MultiSigWrapper",
+      "contracts/utils/multisig/MultiSigWrapper.sol",
+      [
+        "0xB0BBff6311B7F245761A7846d3Ce7B1b100C1836",
+        "0x31F73Abc911710B4620aeE5c9DF681Bec1679e60"
+      ]
+    ],
+    [
       "0xf35A0d6D166268314f96908BbfA02f926675bAE8",
       "MultiSigWrapper",
       "contracts/utils/multisig/MultiSigWrapper.sol",
@@ -7419,6 +7428,7 @@
       ["0x5fD7D0d6b91CC4787Bcb86ca47e0Bd4ea0346d34"]
     ]
   ],
+  "43111": [],
   "43114": [
     [
       "0x2d8d2905C252dF23cb62AEcaB3B317BF68Cf1137",
