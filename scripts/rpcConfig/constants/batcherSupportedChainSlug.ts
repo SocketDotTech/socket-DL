@@ -18,7 +18,7 @@ export const batcherSupportedChainSlugs = [
   // ChainSlug.MODE_TESTNET,
   ChainSlug.BASE,
   ChainSlug.MODE,
-  ChainSlug.REYA_CRONOS,
+  // ChainSlug.REYA_CRONOS,
   ChainSlug.BLAST,
   // ChainSlug.BSC_TESTNET,
   ChainSlug.GNOSIS,
