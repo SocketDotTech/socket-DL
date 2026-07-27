@@ -139,6 +139,27 @@ const parseChainSurchargeFromEnv = (): { [chainSlug: string]: number } => {
   }
 };
 
+const getReyaSponsorshipConfig = (): S3Config["reyaSponsorship"] => {
+  const rateUsdcPerMessage =
+    process.env.REYA_SPONSORSHIP_RATE_USDC?.trim() ?? "";
+  const treasuryAddress =
+    process.env.REYA_SPONSORSHIP_TREASURY_ADDRESS?.trim() ?? "";
+
+  if (rateUsdcPerMessage.length === 0 && treasuryAddress.length === 0) {
+    return undefined;
+  }
+  if (rateUsdcPerMessage.length === 0 || treasuryAddress.length === 0) {
+    throw new Error(
+      "REYA_SPONSORSHIP_RATE_USDC and REYA_SPONSORSHIP_TREASURY_ADDRESS must both be set"
+    );
+  }
+
+  return {
+    rateUsdcPerMessage,
+    treasuryAddress,
+  };
+};
+
 const getChainType = (chainSlug: ChainSlug) => {
   if (opStackL2Chain.includes(chainSlug)) {
     return ChainType.opStackL2Chain;
@@ -208,6 +229,7 @@ export const generateDevConfig = async (txData: TxData): Promise<S3Config> => {
     oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
     disabledDFFeeChains,
     chainSurchargeUsdBySlug: parseChainSurchargeFromEnv(),
+    reyaSponsorship: getReyaSponsorshipConfig(),
   };
 };
 
@@ -236,5 +258,6 @@ export const generateProdConfig = async (txData: TxData): Promise<S3Config> => {
     oldEMVersionChainSlugs: getOldEMVersionChainSlugs(),
     disabledDFFeeChains,
     chainSurchargeUsdBySlug: parseChainSurchargeFromEnv(),
+    reyaSponsorship: getReyaSponsorshipConfig(),
   };
 };

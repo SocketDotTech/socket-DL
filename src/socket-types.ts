@@ -287,4 +287,8 @@ export type S3Config = {
   oldEMVersionChainSlugs: ChainSlug[];
   disabledDFFeeChains: ChainSlug[];
   chainSurchargeUsdBySlug: { [chainSlug: string]: number };
+  reyaSponsorship?: {
+    rateUsdcPerMessage: string;
+    treasuryAddress: string;
+  };
 };
