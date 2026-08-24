@@ -9,5 +9,5 @@ export const getDefaultFinalityBucket = (
 };
 
 export const defaultFinalityBucket = {
-  [ChainSlug.POLYGON_MAINNET]: FinalityBucket.medium,
+  // [ChainSlug.POLYGON_MAINNET]: FinalityBucket.medium,
 };

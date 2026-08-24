@@ -12,9 +12,9 @@ export const finalityOverrides: {
   [chainSlug in ChainSlug]?: ChainFinalityInfo;
 } = {
   [ChainSlug.POLYGON_MAINNET]: {
-    [FinalityBucket.low]: 64,
-    [FinalityBucket.medium]: 256,
-    [FinalityBucket.high]: 1000,
+    [FinalityBucket.low]: 4,
+    [FinalityBucket.medium]: 64,
+    [FinalityBucket.high]: 128,
   },
   [ChainSlug.NEOX_TESTNET]: {
     [FinalityBucket.low]: 1,

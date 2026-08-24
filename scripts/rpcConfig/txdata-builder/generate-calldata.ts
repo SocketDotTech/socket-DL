@@ -124,50 +124,56 @@ export const getTxData = async (): Promise<TxData> => {
   const txData: TxData = {};
   await Promise.all(
     allChainSlugs.map(async (chainSlug) => {
-      console.log(`Getting tx data for ${chainSlug}`);
-      const packetInfo = await getPacketInfo(
-        chainSlug,
-        addresses[chainSlug]?.["CapacitorSimulator"]
-      );
+      try {
 
-      const sbSimulatorAddress = addresses[chainSlug]?.["SwitchboardSimulator"];
-      if (sbSimulatorAddress === undefined)
-        throw new Error("Sb simulator not found!");
+        console.log(`Getting tx data for ${chainSlug}`);
+        const packetInfo = await getPacketInfo(
+          chainSlug,
+          addresses[chainSlug]?.["CapacitorSimulator"]
+        );
 
-      const sealTxData = await getSealTxData(chainSlug, signer, packetInfo);
-      const proposeTxData = await getProposeTxData(
-        chainSlug,
-        signer,
-        packetInfo,
-        sbSimulatorAddress
-      );
-      const attestTxData = await getAttestTxData(
-        chainSlug,
-        signer,
-        packetInfo,
-        sbSimulatorAddress
-      );
-      const executeTxData = await getExecuteTxData(
-        chainSlug,
-        signer,
-        packetInfo
-      );
+        const sbSimulatorAddress = addresses[chainSlug]?.["SwitchboardSimulator"];
+        if (sbSimulatorAddress === undefined)
+          throw new Error("Sb simulator not found!");
 
-      const simulatorContract = new Contract(
-        sbSimulatorAddress,
-        OwnableABIInterface,
-        getProviderFromChainSlug(chainSlug)
-      );
-      const owner = await simulatorContract.owner();
+        const sealTxData = await getSealTxData(chainSlug, signer, packetInfo);
+        const proposeTxData = await getProposeTxData(
+          chainSlug,
+          signer,
+          packetInfo,
+          sbSimulatorAddress
+        );
+        const attestTxData = await getAttestTxData(
+          chainSlug,
+          signer,
+          packetInfo,
+          sbSimulatorAddress
+        );
+        const executeTxData = await getExecuteTxData(
+          chainSlug,
+          signer,
+          packetInfo
+        );
 
-      txData[chainSlug] = {
-        sealTxData,
-        proposeTxData,
-        attestTxData,
-        executeTxData,
-        owner,
-      };
-      console.log(`Tx data for ${chainSlug} done`);
+        const simulatorContract = new Contract(
+          sbSimulatorAddress,
+          OwnableABIInterface,
+          getProviderFromChainSlug(chainSlug)
+        );
+        const owner = await simulatorContract.owner();
+
+        txData[chainSlug] = {
+          sealTxData,
+          proposeTxData,
+          attestTxData,
+          executeTxData,
+          owner,
+        };
+        console.log(`Tx data for ${chainSlug} done`);
+      } catch (e) {
+        console.error(`error while fetching for ${chainSlug}`, e);
+        throw (e);
+      }
     })
   );
 
