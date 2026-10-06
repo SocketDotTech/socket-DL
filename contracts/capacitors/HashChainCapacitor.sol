@@ -58,7 +58,7 @@ contract HashChainCapacitor is BaseCapacitor {
         address owner_,
         uint256 maxPacketLength_
     ) BaseCapacitor(socket_, owner_) {
-        if (maxPacketLength > MAX_LEN) revert InvalidPacketLength();
+        if (maxPacketLength_ > MAX_LEN) revert InvalidPacketLength();
         maxPacketLength = maxPacketLength_;
     }
 
@@ -72,7 +72,7 @@ contract HashChainCapacitor is BaseCapacitor {
     function updateMaxPacketLength(
         uint256 maxPacketLength_
     ) external onlyOwner {
-        if (maxPacketLength > MAX_LEN) revert InvalidPacketLength();
+        if (maxPacketLength_ > MAX_LEN) revert InvalidPacketLength();
         if (maxPacketLength_ < maxPacketLength) {
             uint64 lastPackedMsgIndex = messagePacked;
             uint64 packetCount = _nextPacketCount;

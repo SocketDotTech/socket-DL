@@ -144,6 +144,27 @@ contract HashChainCapacitorTest is Setup {
         assertEq(nextPacketId, packetId_, "packetId Invalid");
     }
 
+    function testRevertOversizedConstructorPacketLength() external {
+        vm.expectRevert(HashChainCapacitor.InvalidPacketLength.selector);
+        new HashChainCapacitor(_socket, _socketOwner, 11);
+    }
+
+    function testRevertOversizedUpdatePacketLength() external {
+        hoax(_socketOwner);
+        vm.expectRevert(HashChainCapacitor.InvalidPacketLength.selector);
+        _hcCapacitor.updateMaxPacketLength(11);
+    }
+
+    function testAcceptBoundaryPacketLength() external {
+        hoax(_socketOwner);
+        _hcCapacitor.updateMaxPacketLength(10);
+        assertEq(
+            _hcCapacitor.getMaxPacketLength(),
+            10,
+            "Boundary length should be accepted"
+        );
+    }
+
     function _assertPacketById(bytes32 root_, uint64 packetCount_) private {
         bytes32 root = _hcCapacitor.getRootByCount(packetCount_);
         bytes32 packedRoot = root_;
