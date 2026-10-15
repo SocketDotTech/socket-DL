@@ -125,14 +125,14 @@ export const getTxData = async (): Promise<TxData> => {
   await Promise.all(
     allChainSlugs.map(async (chainSlug) => {
       try {
-
         console.log(`Getting tx data for ${chainSlug}`);
         const packetInfo = await getPacketInfo(
           chainSlug,
           addresses[chainSlug]?.["CapacitorSimulator"]
         );
 
-        const sbSimulatorAddress = addresses[chainSlug]?.["SwitchboardSimulator"];
+        const sbSimulatorAddress =
+          addresses[chainSlug]?.["SwitchboardSimulator"];
         if (sbSimulatorAddress === undefined)
           throw new Error("Sb simulator not found!");
 
@@ -172,7 +172,7 @@ export const getTxData = async (): Promise<TxData> => {
         console.log(`Tx data for ${chainSlug} done`);
       } catch (e) {
         console.error(`error while fetching for ${chainSlug}`, e);
-        throw (e);
+        throw e;
       }
     })
   );
