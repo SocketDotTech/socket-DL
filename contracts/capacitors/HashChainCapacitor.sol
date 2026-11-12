@@ -76,8 +76,17 @@ contract HashChainCapacitor is BaseCapacitor {
         if (maxPacketLength_ < maxPacketLength) {
             uint64 lastPackedMsgIndex = messagePacked;
             uint64 packetCount = _nextPacketCount;
-            uint64 packets = (nextMessageCount - lastPackedMsgIndex) %
-                uint64(maxPacketLength_);
+            // FIX: pending messages are those added but not yet packed.
+            // nextMessageCount is 1-indexed (starts at 1), so added messages
+            // = nextMessageCount - 1. The number of complete packets of the
+            // new size is pending / newMax. The old code used
+            // (nextMessageCount - messagePacked) % maxPacketLength_: modulo
+            // gives the remainder (not the packet count) and the pending
+            // count was off by one, so it over-created packets, advanced
+            // messagePacked past the messages that exist, and permanently
+            // bricked the capacitor (addPackedMessage underflows).
+            uint64 pending = nextMessageCount - messagePacked - 1;
+            uint64 packets = pending / uint64(maxPacketLength_);
 
             _nextPacketCount += packets;
 
